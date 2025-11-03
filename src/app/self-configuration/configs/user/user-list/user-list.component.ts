@@ -41,7 +41,7 @@ export class UserListComponent implements OnInit {
   searchTerm: any;
   createRole = "hidden";
   org_catgrs = [
-    { name: 'SimplifyVMS', value: 'SUPER_ORG' },
+    { name: 'TalentIQVMS', value: 'SUPER_ORG' },
     { name: 'Client', value: 'CLIENT' },
     { name: 'Vendor', value: 'VENDOR' },
     { name: 'Worker', value: 'CANDIDATE' },
@@ -264,7 +264,7 @@ export class UserListComponent implements OnInit {
       ];
         break;
       default: this.org_catgrs = [
-        { name: 'SimplifyVMS', value: 'SUPER_ORG' },
+        { name: 'TalentIQVMS', value: 'SUPER_ORG' },
         { name: 'MSP', value: 'MSP' },
         { name: 'Client', value: 'CLIENT' },
         { name: 'Vendor', value: 'VENDOR' },

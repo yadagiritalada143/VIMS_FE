@@ -238,7 +238,7 @@ export class createVendorUserComponent implements OnInit, OnDestroy {
           country: addressForm?.secondarycountry,
         })        
       }
-      // const orgId = environment.SIMPLIFY_ORG_ID;
+      // const orgId = environment.TalentIQ_ORG_ID;
       this._loader.show();
       if (this.editData) {
         this.userId = this.editData?.id;

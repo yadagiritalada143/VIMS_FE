@@ -75,7 +75,7 @@ export class ContactSupportComponent implements OnInit {
     }else{
       this.contactForm.patchValue({
         details: this.user?.first_name + ' (' + this.user?.email + ')',
-        // email: 'info@simplifyvms.com',
+        // email: 'info@talentiqvms.com',
       })
     }
   }
@@ -93,11 +93,11 @@ export class ContactSupportComponent implements OnInit {
     this.dashboardService.get(`${_url}`).subscribe({next:(res:any) => {
       let response = JSON.parse(JSON.stringify(res));
       this.contactForm.patchValue({
-        email: response?.config?.email || "info@simplifyvms.com",
+        email: response?.config?.email || "info@talentiqvms.com",
       })
     },error: err => {
       this.contactForm.patchValue({
-        email: "info@simplifyvms.com",
+        email: "info@talentiqvms.com",
       })
     }});
   }
@@ -175,7 +175,7 @@ export class ContactSupportComponent implements OnInit {
       const urlArray:string[]= control?.value?.replace(/\n/g,' ').split(' ');
       let isValid= true;
       for(const url of urlArray){
-        if(url!=='' && !(url.includes('https://') && (url.includes('.simplifyvms.com') || url.includes('.simplifysandbox.net') || url.includes('.simplifyvmsapp.com')))){
+        if(url!=='' && !(url.includes('https://') && (url.includes('.talentiqvms.com') || url.includes('.talentiqsandbox.net') || url.includes('.talentiqvmsapp.com')))){
           isValid=false;
           break;
         }
@@ -200,7 +200,7 @@ export class ContactSupportComponent implements OnInit {
       const messageArray:string[]= control?.value?.replace(/<p>|<\/p>|<br>/g,' ').split(' ');
       let isValid= true;
       for(let s of messageArray){
-        if(s!=='' && isValidUrl(s) && !(s.includes('https://') && (s.includes('.simplifyvms.com') || s.includes('.simplifysandbox.net') || s.includes('.simplifyvmsapp.com')))){
+        if(s!=='' && isValidUrl(s) && !(s.includes('https://') && (s.includes('.talentiqvms.com') || s.includes('.talentiqsandbox.net') || s.includes('.talentiqvmsapp.com')))){
           isValid=false;
           break;
         }

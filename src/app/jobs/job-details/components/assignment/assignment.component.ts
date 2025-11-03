@@ -205,7 +205,7 @@ export class AssignmentComponent implements OnInit {
     }
     getAvailableCandidateListFIlter(pageNo = 1) {
        let url ='configurator/candidates/advanced-filters'
-      // let url ='https://qa-services.simplifysandbox.net/assignment/programs/e0ed0ed7-7423-4ae2-8439-ae71c54b5090/assignment?is_enabled=True&page=1&limit=10&search=Saurabh%20Raj';
+      // let url ='https://qa-services.talentiqsandbox.net/assignment/programs/e0ed0ed7-7423-4ae2-8439-ae71c54b5090/assignment?is_enabled=True&page=1&limit=10&search=Saurabh%20Raj';
       this.candidateService.post(url, this.filter).subscribe({
         next: (data: any) => {
         var cand_arr = [];

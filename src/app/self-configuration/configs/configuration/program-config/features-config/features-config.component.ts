@@ -265,7 +265,7 @@ export class FeaturesConfigComponent extends BaseProgramConfigComponent implemen
     this.programControls.push({
       sequence: 1,
       subtitle: 'Manage Remote Workers',
-      description: 'When enabled, the system will display a mandatory field upon candidate submittal called \'Remote Worker\' which is a Yes/No picklist. This field will follow the candidate through-out their journey within Simplify to the Offer and Assignment. Enabling this setting will also allow for Timesheet Configurations to base the \'Timesheet Type\' on the candidate\'s physical address rather than the Work Location.',
+      description: 'When enabled, the system will display a mandatory field upon candidate submittal called \'Remote Worker\' which is a Yes/No picklist. This field will follow the candidate through-out their journey within TalentIQ to the Offer and Assignment. Enabling this setting will also allow for Timesheet Configurations to base the \'Timesheet Type\' on the candidate\'s physical address rather than the Work Location.',
       type: ControlType.TOGGLE,
       formControlName: 'manage_remote_workers'
     });

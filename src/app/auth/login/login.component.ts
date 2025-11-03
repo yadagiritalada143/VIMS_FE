@@ -25,8 +25,8 @@ import { ConfigurationLoader } from 'src/app/configuration/configuration-loader.
 import { I18NextService } from 'angular-i18next';
 import { GlobalLaunchService } from 'src/app/control-panel/configs/global-launches/global-launch.service';
 const loginConfig = {
-  name: "SimplifyVMS",
-  supportText: "Simplify",
+  name: "TalentIQVMS",
+  supportText: "TalentIQ",
   backgroundImage: "assets/images/login-banner.jpg",
   logo: null,
   hideText: false,

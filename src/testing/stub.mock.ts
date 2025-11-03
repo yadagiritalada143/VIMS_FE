@@ -28,10 +28,10 @@ const MockCurrentProgram = {
   email_addresses: [],
   security_qa: [],
   organization_id: 'a3c0c26d-c5bb-4e2a-ab04-99a705639366',
-  first_name: 'SimplifyVMSs',
+  first_name: 'TalentIQVMSs',
   last_name: 'Admin-update',
-  email: 'simplifyvms.superadmin@simplifyvms.info',
-  username: 'simplify-12345',
+  email: 'talentiqvms.superadmin@talentiqvms.info',
+  username: 'talentiq-12345',
   created_on: 1608485011,
   modified_on: 1709118167,
   avatar: null,
@@ -53,7 +53,7 @@ const MockCurrentProgram = {
   },
   id: '2bf449a9-66ac-4d4b-96e1-164a396ca9bb',
   initials: 'SA',
-  full_name: 'Mr SimplifyVMSs Super-updte Admin-update V',
+  full_name: 'Mr TalentIQVMSs Super-updte Admin-update V',
 };
 
 let user = {
@@ -83,10 +83,10 @@ let user = {
   email_addresses: [],
   security_qa: [],
   organization_id: 'a3c0c26d-c5bb-4e2a-ab04-99a705639366',
-  first_name: 'SimplifyVMSs',
+  first_name: 'TalentIQVMSs',
   last_name: 'Admin-update',
-  email: 'simplifyvms.superadmin@simplifyvms.info',
-  username: 'simplify-12345',
+  email: 'talentiqvms.superadmin@talentiqvms.info',
+  username: 'talentiq-12345',
   created_on: 1608485011,
   modified_on: 1709118167,
   avatar: null,
@@ -108,21 +108,21 @@ let user = {
   },
   id: '2bf449a9-66ac-4d4b-96e1-164a396ca9bb',
   initials: 'SA',
-  full_name: 'Mr SimplifyVMSs Super-updte Admin-update V',
+  full_name: 'Mr TalentIQVMSs Super-updte Admin-update V',
 };
 
 let account = {
   id: '2bf449a9-66ac-4d4b-96e1-164a396ca9bb',
   initials: 'SA',
-  full_name: 'Mr SimplifyVMSs Super-updte Admin-update V',
+  full_name: 'Mr TalentIQVMSs Super-updte Admin-update V',
   name_prefix: 'Mr',
-  first_name: 'SimplifyVMSs',
+  first_name: 'TalentIQVMSs',
   middle_name: 'Super-updte',
   last_name: 'Admin-update',
   name_suffix: 'V',
-  username: 'simplify-12345',
+  username: 'talentiq-12345',
   avatar: null,
-  email: 'simplifyvms.superadmin@simplifyvms.info',
+  email: 'talentiqvms.superadmin@talentiqvms.info',
   secondary_email: null,
   sso_id: null,
   dob: null,
@@ -134,7 +134,7 @@ let account = {
   custom_fields: null,
   organization: {
     id: 'a3c0c26d-c5bb-4e2a-ab04-99a705639366',
-    name: 'SimplifyVMS',
+    name: 'TalentIQVMS',
     category: 'SUPER_ORG',
     industries: [
       {
