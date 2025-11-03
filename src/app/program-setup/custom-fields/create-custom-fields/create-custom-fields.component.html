@@ -1,0 +1,88 @@
+<svms-sidebar
+  [title]="sidebarTitle | i18next"
+  [dataVisibility]="createCustomFields"
+  (onClose)="sidebarClose()"
+  [ngClass]="{ 'with-sidepanel': configurationPanelOpened && !hideExtendedPanel }"
+>
+  <svms-sidebar-body>
+    <app-custom-field-type *ngIf="visiblePanelIndex == 0"
+    [allowed]="allowedFields"
+    (valueChange)="selectedFieldType = $event">
+  </app-custom-field-type>
+    <app-custom-field-options-form
+      *ngIf="visiblePanelIndex == 1"
+      [isEditMode]="isEditMode"
+      [customFieldsId]="customFieldsId"
+      [programId]="programId"
+      [moduleName]="moduleName"
+      [candidateValidations]="candidateValidations"
+      [visiblePanelIndex]="visiblePanelIndex"
+      [selectedType]="selectedFieldType"
+      [isPicklistSelected]="isPicklistSelected"
+      (changeTitle)="sidebarTitle = $event"
+      (toggleConfigurationPanel)="toggleConfigurationPanel($event)"
+      (formChanges)="updateFormValue($event)"
+      (changePanelIndex)="visiblePanelIndex = $event"
+      (getCustomFieldData)="setCustomFieldData($event)"
+      (changeHierarhies)="selectedHierarchies = $event"
+      (changeMultiselectToggle)="changeMultiselectToggle($event)"
+      (changeDataSource)="changeDataSource($event)"
+      [selectedModules] = "selectedAllModules"
+      (changeselectedModules) = "changeselectedModules($event)"
+    ></app-custom-field-options-form>
+  </svms-sidebar-body>
+
+  <svms-sidebar-footer *accessControl>
+    <button type="submit" class="btn btn-secondary-outline float-left" (click)="sidebarClose()">{{ 'cancel' | i18next }}</button>
+    <button
+      *ngIf="isEditMode && visiblePanelIndex == 1; else continueButton"
+      class="btn btn-primary float-right"
+      (click)="editField()"
+      [disabled]="!customFieldFormValid"
+    >
+      {{ 'update' | i18next }}
+    </button>
+    <ng-template #continueButton>
+      <button
+        *ngIf="!customFieldsId"
+        type="submit"
+        class="btn btn-primary float-right"
+        (click)="isValidField && submit()"
+        [disabled]="visiblePanelIndex == 1 && (!customFieldFormValid || !isDependentValid) && !isValidField"
+      >
+        {{ 'continue' | i18next }} <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+      </button>
+    </ng-template>
+  </svms-sidebar-footer>
+</svms-sidebar>
+<div [ngClass]="hideExtendedPanel?'display-none':''" *ngIf="configurationPanelOpened" class="additional-configuration">
+  <div class="configuration-header overflow-hidden p-12">
+    <h4 class="float-left pl-8 mb-0 font-weight-medium">{{ 'dependent_&_linked_field_configuration' | i18next }}</h4>
+  </div>
+  <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)" class="dependent-linked-tabs">
+    <vms-tab label="Dependent" class="linked-tab">
+      <app-dependent-selection
+        [moduleName]="(selectedModules ?? [])?.toString()"
+        [programId]="programId"
+        [dependLabel]="customFieldData?.label"
+        [dependsOn]="customFieldData?.meta_data?.depends_on"
+        [dropdownSelection]="customFieldFormValue?.meta_data?.datasource?.options"
+        [isEditMode]="!customFieldsId || isEditMode"
+        [selectedHierarchies]="selectedHierarchies"
+        (selectDependent)="selectDependent($event)"
+        (changeDependentValidity)="changeDependentValidity($event)"
+      ></app-dependent-selection>
+    </vms-tab>
+    <vms-tab label="Linked" class="linked-tab">
+      <app-linked-modules
+        [programId]="programId"
+        [isEditMode]="!customFieldsId || isEditMode"
+        [customFieldData] = "customFieldData"
+        (changeLinked)="changeLinked($event)"
+        (changeselectedLinkedModules)="changeselectedLinkedModules($event)"
+        [selectedModules] = "selectedAllModules"
+        [showLinkedFieldReadOnly]="showLinkedFieldReadOnly"
+      ></app-linked-modules>
+    </vms-tab>
+  </vms-tab-group>
+</div>

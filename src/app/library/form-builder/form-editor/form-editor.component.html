@@ -1,0 +1,61 @@
+<div class="svms-form-editor" *ngIf="customFields?.length > 0; else no_custom_fields" (drop)="drop($event)"
+  (dragover)="allowDrop($event)">
+  <div class="svms-custom-drop-panel ">
+    <ng-container *ngFor="let customField of customFields; let i = index;">
+      <div class="panel-editor " *ngFor="let field of customField; let j = index;"
+        [draggable]="field != undefined && field.type != undefined " [ngClass]="field?.meta_data?.class"
+        (mouseleave)="showMenus(undefined, undefined)" (drop)="rearrangeList($event, i, j)"
+        (dragstart)="dragStarted($event, i, j)" (dragover)="allowDrop($event)">
+        <ng-template [ngIf]="field && field.type" [ngIfElse]="noField">
+          <div class="panel-editor-content error_color" [ngClass]="(activeIndex?.i === i && activeIndex?.j === j)?'active':''"
+            (click)="customFieldClicked(field, i, j)">
+            <div class="panel-field">
+              <img src="../../../../assets/images/custom-fields-icons/drag_indicator.svg" class="cursor-pointer">
+              <div class="panel-text-field">
+                <h4 class="mb-0"> {{(field.label || field.type)|i18next}}</h4>
+                <!-- shou custom fields -->
+                <app-custom-fields [field]="field"></app-custom-fields>
+              </div>
+            </div>
+            <span class="position-relative">
+              <img src="../../../../assets/images/custom-fields-icons/component.svg" class="cursor-pointer"
+                (click)="showMenus(i, j)">
+              <ng-template [ngIf]="activeField.i == i && activeField.j == j">
+                <ul class="svms-columns-dropdown">
+                  <li (click)="deleteCustomField(i, j)">
+                    <img src="../../../../assets/images/custom-fields-icons/Path 16711.svg">
+                  </li>
+                  <li (click)="minimizeFieldSize($event, i, j)">
+                    <img src="../../../../assets/images/custom-fields-icons/Group 3368.svg">
+                  </li>
+                  <li (click)="maximizeFieldSize($event, i, j)">
+                    <img src="../../../../assets/images/custom-fields-icons/Group 2906.svg">
+                  </li>
+                </ul>
+              </ng-template>
+
+            </span>
+          </div>
+        </ng-template>
+        <ng-template #noField>
+
+        </ng-template>
+      </div>
+    </ng-container>
+    <div class="panel-dragger">
+      {{ '' | i18next }} & {{ 'drop_here' | i18next }}
+    </div>
+  </div>
+  <P class="text-blue drag-text cursor-pointer">
+    {{ 'drag' | i18next }} & {{ 'drop_the_fields_from_left_side_panel' | i18next }}
+  </P>
+</div>
+<ng-template #no_custom_fields>
+  <app-no-fields (drop)="drop($event)" (dragover)="allowDrop($event)"></app-no-fields>
+</ng-template>
+<div class="svms-custom-footer d-flex align-items-center justify-content-between p-12 position-fixed">
+  <button class="btn btn-light">{{ 'cancel' | i18next }}</button>
+  <button class="btn btn-blue "><span>{{ 'save_form' | i18next }}</span>
+    <img src="../../../../assets/images/custom-fields-icons/chevron_right-24px.svg" class="svg-on-right" alt="">
+  </button>
+</div>

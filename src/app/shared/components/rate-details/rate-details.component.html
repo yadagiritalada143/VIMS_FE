@@ -1,0 +1,504 @@
+<svms-sidebar [title]="pageTitle" size="large" [dataVisibility]="showRateDetails" (onClose)="sidebarClose(false)">
+  <svms-sidebar-body>
+    <form [formGroup]="rateDetailsForm">
+      <div>
+        <h4 class="text-black font-weight-medium m-16 p-4">
+          {{ 'standard_time_rate' | i18next }}
+        </h4>
+        <div class="mx-24 mb-24">
+          <div class="row mx-0">
+            <div class="col-4 pl-0" *ngIf="payrateVisible && rateModelPayload?.rate_model !== 'billrate'">
+              <div class="form-group">
+                <label for="">
+                    {{ 'pay_rate' | i18next }}
+                    <span class="require">*</span>
+                </label>
+                <div class="currency-field position-relative">
+                  <span>
+                    {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                  </span>
+                  <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                    formControlName="payrate" class="form-control" onlyNumber
+                    placeholder="0.00" (change)="updatePayrate($event)" inputAccuracy="{{accuracyConfig?.rate}}"
+                    [readonly]="!isEdit || !editablePayrate"
+                  />
+                </div>
+                <ng-container *ngIf="isSourcing">
+                  <span class="validation-msg">
+                    {{ rateDetailsForm?.controls?.payrate?.errors?.max ||
+                      rateDetailsForm?.controls?.payrate?.errors?.min   }}
+                  </span>
+                </ng-container>
+
+              </div>
+            </div>
+            <div class="col-4 pl-0" *ngIf="!_costComponentEnabled && rateModelPayload?.rate_model !== 'billrate'">
+              <div class="form-group">
+                <label for="">
+                    {{ 'mark-up' | i18next }}
+                    <span class="require">*</span>
+                </label>
+                <div class="currency-field position-relative">
+                  <span>%</span>
+                  <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                    formControlName="markup" class="form-control" onlyNumber
+                    placeholder="0.00" inputAccuracy="{{accuracyConfig?.markup_percentage}}"
+                    (change)="updateMarkup($event, 'st')"
+                    [readonly]="!isEdit || !editableMarkup"
+                  />
+                </div>
+                <ng-container *ngIf="isSourcing">
+                  <span class="validation-msg">
+                    {{ rateDetailsForm?.controls?.markup?.errors?.max ||
+                      rateDetailsForm?.controls?.markup?.errors?.min   }}
+                  </span>
+                </ng-container>
+              </div>
+            </div>
+            <div class="col-4 pl-0" *ngIf="!_costComponentEnabled && markupByRateTypeEnabled && billrateVisible">
+              <div class="form-group">
+                <label for="">
+                    {{ 'client_bill_rate' | i18next }}
+                    <span class="require">*</span>
+                </label>
+                <div class="currency-field position-relative">
+                  <span>
+                    {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                  </span>
+                  <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                    formControlName="billrate" class="form-control" onlyNumber
+                    placeholder="0.00" (change)="updateBillrate($event)"
+                    [readonly]="!isEdit || !editableBillrate"
+                  />
+                </div>
+                <ng-container *ngIf="isSourcing">
+                  <span class="validation-msg">
+                    {{ rateDetailsForm?.controls?.billrate?.errors?.max ||
+                      rateDetailsForm?.controls?.billrate?.errors?.min   }}
+                  </span>
+                </ng-container>
+              </div>
+            </div>
+            <div class="col-4 pl-0" *ngIf="!_costComponentEnabled && markupByRateTypeEnabled && vendorRateVisible">
+              <div class="form-group">
+                <label for="">
+                    {{ 'vendor_bill_rate' | i18next }}
+                    <span class="require">*</span>
+                </label>
+                <div class="currency-field position-relative">
+                  <span>
+                    {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                  </span>
+                  <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                    formControlName="vendor_rate" class="form-control" onlyNumber
+                    placeholder="0.00" (change)="updateVendorRate($event)"
+                    [readonly]="!isEdit || !editableVendorRate"
+                  />
+                </div>
+                <ng-container *ngIf="isSourcing">
+                  <span class="validation-msg">
+                    {{ rateDetailsForm?.controls?.vendor_rate?.errors?.max ||
+                      rateDetailsForm?.controls?.vendor_rate?.errors?.min   }}
+                  </span>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+          <div class="row px-8" *ngIf="!_costComponentEnabled && !markupByRateTypeEnabled">
+            <div class="col-4 pl-0" *ngIf="billrateVisible">
+              <div class="form-group">
+                <label for="">
+                    {{ 'client_bill_rate' | i18next }}
+                    <span class="require">*</span>
+                </label>
+                <div class="currency-field position-relative">
+                  <span>
+                    {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                  </span>
+                  <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                    formControlName="billrate" class="form-control" onlyNumber
+                    placeholder="0.00" (change)="updateBillrate($event)"
+                    [readonly]="!isEdit || !editableBillrate"
+                  />
+                </div>
+
+              </div>
+            </div>
+            <div class="col-4 pl-0" *ngIf="!_costComponentEnabled && vendorRateVisible">
+              <div class="form-group">
+                <label for="">
+                    {{ 'vendor_bill_rate' | i18next }}
+                    <span class="require">*</span>
+                </label>
+                <div class="currency-field position-relative">
+                  <span>
+                    {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                  </span>
+                  <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                    formControlName="vendor_rate" class="form-control" onlyNumber
+                    placeholder="0.00" (change)="updateVendorRate($event)"
+                    [readonly]="!isEdit || !editableVendorRate"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-container *ngIf="_costComponentEnabled">
+            <table class="cost-component-table border">
+              <thead class="cost-component-table-header">
+                <tr class="border-bottom info-bg-color">
+                  <th class="text-left w-15">{{ 'level' | i18next }}</th>
+                  <th class="text-left">{{ 'cost_component' | i18next }}</th>
+                  <th class="text-left w-25">{{ 'value' | i18next }}</th>
+                  <th class="text-left w-15">{{ 'cost_amount' | i18next }}</th>
+                  <th class="text-left w-15">{{ 'total_amount' | i18next }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container *ngFor="let component of standardRatesCopy?.cost_component; let ind = index;">
+                  <ng-container *ngIf="component.code">
+                    <tr class="border-bottom">
+                      <td class="w-15">{{component.level}}</td>
+                      <td>{{ component.component_name || getCostComponentName(component.code) }}</td>
+                      <td class="w-25">
+                        <div class="currency-field position-relative">
+                          <span>
+                            {{ component.type === 'percentage' ? '%' : ('' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL }) }}
+                          </span>
+                          <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                            class="form-control" onlyNumber placeholder="0.00" inputAccuracy="{{component.type === 'percentage' ? accuracyConfig?.markup_percentage : accuracyConfig?.markup}}"
+                            [readonly]="!isEdit || !editableCostComponent" (change)="updateCostComponentValue($event, 'st', ind, component.type)"
+                            value="{{ component.value }}"
+                          />
+                        </div>
+                      </td>
+                      <td class="w-15">
+                        <span>
+                          {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                        </span>
+                        {{component.cost_amount}}
+                      </td>
+                      <td class="w-15">
+                        <span>
+                          {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                        </span>
+                        {{component.total_amount}}
+                      </td>
+                    </tr>
+                  </ng-container>
+                </ng-container>
+                <tr class="border-bottom">
+                  <td class="w-15"></td>
+                  <td>{{ 'mark-Up' | i18next }}</td>
+                  <td class="w-25">
+                    <div class="currency-field position-relative">
+                      <span>%</span>
+                      <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                        value="{{ standardRatesCopy?.markup }}" class="form-control" onlyNumber
+                        placeholder="0.00" inputAccuracy="{{accuracyConfig?.markup_percentage}}"
+                        (change)="updateMarkup($event, 'st')"
+                        [readonly]="!isEdit || !editableMarkup"
+                      />
+                    </div>
+                  </td>
+                  <td class="w-15">
+                    <span>
+                      {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                    </span>
+                    <span>{{ standardRatesCopy?.cost_component?.[standardRatesCopy?.cost_component?.length - 1]?.cost_amount }}</span>
+                  </td>
+                  <td class="w-15">
+                    <span>
+                      {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                    </span>
+                    <span>{{ standardRatesCopy?.cost_component?.[standardRatesCopy?.cost_component?.length - 1]?.total_amount }}</span>
+                  </td>
+                </tr>
+                <ng-container *ngIf="vendorRateVisible">
+                  <tr class="footer-rates border-bottom">
+                    <td class="font-weight-medium" colspan="4">{{ 'vendor_bill_rate' | i18next }}</td>
+                    <td class="font-weight-medium">
+                      <span>
+                        {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                      </span>
+                      <span>{{ rateDetailsForm.get('vendor_rate')?.value }}</span>
+                    </td>
+                  </tr>
+                </ng-container>
+                <ng-container *ngIf="billrateVisible">
+                  <tr class="footer-rates border-bottom">
+                    <td class="font-weight-medium" colspan="4">{{ 'client_bill_rate' | i18next }}</td>
+                    <td class="font-weight-medium">
+                      <span>
+                        {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                      </span>
+                      <span>{{ rateDetailsForm.get('billrate')?.value }}</span>
+                    </td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </ng-container>
+        </div>
+      </div>
+      <ng-container formArrayName="rates">
+        <ng-container *ngFor="let rate of rateDetails?.controls; let i = index">
+          <ng-container [formGroupName]="i" *ngIf="rate?.get('is_billable')?.value" >
+            <h4 class="text-black font-weight-medium m-16 p-4">
+              {{ rate?.get('name')?.value }}
+            </h4>
+            <div class="mx-24 mb-24">
+              <div class="row mx-0">
+                <div class="col-4 pl-0" *ngIf="rateModelPayload?.rate_model !== 'billrate'">
+                  <div class="form-group">
+                    <label for="">
+                        {{ (rate?.get('rate_factor')?.value | uppercase) + ' ' + ('factor_pay_rate' | i18next) }}
+                        <span class="require">*</span>
+                    </label>
+                    <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                      formControlName="pay_rate_factor" class="form-control" onlyNumber
+                      placeholder="0.00" inputAccuracy="{{accuracyConfig?.rate}}" (change)="updateFactor($event, 'pay_rate', rate.get('rate_factor').value , i)"
+                      [readonly]="!isEdit || !editableFactors"
+                    />
+                  </div>
+                </div>
+                <div class="col-4 pl-0" *ngIf="(costComponentEnabled || !markupByRateTypeEnabled) && payrateVisible && rateModelPayload?.rate_model !== 'billrate'">
+                  <div class="form-group">
+                    <label for="">
+                        {{ 'pay_rate' | i18next }}
+                        <span class="require">*</span>
+                    </label>
+                    <div class="currency-field position-relative">
+                      <span>
+                        {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                      </span>
+                      <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                        formControlName="payrate" class="form-control" onlyNumber
+                        placeholder="0.00" inputAccuracy="{{accuracyConfig?.rate}}"
+                        [readonly]="true"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row mx-0">
+                <div class="col-4 pl-0" *ngIf="!_costComponentEnabled && rateModelPayload?.rate_model == 'billrate'">
+                  <div class="form-group">
+                    <label for="">
+                        {{ (rate?.get('rate_factor')?.value | uppercase) + ' ' + ('factor_bill_rate' | i18next) }}
+                        <span class="require">*</span>
+                    </label>
+                    <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                      formControlName="bill_rate_factor" class="form-control" onlyNumber
+                      placeholder="0.00" inputAccuracy="{{accuracyConfig?.rate}}" (change)="updateFactor($event, 'bill_rate', rate.get('rate_factor').value,i)"
+                      [readonly]="!isEdit || !editableFactors"
+                    />
+                  </div>
+                </div>
+                <div *ngIf="!_costComponentEnabled && markupByRateTypeEnabled && payrateVisible && rateModelPayload?.rate_model !== 'billrate'" class="col-4 pl-0">
+                  <div class="form-group">
+                    <label for="">
+                        {{ 'pay_rate' | i18next }}
+                        <span class="require">*</span>
+                    </label>
+                    <div class="currency-field position-relative">
+                      <span>
+                        {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                      </span>
+                      <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                        formControlName="payrate" class="form-control" onlyNumber
+                        placeholder="0.00"
+                        [readonly]="true"
+                      />
+                    </div>
+                    <!-- <ng-container *ngIf="isSourcing">
+                      <span class="validation-msg" *ngIf="(rate?.invalid && rate?.errors?.gtr)">
+                      {{rate?.errors?.gtr}}
+                      </span>
+                    </ng-container> -->
+                  </div>
+                </div>
+                <div *ngIf="!_costComponentEnabled && markupByRateTypeEnabled && rateModelPayload?.rate_model !== 'billrate'" class="col-4 pl-0">
+                  <div class="form-group">
+                    <label for="">
+                        {{ 'mark-Up' | i18next }}
+                        <span class="require">*</span>
+                    </label>
+                    <div class="currency-field position-relative">
+                      <span>%</span>
+                      <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                        formControlName="markup" class="form-control" onlyNumber
+                        placeholder="0.00" inputAccuracy="{{accuracyConfig?.markup_percentage}}"
+                        [readonly]="!isEdit || !markupByRateTypeEnabled || !editableMarkup"
+                        (change)="updateMarkup($event, rate.get('rate_factor').value)"
+                      />
+                    </div>
+                    <ng-container *ngIf="isSourcing">
+                      <span class="validation-msg">
+                        {{ rate?.get('markup')?.errors?.max ||
+                          rate?.get('markup')?.errors?.min   }}
+                      </span>
+                    </ng-container>
+                  </div>
+                </div>
+                <div class="col-4 pl-0" *ngIf="!_costComponentEnabled && billrateVisible">
+                  <div class="form-group">
+                    <label for="">
+                        {{ 'client_bill_rate' | i18next }}
+                        <span class="require">*</span>
+                    </label>
+                    <div class="currency-field position-relative">
+                      <span>
+                        {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                      </span>
+                      <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                        formControlName="billrate" class="form-control" onlyNumber
+                        placeholder="0.00"
+                        [readonly]="true"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="col-4 pl-0" *ngIf="!_costComponentEnabled && vendorRateVisible">
+                  <div class="form-group">
+                    <label for="">
+                        {{ 'vendor_bill_rate' | i18next }}
+                        <span class="require">*</span>
+                    </label>
+                    <div class="currency-field position-relative">
+                      <span>
+                        {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                      </span>
+                      <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                        formControlName="vendor_rate" class="form-control" onlyNumber
+                        placeholder="0.00"
+                        [readonly]="true"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <ng-container *ngIf="_costComponentEnabled">
+                <table class="cost-component-table border">
+                  <thead class="cost-component-table-header">
+                    <tr class="border-bottom info-bg-color">
+                      <th class="text-left w-15">{{ 'level' | i18next }}</th>
+                      <th class="text-left">{{ 'cost_component' | i18next }}</th>
+                      <th class="text-left w-25">{{ 'value' | i18next }}</th>
+                      <th class="text-left w-15">{{ 'cost_amount' | i18next }}</th>
+                      <th class="text-left w-15">{{ 'total_amount' | i18next }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <ng-container *ngFor="let component of rate?.get('cost_component')?.value; let ind = index;">
+                      <ng-container *ngIf="component.code">
+                        <tr class="border-bottom">
+                          <td class="w-15">{{component.level}}</td>
+                          <td>{{ component.component_name || getCostComponentName(component.code) }}</td>
+                          <td class="w-25">
+                            <div class="currency-field position-relative">
+                              <span>
+                                {{ component.type === 'percentage' ? '%' : ('' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL }) }}
+                              </span>
+                              <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                                class="form-control" onlyNumber placeholder="0.00" inputAccuracy="{{component.type === 'percentage' ? accuracyConfig?.markup_percentage : accuracyConfig?.markup}}"
+                                [readonly]="!isEdit || !editableCostComponent || rateModelPayload?.ot_exempt" (change)="updateCostComponentValue($event, rate.get('rate_factor').value, ind, component.type)"
+                                value="{{ component.value }}"
+                              />
+                            </div>
+                          </td>
+                          <td class="w-15">
+                            <span>
+                              {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                            </span>
+                            {{accurate(component.cost_amount)}}
+                          </td>
+                          <td class="w-15">
+                            <span>
+                              {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                            </span>
+                            {{accurate(component.total_amount)}}
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </ng-container>
+                    <tr class="border-bottom">
+                      <td class="w-15"></td>
+                      <td>{{ 'mark-Up' | i18next }}</td>
+                      <td class="w-25">
+                        <div class="currency-field position-relative">
+                          <span>%</span>
+                          <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)"
+                            value="{{ rate?.get('markup')?.value }}" class="form-control" onlyNumber
+                            placeholder="0.00" inputAccuracy="{{accuracyConfig?.markup_percentage}}"
+                            (change)="updateMarkup($event, rate.get('rate_factor').value)"
+                            [readonly]="!isEdit || !editableMarkup || !markupByRateTypeEnabled || rateModelPayload?.ot_exempt"
+                          />
+                        </div>
+                      </td>
+                      <td class="w-15">
+                        <span>
+                          {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                        </span>
+                        <span>{{ rate.get('cost_component')?.controls?.[rate.get('cost_component')?.controls?.length - 1]?.get('cost_amount')?.value }}</span>
+                      </td>
+                      <td class="w-15">
+                        <span>
+                          {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                        </span>
+                        <span>{{ rate.get('cost_component')?.controls?.[rate.get('cost_component')?.controls?.length - 1]?.get('total_amount')?.value }}</span>
+                      </td>
+                    </tr>
+                    <ng-container *ngIf="vendorRateVisible">
+                      <tr class="footer-rates border-bottom">
+                        <td class="font-weight-medium" colspan="4">{{ 'vendor_bill_rate' | i18next }}</td>
+                        <td class="font-weight-medium">
+                          <span>
+                            {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                          </span>
+                          <span>{{ rate.get('vendor_rate')?.value }}</span>
+                        </td>
+                      </tr>
+                    </ng-container>
+                    <ng-container *ngIf="billrateVisible">
+                      <tr class="footer-rates border-bottom">
+                        <td class="font-weight-medium" colspan="4">{{ 'client_bill_rate' | i18next }}</td>
+                        <td class="font-weight-medium">
+                          <span>
+                            {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                          </span>
+                          <span>{{ rate.get('billrate')?.value }}</span>
+                        </td>
+                      </tr>
+                    </ng-container>
+                  </tbody>
+                </table>
+              </ng-container>
+            </div>
+          </ng-container>
+        </ng-container>
+      </ng-container>
+    </form>
+  </svms-sidebar-body>
+  <svms-sidebar-footer>
+    <div class="row no-gutters">
+      <div *ngIf="isEdit" class="col-12 d-flex align-items-center justify-content-between">
+        <button type="submit" class="btn btn-outline-secondary mr-8" (click)="sidebarClose(false)">
+          {{ 'cancel' | i18next }}
+        </button>
+        <button type="submit" class="btn btn-primary border-0" [disabled]="updateBtnDisabled || (isSourcing && !rateDetailsForm.valid)"
+          (click)="sidebarClose(true)">
+          <icon size="24px" name="check_circle" type="material" class="d-flex mr-8" cuClass="icon-cu">
+          </icon> {{ 'update' | i18next }}
+        </button>
+      </div>
+      <div *ngIf="!isEdit" class="col-12 d-flex align-items-center justify-content-end">
+        <button type="submit" class="btn btn-primary mr-8" (click)="sidebarClose(false)">
+          {{ 'cancel' | i18next }}
+        </button>
+      </div>
+    </div>
+  </svms-sidebar-footer>
+</svms-sidebar>

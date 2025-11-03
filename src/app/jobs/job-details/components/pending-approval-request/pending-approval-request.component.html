@@ -1,0 +1,147 @@
+<svms-sidebar title="Pending Approval Request" [dataVisibility]="approvalSidebar" (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <div class="approval-ui p-32" *ngIf="jobData?.id">
+      <h3 class="title">{{jobData?.title?.title}}<span
+          class="d-inline-block position-relative pl-24 pr-12 rounded-sm ml-24 text-capitalize"
+          [ngClass]="{'yellowbg': (approvalWorkflowList?.final_status == 'pending'),'redbg': (approvalWorkflowList?.final_status == 'rejected'),'greenbg': (approvalWorkflowList?.final_status == 'approved')}">{{approvalWorkflowList?.final_status | titlecase | i18next}}</span>
+      </h3>
+
+      <p class="job-meta">
+        <icon size="18px" class="tag mr-8" name="label" type="material" cuClass="icon-cu"></icon> <span
+          class="mr-24">{{jobData?.id}}</span>
+        <icon size="14px" class="update-icon mr-8" name="update" type="material" cuClass="icon-cu"></icon> <span
+          class="updated">{{ 'created_on' | i18next }} : {{approvalWorkflowList?.created_on | localDateFormat:"MMM, dd yyyy"}}</span>
+      </p>
+      <p class="mt-64 upper-case">{{ 'approval_workflow' | i18next }}</p>
+      <!--- approved listing start here -->
+
+      <div class="approval mt-12" *ngFor="let approvals of approvalWorkflowList?.approvals; let i = index">
+        <div class="approval-list d-flex p-12">
+          <figure class="avatar d-inline-block rounded-circle mr-8 mt-4">
+            {{approvals?.approver?.first_name | slice: 0:1}}
+          </figure>
+          <p class="user">
+            {{approvals?.approver?.first_name}} {{approvals?.approver?.last_name}}
+            <span>{{approvals?.approver?.role}}</span>
+          </p>
+
+          <ng-template
+            [ngIf]="approvals?.approver?.id === user?._id && approvals?.status == approvedStatusEnum?.pending && isShowAction">
+            <button [disabled]="rejectReason" type="submit" class="btn small btn-primary mr-8 green"
+              (click)="openReason('approved', i)">
+              <icon size="20px" name="check_circle" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+              {{ 'approve' | i18next }}
+            </button>
+            <button [disabled]="approveReason" type="submit" class="btn small btn-primary red"
+              (click)="openReason('rejected', i)">
+              <icon size="20px" name="block" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+              {{ 'reject' | i18next }}
+            </button>
+          </ng-template>
+          <p *ngIf="approvals?.status == 'approved'" class="date mr-32">
+            <icon size="14px" class="mr-4" name="check_circle" type="material" cuClass="icon-cu"></icon> Approved On :
+            {{approvals?.modified_on |  date:"MMM dd, yyyy"}}
+          </p>
+
+          <p *ngIf="approvals?.approver?.id !== user?._id"
+            [ngClass]="{'yellow': (approvals?.status == 'pending'),'red': (approvals?.status == 'rejected'),'green': (approvals?.status == 'approved')}"
+            class="status align-self-center pl-8 position-relative text-capitalize"> {{approvals?.status | titlecase | i18next}}</p>
+          <p *ngIf="approvals?.approver?.id == user?._id && !isShowAction"
+            [ngClass]="{'yellow': (approvals?.status == 'pending'),'red': (approvals?.status == 'rejected'),'green': (approvals?.status == 'approved')}"
+            class="status align-self-center pl-8 position-relative text-capitalize"> {{approvals?.status | titlecase | i18next}}</p>
+        </div>
+        <!-- <ng-template > -->
+        <form *ngIf="approveReason && i == index" class="form" [formGroup]="approveForm" (ngSubmit)="approvedStatus('approved')">
+          <div class="my-4 border-top p-12" >
+            <label>{{ 'reason_for_approve' | i18next }}  </label>
+            <div class="approval-reason d-flex">
+              <div class="mr-8 w-50">
+                <input class="form-control" formControlName="reason_1" type="text" placeholder="{{ 'enter_reason' | i18next }} 1">
+              </div>
+              <div class="mr-8 w-50">
+                <input class="form-control" formControlName="reason_2" type="text" placeholder="{{ 'enter_reason' | i18next }} 2">
+              </div>
+              <div class="mr-8">
+              <button type="submit" class="btn small btn-primary" (click)="approvedStatus('approved')">
+                <icon size="20px" name="check_circle" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+                {{ 'confirm' | i18next }}
+              </button>
+              </div>
+            </div>
+          </div>
+        </form>
+        <!-- </ng-template> -->
+        <!-- <ng-template > -->
+        <form *ngIf="rejectReason && i == index" class="form" [formGroup]="rejectForm">
+          <div class="my-4 border-top p-12" >
+            <label>{{ 'reason_for_reject' | i18next }} &nbsp;<span class="required">*</span></label>
+            <div class="approval-reason d-flex">
+              <div class="mr-8 w-50">
+                <input class="form-control"
+                  [ngClass]="{ 'red-border': submittedR && rejectFormControl.reason_1.errors }"
+                  formControlName="reason_1" type="text" placeholder="{{ 'enter_reason' | i18next }} 1 ">
+                <div *ngIf="submittedR && rejectFormControl.reason_1.errors" class="invalid-feedback">
+                  <div *ngIf="rejectFormControl.reason_1.errors.required">{{ 'reason_1_is_required' | i18next }}</div>
+                </div>
+              </div>
+              <div class="mr-8 w-50">
+                <input class="form-control"
+                  [ngClass]="{ 'red-border': submittedR && rejectFormControl.reason_2.errors }"
+                  formControlName="reason_2" type="text" placeholder="{{ 'enter_reason' | i18next }} 2 ">
+                <div *ngIf="submittedR && rejectFormControl.reason_2.errors" class="invalid-feedback">
+                  <div *ngIf="rejectFormControl.reason_2.errors.required">{{ 'reason' | i18next }} 2 {{ 'is_required' | i18next }}</div>
+                </div>
+              </div>
+              <div class="mr-8">
+              <button type="submit" class="btn small btn-primary" (click)="rejectStatus('rejected')">
+                <icon size="20px" name="check_circle" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+                {{ 'confirm' | i18next }}
+              </button>
+              </div>
+            </div>
+          </div>
+        </form>
+        <!-- </ng-template> -->
+
+      </div>
+      <!--- approved listing end here -->
+      <!--- approval listing start here -->
+
+
+
+      <!--- pending listing end here -->
+
+      <div class="other-information d-flex mt-32 pt-12">
+        <p>
+          <span class="info-label">{{ 'gl_code' | i18next }}</span>
+          {{ 'gl_code' | i18next }} #{{jobData?.foundational?.gl_code ? jobData?.foundational?.gl_code : '-'}}
+        </p>
+        <p>
+          <span class="info-label">{{ 'cost_center' | i18next }}</span>
+          {{ 'cc' | i18next }} #{{jobData?.foundational?.cost_center ? jobData?.foundational?.cost_center : '-'}}
+        </p>
+        <p>
+          <span class="info-label">{{ 'company_code' | i18next }}</span>
+          {{jobData?.foundational?.company_code ? jobData?.foundational?.company_code : '-'}}
+        </p>
+      </div>
+      <div class="other-information d-flex mt-32">
+        <p>
+          <span class="info-label">{{ 'estimated_budget' | i18next }} / {{ 'position' | i18next }}</span>
+          <span class="red mr-12">17,380.00</span> <span
+            class="green">{{jobData?.budget_estimate ? jobData?.budget_estimate : '0'}}</span>
+        </p>
+        <p>
+          <span class="info-label">{{ 'number_of_positions' | i18next }}</span>
+          <span class="red mr-12">2</span> <span
+            class="green">{{jobData?.no_of_openings ? jobData.no_of_openings : '0'}}</span>
+        </p>
+        <p>
+          <span class="info-label">{{ 'total_estimated_budget' | i18next }}</span>
+          <span class="red mr-12">$ 34,760.00</span> <span
+            class="green">{{jobData?.max_budget ? jobData.max_budget : '0'}}</span>
+        </p>
+      </div>
+    </div>
+  </svms-sidebar-body>
+</svms-sidebar>

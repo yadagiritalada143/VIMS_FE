@@ -1,0 +1,51 @@
+<span
+  *ngIf="
+    (status?.toString() | lowercase) == 'approved' ||
+    (status?.toString() | lowercase) === 'open' ||
+    (status?.toString() | lowercase) === 'inactive' ||
+    (status?.toString() | lowercase) == 'closed' ||
+    (status?.toString() | lowercase) === 'active' ||
+    (status?.toString() | lowercase) == 'pending' ||
+    (status?.toString() | lowercase) == 'pending approval' ||
+    (status?.toString() | lowercase) == 'pending review' ||
+    (status?.toString() | lowercase) == 'rejected' ||
+    (status?.toString() | lowercase) == 'deleted' ||
+    (status?.toString() | lowercase) == 'scheduled' ||
+    (status?.toString() | lowercase) == 'completed' ||
+    (status?.toString() | lowercase) == 'cancelled' ||
+    (status?.toString() | lowercase) == 'draft' ||
+    (status?.toString() | lowercase) == 'sourcing' ||
+    (status?.toString() | lowercase) == 'withdrawn' ||
+    (status?.toString() | lowercase) == 'deferred' ||
+    (status?.toString() | lowercase) == 'in progress' ||
+    (status?.toString() | lowercase) == 'overdue' ||
+    (status?.toString() | lowercase) == 'approved modified' ||
+    (status?.toString() | lowercase) == 'missing'
+  "
+  class="status-ui ml-12 position-relative"
+  [ngClass]="{
+    approved:
+      (status?.toString() | lowercase) === 'approved' ||
+      (status?.toString() | lowercase) === 'open' ||
+      (status?.toString() | lowercase) == 'active' ||
+      (status?.toString() | lowercase) == 'scheduled' ||
+      (status?.toString() | lowercase) == 'completed' ||
+      (status?.toString() | lowercase) == 'approved modified',
+    withdrawn: (status?.toString() | lowercase) == 'withdrawn' || (status?.toString() | lowercase) == 'cancelled',
+    'pending-approval':
+      (status?.toString() | lowercase) == 'pending' ||
+      (status?.toString() | lowercase) === 'inactive' ||
+      (status?.toString() | lowercase) == 'pending approval' ||
+      (status?.toString() | lowercase) == 'pending review' ||
+      (status?.toString() | lowercase) == 'in progress' ||
+      (status?.toString() | lowercase) == 'overdue',
+    rejected: (status?.toString() | lowercase) == 'rejected',
+    deleted: (status?.toString() | lowercase) == 'deleted',
+    draft: (status?.toString() | lowercase) == 'draft' || (status?.toString() | lowercase) == 'missing',
+    sourcing: (status?.toString() | lowercase) == 'sourcing',
+    closed: (status?.toString() | lowercase) == 'closed',
+    deferred: (status?.toString() | lowercase) == 'deferred'
+  }"
+>
+  {{ status |i18next}}
+</span>

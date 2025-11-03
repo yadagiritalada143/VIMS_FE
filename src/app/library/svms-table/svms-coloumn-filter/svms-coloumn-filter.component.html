@@ -1,0 +1,175 @@
+<ng-container [formGroup]="filterFormGroup">
+  <ng-container *ngIf="field?.type == FilterType.TEXT">
+    <input #textFilter
+      type="search"
+      [formControlName]="field?.name"
+      [placeholder]="(field?.placeholder ?? field?.title)  | i18next"
+      class="c-form-control small mt-8 min-width"
+      (keyup.enter)="onSearchEvent($event, field)"
+      (input)="textFilter.value === '' && onInputChange($event, field)"
+      [readonly]="field?.disabled ?? false"
+      [disabled]="field?.disabled ?? false"
+      (click)="clearInput(field, $event)"
+    />
+  </ng-container>
+
+
+  <ng-container *ngIf="field?.type == FilterType.NUMBER || field?.type == FilterType.NORANGENUMBER">
+    <div class="input-clear-wrapper">
+            <svms-min-max-picker [placeholder]="field?.placeholder ?? field?.title"
+            (keyup.enter)="onSearchEvent($event, field)"
+            (input)="filterFormGroup.get(field.name)?.value === '' && onInputChange($event, field)"
+            (click)="clearInput(field, $event)"
+            (keydown)="numericOnly($event)"
+            [fieldName]="field?.name"
+            (onValueChange)="onValueChange($event)"
+            (keydown)="numericOnly($event)"
+            [readonly]="field?.disabled ?? false"
+            [disabled]="field?.disabled ?? false"
+            [numberType]="field?.type == FilterType.NUMBER ? 'number' : 'noNumber'"
+            [clearData] ="filterFormGroup.get(field.name)?.value"
+            [allowValue]="allowValue"
+            ></svms-min-max-picker>
+
+        <!-- <input
+            type="search"
+            [formControlName]="field?.name"
+            [placeholder]="(field?.placeholder ?? field?.title)  | i18next"
+            class="c-form-control small mt-8 min-width"
+            (keyup.enter)="onSearchEvent($event, field)"
+            (input)="filterFormGroup.get(field.name)?.value === '' && onInputChange($event, field)"
+            [readonly]="field?.disabled ?? false"
+            [disabled]="field?.disabled ?? false"
+            (click)="clearInput(field, $event)"
+            (keydown)="numericOnly($event)"
+        /> -->
+        <!-- <button *ngIf="filterFormGroup.get(field.name)?.value"
+        class="clear-button"
+        (click)="clearInput(field)">
+          &times;
+        </button> -->
+      <!-- <i placement="right" (click)="numberRangePicker()" class="material-icons">sync</i> -->
+       
+    </div>
+</ng-container>
+
+
+  <ng-container *ngIf="field?.type == FilterType.NONE">
+    <ng-select class="small mt-8 min-width" [readonly]="true" [placeholder]="('All' | i18next)"> </ng-select>
+  </ng-container>
+
+  <ng-container *ngIf="field?.type == FilterType.SELECT">
+    <ng-select
+      class="small mt-8 min-width"
+      [formControlName]="field?.name"
+      [placeholder]="(field?.placeholder ?? field?.title) | i18next"
+      [clearable]="true"
+      [multiple]="false"
+      [readonly]="field?.disabled ?? false"
+      [disabled]="field?.disabled ?? false"
+      [loading]="field?.loading ?? false"
+      (change)="onChangeEvent($event, field)"
+      (open)="onOpenEvent($event,field)"
+      (scrollToEnd)="onScrollEvent(field)"
+      (clear)="clearSelect(field?.name, $event)"
+      [typeahead]="typeahead"
+    >
+      <ng-option [value]="entry?.value" *ngFor="let entry of field?.options">
+        {{ entry?.name | i18next }}
+      </ng-option>
+    </ng-select>
+  </ng-container>
+
+  <ng-container *ngIf="field?.type == FilterType.MULTISELECT">
+    <ng-select
+      #multiSelect
+      class="small mt-8 multi-select-filter min-width"
+      [formControlName]="field?.name"
+      [placeholder]="(field?.placeholder ?? field?.title) | i18next"
+      [clearable]="true"
+      [multiple]="true"
+      [items]="field.options"
+      [closeOnSelect]="false"
+      (clear)="clearMultiSelect(field?.name, $event)"
+      bindValue="value"
+      bindLabel="name"
+      [loading]="field?.loading ?? false"
+      [readonly]="field?.disabled ?? false"
+      [disabled]="field?.disabled ?? false"
+      [typeahead]="multiSelectTypeaheadInput$"
+      (open)="onOpenEvent($event, field)"
+      (close)="onCloseDropdown(field)"
+      (search)="multiSelectSearchTerm = $event?.term"
+    >
+
+    <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+       <span class="custom-value-selected" *ngIf="items.length > 1"> {{items.length}} {{ 'selected' | i18next }} </span>
+       <span class="custom-value-selected" *ngIf="items.length == 1"> {{items[0].name}}</span>
+    </ng-template>
+
+    <ng-template ng-option-tmp let-item$="item$"  let-item="item" let-index="index">
+      <div *ngIf="showMultiSelectEntry(item?.name)" class="d-flex align-items-start py-4 item-container" style="font-size: 11px;">
+        <input class="mr-4" type="checkbox"  [(ngModel)]="item$.selected" [ngModelOptions]="{ standalone : true }"/>
+        <span>{{ item?.name | i18next }}</span>
+      </div>
+    </ng-template>
+
+    <ng-template ng-footer-tmp let-term="searchTerm">
+      <div class="d-flex justify-content-between">
+        <div>
+          <span class="selected-items-count font-weight-normal">{{multiSelect?.selectedValues?.length}} {{'selected' | i18next}}</span>
+          <span *ngIf="multiSelect?.selectedValues?.length > 0" class="selected-items-count font-weight-normal cursor-pointer ml-8" (click)="clearMultiSelect(field?.name, $event)">{{'clear_all' | i18next}}</span>
+        </div>
+        <button [disabled]="multiSelect?.selectedValues?.length == 0" class="c-btn c-btn-primary-medium-left-icon small" (click)="onChangeMultiSelectEvent($event, field, multiSelect)">
+          {{'apply' | i18next}}
+      </button>
+      </div>
+
+    </ng-template>
+
+    </ng-select>
+  </ng-container>
+
+  <ng-container *ngIf="field?.type === FilterType.DATEPICKER">
+    <div class="filter-form-group">
+      <div class="date-picker c-form-group position-relative mb-0 min-width">
+        <svms-datepicker
+          [readonly]="field?.disabled ?? false"
+          [disabled]="field?.disabled ?? false"
+          [inputdateFormat]=""
+          [responsiveDatepicker]="true"
+          [formControlName]="field?.name"
+          [placeholder]="(field?.placeholder ?? field?.title) | i18next"
+          [options]="field?.config ?? datepickerOptions"
+          (onDateChange)="dateChanged($event)"
+          (onendDateChange)="endDateChange($event, field)"
+          [autoClearInputDate]="true"
+          (clearDate)="clearDateFilter($event, field)"
+        ></svms-datepicker>
+      </div>
+    </div>
+  </ng-container>
+
+<ng-container *ngIf="field?.type === FilterType.TIME">
+  <div class="filter-form-group input-clear-wrapper">
+    <input
+      type="time"
+      [formControlName]="field?.name"
+      [placeholder]="(field?.placeholder ?? field?.title)  | i18next"
+      (change)="timeChanged($event, field)"
+      [min]="field?.config?.min"
+      [max]="field?.config?.max"
+      class="c-form-control small mt-8 min-width"
+      [readonly]="field?.disabled ?? false"
+      [disabled]="field?.disabled ?? false"
+    >
+    <button *ngIf="filterFormGroup.get(field.name)?.value"
+      class="clear-button-time"
+      (click)="clearInput(field)">
+        &times;
+      </button>
+  </div>
+</ng-container>
+
+
+</ng-container>

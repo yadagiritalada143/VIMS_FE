@@ -1,0 +1,82 @@
+<div
+  [ngClass]="detail.displayType == CommonViewConfig.BOX_VIEW ? 'detail-item d-flex mb-16' : 'detail-item d-flex align-items-center mb-16'"
+  *ngFor="let detail of details; index as it">
+
+  <ng-container *ngIf="(detail.displayType === CommonViewConfig.HEADER); else others;">
+    <h4 class="item-label pt-32 font-weight-medium">{{detail.label |i18next}}</h4>
+  </ng-container>
+
+  <ng-template #others>
+    <div class="item-label" [ngClass]="{'box-view-label' : detail.displayType == CommonViewConfig.BOX_VIEW}">
+      <span class="font-weight-medium" *ngIf="detail.displayType == CommonViewConfig.SUB_HEADING">{{detail.label
+        |i18next}}</span>
+      <span *ngIf="!detail?.headerTemplate&& detail.displayType != CommonViewConfig.SUB_HEADING">
+        {{detail.label |i18next}}
+      </span>
+      <ng-container [ngTemplateOutlet]="detail?.headerTemplate || empty"
+        [ngTemplateOutletContext]="{ $implicit: detail?.headerValue, name: detail?.label }"></ng-container>
+    </div>
+
+    <icon name="{{detail.icon}}" type="material" class="field-icon pt-4 mr-12" size="14px" *ngIf="detail.icon"></icon>
+    <svg-icon [key]="detail.svgIcon" fontSize="24px" *ngIf="detail.svgIcon" class="mr-12"></svg-icon>
+    <div class="item-value font-weight-medium" *ngIf="detail.displayType == CommonViewConfig.TEXT">{{detail.value}}
+    </div>
+    <div class="item-value font-weight-medium" *ngIf="detail.displayType == CommonViewConfig.HYPERLINK">
+      <a [hrefParse]="detail.value"> {{ detail.value }} </a>
+    </div>
+
+    <div class="item-value font-weight-medium" *ngIf="detail.displayType == CommonViewConfig.STATUS">
+      <span class="c-status-ui" [ngClass]="detail?.enabled ? 'active' : 'inactive'">{{detail?.value | i18next}}</span>
+    </div>
+
+    <div class="item-value font-weight-medium" *ngIf="detail.displayType == CommonViewConfig.CUSTOMSTATUS">
+      <span class="c-status-ui" [ngClass]="detail?.cssClass">{{detail?.value | i18next}}</span>
+    </div>
+
+    <div class="item-value font-weight-medium" *ngIf="detail.displayType == CommonViewConfig.BOX_VIEW">
+      <ul>
+        <li *ngFor="let value of detail?.value">{{value?.name | i18next}}</li>
+      </ul>
+    </div>
+
+    <div class="item-value font-weight-medium" *ngIf="detail.displayType == CommonViewConfig.TEMPLATE_REF">
+      <ng-container [ngTemplateOutlet]="detail?.template || none"
+        [ngTemplateOutletContext]="{ $implicit: detail?.value }"></ng-container>
+    </div>
+
+    <div class="item-value font-weight-medium bordered-paragraph"
+      *ngIf="detail.displayType == CommonViewConfig.INITIAL_CONDITION">
+      <p class="px-12" [innerHtml]="detail?.value"></p>
+    </div>
+
+    <div class="item-value font-weight-medium bordered-paragraph"
+      *ngIf="detail.displayType == CommonViewConfig.TEMPLATE">
+      <span [innerHTML]="detail?.value | safeHtml"></span>
+    </div>
+
+    <div class="item-value font-weight-medium" *ngIf="detail.displayType == CommonViewConfig.DESCRIPTION">
+      <div id="description-{{it}}" class="description-text"
+        [ngStyle]="{'height': commmonViewPropertyMap.get(it)?.showMore?'32px':'max-content'}">
+        {{detail.value | i18next}}
+        <span
+          *ngIf="((commmonViewPropertyMap.get(it)?.height > 32) && (commmonViewPropertyMap.get(it)?.showMore === false))"
+          class="pr-4 blue-text" (click)="toggleShowMore(it, true)">
+          {{ 'Read Less' | i18next }}
+        </span>
+      </div>
+      <p *ngIf="commmonViewPropertyMap.get(it)?.showMore" class="blue-text" (click)="toggleShowMore(it, false)">
+        {{ 'Read More' | i18next }}
+      </p>
+    </div>
+
+    <div class="item-value font-weight-medium" *ngIf="detail.displayType == CommonViewConfig.ATTACHMENT">
+      <a [downloadFile]="detail?.value">
+        {{ detail?.value?.name || "--" }}
+      </a>
+    </div>
+  </ng-template>
+</div>
+
+<ng-template #none>{{ '--' | i18next }}</ng-template>
+
+<ng-template #empty></ng-template>

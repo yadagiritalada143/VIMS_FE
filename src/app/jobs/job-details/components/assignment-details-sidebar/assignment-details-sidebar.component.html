@@ -1,0 +1,262 @@
+
+<div class="p-24" *ngIf="!dataLoading && assignmentViewData">
+    <div class="d-flex align-items-center justify-content-between mb-16">
+        <div class="d-flex flex-column">
+            <h4>{{assignmentViewData?.assignment?.assignment_title?.name || '-'}}</h4>
+            <div class="d-flex align-items-center">
+                <span class="mr-4 orange">
+                    <icon size="16px" name="label" type="material" class="d-flex orange" cuClass="d-flex">
+                    </icon>
+                </span>
+                <p class="small">{{assignmentViewData?.assignment?.code || '-'}}</p>
+                <span class="ml-12 ">
+                    <icon size="16px" theme="outlined" name="watch_later" type="material" class="d-flex "
+                        cuClass="d-flex">
+                    </icon>
+                </span>
+                <p class="small ml-4">{{ 'last_updated_on' | i18next }} :{{assignmentViewData?.assignment?.end_date || '-'}}</p>
+            </div>
+        </div>
+        <div class="status-ui sourcing">
+            {{(assignmentViewData?.assignment?.status | titlecase | i18next) || '-'}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <ul class="notify-listing mt-30">
+                <li class="d-flex">
+                    <img *ngIf="assignmentViewData?.assignment?.logo_url" [src]="assignmentViewData?.assignment?.logo_url" width="60" />
+                    <img *ngIf="!assignmentViewData?.assignment?.logo_url" src="../../../../assets/images/avatar-default.png" width="60" />
+                    <div class="notification-message">
+                        <span class="small">{{ 'vendor' | i18next }} </span>
+                        <p class="small mt-4">{{assignmentViewData?.assignment?.vendor_id?.name ||'-'}}</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="budget_details mt-30 col-6">
+            <div class="font-weight-bold mb-4">{{ 'budget_details' | i18next }}</div>
+            <div class="row">
+                <div class="col-6 ">
+                    <!-- <p class="active text-primary font-weight-medium small">{{budget?.left_budget ? (budget?.left_budget | customcurrency:currencyField) : (0.00|
+                        customcurrency:currencyField)||-''}}</p> -->
+                      <p class="active text-primary font-weight-medium small mt-4"> {{assignmentViewData?.finance?.gross_allocated_budget | customcurrency}}</p>
+                    <p class="small mt-4">{{ 'remaining_budget' | i18next }}</p>
+                </div>
+                <div class=" col-6">
+                    <p class="small active mt-4">
+                         <!-- {{budget?.total_allocated_budget ? (budget?.total_allocated_budget | customcurrency:currencyField) :
+                            (0.00|
+                            customcurrency:currencyField)||'-'}} -->
+                           {{assignmentViewData?.finance?.net_allocated_budget || assignmentViewData?.finance?.timesheet_budget | customcurrency}}
+                    </p>
+                    <p class="small">{{ 'total_budget' | i18next }}</p>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <table class="">
+        <tbody>
+            <tr >
+                <th class="font-weight-bold">
+                    {{ 'rate_information' | i18next }}
+                </th>
+                <th>
+                    {{ 'client_bill_rate' | i18next }}
+                </th>
+                <th>
+                    {{ 'vendor_bill_rate' | i18next }}
+                </th>
+                <th>
+                    {{ 'candidate_pay_rate' | i18next }}
+                </th>
+            </tr>
+            <tr>
+                <th>{{ 'regular_rate' | i18next }}</th>
+                <td>{{assignmentViewData?.finance?.regular_billrate || '-'}}</td>
+                <td>{{assignmentViewData?.finance?.regular_payrate || '-'}}</td>
+                <td>{{assignmentViewData?.finance?.regular_vendor_rate || '-'}}</td>
+
+
+            </tr>
+            <tr>
+                <th>Over {{ 'time_rate' | i18next }}</th>
+                <td>{{assignmentViewData?.finance?.overtime_billrate||'-'}}</td>
+                <td>{{assignmentViewData?.finance?.overtime_payrate||'-'}}</td>
+                <td>{{assignmentViewData?.finance?.overtime_vendor_rate||'-'}}</td>
+
+            </tr>
+            <!-- <tr>
+                <th>Holiday Rate</th>
+                <td>{{assignmentViewData?.finance?.regular_billrate ||'-'}}</td>
+                <td>{{assignmentViewData?.finance?.overtime_vendor_rate ||'-'}}</td>
+                <td>{{assignmentViewData?.finance?.regular_vendor_rate ||'-'}}</td>
+            </tr> -->
+            <tr>
+                <th>{{ 'double_time_rate' | i18next }}</th>
+                <td>{{assignmentViewData?.finance?.doubletime_billrate||'-'}}</td>
+                <td>{{assignmentViewData?.finance?.doubletime_payrate||'-'}}</td>
+                <td>{{assignmentViewData?.finance?.doubletime_vendor_rate||'-'}}</td>
+            </tr>
+        </tbody>
+    </table>
+    <h4 class="mt-8">{{ 'assignment_details' | i18next }}</h4>
+    <div class="row mt-22 mb-8 assigment_section">
+        <div class="col-md-6 mb-16">
+            <div class="d-flex align-items-center">
+                <div class="d-flex flex-column">
+                    <span class="small">{{ 'hierarchy' | i18next }}</span>
+                    <p class="small"> {{assignmentViewData?.assignment?.hierarchy_id?.name ||'-'}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-16">
+            <span>{{ 'job_manager' | i18next }}</span>
+            <div class="d-flex align-items-center mt-4">
+                <!-- <div class="mr-16 initials initials-profile">
+                    <img src="../../../../assets/images/avatar-default.png" />
+                </div> -->
+                <p class="small">{{assignmentViewData?.assignment?.assignment_manager?.name ||'-'}}</p>
+            </div>
+        </div>
+        <div class="col-md-6 mb-16">
+            <div class="d-flex align-items-center">
+                <div class="d-flex flex-column">
+                    <span class="small">{{ 'assignment_duration' | i18next }}</span>
+                    <p class="small">{{assignmentViewData?.assignment?.start_date | localDateFormat:'dd/MM/yyyy'}} -
+                        {{assignmentViewData?.assignment?.end_date | localDateFormat:'dd/MM/yyyy'||'-'}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-16">
+            <div class="d-flex align-items-center">
+                <div class="d-flex flex-column">
+                    <span class="small">{{ 'job_title' | i18next }}</span>
+                    <p class="text-primary font-weight-medium small">{{assignmentViewData?.assignment?.job_id?.title || assignmentViewData?.assignment?.assignment_title?.name || '-'}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-16">
+            <div class="d-flex align-items-center">
+                <div class="d-flex flex-column">
+                    <span class="small"> {{ 'original_start_date' | i18next }} </span>
+                    <p class="small">{{assignmentViewData?.worker?.original_start_date | localDateFormat:'dd/MM/yyyy'}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-16">
+            <div class="d-flex flex-column">
+                <span class="small">{{ 'unique_id' | i18next }}({{ 'system_generated' | i18next }})</span>
+                <p class="small">{{assignmentViewData?.assignment?.code||'-'}}</p>
+            </div>
+        </div>
+        <div class="col-md-6 mb-16">
+            <div class="d-flex align-items-center">
+                <div class="d-flex flex-column">
+                    <span class="small">{{ 'vendor' | i18next }}</span>
+                    <p class="small">{{assignmentViewData?.assignment?.vendor_organization_id?.name||'-'}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h4>{{ 'financial_details' | i18next }}</h4>
+    <div class="row  mt-22 mb-8 assigment_section">
+        <div class="col-md-6 mb-16">
+            <span class="small">{{ 'timesheet_manager' | i18next }}</span>
+            <div class="d-flex align-items-center mt-4">
+                <!-- <div class="mr-16 initials initials-profile">
+                    <img src="../../../../../../assets/images/avatar-default.png" />
+                </div> -->
+                <p><span class="initials initials__pink" *ngIf="assignmentViewData?.finance?.timesheet_manager?.initials">
+                    {{assignmentViewData?.finance?.timesheet_manager?.initials}}</span>
+                    <a 
+                    class="font-weight-medium">
+                    {{assignmentViewData?.finance?.timesheet_manager?.name || '-'}}</a>
+                </p>
+            </div>
+        </div>
+        <div class="col-md-6 mb-16">
+            <span class="small">{{ 'expense_manager' | i18next }}</span>
+            <div class="d-flex align-items-center mt-4">
+                <div *ngIf="assignmentViewData?.finance?.expense_manager?.initials" class="mr-16 initials initials-profile">
+                    {{assignmentViewData?.finance?.expense_manager?.initials}}
+                </div>
+                <p class="small">{{assignmentViewData?.finance?.expense_manager?.name || '-'}}</p>
+            </div>
+        </div>
+        <div class="col-md-6 mb-16">
+            <div class="d-flex align-items-center">
+                <div class="d-flex flex-column">
+                    <span class="small"> {{ 'timesheet_type' | i18next }}</span>
+                    <p class="small">{{assignmentViewData?.finance?.timesheet_type | uppercase}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-16">
+            <div class="d-flex align-items-center">
+                <div class="d-flex flex-column">
+                    <span class="small"> {{ 'ot_exempt' | i18next }}</span>
+                    <p class="small">{{assignmentViewData?.finance?.ot_exempt_position  || '-'}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-16">
+            <div class="d-flex align-items-center">
+                <div class="d-flex flex-column">
+                    <span class="small"> {{ 'rate_model' | i18next }}</span>
+                    <p class="small">{{assignmentViewData?.finance?.rate_model  || '-'}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-16">
+            <div class="d-flex align-items-center">
+                <div class="d-flex flex-column">
+                    <span class="small"> {{ 'rate_type' | i18next }}</span>
+                    <p class="small">{{assignmentViewData?.finance?.rate_type || '-'}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-16">
+            <div class="d-flex align-items-center">
+                <div class="d-flex flex-column">
+                    <span class="small"> {{ 'work_location' | i18next }}</span>
+                    <p class="small">{{assignmentViewData?.assignment?.work_location?.name ||'-'}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-16">
+            <div class="d-flex align-items-center">
+                <div class="d-flex flex-column">
+                    <span> {{ 'billable' | i18next }}</span>
+                    <p *ngIf="assignmentViewData?.finance?.is_billable === 0" class="d-flex"><a 
+                        class="font-weight-medium mr-8 d-flex">{{ 'no' | i18next }}
+                      </a>
+                    </p>
+                    <p *ngIf="assignmentViewData?.finance?.is_billable === 1" class="d-flex"><a 
+                        class="font-weight-medium mr-8 d-flex">{{ 'yes' | i18next }} </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-8">
+            <span class="small">{{ 'currency' | i18next }}</span>
+            <div class="d-flex align-items-center mt-8">
+                <img *ngIf="(assignmentViewData?.finance?.currency | uppercase) == 'CAD'" src="../../../../../assets/images/flag/English (Canada).png" width="20" />
+                <img *ngIf="(assignmentViewData?.finance?.currency | uppercase) == 'USD'" src="../../../../../assets/images/flag/us.png" width="20" />
+                <img *ngIf="(assignmentViewData?.finance?.currency | uppercase) == 'INR'" src="../../../../../assets/images/flag/हिन्दी.png" width="20" />
+                <p class="pl-8 small"> {{assignmentViewData?.finance?.currency | uppercase }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div *ngIf="dataLoading" class="d-flex justify-content-center loader-height align-items-center img_height">
+    <div class="dotloader"></div>
+</div>
+<div class="d-flex justify-content-center align-items-center img_height"  *ngIf="!dataLoading && !assignmentViewData">
+    <div class="text-center">
+        <img  alt="no data" width="100" class="img-fluid" src="./assets/images/freepik--Envelope--inject-10.svg">
+        <h5 class="pt-16">{{ 'no_assignments_created_message' | i18next }}</h5>
+    </div>
+</div>

@@ -1,0 +1,255 @@
+<app-logs [log]="logs"></app-logs>
+<ng-container *ngIf="approversList">
+  <div class="d-flex mb-16 justify-content-between align-items-center column-direction seperation-border-m p-m-12"
+    *ngIf="approversList?.status?.toLowerCase() === ApprovalStatus?.pending && hasApprovalOverridePermission">
+    <div class="d-flex align-items-center">
+      <icon size="24px" color="red" name="notifications_active" theme="outlined" type="material"
+        class="icon--on-left mr-8 mr-m-0"> </icon>
+      <p class="font-weight-bold">{{ 'your_approval_requested' | i18nextEager }}</p>
+    </div>
+    <div class="d-flex column-direction mt-m-8 full-page-width">
+      <div *ngIf="request_sub_type == SubStatusTypes.PendingReview; else not_pending_review"
+        class="d-flex ml-24 align-items-center">
+        <div class="d-flex ml-24 align-items-center" (click)="openPendingReview()">
+          <button class="btn btn-orange ml-16">{{ 'review_&_approval' | i18nextEager }}</button>
+        </div>
+      </div>
+      <ng-template #not_pending_review >
+        <ng-select class="min_width" placeholder="{{ 'select_the_approval' | i18nextEager }}" [(ngModel)]="adminApprovalMode">
+          <ng-option value="sequence">{{ 'current_sequence_approval' | i18nextEager }}</ng-option>
+          <ng-option value="assignment">{{ 'entire_approval_workflow' | i18nextEager }}</ng-option>
+        </ng-select>
+        <div class="button-wrapper d-flex mt-m-8">
+          <!-- approveUpdate(null); -->
+        <button class="btn btn-success ml-16 m-m-4 d-flex-1-m" (click)="getAssignmentLockStatus(null, true,'approve')" [disabled]="!adminApprovalMode || isLock" *accessControl>
+          <icon size="20px" name="check_circle" type="material" class="icon--on-left"> </icon>
+          {{ 'approve' | i18nextEager }}
+        </button>
+        <!-- rejectUpdate(null) -->
+        <button class="btn btn-danger ml-16 m-m-4 d-flex-1-m" (click)="getAssignmentLockStatus(null, true,'reject')" [disabled]="!adminApprovalMode || isLock" *accessControl>
+          <icon size="20px" name="block" type="material" class="icon--on-left"> </icon>{{ 'reject' | i18nextEager }}
+        </button>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</ng-container>
+<div *ngIf="pendingItem; else noPending" class="assignment-header p-24 seperation-border-m">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="d-flex align-items-center">
+        <icon class="d-flex mr-4" color="#5E71FE" size="24px" name="tips_and_updates" type="material" theme="outlined"
+          cuClass="d-flex"></icon>
+        <div class="d-flex justify-items-center flex-column ml-4">
+          <h4 class="font-weight-medium">
+            {{ (title | titlecase ) | i18nextEager }}
+          </h4>
+          <span class="sub-head" *ngIf="updationDetails?.updatedBy ||updationDetails?.updatedOn">{{'Requested
+            by'|i18next}} {{ updationDetails?.updatedBy || '-' }}
+            &nbsp;<span *ngIf="updationDetails?.impersonated_by?.name">({{ 'impersonated_by' | i18nextEager }}: {{updationDetails?.impersonated_by?.name}} <span *ngIf="updationDetails?.impersonated_by?.role?.name"> - {{updationDetails?.impersonated_by?.role?.name}}</span> <span *ngIf="updationDetails?.impersonated_by?.role?.organization_category">({{updationDetails?.impersonated_by?.role?.organization_category}})</span>)</span>
+            {{ 'on' | i18nextEager }} {{ (updationDetails?.updatedOn |
+            localDateFormat) || '-' }}
+            {{ (updationDetails?.updatedOn | localDateFormat: 'hh:mm:ss a z') || '' }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 info d-flex align-items-center align-items-start-m column-direction update-reason">
+      <div class="d-flex align-items-center mr-64">
+        <div class="initials initials-light">
+          <icon class="d-flex" size="18px" name="record_voice_over" type="material" theme="outlined" cuClass="d-flex">
+          </icon>
+        </div>
+        <div class="d-flex justify-items-center flex-column ml-4">
+          <p class="mb-0 small">{{ 'reason' | i18nextEager }}</p>
+          <span class="text-black">{{ updationDetails?.updateReason?.name || '-' }}</span>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="initials initials-green">
+          <icon class="d-flex" size="14px" name="mail" type="material" theme="outlined" cuClass="d-flex"></icon>
+        </div>
+        <div class="d-flex justify-items-center flex-column ml-4">
+          <p class="mb-0 small">{{ 'effective_date' | i18nextEager }}</p>
+          <span class="text-black">{{ effectiveDate ? (effectiveDate | localDateFormat : '': '':'' : true) : '-' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row mt-24">
+    <div class="col-12">
+      <div class="d-flex align-items-start">
+        <icon size="16px" name="sticky_note_2" theme="outlined" color="black" class="d-flex mr-8" cuClass="d-flex">
+        </icon>
+        <div class="d-flex flex-column">
+          <span class="font-weight-medium text-black">{{ 'additional_notes' | i18nextEager }}</span>
+          <p class="text-black mt-8">
+            {{ (updationDetails?.updateNotes ? updationDetails?.updateNotes : 'N/A')|i18next }}
+            <!-- <a href="" class="text-link">more </a> -->
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #noPending>
+  <div>{{ 'no_approvals_required' | i18nextEager }}</div>
+</ng-template>
+
+<ng-container *ngIf="revisionHistory.length">
+  <h4 class="d-flex align-items-center pb-12 mt-24 column-direction">
+    <span class="mr-8">
+      <icon size="24px" name="sort" type="material" class="d-flex" cuClass="d-flex"> </icon>
+    </span>
+    <span class="font-weight-medium">{{ 'summary' | i18nextEager }}</span>
+    <button class="btn btn-outine small ml-16" *ngIf="assignmentData" (click)="viewAssignmentDetails()">
+      {{ 'view_assignment_details' | i18nextEager }}
+    </button>
+  </h4>
+
+  <div class="row mt-24 pl-24 pl-m-0 ml-m-0 mr-m-0 seperation-border-m">
+    <div class="col-md-2 mb-16" *ngFor="let data of revisionHistory" [hidden]="data?.hidden">
+      <p class="small text-muted" *ngIf="!data?.fieldStrike">{{data?.label | snakeToTitleCase | titlecase | i18nextEager}}</p>
+      <del class="small text-muted d-block text-red" *ngIf="data?.fieldStrike">{{data?.label | snakeToTitleCase | titlecase | i18nextEager}}</del>
+      <span class="changed-text" tooltip="{{data?.isCurrency ? showToolTip(data?.new_value, checkAccuracyConfigType(data?.type)) : data?.new_value}}" placement="top">{{ data?.isCurrency ? (data?.new_value | accuracy :  checkAccuracyConfigType(data?.type) : { currencyCode: currency}) : (data?.new_value + (data?.isPercentage ? '%': '')) }}
+      </span>
+      <p class="text-red small" *ngIf="(data?.old_value || data?.old_value == '0')">
+        <del tooltip="{{(data?.isCurrency ? showToolTip(data?.old_value, checkAccuracyConfigType(data?.type)) : data?.old_value)|i18next}}" placement="top">{{ data?.isCurrency ? (data?.old_value | accuracy :  checkAccuracyConfigType(data?.type) : { currencyCode: currency}) : (data?.old_value + (data?.isPercentage ? '%': '')) }}</del>
+      </p>
+    </div>
+  </div>
+</ng-container>
+
+<!-- new approval -->
+<!-- <div  class="p-16">
+  <app-multi-approvals [multiApprovals]="multiApprovals" [module]="'assignments'"
+    [ID]="assignmentId"[approvalUrl]="approvalUrl"></app-multi-approvals>
+     <app-multi-workflow [moduleName]="'assignments'" [moduleStatus]="expenseDetail.expense_status"
+          [multiApprovals]="multiApprovals" [moduleId]="assignmentId"></app-multi-workflow>
+</div> -->
+<!-- new approval -->
+
+<ng-container *ngIf="approversList && approversList?.approvers?.length > 0">
+  <h4 class="d-flex align-items-center pt-16 pb-12 ml-m-8">
+    <span class="mr-8">
+      <icon size="24px" name="task_alt" type="material" class="d-flex" cuClass="d-flex"> </icon>
+    </span>
+    <span class="font-weight-medium">{{ 'approvers' | i18nextEager }}</span>
+  </h4>
+  <div class="ml-24 mb-24 panel panel-light p-16 pb-8 ml-m-0 approvers-item" *ngFor="let approverData of approversList?.approvers; let i = index">
+    <p class="pb-8 d-flex align-items-center justify-content-between small text-uppercase">
+      <span>{{ approverData?.role?.name?.replace('_', ' ') | titlecase |i18next }}</span>
+      <span class="d-none">
+        <icon size="15px" name="keyboard_arrow_down" type="material" class="d-flex" cuClass="d-flex"> </icon>
+      </span>
+    </p>
+    <ng-container *ngIf="approverData?.members.length; else displayStatus">
+      <div class="item-wrapper d-flex mb-16" *ngFor="let member of approverData?.members; let j = index">
+        <div
+          class="p-12 d-flex justify-content-center flex-column"
+          [ngClass]="{
+            'approved-panel': member.status?.toLowerCase() === ApprovalStatus.approved,
+            'no-approved-panel': (member.status?.toLowerCase() === ApprovalStatus.pending || member.status?.toLowerCase() === ApprovalStatus.not_needed),
+            'rejected-panel': member.status?.toLowerCase() === ApprovalStatus.rejected
+          }"
+        >
+          <div class="item-box column-direction d-flex align-items-center justify-content-between position-relative">
+            <div class="d-flex">
+              <figure class="initials initials-profile mr-8">
+                {{ member.first_name + ' ' + member.last_name | shortName: 'last' }}
+              </figure>
+              <div>
+                <span class="text-dark font-weight-medium approver-name" [ngClass]="{'disable-text': !member?.is_active}" >{{ member?.first_name }} {{ member?.middle_name }} {{ member?.last_name }} <span class="text-dark font-weight-medium approver-name" [ngClass]="{'disable-text': !member?.is_active}" *ngIf="!member?.is_active">{{ " (Inactive)" }}</span></span>
+                <span *ngIf="member?.title && member?.title!=='null' "><i>{{member?.title}}</i> </span>
+              </div>
+            </div>
+            <div class="d-flex align-items-center">
+              <div *ngIf="member.status?.toLowerCase() === ApprovalStatus.approved">
+                <icon name="check_circle" color="#079A12" size="16px" class="mr-8"></icon> <span class="text-green font-weight-medium">{{ member?.status | titlecase | i18nextEager }} </span>
+                 <span *ngIf="member?.status_modified_by?.first_name && member?.id !== member?.status_modified_by?.id"> {{ 'by' | i18nextEager }} {{member?.status_modified_by?.first_name}}</span>
+              </div>
+              <div *ngIf="member?.status?.toLowerCase() === ApprovalStatus.pending">
+                <icon name="hourglass_bottom" color="#D19F00" size="16px" class="mr-8"></icon> <span class="text-brown font-weight-medium">{{ member?.status | titlecase | i18nextEager }} </span>
+              </div>
+              <div *ngIf="member.status?.toLowerCase() === ApprovalStatus.rejected">
+                <icon name="check_circle" color="#C72F43" size="16px" class="mr-8"></icon> <span class="text-red font-weight-medium">{{ member?.status | titlecase | i18nextEager }} </span>
+              </div>
+              <span *ngIf="member?.is_impersonated" class="font-weight-bold approver-name ml-8">
+                ({{'impersonated_by'|i18next}}:
+                {{member?.impersonated_data?.impersonated_by?.first_name}}
+                {{member?.impersonated_data?.impersonated_by?.middle_name}}
+                {{member?.impersonated_data?.impersonated_by?.last_name}})
+              </span>
+            </div>
+            <div>
+              <div *ngIf="member.status?.toLowerCase() === ApprovalStatus.approved">
+                <icon name="event" color="#536476" size="14px" class="mr-8"></icon>
+                <span>
+                  {{ (member?.status_modified_on | localDateFormat) || '-' }} {{ (member?.status_modified_on | localDateFormat: 'hh:mm:ss a z') || '' }}
+                </span>
+              </div>
+              
+              <ng-container *ngIf="member.status?.toLowerCase() !== ApprovalStatus.approved &&
+                                              member.status?.toLowerCase() !== ApprovalStatus.rejected &&
+                                              member.id === currentUserId && member.is_approval_allowed">
+                <div *ngIf="request_sub_type == SubStatusTypes.PendingReview && i == 0; else approve_or_reject"
+                  class="d-flex ml-24 align-items-center justify-content-end">
+                  <div class="d-flex ml-24 align-items-center" (click)="openPendingReview()">
+                    <button class="btn btn-success small ml-16">{{ 'review_&_approval' | i18nextEager }}</button>
+                  </div>
+                </div>
+                <ng-template #approve_or_reject>
+                  <!-- (click)="approveUpdate(approverData?.approval_chain_id)" -->
+                  <div class="d-flex ml-24 align-items-center justify-content-end">
+                    <button class="btn btn-success small ml-16" (click)="getAssignmentLockStatus(approverData?.approval_chain_id, true,'approve', member)" [disabled]="isLock">
+                      <icon size="16px" name="check_circle" type="material" class="icon--on-left"> </icon>
+                      {{ 'approve' | i18nextEager }}
+                    </button>
+                    <!-- rejectUpdate(approverData?.approval_chain_id) -->
+                    <button class="btn btn-danger small ml-16" (click)="getAssignmentLockStatus(approverData?.approval_chain_id, true,'reject', member)" [disabled]="isLock">
+                      <icon size="16px" name="block" type="material" class="icon--on-left"> </icon>{{ 'reject' | i18nextEager }}
+                    </button>
+                  </div>
+                </ng-template>
+              </ng-container>
+              <div  *ngIf="member.status?.toLowerCase() === ApprovalStatus.rejected">
+                <icon name="event" color="#536476" size="14px" class="mr-8"></icon>
+                <span>
+                  {{ (member?.status_modified_on | localDateFormat) || '-' }} {{ (member?.status_modified_on | localDateFormat: 'hh:mm:ss a z') || '' }}
+                </span>
+              </div>
+
+            </div>
+          </div>
+          <div *ngIf="member.status?.toLowerCase() === ApprovalStatus.approved">
+            <div class="member-note mt-8" *ngIf="member?.status_note">
+              {{ member?.status_note }}
+            </div>
+          </div>
+          <div *ngIf="member.status?.toLowerCase() === ApprovalStatus.rejected">
+            <div class="member-note mt-8" *ngIf="member?.status_note">
+              {{ member?.status_note }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #displayStatus>
+      <span
+        [ngClass]="{
+          'text-green': approverData?.status.toLowerCase() === ApprovalStatus.approved,
+          'text-red': approverData?.status.toLowerCase() === ApprovalStatus.rejected,
+          'text-grey': approverData?.status.toLowerCase() === ApprovalStatus.pending
+        }"
+        class="d-flex mb-16"
+        >{{ (approverData?.status | titlecase) | i18nextEager}}</span
+      >
+    </ng-template>
+  </div>
+</ng-container>
+
+<app-rejection-sidebar *ngIf="isOpenReject" (closeRejectModal)="closeReject()"
+  (rejectRequest)="rejectApprovalRequest($event)" [programId]="programId" [assignmentId]="assignmentId"
+  [requestType]="pendingItem?.request_type" title="Reject Assignment Update"></app-rejection-sidebar>
+<app-assignment-detail-view-sidepanel *ngIf="isOpenDetails" [assignmentData]="assignmentData" [config]="detailsConfig"
+  [jobID]="jobID" [programType]="programType" (closeAssignmentDetails)="closeDetails()" [customFields]="customFields?.[0]">
+</app-assignment-detail-view-sidepanel>

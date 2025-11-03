@@ -1,0 +1,89 @@
+<div class="header-fixed d-print-none">
+  <div class="header-left">
+    <div class="logo d-flex align-items-center mr-16">
+      <img [src]="logoUrl" height="40">
+    </div>
+  </div>
+  <div class="header-right position-relative">
+    <!--  <div class="global-search-wrap float-left">
+        <div class="global-search" [ngClass]="{'search-active': searchToggle }">
+          <icon class="search-icon" cuClass="global-search-icon" name="search" size="22px" type="material"></icon>
+          <input type="search" placeholder="Search" (click)="openSearch()" I18n>
+          <a href="javascript:void(0)" class="close-search" (click)="closeSearch()" *ngIf="searchToggle">
+            <icon name="clear" size="20px" type="material"></icon>
+          </a>
+          <div class="search-listing" *ngIf="searchToggle">
+            <div class="no-result">
+              <span>
+                <icon name="highlight" size="24px" type="material"></icon>
+              </span>
+              <p class="mt-12" I18n>No Recent Searches Found</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="name d-none">
+        <a href="javascript:void(0)" (click)="showAllPrograms()">
+            <span class="p-title">{{currentProgram?.name}}</span>
+        </a>
+      </div>
+      <div class="grid">
+        <a href="javascript:void(0)" (click)="showAllPrograms()">
+          <icon class="pt-4" cuClass="all-apps-icon" name="apps" size="24px" type="material"></icon>
+        </a>
+      </div>-->
+    <div class="d-flex justify-content-start align-items-center">
+      <div class="env-name">
+        <span class="text-light">
+          {{environmentName}}
+        </span>
+      </div>
+      <div  *authorize="'view_login_qrcode'" class="qr-menu hide-on-mobile">
+        <qr-scanner></qr-scanner>
+      </div>
+      <div class="notification">
+        <app-notification></app-notification>
+      </div>
+      <!-- *ngIf="helpSection?.is_show" -->
+
+      <div class="language">
+        <app-lang-switcher></app-lang-switcher>
+      </div>
+      <div *ngIf="currentProgram?.id" class="help position-relative">
+        <a class="cursor-pointer" (click)="helpClicked()">
+          <icon name="help" size="19px" type="material"></icon> {{'help'|i18next}}
+          <icon class="float-right" name="expand_more" size="19px" type="material"></icon>
+        </a>
+        <div class="help-dropdown" *ngIf="showDropDown" >
+          <ul>
+            <li class="cursor-pointer" *ngIf="helpSection?.is_show" (click)="navigateToLibrary()">
+              {{'download'|i18next}}
+            </li>
+            <li class="cursor-pointer" (click)="navigateToLibrary()">
+              {{'reference_library'|i18next}}
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="pr-8" *ngIf="loginService?.impersonationSession">
+        <a class="cursor-pointer impersonation" (click)="exitImpersonation()"
+        [tooltip]='"Click here to end the impersonation and navigate back to your dashboard" | i18next'
+        placement="bottom">
+          <icon name="theater_comedy" size="19px" type="material"></icon>
+          {{ 'exit_impersonation' | i18next }}
+        </a>
+      </div>
+      <div *ngIf="showLocalStorageData" class="mx-16 hide-on-mobile">
+        <app-local-storage-data></app-local-storage-data>
+      </div>
+    </div>
+    <!-- <div class="recent-comments">
+      <a href="javascript:void(0)">
+        <icon cuClass="header-chat-link" name="textsms" size="24px" type="material"></icon>
+        <span class="count">4</span>
+      </a>
+    </div> -->
+    <div class="clearfix"></div>
+  </div>
+  <div class="clearfix"></div>
+</div>

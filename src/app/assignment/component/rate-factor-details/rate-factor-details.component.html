@@ -1,0 +1,57 @@
+<svms-sidebar-ng title="{{ 'rate_factor_details' | i18nextEager }}" [dataVisibility]="addCertificate" (onClose)="sidebarClose()">
+    <div class="sidebar-wrapper">
+        <div class="rate-factor-wrapper">
+            <p class="sub-title">
+                {{title | i18nextEager}}
+            </p>
+            <div class="d-flex align-items-center justify-content-between mx-24">
+                <div class="factor form-group-row">
+                    <div class="form-group mr-0">
+                        <label>{{ 'factor' | i18nextEager }}</label>
+                        <input type="text" class="form-control" (keydown.space)="$event.preventDefault()" placeholder="1.0" inputAccuracy="{{accuracyConfig?.rate}}" [(ngModel)]="frmratefactors.rates[0].factor">
+                    </div>
+                    <div class="form-group mr-0">
+                        <label>{{ 'select_rate' | i18nextEager }}</label>
+                        <ng-select placeholder="{{ 'select_rate' | i18nextEager }}" [readonly]="true" [ngModel]="ratename1">
+                          <ng-option value="Bill Rate" selected>{{ 'bill_rate' | i18nextEager }}</ng-option>
+                          <ng-option value="Pay Rate" selected>{{ 'pay_rate' | i18nextEager }}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+                <div class="mx-8" *ngIf="frmratefactors?.rates?.length > 1">
+                    <icon name="add_circle" size="20px" color="#FFC77B"></icon>
+                </div>
+                <div class="factor form-group-row" *ngIf="frmratefactors?.rates?.length > 1">
+                    <div class="form-group  mr-0">
+                        <label>{{ 'factor' | i18nextEager }}</label>
+                        <input type="text" class="form-control" placeholder="1.0" (keydown.space)="$event.preventDefault()" inputAccuracy="{{accuracyConfig?.rate}}" [(ngModel)]="frmratefactors.rates[1].factor">
+                    </div>
+                    <div class="form-group  mr-0">
+                        <label>{{ 'select_rate' | i18nextEager }}</label>
+                        <ng-select placeholder="{{ 'select_pay_rate' | i18nextEager }}" [readonly]="true" [ngModel]="ratename2">
+                          <ng-option value="Bill Rate" selected>{{ 'bill_rate' | i18nextEager }}</ng-option>
+                          <ng-option value="Pay Rate" selected>{{ 'pay_rate' | i18nextEager }}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+                <!--<div  class="mx-8">
+                    <icon name="add_circle" size="20px" color="#FFC77B"></icon>
+                </div>
+                <div class="form-group-row">
+                    <div class="form-group  mr-0">
+                        <label>Flat Adjustment</label>
+                        <div class="adjustment position-relative">
+                            <span>$</span>
+                            <input type="text" class="form-control" placeholder="0.00">
+                        </div>
+                    </div>
+                </div>-->
+            </div>
+        </div>
+    </div>
+    <svms-sidebar-footer-ng>
+      <button type="submit" (click)="updateFactors()" class="btn btn-primary float-right">
+        {{ 'update' | i18nextEager }}
+      </button>
+    </svms-sidebar-footer-ng>
+  </svms-sidebar-ng>

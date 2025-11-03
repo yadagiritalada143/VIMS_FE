@@ -1,0 +1,53 @@
+<div class="create-wrapper p-24 pt-32">
+  <app-logs [log]="logs"></app-logs>
+  <div class="user-preference-wrap">
+    <app-user-preference-header [profileUser]="profileUser"></app-user-preference-header>
+    <div class="preference-body mt-16 rounded-sm p-24">
+      <!-- if there is no delegates need to show below html start here-->
+      <div class="" >
+        <!-- <div class="d-flex">
+          <h4 class="mr-8">{{ 'delegates' | i18nextEager }}</h4>
+          <button type="button" class="btn small btn-primary ml-8 rounded-circle add-btn"
+            (click)="addDelegates($event)">
+            <icon size="20px" name="add" color="#ffffff" type="material" cuclass="d-flex" class="d-flex"></icon>
+          </button>
+        </div> -->
+        <div class="no-delegates text-center mt-64 pt-24" *ngIf="delegateList?.count?.all === 0">
+          <figure class="mb-16">
+            <img src="../../../../assets/images/no-delegates.svg" alt="">
+          </figure>
+          <!-- <h4 class="font-weight-medium">{{ 'you_are_not_adding_any_delegates_yet' | i18nextEager }}</h4>
+          <p class="small mb-16">{{ 'here_we_can_explain_what_is_delegates_and_its_function_we_need_copy_for_this_form_po' | i18nextEager }}
+          </p> -->
+          <button type="button" class="btn btn-primary d-inline-block font-weight-normal custom-size"
+            (click)="addDelegates($event)">
+            {{ 'add_delegates' | i18nextEager }}
+          </button>
+        </div>
+      </div>
+      <!-- if there is no delegates html end here-->
+      <!-- if delegates list available -->
+      <div class="delegate-list" *ngIf="delegateList?.count?.all != 0">
+        <vms-table *ngIf="tableLoaded" 
+          [vmsTableConfig]="tableConfig" 
+          [vmsDataSource]="delegateList?.delegations"
+          [loading]="dataLoading" 
+          [totalItem]="totalRecords" 
+          [itemsPerPage]="itemsPerPage" 
+          [count]="countData"   
+          (onViewClick)="onClickView($event)"  
+          (onCreate)="onCreateClick($event)"
+          [currentTab]="selectedTab" 
+          (onEditClick)="onEditClick($event)"
+          (onTabClick)="onTabClick($event)" 
+          (onOptionClicked)="onOptionClick($event)"
+          (changePage)="onPageChange($event)"
+          (changeRecords)="changeItemCount($event)"
+          [currentPage]="this.prevQuery?.page ?? 1">
+        </vms-table>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- (close)=onClickView($event) -->
+<app-add-delegates [programMember]="programMember" (close)=onClose($event) ></app-add-delegates>

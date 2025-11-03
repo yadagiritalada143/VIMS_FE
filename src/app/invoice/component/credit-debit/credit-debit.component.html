@@ -1,0 +1,217 @@
+<svms-sidebar-ng [title]="'Credit/Debit Details' | i18nextEager" [dataVisibility]="creditDebit"
+  (onClose)='creditDebit = "hidden"; form = null'>
+  <app-logs [log]="logs"></app-logs>
+  <div class="sidebar-wrapper">
+    <form *ngIf='form' [formGroup]='form'>
+      <div class="px-24 pb-24">
+
+        <div class="row mt-24">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>{{ 'select_worker_name' | i18nextEager }} <span class="require">*</span></label>
+              <div class="mr-8 position-relative search-candidate">
+                <ng-select [items]="workerLst" placeholder="{{ 'search_worker_name' | i18nextEager }}"
+                  (search)="this.workerSearchManager.next($event)" [typeahead]="workerTypeAhead$"
+                  [clearOnBackspace]="true" [searchable]="true" (clear)="this.workerSearchManager.next({term: ''});"
+                  [clearable]="true" bindLabel="worker_name" bindValue="worker_uuid" ngDefaultControl
+                  formControlName="worker_name" [loading]='workersLoading' loadingText="{{ 'loading....' | i18nextEager }}">
+                </ng-select>
+                <div class="position-absolute search-cand">
+                  <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+                </div>
+              </div>
+              <span class="text-danger" *ngIf="
+              (form.get('worker_name').touched || submitted) &&
+              form.get('worker_name').errors?.required
+            ">
+                {{ 'worker_name_is_required' | i18nextEager }}
+              </span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group" [ngClass]="{'disabled-wrapper': form?.errors?.vendor_name_disabled}">
+              <label>{{ 'vendor_name' | i18nextEager }}<span class="require">*</span></label>
+              <div class="mr-8 position-relative search-candidate">
+                <ng-select [items]="($vendorList | async)" placeholder="{{ 'search_vendor_name' | i18nextEager }}"
+                  (search)="this.vendorSearchManager.next($event)" [clearOnBackspace]="true"
+                  (clear)="this.vendorSearchManager.next({term: ''});" [searchable]="true" [clearable]="true"
+                  bindLabel="vendor_name" bindValue="vendor_uuid" ngDefaultControl formControlName="vendor_name"
+                  [ngClass]="{'disabled': form?.errors?.vendor_name_disabled}" [loading]='vendorsLoading'
+                  loadingText="{{ 'loading....' | i18nextEager }}">
+                </ng-select>
+                <div class="position-absolute search-cand">
+                  <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+                </div>
+              </div>
+              <span class="text-danger" *ngIf="
+            (form.get('vendor_name').touched || submitted) &&
+            form.get('vendor_name').errors?.required
+          ">
+                {{ 'vendor_name_is_required' | i18nextEager }}
+              </span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group" [ngClass]="{'disabled-wrapper': form?.errors?.type_disabled}">
+              <label>{{ 'type' | i18nextEager }}<span class="require">*</span></label>
+              <div class="mr-8 position-relative search-candidate">
+                <ng-select [items]="(distcintInvoiceTypesList$ | async)"
+                  placeholder="{{ 'search_invoice_type' | i18nextEager }}"
+                  (search)="this.invoiceTypeSearchManager.next($event)" [clearOnBackspace]="true" [searchable]="true"
+                  [clearable]="true" bindLabel="invoice_label" bindValue="invoice_type" ngDefaultControl
+                  formControlName="type" [ngClass]="{'disabled': form?.errors?.type_disabled}" [loading]='typesLoading'
+                  loadingText="{{ 'loading....' | i18nextEager }}">
+                </ng-select>
+                <div class="position-absolute search-cand">
+                  <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+                </div>
+              </div>
+              <span class="text-danger" *ngIf="
+            (form.get('type').touched || submitted) &&
+            form.get('type').errors?.required
+          ">
+                {{ 'type_is_required' | i18nextEager }}
+              </span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group" [ngClass]="{'disabled-wrapper': form?.errors?.timesheet_disbaled}">
+              <label>{{ 'timesheet' | i18nextEager }}/{{ 'expense' | i18nextEager }}/{{ 'misc' | i18nextEager }}. {{ 'id' | i18nextEager }}<span
+                  class="require">*</span></label>
+              <div class="mr-8 position-relative search-candidate">
+                <ng-select [items]="(distcintTimesheetTypesList$ | async)"
+                  placeholder="{{ 'timesheet' | i18nextEager }}/{{ 'expense' | i18nextEager }}/{{ 'misc' | i18nextEager }}. {{ 'id' | i18nextEager }}"
+                  (search)="this.timesheetSearchManager.next($event)" [clearOnBackspace]="true" [searchable]="true"
+                  [clearable]="true" bindLabel="ts_es_code" bindValue="invoice_uuid" ngDefaultControl
+                  formControlName="timesheet" [ngClass]="{'disabled': form?.errors?.timesheet_disbaled}"
+                  [loading]='InvoicesLoading' loadingText="{{ 'loading....' | i18nextEager }}">
+                </ng-select>
+                <div class="position-absolute search-cand">
+                  <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+                </div>
+              </div>
+              <span class="text-danger" *ngIf="
+            (form.get('timesheet').touched || submitted) &&
+            form.get('timesheet').errors?.required
+          ">
+                {{ 'timesheet' | i18nextEager }}/{{ 'expense' | i18nextEager }}/{{ 'misc' | i18nextEager }}. {{ 'id_is_required' | i18nextEager }}
+              </span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group disabled-wrapper">
+              <label>{{ 'invoice_id' | i18nextEager }}<span class="require">*</span></label>
+              <input type="text" class="form-control disabled" placeholder="{{ 'invoice_id' | i18nextEager }}" formControlName="invoice_no">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group disabled-wrapper">
+              <label>{{ 'start_date' | i18nextEager }}<span class="require">*</span></label>
+              <svms-datepicker [disabled]='true' [inputdateFormat]="'MM/DD/YY' |i18next" ngDefaultControl id="start_date_invoice"
+                #start_date_invoice formControlName="start_date" placeholder = "{{ 'start_date' | i18nextEager }}" [options]="options" I18n></svms-datepicker>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group disabled-wrapper">
+              <label>{{ 'end_date' | i18nextEager }}<span class="require">*</span></label>
+              <svms-datepicker [inputdateFormat]="'MM/DD/YY' |i18next" [disabled]='true' ngDefaultControl id="end_date_invoice"
+                #end_date_invoice formControlName="end_date" placeholder = "{{ 'end_date' | i18nextEager }}" [options]="options" I18n></svms-datepicker>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>{{ 'select_type_credit' | i18nextEager }}/{{ 'debit' | i18nextEager }}<span class="require">*</span></label>
+              <ng-select [items]="" placeholder="{{ 'select_type_credit/debit' | i18nextEager }}" [clearOnBackspace]="true"
+                [searchable]="false" [clearable]="true" bindLabel="label" bindValue="id" ngDefaultControl
+                formControlName="credit_dbit_type">
+                <ng-option [value]="'credit'">{{ 'credit_(-)' | i18nextEager }}</ng-option>
+                <ng-option [value]="'debit'">{{ 'debit_(+)' | i18nextEager }}</ng-option>
+              </ng-select>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>{{ 'cd_fund' | i18nextEager }}: {{ 'ar' | i18nextEager }}/{{ 'ap' | i18nextEager }}<span
+                  class="require">*</span></label>
+              <ng-select [items]="" placeholder="{{ 'cd_fund' | i18nextEager }}: {{ 'ar' | i18nextEager }}/{{ 'ap' | i18nextEager }}" [clearOnBackspace]="true"
+                [searchable]="true" [clearable]="true" bindLabel="label" bindValue="id" ngDefaultControl
+                formControlName="cdfund">
+                <ng-option [value]="'client'">{{ 'client' | i18nextEager }}</ng-option>
+                <ng-option [value]="'vendor'">{{ 'vendor' | i18nextEager }}</ng-option>
+                <ng-option [value]="'clientvendor'">{{ 'client_&_vendor' | i18nextEager }}</ng-option>
+              </ng-select>
+            </div>
+          </div>
+          <!-- <div class="col-md-6">
+        <div class="form-group">
+          <label>Reason for Credit debit</label>
+           <ng-select
+            [items]=""
+            placeholder="{{ 'cd_fund:_ar/ap' | i18nextEager }}"
+            [clearOnBackspace]="true"
+            [searchable]="true"
+            [clearable]="true"
+            bindLabel="label"
+            bindValue="id"
+            ngDefaultControl
+            formControlName="cd_reason"
+          >
+          </ng-select>
+        </div>
+      </div>
+
+      </div> -->
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>{{ 'amount' | i18nextEager }}<span class="require">*</span></label>
+              <div class="mr-8 position-relative search-candidate">
+                <input type="number" inputAccuracy="{{accuracyEnum?.AMOUNT}}" class="form-control pl-5" formControlName="amount" placeholder="" (blur)="onBlurAmount()">
+                <div class="position-absolute search-cand">
+                  {{ ''  | accuracy : '' : { currencyCode: currency, display: accuracyEnum.SYMBOL } }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <ng-container *ngIf="!currentProgram.config.is_tax_hidden">
+            <div class="col-md-4">
+              <div class="form-group disabled-wrapper">
+                <label>{{ 'msp_fee' | i18nextEager }} (%)<span class="require">*</span></label>
+                <input type="text" class="form-control disabled" formControlName="msp_fee" placeholder="0" disabled>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group disabled-wrapper">
+                <label>{{ 'tax' | i18nextEager }} (%)<span class="require">*</span></label>
+                <input type="text" class="form-control disabled" formControlName="tax" placeholder="0" disabled>
+              </div>
+            </div>
+          </ng-container>
+          <div class="col-md-12">
+            <div class="form-group">
+              <label>{{ 'reason_for_credit/debit' | i18nextEager }}<span class="require">*</span></label>
+              <ng-select [items]="reasonCodes" placeholder="{{ 'reason_for_credit/debit' | i18nextEager }}" [clearOnBackspace]="true"
+                [searchable]="true" [clearable]="true" bindLabel="name" bindValue="name" ngDefaultControl
+                formControlName="cd_reason">
+              </ng-select>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="form-group">
+              <label>{{ 'notes' | i18nextEager }}</label>
+              <textarea class="form-control" formControlName='notes' placeholder="{{ 'notes' | i18nextEager }}"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <svms-sidebar-footer-ng>
+    <button type="button" class="btn btn-outline-danger float-right" (click)='cancelForm()'>{{ 'cancel' | i18nextEager }}</button>
+    <button type="button" class="btn btn-primary float-right mr-16" [disabled]='!form?.valid || saveInProgress || !hasAccess'
+      (click)="saveCreditDebitDetails()">
+      {{ 'save' | i18nextEager }}
+      <span *ngIf="saveInProgress" class="loader ml-12"> </span>
+    </button>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

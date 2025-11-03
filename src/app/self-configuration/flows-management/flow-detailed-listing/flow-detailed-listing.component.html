@@ -1,0 +1,47 @@
+<ng-template #flowStatus let-row let-value="value">
+  <span class="c-status-ui active" *ngIf="value">
+    {{ 'active' | i18next }}
+  </span>
+  <span class="c-status-ui inactive" *ngIf="!value">
+    {{ 'inactive' | i18next }}
+  </span>
+</ng-template>
+<app-svms-table
+  [tableOptions]="tableOptions"
+  [coloumnDefintions]="svmstableColomnDefn"
+  (changedOrderClicked)="changedOrderClicked($event)"
+  (goToPreviousPage)="goToPreviousPage($event)"
+  (quickViewFlow)="quickViewFlowCard($event)"
+  [dataSource]="svmsData"
+  [informativeBubbleText]="informativeBubbleText"
+  [dataSourceWithoutLimit]="allFlowConfigList">
+</app-svms-table>
+<column-custom-order *ngIf="showOrderChangedFlyout" (onSave)="changedCustomColoumnOrder($event)" (onClose)="onCloseOrderChangedModel($event)" [tableTitle]="tableOptions.headerConfig.title" [dataSource]="allFlowConfigList"></column-custom-order>
+<quick-view-flow [flowData]="flowData" *ngIf="showQuickViewFlow" (onClose)="onCloseQuickViewFlow($event)"></quick-view-flow>
+<ng-template #emptyDataTemplate>
+  <app-no-listing-page
+    clickHere="click here"
+    btnClickUrl="FOUNDATION_DATA_TYPE_CREATE"
+    btnmsg="Create Your First Flow"
+    pmsg="If you would like to add Flow,"
+    headingmsg="No Flow found for the selected program."
+    (onCreateClick)="onCreateClick(true)"
+    #emptyDataTemplate
+  >
+  </app-no-listing-page>
+</ng-template>
+
+<ng-template #quickView let-rowData let-value="value">
+  <div class="d-flex">
+    <p class="mr-12 text-ellipsis cursor-pointer blue-text" 
+      style="color: #00338E" (click)="onClickView(rowData)">
+      {{ value | i18next }}
+    </p>
+    <div>
+      <a class="column-order-cta mr-8" href="javascript:void(0)" tooltip="{{'quick_view' | i18next}}"
+        placement="right" (click)="quickViewFlowCard(rowData)">
+        <i class="material-icons visibility-icon">preview</i>
+      </a>
+    </div>
+  </div>
+</ng-template>

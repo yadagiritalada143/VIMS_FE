@@ -1,0 +1,586 @@
+<form [formGroup]="customFieldForm" class="p-32" *ngIf="customFieldForm">
+  <div class="form-group">
+    <label class="text-lightgray">{{ 'field_type' | i18next }}</label>
+    <div class="position-relative" *ngIf="selectedFieldType">
+      <span class="position-absolute selected-field-icon">
+        <svg-icon [key]="getSvgName(selectedFieldType.icon)" fontSize="34px" class="input-fields-icon"></svg-icon>
+      </span>
+      <input type="text" class="form-control field-type-input" readonly [value]="selectedFieldType.label | i18next" />
+      <span *ngIf="!customFieldsId" (click)="changePanel(0)" class="position-absolute field-btn">
+        <button type="button" class="btn btn-secondary small">{{ 'change_field_type' | i18next }}</button>
+      </span>
+    </div>
+  </div>
+  <ng-container *ngIf="showHierarchy">
+    <div class='form-group treeview-group' [ngClass]="{'disable' : (customFieldsId && !isEditMode)}">
+      <label>
+        {{ 'hierarchy_' | i18next }}
+        <span class="require">*</span>
+      </label>
+      <ngx-dropdown-treeview
+        buttonClass='btn-outline-light'
+        [config]='hierarchyConfig'
+        [items]='treeViewItems'
+        (selectedChange)='observeSelectedChange($event)'
+        class='hierarchy-tree'>
+      </ngx-dropdown-treeview>
+      <div class='chip-holder' *ngIf="hierarchyListTags.length !== 0">
+        <div *ngFor="let chipData of hierarchyListTags; index as it" class='d-flex chip p-4 m-4 chip-bg'>
+          <p class='chip-name'> {{ chipData?.name }}</p>
+          <icon (click)='removeSelectedHierarchy(chipData?.id)'
+            class='close' type='material'
+            name='close' size='16px'>
+          </icon>
+        </div>
+      </div>
+      <div class="pt-4"
+        *ngIf="hierarchyValidationText" >
+        <p class="warn-text">
+          {{ '* ' + hierarchyValidationText | i18next }}
+        </p>
+      </div>
+    </div>
+  </ng-container>
+  <div class="form-group" [ngClass]="{'disable' : (customFieldsId && !isEditMode)}">
+    <label class="text-lightgray">{{ 'module' | i18next }}<span class="require pl-8">*</span></label>
+    <ng-select
+      [clearable]="false"
+      [placeholder]="'Select Module' | i18next"
+      bindLabel="name"
+      bindValue="code"
+      formControlName="module"
+      class="type-select"
+      (change)="changeModule($event)"
+    >
+    <ng-option *ngFor="let allModule of sortedModules"
+      [value]="allModule.code"  [disabled]="selectedModules.includes(allModule.code)">{{allModule.name}}</ng-option>
+    </ng-select>
+    <div class='chip-holder' *ngIf="modules.length > 0">
+      <div *ngFor="let module of selectedLocalModules; let i = index" class='d-flex chip p-4 m-4 chip-bg'>
+        <p class='chip-name'> {{getModuleName(module)}}</p>
+        <icon (click)="removeSelected(module,i)"
+          class='close' type='material'
+          name='close' size='16px'>
+        </icon>
+      </div>
+      <p class="validation-msg" *ngIf="selectedLocalModules?.length == 0 &&
+      customFieldForm?.get('module').touched">
+        <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+        {{ 'please_select_atleast_one_module' | i18next }}.
+      </p>
+    </div>
+  </div>
+
+  <div *ngIf="isProgramUserSelected" class="form-group"  [ngClass]="{'disable' : (customFieldsId && !isEditMode)}">
+    <label class="text-lightgray">
+      {{ 'organization_category' | i18next }}
+      <span class="require pl-8">*</span>
+      <icon color="#A3B0C0" size="16px" name="help" cuClass="d-flex" class="material-icons float-right mr-8" 
+        tooltip="{{ 'Select the Organization Category(s) which this custom field should appear on. For example, if the custom field should only appear on client users (i.e. not vendor users or MSP users) then select \"Client\" here.' | i18next }}" 
+        placement="left"></icon>
+    </label>
+    <ng-select
+      [ngModelOptions]="{ standalone: true }"
+      [(ngModel)]="org_category"
+      [clearable]="false"
+      [multiple]="true"
+      [disabled]="(customFieldsId && !isEditMode)"
+      [readonly]="(customFieldsId && !isEditMode)"
+      [placeholder]="'select_organization_category' | i18next"
+    >
+      <ng-option *ngFor="let category of (orgCategories | keysort:'name')" 
+        [value]="category?.value">
+        {{ category?.name | i18next }}
+      </ng-option>
+    </ng-select>
+  </div>
+
+  <div class="form-group">
+    <label class="text-lightgray">{{ 'field_name' | i18next }}<span class="require pl-8">*</span></label>
+    <input formControlName="name" type="text" class="form-control" placeholder="{{ 'textbox' | i18next }}" [readonly]="customFieldsId && !isEditMode" />
+  </div>
+  <ng-container *ngIf="metaFieldsForm">
+    <div [formGroup]="metaFieldsForm">
+      <ng-container *ngIf="(selectedFieldType?.type === 'HYPERLINK')">
+        <label class="text-lightgray">{{ 'url' | i18next }}<span class="require pl-8">*</span></label>
+        <input formControlName="HYPERLINK" type="text" class="form-control" placeholder="{{ 'enter_url' | i18next }}"
+          [readonly]="customFieldsId && !isEditMode" />
+        <p class="error-text mt-4"
+          *ngIf="metaFieldsForm?.get('HYPERLINK')?.touched && metaFieldsForm?.get('HYPERLINK')?.invalid">
+          {{ '*_please_enter_a_valid_url_pattern' | i18next }}
+        </p>
+      </ng-container>
+      <ng-container *ngIf="(selectedFieldType?.type === 'NUMBERS')">
+
+        <div class="mb-8">
+          <label class="text-lightgray">{{ 'decimal_places' | i18next }} </label>
+          <ng-select formControlName="decimal"
+            [placeholder]="'Select Decimal value' | i18next"
+            [readonly]="customFieldsId && !isEditMode"
+            (change)="clearDefaultValue()"
+          >
+            <ng-option *ngFor="let val of [0,1,2,3,4,5,6,7,8]" [value]="val">
+              {{ val | i18next }}
+            </ng-option>
+          </ng-select>
+        </div>
+
+        <div class="toggle">
+          <div class="toggle-panel mr-16">
+            <div class="toggle-panel-inner"
+              [ngClass]="metaControl?.range_applicable?.value ? 'if-active' : 'if-inactive'">
+              <span class="toggle-switch"
+                [ngClass]="{
+                  'toggle-on': metaControl?.range_applicable?.value,
+                  'toggle-off': !metaControl?.range_applicable?.value,
+                  disable: customFieldsId && !isEditMode
+                }"
+                (click)="toggleNew('range_applicable', metaControl?.range_applicable?.value); clearDefaultValue()">
+              </span>
+              <span class="status-text ml-24">{{ 'range_applicable' | i18next }}</span>
+            </div>
+          </div>
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner"
+              [ngClass]="metaControl?.show_in_thousands?.value ? 'if-active' : 'if-inactive'">
+              <span class="toggle-switch"
+                [ngClass]="{
+                  'toggle-on': metaControl?.show_in_thousands?.value,
+                  'toggle-off': !metaControl?.show_in_thousands?.value,
+                  'disable' : customFieldsId && !isEditMode
+                }"
+                (click)="toggleNew('show_in_thousands', metaControl?.show_in_thousands?.value)">
+              </span>
+              <span class="status-text ml-24">{{ 'show_in_thousands' | i18next }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="metaControl?.range_applicable?.value" class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label class="text-lightgray">{{ 'range_min' | i18next }}<span class="require pl-8">*</span></label>
+              <input formControlName="range_min" type="number" class="form-control" placeholder="{{ '1' | i18next }}"
+                [readonly]="customFieldsId && !isEditMode" (keyup)="clearDefaultValue()"/>
+              <p class="error-text mt-4"
+                *ngIf="metaControl?.range_min?.touched && !(metaControl?.range_min?.value > 0)">
+                {{ '*_please_enter_a_valid_number_range' | i18next }}
+              </p>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label class="text-lightgray">{{ 'range_max' | i18next }}<span class="require pl-8">*</span></label>
+              <input formControlName="range_max" type="number" class="form-control" placeholder="{{ '1,000,000,000' | i18next }}"
+                [readonly]="customFieldsId && !isEditMode" (keyup)="clearDefaultValue()"/>
+              <p class="error-text mt-4"
+                *ngIf="metaControl?.range_max?.touched && !(metaControl?.range_max?.value > 0)">
+                {{ '*_please_enter_a_valid_number_range' | i18next }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <p class="error-text mb-8" *ngIf="metaControl?.range_applicable?.value && metaControl?.range_max?.touched &&
+          metaControl?.range_min?.touched && (metaControl?.range_min?.value > metaControl?.range_max?.value)">
+          {{ '*_supplied_range_is_not_valid' | i18next }}
+        </p>
+
+      </ng-container>
+    </div>
+  </ng-container>
+  <div class="toggle">
+    <div class="toggle-panel mr-16">
+      <div class="toggle-panel-inner" [ngClass]="formControl?.is_enabled.value ? 'if-active' : 'if-inactive'">
+        <span
+          class="toggle-switch"
+          [ngClass]="{
+            'toggle-on': formControl?.is_enabled.value,
+            'toggle-off': !formControl?.is_enabled.value,
+            disable: customFieldsId && !isEditMode
+          }"
+          (click)="toggle('is_enabled', formControl?.is_enabled.value)"
+        ></span>
+        <span class="status-text ml-24">{{ 'active' | i18next }}</span>
+      </div>
+    </div>
+    <div class="toggle-panel">
+      <div class="toggle-panel-inner" [ngClass]="formControl?.is_required?.value ? 'if-active' : 'if-inactive'">
+        <span
+          class="toggle-switch"
+          [ngClass]="{
+            'toggle-on': formControl?.is_required?.value,
+            'toggle-off': !formControl?.is_required?.value,
+            disable: customFieldsId && !isEditMode
+          }"
+          (click)="toggle('is_required', formControl?.is_required?.value)"
+        ></span>
+        <span class="status-text ml-24">{{ 'required' | i18next }}</span>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="!onlyProgramUserModuleSelected" class="toggle">
+    <div *ngIf="showDependedToggle" class="toggle-panel">
+      <div class="toggle-panel-inner" [ngClass]="formControl?.has_dependent_linked?.value ? 'if-active' : 'if-inactive'">
+        <span
+          class="toggle-switch"
+          [ngClass]="{
+            'toggle-on': formControl?.has_dependent_linked?.value,
+            'toggle-off': !formControl?.has_dependent_linked?.value,
+            disable: customFieldsId && !isEditMode
+          }"
+          (click)="toggleDependentLinked()"
+        ></span>
+        <span class="status-text ml-24">{{ 'dependent/linked' | i18next }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="toggle" [ngClass]="showReadOnly?'':'display-none'">
+    <div class="toggle-panel mr-16">
+      <div class="toggle-panel-inner" [ngClass]="formControl?.is_readOnly.value ? 'if-active' : 'if-inactive'">
+        <span
+          class="toggle-switch"
+          [ngClass]="{
+            'toggle-on': formControl?.is_readOnly.value,
+            'toggle-off': !formControl?.is_readOnly.value,
+            disable: customFieldsId && !isEditMode
+          }"
+          (click)="toggle('is_readOnly', formControl?.is_readOnly.value)"
+        ></span>
+        <span class="status-text ml-24">{{ 'read_only' | i18next }}</span>
+      </div>
+    </div>
+
+    <div class="toggle-panel" *ngIf="showSensitiveData">
+      <div class="toggle-panel-inner" [ngClass]="formControl?.data_subject_right?.value ? 'if-active' : 'if-inactive'">
+        <span
+          class="toggle-switch"
+          [ngClass]="{
+            'toggle-on': formControl?.data_subject_right?.value,
+            'toggle-off': !formControl?.data_subject_right?.value,
+            disable: customFieldsId && !isEditMode
+          }"
+          (click)="toggle('data_subject_right', formControl?.data_subject_right.value)"
+        ></span>
+        <label class="status-text d-flex ml-24"><span>{{ 'sensitive_data' | i18next }}</span> <icon  color="#A3B0C0" size="16px" name="help" cuClass="d-flex" class="material-icons ml-8" tooltip="{{ 'when_enabled,_system_considers_the_custom_field_as_sensitive_and_anonymize_it_after_the_defined_threshold_period_from_assignment_closure/candidate_rejection_date.' | i18next }}" placement="top"></icon></label>
+      </div>
+    </div>
+
+  </div>
+  <div class="form-group">
+    <label class="text-lightgray">{{ 'field_label' | i18next }}<span class="require pl-8">*</span></label>
+    <input formControlName="label" type="text" class="form-control" placeholder="{{ 'field_label' | i18next }}" [readonly]="customFieldsId && !isEditMode" />
+  </div>
+  <div class="form-group">
+    <label class="text-lightgray">{{ 'supporting_text' | i18next }}</label>
+    <textarea formControlName="support_text"
+      class="form-control textarea-without-resize"
+      placeholder="{{ 'enter_support_text' | i18next }}"
+      rows="4" [maxlength]="255"
+      [readonly]="customFieldsId && !isEditMode"
+    ></textarea>
+  </div>
+  <div *ngIf="isPicklistSelected" class="form-group">
+    <label class="text-lightgray">
+      {{ 'picklist' | i18next }}
+      <span class="require pl-8">*</span>
+    </label>
+    <ng-select formControlName="picklist"
+      [multiple]="false" [loading]="picklistLoading"
+      [placeholder]=" 'Select Picklist' | i18next"
+      (scrollToEnd)="fetchMorePicklists()"
+      (change)="updatePicklistSelection()"
+      [readonly]="customFieldsId && !isEditMode"
+      bindLabel="name"
+    >
+      <ng-option *ngFor="let entry of predefinedPicklists;" [value]="entry?.id">
+        {{ entry?.name | i18next }}
+      </ng-option>
+    </ng-select>
+  </div>
+  <app-picklist
+    *ngIf="
+      selectedFieldType?.type === 'DROPDOWN' ||
+      selectedFieldType?.type === 'RADIO' ||
+      selectedFieldType?.type === 'CHECKBOX'
+    "
+    [existingOptions]="metaData().get('datasource')?.value?.options"
+    [isMultiselect]="selectedFieldType?.type === 'MULTI_SELECT_DROPDOWN' && is_multi_select ? is_multi_select : false"
+    [showMultiselect]="((selectedFieldType?.type !== 'RADIO') && (selectedFieldType?.type !== 'TOGGLE') && (selectedFieldType?.type !== 'DROPDOWN') && (selectedFieldType?.type !== 'CHECKBOX'))"
+    [type]="selectedFieldType?.type"
+    [isEditMode]="!customFieldsId || isEditMode"
+    (changeMultiselect)="changeMultiselect($event)"
+    (changeOptions)="changeOptions($event)"
+  ></app-picklist>
+  <div class="form-group">
+
+    <ng-container *ngIf="selectedFieldType?.type === 'TEXT'">
+      <label class="text-lightgray">
+        {{ 'default_value' | i18next }}
+      </label>
+      <input formControlName="default_value"
+        type="text" class="form-control"
+        placeholder="{{ 'enter_default_value' | i18next }}"
+        [readonly]="customFieldsId && !isEditMode"
+      />
+    </ng-container>
+
+    <ng-container *ngIf="selectedFieldType?.type === 'TEXTAREA'">
+      <label class="text-lightgray">
+        {{ 'default_value' | i18next }}
+      </label>
+      <textarea
+        formControlName="default_value"
+        class="form-control textarea-without-resize"
+        placeholder="{{ 'enter_default_value' | i18next }}"
+        rows="5" [maxlength]="1000"
+        [readonly]="customFieldsId && !isEditMode"
+      ></textarea>
+    </ng-container>
+
+    <ng-container *ngIf="selectedFieldType?.type === 'NUMBERS'">
+      <label class="text-lightgray">
+        {{ 'default_value' | i18next }}
+      </label>
+      <input aria-range formControlName="default_value" type="text"
+        [allowUptoNDigitDecimalNumber]="metaControl?.decimal?.value ?? 0" class="form-control"
+        placeholder="{{ 'enter_default_value' | i18next }}"
+        [readonly]="customFieldsId && !isEditMode"
+        [mandatePattern]="numberPattern"
+        [min]="metaControl?.range_applicable?.value?metaControl?.range_min?.value:null"
+        [max]="metaControl?.range_applicable?.value?metaControl?.range_max?.value:null"
+      />
+      <p class="error-text mt-4" *ngIf="formControl?.default_value?.touched && formControl?.default_value?.invalid">
+        {{ 'default_value_out_of_supported_range' | i18next }}
+      </p>
+    </ng-container>
+
+    <ng-container *ngIf="selectedFieldType?.type === 'TOGGLE'">
+      <label class="text-lightgray">
+        {{ 'default_value' | i18next }}
+      </label>
+      <div class="row">
+        <div class="col-sm-4 toggle-panel">
+          <div class="toggle-panel-inner d-flex">
+            <div> {{ (customFieldForm?.get('default_value')?.value?'Active':'Inactive') | i18next }} </div>
+            <toggle-button
+              [disabled]="customFieldsId && !isEditMode"
+              [checked]="customFieldForm?.get('default_value')?.value"
+              (changed)="changeDefaultToggle($event)"
+            ></toggle-button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="selectedFieldType?.type === 'DATE'">
+      <div class="c-form-group-row">
+        <div class="date-picker c-form-group position-relative mb-0">
+          <label class="text-lightgray">
+            {{ 'default_value_(date)' | i18next }}
+          </label>
+          <svms-datepicker formControlName="default_value"
+            [inputdateFormat]="dateFormat"
+            (onDateChange)="dateChanged($event)"
+            [disabled]="customFieldsId && !isEditMode"
+            [readonly]="customFieldsId && !isEditMode"
+            [placeholder]="'select_default_date' | i18next"
+            [options]="{ language: 'English' }">
+          </svms-datepicker>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="selectedFieldType?.type === 'CURRENCY'">
+      <label class="text-lightgray">
+        {{ 'default_value' | i18next }}
+      </label>
+      <input formControlName="default_value" type="text"
+        [allowUptoNDigitDecimalNumber]="amountAccuracy" class="form-control"
+        placeholder="{{ '0' | i18next }}"
+        [readonly]="customFieldsId && !isEditMode"
+      />
+    </ng-container>
+
+    <ng-container *ngIf="selectedFieldType?.type === 'EMAIL'">
+      <label class="text-lightgray">
+        {{ 'default_value' | i18next }}
+      </label>
+      <input formControlName="default_value" type="text" class="form-control"
+        placeholder="{{ 'abc@gmail.com' | i18next }}"
+        [pattern]="emailPattern"
+        [readonly]="customFieldsId && !isEditMode"
+      />
+      <p class="error-text mt-4" *ngIf="formControl?.default_value?.invalid">
+        {{ 'given_email_id_is_not_in_proper_format' | i18next }}
+      </p>
+    </ng-container>
+
+    <ng-container *ngIf="selectedFieldType?.type === 'PHONE'">
+      <label class="text-lightgray">
+        {{ 'default_value' | i18next }}
+      </label>
+      <input formControlName="default_value" type="text" class="form-control"
+        placeholder="{{ 'enter_default_value' | i18next }}"
+        [mandatePattern]="alphaNumericPattern"
+        [readonly]="customFieldsId && !isEditMode"
+        [errorText]="'Only Alphanumeric values are allowed'"
+      />
+    </ng-container>
+
+    <ng-container *ngIf="selectedFieldType?.type === 'TIME'">
+      <label class="text-lightgray">
+        {{ 'default_value_(time)' | i18next }}
+      </label>
+      <input formControlName="default_value" type="text" class="form-control"
+        placeholder="{{ '00:00' | i18next }}"
+        [mandatePattern]="timeTypePattern"
+        [readonly]="customFieldsId && !isEditMode"
+        [pattern]="timePattern"
+        [customAction]="timeFieldAction"
+      />
+      <p class="error-text mt-4" *ngIf="formControl?.default_value?.invalid">
+        {{ timeErrorText | i18next }}
+      </p>
+    </ng-container>
+
+    <ng-container *ngIf="selectedFieldType?.type === 'DATETIME'">
+      <div class="c-form-group-row">
+        <div class="date-picker c-form-group position-relative mb-0">
+          <label class="text-lightgray">
+            {{ 'default_value_(date)' | i18next }}
+          </label>
+          <svms-datepicker formControlName="default_value"
+            [inputdateFormat]="dateFormat"
+            [disabled]="customFieldsId && !isEditMode"
+            [readonly]="customFieldsId && !isEditMode"
+            [placeholder]="'select_default_date' | i18next"
+            [options]="{ language: 'English' }">
+          </svms-datepicker>
+        </div>
+      </div>
+      <label class="text-lightgray mt-12">
+        {{ 'default_value_(time)' | i18next }}
+      </label>
+      <input formControlName="default_value_2" type="text" class="form-control"
+        placeholder="{{ '00:00' | i18next }}"
+        [mandatePattern]="timeTypePattern"
+        [readonly]="customFieldsId && !isEditMode"
+        [pattern]="timePattern"
+        [customAction]="timeFieldAction"
+      />
+      <p class="error-text mt-4" *ngIf="formControl?.default_value_2?.invalid">
+        {{ timeErrorText | i18next }}
+      </p>
+    </ng-container>
+
+  <ng-container *ngIf="(selectedFieldType?.type === 'FILE') || (selectedFieldType?.type === 'IMAGE')">
+    <app-upload-document-s3 [ngClass]="isViewMode?'disable':''" uploadLabel="{{ 'default_file' | i18next }}"
+      [multiple]="false" [refName]="'CONFIGURATOR'" (isValidFile)="isValidFile($event)"
+      (uploadDataFiles)="uploadFile($event)"
+      [oldUploadedFiles]="this.customFieldForm?.get('default_value')?.value"
+      errorMessage="Error: File type is not supported. Please upload the documents either in pdf, doc, docx, jpeg, jpg, png"
+      sizeErrorText="File size exceeded the max allowed size 25 MB"
+      allowedMessage="Only .pdf, .doc, .docx, .jpeg, .jpg, .png files with maximum size of 25 MB">
+    </app-upload-document-s3>
+  </ng-container>
+
+  </div>
+  <div class="form-group">
+    <label class="text-lightgray">{{ 'placeholder' | i18next }}<span class="require pl-8">*</span></label>
+    <input
+      formControlName="placeholder"
+      type="text"
+      class="form-control"
+      placeholder="{{ 'placeholder_text' | i18next }}"
+      [readonly]="customFieldsId && !isEditMode"
+    />
+  </div>
+  <div class="form-group">
+    <label class="text-lightgray">{{ 'description' | i18next }}</label>
+    <textarea
+      formControlName="description"
+      class="form-control textarea-without-resize"
+      placeholder="{{ 'field_description' | i18next }}"
+      rows="5"
+      [readonly]="customFieldsId && !isEditMode"
+    ></textarea>
+  </div>
+  <div *ngIf="selectedFieldType?.type === 'CURRENCY'" class="form-group">
+    <label class="text-lightgray">{{ 'currency' | i18next }}</label>
+    <ng-select [clearable]="false" formControlName="currency" placeholder="{{ 'select_currency' | i18next }}" [readonly]="customFieldsId && !isEditMode">
+      <ng-option *ngFor="let currency of currencyData$ | async" [value]="currency.code">
+        {{ currency.name }} ({{ currency.symbol }})
+      </ng-option>
+    </ng-select>
+  </div>
+
+  <div *ngIf="selectedFieldType?.type === 'SOURCE'">
+    <div class="form-group">
+      <label class="text-lightgray">{{ 'source_for_lov_s_' | i18next }} <span class="require">*</span></label>
+      <ng-select
+        [clearable]="false"
+        formControlName="source_lov"
+        placeholder="{{ 'select_source_for_lov' | i18next }}"
+        [items]="sourceLOV"
+        bindLabel="name"
+        bindValue="id"
+        [required]="selectedFieldType?.type === 'SOURCE' ? true : false"
+        [readonly]="customFieldsId && !isEditMode
+      ">
+      </ng-select>
+    </div>
+    <div class="form-group">
+      <label class="text-lightgray">{{ 'select_user_type_' | i18next }} <span class="require">*</span></label>
+      <ng-select
+        [clearable]="false"
+        formControlName="user_type"
+        placeholder="{{ 'select_user_type' | i18next }}"
+        [items]="userType"
+        (change)="onUserType($event)"
+        bindLabel="name"
+        bindValue="id"
+        [required]="selectedFieldType?.type === 'SOURCE' ? true : false"
+        [readonly]="customFieldsId && !isEditMode && !customFieldForm?.get('source_lov').value"
+      >
+      </ng-select>
+    </div>
+    <div class="form-group" *ngIf="customFieldForm?.get('user_type').value == 'BY ORGANIZATION'">
+      <label class="text-lightgray">{{ 'by_organization_' | i18next }} <span class="require">*</span></label>
+      <ng-select
+        [clearable]="false"
+        formControlName="user_category"
+        placeholder="{{ 'select_by_organization' | i18next }}"
+        [items]="userCategory"
+        bindLabel="name"
+        bindValue="id"
+        [required]="selectedFieldType?.type === 'SOURCE' && customFieldForm?.get('user_type').value == 'BY ORGANIZATION' ? true : false"
+        [readonly]="(customFieldsId && !isEditMode) && !customFieldForm?.get('user_type').value"
+      >
+      </ng-select>
+    </div>
+    <div class="form-group" *ngIf="customFieldForm?.get('user_type').value == 'BY USER ROLE'">
+      <label class="text-lightgray">{{ 'select_user_role_' | i18next }} <span class="require">*</span></label>
+      <ng-select
+        #userRole
+        [clearable]="false"
+        formControlName="user_role"
+        placeholder="{{ 'select_user_role' | i18next }}"
+        (keyup)="getUserRoles(userRole?.searchTerm)"
+        [items]="userRoles"
+        bindLabel="name"
+        bindValue="id"
+        [required]="selectedFieldType?.type === 'SOURCE' && customFieldForm?.get('user_type').value == 'BY USER ROLE' ? true : false"
+        [readonly]="(customFieldsId && !isEditMode) && !customFieldForm?.get('user_type').value && userRoles.length <=  0"
+      >
+      </ng-select>
+    </div>
+  </div>
+
+  <app-vendors-fields
+    [programId]="programId"
+    [customField]="customFieldData"
+    [isEditMode]="!customFieldsId || isEditMode"
+    (changeVendorFields)="changeVendorFields($event)"
+  ></app-vendors-fields>
+</form>

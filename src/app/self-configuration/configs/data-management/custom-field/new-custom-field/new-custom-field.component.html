@@ -1,0 +1,751 @@
+<div>
+  <header class="section-header p-24 d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+      <i tooltip="{{'back' | i18next}}" placement="bottom" class="material-icons back-arrow-icon mr-16 cursor-pointer"
+        (click)="backButtonClicked()">arrow_back</i>
+      <h3 class="font-weight-semibold mb-0" *ngIf="!isEditMode">{{  'add_new_custom_field'  | i18next }}</h3>
+      <h3 class="font-weight-semibold mb-0" *ngIf="isEditMode">{{ "Update "+ customField_Obj.customFieldName | i18next }}</h3>
+
+    </div>
+    <div>
+      <button type="submit" class="c-btn c-btn-success-medium" *accessControl (click)="saveCustomField()">
+        {{ !isEditMode ? 'Save' : 'Update' | i18next }}
+      </button>
+    </div>
+  </header>
+  <section class="section-body-content">
+    <div class="p-24">
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+          <label>{{ 'module' | i18next }} <span class="require">*</span></label>
+          <ng-select
+              *ngIf="moduleList.length"
+              id="module_type"
+              name="module_type"
+              #module_type="ngModel"
+              (change)="getCustomFieldListByModules(customField_Obj.moduleType)"
+              [(ngModel)]="customField_Obj.moduleType"
+              placeholder="{{'select_module' | i18next}}"
+            >
+            <ng-option *ngFor="let module of moduleList | keysort:'name'" [value]="module.code" [disabled]="module.linkModule">
+              {{ module.name }}
+            </ng-option>
+            </ng-select>
+        </div>
+      </div>
+
+      <div class="c-form-group-row" *ngIf="isProgramUserSelected">
+        <div class="c-form-group">
+          <label>
+            {{ 'organization_category' | i18next }} 
+            <span class="require">*</span>
+            <icon color="#A3B0C0" size="16px" name="help" cuClass="d-flex" class="material-icons ml-4"
+              tooltip="{{ 'Select the Organization Category(s) which this custom field should appear on. For example, if the custom field should only appear on client users (i.e. not vendor users or MSP users) then select \"Client\" here.' | i18next }}"
+            placement="right"></icon>
+          </label>
+          <ng-select
+            [ngModelOptions]="{ standalone: true }"
+            [(ngModel)]="org_category"
+            [clearable]="false"
+            [multiple]="true"
+            [disabled]="(customFieldId && !isEditMode)"
+            [readonly]="(customFieldId && !isEditMode)"
+            [placeholder]="'select_organization_category' | i18next"
+          >
+            <ng-option *ngFor="let category of (orgCategories | keysort:'name')"
+              [value]="category?.value">
+              {{ category?.name | i18next }}
+            </ng-option>
+          </ng-select>
+        </div>
+      </div>
+
+      <div class="c-form-group-row" [ngClass]="hideHierarchyInModules?.includes(customField_Obj?.moduleType) ? 'd-none' : ''">
+        <div class="c-form-group">
+          <label>{{ 'hierarchy' | i18next }} <span class="require">*</span></label>
+          <ngx-dropdown-treeview
+              buttonClass='btn-outline-light'
+              [config]='hierarchyConfig'
+              [items]='treeViewItems'
+              (selectedChange)='observeSelectedChange($event)'
+              class='hierarchy-tree'>
+            </ngx-dropdown-treeview>
+            <div class='chip-holder' *ngIf="hierarchyListTags?.length !== 0">
+              <div *ngFor="let chipData of hierarchyListTags; index as it" class='d-flex chip p-4 m-4 chip-bg'>
+                <p class='chip-name'> {{ chipData?.name }}</p>
+                <icon (click)='removeSelectedHierarchy(chipData?.id)'
+                  class='close' type='material'
+                  name='close' size='16px'>
+                </icon>
+              </div>
+            </div>
+            <div class="pt-4"
+            *ngIf="hierarchyValidationText">
+              <p class="warn-text">
+                {{ '* ' + hierarchyValidationText | i18next }}
+              </p>
+            </div>
+        </div>
+      </div>
+
+      <!-- Master Data Type -->
+      <div *ngIf="isMasterDataTypeSelected" class="c-form-group-row">
+        <div class="c-form-group">
+          <label>
+            {{ 'master_data_type' | i18next }}
+            <span class="require">*</span>
+          </label>
+          <ng-select [loading]="mdtLoading" [(ngModel)]="mdtSelected"
+            placeholder="{{ 'select_master_data_type' | i18next }}"
+            [readonly]="(customFieldId && !isEditMode)"
+            (open)="mdtSubject.next({ term: '', page: 1 })"
+            (search)="mdtSubject.next({ term: $event.term, page: 1 })"
+            (scrollToEnd)="loadMoreMDTEntries()">
+              <ng-option *ngFor="let entry of (mdtList | uniqueKey: 'id' | keysort: 'name')" [value]="entry?.id">
+                {{ entry?.name || '--' }}
+              </ng-option>
+          </ng-select>
+        </div>
+      </div>
+
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+          <label>{{ 'custom_field_name' | i18next }} <span class="require">*</span></label>
+          <input type="text" class="c-form-control" id="customFieldName" name="customFieldName" #customFieldName="ngModel" placeholder="{{'custom_field_name' | i18next}}" [maxlength]="100" [(ngModel)]="customField_Obj.customFieldName" required />
+        </div>
+        <div class="c-form-group toggle-width toggle-panel pt-24">
+          <div class="toggle-panel-inner" [ngClass]="titleToggle?.value ? 'if-active' : 'if-inactive'">
+            <span class="status-text">{{(titleToggle?.value ? 'active':'inactive') | i18next}}</span>
+            <span class="toggle-switch" [ngClass]="titleToggle?.value ? 'toggle-on' : 'toggle-off'"
+              (click)="onClickToggle()"></span>
+          </div>
+        </div>
+      </div>
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+          <div class="d-flex align-items-center mb-8">
+            <label class="mr-8 mb-0">{{ 'description' | i18next }}</label>
+            <i class="tooltip-icon material-icons" tooltip="Description" placement="right">info</i>
+          </div>
+          <textarea class="c-form-control" id="customFieldDescription" name="customFieldDescription" #customFieldDescription="ngModel"  placeholder="Description" [(ngModel)]="customField_Obj.customFieldDescription"></textarea>
+        </div>
+      </div>
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+          <label>{{ 'field_type' | i18next }} <span class="require">*</span></label>
+          <ng-select placeholder="{{ 'select' | i18next }}" [disabled]="(!hideHierarchyInModules?.includes(customField_Obj?.moduleType) && !hierarchyListTags?.length) || isEditMode" (change)="onFieldTypeChange($event)" [(ngModel)]="customField_Obj.selectedFieldType">
+            <ng-option *ngFor="let fieldType of fieldTypeList" [value]="fieldType.type">
+              <div class="select-svg-template d-flex align-items-center">
+                <div class="svg-wrapper">
+                  <svg-icon [key]="getSvgName(fieldType.icon)" fontSize="24px"></svg-icon>
+                </div>
+                <span class="ml-8">{{ fieldType.label | i18next }}</span>
+              </div>
+            </ng-option>
+          </ng-select>
+        </div>
+      </div>
+      <div class="c-form-group" *ngIf="customField_Obj.selectedFieldType == 'HYPERLINK'">
+        <label class="text-lightgray">{{ 'url' | i18next }}<span class="require pl-8">*</span></label>
+        <input #url="ngModel" hyperlink [(ngModel)]="customField_Obj.hyperlink" id="hyperlink" name="hyperlink"  type="text" class="form-control" placeholder="{{'enter_url'|i18next}}"
+          [readonly]="customFieldId && !isEditMode" />
+        <p class="error-text mt-4"
+          *ngIf="url?.invalid">
+          {{ '*_please_enter_a_valid_url_pattern' | i18next }}
+        </p>
+      </div>
+      <div class="c-form-group" *ngIf="customField_Obj.selectedFieldType == 'NUMBERS'">
+        <label>{{ 'decimal_places' | i18next }} </label>
+        <ng-select [(ngModel)]="customField_Obj.decimal"
+          [placeholder]="'select_decimal_value' | i18next"
+          [readonly]="customFieldId && !isEditMode"
+          (change)="clearDefaultValue()"
+        >
+          <ng-option *ngFor="let val of [0,1,2,3,4,5,6,7,8]" [value]="val">
+            {{ val | i18next }}
+          </ng-option>
+        </ng-select>
+      </div>
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+          <div class="d-flex align-items-center mb-8">
+            <label class="mr-8 mb-0">{{ 'custom_field_label' | i18next }} <span class="require">*</span></label>
+            <i class="tooltip-icon material-icons" tooltip="Custom Field Label" placement="right">info</i>
+          </div>
+          <input type="text" class="c-form-control" id="customFieldLabel" name="customFieldLabel" #customFieldLabel="ngModel" placeholder="{{'custom_field_label' | i18next}}" [maxlength]="100" [(ngModel)]="customField_Obj.customFieldLabel" />
+        </div>
+      </div>
+
+      <app-picklist *ngIf="customField_Obj.selectedFieldType === 'DROPDOWN' ||
+      customField_Obj.selectedFieldType === 'RADIO' ||
+      customField_Obj.selectedFieldType === 'CHECKBOX'"
+
+      [selectedHierarchy]="hierarchyListTags"
+      [selectedModule]="customField_Obj?.moduleType"
+      [customFieldListByModule]="customFieldListByModule"
+      [existingOptions]="customField_Obj?.metaData?.datasource?.options || []"
+      [isMultiselect]="customField_Obj.selectedFieldType === 'MULTI_SELECT_DROPDOWN' && customField_Obj?.metaData?.datasource?.is_multi_select ? customField_Obj?.metaData?.datasource?.is_multi_select : false"
+      [showMultiselect]="((customField_Obj.selectedFieldType !== 'RADIO') && (customField_Obj.selectedFieldType !== 'TOGGLE') && (customField_Obj.selectedFieldType !== 'DROPDOWN') && (customField_Obj.selectedFieldType !== 'CHECKBOX'))"
+      [type]="customField_Obj.selectedFieldType"
+      [isEditMode]="customFieldId || isEditMode ? true : false"
+      (changeMultiselect)="changeMultiselect($event)"
+      (changeOptions)="changeOptions($event)"
+      [allSelectedOptions]="allSelectedResultingFields"
+      ></app-picklist>
+
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+          <div class="d-flex align-items-center mb-8">
+            <label class="mr-8 mb-0">{{ 'supporting_text' | i18next }}</label>
+          </div>
+          <textarea class="c-form-control" id="customFieldSupportingText" name="customFieldSupportingText" #customFieldSupportingText="ngModel"  placeholder="Supporting Text" [(ngModel)]="customField_Obj.customFieldSupportingText"></textarea>
+          <p class="error-text mt-4"
+          *ngIf="customField_Obj?.customFieldSupportingText?.length > 1000 ">
+          {{ '*_supporting_text_must_be_less_than_1000_characters' | i18next }}
+          </p>
+        </div>
+      </div>
+
+      <div *ngIf="customField_Obj.selectedFieldType == 'PICKLIST'" class="c-form-group">
+        <label>
+          {{ 'picklist' | i18next }}
+          <span class="require pl-8">*</span>
+        </label>
+        <ng-select
+          [(ngModel)]="customField_Obj.picklist"
+          [multiple]="false" [loading]="picklistLoading"
+          [placeholder]=" 'select_picklist' | i18next"
+          (scrollToEnd)="fetchMorePicklists()"
+          [readonly]="customFieldId && !isEditMode"
+          bindLabel="name"
+        >
+          <ng-option *ngFor="let entry of predefinedPicklists;" [value]="entry?.id">
+            {{ entry?.name | i18next }}
+          </ng-option>
+        </ng-select>
+      </div>
+
+      <ng-container *ngIf="customField_Obj.selectedFieldType === 'TEXT'">
+        <label class="text-lightgray">
+          {{ 'default_value' | i18next }}
+        </label>
+        <input id="default_value" name="default_value"
+          #default_value="ngModel"
+          [(ngModel)]="customField_Obj.default_value"
+          type="text" class="form-control"
+          placeholder="{{'enter_default_value'|i18next}}"
+          [readonly]="customFieldId && !isEditMode"
+        />
+      </ng-container>
+
+      <ng-container *ngIf="customField_Obj.selectedFieldType === 'TEXTAREA'">
+        <label class="text-lightgray">
+          {{ 'default_value' | i18next }}
+        </label>
+        <textarea
+          id="default_value" name="default_value"
+          #default_value="ngModel"
+          [(ngModel)]="customField_Obj.default_value"
+          class="form-control textarea-without-resize"
+          placeholder="{{'enter_default_value'|i18next}}"
+          rows="5" [maxlength]="1000"
+          [readonly]="customFieldId && !isEditMode"
+        ></textarea>
+      </ng-container>
+
+      <ng-container *ngIf="customField_Obj.selectedFieldType === 'NUMBERS'">
+        <label class="text-lightgray">
+          {{ 'default_value' | i18next }}
+        </label>
+        <input aria-range id="default_value" name="default_value"
+          #default_value="ngModel"
+          [(ngModel)]="customField_Obj.default_value" type="text"
+          [allowUptoNDigitDecimalNumber]="customField_Obj?.decimal ?? 0" class="form-control"
+          placeholder="{{'enter_default_value'|i18next}}"
+          [readonly]="customFieldId && !isEditMode"
+          [mandatePattern]="numberPattern"
+          [min]="customField_Obj?.range_applicable ? customField_Obj?.range_min : null"
+          [max]="customField_Obj?.range_applicable ? customField_Obj?.range_max : null"
+        />
+      </ng-container>
+
+      <ng-container *ngIf="customField_Obj.selectedFieldType === 'TOGGLE'">
+        <label class="text-lightgray">
+          {{ 'default_value' | i18next }}
+        </label>
+        <div class="row">
+          <div class="col-sm-4 toggle-panel">
+            <div class="toggle-panel-inner d-flex">
+              <div> {{ (customField_Obj.default_value ? 'active' : 'inactive') | i18next }} </div>
+              <toggle-button
+                [disabled]="customFieldId && !isEditMode"
+                [checked]="customField_Obj.default_value"
+                (changed)="changeDefaultToggle($event)"
+              ></toggle-button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="customField_Obj.selectedFieldType === 'DATE'">
+        <div class="c-form-group-row">
+          <div class="date-picker c-form-group position-relative mb-0">
+            <label class="text-lightgray">
+              {{ 'default_value_(date)' | i18next }}
+            </label>
+            <svms-datepicker
+              id="default_value" name="default_value"
+              #default_value="ngModel"
+              [(ngModel)]="customField_Obj.default_value"
+              [inputdateFormat]="dateFormat"
+              (onDateChange)="dateChanged($event)"
+              [disabled]="customFieldId && !isEditMode"
+              [readonly]="customFieldId && !isEditMode"
+              [placeholder]="'select_default_date' | i18next"
+              [options]="{ language: 'English' }">
+            </svms-datepicker>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="customField_Obj.selectedFieldType === 'CURRENCY'">
+        <label class="text-lightgray">
+          {{ 'default_value' | i18next }}
+        </label>
+        <input id="default_value" name="default_value"
+          #default_value="ngModel"
+          [(ngModel)]="customField_Obj.default_value" type="text"
+          [allowUptoNDigitDecimalNumber]="amountAccuracy" class="form-control"
+          placeholder="{{'0'|i18next}}"
+          [readonly]="customFieldId && !isEditMode"
+        />
+      </ng-container>
+
+      <ng-container *ngIf="customField_Obj.selectedFieldType === 'CURRENCY'">
+        <label class="text-lightgray">{{ 'currency' | i18next }}</label>
+        <ng-select [clearable]="false" [(ngModel)]="customField_Obj.currency" placeholder="{{'select_currency'|i18next}}" [readonly]="customFieldId && !isEditMode">
+          <ng-option *ngFor="let currency of currencyData$ | async" [value]="currency.code">
+            {{ currency.name }} ({{ currency.symbol }})
+          </ng-option>
+        </ng-select>
+      </ng-container>
+
+      <ng-container *ngIf="customField_Obj.selectedFieldType === 'EMAIL'">
+        <label class="text-lightgray">
+          {{ 'default_value' | i18next }}
+        </label>
+        <input id="default_value" name="default_value"
+          #default_value="ngModel"
+          [(ngModel)]="customField_Obj.default_value" type="text" class="form-control"
+          placeholder="{{'abc@gmail.com'|i18next}}"
+          [pattern]="emailPattern"
+          [readonly]="customFieldId && !isEditMode"
+        />
+        <p class="error-text mt-4" *ngIf="default_value.invalid">
+          {{ "given_email_id_is_not_in_proper_format" | i18next }}
+        </p>
+      </ng-container>
+
+      <ng-container *ngIf="customField_Obj.selectedFieldType === 'PHONE'">
+        <label class="text-lightgray">
+          {{ 'default_value' | i18next }}
+        </label>
+        <input id="default_value" name="default_value"
+          #default_value="ngModel"
+          [(ngModel)]="customField_Obj.default_value" type="text" class="form-control"
+          placeholder="{{'enter_default_value'|i18next}}"
+          [mandatePattern]="alphaNumericPattern"
+          [readonly]="customFieldId && !isEditMode"
+          [errorText]="'Only Alphanumeric values are allowed'"
+        />
+      </ng-container>
+
+      <ng-container *ngIf="customField_Obj.selectedFieldType === 'TIME'">
+        <label class="text-lightgray">
+          {{ 'default_value_(time)' | i18next }}
+        </label>
+        <input id="default_value" name="default_value"
+          #default_value="ngModel"
+          [(ngModel)]="customField_Obj.default_value" type="text" class="form-control"
+          placeholder="{{'00:00'|i18next}}"
+          [mandatePattern]="timeTypePattern"
+          [readonly]="customFieldId && !isEditMode"
+          [pattern]="timePattern"
+          [customAction]="timeFieldAction"
+        />
+        <p class="error-text mt-4" *ngIf="default_value?.invalid">
+          {{ timeErrorText | i18next }}
+        </p>
+      </ng-container>
+
+      <ng-container *ngIf="customField_Obj.selectedFieldType === 'DATETIME'">
+        <div class="c-form-group-row">
+          <div class="date-picker c-form-group position-relative mb-0">
+            <label class="text-lightgray">
+              {{ 'default_value_(date)' | i18next }}
+            </label>
+            <svms-datepicker id="default_value" name="default_value"
+              #default_value="ngModel"
+              [(ngModel)]="customField_Obj.default_value"
+              [inputdateFormat]="dateFormat"
+              [disabled]="customFieldId && !isEditMode"
+              [readonly]="customFieldId && !isEditMode"
+              [placeholder]="'select_default_date' | i18next"
+              [options]="{ language: 'English' }">
+            </svms-datepicker>
+          </div>
+        </div>
+        <label class="text-lightgray mt-12">
+          {{ 'default_value_(time)' | i18next }}
+        </label>
+        <input type="text" class="form-control"
+          placeholder="{{'00:00'|i18next}}"
+          id="default_value_2" name="default_value_2"
+          #default_value_2="ngModel"
+          [(ngModel)]="customField_Obj.default_value_2"
+          [mandatePattern]="timeTypePattern"
+          [readonly]="customFieldId && !isEditMode"
+          [pattern]="timePattern"
+          [customAction]="timeFieldAction"
+        />
+        <p class="error-text mt-4" *ngIf="default_value_2?.invalid">
+          {{ timeErrorText | i18next }}
+        </p>
+      </ng-container>
+
+      <ng-container *ngIf="(customField_Obj.selectedFieldType === 'FILE') || (customField_Obj.selectedFieldType === 'IMAGE')">
+        <app-upload-document-s3 uploadLabel="{{'default_file'| i18next}}"
+          [multiple]="false" [refName]="'CONFIGURATOR'" (isValidFile)="isValidFile($event)"
+          (uploadDataFiles)="uploadFile($event)"
+          [oldUploadedFiles]="customField_Obj.default_value"
+          errorMessage="Error: File type is not supported. Please upload the documents either in pdf, doc, docx, jpeg, jpg, png"
+          sizeErrorText="File size exceeded the max allowed size 25 MB"
+          allowedMessage="Only .pdf, .doc, .docx, .jpeg, .jpg, .png files with maximum size of 25 MB">
+        </app-upload-document-s3>
+      </ng-container>
+
+      <div *ngIf="customField_Obj.selectedFieldType === 'SOURCE'">
+        <div class="form-group">
+          <label class="text-lightgray">{{ "source_for_list_of_values" | i18next }} <span class="require">*</span></label>
+          <ng-select
+            [clearable]="false"
+            placeholder="{{'select_source_for_lov'|i18next}}"
+            [items]="sourceLOV"
+            bindLabel="name"
+            bindValue="id"
+            [required]="customField_Obj.selectedFieldType === 'SOURCE' ? true : false"
+            [readonly]="customFieldId && !isEditMode"
+            [(ngModel)]="customField_Obj.source_lov"
+          >
+          </ng-select>
+        </div>
+        <div class="form-group">
+          <label class="text-lightgray">{{ "select_user_type" | i18next }} <span class="require">*</span></label>
+          <ng-select
+            [clearable]="false"
+            placeholder="{{'select_user_type'|i18next}}"
+            [items]="userType"
+            (change)="onUserType($event)"
+            bindLabel="name"
+            bindValue="id"
+            [required]="customField_Obj.selectedFieldType === 'SOURCE' ? true : false"
+            [(ngModel)]="customField_Obj.user_type"
+          >
+          </ng-select>
+        </div>
+        <div class="form-group" *ngIf="customField_Obj.user_type == 'BY ORGANIZATION'">
+          <label class="text-lightgray">{{ "by_organization " | i18next }} <span class="require">*</span></label>
+          <ng-select
+            [clearable]="false"
+            placeholder="{{'select_by_organization'|i18next}}"
+            [items]="userCategory"
+            bindLabel="name"
+            bindValue="id"
+            [required]="customField_Obj.selectedFieldType === 'SOURCE' && customField_Obj.user_type == 'BY ORGANIZATION' ? true : false"
+            [readonly]="(customFieldId && !isEditMode) && !customField_Obj.user_type"
+            [(ngModel)]="customField_Obj.user_category"
+          >
+          </ng-select>
+        </div>
+        <div class="form-group" *ngIf="customField_Obj.user_type == 'BY USER ROLE'">
+          <label class="text-lightgray">{{ "select_user_role" | i18next }} <span class="require">*</span></label>
+          <ng-select
+            #userRole
+            [clearable]="false"
+            placeholder="{{'Select User Role'|i18next}}"
+            (keyup)="getUserRoles(userRole?.searchTerm)"
+            [items]="userRoles"
+            bindLabel="name"
+            bindValue="id"
+            [required]="customField_Obj.selectedFieldType === 'SOURCE' && customField_Obj.user_type == 'BY USER ROLE' ? true : false"
+            [readonly]="(customFieldId && !isEditMode) && !customField_Obj.user_type && userRoles.length <=  0"
+            [(ngModel)]="customField_Obj.user_role"
+          >
+          </ng-select>
+        </div>
+      </div>
+
+      <div class="c-form-group-row" *ngIf="!hidePlaceholder.includes(customField_Obj.selectedFieldType)">
+        <div class="c-form-group">
+          <label class="text-lightgray">{{ 'placeholder' | i18next }}<span class="require pl-8">*</span></label>
+            <input
+              id="customFieldPlaceholder"
+              name="customFieldPlaceholder"
+              #customFieldPlaceholder="ngModel"
+              [(ngModel)]="customField_Obj.customFieldPlaceholder"
+              type="text"
+              class="form-control"
+              placeholder="{{'placeholder_text'|i18next}}"
+              [readonly]="customFieldId && !isEditMode"
+            />
+        </div>
+      </div>
+
+      <h4 class="font-weight-medium">{{ 'permissions' | i18next }}</h4>
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+          <label>{{ 'can_view' | i18next }} <span class="require">*</span></label>
+          <ng-select
+            [disabled]="!roles?.length"
+            [multiple]="true"
+            placeholder="{{ 'select_roles' | i18next }}"
+            [items]="roles"
+            (change)="viewRolesChange($event)"
+            [(ngModel)]="customField_Obj.customFieldCanView"
+          >
+          </ng-select>
+          <div class="permission-edit mt-8 d-flex align-items-center" *ngIf="customField_Obj.customFieldCanView?.includes('VENDOR')">
+            <p class="small mr-4">{{ 'vendors_who_can_view' | i18next }}:</p>
+            <span class="mr-8 px-8" *ngIf="customField_Obj?.can_view_vendors?.length > 0">{{!customField_Obj?.can_view_vendors_ids?.length ? 'All' : customField_Obj?.can_view_vendors_ids?.length + ' Vendors' || 0 + ' Vendors' }}</span>
+            <span *ngIf="!customField_Obj?.can_view_vendors?.length"><div class="spinner"></div></span>
+            <i class="material-icons cursor-pointer" *ngIf="customField_Obj?.can_view_vendors?.length > 0" (click)="openVendorVisibility('can_view')">drive_file_rename_outline</i>
+          </div>
+        </div>
+      </div>
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+          <label>{{ 'can_edit' | i18next }} <span class="require" *ngIf="canEditList?.length > 0">*</span></label>
+          <ng-select
+            [multiple]="true"
+            placeholder="{{ 'select_roles' | i18next }}"
+            [items]="canEditList"
+            bindValue="id"
+            bindLabel="name"
+            (change)="editRolesChange($event)"
+            [(ngModel)]="customField_Obj.customFieldCanEdit"
+          >
+          </ng-select>
+          <div class="permission-edit mt-8 d-flex align-items-center" *ngIf="customField_Obj.customFieldCanEdit?.includes('VENDOR')">
+            <p class="small mr-4">{{ 'vendors_who_can_edit' | i18next }}:</p>
+            <span class="mr-8 px-8">{{!customField_Obj?.can_edit_vendors_ids?.length ? 'All' : customField_Obj?.can_edit_vendors_ids?.length+ ' Vendors' }}</span>
+            <i class="material-icons cursor-pointer" *ngIf="customField_Obj?.can_edit_vendors?.length>0" (click)="openVendorVisibility('can_edit')">drive_file_rename_outline</i>
+          </div>
+        </div>
+      </div>
+      <h4 class="font-weight-medium">{{ 'field_settings' | i18next }}</h4>
+      <div class="d-flex justify-content-between align-items-center border rounded-sm p-16 mb-16">
+        <div>
+          <p class="font-weight-medium">{{ 'required' | i18next }}</p>
+          <p>{{ 'when_enabled,_CF_will_be_mandatory_to_select_at_the_respective_module_transactions.' | i18next }}</p>
+        </div>
+        <div class="toggle-panel transparent-bg-toggle">
+          <div class="toggle-panel-inner p-0" [ngClass]="required?.value ? 'if-active' : 'if-inactive'">
+            <span class="toggle-switch" [ngClass]="required?.value ? 'toggle-on' : 'toggle-off'"
+              (click)="onClickRequired()"></span>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex justify-content-between align-items-center border rounded-sm p-16 mb-16" *ngIf="showReadOnly">
+        <div>
+          <p class="font-weight-medium">{{ 'read_only' | i18next }}</p>
+          <p>{{ 'when_enabled,_CF_will_be_read-only_at_the_respective_module_transactions.' | i18next }}</p>
+        </div>
+        <div class="toggle-panel transparent-bg-toggle">
+          <div class="toggle-panel-inner p-0" [ngClass]="readonly?.value ? 'if-active' : 'if-inactive'">
+            <span class="toggle-switch" [ngClass]="readonly?.value ? 'toggle-on' : 'toggle-off'"
+              (click)="onClickReadonly()"></span>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex justify-content-between align-items-center border rounded-sm p-16 mb-16" *ngIf="showSensitiveData">
+        <div>
+          <p class="font-weight-medium">{{ 'sensitive_data' | i18next }}</p>
+          <p>{{ 'when_enabled,_system_considers_the_custom_field_as_sensitive_and_anonymize_it_after_the_defined_threshold_period_from_assignment_closure/candidate_rejection_date.' | i18next }}</p>
+        </div>
+        <div class="toggle-panel transparent-bg-toggle">
+          <div class="toggle-panel-inner p-0" [ngClass]="data_subject_right?.value ? 'if-active' : 'if-inactive'">
+            <span class="toggle-switch" [ngClass]="data_subject_right?.value ? 'toggle-on' : 'toggle-off'"
+              (click)="onClickSensitiveToggle()"></span>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex justify-content-between align-items-center border rounded-sm p-16 mb-16" *ngIf="customField_Obj.selectedFieldType == 'NUMBERS'">
+        <div>
+          <p class="font-weight-medium">{{ 'show_in_thousands' | i18next }}</p>
+          <p>{{ 'supporting_text_required' | i18next }}</p>
+        </div>
+        <div class="toggle-panel transparent-bg-toggle">
+          <div class="toggle-panel-inner p-0" [ngClass]="customField_Obj?.show_in_thousands ? 'if-active' : 'if-inactive'">
+            <span class="toggle-switch" [ngClass]="customField_Obj?.show_in_thousands ? 'toggle-on' : 'toggle-off'"
+              (click)="toggleNew('show_in_thousands', customField_Obj?.show_in_thousands)"></span>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex justify-content-between align-items-center border rounded-sm p-16 mb-16" *ngIf="customField_Obj.selectedFieldType == 'NUMBERS'">
+        <div>
+          <p class="font-weight-medium">{{ 'range_applicable' | i18next }}</p>
+          <p>{{ 'supporting_text_required' | i18next }}</p>
+        </div>
+        <div class="toggle-panel transparent-bg-toggle">
+          <div class="toggle-panel-inner p-0" [ngClass]="customField_Obj?.range_applicable ? 'if-active' : 'if-inactive'">
+            <span class="toggle-switch" [ngClass]="customField_Obj?.range_applicable ? 'toggle-on' : 'toggle-off'"
+              (click)="toggleNew('range_applicable', customField_Obj?.range_applicable)"></span>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="customField_Obj?.range_applicable" class="row">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label class="text-lightgray">{{ 'range_min' | i18next }}<span class="require pl-8">*</span></label>
+            <input id="range_min" name="range_min" type="number" class="form-control" placeholder="{{'1'|i18next}}"
+              [readonly]="customFieldId && !isEditMode" [(ngModel)]="customField_Obj.range_min" (keyup)="clearDefaultValue()"/>
+            <p class="error-text mt-4"
+              *ngIf="customField_Obj?.range_min == 0">
+              {{ '*_please_enter_a_valid_number_range' | i18next }}
+            </p>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label class="text-lightgray">{{ 'range_max' | i18next }}<span class="require pl-8">*</span></label>
+            <input id="range_max" name="range_max" [(ngModel)]="customField_Obj.range_max" type="number" class="form-control" placeholder="{{'1,000,000,000'|i18next}}"
+              [readonly]="customFieldId && !isEditMode" (keyup)="clearDefaultValue()"/>
+            <p class="error-text mt-4"
+              *ngIf="customField_Obj?.range_max == 0">
+              {{ '*_please_enter_a_valid_number_range' | i18next }}
+            </p>
+          </div>
+        </div>
+        <p class="error-text mt-4"
+              *ngIf="customField_Obj?.range_min > customField_Obj?.range_max">
+              {{ '*_supplied_range_is_not_valid' | i18next }}
+            </p>
+      </div>
+      <div class="table-view mb-24 overflow-inherit" [ngClass]="linkedModuleList?.length > 0 && moduleList?.length > 0 && !hideLinkedPartInModules?.includes(customField_Obj?.moduleType) ? '' : 'disabled-field'">
+        <div class="p-16 d-flex align-items-center justify-content-between">
+          <div>
+            <p class="blue-color font-weight-medium">{{ 'linked' | i18next }}</p>
+            <p class="small">{{ 'when_enabled,_this_custom_field_can_be_linked_to_other_modules_downstream_within_the_application._as_part_of_linking_a_field,_the_ability_to_define_who_can_view_and/or_edit_the_linked_field_will_be_provided.' | i18next }}</p>
+          </div>
+          <div class="d-flex align-items-center">
+            <div class="toggle-panel transparent-bg-toggle">
+              <div class="toggle-panel-inner p-0" [ngClass]="linked?.value ? 'if-active' : 'if-inactive'">
+                <span class="toggle-switch" [ngClass]="linked?.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickLinked()"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <table *ngIf="linked?.value && !loadingLinkedData">
+          <thead>
+            <tr>
+              <th>{{ 'link_yes/no?' | i18next }}</th>
+              <th>{{ 'module' | i18next }} <span class="require">*</span></th>
+              <th>{{ 'can_view' | i18next }} <span class="require">*</span></th>
+              <th>{{ 'can_edit' | i18next }} <span class="require">*</span></th>
+              <th>{{ 'read_only' | i18next }}</th>
+            </tr>
+          </thead>
+          <tbody *ngIf="!loadingLinkedData">
+            <tr *ngFor="let module of linkedModuleList; let i = index">
+              <td>
+                <div class="toggle-panel transparent-bg-toggle">
+                  <div class="toggle-panel-inner p-0" [ngClass]="module?.linkModule ? 'if-active' : 'if-inactive'">
+                    <span class="toggle-switch" [ngClass]="module?.linkModule ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickLinkModule(i)"></span>
+                  </div>
+                </div>
+              </td>
+              <td [ngClass]="!module?.linkModule ? 'disabled-field' : ''">
+                {{module.name}}
+              </td>
+              <td [ngClass]="!module?.linkModule ? 'disabled-field' : ''">
+                <ng-select class="no-border" placeholder="{{ 'select_values' | i18next }}" multiple="true"
+                  [disabled]="!module?.linkModule || !module?.roles?.length"
+                  [multiple]="true"
+                  placeholder="{{ 'select_roles' | i18next }}"
+                  [items]="module?.roles"
+                  bindValue="id"
+                  bindLabel="name"
+                  (change)="viewModuleRolesChange(i)"
+                  [(ngModel)]="module.customFieldCanView"
+                >
+                </ng-select>
+                <div class="permission-edit mt-8 d-flex align-items-center" *ngIf="module?.customFieldCanView?.includes('VENDOR')">
+                  <p class="small mr-4">{{ 'vendors_who_can_view' | i18next }}:</p>
+                  <span class="mr-8 px-8" *ngIf="module?.can_view_vendors?.length > 0">{{!module?.can_view_vendors_ids?.length ? 'All' : module?.can_view_vendors_ids?.length + ' Vendors' || 0 + ' Vendors' }}</span>
+                  <span *ngIf="!module?.can_view_vendors?.length"><div class="spinner"></div></span>
+                  <i class="material-icons cursor-pointer" *ngIf="module?.can_view_vendors?.length > 0" (click)="openModuleVendorVisibility('can_view', i)">drive_file_rename_outline</i>
+                </div>
+              </td>
+              <td [ngClass]="!module?.linkModule ? 'disabled-field' : ''">
+                <ng-select class="no-border" placeholder="{{ 'select_values' | i18next }}" multiple="true"
+                  [disabled]="!module?.canEditList?.length || !module?.linkModule"
+                  [multiple]="true"
+                  placeholder="{{ 'select_roles' | i18next }}"
+                  [items]="module.canEditList"
+                  bindValue="id"
+                  bindLabel="name"
+                  (change)="editModuleRolesChange($event,i)"
+                  [(ngModel)]="module.customFieldCanEdit"
+                >
+                </ng-select>
+                <div class="permission-edit mt-8 d-flex align-items-center" *ngIf="module?.customFieldCanEdit?.includes('VENDOR')">
+                  <p class="small mr-4">{{ 'vendors_who_can_edit' | i18next }}:</p>
+                  <span class="mr-8 px-8">{{!module?.can_edit_vendors_ids?.length ? 'All' : module?.can_edit_vendors_ids?.length+ ' Vendors' }}</span>
+                  <i class="material-icons cursor-pointer" *ngIf="module?.can_edit_vendors?.length > 0" (click)="openModuleVendorVisibility('can_edit', i)">drive_file_rename_outline</i>
+                </div>
+              </td>
+              <td *ngIf="showLinkedReadOnly">
+                <div class="toggle-panel transparent-bg-toggle" [ngClass]="!module?.linkModule ? 'disabled-field' : ''">
+                  <div class="toggle-panel-inner p-0" [ngClass]="module?.readOnly ? 'if-active' : 'if-inactive'">
+                    <span class="toggle-switch" [ngClass]="module?.readOnly ? 'toggle-on' : 'toggle-off'"
+                      (click)="readOnlyToggle(i)"></span>
+                  </div>
+                </div>
+              </td>
+              <app-vendor-selection-modal *ngIf="module?.moduleVendorVisibility && module?.vendorVisibilityType=='can_view'" [vendors]="module?.can_view_vendors" (changeSelection)="moduleCanViewChanged($event,i)" (closeModal)="moduleHideVendorModel($event,i)"></app-vendor-selection-modal>
+
+              <app-vendor-selection-modal *ngIf="module?.moduleVendorVisibility && module?.vendorVisibilityType=='can_edit'" [vendors]="module?.can_edit_vendors" (changeSelection)="moduleCanEditChanged($event,i)" (closeModal)="moduleHideVendorModel($event,i)"></app-vendor-selection-modal>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 *ngIf='jobTypeAllowed' class="mt-32"> {{ 'associations' | i18next }} </h4>
+
+      <div *ngIf="jobTypeAllowed" class="form-group">
+        <label>
+          {{ 'job_type' | i18next }}
+          <icon style="vertical-align: middle;" class="pl-4" name="help" placement="right" size="16px" color="#A3B0C0"
+                tooltip="If no Job Type defined for a Custom Field, then it would be applicable for any Job Type which can be selected while creating Job.">
+          </icon>
+        </label>
+        <ng-select [loading]="jobTypesLoading"
+                   placeholder="{{ 'select_job_types' | i18next }}"
+                   multiple="true" [(ngModel)]="selectedJobTypes"
+                   [ngModelOptions]="{standalone: true}"
+                   [readonly]="(customFieldId && !isEditMode)">
+          <ng-option *ngFor="let type of jobTypesList" [value]="type?.id">
+            {{ type?.name }}
+          </ng-option>
+        </ng-select>
+      </div>
+    </div>
+  </section>
+</div>
+
+<app-vendor-selection-modal *ngIf="vendorVisibility && vendorVisibilityType=='can_view'" [vendors]="customField_Obj.can_view_vendors" (changeSelection)="canViewChanged($event)" (closeModal)="hideVendorModel($event)"></app-vendor-selection-modal>
+
+<app-vendor-selection-modal *ngIf="vendorVisibility && vendorVisibilityType=='can_edit'" [vendors]="customField_Obj.can_edit_vendors" (changeSelection)="canEditChanged($event)" (closeModal)="hideVendorModel($event)"></app-vendor-selection-modal>
+

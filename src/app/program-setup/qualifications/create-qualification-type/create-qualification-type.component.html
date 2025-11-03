@@ -1,0 +1,73 @@
+<svms-sidebar [title]="title" [clickOutside]="clickOutside" icon="school" [dataVisibility]="createQualificationType"
+  (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <form class="p-24" [formGroup]="addQualificationTypeForm">
+      <div class="form-group-row mb-16">
+        <div class="form-group" [ngClass]="{'disable':isViewMode}">
+          <label>{{ 'qualification_type' | i18next }}<span class="require">*</span></label>
+          <input type="text" class="form-control" minlength="3" maxlength="100" [readOnly]="isViewMode || isPredefined"
+            placeholder="{{ 'enter_qualification_type_name' | i18next }}" formControlName="name" />
+          <p class="validation-msg"
+            *ngIf="addQualificationTypeForm.controls.name.touched && addQualificationTypeForm.controls['name'].invalid && addQualificationTypeForm.controls['name'].errors?.required">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'qualification_type_name_is_required' | i18next }}
+          </p>
+          <p class="validation-msg" *ngIf="addQualificationTypeForm.controls.name.touched && addQualificationTypeForm.controls.name.errors?.minlength">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'minimum_3_characters_required' | i18next }}.
+          </p>
+          <p class="validation-msg" *ngIf="addQualificationTypeForm.controls.name.touched && addQualificationTypeForm.controls.name.errors?.maxlength">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'maximum_100_characters_allowed' | i18next }}.
+          </p>
+        </div>
+
+        <div class="toggle-panel" [ngClass]="{'disable':isViewMode}">
+          <div class="toggle-panel-inner toggle-background" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+            <span class="status-text">{{toggle?.title | i18next}}</span>
+            <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+              (click)="onClickToggle()"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group-row mb-16">
+        <div class="form-group" [ngClass]="{'disable': isViewMode || isUpdateReq}">
+          <label>{{'qualification_code' | i18next}}<span class="require">*</span></label>
+          <input type="text" class="form-control" minlength="3" maxlength="100" [readOnly]="isViewMode || isUpdateReq || isPredefined"
+            placeholder="{{'enter_qualification_type_code' | i18next}}" formControlName="code" [mandatePattern]="codePattern"/>
+          <p class="validation-msg"
+            *ngIf="addQualificationTypeForm.controls.code.touched && addQualificationTypeForm.controls['code'].invalid && addQualificationTypeForm.controls['code'].errors?.required">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{'Qualification Type Code is required'|i18next}}
+          </p>
+          <p class="validation-msg" *ngIf="addQualificationTypeForm.controls.code.touched && addQualificationTypeForm.controls.code.errors?.minlength">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{'minimum_3_characters_required'|i18next}}.
+          </p>
+          <p class="validation-msg" *ngIf="addQualificationTypeForm.controls.code.touched && addQualificationTypeForm.controls.code.errors?.maxlength">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{'maximum_100_characters_allowed'|i18next}}.
+          </p>
+        </div>
+      </div>
+
+      <div class="form-group mb-32" [ngClass]="{'disable':isViewMode}">
+        <label> {{ 'description' | i18next }} </label>
+        <textarea type="textarea" rows="4" cols="12" maxlength="1000" [readOnly]="isViewMode"
+          formControlName="description" class="form-control" placeholder="{{ 'enter_description_here' | i18next }}">
+              </textarea>
+        <p class="validation-msg" *ngIf="addQualificationTypeForm.controls.description.touched && addQualificationTypeForm.controls.description.errors?.maxlength">
+          {{ 'maximum_1000_characters_allowed' | i18next }}.
+        </p>
+      </div>
+    </form>
+  </svms-sidebar-body>
+
+  <svms-sidebar-footer *accessControl>
+    <button type="submit" (click)="onSave()" class="btn btn-primary float-right" *ngIf="!isViewMode">
+      <icon size="20px" name="check_circle" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+      &nbsp;{{ btnTitle | i18next}}
+    </button>
+  </svms-sidebar-footer>
+</svms-sidebar>

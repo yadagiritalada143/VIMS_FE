@@ -1,0 +1,69 @@
+<svms-sidebar-ng
+  size="small"
+  [title]="title"
+  [dataVisibility]="withdrawSidebar"
+  (onClose)="sidebarClose()"
+>
+<app-logs [log]="logs"></app-logs>
+  <div class="scroll-wrapper pl-24 pt-32 pb-32" [formGroup]="withdrawForm">
+    <div class="pr-24">
+      <div class="form-group" [hidden]="isPendingInterviewReview && userType === 'MSP' && cancelInterview" *ngIf="(!acceptOffer && !cancelOffer && !cancelCounteredOffer && !isShortlistReviewRejected)">
+        <label>{{ label | i18next }} <span class="require">*</span></label>
+        <ng-select
+          [clearable]="false"
+          placeholder="{{ 'select_reason' | i18next }}"
+          [searchable]="false"
+          formControlName="reason"
+        >
+          <ng-option
+            *ngFor="let reason of optPickListData"
+            [value]="reason?.name ? reason?.name :reason?.label"
+            >{{ reason?.name ? reason?.name : reason?.label }}</ng-option
+          >
+          <!-- <ng-option [value]="'Reason 02'">Reason 02</ng-option> -->
+        </ng-select>
+      </div>
+
+      <ng-container *ngIf="acceptOffer && (userType.toLowerCase() == 'vendor' || userType.toLowerCase() == 'super_org')">
+        <app-adjustment-and-tax-forms [isShowTax]="isShowTax" [acceptOffer]="acceptOffer" [taxesData]="taxData" (taxFormValueChange)="handleTaxFormValueChange($event)"></app-adjustment-and-tax-forms>
+      </ng-container>
+
+      <div class="form-group">
+        <label>{{ 'notes' | i18next }}</label>
+        <textarea
+          class="form-control"
+          placeholder="{{ 'enter_additional_notes' | i18next }}"
+          rows="7"
+          cols="12"
+          maxlength="3000"
+          formControlName="notes"
+        ></textarea>
+      </div>
+      <ng-container *ngIf="this.onBoardingReview">
+        <app-upload-documents uploadLabel="{{ 'attachments' | i18next }}" (uploadDataFiles)="uploadFiles($event)"
+          [newUploadfileArr]="newUploadfileArr" [multiple]="false" [isFiveMbFileValid]="true" (isValidFile)="isValidFile($event)"
+          [supportedFileTypes]="['pdf','doc','docx']" allowedMessage = "{{ 'only_.pdf,_.doc,_.docx_files_with_maximum_size_of_5_mb' | i18next }}}">
+        </app-upload-documents>
+      </ng-container>
+    </div>
+    </div>
+
+  <svms-sidebar-footer-ng  *accessControl>
+    <button
+      type="submit"
+      [disabled]="!withdrawForm.valid || loading  || !isValidFileSize || isTaxValid"
+      class="btn btn-primary float-right"
+      (click)="withdrawCandidate()"
+      *accessControl>
+      <icon
+        size="20px"
+        name="check_circle"
+        type="material"
+        class="icon--on-left"
+        cuClass="icon-cu"
+      ></icon>
+      {{ btnLabel | i18next }}
+      <span *ngIf="loading" class="loader ml-12"> </span>
+    </button>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

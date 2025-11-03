@@ -1,0 +1,80 @@
+<div class="view-detail-page">
+  <section>
+    <header class="p-24 position-relative">
+          <h3 class="mb-0 font-weight-bold">{{'profiles_pending_link' | i18next }}</h3>
+          <p class="small gray-7">
+            <span *ngIf="!showLoader">{{ totalRecords }} {{ 'records' | i18next }}</span>
+            <ngx-skeleton-loader
+              animation="progress"
+              appearance="line"
+              [theme]="{ height: '10px', 'margin-bottom': '0', 'max-width': '200px' }"
+              *ngIf="showLoader"
+            >
+            </ngx-skeleton-loader>
+          </p>
+    </header>
+    <div class="session-content bg-white">
+      <div class="border-top border-bottom d-flex py-12 px-24">
+        <icon size="20px" class="material-outlined mt-4" name="search"></icon>
+        <input
+          [(ngModel)]="searchInput"
+          type="text"
+          class="search-field ml-8"
+          (keyup)="searchMember($event)"
+          placeholder="{{ 'search..' | i18next }}"
+        />
+      </div>
+      <div class="no-data-found gray-7" *ngIf="showPendingLinkError">
+        <span>{{'No Data Found '}}</span> 
+      </div>
+      <div class="section-info" *ngIf="candidates && candidates.length && !showPendingLinkError">
+        <ul class="item-list">
+          <li class="position-relative px-24 d-flex align-items-center justify-content-between cursor-pointer" *ngFor="let rowData of candidates; let i = index" (click)="openMTPLinking(rowData)">
+            <div class="content-item d-flex justify-content-between py-16">
+              <div *ngIf="showLoader">
+                <ngx-skeleton-loader count="2" animation="progress" appearance="line" [theme]="{
+                  width: '130px',
+                  height: '15px',
+                  display: 'block',
+                  'border-radius': '4px',
+                  'background-color': '#dce2e7',
+                  'border-top': '0',
+                  'margin-bottom': '9px'
+                }"></ngx-skeleton-loader>
+              </div>
+              <div *ngIf="!showLoader">
+                <p class="title text-primary">{{ rowData?.fullName  ?? 'Name' }}</p>
+                <p class="small">{{ rowData?.uniqueId ?? 'something else' }}</p>
+              </div>
+              <div *ngIf="!showLoader">
+                <p class="small">{{ rowData?.created_on | localDateFormat }}</p>
+              </div>
+            </div>
+            <icon *ngIf="!showLoader" class="material-symbols-outlined px-12" name="keyboard_arrow_right"></icon>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <footer class="c-listing-footer position-static px-24" *ngIf="candidates && candidates.length && !showPendingLinkError">
+      <app-svms-table-paginator
+        [itemsPerPage]="itemsPerPage"
+        [recordsPerPageSetting]="recordsPerPageSetting"
+        [currentPage]="currentPage"
+        (changeRecords)="onClickRecords($event)"
+        [maxPages]="pageCount"
+        [showPageSettingData]="showPageSettingData"
+        (changePage)="onPaginationClick($event)"
+      >
+      </app-svms-table-paginator>
+    </footer>
+  </section>
+</div>
+<app-svms-modal size="largest" [visibility]="showMTPLinking" (onClose)="onCloseModal()"> 
+  <app-master-profile-linking
+   [selectedMasterProfileID]="selectedMasterProfileID"
+   [mtpMatches]="mtpMatches"
+   [candidateData]="candidateData"
+   (onClose)="onCloseModal($event)"
+   (setSelectedMtpID)="selectedMasterProfileID = $event"   
+   ></app-master-profile-linking>
+</app-svms-modal>

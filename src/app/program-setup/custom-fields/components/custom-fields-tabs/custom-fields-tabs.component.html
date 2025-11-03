@@ -1,0 +1,28 @@
+<div #customFieldsTabs *ngIf="isActive" class="tabs">
+  <div class="line"></div>
+  <div
+    *ngFor="let tab of visibleTabs"
+    [ngClass]="{ current: currentTab?.name === tab.name }"
+    class="tab"
+    (click)="openTab(tab)"
+  >
+    {{ tab.name | i18next}}
+  </div>
+  <button
+    (click)="isHiddenTabsActive = !isHiddenTabsActive"
+    *ngIf="hiddenTabs.length"
+    class="btn small btn-primary ml-16 pl-8"
+  >
+    {{ 'more' | i18next }}
+  </button>
+  <div *ngIf="hiddenTabs.length && isHiddenTabsActive" class="hidden-tabs">
+    <div
+      (click)="openTab(tab)"
+      *ngFor="let tab of hiddenTabs"
+      [ngClass]="{ current: currentTab.name === tab.name }"
+      class="hidden-tab"
+    >
+      {{ tab.name | i18next}}
+    </div>
+  </div>
+</div>

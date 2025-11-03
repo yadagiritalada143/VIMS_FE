@@ -1,0 +1,176 @@
+<header class="grid-header d-flex align-items-center justify-content-between mb-24">
+    <div class="d-flex">
+        <h3 class="grid-heading">{{ 'submitted_77790=uijii' | i18next }}</h3>
+    </div>
+    <div class="d-flex">
+        <ul class="grid-filter">
+            <li class="position-relative">
+                <a class="btn small btn-light bg-light" #search>
+                    <icon size="17px" name="search" type="material" cuClass="d-flex"></icon>
+                </a>
+                <div class="filter-search" [hidden]="!isSearchOpen" #searchInput>
+                    <input type="text" placeholder="{{ 'enter_search_term' | i18next }}" [(ngModel)]="searchValue" class="form-control search-input " (keyup.enter)="onSearchClick($event)">
+                    <icon size="17px" name="search" type="material" cuClass="d-flex" (click)="onSearchClick($event)"></icon>
+                </div>
+            </li>
+            <li class="position-relative">
+                <a class="btn small btn-light bg-light" #setting>
+                    <icon size="17px" name="settings" type="material" cuClass="d-flex"></icon>
+                </a>
+                <div class="header-dropdown bg-light border rounded-sm position-absolute" [hidden]="!showSettings" #settingMenu>
+                    <h5 class="px-16 py-12 font-weight-bold border-bottom">{{ 'customize_listing' | i18next }}</h5>
+                    <div class="">
+                        <h6 class="px-16 pb-4 pt-8 font-weight-bold">
+                    {{ 'display_density' | i18next }}
+                        </h6>
+                        <ul class="density-tab px-16 pb-12 d-flex flex-row">
+                            <li class="text-center py-8 mr-0" [ngClass]="{'active' : density === 'COMFORTABLE' }" (click)="onDensityClick('COMFORTABLE')">{{ 'comfortable' | i18next }}</li>
+                            <li class="text-center py-8 mr-0" [ngClass]="{'active' : density === 'COMPACT' }" (click)="onDensityClick('COMPACT')">
+                                {{ 'compact' | i18next }}
+                            </li>
+                        </ul>
+                        <h6 class="px-16 pb-4 pt-12 font-weight-bold">
+                           {{ 'time_&_expense' | i18next }}
+                        </h6>
+                        <div class="d-flex flex-column px-16 mb-8 reordring-column">
+                            <div class="dndPlaceholder col-md-12" #placeholder></div>
+                            <div class="toggle-inner d-flex align-items-center justify-content-between reordering-item">
+                                <div class="toggle d-flex align-items-center" [ngClass]="sortingCol ? 'if-active' : 'if-inactive'">
+                                    <icon size="40px" [name]="sortingCol ? 'toggle_on' : 'toggle_off'" type="material" cuClass="d-flex cursor-pointer" class="d-flex" (click)="onClickColumn()">
+                                    </icon>
+                                    <span class="ml-4 toggle-name">{{ 'candidate_name' | i18next }}</span>
+                                </div>
+                                <span class="drag cursor-pointer">
+                  <icon size="20px" name="drag_indicator" type="material" cuClass="d-flex" class="d-flex">
+                  </icon>
+                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li class="position-relative">
+                <a class="small btn btn-light bg-light" #filter>
+                    <icon size="17px" name="filter_alt" type="material" cuClass="d-flex"></icon>
+                </a>
+                <div class="active-filter btn small btn-secondary d-none">
+                    <a class="filter-trigger" #filter>
+                        <icon size="17px" name="filter_alt" type="material" cuClass="d-flex"></icon>
+                    </a>
+                    <span class="active-count font-weight-normal pl-4 pr-4">{{ '2_active_filters' | i18next }}</span>
+                    <a class="clear-filter">
+                        <icon size="14px" name="close" type="material" cuClass="d-flex"></icon>
+                    </a>
+                </div>
+                <app-grid-filter [class.active]="showFilter" #filterMenu>
+                </app-grid-filter>
+            </li>
+            <li class="position-relative mr-0 view-type no-radius-right">
+                <!--ui for list view-->
+                <a (click)="onListViewClicked()" class="small btn btn-light bg-light">
+                    <icon size="22px" name="reorder" type="material" cuClass="d-flex"></icon>
+                </a>
+            </li>
+            <li class="position-relative mr-0 view-type no-radius">
+                <!--ui for kanban view-->
+                <a class="small btn btn-light bg-light">
+                    <icon size="22px" name="view_stream" type="material" cuClass="d-flex"></icon>
+                </a>
+            </li>
+            <li class="position-relative mr-0 view-type no-radius-left">
+                <!--ui for grid view-->
+                <a class="small btn btn-light bg-light active">
+                    <icon size="22px" name="apps" type="material" cuClass="d-flex"></icon>
+                </a>
+            </li>
+        </ul>
+    </div>
+</header>
+<section class="grid-view">
+    <div class="grid-item rounded-sm position-relative" *ngFor="let griditem of vmsData?.candidate" (mouseleave)="hideActionDropdown(griditem)">
+        <div class="p-16">
+            <div class="grid-actions position-absolute">
+                <!-- <button class="btn btn-secondary small d-inline-block mr-4">View</button> -->
+                <button class="btn btn-light small d-inline-block more-btn" (click)="showActions(griditem)">
+          <icon size="20px" class="mr-4" name="more_horiz" type="material" cuClass="icon-cu"></icon>
+        </button>
+                <nav class="action-dropdown position-absolute" [ngClass]="{'active' : griditem.active}">
+                    <ul>
+                        <!-- <li>
+              <a >
+                <icon size="19px" name="how_to_reg" type="material" cuClass="d-flex"></icon>
+                View Profile
+              </a>
+            </li>
+            <li>
+              <a >
+                <icon size="19px" name="create" type="material" cuClass="d-flex"></icon>
+                Edit
+              </a>
+            </li> -->
+                        <li class="withdraw">
+                            <a (click)="withdrawalClicked(griditem)">
+                                <icon size="19px" name="person_remove" type="material" cuClass="d-flex"></icon>
+                              {{ 'withdraw_candidate' | i18next }}
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="float-left checkbox-wrapper mr-12 mt-12">
+                <label class="checkbox-container">
+          <input type="checkbox" name="selectall">
+          <span class="checkmark"></span>
+        </label>
+            </div>
+            <figure class="float-left user-avatar mr-12 text-center rounded-sm overflow-hidden">
+                {{griditem?.candidate | shortName:'first'}}
+            </figure>
+            <p class="title float-left font-weight-semibold">{{griditem?.candidate}} <br><span class="d-inline-block rounded-sm position-relative font-weight-normal status">{{ 'submitted' | i18next }}</span></p>
+            <div class="updated-on float-right">
+                <icon size="14px" class="mr-4" name="schedule" type="material" cuClass="icon-cu"></icon>
+                {{griditem.submittenOn}} {{ 'days_ago' | i18next }}
+            </div>
+            <div class="clearfix"></div>
+            <div class="rates d-flex mt-32 mb-16">
+                <p class="font-weight-medium">
+                    {{griditem.pay_rate}}
+                    <span class="d-block font-weight-normal">{{ 'pref._pay_rate' | i18next }}</span>
+                </p>
+                <p class="font-weight-medium">
+                    {{griditem.est_hours}}
+                    <span class="d-block font-weight-normal">{{ 'est.hours' | i18next }}</span>
+                </p>
+                <p class="font-weight-medium">
+                    {{griditem.est_pay}}
+                    <span class="d-block font-weight-normal">{{ 'est.pay' | i18next }}</span>
+                </p>
+            </div>
+        </div>
+        <footer class="grid-footer p-16">
+            <div class="float-left availability">
+                <icon size="14px" class="mr-4" name="event" type="material" cuClass="icon-cu"></icon> {{griditem.availability}}
+            </div>
+            <div class="match-value float-right font-weight-medium ml-8">
+                {{griditem.match?.matchValue}}%
+            </div>
+            <div class="progress-wrap float-right">
+                <span class="progress-value" [ngStyle]="matchValues(griditem.match)"></span>
+            </div>
+            <div class="clearfix"></div>
+        </footer>
+    </div>
+    <div class="clearfix"></div>
+</section>
+<section class="grid-pagination pt-16">
+    <div class="pagination font-weight-normal">
+        <a>
+            <icon name="keyboard_arrow_left" size="14px" type="material" class="d-flex" cuClass="d-flex"></icon>
+        </a>
+        <a class="active">1</a>
+        <!-- <a>2</a> -->
+        <a>
+            <icon name="keyboard_arrow_right" size="14px" type="material" class="d-flex" cuClass="d-flex"></icon>
+        </a>
+    </div>
+</section>

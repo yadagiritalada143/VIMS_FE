@@ -1,0 +1,211 @@
+@import '../../../../../assets/sass/abstracts/variables';
+
+/* Style internal-tab */
+.interview-tab {
+
+  .btn {
+    cursor: pointer;
+    transition: 0.3s;
+    border-color: #EBEEF3 !important;
+    font-weight: $font-weight-regular;
+    font-size: 14px;
+  }
+
+  .btn-tab {
+    background-color: var(----color-assets-light);
+    border-color: var(----color-assets-light);
+    color: $color-secondary;
+    position: relative;
+  }
+
+  /* Change background color of buttons on hover */
+  .btn-tab:hover {
+    background-color: var(--color-assets-secondary-shade);
+    border-color: var(--color-assets-secondary-shade);
+    color: $light;
+  }
+
+  /* Create an active/current tablink class */
+  .btn-tab.active {
+    background-color: var(--color-assets-secondary-shade);
+    border-color: var(--color-assets-secondary-shade);
+    color: $light;
+
+    &:before {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-top: 14px solid var(--color-assets-secondary-shade);
+      border-left: 17px solid transparent;
+      border-right: 17px solid transparent;
+      content: '.';
+      text-indent: -9999px;
+      overflow: hidden;
+      visibility: visible;
+    }
+  }
+}
+
+/* Style the tab content */
+.tabcontent {
+  padding-top: $p16;
+}
+
+.date-time-tab {
+
+  header {
+
+    h4,
+    p {
+      line-height: 24px;
+      color: $color-dark;
+    }
+
+    icon {
+      ::ng-deep i {
+        vertical-align: middle;
+      }
+    }
+
+    label {
+      font-size: 12px;
+      line-height: 24px;
+    }
+
+    input {
+      vertical-align: middle;
+    }
+
+    .header-right {
+      width: 35%;
+      min-width: 237px;
+    }
+  }
+
+  .date-picker-holder {
+    width: 62%;
+  }
+
+  .time-picker-holder {
+    width: 35%;
+    min-width: 237px;
+
+    ul {
+      list-style-type: none;
+
+      li {
+        margin-bottom: $m12;
+
+        .radio-container {
+          padding-left: 0;
+          display: block;
+
+          .checkmark {
+            position: relative;
+            width: 100%;
+            height: auto;
+            border: 1px solid $color-gray-30;
+            border-radius: $border-radius;
+            background-color: $light;
+            line-height: 44px;
+            font-size: 12px;
+            color: $color-gray-90;
+            display: block;
+            padding: 0 $p24 0 43px;
+            transition: $transition;
+
+            &:before {
+              position: absolute;
+              top: 50%;
+              left: 14px;
+              transform: translateY(-50%);
+              content: 'check_box_outline_blank';
+              font-family: 'Material Icons';
+              font-size: 18px;
+              overflow: hidden;
+              display: block;
+              visibility: visible;
+              color: $color-gray-30;
+            }
+
+            &:after {
+              display: none;
+            }
+          }
+
+          input {
+            &:checked {
+
+              &~.checkmark {
+                background-color: $color-secondary;
+                color: $light;
+
+                &:before {
+                  content: 'check_box';
+                }
+              }
+            }
+          }
+        }
+
+        &.disabled {
+          pointer-events: none;
+
+          .radio-container {
+            .checkmark {
+              &:before {
+                content: 'event_busy';
+                color: $color-red-80;
+              }
+
+              color: $color-gray-70;
+            }
+          }
+        }
+      }
+    }
+
+    .scroller {
+      max-height: 310px;
+      overflow: auto;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+  }
+
+  .selected-date-time {
+    p {
+      width: 20%;
+      color: $color-secondary;
+      line-height: 28px;
+    }
+
+    ul {
+      list-style-type: none;
+      width: 75%;
+
+      li {
+        display: inline-block;
+        background-color: $color-gray-10;
+        border-radius: $border-radius;
+        line-height: 28px;
+        padding: 0 $p8; 
+        margin-right: $m8;
+        margin-bottom: $m8;
+        font-size: 12px;
+        color: $color-gray-90;
+
+        icon {
+          cursor: pointer;
+
+          ::ng-deep i {
+            vertical-align: middle;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+<app-svms-modal class="common-checkbox-modal" title="{{ 'select_vendor' | i18next }}" [visibility]="true" (onClose)="onCloseModal()">
+  <app-svms-modal-body>
+    <div class="c-search-panel-wrapper mb-16 position-relative">
+      <div class="c-search-panel position-absolute">
+          <div class="position-relative" placement="top">
+              <i class="material-icons">search</i>
+          <input type="search" #vendor_search [(ngModel)]="searchText" (input)="search()" class="custom-form-control" placeholder="{{'search...' | i18next}}" />
+          </div>
+      </div>
+  </div>
+  <div class="px-16">
+    <div class="content-item" *ngFor="let ven of vendors let i = index">
+      <div class="checkbox-block">
+        <label class="c-input-checkbox mb-0">
+          <input type="checkbox" [(ngModel)]="ven.checked" (ngModelChange)="selectVendor($event,ven)">
+          <span class="cb-ui"></span>
+          <span class="cb-label">{{ven?.vendor?.name}}</span>
+        </label>
+      </div>
+    </div>
+  </div>
+  </app-svms-modal-body>
+  <app-svms-modal-footer>
+    <div class="d-flex justify-content-start" *ngIf="getSelectedVendorLength() > 0">
+      <button class="btn btn-primary" (click)="removeSelection()">{{ 'unselect_all' | i18next }}</button>
+    </div>
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-primary" (click)="selectVendors()">{{ 'add' | i18next }}</button>
+    </div>
+  </app-svms-modal-footer>
+</app-svms-modal>

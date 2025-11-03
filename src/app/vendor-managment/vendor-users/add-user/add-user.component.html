@@ -1,0 +1,41 @@
+<svms-sidebar [title]="formTitle" icon="person_add" [clickOutside]="clickOutside" [dataVisibility]="createManageUser" (onClose)="sidebarClose()">
+    <svms-sidebar-body>
+      <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)">
+        <vms-tab label="{{ 'basic_info' | i18next }}">
+          <app-vendor-basic-info [simplifyUser]="false" [editData]="basicFormEditData" [viewData]="viewData"
+            [isViewClicked]="isViewClicked1"></app-vendor-basic-info>
+        </vms-tab>
+  
+        <vms-tab label="{{ 'address' | i18next }}">
+          <app-address-contact-details [showSecondaryAddress]="true" [showSecondaryContact]="false"
+            [editAddress]="editAddressInfo" [isViewClicked]="isViewClicked1" [isCreate]="false" [hideContact]="true">
+          </app-address-contact-details>
+        </vms-tab>
+  
+      </vms-tab-group>
+    </svms-sidebar-body>
+  
+    <svms-sidebar-footer>
+  
+      <!-- <button class="btn btn-outline float-left" *ngIf='userBasic && !isViewClicked1'
+        (click)="fromBuilderOpen= 'visible';"> Add Custom
+        Fields
+      </button> -->
+      <!-- <app-form-builder [dataVisibility]="fromBuilderOpen" (onClose)="fromBuilderOpen= 'hidden';">
+      </app-form-builder> -->
+      <button type="submit" class="btn btn-primary float-right" (click)="onContinue()"
+        *ngIf="tabIndex === 0 && !isViewClicked1" [disabled]="basicFormstatus=='INVALID'">
+        {{ 'continue' | i18next }} <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+      </button>
+      <!-- <button type="submit" class="btn btn-primary float-right" (click)="onContinue()"
+        [disabled]="basicFormstatus=='INVALID' || addressFormStatus == 'INVALID'"
+        *ngIf="tabIndex === 1 && !isViewClicked1">
+        Continue <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+      </button> -->
+      <button type="submit" class="btn btn-primary float-right" (click)="onContinue()"
+        *ngIf="tabIndex === 1 && !isViewClicked1"
+        [disabled]="basicFormstatus=='INVALID' || addressFormStatus == 'INVALID' ">
+        <icon size="20px" name="check_circle" type="material" class="icon--on-left" cuClass="icon-cu"></icon> {{ 'save' | i18next }}
+      </button>
+    </svms-sidebar-footer>
+  </svms-sidebar>

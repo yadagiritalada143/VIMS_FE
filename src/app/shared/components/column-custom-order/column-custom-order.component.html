@@ -1,0 +1,40 @@
+<app-svms-modal size="medium" title="{{'reorder_values' | i18next}}" [visibility]="columnOrderModal" (onClose)="sidebarClose()">
+  <app-svms-modal-body>
+    <div class="c-form-group"  *ngIf="moduleList?.length">
+      <label>{{ 'select_module' | i18next }} <span class="require">*</span></label>
+      <ng-select
+          id="module_type"
+          name="module_type"
+          #module_type="ngModel"
+          (change)="getCustomFieldListByModules(moduleCode)"
+          [(ngModel)]="moduleCode"
+          placeholder="{{'select_module' | i18next}}"
+        >
+        <ng-option *ngFor="let module of moduleList" [value]="module.value">{{module.name}}</ng-option>
+        </ng-select>
+    </div>
+
+      <div *ngIf="dataSource?.length > 0" class="d-flex flex-column reordering-column" dndDropzone
+        dndEffectAllowed="copyMove" (dndDrop)="onDrop($event)">
+        <div dndPlaceholderRef class="dndPlaceholder"></div>
+        <div class="d-flex align-items-center reordering-item p-16 text-dark"
+          *ngFor="let data of dataSource, let i = index" [attr.data-index]="i" [dndDraggable]="data"
+          (dndStart)="onDragStart(i)" [class.dnone]="(i===0) ||
+      (i==dataSource?.length - 1)">
+          <span class="drag cursor-pointer  d-flex align-items-center w-100">
+            <i [class]="'material-icons d-flex mr-8'">drag_indicator</i>
+            <input *ngIf="!hideInputBox" class="sequence-box c-form-control small" type="number" id="seq" name="seq" #seq="ngModel" placeholder="{{'enter_text' | i18next}}" [(ngModel)]="data.selectedSeq">
+            {{data.name | i18next}}
+          </span>
+        </div>
+      </div>
+    <div class="no-data align-justify-center mt-24 pt-24" *ngIf="dataSource?.length == 0">
+      {{ 'no' | i18next}} {{tableTitle}} {{'available' | i18next }}
+    </div>
+  </app-svms-modal-body>
+  <app-svms-modal-footer>
+    <div class="text-right">
+      <button class="c-btn c-btn-primary-medium" (click)="reOrderDataSource()">{{'apply_changes'|i18next}}</button>
+    </div>
+  </app-svms-modal-footer>
+</app-svms-modal>

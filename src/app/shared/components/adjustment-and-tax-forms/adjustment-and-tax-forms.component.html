@@ -1,0 +1,70 @@
+<form [formGroup]="taxAdjustmentForm">
+
+  <!--*ngIf="programDetails?.config?.is_custom_tax_on_assignment"-->
+  <ng-container *ngIf="viewTax && isShowTax && (manageTax || taxArray?.length>0)">
+    <div>
+        <h4 class="pb-16 font-weight-medium">{{'tax(s)'|i18next}}</h4>
+      <ng-container formArrayName="taxes">
+        <div *ngFor="let tax of taxArray?.controls; let i = index;">
+          <ng-container [formGroupName]="i">
+            <div class="form-group-row mb-12">
+              <div class="form-group">
+                <label for="tax_type_{{ i }}">{{ 'tax_type' | i18next | titlecase }}</label>
+
+                <input [readonly]="!manageTax && viewTax" type="text" id="tax_type_{{ i }}" name="tax_type" class="form-control mb-4" placeholder="Enter Tax Type"  (input)="isCutomTaxExist($event?.target?.value, i);"
+                formControlName="name">
+
+                <!-- <ng-select [readonly]="!manageTax && viewTax" *ngIf="taxTypePicklist && taxTypePicklist.length > 0" id="tax_type_{{ i }}" name="tax_type" (add)="isCutomTaxExist(this.taxArray?.at(i).get('name').value,i);" (change)="updateOptions(i, 'CHANGE');" formControlName="name" placeholder="Enter Tax Type">
+                  <ng-option [value]="item.value" *ngFor="let item of taxOptionsArray">
+                    {{item?.label}}
+                  </ng-option>
+                </ng-select> -->
+
+                <span *ngIf="tax.controls['name']?.hasError('required') && (tax.controls['name']?.dirty || tax.controls['name']?.touched)" class="validation-msg">
+                  {{ 'please_enter_valid_tax_type' | i18next }}
+                </span>
+                <span *ngIf="tax.controls['name']?.hasError('duplicate')" class="validation-msg">
+                  {{ 'tax_type_can_not_be_same' | i18next }}
+                </span>
+              </div>
+              <div class="form-group">
+                <label for="tax_percentage_{{ i }}">{{ 'tax_percentage' | i18next }} (%)</label>
+                <div class="input-with-fixed-value right-aligned position-relative mb-4">
+                  <span> % </span>
+                  <input type="text" id="tax_percentage_{{ i }}" name="tax_percentage" inputAccuracy="tax_percentage" class="form-control"  placeholder="0"
+                  formControlName="value" (input)="checkTaxAmountValue($event?.target?.value, i)" [ngClass]="{ error: tax?.controls?.value?.value > 100 }" [readOnly]="!manageTax && viewTax"
+                  >
+                </div>
+                <span *ngIf="tax.controls['value']?.invalid && (tax.controls['value']?.dirty || tax.controls['value']?.touched)" class="validation-msg">
+                  {{'please_enter_valid_tax_value' | i18next}}
+                </span>
+              </div>
+              <icon *ngIf="manageTax && viewTax" class="remove-type-icon" name="remove_circle" size="24px" color="#FF6565" (click)="removeTaxTypeField(tax.controls['name']?.value,i)"></icon>
+            </div>
+          </ng-container>
+        </div>
+      </ng-container>
+      <button *ngIf="manageTax && viewTax" class="btn add-new" (click)="addNewTaxType()" [disabled]="isTaxButtonDisabled()">
+        <icon name="add" size="14px" class="icon--on-left"></icon>  {{ 'add_new_tax_type' | i18next }}
+      </button>
+    </div>
+  </ng-container>
+
+<ng-container *ngIf="adjustmentAllowed && viewAdjustment && !acceptOffer">
+      <h4 class="pb-16 font-weight-medium">{{'Adjustment(s)'|i18next}}</h4>
+        <div class="form-group-row">
+          <div class="form-group">
+            <label for="adjustment_type">{{ 'Adjustment type' | i18next | titlecase }}</label>
+            <input type="text" id="adjustment_type" name="adjustment_type" class="form-control" disabled="true" formControlName="adjustmentType" placeholder="Enter Tax Type">
+          </div>
+          <div class="form-group">
+            <label for="adjustment_amount">{{ 'Adjustment Amount' | i18next }}</label>
+            <div class="input-with-fixed-value position-relative">
+              <span>{{'' | accuracy : '' : { currencyCode: currency, display: 'symbol' } }}</span>
+              <input type="text" id="adjustment_amount" name="adjustment_amount" inputAccuracy="adjustment" formControlName="adjustmentAmount" class="form-control" (keyup)="changeACAValue($event)" placeholder="0" [readOnly]="!manageAdjustment && viewAdjustment">
+            </div>
+          </div>
+      </div>
+
+</ng-container>
+</form>

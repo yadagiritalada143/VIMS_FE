@@ -1,0 +1,1363 @@
+<ng-container *ngIf="(!loading || !offerCreate) && !counterOffer && !offerEdit && !noData">
+  <app-logs [log]="logs"></app-logs>
+  <ng-container *ngIf="!noOffer && offerData">
+    <div class="job-view-content-header overflow-inherit position-relative no-border-bottom">
+      <app-status-message *ngIf="isAlertBoxShown" [data]="statusMessageData" [type]="'Job'"></app-status-message>
+      <h4>{{ 'offer_details' | i18next }}</h4>
+      <span
+        class="status-ui"
+        [ngClass]="{
+          'pending-approval': offerData?.status?.toLowerCase() == 'pending_approval',
+          'offer-accepted': offerData?.status == 'ACCEPTED',
+          rejected: offerData?.status == 'REJECTED',
+          released: offerData?.status == 'RELEASED',
+          countered: offerData?.status?.toLowerCase() == 'countered',
+          withdrawn:
+            offerData?.status == 'WITHDRAWN' ||
+            offerData?.status?.toLowerCase() == 'cancelled' ||
+            offerData?.status?.toLowerCase() == 'countered_cancelled' ||
+            offerData?.status?.toLowerCase() == 'countered_pending_approval',
+          'pending-review': offerData?.status?.toLowerCase() == 'pending_offer_review',
+          'countered-pending-review': offerData?.status?.toLowerCase() == 'countered_pending_review'
+        }"
+      >
+        {{ getStatusChange(offerData?.status) | titlecase | i18next }}
+      </span>
+      <span class="offer-id hide-on-desktop ml-8">
+        <icon name="label" color="#FFC409" class="mr-4" size="18px" type="material"></icon>
+        <span>{{ offerData?.unique_id }}</span>
+      </span>
+      <div class="buttons-wrapper-m d-flex-m mt-m-8 align-items-center justify-content-start flex-wrap-m">
+        <div class="d-flex align-items-center justify-content-between float-right mb-m-8">
+          <ng-container *ngIf="approvalStatus && !offerDetailsNewUi">
+            <div
+              [hidden]="
+                (userType?.toLowerCase() === 'vendor' && offerData?.status?.toLowerCase() === 'countered') ||
+                offerData?.status?.toLowerCase() === 'withdrawn'
+              "
+            >
+              <div
+                class="approval-nofification d-flex align-items-center mr-16 cursor-css"
+                *ngIf="(offerApprovalStatus | lowercase) == 'pending' || (offerData?.status | lowercase) == 'pending_approval'"
+                (click)="goToApproval()"
+              >
+                <div class="d-flex align-items-center">
+                  <span class="mr-8">
+                    <icon
+                      name="notifications_active"
+                      class="d-flex justify-content-center align-items-center"
+                      size="16px"
+                      theme="outlined"
+                      type="material"
+                    ></icon>
+                  </span>
+                  <p>
+                    <!-- <span *ngIf="approvalCount > 0">{{approvalCount}}</span> -->
+                    {{ 'pending_approval_request' | i18next }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+            <div *ngIf="offerDetailsNewUi && candidateDetails?.candidate?.status !== 'REJECTED' &&
+            jobCurrentStatus !== 'FILLED'" class="d-flex align-items-center">
+                <ng-template [ngIf]="((offerData?.status | lowercase) === jobsStatus.PENDING_OFFER_REVIEW || (offerData?.status | lowercase) === jobsStatus.COUNTERED_PENDING_REVIEW) && approvalChainId">
+                  <button class="btn btn-review mr-16"
+                    (click)="reviewClicked()">{{'review'|i18next}}</button>
+                </ng-template>
+                <ng-template [ngIf]="((offerData?.status | lowercase) === jobsStatus.PENDING_APPROVAL ||
+                  (offerData?.status | lowercase) === jobsStatus.COUNTERED_PENDING_APPROVAL) &&
+                  (approvalChainId || (hasApprovalOverridePermission && approvalInstance))">
+                  <div class="position-relative mr-16">
+                    <button class="btn btn-success hide-on-mobile" #jobBreadcumDropdownTrigger>{{'approve'|i18next}}
+                    <icon *ngIf="hasApprovalOverridePermission" size="20px" [name]="approvalOption? 'keyboard_arrow_up' : 'keyboard_arrow_down'" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+                  </button>
+                    <div class="breadcrumb-dropdown hide-on-mobile" *ngIf="approvalOption">
+                      <ul>
+                        <li>
+                          <a (click)="openApprovalPanel('approved', true, 'sequence')" >
+                            {{'current_level_approval'|i18next }}
+                            <span class="d-block">{{'select_to_approve_the_current_approval_level'|i18next }}</span>
+                          </a>
+                        </li>
+                        <li>
+                          <a (click)="openApprovalPanel('approved', true, 'job')" >
+                            {{'entire_approval_workflow'|i18next }}
+                            <span class="d-block">{{'select_to_approve_the_entire_approval_workflow'|i18next }}</span>
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </ng-template>
+                <ng-template [ngIf]="(((offerData?.status | lowercase) === jobsStatus.PENDING_APPROVAL ||
+                 (offerData?.status | lowercase) === jobsStatus.COUNTERED_PENDING_APPROVAL ||
+                 (offerData?.status | lowercase) === jobsStatus.PENDING_OFFER_REVIEW ||
+                 (offerData?.status | lowercase) === jobsStatus.COUNTERED_PENDING_REVIEW) &&
+                 (approvalChainId || ((hasApprovalOverridePermission && approvalInstance &&
+                 ((offerData?.status | lowercase) === jobsStatus.PENDING_APPROVAL || (offerData?.status | lowercase) === jobsStatus.COUNTERED_PENDING_APPROVAL))))) ">
+                  <button class="btn btn-reject mr-16 hide-on-mobile"
+                    (click)="openApprovalPanel('rejected',hasApprovalOverridePermission,'entire')">{{'reject'|i18next}}</button>
+                </ng-template>
+            </div>
+
+          <ng-template [ngIf]="offerData?.status !== 'PENDING_APPROVAL' && offerData?.status !== 'PENDING_MSP_REVIEW'">
+            <ng-container *accessControl>
+              <ng-container *authorize="'update_offer'">
+                <button
+                  [hidden]="offerData?.status == 'COUNTERED_PENDING_REVIEW' || offerData?.status == 'PENDING_OFFER_REVIEW' ||
+                  offerData?.status?.toUpperCase() == 'COUNTERED_PENDING_APPROVAL'"
+                  *ngIf="
+                    !(
+                      userType == offerData?.stages[0]?.created_by?.org_type ||
+                      offerData?.status == 'REJECTED' ||
+                      offerData?.status == 'ACCEPTED' ||
+                      offerData?.status !== 'OFFER_RELEASED'
+                    ) ||
+                    ((userType | uppercase) === 'SUPER_ORG' && offerData?.status !== 'REJECTED' && offerData?.status !== 'ACCEPTED')
+                  "
+                  class="btn btn-primary small mr-12"
+                  (click)="checkOverlap()"
+                >
+                  {{ 'accept_offer' | i18next }}
+                </button>
+              </ng-container>
+            </ng-container>
+            <div class="dd-button-wrap position-relative">
+              <button class="dd-button btn btn-outine small outline-btn" *ngIf="getActionButton" #optionButton>
+                <icon name="more_horiz" size="24px" class="d-flex align-items-center justify-content-center" type="material"> </icon>
+              </button>
+              <nav [hidden]="!showDropdownOffer" class="dropdown-box-wrapper no-transform" id="rowDropdownWorkflow" #rowDropDownBox>
+                <ul>
+                  <li class="no-action-message" *ngIf="noActionMessages">
+                    <a>
+                      {{ 'no_actions_available' | i18next }}
+                    </a>
+                  </li>
+                  <li
+                    *authorize="'counter_offer'"
+                    [hidden]="
+                      (userType !== 'SUPER_ORG' && userType?.toLowerCase() != 'vendor') ||
+                      offerData?.status == 'REJECTED' ||
+                      candidateDetails?.candidate?.status == 'WITHDRAWN' ||
+                      candidateDetails?.candidate?.status == 'REJECTED' ||
+                      offerData?.candidate_submission_status == 'WITHDRAWN' ||
+                      offerData?.status == 'COUNTERED' ||
+                      offerData?.status == 'ACCEPTED' ||
+                      (userType === 'VENDOR' && !currentProgram?.config.is_counter_offer) ||
+                      (offerApprovalStatus | lowercase) == 'pending' ||
+                      getStatusChange(offerData?.status) == 'countered pending review' ||
+                      getStatusChange(offerData?.status) == 'countered review cancelled' ||
+                      offerData?.status?.toUpperCase() == 'COUNTERED_PENDING_APPROVAL'
+                    "
+                  >
+                    <a (click)="clickToCounterOffer()">
+                      {{ 'counter_offer' | i18next | titlecase }}
+                    </a>
+                  </li>
+                  <ng-container *accessControl>
+                    <li
+                      *authorize="'update_offer'"
+                      [hidden]="
+                        (userType !== 'SUPER_ORG' && userType?.toLowerCase() != 'vendor') ||
+                        offerData?.status?.toUpperCase() == 'REJECTED' ||
+                        offerData?.status?.toUpperCase() == 'WITHDRAWN' ||
+                        candidateDetails?.candidate?.status == 'WITHDRAWN' ||
+                        offerData?.candidate_submission_status == 'WITHDRAWN' ||
+                        candidateDetails?.candidate?.status == 'REJECTED' ||
+                        offerData?.status?.toUpperCase() == 'ACCEPTED' ||
+                        (offerApprovalStatus | lowercase) == 'pending' ||
+                        getStatusChange(offerData?.status) == 'countered pending review' ||
+                        getStatusChange(offerData?.status) == 'countered review cancelled' ||
+                        offerData?.status?.toUpperCase() == 'COUNTERED_PENDING_APPROVAL'
+                      "
+                    >
+                      <a (click)="checkOverlap()">
+                        {{ 'accept_offer' | i18next }}
+                      </a>
+                    </li>
+                  </ng-container>
+
+                  <li
+                    *authorize="'update_offer'"
+                    [hidden]="
+                      (userType !== 'SUPER_ORG' && userType?.toLowerCase() != 'vendor') ||
+                      offerData?.status == 'REJECTED' ||
+                      offerData?.status?.toUpperCase() == 'WITHDRAWN' ||
+                      candidateDetails?.candidate?.status == 'WITHDRAWN' ||
+                      offerData?.candidate_submission_status == 'WITHDRAWN' ||
+                      candidateDetails?.candidate?.status == 'REJECTED' ||
+                      offerData?.status == 'ACCEPTED' ||
+                      (offerApprovalStatus | lowercase) == 'pending' ||
+                      getStatusChange(offerData?.status) == 'countered pending review' ||
+                      getStatusChange(offerData?.status) == 'countered review cancelled' ||
+                      offerData?.status?.toUpperCase() == 'COUNTERED_PENDING_APPROVAL'
+                    "
+                  >
+                    <a (click)="clickToRejectOffer()">
+                      {{ 'reject_offer' | i18next }}
+                    </a>
+                  </li>
+                  <ng-container *ngIf="candidateDetails?.candidate?.status != 'REJECTED'">
+                    <li *authorize="'reject_candidate'" class="red-color" [hidden]="hasAssignments">
+                      <a *ngIf="userType !== 'VENDOR'" (click)="clickToRejectCandidate()">
+                        {{ 'reject_candidate' | i18next }}
+                      </a>
+                    </li>
+                  </ng-container>
+                  <ng-container *authorize="'amend_offer'">
+                    <li
+                      [hidden]="offerData?.candidate_submission_status == 'REJECTED'"
+                      *ngIf="
+                        reviewAuthority(offerData) ||
+                        offerData?.status?.toLowerCase() === 'countered_cancelled' ||
+                        offerData?.status?.toLowerCase() === 'cancelled'
+                      "
+                    >
+                      <a (click)="clickToEditOffer()">
+                        {{ 'edit_offer' | i18next }}
+                      </a>
+                    </li>
+                  </ng-container>
+                  <ng-container *ngIf="reviewAuthority(offerData)">
+                    <li [hidden]="offerData?.candidate_submission_status == 'REJECTED'">
+                      <a (click)="clickToCancelOffer(offerData?.status)">
+                        {{ 'cancel' | i18next }}
+                      </a>
+                    </li>
+                  </ng-container>
+                </ul>
+              </nav>
+            </div>
+          </ng-template>
+        </div>
+
+        <ng-container *authorize="'amend_offer'">
+          <div
+            class="d-flex align-item-center float-right mb-m-8"
+            *ngIf="(offerData?.status !== 'PENDING_APPROVAL' && offerData?.status == 'REJECTED') || offerData?.status == 'WITHDRAWN'"
+          >
+            <button
+              class="btn btn-primary small mr-12"
+              (click)="clickToEditOffer()"
+              [hidden]="offerData?.candidate_submission_status == 'REJECTED'"
+            >
+              <ng-container
+                *ngIf="
+                  (offerData?.status !== 'PENDING_APPROVAL' &&
+                    offerData?.status == 'REJECTED' &&
+                    offerData?.status?.toLowerCase() !== 'pending_offer_review') ||
+                  (offerData?.status !== 'PENDING_APPROVAL' && offerData?.status == 'WITHDRAWN')
+                "
+              >
+                {{ 'edit_offer' | i18next }}
+              </ng-container>
+            </button>
+          </div>
+        </ng-container>
+        <ng-container>
+          <div class="d-flex align-item-center float-right" *ngIf="reviewAuthority(offerData)">
+            <button
+              class="btn btn-success small mr-12 mb-m-8"
+              (click)="clickToApproveOfferReview()"
+              [hidden]="offerData?.candidate_submission_status == 'REJECTED'"
+              [disabled]="isReviewBtnDisable"
+            >
+              {{ 'review' | i18next }}
+            </button>
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="sub-head-info hide-on-mobile">
+        <label>
+          <icon name="label" color="#FFC409" size="18px" type="material"></icon>
+          <span>{{ offerData?.unique_id }}</span>
+        </label>
+        <label>
+          <icon name="update" color="#536476" size="18px" type="material"></icon>
+          <span
+            >{{ 'created_on' | i18next }} : {{ offerData?.stages[0]?.created_on | localDateFormat }}
+            {{ offerData?.stages[0]?.created_on | localDateFormat : 'hh:mm:ss a z' }}<span class="text-capitalize"> </span>
+            <span
+              *ngIf="
+                !(
+                  isVendorNeutral &&
+                  userRole == 'vendor' &&
+                  (offerData?.status.toLowerCase() == 'released' ||
+                    offerData?.status.toLowerCase() == 'countered' ||
+                    offerData?.status.toLowerCase() == 'withdrawn')
+                )
+              "
+            >
+              by {{ offerData?.created_by?.full_name }}</span
+            >
+          </span>
+        </label>
+      </div>
+      <div class="clearfix"></div>
+    </div>
+    <!-- for offer approval start ...... -->
+    <div *ngIf="pendingApprovalRequest">
+      <app-candidate-job-offer-approval
+        (hideApprovalRequest)="getHideEvent($event)"
+        [candidateId]="currentCandidate"
+        [offerId]="currentOfferId"
+        [currentJobid]="currentJobid"
+        [offerData]="offerData"
+      >
+      </app-candidate-job-offer-approval>
+    </div>
+
+    <!-- for offer approval end ...... -->
+    <div *ngIf="!pendingApprovalRequest">
+      <div class="d-flex align-item-center column-direction">
+        <ng-container *ngIf="noOffer && !offerData">
+          <button class="btn btn-primary color-green small mr-8">
+            <icon name="dashboard_customize" size="18px" type="material" class="icon--on-left" theme="outlined"></icon>
+            {{ 'create_offer' | i18next }}
+          </button>
+        </ng-container>
+      </div>
+      <div class="detailed-page-section">
+        <!-- new offer design start  -->
+        <div class="offers-tab-content" *ngIf="offerDetailsNewUi">
+          <div class="nav-wrapper">
+            <nav>
+              <ul>
+                <li>
+                  <a [ngClass]="{ active: currentTab == 'offer_details' }" (click)="tabClick('offer_details')">
+                    <icon name="info" size="18px" type="material" theme="outlined" class="mr-4"></icon>
+                    {{ 'offer_details' | i18next }}
+                  </a>
+                </li>
+                <li>
+                  <a [ngClass]="{ active: currentTab == 'workflow' }" (click)="tabClick('workflow')" *ngIf="userType.toUpperCase()!=='VENDOR'">
+                    <icon name="check_circle" size="18px" type="material" theme="outlined" class="mr-4"></icon>
+                    {{ 'workflow' | i18next }}
+                  </a>
+                </li>
+                <li>
+                  <a [ngClass]="{ active: currentTab == 'history' }" (click)="tabClick('history')" *ngIf="userType.toUpperCase()!=='VENDOR'">
+                    <icon name="history" size="18px" type="material" theme="outlined" class="mr-4"></icon>
+                    {{ 'history' | i18next }}
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+        <div class="content-details">
+          <div *ngIf="currentTab == 'offer_details'">
+            <h4
+            class="font-weight-medium mt-24 hide-on-desktop section-title mt-m-0 mb-m-0"
+            [ngClass]="{ active: detailedValue === 'basicinfo' }"
+            (click)="detailCollapse('basicinfo')"
+          >
+            <icon
+              class="mr-8 hide-on-desktop"
+              theme="outlined"
+              size="15px"
+              [name]="detailedValue === 'basicinfo' ? 'remove' : 'add'"
+              type="material"
+              cuClass="icon-cu"
+            ></icon>
+            {{ 'Basic Information' | i18nextEager }}
+          </h4>
+          <div class="px-24 pt-8 p-32" [ngClass]="detailedValue === 'basicinfo' ? 'active' : 'inactive'">
+            <div class="d-flex justify-content-between interview-info mb-8 column-direction">
+              <div class="d-flex align-items-center grid-data-wrap">
+                <icon size="18px" name="today" theme="outlined" color="#495057" type="material" cuClass="d-flex"> </icon>
+                <div class="d-flex-m grid-data d-flex-1-m">
+                  <span class="small mb-m-0 font-m">{{ 'start_date' | i18next }}</span>
+                  <label
+                    class="font-m"
+                    [ngClass]="{ 'green-color': isCounteredOffer && offerData?.stages[0]?.start_date !== offerData?.stages[1]?.start_date }"
+                    >{{ offerData?.stages[0]?.start_date | localDateFormat : '' : '' : '' : true }}</label
+                  >
+                  <label class="strike-through" *ngIf="isCounteredOffer && offerData?.stages[0]?.start_date !== offerData?.stages[1]?.start_date">{{
+                    offerData?.stages[1]?.start_date | localDateFormat : '' : '' : '' : true
+                  }}</label>
+                </div>
+              </div>
+              <div class="d-flex align-items-center grid-data-wrap">
+                <icon size="18px" name="event" theme="outlined" color="#495057" type="material" cuClass="d-flex"> </icon>
+                <div class="grid-data d-flex-m d-flex-1-m">
+                  <span class="small mb-m-0 font-m">{{ 'end_date' | i18next }}</span>
+                  <label
+                    class="font-m"
+                    [ngClass]="{ 'green-color': isCounteredOffer && offerData?.stages[0]?.end_date !== offerData?.stages[1]?.end_date }"
+                    >{{ offerData?.stages[0]?.end_date | localDateFormat : '' : '' : '' : true }}</label
+                  >
+                  <label class="strike-through" *ngIf="isCounteredOffer && offerData?.stages[0]?.end_date !== offerData?.stages[1]?.end_date">{{
+                    offerData?.stages[1]?.end_date | localDateFormat : '' : '' : '' : true
+                  }}</label>
+                </div>
+              </div>
+              <div class="d-flex align-items-center grid-data-wrap">
+                <div class="grid-data d-flex-m d-flex-1-m">
+                  <span class="small mb-m-0 font-m">{{ 'job_manager' | i18next }}</span>
+
+                  <label class="d-flex align-items-center">
+                    <ng-container *ngIf="isVendorNeutral && userType.toLowerCase() === 'vendor'; else noVendorNeutral">
+                      {{ '--' }}
+                    </ng-container>
+                    <ng-template #noVendorNeutral>
+                      <small class="initials initials__purple">{{ offerJobManager?.initials }}</small>
+                      {{ offerJobManager?.full_name }}
+                    </ng-template>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between interview-info mb-8 column-direction">
+              <div class="d-flex align-items-center grid-data-wrap">
+                <icon size="18px" name="location_on" theme="outlined" color="#495057" type="material" cuClass="d-flex"> </icon>
+                <div class="grid-data d-flex-m d-flex-1-m">
+                  <span class="small mb-m-0 font-m">{{ 'work_location' | i18next }}</span>
+                  <label class="text-break pr-16 font-m">{{
+                    offerData?.stages[0]?.offer_work_location?.work_location
+                      ? offerData?.stages[0]?.offer_work_location?.work_location?.name +
+                        '-' +
+                        offerData?.stages[0]?.offer_work_location?.work_location?.code
+                      : '--'
+                  }}</label>
+                </div>
+              </div>
+
+              <div class="d-flex align-items-center grid-data-wrap">
+                <span
+                  *ngIf="
+                    !!offerData?.stages[0]?.timesheet_manager?.full_name &&
+                    offerData?.stages[0]?.timesheet_manager?.initials &&
+                    userRole != 'vendor' &&
+                    isVendorNeutral && (offerData?.status.toLowerCase() == 'released' || offerData?.status.toLowerCase() == 'countered')
+                  "
+                  class="initials initials__purple"
+                  >{{ offerData?.stages[0]?.timesheet_manager?.initials | uppercase }}</span
+                >
+                <icon size="18px" name="people_outline" theme="outlined" color="#495057" type="material" cuClass="d-flex"> </icon>
+                <div class="grid-data d-flex-m d-flex-1-m">
+                  <span class="small mb-m-0 font-m d-flex-1-m">{{ 'timesheet_manager' | i18next }}</span>
+                  <div
+                    *ngIf="!(isVendorNeutral && userType === 'VENDOR')"
+                    class="int-list d-flex-m position-relative align-items-center d-flex-1-m"
+                  >
+                    <ul>
+                      <li *ngFor="let i of displayFirstTimesheetManager">
+                        <span class="initials initials__purple">{{ i?.initials }}</span>
+                      </li>
+                      <li *ngIf="remainingTimesheetManagers?.length > 0" (click)="showPopoverInt()">
+                        <span class="initials count">{{ '+' }}{{ remainingTimesheetManagers.length }}</span>
+                      </li>
+                    </ul>
+                    <label class="float-none"
+                      >{{ displayFirstTimesheetManagerName || '--' }}
+                      <a (click)="showPopoverInt()" *ngIf="remainingTimesheetManagers?.length > 0"> +{{ remainingTimesheetManagers.length }} </a>
+                    </label>
+                    <div class="clearfix"></div>
+                    <div class="pop-over" [ngClass]="{ active: showTimesheetManagers }" (mouseleave)="hidePopOverInt()">
+                      <ul>
+                        <li *ngFor="let i of remainingTimesheetManagers" class="mt-8">
+                          <div class="d-flex align-items-center">
+                            <div class="mr-8">
+                              <span class="initials initials__purple">{{ i?.initials }}</span>
+                            </div>
+                            <div>{{ i.full_name }}</div>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <label *ngIf="!!(isVendorNeutral && userRole == 'vendor')">{{ '--' }}</label>
+                </div>
+              </div>
+              <div class="d-flex align-items-center grid-data-wrap">
+                <icon size="18px" name="watch_later" theme="outlined" color="#495057" type="material" cuClass="d-flex"> </icon>
+                <div class="grid-data d-flex-m d-flex-1-m">
+                  <span class="small mb-m-0 font-m">{{ 'timesheet_type' | i18next }}</span>
+                  <label class="font-m">{{ offerData?.stages[0]?.timesheet_type?.label || '--' }}</label>
+                  <!-- <label class="strike-through"
+                        *ngIf="offerData?.stages.length > 1 && prevTimeSheetType != timesheetType">{{ prevTimeSheetType
+                        }}</label> -->
+                </div>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between interview-info mb-8 column-direction">
+              <!-- <div class="d-flex align-items-center grid-data-wrap">
+                    <icon size="18px" name="weekend" theme="outlined" color="#495057" type="material" cuClass="d-flex"></icon>
+                    <div class="grid-data">
+                      <span class="small">{{ 'holiday_calendar' | i18next }}</span>
+                      <label>{{ holidayCalender }}</label>
+                      <label class="strike-through"
+                        *ngIf="offerData?.stages.length > 1 && prevholidayCalender !== holidayCalender">{{ prevholidayCalender
+                        }}</label>
+                    </div>
+                  </div> -->
+
+              <div class="d-flex align-items-center grid-data-wrap">
+                <icon name="email" size="14px" type="material" theme="outlined" color="#495057" cuClass="d-flex"> </icon>
+                <div class="grid-data d-flex-m d-flex-1-m">
+                  <span class="small mb-m-0 font-m">{{ 'worker_email' | i18next }}</span>
+                  <label class="text-lowercase text-break pr-16 font-m">{{ candidateDetails?.candidate?.email || '-' }}</label>
+                </div>
+              </div>
+              <div class="d-flex align-items-center grid-data-wrap">
+                <icon name="assignment_late" size="14px" type="material" theme="outlined" color="#495057" cuClass="d-flex"> </icon>
+                <div class="grid-data d-flex-m d-flex-1-m">
+                  <span class="small mb-m-0 font-m">{{ 'assignment_active_upon' | i18next }}</span>
+                  <label *ngIf="offerData?.assignment_workflow === 'OFFER_ACCEPTANCE'">{{ 'offer_acceptance' | i18next }}</label>
+                  <label *ngIf="offerData?.assignment_workflow === 'ONBOARDING_COMPLETION'"> {{ 'onboarding_completion' | i18next }}</label>
+                  <label *ngIf="offerData?.assignment_workflow === 'CREDENTIAL_VERIFICATION_COMPLETION'">
+                    {{ 'credential_verification_completion' | i18next }}</label
+                  >
+                  <label *ngIf="offerData?.assignment_workflow === 'ONBOARDING_CREDENTIAL_VERIFICATION_COMPLETION'">
+                    {{ 'onboarding_&_credential_verification_completion' | i18next }}</label
+                  >
+                </div>
+              </div>
+              <div class="d-flex align-items-center grid-data-wrap" *ngIf="programRateModel !== 'BILL_RATE'">
+                <icon name="badge" size="14px" type="material" theme="outlined" color="#495057" cuClass="d-flex"> </icon>
+                <ng-container *ngIf="programRateModel !== 'BILL_RATE'">
+                  <div class="grid-data d-flex-m d-flex-1-m">
+                    <span class="small mb-m-0 font-m">{{ 'candidate_source_type' | i18next }}</span>
+                    <label class="font-m"> {{ offerData?.stages[0]?.candidate_sourcing_type || '--' }}</label>
+                    <label
+                      class="strike-through"
+                      *ngIf="
+                        offerData?.stages?.length > 1 &&
+                        offerData?.stages[0]?.candidate_sourcing_type !== offerData?.stages[1]?.candidate_sourcing_type
+                      "
+                      >{{ offerData?.stages[1]?.candidate_sourcing_type || '--' }}</label
+                    >
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+            <div class="d-flex align-items-center grid-data-wrap column-direction">
+              <div class="d-flex align-items-center grid-data-wrap pr-16 d-flex-1-m">
+                <icon size="18px" name="event" theme="outlined" color="#495057" type="material" cuClass="d-flex"> </icon>
+                <div class="grid-data d-flex-m d-flex-1-m">
+                  <span class="small d-flex-1-m mb-m-0 font-m">{{ 'worker_original/tenure_start_date' | i18next }}</span>
+                  <label class="font-m d-flex-1-m">{{ offerData?.stages[0]?.tenure_date | localDateFormat : '' : '' : '' : true }}</label>
+                  <!-- <label class="strike-through"
+                          *ngIf="isCounteredOffer && offerData?.stages[0]?.tenure_date !== offerData?.stages[1]?.tenure_date">
+                          {{ offerData?.stages[1]?.tenure_date | localDateFormat}}</label> -->
+                </div>
+              </div>
+              <div class="d-flex align-items-center grid-data-wrap width-m-100" [ngClass]="{ 'hide-on-mobile': !job?.is_expense_allowed_display }">
+                <ng-container *ngIf="job?.is_expense_allowed_display">
+                  <icon class="mr-8" size="18px" name="payments" theme="outlined" color="#495057" type="material" cuClass="d-flex"></icon>
+                  <div class="grid-data d-flex-m d-flex-1-m">
+                    <span class="small mb-m-0 font-m">{{ 'expense_allowed' | i18next }}</span>
+                    <label class="font-m">{{ offerData?.stages[0]?.is_expense_allowed ? 'Yes' : 'No' || '--' }}</label>
+                  </div>
+                </ng-container>
+              </div>
+              <div
+                class="d-flex align-items-center grid-data-wrap width-m-100"
+                *ngIf="job?.is_expense_allowed_display && offerData?.stages[0]?.is_expense_allowed"
+              >
+                <span
+                  *ngIf="
+                    !!offerData?.stages[0]?.expense_managers?.full_name &&
+                    offerData?.stages[0]?.expense_managers?.initials &&
+                    userRole != 'vendor' &&
+                    isVendorNeutral && (offerData?.status.toLowerCase() == 'released' || offerData?.status.toLowerCase() == 'countered')
+                  "
+                  class="initials initials__purple"
+                  >{{ offerData?.stages[0]?.expense_managers?.initials | uppercase }}</span
+                >
+                <icon class="mr-8" size="18px" name="payments" theme="outlined" color="#495057" type="material" cuClass="d-flex"></icon>
+                <div class="grid-data d-flex-m d-flex-1-m">
+                  <span class="small d-flex-1-m">{{ 'expense_manager' | i18next }}</span>
+                  <div *ngIf="!(isVendorNeutral && userType === 'VENDOR')" class="int-list d-flex-m position-relative align-items-center d-flex-1-m">
+                    <ul>
+                      <li *ngFor="let i of displayFirstExpenseManager">
+                        <span class="initials initials__purple">{{ i?.initials }}</span>
+                      </li>
+                      <li *ngIf="remainingExpenseManagers?.length > 0" (click)="showExpenceManagers()">
+                        <span class="initials count">{{ '+' }}{{ remainingExpenseManagers.length }}</span>
+                      </li>
+                    </ul>
+                    <label class="float-none"
+                      >{{ displayFirstExpenseManagerName || '--' }}
+                      <a (click)="showExpenceManagers()" *ngIf="remainingExpenseManagers?.length > 0"> +{{ remainingExpenseManagers.length }} </a>
+                    </label>
+                    <div class="clearfix"></div>
+                    <div class="pop-over" [ngClass]="{ active: showExpenseManagers }" (mouseleave)="hideExpenceManagers()">
+                      <ul>
+                        <li *ngFor="let i of remainingExpenseManagers" class="mt-8">
+                          <div class="d-flex align-items-center">
+                            <div class="mr-8">
+                              <span class="initials initials__purple">{{ i?.initials }}</span>
+                            </div>
+                            <div>{{ i.full_name }}</div>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <label *ngIf="!!(isVendorNeutral && userRole == 'vendor')">{{ '--' }}</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Remote worker and OT Exempt desktop ui start here -->
+          <div class="d-flex justify-content-between interview-info grid-data-wrap mb-8 px-24 hide-on-mobile">
+            <div class="d-flex align-items-center grid-data-wrap" *ngIf="showRemoteWorker">
+              <img src="../../../../../../../assets/images/remote-worker.svg" alt="" width="18" height="18" class="mr-24" />
+              <div class="grid-data">
+                <span class="small">{{ 'remote_worker' | i18next }}</span>
+                <label class="d-flex align-items-center" [ngClass]="offerData?.remote_worker ? 'enabled' : 'disabled'">{{
+                  offerData?.remote_worker ? 'Yes' : 'No'
+                }}</label>
+              </div>
+            </div>
+
+            <div class="d-flex align-items-center grid-data-wrap">
+              <icon class="mr-8" size="18px" name="hourglass_top" theme="outlined" color="#776DE0" type="material" cuClass="d-flex "></icon>
+              <div class="grid-data">
+                <span class="small">{{ 'ot_exempt' | i18next }}</span>
+                <label class="d-flex align-items-center" [ngClass]="offerData?.stages[0]?.ot_exempt ? 'enabled' : 'disabled'">{{
+                  offerData?.stages[0]?.ot_exempt ? 'Yes' : 'No'
+                }}</label>
+              </div>
+            </div>
+
+            <div class="d-flex align-items-center grid-data-wrap" *authorize="'manage_onboarding_offer'">
+              <icon class="mr-8" size="18px" name="check_circle" theme="outlined" color="#776DE0" type="material" cuClass="d-flex "></icon>
+              <div class="grid-data">
+                <span class="small">{{ 'Onboarding Checklist' | i18next }} </span>
+                <label class="d-flex align-items-center">
+                  {{ offerData?.onboarding_checklist?.name || '--' }}
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="hide-on-mobile">
+            <app-remote-worker-details-view
+              [remoteWorkerDetails]="offerData?.remote_worker_details"
+              *ngIf="showRemoteWorker && offerData?.remote_worker"
+            ></app-remote-worker-details-view>
+          </div>
+          <!-- Remote worker and OT Exempt desktop ui end here -->
+
+          <!-- Remote worker mobile ui start here -->
+          <h4
+            class="font-weight-medium mt-24 hide-on-desktop section-title mt-m-0 mb-m-0 hide-on-desktop"
+            [ngClass]="{ active: detailedValue === 'remoteWorkerDetails' }"
+            (click)="detailCollapse('remoteWorkerDetails')"
+          >
+            <icon
+              class="mr-8 hide-on-desktop"
+              theme="outlined"
+              size="15px"
+              [name]="detailedValue === 'remoteWorkerDetails' ? 'remove' : 'add'"
+              type="material"
+              cuClass="icon-cu"
+            >
+            </icon
+            >{{ 'Remote Workers Details' | i18nextEager }}
+          </h4>
+
+          <div class="px-24 pt-8 p-32 hide-on-desktop" [ngClass]="detailedValue === 'remoteWorkerDetails' ? 'active' : 'inactive'">
+            <div class="d-flex align-items-center grid-data-wrap mt-m-0">
+              <img src="../../../../../../../assets/images/remote-worker.svg" alt="" width="18" height="18" class="mr-24" />
+              <div class="grid-data d-flex-m">
+                <span class="small mb-m-0">{{ 'remote_worker' | i18next }}</span>
+                <label class="d-flex align-items-center" [ngClass]="offerData?.remote_worker ? 'enabled' : 'disabled'">{{
+                  offerData?.remote_worker ? 'Yes' : 'No'
+                }}</label>
+              </div>
+            </div>
+
+            <app-remote-worker-details-view
+              [remoteWorkerDetails]="offerData?.remote_worker_details"
+              *ngIf="showRemoteWorker && offerData?.remote_worker"
+            ></app-remote-worker-details-view>
+          </div>
+          <!-- Remote worker mobile ui end here -->
+          <!-- OT Exempt mobile ui start here -->
+
+          <h4
+            class="font-weight-medium mt-24 hide-on-desktop section-title mt-m-0 mb-m-0 hide-on-desktop"
+            [ngClass]="{ active: detailedValue === 'otexempt' }"
+            (click)="detailCollapse('otexempt')"
+          >
+            <icon
+              class="mr-8 hide-on-desktop"
+              theme="outlined"
+              size="15px"
+              [name]="detailedValue === 'otexempt' ? 'remove' : 'add'"
+              type="material"
+              cuClass="icon-cu"
+            ></icon>
+            {{ 'ot_exempt' | i18next }}
+          </h4>
+          <div class="px-24 pt-8 p-32 hide-on-desktop" [ngClass]="detailedValue === 'otexempt' ? 'active' : 'inactive'">
+            <div class="d-flex align-items-center grid-data-wrap mt-m-0">
+              <icon class="mr-8" size="18px" name="hourglass_top" theme="outlined" color="#776DE0" type="material" cuClass="d-flex "></icon>
+              <div class="grid-data d-flex-m">
+                <span class="small">{{ 'ot_exempt' | i18next }}</span>
+                <label class="d-flex align-items-center" [ngClass]="offerData?.stages[0]?.ot_exempt ? 'enabled' : 'disabled'">{{
+                  offerData?.stages[0]?.ot_exempt ? 'Yes' : 'No'
+                }}</label>
+              </div>
+            </div>
+          </div>
+          <!-- OT Exempt mobile ui end here -->
+
+          <h4
+            class="font-weight-medium mt-24 hide-on-desktop section-title mt-m-0 mb-m-0"
+            [ngClass]="{ active: detailedValue === 'masterdata' }"
+            (click)="detailCollapse('masterdata')"
+          >
+            <icon
+              class="mr-8 hide-on-desktop"
+              theme="outlined"
+              size="15px"
+              [name]="detailedValue === 'masterdata' ? 'remove' : 'add'"
+              type="material"
+              cuClass="icon-cu"
+            ></icon>
+            {{ 'Master Data' | i18nextEager }}
+          </h4>
+          <div class="px-24 pt-8 p-32" [ngClass]="detailedValue === 'masterdata' ? 'active' : 'inactive'">
+            <div class="mt-32">
+              <h5 class="section-title position-relative mb-24 hide-on-mobile">
+                <icon class="mr-8 icon-success-bg" size="15px" name="layers" type="material" cuClass="icon-cu"> </icon>
+                {{ 'master_data' | i18next }}
+              </h5>
+              <div class="row">
+                <div class="col-md-4" *ngFor="let found of offerData?.foundational_data">
+                  <div class="value-group row-direction-m">
+                    <label class="value-head d-flex-1-m"
+                      >{{ found?.name }}
+                      <icon
+                        *ngIf="found?.configuration?.financial_master_data_type === 'true'"
+                        name="payments"
+                        type="material"
+                        theme="outlined"
+                        color="#4c7ff0"
+                        size="16px"
+                        cuClass="icon-cu"
+                        class="mx-8 position-absolute"
+                      ></icon>
+                    </label>
+                    <span class="value-content d-flex-1-m" *ngFor="let fData of found?.foundation_data; let i = index">
+                      <span *ngIf="found?.foundation_data.length > 1">{{ i + 1 }}. </span>
+                      <span *ngIf="!hideMasterDataTypeName">{{ fData?.name }}</span>
+                      <span *ngIf="fData?.code && !hideMasterDataTypeName"> - {{ fData?.code }}</span>
+                      <span *ngIf="fData?.code && hideMasterDataTypeName">{{ fData?.code }}</span>
+                    </span>
+                  </div>
+                </div>
+                <div *ngIf="!offerData?.foundational_data?.length" class="col-md-12 text-center">
+                  {{ 'no_data_available' | i18next }}
+                </div>
+              </div>
+
+              <!--Show foundation related custom fields-->
+              <div *ngIf="foundationCustomFieldsList && foundationCustomFieldsList.length > 0">
+                <div *ngFor="let foundationCustomField of foundationCustomFieldsList" class="panel panel-light p-16 pb-0 mb-12">
+                  <label I18n class="mb-12 font-weight-medium">{{ foundationCustomField.label }}</label>
+                  <div class="panel-wrapper">
+                    <div
+                      class="panel panel-light p-16 pb-0 mb-12"
+                      *ngFor="let foundData of foundationCustomField.foundationalData"
+                      [ngClass]="{ showonlyone: foundationCustomField.foundationalData?.length === 1 || foundData.customFields?.length > 2 }"
+                    >
+                      <label class="mb-12 font-weight-regular">{{ foundData?.label }} </label>
+                      <div class="row">
+                        <div
+                          class="col-4 value-group"
+                          *ngFor="let customField of foundData.customFields"
+                          [ngClass]="{
+                            'col-4': foundationCustomField.foundationalData?.length === 1 || foundData.customFields?.length > 2,
+                            'col-6': !(foundationCustomField.foundationalData?.length === 1 || foundData.customFields?.length > 2)
+                          }"
+                        >
+                          <label class="value-head">{{ customField?.label }} </label>
+                          <span class="value-content">
+                            <span>{{ customField?.value }}</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <h4
+            class="font-weight-medium mt-24 hide-on-desktop section-title mt-m-0 mb-m-0"
+            [ngClass]="{ active: detailedValue === 'customdata' }"
+            (click)="detailCollapse('customdata')"
+          >
+            <icon
+              class="mr-8 hide-on-desktop"
+              theme="outlined"
+              size="15px"
+              [name]="detailedValue === 'customdata' ? 'remove' : 'add'"
+              type="material"
+              cuClass="icon-cu"
+            ></icon>
+            {{ 'Custom Field' | i18nextEager }}
+          </h4>
+          <div class="px-24 pt-8 p-32" [ngClass]="detailedValue === 'customdata' ? 'active' : 'inactive'">
+            <div class="mt-32">
+              <h5 class="section-title position-relative mb-24 hide-on-mobile">
+                <icon class="mr-8 icon-info-bg" size="15px" name="extension" type="material" cuClass="icon-cu"></icon>
+                {{ 'custom_fields' | i18next }}
+              </h5>
+
+              <div class="row" *ngIf="offerData && offerData?.custom_fields">
+                <div
+                  class="col-md-4"
+                  *ngFor="let custom of offerData?.custom_fields"
+                  [hidden]="custom?.value === null || custom?.value === undefined || custom?.value === ''"
+                >
+                  <div class="value-group row-direction-m">
+                    <label class="value-head d-flex-1-m">{{ custom?.label|| getWorkedRehire(custom?.slug) }}</label>
+                    <div class="value-content d-flex-1-m mb-2">
+                      <ng-container
+                        *ngIf="
+                          custom?.type !== 'HYPERLINK' &&
+                          custom?.type !== 'FILE' &&
+                          custom?.type !== 'IMAGE' &&
+                          custom?.type !== 'PASSWORD' &&
+                          custom?.type !== 'DATETIME' &&
+                          custom?.type !== 'DATE'
+                        "
+                      >
+                        <span *ngIf="typeOf(custom?.value) === 'string'">
+                          {{ custom?.value }}
+                        </span>
+                        <span *ngIf="typeOf(custom?.value) === 'number'">
+                          <span *ngIf="custom?.currency">{{ '' | accuracy : '' : { currencyCode: custom?.currency, display: 'symbol' } }}</span>
+                          <span> {{ custom?.value }} </span>
+                        </span>
+                        <span *ngIf="typeOf(custom?.value) !== 'number' && typeOf(custom?.value) !== 'string'">
+                          <ng-container *ngIf="checkIfArray(custom?.value)">
+                            <span class="value-content">{{ custom?.value?.join(', ') }}</span>
+                          </ng-container>
+                        </span>
+                      </ng-container>
+                      <ng-container *ngIf="custom?.type === 'HYPERLINK'">
+                        <span class="value-content">
+                          <a class="text-primary" [href]="custom?.value" target="_blank">
+                            {{ custom?.value }}
+                          </a>
+                        </span>
+                      </ng-container>
+                      <ng-container *ngIf="custom?.type === 'PASSWORD'">
+                        <span class="value-content">
+                          {{ '*'.repeat(custom?.value?.length) }}
+                        </span>
+                      </ng-container>
+                      <ng-container *ngIf="custom?.type === 'FILE' || custom?.type === 'IMAGE'">
+                        <span class="download-file">
+                          <a *ngIf="custom?.value?.raw" class="d-flex" [href]="custom?.value?.raw" target="_blank">
+                            <icon size="20px" name="file_download" type="material" cuClass="d-flex"></icon>
+                            <span>{{ custom?.value?.name || '-' }}</span>
+                          </a>
+                          <a class="d-flex" *ngIf="custom?.value?.key" (click)="downloadS3Attachment(custom?.value)">
+                            <icon size="20px" name="file_download" type="material" cuClass="d-flex"></icon>
+                            <span>{{ custom?.value?.name }}</span>
+                          </a>
+                        </span>
+                      </ng-container>
+                      <ng-container *ngIf="custom?.type === 'DATETIME' || custom?.type == 'DATE'">
+                        <span *ngIf="custom?.type == 'DATE'">{{ custom?.value | localDateFormat : '' : '' : '' : true }}</span>
+                        <span *ngIf="custom?.type == 'DATETIME'"
+                          >{{ custom?.value?.split(' ')?.[0] | localDateFormat :
+                                    '': '':'' : true }}
+                          {{ custom?.value?.split(' ')?.[1] }}</span
+                        >
+                      </ng-container>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div *ngIf="!offerData?.custom_fields" class="col-md-12 text-center">
+                  {{ 'no_data_available' | i18next }}
+                </div>
+              </div>
+            </div>
+            <div *ngIf="offerData?.account_code_data?.account_code">
+              <div *authorize="'show_account_code'">
+                <h4 class="mt-32 pb-12 font-weight-medium">{{ 'account_code_' | i18next }}</h4>
+                <div class="row mb-12">
+                  <div class="col-md-6 font-weight-normal">
+                    <input
+                      type="text"
+                      class="form-control"
+                      [ngModel]="offerData?.account_code_data?.account_code"
+                      placeholder=""
+                      [readonly]="true"
+                      style="font-size: 14px; border: none; background-color: transparent"
+                    />
+                  </div>
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-light w-30" (click)="showAccountCodeDetails = 'visible'">
+                      <icon class="d-flex" size="18px" name="remove_red_eye" type="material" theme="outlined" cuClass="d-flex"> </icon>
+                    </button>
+                  </div>
+                </div>
+                <app-account-code-generate
+                  [module]="'job'"
+                  [accountCodeFields]="offerData?.account_code_data"
+                  (onClose)="onCloseSideBar($event)"
+                  [visiblity]="showAccountCodeDetails"
+                  [entityId]="offerData?.id"
+                  [readOnly]="true"
+                >
+                </app-account-code-generate>
+              </div>
+            </div>
+          </div>
+          <h4
+            class="font-weight-medium mt-24 hide-on-desktop section-title mt-m-0 mb-m-0"
+            [ngClass]="{ active: detailedValue === 'budgetsummary' }"
+            (click)="detailCollapse('budgetsummary')"
+          >
+            <icon
+              class="mr-8 hide-on-desktop"
+              theme="outlined"
+              size="15px"
+              [name]="detailedValue === 'budgetsummary' ? 'remove' : 'add'"
+              type="material"
+              cuClass="icon-cu"
+            >
+            </icon
+            >{{ 'budget_summary' | i18next }}
+          </h4>
+          <div class="px-24 pt-8 p-32" [ngClass]="detailedValue === 'budgetsummary' ? 'active' : 'inactive'">
+            <h4 class="pt-12 pb-12 font-weight-medium hide-on-mobile">{{ 'budget_summary' | i18next }}</h4>
+            <div class="budget-section d-flex column-direction">
+              <div class="budget-item mr-16 p-12">
+                <icon name="hourglass_empty" size="20" class="green mr-12"></icon>
+                <p>
+                  <span class="font-weight-bold-500">
+                    {{ formatted_working_days }}
+                  </span>
+                  <span class="text-left-m">{{ 'duration' | i18next }}</span>
+                </p>
+              </div>
+              <div class="budget-item mr-16 p-12">
+                <icon name="payments" size="20" class="yellow mr-12"></icon>
+                <p>
+                  <span class="font-weight-bold-500 d-flex">
+                    {{ totalBudget | accuracy : 'amount' : { currencyCode: jobCurrency } }} </span
+                  ><span>{{ 'total_estimated' | i18next }} {{ 'budget' | i18next }}</span>
+                </p>
+              </div>
+              <div class="budget-item mr-16 p-12" *ngIf="offerData?.stages[0]?.rate_markup_info">
+                <div class="detail-button" (click)="openCreateEstimateOpen()">
+                  <button type="button">{{ 'view_detailed_estimate' | i18next }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <h4
+            class="font-weight-medium mt-24 hide-on-desktop section-title mt-m-0 mb-m-0"
+            [ngClass]="{ active: detailedValue === 'offernotes' }"
+            (click)="detailCollapse('offernotes')"
+          >
+            <icon
+              class="mr-8 hide-on-desktop"
+              theme="outlined"
+              size="15px"
+              [name]="detailedValue === 'offernotes' ? 'remove' : 'add'"
+              type="material"
+              cuClass="icon-cu"
+            ></icon>
+            {{ 'Offer Notes' | i18next }}
+          </h4>
+          <div class="px-24 pt-8 p-32" [ngClass]="detailedValue === 'offernotes' ? 'active' : 'inactive'">
+            <ng-container *ngIf="offerData?.stages[0]?.notes">
+              <h4 class="font-weight-medium mt-24 hide-on-mobile">{{ 'offer_notes' | i18next }}</h4>
+              <div class="notes-wrap mini">
+                <div class="detail-instruction pt-12 col-12">
+                  <span
+                    [ngClass]="{ 'short-view': !toggleDescription && offerData?.stages[0]?.notes?.length > maxContentLength }"
+                    innerHTML=" {{ toggleDescription ? offerData?.stages[0]?.notes : offerData?.stages[0]?.notes?.substr(0, maxContentLength) }}"
+                  ></span>
+                  <a class="more-link" (click)="toggleDescription = !toggleDescription" *ngIf="offerData?.stages[0]?.notes?.length > maxContentLength">{{
+                    toggleDescription ? 'View Less' : 'Read more'
+                  }}</a>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+          <h4
+            class="font-weight-medium mt-24 hide-on-desktop section-title mt-m-0 mb-m-0"
+            *ngIf="programRateModel"
+            [ngClass]="{ active: detailedValue === 'rateinformation' }"
+            (click)="detailCollapse('rateinformation')"
+          >
+            <icon
+              class="mr-8 hide-on-desktop"
+              theme="outlined"
+              size="15px"
+              [name]="detailedValue === 'rateinformation' ? 'remove' : 'add'"
+              type="material"
+              cuClass="icon-cu"
+            >
+            </icon>
+            {{ 'Rate Information' | i18nextEager }}
+          </h4>
+          <div class="px-24 pt-8 p-32" [ngClass]="detailedValue === 'rateinformation' ? 'active' : 'inactive'">
+            <div class="row rate-info-table mt-24" *ngIf="programRateModel">
+              <div class="w-100 d-flex justify-content-between align-items-start hide-on-mobile">
+                <h4 class="font-weight-medium mt-24">{{ 'rate_information' | i18next }}</h4>
+            <ng-container *ngIf="markupByRateTypeEnabled || costComponentEnabled">
+              <a class="text-link small mx-16 my-auto" (click)="showRateDetails()">
+                  {{ 'view_rate_details' | i18next}}
+              </a>
+            </ng-container>
+              </div>
+              <div class="row no-gutters panel panel-light full-page-width">
+                <div class="col-12">
+                  <div class="p-16">
+                    <div class="row no-gutters info">
+                      <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                          <div class="initials initials-green">
+                            <icon class="d-flex" size="14px" name="mail" type="material" theme="outlined" cuClass="d-flex"> </icon>
+                          </div>
+                          <div class="d-flex justify-items-center flex-column ml-4">
+                            <p class="text-dark">{{ offerData?.rate_type }}</p>
+                            <p class="small text-muted">{{ 'unit_of_measure' | i18next }}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-3" *ngIf="!hideRateAuthority">
+                        <div class="d-flex align-items-center">
+                          <div class="initials initials-blue">
+                            <icon class="d-flex" size="14px" name="mail" type="material" theme="outlined" cuClass="d-flex"> </icon>
+                          </div>
+                          <div class="d-flex justify-items-center flex-column ml-4">
+                            <p class="text-dark">{{ (minRate | accuracy : 'rate' : { currencyCode: jobCurrency }) || '--' }}</p>
+                            <p class="small text-muted">
+                              {{ 'min' | i18next }}.
+                              {{
+                                (programRateModel === 'PAY_RATE'
+                                  ? 'Pay
+                                        Rate'
+                                  : userType?.toLowerCase() === 'vendor' && !clientBillRateEnabled
+                                  ? 'Vendor Bill
+                                        Rate'
+                                  : 'Bill Rate'
+                                ) | i18nextEager
+                              }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-3" *ngIf="!hideRateAuthority">
+                        <div class="d-flex align-items-center">
+                          <div class="initials initials-orange">
+                            <icon class="d-flex" size="14px" name="mail" type="material" theme="outlined" cuClass="d-flex"> </icon>
+                          </div>
+                          <div class="d-flex justify-items-center flex-column ml-4">
+                            <p class="text-dark">{{ (maxRate | accuracy : 'rate' : { currencyCode: jobCurrency }) || '--' }}</p>
+                            <p class="small text-muted">
+                              {{ 'max' | i18next }}.
+                              {{
+                                (programRateModel === 'PAY_RATE'
+                                  ? 'Pay
+                                        Rate'
+                                  : userType?.toLowerCase() === 'vendor' && !clientBillRateEnabled
+                                  ? 'Vendor Bill
+                                        Rate'
+                                  : 'Bill Rate'
+                                ) | i18nextEager
+                              }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-3" [hidden]="markupByRateTypeEnabled" *ngIf="programRateModel === 'PAY_RATE' || programRateModel === 'MARKUP'">
+                        <div *ngIf="userType?.toLowerCase() !== 'client'">
+                          <div class="d-flex align-items-center">
+                            <div class="initials initials-pink">
+                              <icon class="d-flex" size="14px" name="mail" type="material" theme="outlined" cuClass="d-flex"> </icon>
+                            </div>
+                            <div class="d-flex justify-items-center flex-column ml-4">
+                              <p class="text-dark">
+                                <span>{{ +offerData?.stages[0].rate_markup | accuracy : 'markup_percentage' || '--' }} </span>
+                                <label
+                                  class="strike-through inline-item"
+                                  *ngIf="offerData?.stages.length > 1 && offerData?.stages[1].rate_markup !== offerData?.stages[0].rate_markup"
+                                  >{{ +offerData?.stages[1].rate_markup | accuracy : 'markup_percentage' || '--' }}</label
+                                >
+                              </p>
+                              <p class="small text-muted">{{ 'mark-up' | i18next }}</p>
+                            </div>
+                          </div>
+                        </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="scroll-wrapper rate-table-wrapper">
+                    <table class="table-rate">
+                      <thead class="border-top">
+                        <th class="text-left">{{ 'rate_type' | i18next }}</th>
+                        <th
+                          class="text-left"
+                          [hidden]="programRateModel === 'BILL_RATE'"
+                          *ngIf="userRole != 'client' || programRateModel === 'PAY_RATE'"
+                        >
+                          {{ 'pay_rate' | i18next | titlecase }}
+                        </th>
+                        <th class="text-left" *ngIf="checkConfig()">{{ 'client_bill_rate' | i18next }}</th>
+                        <th class="text-left" *ngIf="userRole != 'client'">{{ 'vendor_bill_rate' | i18next }}</th>
+                  <th class="text-left" *ngIf="markupByRateTypeEnabled && (programRateModel == 'PAY_RATE' || programRateModel == 'MARKUP')">{{'mark-up'|i18next}}</th>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let rate of offerData?.stages[0]?.rates; let i = index">
+                          <!--*ngIf="rate?.billable"-->
+                          <ng-container *ngIf="offerData?.stages[0]?.is_hybrid; else nonHybrid">
+                            <ng-container *ngIf="rate?.applicable">
+                              <td data-value="Rate Type">{{ rate?.name | i18next }}</td>
+                              <td
+                                [hidden]="programRateModel === 'BILL_RATE'"
+                                *ngIf="userRole != 'client' || programRateModel === 'PAY_RATE'"
+                                data-value="Pay Rate"
+                              >
+                                <label
+                                  [ngClass]="{ 'green-color': isCounteredOffer && rate?.pay_rate !== getPastData(rate?.rate_factor)?.pay_rate }"
+                                  >{{ rate?.pay_rate | accuracy : 'rate' : { currencyCode: jobCurrency } }}</label
+                                >
+                                <label
+                                  class="strike-through"
+                                  *ngIf="isCounteredOffer && rate?.pay_rate !== getPastData(rate?.rate_factor)?.pay_rate"
+                                  >{{ getPastData(rate?.rate_factor)?.pay_rate | accuracy : 'rate' : { currencyCode: jobCurrency } }}</label
+                                >
+                              </td>
+                              <td *ngIf="checkConfig()" data-value="Client Bill Rate">
+                                <label
+                                  [ngClass]="{ 'green-color': isCounteredOffer && rate?.bill_rate !== getPastData(rate?.rate_factor)?.bill_rate }"
+                                  >{{ rate?.bill_rate | accuracy : 'rate' : { currencyCode: jobCurrency } }}</label
+                                >
+                                <label
+                                  class="strike-through"
+                                  *ngIf="isCounteredOffer && rate?.bill_rate !== getPastData(rate?.rate_factor)?.bill_rate"
+                                  >{{ getPastData(rate?.rate_factor)?.bill_rate | accuracy : 'rate' : { currencyCode: jobCurrency } }}</label
+                                >
+                              </td>
+                              <td *ngIf="userRole != 'client'" data-value="Vendor Bill Rate">
+                                <label
+                                  [ngClass]="{
+                                    'green-color': isCounteredOffer && rate?.vendor_bill_rate !== getPastData(rate?.rate_factor)?.vendor_bill_rate
+                                  }"
+                                  >{{ rate?.vendor_bill_rate | accuracy : 'rate' : { currencyCode: jobCurrency } }}</label>
+                                <label
+                                  class="strike-through"
+                                  *ngIf="isCounteredOffer && rate?.vendor_bill_rate !== getPastData(rate?.rate_factor)?.vendor_bill_rate"
+                                  >{{ getPastData(rate?.rate_factor)?.vendor_bill_rate | accuracy : 'rate' : { currencyCode: jobCurrency } }}</label
+                                >
+                              </td>
+                        <td data-value="Markup" class="text-left has-border" *ngIf="markupByRateTypeEnabled && (programRateModel == 'PAY_RATE' || programRateModel == 'MARKUP')">
+                          {{rate?.markup | accuracy : 'markup_percentage'}}
+                        </td>
+                            </ng-container>
+                          </ng-container>
+
+                          <ng-template #nonHybrid>
+                            <ng-container *ngIf="rate?.billable">
+                              <td data-value="Rate Type">{{ rate?.name | i18next }}</td>
+                              <td
+                                [hidden]="programRateModel === 'BILL_RATE'"
+                                *ngIf="userRole != 'client' || programRateModel === 'PAY_RATE'"
+                                data-value="Pay Rate"
+                              >
+                                <label
+                                  [ngClass]="{ 'green-color': isCounteredOffer && rate?.pay_rate !== getPastData(rate?.rate_factor)?.pay_rate }"
+                                  >{{ rate?.pay_rate | accuracy : 'rate' : { currencyCode: jobCurrency } }}</label
+                                >
+                                <label
+                                  class="strike-through"
+                                  *ngIf="isCounteredOffer && rate?.pay_rate !== getPastData(rate?.rate_factor)?.pay_rate"
+                                  >{{ getPastData(rate?.rate_factor)?.pay_rate | accuracy : 'rate' : { currencyCode: jobCurrency } }}</label
+                                >
+                              </td>
+                              <td *ngIf="checkConfig()" data-value="Client Bill Rate">
+                                <label
+                                  [ngClass]="{ 'green-color': isCounteredOffer && rate?.bill_rate !== getPastData(rate?.rate_factor)?.bill_rate }"
+                                  >{{ rate?.bill_rate | accuracy : 'rate' : { currencyCode: jobCurrency } }}</label
+                                >
+                                <label
+                                  class="strike-through"
+                                  *ngIf="isCounteredOffer && rate?.bill_rate !== getPastData(rate?.rate_factor)?.bill_rate"
+                                  >{{ getPastData(rate?.rate_factor)?.bill_rate | accuracy : 'rate' : { currencyCode: jobCurrency } }}</label
+                                >
+                              </td>
+                              <td *ngIf="userRole != 'client'" data-value="Vendor Bill Rate">
+                                <label
+                                  [ngClass]="{
+                                    'green-color': isCounteredOffer && rate?.vendor_bill_rate !== getPastData(rate?.rate_factor)?.vendor_bill_rate
+                                  }"
+                                  >{{ rate?.vendor_bill_rate | accuracy : 'rate' : { currencyCode: jobCurrency } }}</label
+                                >
+                                <label
+                                  class="strike-through"
+                                  *ngIf="isCounteredOffer && rate?.vendor_bill_rate !== getPastData(rate?.rate_factor)?.vendor_bill_rate"
+                                  >{{ getPastData(rate?.rate_factor)?.vendor_bill_rate | accuracy : 'rate' : { currencyCode: jobCurrency } }}</label
+                                >
+                              </td>
+                        <td data-value="Markup" class="text-left has-border" *ngIf="markupByRateTypeEnabled && (programRateModel == 'PAY_RATE' || programRateModel == 'MARKUP')">
+                          {{rate?.markup | accuracy : 'markup_percentage'}}
+                        </td>
+                            </ng-container>
+                          </ng-template>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="px-24 p-32">
+            <!--Tax and Adjustment Detail-->
+            <app-adjustment-tax-detail-page
+              [taxData]="taxData"
+              [adjustmentData]="adjustmentData"
+              [currency]="jobCurrency"
+            ></app-adjustment-tax-detail-page>
+          </div>
+          </div>
+          <div *ngIf="currentTab == 'workflow'">
+            <div class="detailed-page-section p-24">
+              <div class="p-16">
+                <app-multi-workflow
+                  [moduleName]="'offers'"
+                  [moduleStatus]="moduleStatus"
+                  [multiApprovals]="multiApprovals"
+                  [moduleId]="currentOfferId"
+                  [showPreviousWorkflow]="true"
+                  [version]="version"
+                ></app-multi-workflow>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="currentTab == 'history'">
+            <div class="detailed-page-section p-0">
+              <app-candidate-job-history [offerHistory]="true"></app-candidate-job-history>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</ng-container>
+<!-- create offer section start here -->
+<ng-container *ngIf="showCreateOffer">
+  <ng-container
+    *ngIf="
+      ((offerCreate && !offerData) || (offerEdit && offerData)) &&
+      !loading &&
+      candidateDetails?.candidate?.status != 'PENDING_SHORTLIST' &&
+      candidateDetails?.candidate?.status != 'REJECTED' &&
+      candidateDetails?.candidate?.status != 'WITHDRAWN' &&
+      jobCurrentStatus != 'FILLED'
+    "
+  >
+    <app-create-offers
+      *ngIf="currentOfferId > 0 || this.userType !== 'VENDOR'"
+      [candidateDetails]="candidateDetails"
+      [isopen]="isopen"
+      isfeomDetails="true"
+      (offerModeReset)="resetOfferMode($event)"
+      [offerPageMode]="offerPageMode"
+      [offerId]="currentOfferId"
+      [candidateId]="currentCandidate"
+    ></app-create-offers>
+  </ng-container>
+</ng-container>
+<!-- create offer section end here -->
+
+<div *ngIf="loading" class="d-flex justify-content-center loader-height align-items-center p-24 img_height">
+  <div class="dotloader"></div>
+</div>
+
+<ng-container *ngIf="counterOffer">
+  <counter-offer
+    [candidateDetails]="candidateDetails"
+    [candidateId]="currentCandidate"
+    [isopen]="counterOffer"
+    [offerId]="currentOfferId"
+  ></counter-offer>
+</ng-container>
+
+<ng-container *ngIf="(noData && !loading) || (jobCurrentStatus == 'FILLED' && !offerData)">
+  <ng-container
+    *ngIf="
+      (!isopen && !loading && noOffer && !offerData && !counterOffer && !offerEdit) ||
+      noData ||
+      (currentOfferId == 0 && this.userType == 'VENDOR') ||
+      candidateDetails?.candidate?.status === 'PENDING_SHORTLIST' ||
+      (jobCurrentStatus == 'FILLED' && !offerData)
+    "
+  >
+    <div class="d-flex justify-content-center align-items-center p-24 img_height no-offer-height">
+      <ng-container
+        *ngIf="
+          (!isopen && !loading && noOffer && !offerData) ||
+          noData ||
+          (currentOfferId == 0 && this.userType == 'VENDOR') ||
+          candidateDetails?.candidate?.status === 'PENDING_SHORTLIST' ||
+          (jobCurrentStatus === 'FILLED' && !offerData)
+        "
+      >
+        <div class="d-flex justify-content-center align-items-center p-24 img_height no-offer-height">
+          <div class="text-center">
+            <app-no-data
+              [noDataJson]="tableNoDataObj"
+              [jobStatus]="jobCurrentStatus"
+              (createOffer)="createoffer($event)"
+              [canCreateOffer]="userType !== 'VENDOR'"
+            ></app-no-data>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </ng-container>
+</ng-container>
+
+<app-offer-estimate-budget
+  [workingData]="workingData"
+  [clientBillRate]="clientBillRate"
+  [estimateFields]="budgetInfo"
+  [jobData]="job"
+  [isOfferDetailPage]="this.isOfferDetailPage"
+  *ngIf="isCreateEstimate"
+  (onCreateClose)="closePopup($event)"
+></app-offer-estimate-budget>
+
+<app-rate-details
+    [rateDetailsVisible]="rateDetailsVisible" (onUpdateClose)="hideRateDetails($event)"
+    (updateRateDetailsVisibility)="updateRateDetailsVisibility($event)"
+    [standardRates]="standardRateDetails" [ratesArray]="rateDetailsRateArray || []"
+    [factors]="payloadRateFactors" [selectedCurrency]="jobCurrency" [rateModelPayload]="rateModelPayload"
+    [editableFactors]="false" [editableMarkup]="false"  [isSourcing]="true"
+    [markupByRateTypeEnabled]="markupByRateTypeEnabled" [costComponentEnabled]="costComponentEnabled"
+    [payrateVisible]="showPayRate" [billrateVisible]="checkConfig()">
+</app-rate-details>
+<app-approval-notes-history [visiblity]="approvalNote" [approvalFor]="approvalFor" [jobDetail]="jobDetails" [approvalChainId]="approvalChainId"
+[approvalWorkflow]="approvalWorkflow" (onSubmit)="onSubmitApproveReject($event)"  (onClose)="onSidePanelClose()" [isProgramAdmin]="isProgramAdmin"
+[superAdminEdit]="superAdminEdit" [isOfferApproval]="true" [sidebarTitle]="approvalPanelTitle"
+>
+</app-approval-notes-history>
+<app-assignment-overlap-warning [showWarning]="showOverlapWarning" [assignmentData]="overlapAssignmentData" 
+(onWarningClose)="showOverlapWarning=false" >
+</app-assignment-overlap-warning>

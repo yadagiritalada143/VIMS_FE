@@ -1,0 +1,480 @@
+@import '../../../assets/sass/abstracts/variables';
+
+.create-program {
+  background-color: $bg-default;
+  position: relative;
+
+  &-inner {
+    max-width: 650px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.checkbox-panel {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0px 0px 48px 0px;
+  justify-content: space-between;
+}
+
+.toggle-panel {
+  width: 49%;
+
+  &-inner {
+    padding: $p12;
+    font-size: $font-primary;
+    font-weight: $font-weight-semibold;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $p8;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+  }
+}
+
+.program-manager {
+  &-tab {
+    display: flex;
+  }
+
+  &-table {
+    font-weight: 500;
+    width: 100%;
+
+    thead {
+      background-color: $bg-default;
+
+      th {
+        color: $text-secondary;
+        border-bottom-width: 0px;
+        padding: $p16;
+      }
+    }
+
+    tbody {
+      tr {
+        &:not(:last-child) {
+          border-bottom: 1px solid $border-color;
+        }
+
+        td {
+          vertical-align: middle;
+          padding-top: $p12;
+          padding-bottom: $p12;
+          border-color: $border-color;
+
+          &:last-child {
+            text-align: right;
+            font-weight: $font-weight-bold;
+
+          }
+
+          &:first-child {
+            display: flex;
+            align-items: center;
+          }
+
+          &:nth-of-type(2) {
+            color: $color-assets-secondary-shade;
+          }
+        }
+      }
+    }
+
+  }
+}
+
+.org-summary {
+  display: flex;
+  align-items: center;
+  background-color: $alert-info;
+  font-size: $font-primary;
+  justify-content: space-between;
+  padding: $p16 $p24;
+  margin-bottom: $m32;
+  position: relative;
+  color: $color-assets-secondary-shade;
+  border-radius: $border-radius;
+
+  &:after {
+    content: "";
+    background-color: $alert-info;
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    top: -8px;
+    transform: rotate(45deg);
+  }
+
+  // .client,
+  // .labor-category {
+  //   display: flex;
+  //   flex-direction: column;
+
+  //   span {
+  //     &:first-child {
+  //       color: $color-assets-secondary-shade;
+
+  //     }
+  //   }
+  // }
+
+  .icons {
+    a {
+      &:not(:last-child) {
+        margin-right: $m8;
+      }
+    }
+  }
+}
+
+
+@media screen and (max-width: 768px) {
+  .back-button {
+    position: relative;
+    margin-top: 50px;
+    margin-bottom: 22px;
+  }
+}
+
+.add-user {
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+
+.if-noUser {
+  background-color: $color-gray-10;
+  padding: $p16;
+  margin-top: $m0;
+  margin-bottom: $m16;
+  display: flex;
+  align-items: center;
+  font-size: $font-primary;
+  color: $text-secondary;
+
+  &-icon {
+    margin-right: $m12;
+  }
+}
+
+.program-id {
+  position: relative;
+
+  span {
+    position: absolute;
+    top: 10px;
+    right: 8px;
+    background-color: $color-assets-secondary-tint;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: $border-radius;
+    color: $light;
+
+    .edit-icon {
+      display: flex;
+    }
+
+    icon {
+      display: flex;
+      color: $light;
+    }
+
+  }
+}
+
+.invite-user {
+  position: relative;
+
+  .invite-btn {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    z-index: 20;
+
+  }
+}
+
+.select-user {
+  border: 1px solid $border-color;
+  border-radius: 0px 5px 5px 0px;
+  font-size: 13px;
+  color: var(--color);
+  height: 40px;
+  transition: 0.4s ease-in-out;
+  padding-right: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 1rem;
+
+  a {
+    text-decoration: none;
+    color: $navigation-text;
+  }
+}
+
+.create-client {
+  width: 100%;
+}
+
+.choose-role {
+  width: 75%;
+}
+
+.select-tab {
+  width: 100%;
+}
+
+.modal-backdrop {
+  background: $color-secondary;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  transition: $transition;
+  opacity: 0;
+  visibility: hidden;
+  transition: $transition;
+
+  &.active {
+    visibility: visible;
+    opacity: .8;
+  }
+}
+
+.success-modal {
+  width: 478px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50.1%);
+  z-index: 1001;
+  transition: $transition;
+  opacity: 0;
+  visibility: hidden;
+
+  .close-success-modal {
+    position: absolute;
+    top: 13px;
+    right: 16px;
+
+    icon {
+      display: inline-block;
+
+      ::ng-deep i {
+        color: $color-dark;
+      }
+    }
+  }
+
+  .success-modal-body {
+    .success-icon {
+      display: inline-block;
+
+      ::ng-deep i {
+        color: $color-green;
+      }
+    }
+
+    h3 {
+      line-height: 32px;
+      max-width: 202px;
+      margin: auto;
+      color: $color-dark;
+    }
+  }
+
+  .modal-footer {
+    background: $color-gray-10;
+    border-top: 1px solid $color-gray-50;
+
+    .user-avatar {
+      background: $initials-purple;
+      color: $light;
+      line-height: 40px;
+      width: 40px;
+      font-size: 16px;
+    }
+
+    .user-info {
+      color: $color-body-txt-default;
+
+      p {
+        line-height: 16px;
+      }
+
+      .user-status {
+        line-height: 21px;
+        font-size: 12px;
+
+        span {
+          width: 7px;
+          height: 7px;
+        }
+
+        &.inactive {
+          background: $color-gray-30;
+          color: $color-gray-70;
+
+          span {
+            background: $color-gray-70;
+          }
+        }
+      }
+    }
+  }
+
+  &.active {
+    visibility: visible;
+    opacity: 1;
+  }
+}
+
+.option-icon {
+  color: $color-secondary-shade;
+  font-size: 19px;
+}
+
+.select-option-icon {
+  color: $color-secondary-shade;
+  font-size: 32px;
+}
+
+.module-panel {
+
+  ::ng-deep .checkbox-panel {
+    padding-bottom: 0;
+
+    .toggle-panel {
+      width: 48%;
+
+      .toggle-panel-inner {
+        height: 44px;
+      }
+    }
+  }
+}
+
+.program-toggle-panel {
+  width: 150%;
+  padding: 0px 24px 24px;
+  .toggle-panel {
+    width: 32%;
+
+    &-inner {
+      padding: $p8 $p12;
+      font-size: $font-primary;
+      font-weight: $font-weight-regular;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: $p4 $p8;
+      border: 1px solid $border-color;
+      border-radius: $border-radius;
+      background: white
+    }
+    .toggle-panel-inner .toggle-switch {
+      min-width: 27px !important;
+  }
+}
+.toggle-panel:nth-child(2){
+  margin-left: 10px;
+}
+}
+
+.rate-model{
+  padding: 0px 24px 24px;
+  p{
+    color: #2B2D42;
+    font-weight: bold;
+  }
+  .no-gutters {
+    margin-left: 40px;
+    margin-top: 7px;
+    .radio-button {
+      input{
+        cursor: pointer;
+      }
+      input:nth-child(2n-3){
+        margin-left: 15px;
+      }
+      label{
+        cursor: pointer;
+        margin-left: 5px;
+        font-size: 12px;
+        color: #2B2D42;
+        font-weight: 600;
+      }
+    }
+  }
+}
+.program-select{
+  padding: 0px 24px 24px;
+  width: 100%;
+  label{
+    color: #888888;
+  }
+  div{
+    width: 50%;
+  }
+}
+
+.labor-category-box {
+  .toggle-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: auto;
+
+    .toggle-panel-inner {
+      padding: 0;
+      border: 0;
+      background-color: transparent;
+      height: 20px;
+    }
+  }
+
+  .selected-labor-categories {
+
+    li {
+      background: #8182d5;
+      border-radius: 20px;
+      color: white;
+      font-size: 12px;
+      padding: 4px 32px 4px 12px;
+      line-height: 20px;
+      position: relative;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      display: inline-block;
+
+      a {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        font-size: 18px;
+        padding: 0;
+        height: 20px;
+
+
+        &:hover {
+          background: transparent;
+        }
+      }
+    }
+  }
+}
+
+.work-location-toggle {
+  margin-top: $m8;
+
+  .toggle-panel {
+    width: 100%;
+  }
+}

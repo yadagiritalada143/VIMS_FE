@@ -1,0 +1,50 @@
+<ng-template [ngIf]="showTimesheets">
+    <h3 class="font-weight-medium pl-8 pb-8">{{ 'update_impacted_timesheet(s)' | i18next }}</h3>
+    <div *ngIf="is_work_week_change?.is_work_week_change" class="warning-msg d-flex p-16 rounded-sm mb-12">
+        <icon name="warning" color="#F6AB2B" size="24px"></icon>
+        <div class="ml-24">
+            <p class="small font-weight-medium">{{ 'warning' | i18next }}</p>
+            <p class="small">{{is_work_week_change?.message }}</p>
+        </div>
+    </div>
+<div class="p-8">
+<table class="impacted-sheet" *ngIf="timesheets?.length> 0">
+    <thead>
+    <tr>
+        <th class="pl-10" width="7%">
+        <input type="checkbox"  checked="true" disabled="true">
+        </th>
+        <th class="font-weight-medium" width="25%">
+        {{ 'timesheet_id' | i18next }}
+        </th>
+        <th class="font-weight-medium" width="40%">
+        {{ 'work_period' | i18next }}
+            </th>
+        <th class="font-weight-medium">
+        {{ 'status' | i18next }}
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let timesheet of timesheets">
+        <td class="pl-10">
+        <input type="checkbox" (change)="updateControl(timesheet)" [checked]="timesheet.selected" [disabled]="!timesheet.is_enable">
+        </td>
+        <td>
+            <span class="text-primary"> {{timesheet?.display_timesheet_code}}</span>
+        </td>
+        <td>
+        <span>
+            {{timesheet?.display_value}}
+        </span>
+        </td>
+        <td>
+            <span class="status-ui"
+            [ngClass]="{'draft':(timesheet?.status ==='draft' || timesheet?.status=='missing'), 'pending-approval':(timesheet?.status ==='pending'), 'rejected': (timesheet?.status ==='rejected'),'approved':(timesheet?.status==='approved'), 'withdrawn':(timesheet?.status ==='withdrawn'),'deferred': (timesheet?.status==='deferred')}">
+            {{timesheet?.status|i18next}}</span>
+        </td>
+    </tr>
+   </tbody>
+</table>
+</div>
+</ng-template>

@@ -1,0 +1,26 @@
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { CommonTestingModule } from 'src/testing/commontest.module';
+import { NewFlowComponent } from './new-flow.component';
+
+describe('NewFlowComponent', () => {
+  let component: NewFlowComponent;
+  let fixture: ComponentFixture<NewFlowComponent>;
+  CommonTestingModule.setUpTestBed(NewFlowComponent);
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      declarations: [ NewFlowComponent ]
+    })
+    .compileComponents();
+  }));
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(NewFlowComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});

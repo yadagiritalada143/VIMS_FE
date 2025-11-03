@@ -1,0 +1,96 @@
+<div class="form-group mb-0">
+  <label *ngIf="_showLabel">{{uploadLabel}}</label>
+  <div class="upload-zone text-center p-16" (click)="uploadFileInput.click()">
+    <div class="drop-zone mb-4">
+      <icon size="24px" name="publish" type="material" cuClass="d-flex"></icon>
+    </div>
+    <p class="small pt-4 mb-4">{{ 'drag' | i18next }} &amp; {{ 'drop_file_or' | i18next }} <a >{{ 'browse' | i18next }}</a></p>
+    <input hidden type="file" [accept]='"."+ supportedFileTypes.join(", .")' #uploadFileInput (change)="uploadFile($event)">
+    <!-- <p class="file-format mb-32">Only .png, .jpg, .pdf, .doc files with maximum size of 10 MB</p> -->
+    <p class="file-format">{{allowedMessage | i18next}}</p>
+  </div>
+
+  <ul class="uploaded-list" *ngFor="let file of oldUploadfileArr, let i = index">
+    <li>
+      <figure *ngIf="file.ext == 'pdf'">
+        <img src="/assets/images/pdf.svg" alt="">
+      </figure>
+      <figure *ngIf="file.ext == 'docx' || file.ext == 'doc' ">
+        <img src="/assets/images/word.svg" alt="">
+      </figure>
+      <figure *ngIf="file.ext == 'jpg' || file.ext == 'jpeg' ">
+        <img src="/assets/images/img-jpg.svg" alt="">
+      </figure>
+      <figure *ngIf="file.ext == 'png'">
+        <img src="/assets/images/img-png.svg" alt="">
+      </figure>
+      <div class="item-description">
+        {{file.filename}}
+        <icon class="d-inline-block ml-8" size="18px" name="check_circle" type="material" cuClass="d-flex"></icon>
+        <p class="upload-size">
+          {{file?.size}} {{mbKbFileSize}}<span>|</span>{{file?.time | localDateFormat:'d MMM'}}
+        </p>
+      </div>
+      <a (click)="deleteOldFile(i)" class="delete-file">
+        <icon class="d-flex" size="24px" name="delete_forever" type="material" cuClass="d-flex">
+        </icon>
+      </a>
+    </li>
+  </ul>
+  <ul class="uploaded-list" *ngFor="let file of uploadedFileArr, let i = index">
+    <li>
+      <figure *ngIf="file.ext == 'pdf'">
+        <img src="/assets/images/pdf.svg" alt="">
+      </figure>
+      <figure *ngIf="file.ext == 'docx' || file.ext == 'doc' ">
+        <img src="/assets/images/word.svg" alt="">
+      </figure>
+      <figure *ngIf="file.ext == 'jpg' || file.ext == 'jpeg' ">
+        <img src="/assets/images/img-jpg.svg" alt="">
+      </figure>
+      <figure *ngIf="file.ext == 'png'">
+        <img src="/assets/images/img-png.svg" alt="">
+      </figure>
+      <div class="item-description text-capitalize">
+        {{file.name || file.file_name}}
+        <icon class="d-inline-block ml-8" size="18px" name="check_circle" type="material" cuClass="d-flex"></icon>
+        <p class="upload-size" *ngIf="file.size || mbKbFileSize || file.time">
+          {{file.size}} {{mbKbFileSize}}<span>|</span>{{file.time | localDateFormat:'d MMM'}}
+        </p>
+      </div>
+      <span *ngIf="_fileUrl && _isVendorAndSuperOrg" class="material-icons ml-8 download-file"
+        (click)="downloadAttachment(_fileUrl)">
+        <icon class="d-flex" size="24px" name="file_download" type="material" cuClass="d-flex">
+        </icon>
+      </span>
+      <a (click)="deleteFile(i)" class="delete-file" *ngIf="showDeleteButton">
+        <icon class="d-flex" size="24px" name="delete_forever" type="material" cuClass="d-flex">
+        </icon>
+      </a>
+    </li>
+  </ul>
+  <ul class="uploaded-list error" *ngIf="!isValidFileSize">
+    <li>
+      <div class="item-description">
+        <icon class="d-inline-block mr-8" size="18px" name="error" type="material" cuClass="d-flex"></icon>
+        <p class="d-inline-block upload-size">
+          {{ isFiveMbFileValid ?
+            ('Error : File size must be less than 5 MB') :
+            (sizeErrorText ? sizeErrorText : 'Error : File size must be less than 10 MB')
+            | i18next
+          }}
+        </p>
+      </div>
+    </li>
+  </ul>
+  <ul class="uploaded-list error" *ngIf="fileNotSupportAlert">
+    <li>
+      <div class="item-description">
+        <icon class="d-inline-block mr-8" size="18px" name="error" type="material" cuClass="d-flex"></icon>
+        <p class="d-inline-block upload-size">
+          {{errorMessage}}
+        </p>
+      </div>
+    </li>
+  </ul>
+</div>

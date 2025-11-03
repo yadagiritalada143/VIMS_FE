@@ -1,0 +1,33 @@
+<div class="d-flex justify-content-end align-items-center" [ngClass]="{ 'justify-content-between': showRecordSelect }">
+  <div *ngIf="showRecordSelect" class="d-flex align-items-center">
+    <p class="mr-8 ml-24">{{ 'show_records' | i18next }}</p>
+    <ng-select
+      [clearable]="false"
+      [(ngModel)]="selectedRecords.selected"
+      (change)="selectRecord($event)"
+      class="record-dropdown small-record"
+    >
+      <ng-option selected value="10">{{ '10' | i18next }}</ng-option>
+      <ng-option value="25">{{ '25' | i18next }}</ng-option>
+      <ng-option value="50">{{ '50' | i18next }}</ng-option>
+      <ng-option value="75">{{ '75' | i18next }}</ng-option>
+      <ng-option value="100">{{ '100' | i18next }}</ng-option>
+    </ng-select>
+  </div>
+  <div class="pagination font-weight-normal mx-24" [attr.actpage]="currentPage" *ngIf="pager?.length > 1">
+    <a (click)="onClick($event, '-1')" *ngIf="currentPage!==1">
+      <table-icon name="keyboard_arrow_left" size="14px" type="material" class="d-flex" cuClass="d-flex"></table-icon>
+    </a>
+    <a
+      *ngFor="let page of pager"
+      [ngClass]="{ active: currentPage === page }"
+      [hidden]="paginationTabShowHide(page)"
+      (click)="onClick($event, page.toString())"
+    >
+      {{ page }}
+    </a>
+    <a (click)="onClick($event, '+1')" *ngIf="(maxPages !== currentPage) && maxPages > 1  ">
+      <table-icon name="keyboard_arrow_right" size="14px" type="material" class="d-flex" cuClass="d-flex"></table-icon>
+    </a>
+  </div>
+</div>

@@ -1,0 +1,313 @@
+<div class="p-32 pt-24 sidebar-view-wrapper interview-detail-view" *ngIf="submissionDetails">
+    <div class="sp-head-module-info">
+        <div class="row">
+            <div class="col-md-7">
+                <h4>{{ 'submission_details' | i18next }}</h4>
+            </div>
+            <div class="col-md-5">
+              <label class="status-ui position-relative float-right" *ngIf="submissionDetails?.status!='REHIRE_REJECTED' && submissionDetails?.status!='SHORTLIST_REVIEW_REJECTED'" [ngClass]="{'open': submissionDetails?.status!='REHIRE_CHECK_PENDING' && submissionDetails?.status!='PENDING_SHORTLIST_REVIEW',
+            're-hire-check-pending':submissionDetails?.status=='REHIRE_CHECK_PENDING',
+            'pending-review':submissionDetails?.status=='PENDING_SHORTLIST_REVIEW',
+            'withdrawn':submissionDetails?.status?.toLowerCase()=='offer_cancelled'}">{{snakeCaseToTitle(submissionDetails?.status) | i18next}}</label>
+            <label class="status-ui position-relative float-right" *ngIf="submissionDetails?.status=='REHIRE_REJECTED' || submissionDetails?.status=='SHORTLIST_REVIEW_REJECTED'" [ngClass]="{'rejected':submissionDetails?.status=='REHIRE_REJECTED' || submissionDetails?.status=='SHORTLIST_REVIEW_REJECTED' }">{{snakeCaseToTitle(submissionDetails?.status) | i18next}}</label>
+                <!-- <label class="status-ui submitted position-relative float-right">{{getStatus(submissionDetails?.status) |i18next}}</label> -->
+            </div>
+        </div>
+        <div class="sp-sub-head-info">
+            <label class="mdid d-flex float-left">
+                <icon size="20px" name="label" color="#FFC409" type="material" cuClass="d-flex"
+                    *ngIf="submissionDetails?.unique_id"></icon>
+                <span class="ml-4">{{submissionDetails?.unique_id}}</span>
+            </label>
+            <label class="publish-date-time float-left">
+                <icon size="18px" name="update" color="#536476" type="material" cuClass="d-flex"></icon>
+                <span>{{ 'submitted_on' | i18next }} : {{ submissionDetails?.submitted_on | localDateFormat }} {{ submissionDetails?.submitted_on | localDateFormat: 'hh:mm:ss a z' }}</span>
+            </label>
+
+        </div>
+    </div>
+    <div class="clearfix"></div>
+    <div class="alert_message alert_error border-none mt-12" *ngIf="isAlertError">
+        <div class="d-flex align-items-center w-100">
+          <div class="d-flex align-items-center justify-content-start">
+            <icon name="error" size="24px" type="material" cuClass="validation-icon"></icon>
+          </div>
+        <div class="pl-8">
+            <div class="font-weight-bold mb-0 medium-font" *ngIf="this.candidateStatusReason">
+            {{ 'rejection_reason' | i18next }}: {{this.candidateStatusReason}}
+            </div>
+            <div class="font-weight-bold mb-0 medium-font" *ngIf="this.candidateStatusNote">
+                {{ 'notes' | i18next }}: {{this.candidateStatusNote}}
+            </div>
+        </div>
+        </div>
+    </div>
+    <div class="d-flex  justify-content-between interview-info">
+        <div class="d-flex align-items-center grid-data-wrap">
+            <icon size="18px" name="today" theme="outlined" color="#495057" type="material" cuClass="d-flex"></icon>
+            <div class="grid-data">
+                <span class="small">{{ 'available_start_date' | i18next }}</span>
+                <label>{{submissionDetails?.available_start_date | localDateFormat :'':'':'':true}}</label>
+            </div>
+        </div>
+        <div class="d-flex align-items-center grid-data-wrap">
+            <icon size="18px" name="event" theme="outlined" color="#495057" type="material" cuClass="d-flex"></icon>
+            <div class="grid-data">
+                <span class="small">{{ 'available_end_date' | i18next }}</span>
+                <label>{{submissionDetails?.available_end_date |localDateFormat :'':'':'':true}}</label>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex  justify-content-between interview-info">
+        <div *authorize="'view_submission_birthday'" class="d-flex align-items-center grid-data-wrap">
+            <icon class="mr-8" size="18px" name="cake" theme="outlined" color="#495057" type="material"
+                cuClass="d-flex"></icon>
+            <div class="grid-data">
+                <span class="small">{{ 'date_of_birth' | i18next }}</span>
+                <div class="d-flex sensitive-data">
+                    <label *ngIf="!showDOB" class="hidden-value">{{ 'sensitive_data' | i18next }}</label>
+                    <label class="dot-show" *ngIf="showDOB">{{ (candidateData?.dob | localDateFormat : "MM/dd" : '':'':true) ||
+                        '--'}}</label>
+                    <ng-container *ngIf="hideEyeIcon">
+                      <icon size="16px" *ngIf="!showDOB" name="visibility" (click)="showDOB = !showDOB" color="#495057"
+                          type="material" cuClass="d-flex" class="cursor-pointer"> </icon>
+                      <icon size="16px" *ngIf="showDOB" name="visibility_off" (click)="showDOB = !showDOB" color="#495057"
+                          type="material" cuClass="d-flex" class="cursor-pointer ml-16"></icon>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+        <div *authorize="'view_submission_stateId'" class="d-flex align-items-center grid-data-wrap">
+            <icon class="mr-8" size="18px" name="public" theme="outlined" color="#495057" type="material"
+                cuClass="d-flex"></icon>
+            <div class="grid-data">
+                <span class="small">{{ 'state/national_id' | i18next }}</span>
+                <div class="d-flex sensitive-data">
+                    <label *ngIf="!showStateID" class="hidden-value">{{ 'sensitive_data' | i18next }}</label>
+                    <label class="dot-show" *ngIf="showStateID">{{address.state_id || '--'}}</label>
+                    <ng-container *ngIf="hideEyeIcon">
+                      <icon size="16px" *ngIf="!showStateID" name="visibility" (click)="showStateID = !showStateID"
+                          color="#495057" type="material" cuClass="d-flex" class="cursor-pointer"> </icon>
+                      <icon size="16px" *ngIf="showStateID" name="visibility_off" (click)="showStateID = !showStateID"
+                          color="#495057" type="material" cuClass="d-flex" class="cursor-pointer ml-16"></icon>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex  justify-content-between interview-info">
+        <div class="d-flex align-items-center grid-data-wrap">
+            <icon class="mr-8" size="18px" name="badge" theme="outlined" color="#495057" type="material"
+                cuClass="d-flex"></icon>
+            <div class="grid-data">
+                <span class="small">{{ 'candidate_sourcing_type' | i18next }}</span>
+                <label>{{submissionDetails?.candidate_sourcing_type||'-'}}</label>
+            </div>
+        </div>
+        <div class="d-flex align-items-center grid-data-wrap" *ngIf="submissionDetails?.candidate_type">
+          <icon class="mr-8" size="18px" name="manage_accounts" theme="outlined" color="#495057" type="material"
+              cuClass="d-flex"></icon>
+          <div class="grid-data">
+              <span class="small">{{ 'candidate_type' | i18next }}</span>
+              <label>{{submissionDetails?.candidate_type ||'-'}}</label>
+          </div>
+       </div>
+    </div>
+
+    <div class="d-flex  justify-content-between interview-info">
+
+      <div class="d-flex align-items-center grid-data-wrap mb-24" *ngIf="showRemoteWorker">
+        <img src="../../../../../../../assets/images/remote-worker.svg" alt="" width="18" height="18" class="mr-24">
+        <div class="grid-data">
+          <span class="small">{{'remote_worker'|i18next}}</span>
+          <label class="d-flex align-items-center" [ngClass]="submissionDetails?.remote_worker ? 'enabled' : 'disabled' ">{{submissionDetails?.remote_worker ? 'Yes' : 'No'}}</label>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center grid-data-wrap">
+        <icon class="mr-8" size="18px" name="hourglass_top" theme="outlined" color="#776DE0" type="material"
+                cuClass="d-flex "></icon>
+        <div class="grid-data">
+          <span class="small">{{'ot_exempt'|i18next}}</span>
+          <label class="d-flex align-items-center" [ngClass]="submissionDetails?.ot_exempt ? 'enabled' : 'disabled' ">{{submissionDetails?.ot_exempt ? 'Yes' : 'No'}}</label>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="mt-24">
+      <app-remote-worker-details-view [remoteWorkerDetails]="submissionDetails?.remote_worker_details" *ngIf="showRemoteWorker && submissionDetails?.remote_worker"></app-remote-worker-details-view>
+    </div>
+
+    <div class="d-flex  justify-content-between interview-info">
+        <!-- <div class="d-flex align-items-center grid-data-wrap">
+            <icon class="mr-8" size="18px" name="credit_score" theme="outlined" type="material" cuClass="d-flex"></icon>
+            <div class="grid-data">
+                <span class="small">Candidate eligible to work in the US without employer sponsorship?</span>
+                <label>{{submissionDetails?.candidate_type ||'-'}}</label>
+            </div>
+        </div> -->
+    </div>
+
+
+
+
+    <div class="notes-wrap mini mt-24 " *ngIf="submissionDetails?.comments">
+        <div class="d-flex trigger align-items-center notes-header" (click)="showHideInstruction()">
+            <icon class="mr-8" size="18px" name="sticky_note_2" theme="outlined" color="#776DE0" type="material"
+                cuClass="d-flex "></icon>
+            <label>{{ 'submission_notes' | i18next }}</label>
+            <icon size="18px" [name]="showInstruction? 'keyboard_arrow_up' : 'keyboard_arrow_down'" theme="outlined"
+                color="#666666" type="material" cuClass="d-flex float-right"></icon>
+        </div>
+        <div class="detail-instruction" *ngIf="!showInstruction">
+            {{submissionDetails?.comments }}
+        </div>
+    </div>
+
+
+    <div class="notes-wrap mini mt-24 p-12" *ngIf="submissionDetails?.is_rehire">
+        <div class="d-flex align-items-center mb-8">
+            <icon class="mr-8" size="18px" name="check_circle"  color="#3AA512" type="material" cuClass="d-flex"></icon>
+            <p class="font-weight-medium">{{ 'has_the_candidate_worked_for_same' | i18next }} {{ 'organization_or_affiliated_in_the_past?' | i18next }}</p>
+        </div>
+        <div class="d-flex align-items-center mb-8" *ngIf="submissionDetails?.candidate_worked_as">
+            <icon class="mr-8" size="18px" name="badge" theme="outlined" color="#495057" type="material" cuClass="d-flex"></icon>
+            <p class="small"> {{ 'worker_employment_status' | i18next }}: <span class="text-dark">{{submissionDetails?.candidate_worked_as}}</span></p>
+        </div>
+        <div class="d-flex align-items-center">
+            <icon class="mr-8" size="18px" name="sticky_note_2" theme="outlined" color="#495057" type="material"cuClass="d-flex"></icon>
+            <p class="small">{{submissionDetails?.candidate_rehire_details}}</p>
+        </div>
+    </div>
+    <div class="notes-wrap mini mt-24 p-12" *ngIf="(submissionDetails?.is_rehire && submissionDetails?.rehire_notes) ">
+        <div class="d-flex align-items-center mb-8">
+            <p class="font-weight-medium">{{ 'approve_rehire_notes' | i18next }}</p>
+        </div>
+        <div class="d-flex align-items-center mb-8" *ngIf="submissionDetails?.rehire_notes">
+            <p class="small"> <span class="text-dark">{{submissionDetails?.rehire_notes}}</span></p>
+        </div>
+    </div>
+
+    <div class="rate-info-table mt-24" *ngIf="programRateModel">
+        <div class="col-12">
+            <h4 class="font-weight-medium mt-24">{{ 'rate_information' | i18next }}</h4>
+        </div>
+        <div class="row no-gutters panel panel-light full-page-width rate-info-m">
+            <div class="col-12">
+              <div class="p-16">
+                <div class="row no-gutters info">
+                  <div class="col-md-3">
+                    <div class="d-flex align-items-center">
+                        <div class="initials initials-green">
+                            <icon class="d-flex" size="14px" name="mail" type="material" theme="outlined" cuClass="d-flex">
+                            </icon>
+                        </div>
+                        <div class="d-flex justify-items-center flex-column ml-4">
+                            <p class="text-dark">{{(submissionDetails?.rate_type | uppercase) || '--'}}</p>
+                            <p class="small text-muted">{{'unit_of_measure'|i18next}}</p>
+                        </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3" *ngIf="!hideRateAuthority">
+                    <div class="d-flex align-items-center">
+                      <div class="initials initials-blue">
+                        <icon class="d-flex" size="14px" name="mail" type="material" theme="outlined" cuClass="d-flex">
+                        </icon>
+                      </div>
+                      <div class="d-flex justify-items-center flex-column ml-4">
+                        <p class="text-dark"> {{ (minRate | accuracy : 'rate' : {currencyCode: jobCurrency})  || '--' }}</p>
+                        <p class="small text-muted">{{'min'|i18next}}. {{ (programRateModel === 'PAY_RATE' ? 'Pay Rate' : (user_type.toLowerCase() === 'vendor' && !clientBillRateEnabled) ? 'Vendor Bill Rate' : 'Bill Rate') |
+                            i18nextEager}}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-3" *ngIf="!hideRateAuthority">
+                    <div class="d-flex align-items-center">
+                      <div class="initials initials-orange">
+                        <icon class="d-flex" size="14px" name="mail" type="material" theme="outlined" cuClass="d-flex">
+                        </icon>
+                      </div>
+                      <div class="d-flex justify-items-center flex-column ml-4">
+                        <p class="text-dark"> {{ (maxRate | accuracy : 'rate' : {currencyCode: jobCurrency})  || '--' }}</p>
+                        <p class="small text-muted">{{'max'|i18next}}. {{ (programRateModel === 'PAY_RATE' ? 'Pay Rate' : (user_type.toLowerCase() === 'vendor' && !clientBillRateEnabled) ? 'Vendor Bill Rate' : 'Bill Rate') |
+                            i18nextEager}}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-3" [hidden]="markupByRateTypeEnabled" *ngIf="programRateModel === 'PAY_RATE' || programRateModel === 'MARKUP'">
+                    <div class="d-flex align-items-center" *ngIf="user_type.toLowerCase() !== 'client'">
+                        <div class="initials initials-pink">
+                        <icon class="d-flex" size="14px" name="mail" type="material" theme="outlined" cuClass="d-flex">
+                        </icon>
+                        </div>
+                        <div class="d-flex justify-items-center flex-column ml-4">
+                        <p class="text-dark">{{submissionDetails?.rate_markup | accuracy : 'markup_percentage' || '--'}}</p>
+                        <p class="small text-muted">{{ 'mark-up' | i18next }}</p>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div class="col-12" *ngIf="submissionDetails?.rates">
+                <div class="scroll-wrapper rate-table-wrapper">
+                    <table class="table-rate">
+                        <thead class="border-top">
+                            <th class="text-left">{{'rate_type' | i18next}}</th>
+                            <th class="text-left" [hidden]="programRateModel === 'BILL_RATE'" *ngIf="userRole != 'client' || programRateModel === 'PAY_RATE'">{{'pay_rate' | i18next | titlecase}}</th>
+                            <th class="text-left" *ngIf="checkConfig()">{{'client_bill_rate' | i18next}}</th>
+                            <th class="text-left" *ngIf="userRole != 'client'">{{'vendor_bill_rate' | i18next}}</th>
+                            <th class="text-left" *ngIf="markupByRateTypeEnabled && (programRateModel == 'PAY_RATE' || programRateModel == 'MARKUP')">{{'mark-up'|i18next}}</th>
+                          </thead>
+                        <tbody>
+                            <tr *ngFor="let rate of submissionDetails?.rates">
+                                <ng-container *ngIf="rate?.billable">
+                                    <td data-value="Rate Type">
+                                        {{ rate?.name || rate?.rate_factor | i18next}}
+                                    </td>
+                                    <td [hidden]="programRateModel === 'BILL_RATE'" class="text-left has-border" *ngIf="userRole != 'client' || programRateModel === 'PAY_RATE'" data-value="Candidate Pay">
+                                        {{ rate?.pay_rate | accuracy : 'rate' : {currencyCode: jobCurrency || currentProgram.defaultCurrency} }}
+                                    </td>
+                                    <td class="text-left has-border" *ngIf="checkConfig()" data-value="Client Bill">
+                                        {{ rate?.bill_rate | accuracy : 'rate' : {currencyCode: jobCurrency || currentProgram.defaultCurrency} }}
+                                    </td>
+                                    <td class="text-left has-border" *ngIf="userRole != 'client'" data-value="Vendor Bill">
+                                        {{ rate?.vendor_bill_rate | accuracy : 'rate' : {currencyCode: jobCurrency || currentProgram.defaultCurrency} }}
+                                    </td>
+                                    <td data-value="Markup" class="text-left has-border" *ngIf="markupByRateTypeEnabled && (programRateModel == 'PAY_RATE' || programRateModel == 'MARKUP')">
+                                      {{rate?.markup | accuracy : 'markup_percentage'}}
+                                    </td>
+                                </ng-container>
+                            </tr>
+                        </tbody>
+                    </table>
+            </div>
+            </div>
+    </div>
+</div>
+
+    <div class="notes-wrap mini empty mt-24 " *ngIf="!submissionDetails?.comments">
+      <div class="d-flex trigger align-items-center notes-header">
+          <icon class="mr-8" size="18px" name="sticky_note_2" theme="outlined" color="#776DE0" type="material"
+              cuClass="d-flex "></icon>
+          <label>{{ 'no_submission_notes_added' | i18next }}</label>
+      </div>
+    </div>
+</div>
+
+
+<div *ngIf="!submissionDetails && !isLoading"
+    class="d-flex justify-content-center align-items-center height-vh loader-height">
+    <div class="text-center">
+        <img alt="no data" width="100" class="img-fluid" src="./assets/images/freepik--Envelope--inject-10.svg">
+        <h5 _ngcontent-hhf-c159="" class="pt-16">{{ 'no_submission_for_candidate' | i18next }}</h5>
+    </div>
+</div>
+
+<div *ngIf="isLoading" class="d-flex justify-content-center loader-height align-items-center height-vh">
+    <div class="dotloader"></div>
+</div>

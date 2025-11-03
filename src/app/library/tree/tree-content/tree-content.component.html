@@ -1,0 +1,161 @@
+<div class="fixed-header" [ngClass]="{'active': fixedHeader}">
+  <section class="tree-listing-head overflow-hidden pl-16">
+    <div class="column show-hide">
+      <button class="btn x-small btn-light rounded-sm expaneded-btn">
+        <icon size="12px" name="add" type="material" cuClass="d-flex"></icon>
+      </button>
+    </div>
+    <div *ngFor="let header of treeConfig?.columnList; let i=index" [ngStyle]="{'width': header.width + '%'}" [class]="header.isVisible ? 'column' : 'dnone'">{{header.isVisible ? (header.title | i18next) : ""}}</div>
+  </section>
+</div>
+<section class="tree-listing-head overflow-hidden pl-16" *ngIf="viewBlock">
+  <div class="column show-hide">
+    <button class="btn x-small btn-light rounded-sm expaneded-btn">
+      <icon size="12px" name="add" type="material" cuClass="d-flex"></icon>
+    </button>
+  </div>
+  <div *ngFor="let header of treeConfig?.columnList; let i=index" [ngStyle]="{'width': header.width + '%'}" [class]="header.isVisible ? 'column' : 'dnone'">{{header.isVisible ? (header.title | i18next) : ""}}</div>
+</section>
+<section class="tree-rows"  *ngFor="let vmsTreeDataSource of vmsTreeDataSource">
+  <!-- parent row start here -->
+  <div class="tree-row-item parent pl-16 clearfix" (mouseleave)="hideOptionDropdown(vmsTreeDataSource)">
+    <div *ngIf="viewBlock" class="column show-hide"></div>
+    <div *ngFor="let header of treeConfig?.columnList; let i=index" [ngStyle]="{'width': header.width + '%'}" [class]="header.isVisible ? 'column p-0' : 'dnone'">
+      <div class="column h-name" *ngIf="header.name == 'hierarchies'">
+        <span class="initials initials__purple">{{vmsTreeDataSource?.name   | shortName: '': 1}}</span>
+        <a href="javascript:void(0)">{{vmsTreeDataSource?.name|i18next}}</a>
+
+      </div>
+      <ng-container *ngIf="header?.isCreate">
+        <div *ngIf="header.name == 'hierarchies' && viewBlock"  class="column float-right border-right-active"  style="width: 5%">
+          <a class="add-fields" (click)="onClickAddSubLevel($event, vmsTreeDataSource)">
+            <icon size="24px" name="add_circle" type="material"></icon>
+          </a>
+        </div>
+      </ng-container>
+
+      <div *ngIf="header.name == 'managers'"  class="column">
+        <ng-container *ngIf="vmsTreeDataSource.managers?.length == 1">
+          <span class="initials initials__purple">{{vmsTreeDataSource.managers[0].first_name   | shortName:'first'}}</span>
+          {{vmsTreeDataSource.managers[0].first_name}}
+        </ng-container>
+        <ng-container *ngIf="vmsTreeDataSource.managers?.length == 2">
+          <ul class="avatar-list" *ngIf="vmsTreeDataSource.managers">
+            <li>
+              <figure class="overflow-hidden rounded-circle">{{vmsTreeDataSource.managers[0].first_name   | shortName: '': 1}}</figure>
+            </li>
+            <li>
+              <figure class="overflow-hidden rounded-circle">{{vmsTreeDataSource.managers[1].first_name | shortName: '': 1}}</figure>
+            </li>
+          </ul>
+        </ng-container>
+        <ng-container *ngIf="vmsTreeDataSource.managers?.length > 2">
+          <ul class="avatar-list">
+            <ng-container *ngFor="let item of vmsTreeDataSource.managers; let x = index">
+              <li *ngIf="x < 2">
+                <figure class="overflow-hidden rounded-circle">{{item.first_name | shortName: '': 1}}</figure>
+              </li>
+              </ng-container>
+              <li class="more-link">
+                <a href="javascript:void(0)">+ {{vmsTreeDataSource.managers?.length - 2}}</a>
+                <div class="more-item-dropdown position-absolute bg-light">
+                  <ul>
+                    <ng-container *ngFor="let item of vmsTreeDataSource.managers; let x = index">
+                    <li *ngIf="x > 1">
+                      <figure class="overflow-hidden rounded-circle">{{item.first_name | shortName:'first'}}</figure>
+                    </li>
+                  </ng-container>
+                  </ul>
+                </div>
+              </li>
+          </ul>
+        </ng-container>
+      </div>
+
+
+      <div class="column" *ngIf="header.name == 'modified_on' && viewBlock" >{{vmsTreeDataSource?.modified_on | localDateFormat}}</div>
+
+
+      <div class="column" *ngIf="header.name == 'is_enabled' && viewBlock"  >
+        <span class="status status-active" *ngIf="vmsTreeDataSource.is_enabled">
+          <icon size="12px" name="stop_circle" type="material" cuClass="d-flex"></icon>  {{ 'active' | i18next }}
+        </span>
+        <span class="status status-inactive" *ngIf="!vmsTreeDataSource.is_enabled">
+          <icon size="12px" name="stop_circle" type="material" cuClass="d-flex"></icon> {{ 'inactive' | i18next }}
+        </span>
+        <span class="actions">
+          <button [ngStyle]="{'visibility': (!header?.isView)?'hidden':'visible' }" class="btn small btn-secondary" (click)="onViewClick($event, vmsTreeDataSource)">
+            <icon size="14px" name="visibility" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+            </icon>
+            {{ 'view' | i18next }}
+          </button>
+          <button *ngIf="navItemsAllowed(header)" class="btn small btn-outine rounded-sm ml-4" (click)="showOptionDropdown(vmsTreeDataSource)">
+            <icon size="14px" name="more_horiz" type="material" cuClass="d-flex" class="flex">
+            </icon>
+          </button>
+        </span>
+        <nav class="option-dropdown position-absolute" [ngClass]="{'active' : vmsTreeDataSource.active}">
+          <ul>
+            <li *ngIf="header?.isCreate">
+              <a href="javascript:void(0)" (click)="onClickAddSubLevel($event, vmsTreeDataSource)">
+                <icon size="19px" name="add_circle" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+                </icon>
+                {{ 'add_sub_level' | i18next }}
+              </a>
+            </li>
+            <li *ngIf="header?.isEdit">
+              <a href="javascript:void(0)" (click)="onEditClick($event,vmsTreeDataSource)">
+                <icon size="19px" name="create" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+                </icon>
+                {{ 'edit' | i18next }}
+              </a>
+            </li>
+            <ng-container *accessControl>
+              <li *ngIf="header?.isDisable">
+                <a href="javascript:void(0)" (click)="onDisableClick(vmsTreeDataSource)">
+                  <div *ngIf="vmsTreeDataSource.is_enabled">
+                    <icon size="19px" name="label_off" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+                    </icon>
+                    {{ 'disable' | i18next }}
+                  </div>
+                  <div *ngIf="!vmsTreeDataSource.is_enabled">
+                    <icon size="19px" name="label" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+                    </icon>
+                    {{ 'enable' | i18next }}
+                  </div>
+                </a>
+              </li>
+            </ng-container>
+            <ng-container *accessControl>
+              <li *ngIf="header?.isDelete">
+                <button href="javascript:void(0)" [ngClass]="{'disable':(vmsTreeDataSource?.hierarchies?.length !== 0)}"
+                  [disabled]="vmsTreeDataSource?.hierarchies?.length !== 0" (click)="onDeleteClicked(vmsTreeDataSource)">
+                  <icon size="19px" name="delete" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+                  </icon>
+                  {{ 'delete' | i18next }}
+                </button>
+              </li>
+            </ng-container>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+
+  </div>
+  <!-- parent row end here -->
+
+  <!-- child row start here -->
+  <app-tree-node
+    *ngFor="let vmsParentNode of vmsTreeDataSource?.hierarchies"
+    [vmsTreeNode]="vmsParentNode"
+    [viewBlock]="viewBlock"
+    [flattednedHierarchy]="flattednedHierarchy"
+    [vmstreeConfig]="treeConfig"
+    (clickAddSubLevel)="onClickAddSubLevel($event, vmsParentNode)"
+    (disableClicked)="onDisableClick($event)"
+    (deleteClicked)="onDeleteClicked($event)"
+  ></app-tree-node>
+  <!-- child row end here -->
+</section>
+

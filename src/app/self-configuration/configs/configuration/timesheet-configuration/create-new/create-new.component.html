@@ -1,0 +1,721 @@
+<div class="create-new-timesheet">
+  <header class="section-header p-24 d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+      <i (click)="backClicked()" class="material-icons back-arrow-icon cursor-pointer mr-16">arrow_back</i>
+      <h3 class="font-weight-semibold mb-0">
+        <h3 class="font-weight-semibold mb-0">
+          {{ 
+              (mode === configurationMode?.View ? 'view_timesheet_configuration' : 
+              mode === configurationMode?.Edit ? 'edit_timesheet_configuration' : 
+              mode === configurationMode?.Clone ? 'clone_timesheet_configuration' :
+              mode === configurationMode?.Create ? 'create_timesheet_configuration' :
+              'create_timesheet_configuration') 
+              | i18next 
+          }}
+      </h3>
+    </h3>
+    </div>
+    <div *ngIf="mode !== configurationMode.View">
+      <button *accessControl [disabled]="isValidData" (click)="saveAction()" type="submit" class="c-btn c-btn-success-medium">{{ mode === configurationMode.Edit ? 'Update' : 'save' | i18next}}</button>
+    </div>
+  </header>
+  <section class="section-body-content">
+  <app-logs [log]="logs"></app-logs>
+    <div class="p-24">
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+          <label>{{ 'timesheet_configuration_name' | i18next }} <span class="require mr-4">*</span> <i class="tooltip-icon material-icons" tooltip="{{ 'timesheet_config_name_info' | i18next }}" placement="right">help</i></label>
+          <input [ngClass]="{'disableDiv': mode === configurationMode?.View}" [disabled]="mode === configurationMode.View || mode === configurationMode.Edit" [(ngModel)]="request.title" type="text" class="c-form-control"  name="configuration-name">
+          <p class="mt-4 small">
+            {{ 'timesheet_configuration_name_has_to_be_unique_&_will_be_used_as_a_picklist_for_‘timesheet_type__in_the_application_on_an_offer_&_assignment_modules.' | i18next }}
+          </p>
+        </div>
+        <div class="c-form-group toggle-width pt-24" [ngClass]="{'disableDiv': mode === configurationMode?.Edit}">
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner" [ngClass]="request?.is_active ? 'if-active' : 'if-inactive'">
+              <span class="status-text">{{(request?.is_active ? 'Active' : 'InActive') | i18next}}</span>
+              <span class="toggle-switch" [ngClass]="request?.is_active ? 'toggle-on' : 'toggle-off'"
+                (click)="onToggle()"></span>
+              <app-svms-modal title="Timesheet List" size="large" [visibility]="isDialogVisible" (onClose)="onModalClose()">
+                <app-svms-modal-body>
+                  <app-svms-table [coloumnDefintions]="tableColomnDefn"
+                    [tableOptions]="tableOptions"
+                    [showPageSettingData]="false"
+                    [dataSource]="timesheetList"></app-svms-table>
+                </app-svms-modal-body>
+              </app-svms-modal>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="c-notifications warning mb-24" *ngIf="impactedAssignmentsCount > 0 && isToggled">
+        <div class="notification-text-box d-flex align-items-center justify-content-between">
+          <i class="type material-icons">warning</i>
+          <p>{{'by_inactivating_this_timesheet_configuration,_impacted_assignments_and_timesheets_will_continue_to_use_this_timesheet_configuration_unless_an_assignment_update_is_made_to_associate_a_new_timesheet_configuration_to_the_assignment.' | i18next}}
+          </p>
+        </div>
+        <button class="c-btn c-btn-danger" (click)="showImpactedAssignment()">{{'view_details'|i18next}}</button>
+      </div>
+      <div class="c-form-group-row" *ngIf="totalRecords && isToggleChanged">
+        <div class="alert alert-warning d-flex align-items-center c-form-group">
+          <icon name="warning" size="26px" type="material" class="float-left mr-24"></icon>
+          <div class="alert-content float-left w-100">
+            <h3 class="mb-0">{{ 'warning' | i18next }}</h3>
+            <p>
+              {{'Disabling this rule configuration will affect' | i18next}} {{totalRecords}} {{'timesheets. Please view the details before proceeding' | i18next}}
+            </p>
+          </div>
+          <div class="view-details-btn d-flex">
+            <button (click)="viewImpactedTimesheetList()">
+              {{'view_details ' | i18next}}
+            </button>
+            <button (click)="onUpdateToggle()">
+              {{'save' | i18next}}
+            </button>
+          </div>
+          <span class="cursor-pointer position-absolute">
+            <icon name="clear" size="16px" type="material" class="ml-8 d-flex" cuClass="cu-icon">
+            </icon>
+          </span>
+        </div>
+      </div>
+  <div>
+      <div class="c-form-group-row">
+        <div class="c-form-group tooltip-info">
+        <hierarchy-treeview 
+          [disabled]="mode === configurationMode.View || mode === configurationMode.Edit"
+          label="{{'Hierarchies' | i18next}}"
+          hierarchySupportText="{{'hierarchies_info' | i18next}}"
+          [treeInput]="hierarchies"
+          [allowDefaultSelection]="true"
+          [allowDefaultClear]="false"
+          [selected]="selections"
+          [initialDefaults]="defaultSelections"
+          [mandatory]="true"
+          (changed)="hierarchySelectionChanged($event)"
+          [decoupleChildFromParent]="true"
+        >
+        </hierarchy-treeview>
+      </div>
+      </div>
+      <div [ngClass]="{'disableDiv': mode === configurationMode.View || mode === configurationMode.Edit}" class="c-form-group-row" *ngIf="remoteWorkerLocation">
+        <div class="c-form-group">
+            <label class="mb-16">{{ 'location_type' |i18next }} <span class="require mr-4">*</span>
+            <i class="tooltip-icon material-icons enableDiv" tooltip="{{ 'Indicates which Location Type will drive the Timesheet Configuration. For example, if Work Location is selected, the Timesheet Type options at Offer and/or Assignment will consider the Work Location of the Offer and/or Assignment. Additionally, if Remote Worker Location is selected, the Timesheet Type will consider the Remote Worker Location on the Offer and/or Assignment to provide the appropriate Timesheet Type options.' }}" placement="right">help</i></label>
+            <div class="d-flex align-items-center">
+                <div class="mr-24 d-flex">
+                    <label class="c-input-checkbox mb-0" (click)="onWorklocationClick($event)">
+                        <input class="mr-8" type="checkbox" id="rules.basic_rules.workLocation" [(ngModel)]="request.rules.basic_rules.workLocation" value="WORKLOCATION">
+                        <span class="cb-ui"></span>
+                        <span  class="cb-label">{{'work_location'|i18next}}</span>
+                    </label>
+                </div>
+                <div class="mr-4 d-flex tooltip-hover">
+                    <label class="c-input-checkbox mb-0" (click)="onRemoteWorkerlocationClick($event)">
+                        <input class="mr-8" type="checkbox" id="rules.basic_rules.remoteWorkerLocation" [(ngModel)]="request.rules.basic_rules.remoteWorkerLocation" value="REMOTEWORKERLOCATION">
+                        <span class="cb-ui"></span>
+                        <span  class="cb-label">{{'remote_worker_location'| i18next}}</span>
+                    </label>
+                    <i class="tooltip-icon ml-8 material-icons enableDiv" tooltip="The Remote Worker Location selected here will drive when this Timesheet Configuration will be available to select in the 'Timesheet Type' field based on the Remote Worker Location of the Offer and/or Assignment." placement="right">help</i>
+                </div>
+            </div>
+        </div>
+    </div>
+      <div [ngClass]="{'disableDiv': mode === configurationMode.View || mode === configurationMode.Edit}" class="c-form-group-row" *ngIf="request.rules.basic_rules.workLocation || !remoteWorkerLocation">
+        <div class="c-form-group">
+          <h4 class="font-weight-bold mb-16" *ngIf="remoteWorkerLocation">{{ 'work_location' | i18next }}</h4>
+          <label>{{ 'work_locations' | i18next }} <span class="require mr-4">*</span>
+          <i class="tooltip-icon material-icons enableDiv" tooltip="{{ 'worklocation_info' | i18next }}" placement="right">help</i></label>
+          <ng-select [disabled]="mode === configurationMode.View" [clearable]="true" (change)="allWorkLocation(request.location)"
+              id="rules.basic_rules.work_week.location" [(ngModel)]="request.location" [multiple]='true'
+              [placeholder]="'Select Work Location' | i18next" (search)="this.workLocation.next($event)" [searchable]="true">
+              <ng-option *ngFor="let workLocation of locations | keysort:'name'" value="{{workLocation?.id}}">
+                {{workLocation?.name}}
+              </ng-option>
+            </ng-select>
+        </div>
+      </div>
+      <div [ngClass]="{'disableDiv': mode === configurationMode.View || mode === configurationMode.Edit}" class="c-form-group-row" *ngIf="request.rules.basic_rules.remoteWorkerLocation">
+        <div class="c-form-group">
+        <h4 class="font-weight-bold mb-16" *ngIf="remoteWorkerLocation">{{ 'remote_worker_location' | i18next }}</h4>
+          <label>{{ 'country' | i18next }} <span class="require">*</span></label>
+          <ng-select [disabled]="mode === configurationMode.View" [clearable]="true" (change)="changeCountry($event)" [multiple]='true'
+             id = "rules.basic_rules.remote_country" [(ngModel)]="request.remote_country"
+              [placeholder]="'select_country' | i18next" [searchable]="true">
+              <ng-option *ngFor="let country  of allCountryList | keysort:'name'" value="{{country?.id}}">
+                {{country?.name}}
+              </ng-option>
+            </ng-select>
+        </div>
+      </div>
+      <div [ngClass]="{'disableDiv': mode === configurationMode.View || mode === configurationMode.Edit}" class="c-form-group-row" *ngIf="request.rules.basic_rules.remoteWorkerLocation">
+        <div class="c-form-group">
+          <label>{{ 'state' | i18next }}</label>
+          <ng-select [disabled]="mode === configurationMode.View" [clearable]="true" (change)="changeState($event)" [multiple]='true'
+             id = "rules.basic_rules.remote_state" [(ngModel)]="request.remote_state"
+              [placeholder]="'select_state' | i18next" [searchable]="true">
+              <ng-option *ngFor="let state of stateList | keysort:'name'" value="{{state?.id}}">
+                {{state?.name }}
+              </ng-option>
+            </ng-select>
+        </div>
+      </div>
+      <div [ngClass]="{'disableDiv': mode === configurationMode.View || mode === configurationMode.Edit}" class="c-form-group-row" *ngIf="request.rules.basic_rules.remoteWorkerLocation">
+        <div class="c-form-group">
+          <label>{{ 'county' | i18next }}</label>
+          <ng-select [disabled]="mode === configurationMode.View" [clearable]="true" (change)="changeCounty($event)" [multiple]='true'
+               id = "rules.basic_rules.remote_county" [(ngModel)]="request.remote_county"
+              [placeholder]="'select_county' | i18next" [searchable]="true">
+              <ng-option *ngFor="let county of countyList | keysort:'name'" value="{{county?.id}}">
+                {{county?.name}}
+              </ng-option>
+            </ng-select>
+        </div>
+      </div>
+      <div [ngClass]="{'disableDiv': mode === configurationMode.View || mode === configurationMode.Edit}" class="c-form-group-row" *ngIf="request.rules.basic_rules.remoteWorkerLocation">
+        <div class="c-form-group">
+          <label>{{ 'city' | i18next }}</label>
+          <ng-select [disabled]="mode === configurationMode.View" [clearable]="true" (change)="changeCity($event)" [multiple]='true'
+             id = "rules.basic_rules.remote_city" [(ngModel)]="request.remote_city"
+              [placeholder]="'select_city' | i18next" [searchable]="true">
+              <ng-option *ngFor="let city of cityList | keysort:'name'" value="{{city?.id}}">
+                {{city?.name }}
+              </ng-option>
+            </ng-select>
+        </div>
+      </div>
+      <div [ngClass]="{'disableDiv': mode === configurationMode.View || mode === configurationMode.Edit}" class="c-form-group-row">
+        <!-- <div class="c-form-group position-relative">
+          <label>{{ 'timesheet_start_date' | i18next }} <span class="require">*</span></label>
+          <svms-datepicker [disabled]="mode === configurationMode.View" *ngIf="currentprogram?.start_date"
+              [(ngModel)]="request.start_date" [inputdateFormat]="dateFormat" [options]="calendarOptions"
+              id="timesheetstartdate" I18n>
+            </svms-datepicker>
+        </div> -->
+        <div class="c-form-group">
+          <label>{{ 'work_period' | i18next }} <span class="require">*</span></label>
+          <ng-select [disabled]="mode === configurationMode.View || mode === configurationMode.Edit" [clearable]="true"
+              id="rules.basic_rules.work_week.period" [(ngModel)]="request.rules.basic_rules.work_week.period"
+              [placeholder]="'Select Work Period' | i18next" [searchable]="false" #periodVal (change)="updateWorkPeriodConfig()">
+              <ng-option *ngFor="let weekPeriod of options.weekPeriods | keysort:'name'" value="{{weekPeriod.value}}">
+                {{weekPeriod.name}}
+              </ng-option>
+            </ng-select>
+        </div>
+        <div class="c-form-group" *ngIf="request.rules.basic_rules.work_week.period =='weekly'">
+          <label>{{ 'work_start_day' | i18next }} <span class="require">*</span></label>
+          <ng-select [disabled]="mode === configurationMode.View || mode === configurationMode.Edit" [clearable]="true"
+              id="rules.basic_rules.work_week.week_start_day" [(ngModel)]="request.rules.basic_rules.work_week.week_start_day"
+              [placeholder]="'Select Work Period' | i18next" [searchable]="false" #periodVal (change)="workStartDay()">
+              <ng-option *ngFor="let weekPeriod of weekStartDay" value="{{weekPeriod.value}}">
+                {{weekPeriod.name}}
+              </ng-option>
+            </ng-select>
+        </div>
+        <div class="c-form-group" *ngIf="request.rules.basic_rules.work_week.period =='X Weekly'">
+          <label>{{ 'work_week_number' | i18next }} <span class="require">*</span></label>
+          <ng-select [disabled]="mode === configurationMode.View || mode === configurationMode.Edit" [clearable]="true"
+              id="rules.basic_rules.work_week.week_number" [(ngModel)]="request.rules.basic_rules.work_week.week_number"
+              [placeholder]="'Select Week Number' | i18next" [searchable]="false" #periodVal (change)="workWeekNumber()">
+              <ng-option *ngFor="let weekNumber of weekNumbers" value="{{weekNumber.value}}">
+                {{weekNumber.name}}
+              </ng-option>
+            </ng-select>
+        </div>
+
+        <!-- <div class="c-form-group" *ngIf="request.rules.basic_rules.work_week.period =='Monthly'">
+          <label>{{ 'month_start_date' | i18next }} <span class="require">*</span></label>
+          <ng-select [disabled]="mode === configurationMode.View || mode === configurationMode.Edit" [clearable]="true"
+              id="rules.basic_rules.work_week.month_start_day" [(ngModel)]="request.rules.basic_rules.work_week.month_start_day"
+              [placeholder]="'Select Month Start Date' | i18next" [searchable]="false" #periodVal (change)="monthStartDay()">
+              <ng-option *ngFor="let monthStartDay of monthStartDays" value="{{monthStartDay.value}}">
+                {{monthStartDay.name}}
+              </ng-option>
+            </ng-select>
+        </div> -->
+        <!-- <div class="c-form-group" *ngIf="isCico()">
+          <label>{{ 'time_format' | i18next }} <span class="require">*</span></label>
+          <ng-select [disabled]="mode === configurationMode.View" [clearable]="true" [placeholder]="'Select Time Format'|i18next"
+            [searchable]="false" [(ngModel)]="request.rules.basic_rules.time_format">
+            <ng-option *ngFor="let format of options.timeFormats" [value]="format.value">{{format.name}}</ng-option>
+          </ng-select>
+        </div> -->
+        <div class="c-form-group">
+          &nbsp;
+        </div>
+      </div>
+      <h4 class="font-weight-medium">{{ 'timesheet_format' | i18next }}</h4>
+      <p class="font-weight-medium mb-16">{{ 'select_timesheet_format' | i18next }} <span class="require">*</span></p>
+      <div class="d-flex mb-24" >
+        <div class="d-flex align-items-center mr-24" *ngFor="let type of selectedTimesheet" [attr.disabled]="mode === configurationMode.View">
+          <div>
+            <label class="mb-0 c-input-radio">
+              <input class="mr-8" id="{{type.value}}" [value]='type.value' type="radio" 
+                [(ngModel)]="request.rules.basic_rules.timesheet_type[0]" 
+                (click)="selectedTimeSheet(type.value)" 
+                [disabled]="(mode === configurationMode.View || mode === configurationMode.Edit)" 
+                [readonly]="(mode === configurationMode.View || mode === configurationMode.Edit)"
+              >
+              <span class="cb-ui"></span>
+              <span class="cb-label">{{ type?.label | i18next}}</span>
+            </label>
+          </div>
+          <i class="tooltip-icon ml-8 material-icons" tooltip="Quick intro about this option" placement="right">help</i>
+        </div>
+      </div>
+      
+      <div [ngClass]="{'disableDiv': mode === configurationMode.View || mode === configurationMode.Edit}" class="c-form-group-row" *ngIf="isCico()">
+        <div class="c-form-group">
+        <label>{{ 'time_format' | i18next }} <span class="require">*</span></label>
+        <ng-select [disabled]="mode === configurationMode.View || mode === configurationMode.Edit" [clearable]="true" [placeholder]="'Select Time Format'|i18next"
+          [searchable]="false" [(ngModel)]="request.rules.basic_rules.time_format" (change)="titoTimeFormat(request.rules.basic_rules.time_format)">
+          <ng-option *ngFor="let format of options.timeFormats" [value]="format.value">{{format.name}}</ng-option>
+        </ng-select>
+        </div>
+      </div>
+    
+      <div class="c-form-box border rounded-sm mb-16 p-24" *ngIf="isHourly() && !isDayTimesheet() && !isCico()">
+        <div class="d-flex justify-content-between">
+          <div>
+            <p class="font-weight-medium dark">{{ 'allocation_method' | i18next }} <span class="require">*</span></p>
+            <p class="small mb-16 mr-32">{{ 'hybrid_is_a_combination_of_both_methods' | i18next }}</p>
+          </div>
+          <div class="c-form-group-row">
+             <div class="c-form-group">
+              <ng-select class = "allocation-method-wrapper" [disabled]="mode === configurationMode.View || mode === configurationMode.Edit" [clearable]="true"
+              [placeholder]="'select_hours_allocation' | i18next" [searchable]="false"
+              [(ngModel)]="request.rules.basic_rules.hour_type_calculation" (change)="hideRate(request.rules.basic_rules.hour_type_calculation)">
+              <ng-option *ngFor="let type of options.hoursAllocationTypes | keysort:'name'" [value]="type.value">{{type.name}}</ng-option>
+            </ng-select>
+             </div>
+             
+          </div>
+        </div>
+     <!-- ui for manual allocation end  here -->
+     <!-- ui for Hybrid start here-->
+     <div>
+       <div class="c-child position-relative border-bottom mb-16" *ngIf="(isHourly() && (request.rules.basic_rules.hour_type_calculation==='hybrid'))">
+         <p class="font-weight-medium dark">{{ 'automation_allocation_settings' | i18next }}</p>
+         <p class="small mb-16">
+           {{ 'hours_entered_worker_timesheet' | i18next }}
+         </p>
+         <div [ngClass]="{'disableDiv': mode === configurationMode.View || mode === configurationMode.Edit}" class="c-form-group-row">
+          <div class="c-form-group">
+            <label>{{ 'timesheet_rule_configuration' | i18next }}</label>
+            <ng-select [disabled]="true" [clearable]="true" id="request.rule_config" [(ngModel)]="ruleConfigs" [multiple]='true'
+              [searchable]="true">
+              <ng-option *ngFor="let ruleconfig of request.rule_config" value="{{ruleconfig?.uuid}}">
+                {{ruleconfig?.title}}
+              </ng-option>
+            </ng-select>
+          </div>
+        </div>
+       </div>
+       <div class="c-child position-relative" *ngIf="(isHourly() && (request.rules.basic_rules.hour_type_calculation==='hybrid'))">
+        <p class="font-weight-medium mb-12 dark">{{ 'manual_allocation_settings' | i18next }}</p>
+        <p class="font-weight-medium dark">{{ 'project' | i18next }}</p>
+        <p class="small mb-16">
+          {{ 'project_dropdown_of_the_timesheet' | i18next }}
+        </p>
+         <div class="c-form-group-row">
+          <div class="c-form-group">
+            <label>{{ 'source_for_project' | i18next }} <span class="require">*</span>
+            </label>
+            <ng-select [disabled]="true" [(ngModel)]="projectTypes">
+              <ng-option *ngFor="let option of options?.timesheetProjectTypes | keysort:'name'" [value]="option.value">{{option.name}}
+              </ng-option>
+            </ng-select>
+          </div>
+         </div>
+         <div class="c-form-group-row" [ngClass]="{'disableDiv': mode === configurationMode.View || mode === configurationMode.Edit}">
+          <div class="c-form-group mb-0 pb-0">
+            <label>{{ 'select_option' | i18next }} <span class="require">*</span>
+            </label>
+            <ng-select [clearable]="true" multiple="true" [(ngModel)]="secondProjects" (change)="selectionPrjectOption($event)"
+              [placeholder]="'select' | i18next" [searchable]="true">
+              <ng-option *ngFor="let option of secondProjectsDropdown | keysort:'name'" [value]="option.name">{{option.name}}
+              </ng-option>
+            </ng-select>
+          </div>
+         </div>
+       </div>
+       <div>
+       </div>
+     </div>
+     <!-- ui for Hybrid end here-->
+     </div>
+
+     <app-toggle-box [ngClass]="{'disableDiv': mode === configurationMode.View || mode === configurationMode.Edit}" *ngIf="!isCico() && (isHourly() && !(request.rules.basic_rules.hour_type_calculation==='hybrid')) || isDayTimesheet() " title="Project" subtitle="When enabled, timesheets can be structured for time entry based on projects.  The source and values of the projects defined below will be derived from the Assignment and presented on the Timesheet.  Time can then be entered against each value on the Timesheet." selectbox="true"
+        [isMultiple]="false" selectrequired="true" [fromTSConfig]="true" [options]="options | keysort:'name'" placeholderLabel="Select Values" selectboxlabel="Source for Projects" [projectTypes]="projectTypes" [projectSource]="options?.timesheetProjectTypes" [request] ="request" [mode]="mode" 
+        [foundationalFields]="foundationalFields" [customFields]="customFields" [customProjects]="customProjects" [configurationMode]="configurationMode" [secondProjectsDropdown]="secondProjectsDropdown" [secondProjects]="secondProjects" [isTrue]="request?.rules?.basic_rules?.project?.is_allow"
+        (selectionChanged)="selectionProject($event)" (projectSelectOptionChanged)="selectionPrjectOption($event)" (initSelectionChanged)="selectionProject($event, true)" (isToggleBtnChecked)="projectToggle($event)">
+      </app-toggle-box>
+
+      <app-toggle-box [ngClass]="{'disableDiv': mode === configurationMode.View}" title="Master Data Type(s) to Display on Timesheet Header" subtitle="Select any additional Master Data Types to display on the Timesheet Header." selectbox="true" [projectTypes]="masterDataTypes"
+        isMultiple="true" [options]="options | keysort:'name'" placeholderLabel="Select Values" selectboxlabel="Select Master Data Type" [showMdtInput]="true" [projectSource]="foundationalFields" [request] ="request" [mode]="mode"
+        [selectrequired] = "true"   [configurationMode]="configurationMode" [isTrue]="request?.rules?.basic_rules?.header?.foundational_data?.is_allow"
+          (isToggleBtnChecked)="mdtToggle($event)" (selectionChanged)="selectionMasterDataTypes($event)">
+      </app-toggle-box>
+    </div>
+  </div>
+  <div [ngClass]="{'disableDiv': mode === configurationMode?.View}">
+    <div [ngClass]="{'disableDiv': mode === configurationMode?.Edit}">
+    <div  class="config-item d-flex align-items-center justify-content-between sticky-header">
+      <p class="font-weight-medium blue-color">{{ 'timesheet_notes' | i18next }}</p>
+      <div class="toggle-panel">
+        <div class="toggle-panel-inner" [ngClass]="request?.rules?.basic_rules?.notes?.is_allow ? 'if-active' : 'if-inactive'">
+          <span class="toggle-switch" [ngClass]="request?.rules?.basic_rules?.notes?.is_allow ? 'toggle-on' : 'toggle-off'"
+            (click)="onClickToggleNotes()"></span>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="tsNotes?.value" [ngClass]="{'disableDiv':request?.rules?.basic_rules?.notes?.is_allow == false}">
+      <app-config-common-listing mainIcon="calculate" itemLevel="parent" subtitle="Timesheet Notes"  [disabled]="mode === configurationMode.View || !request?.rules.basic_rules?.notes.option?.week_level?.is_allow"
+        description="There will be only one Text box on the Timesheet to enter Notes." selectBox="true" [updatedSelectBoxValue]="weeklySelectedValue" [options]="notesValue | keysort: 'name'" (onValueChange)="timesheetNotesSelected($event)" >
+      </app-config-common-listing>
+      <app-config-common-listing mainIcon="calculate" itemLevel="parent" subtitle="Daily Notes" [disabled]="mode === configurationMode.View || !request?.rules?.basic_rules?.notes?.option?.day_level?.is_allow"
+        description="" selectBox="true" [updatedSelectBoxValue]="dailySelectedValue" [options]="notesValue | keysort: 'name'" (onValueChange)="dailyNotesSelected($event)">
+      </app-config-common-listing>
+      <app-config-common-listing *ngIf="projectTypes?.length > 0" mainIcon="calculate" itemLevel="parent"
+        subtitle="Daily Notes for Each Project" [disabled]="mode === configurationMode.View || !request?.rules?.basic_rules?.notes?.option?.project_level?.is_allow"
+        description="" selectBox="true" [updatedSelectBoxValue]="activitySelectedValue" [options]="notesValue | keysort: 'name'" (onValueChange)="projectNotesSelected($event)">
+      </app-config-common-listing>
+    </div>
+    <div *ngIf="isBreakTiming"  class="config-item d-flex align-items-center justify-content-between sticky-header">
+      <p class="font-weight-medium blue-color">{{ 'break_timing' | i18next }}</p>
+      <div class="toggle-panel">
+        <div class="toggle-panel-inner" [ngClass]="breakTime?.value ? 'if-active' : 'if-inactive'">
+          <span class="toggle-switch" [ngClass]="breakTime?.value ? 'toggle-on' : 'toggle-off'"
+            (click)="onClickToggleBreakTime()"></span>
+        </div>
+      </div>
+    </div>
+    <div  *ngIf="breakTime?.value && isBreakTiming">
+      <app-config-common-listing mainIcon="how_to_reg" itemLevel="parent" subtitle="Let's Define the Break Rule"
+        description="Allow ability to edit/update rate factor while updating an assignment" buttonInput="Define Rule"
+        buttonIcon="add" restBreak="true" [breakType]="request.rules.basic_rules.break" (onBtnClick)="openBreakModal($event)" ></app-config-common-listing>
+    </div>
+    <div class="config-item d-flex align-items-center justify-content-between sticky-header">
+      <p class="font-weight-medium blue-color">{{ 'timesheet_hour_settings' | i18next }}</p>
+    </div>
+    <app-config-common-listing  mainIcon="calculate" itemLevel="parent" subtitle="Maximum Number of ST hours / Week"
+      description="" inputText="true" [updatedTextInput]="request.rules.basic_rules.max_regular_weekly_hours" [viewMode]="mode === configurationMode.View" (onValueChange)="validateStHours($event)">
+    </app-config-common-listing>
+    <app-config-common-listing  mainIcon="calculate" itemLevel="parent" subtitle="Maximum Number of ST hours / Day"
+      description="" inputText="true" [updatedTextInput]="request.rules.basic_rules.max_regular_daily_hours" [viewMode]="mode === configurationMode.View" (onValueChange)="validateNumberStHours($event)">
+    </app-config-common-listing>
+    <app-config-common-listing  mainIcon="calculate" itemLevel="parent" subtitle="Maximum Number of Work Days / Week"
+      description="" inputText="true" [updatedTextInput]="request.rules.basic_rules.working_days_in_week" [viewMode]="mode === configurationMode.View" (onValueChange)="validateDays($event)">
+    </app-config-common-listing>
+    <div class="c-form-group-row" *ngIf="request?.rules?.basic_rules?.timesheet_type?.length && !isDayTimesheet()">
+      <div class="c-form-group">
+        <app-config-common-listing mainIcon="calculate" itemLevel="parent"
+          [updatedToggleValue]="request?.rules?.basic_rules?.is_enable_daily_hour_limit" subtitle="Daily Hour Limit"
+          description="When enabled the system will validate the daily hours entered on a timesheet against the allowable limit defined below. If exceeded, then the user will receive an error and be prevented from submitting the timesheet until adjustments are made." (onValueChange)="onToggleDailyHourLimit($event)"
+          toggleSwitch="true"></app-config-common-listing>
+    
+        <div *ngIf="request?.rules?.basic_rules?.is_enable_daily_hour_limit">
+          <app-config-common-listing itemLevel="child" subtitle="Allow Maximum Daily Hours" description="" inputText="true"
+            [updatedTextInput]="request.rules.basic_rules.allowed_maximum_daily_hours"
+            (onValueChange)="onDailyHourChange($event)">
+          </app-config-common-listing>
+        </div>
+    
+        <app-config-common-listing mainIcon="calculate" itemLevel="parent"
+          [updatedToggleValue]="request?.rules?.basic_rules?.is_enable_weekly_hour_limit" subtitle="Weekly Hour Limit"
+          description="When enabled the system will validate the weekly hours entered on a timesheet against the allowable limit defined below. If exceeded, then the user will receive an error and be prevented from submitting the timesheet until adjustments are made." (onValueChange)="onToggleWeeklyHourLimit($event)"
+          toggleSwitch="true" toggleSwitch="true"></app-config-common-listing>
+    
+        <div *ngIf="request?.rules?.basic_rules?.is_enable_weekly_hour_limit">
+          <app-config-common-listing itemLevel="child"
+            [updatedTextInput]="request.rules.basic_rules.allowed_maximum_weekly_hours"
+            subtitle="Allow Maximum Weekly Hours" description="" inputText="true"
+            (onValueChange)="onDailyWeeklyChange($event)"></app-config-common-listing>
+        </div>
+      </div>
+    </div>
+
+    <!-- <app-config-common-listing  mainIcon="how_to_reg" itemLevel="parent" subtitle="Half Day Rule"
+      description="" numberSelectNumber="true"></app-config-common-listing> -->
+    <div class="config-item d-flex align-items-center justify-content-between sticky-header">
+      <p class="font-weight-medium blue-color">{{ 'manage_weekends' | i18next }}</p>
+    </div>
+    <app-config-common-listing  mainIcon="calculate" itemLevel="parent" subtitle="Select Weekend Days"
+      description="" description="The selected weekend days will be identified on a timesheet as a weekend." multipleOption="true" [options]="options.days" [updatedSelectBoxValue]="request.rules.basic_rules.weekend.option" [viewMode]="mode === configurationMode.View || request.rules.basic_rules.working_days_in_week == 7"
+      multiple="true" (onValueChange)="selectWeekend($event)"></app-config-common-listing>
+    <app-config-common-listing  mainIcon="percent" itemLevel="parent" subtitle="Allow Entries on Weekend Days" [viewMode]="mode === configurationMode.View || request.rules.basic_rules.working_days_in_week == 7"
+      description=" If enabled, the user can enter time on weekend days on a timesheet. If disabled, the user cannot enter time on weekend days on a timesheet. " toggleSwitch="true" [updatedToggleValue]="request.rules.basic_rules.weekend.is_allow_entry" (onValueChange)="weekendWeekOffToggle($event)">
+    </app-config-common-listing>
+    <!-- <app-config-common-listing  mainIcon="percent" itemLevel="parent" subtitle="Paid Weekend / Week Off"
+      description="This setting allows user to pay amount as per various Rate Factors configured in Rule Configuration when workers worked on a weekend." toggleSwitch="true" [viewMode]="mode === configurationMode.View || request.rules.basic_rules.working_days_in_week == 7" [updatedToggleValue]="request.rules.basic_rules.weekend.is_paid" (onValueChange)="paidWeekendWeekOffToggle($event)">
+    </app-config-common-listing> -->
+    </div>
+    <!-- End -->
+    
+    <div  class="config-item d-flex align-items-center justify-content-between sticky-header">
+      <p class="font-weight-medium blue-color">{{ 'timesheet_modification_rules' | i18next }}</p>
+      <div class="toggle-panel">
+        <div class="toggle-panel-inner" [ngClass]="modificationRule?.value ? 'if-active' : 'if-inactive'">
+          <span class="toggle-switch" [ngClass]="modificationRule?.value ? 'toggle-on' : 'toggle-off'"
+            (click)="onClickToggleModification()"></span>
+        </div>
+      </div>
+    </div>
+    <div  *ngIf="modificationRule?.value">
+      <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+        subtitle="Timesheet Modification Duration for Vendor" [viewMode]="mode === configurationMode.View"
+        description="This setting allows the Vendor to perform timesheet modifications X days after the Timesheet Approved Date." [value]="request.rules.basic_rules.hours_modification_period.option.vendor.period"
+        [options]="allowVendorToPerformModification | keysort:'name'" [selectedValue]="request.rules.basic_rules.hours_modification_period.option.vendor.type"
+        (onOptionValueChange)="getSelectedValue($event)"
+        (onValueChange)="allowVendowTofPerModifn($event)" numberSelectOption="true">
+      </app-config-common-listing>
+      <!-- <app-config-common-listing itemLevel="child" subtitle="Vendor Modification After"
+        description="" selectBox="true"
+        [options]="options.modificationOptions" [updatedSelectBoxValue]="request.rules.basic_rules.hours_modification_period.option.vendor.applicable_on"
+        (onValueChange)="onValueChangeonValueChange($event)"></app-config-common-listing> -->
+      <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+        subtitle="Timesheet Modification Duration for MSP"
+        description="This setting allows the MSP to perform timesheet modifications X days after the Timesheet Approved Date."
+        [value]="request.rules.basic_rules.hours_modification_period.option.msp.period"
+        [options]="allowVendorToPerformModification | keysort:'name'" [selectedValue]="request.rules.basic_rules.hours_modification_period.option.msp.type"
+        (onOptionValueChange)="getSelectedMSPValue($event)"
+        (onValueChange)="allowMSPToPerModifn($event)" numberSelectOption="true">
+      </app-config-common-listing>
+      <!-- <app-config-common-listing itemLevel="child" subtitle="MSP Modification After"
+        description="" [options]="options.modificationOptions" [updatedSelectBoxValue]="request.rules.basic_rules.hours_modification_period.option.msp.applicable_on"
+        (onValueChange)="onValueChangeonMSPValueChange($event)" selectBox="true"></app-config-common-listing> -->
+    </div>
+    <div [ngClass]="{'disableDiv': mode === configurationMode?.Edit}" class="config-item d-flex align-items-center justify-content-between sticky-header">
+      <p class="font-weight-medium blue-color">{{ 'timesheet_entry_thresholds' | i18next }}</p>
+      <div class="toggle-panel">
+        <div class="toggle-panel-inner" [ngClass]="timesheetEntries?.value ? 'if-active' : 'if-inactive'">
+          <span class="toggle-switch" [ngClass]="timesheetEntries?.value ? 'toggle-on' : 'toggle-off'"
+            (click)="onClickToggleEntries()"></span>
+        </div>
+      </div>
+    </div>
+   
+    <div *ngIf="timesheetEntries?.value" [ngClass]="{'disableDiv': mode === configurationMode.View || mode === configurationMode.Edit}">
+
+      <!-- Start V2M-25704 -->
+      <div>
+        <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+          subtitle="Enter & Submit Final Timesheet after Assignment Ends" description="Allows the selected persona to enter and submit the final timesheet (i.e. the last week of assignment)within the defined
+                    threshold from the assignment end date. For example, if the assignment closed on 10/31, and has been given this threshold
+                    for 5 calendar days, then the user shall be submit final timesheet until 11/05." toggleSwitch="true"
+          [updatedToggleValue]="request.rules.basic_rules.grace_period.is_allow" (onValueChange)="toggleChangeValue()">
+        </app-config-common-listing>
+        <div *ngIf="request.rules.basic_rules.grace_period.is_allow">
+          <app-config-common-listing itemLevel="child" subtitle="Define Persona and Threshold" description=""
+            addRemoveFieldItem="true" required="true" (onMultiSelectArrayChange)="updatePeriod($event, 'grace_period')"
+            [multiSelectArray]="request.rules.basic_rules.grace_period.option">
+          </app-config-common-listing>
+        </div>
+        <!-- <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+              subtitle="Enter & Submit Past Missing Timesheet(s)" description="Allows the selected persona to enter and submit timesheets for the past weeks of assignment that might have been missed, for the
+                    selected time period. For example, if assignment started on 01/01/2023, the permission is granted for 5 days and current date is 10/31/2023,
+                    then the user can submit any timesheet from 01/01/2023 that they might have missed till 11/05/2023."
+              toggleSwitch="true" [updatedToggleValue]="request.rules.basic_rules.past_period.is_allow" (onValueChange)="togglePastTimesheet()">
+            </app-config-common-listing>
+            <div *ngIf="request.rules.basic_rules.past_period.is_allow">
+              <app-config-common-listing itemLevel="child" subtitle="Define Persona and Threshold" description=""
+                addRemoveFieldItem="true" (onMultiSelectArrayChange)="updatePeriod($event, 'past_period')" [multiSelectArray]="request.rules.basic_rules.past_period.option">
+              </app-config-common-listing>
+            </div>
+      
+            <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent" subtitle="Enter & Submit Future Timesheet(s)"
+              description="Allows the selected persona to enter and submit timesheets for the future weeks of assignment for the selected time period. For example,
+                    if the assignment duration is 01/01/2023 - 12/31/2023, current date is 10/31/2023 and this permission has been given for 5 days, then the
+                    user shall be able to submit timesheet for the weeks of 11/06/2023 onwards till 11/05/2023."
+              toggleSwitch="true" [updatedToggleValue]="request.rules.basic_rules.future_period.is_allow" (onValueChange)="toggleFutureTimesheet()">
+            </app-config-common-listing>
+            <div *ngIf="request.rules.basic_rules.future_period.is_allow">
+              <app-config-common-listing itemLevel="child" subtitle="Define Persona and Threshold" description=""
+                addRemoveFieldItem="true" (onMultiSelectArrayChange)="updatePeriod($event, 'future_period')" [multiSelectArray]="request.rules.basic_rules.future_period.option">
+              </app-config-common-listing>
+            </div> -->
+      </div>
+      <!-- End -->
+
+      <!-- <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+      subtitle="The Worker gets access to enter & submit Timesheet after Assignment End Date"
+      description=""
+      [value]="request.rules.basic_rules.grace_period.option.worker.period"
+      [options]="options.accessOptions" [selectedValue]="request.rules.basic_rules.grace_period.option.worker.type"
+      (onOptionValueChange)="allowWorkerEndDateTimesheetEntriesDropdown($event)"
+      (onValueChange)="allowWorkerEndDateTimesheetEntries($event)" numberSelectOption="true">
+    </app-config-common-listing>
+    <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+      subtitle="The Vendor gets access to enter & submit Timesheet after Assignment End Date"
+      description=""
+      [value]="request.rules.basic_rules.grace_period.option.vendor.period"
+      [options]="options.accessOptions" [selectedValue]="request.rules.basic_rules.grace_period.option.vendor.type"
+      (onOptionValueChange)="allowVendorEndDateTimesheetEntriesDropdown($event)"
+      (onValueChange)="allowVendorEndDateTimesheetEntries($event)" numberSelectOption="true">
+    </app-config-common-listing>
+    <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+      subtitle="The MSP gets access to enter & submit Timesheet after Assignment End Date"
+      description=""
+      [value]="request.rules.basic_rules.grace_period.option.msp.period"
+      [options]="options.accessOptions" [selectedValue]="request.rules.basic_rules.grace_period.option.msp.type"
+      (onOptionValueChange)="allowMSPEndDateTimesheetEntriesDropdown($event)"
+      (onValueChange)="allowMSPEndDateTimesheetEntries($event)" numberSelectOption="true">
+    </app-config-common-listing> -->
+    <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+    subtitle="The Worker gets access to enter the Passed Unfilled Timesheet(s)"
+    description=""
+    [value]="request.rules.basic_rules.past_period.option.worker.period"
+    [options]="options.accessOptions | keysort:'name'" [selectedValue]="request.rules.basic_rules.past_period.option.worker.type"
+    (onOptionValueChange)="allowWorkerUnfilledTimesheetEntriesDropdown($event)"
+    (onValueChange)="allowWorkerUnfilledTimesheetEntries($event)" numberSelectOption="true">
+  </app-config-common-listing>
+  <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+    subtitle="The Vendor gets access to enter the Passed Unfilled Timesheet(s)"
+    description=""
+    [value]="request.rules.basic_rules.past_period.option.vendor.period"
+    [options]="options.accessOptions | keysort:'name'" [selectedValue]="request.rules.basic_rules.past_period.option.vendor.type"
+    (onOptionValueChange)="allowVendorUnfilledTimesheetEntriesDropdown($event)"
+    (onValueChange)="allowVendorUnfilledTimesheetEntries($event)" numberSelectOption="true">
+  </app-config-common-listing>
+  <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+    subtitle="The MSP gets access to enter the Passed Unfilled Timesheet(s)"
+    description=""
+    [value]="request.rules.basic_rules.past_period.option.msp.period"
+    [options]="options.accessOptions | keysort:'name'" [selectedValue]="request.rules.basic_rules.past_period.option.msp.type"
+    (onOptionValueChange)="allowMSPUnfilledTimesheetEntriesDropdown($event)"
+    (onValueChange)="allowMSPUnfilledTimesheetEntries($event)" numberSelectOption="true">
+  </app-config-common-listing>
+      <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+        subtitle="The Worker gets access to enter future Timesheet ahead of the current Timesheet period"
+        description=""
+        [value]="request.rules.basic_rules.future_period.option.worker.period"
+        [options]="options.accessOptions | keysort:'name'" [selectedValue]="request.rules.basic_rules.future_period.option.worker.type"
+        (onOptionValueChange)="allowWorkerTimesheetEntriesDropdown($event)"
+        (onValueChange)="allowWorkerTimesheetEntries($event)" numberSelectOption="true">
+      </app-config-common-listing>
+      <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+        subtitle="The Vendor gets access to enter future Timesheet ahead of the current Timesheet period"
+        description=""
+        [value]="request.rules.basic_rules.future_period.option.vendor.period"
+        [options]="options.accessOptions | keysort:'name'" [selectedValue]="request.rules.basic_rules.future_period.option.vendor.type"
+        (onOptionValueChange)="allowVendorTimesheetEntriesDropdown($event)"
+        (onValueChange)="allowVendorTimesheetEntries($event)" numberSelectOption="true">
+      </app-config-common-listing>
+      <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+        subtitle="The MSP gets access to enter future Timesheet ahead of the current Timesheet period"
+        description=""
+        [value]="request.rules.basic_rules.future_period.option.msp.period"
+        [options]="options.accessOptions | keysort:'name'" [selectedValue]="request.rules.basic_rules.future_period.option.msp.type"
+        (onOptionValueChange)="allowMSPTimesheetEntriesDropdown($event)"
+        (onValueChange)="allowMSPTimesheetEntries($event)" numberSelectOption="true">
+      </app-config-common-listing>
+    </div>
+    <div class="config-item d-flex align-items-center justify-content-between sticky-header">
+      <p class="font-weight-medium blue-color">{{ 'other_settings' | i18next }}</p>
+    </div>
+    <app-config-common-listing  mainIcon="percent" itemLevel="parent" subtitle="Copy Timesheet"
+      toggleSwitch="true" description="Enabling this setting will allow end users to copy previous timesheets."
+      [updatedToggleValue]="copytimesheet" (onValueChange)="toggleChanged('copytimesheet')">
+    </app-config-common-listing>
+    <div  *ngIf="copytimesheet">
+      <!-- <app-config-common-listing itemLevel="child" subtitle="Select Copy Range"
+        description="" selectBox="true" [options]="options.copyOptions | keysort:'name'" [updatedSelectBoxValue]="request.rules.basic_rules.copy_timesheet.option.type"
+        (onValueChange)="copyTimesheetRange($event)">
+      </app-config-common-listing> -->
+      <app-config-common-listing [preventZero]="true" itemLevel="child" subtitle="Allowed Number of Previous Timesheet(s)" description="Identify the number of previous timesheet(s) from which end users will have the ability to copy.  For example, if the Program is using weekly timesheets and the number entered here is 2, then end users will have the ability to copy timesheets from the previous 2 weeks."
+        inputText="true" [updatedTextInput]="request.rules.basic_rules.copy_timesheet.option.period" required="true"
+        (onValueChange)="allowedPreviousWeek($event)">
+        
+      </app-config-common-listing>
+    </div>
+    <!-- <app-config-common-listing  mainIcon="percent" itemLevel="parent" subtitle="Mass Approval"
+      description="" toggleSwitch="true" [updatedToggleValue]="currentprogram?.config?.bulk_timesheet_approval"
+      (onValueChange)="massApproval($event)">
+    </app-config-common-listing> -->
+    <app-config-common-listing *ngIf="isCico()"  mainIcon="percent" itemLevel="parent" subtitle="Allow a day cross-over (overnight)"
+      description="" toggleSwitch="true" [updatedToggleValue]="request?.rules?.basic_rules?.overnight"
+      (onValueChange)="crossOver($event)">
+    </app-config-common-listing>
+    <app-config-common-listing  mainIcon="percent" itemLevel="parent" subtitle="Delete Timesheet"
+      description="" toggleSwitch="true" [updatedToggleValue]="deleteTimesheet" (onValueChange)="toggleDelete('delete')">
+    </app-config-common-listing>
+    <div  *ngIf="deleteTimesheet">
+        <app-config-common-listing itemLevel="child" subtitle="Soft Delete Timesheet"
+        description="The user gets access to soft delete Pending/Approved but Non-Invoiced Timesheet which will further reflect in Trackback section" selectBox="true"
+        [options]="options.softDeleteOptions | keysort:'name'" [updatedSelectBoxValue]="request.rules.basic_rules.soft_delete.option"
+        (onValueChange)="softDeleteTimesheet($event)">
+      </app-config-common-listing>
+    </div>
+    <!-- <app-config-common-listing mainIcon="percent" itemLevel="parent" subtitle="Allow Attachments"
+        description="This allows user to upload the document against day/timesheet etc." selectBox="true"
+        [updatedSelectBoxValue]="allowUploadValue" [options]="allowUpload" (onValueChange)="allowUploads($event)">
+      </app-config-common-listing>
+      <app-config-common-listing itemLevel="child" subtitle="Select Type"
+        description="" selectBox="true" [updatedSelectBoxValue]="uploadLevel" [options]="options.uploadLevels"
+        (onValueChange)="allowUploadSelectType($event)">
+      </app-config-common-listing> -->
+
+      <app-config-common-listing mainIcon="calculate" itemLevel="parent" subtitle="Allow Timesheet to be Submitted"
+        description="" selectBox="true"
+        [updatedSelectBoxValue]="allowTimesheetSubmitted" [options]="allowTimesheetSubmit | keysort:'name'" (onValueChange)="allowSubmitTimesheet($event)">
+      </app-config-common-listing>
+      <div [ngClass]="{'disableDiv': mode === configurationMode.View || mode === configurationMode.Edit}"  *ngIf="(isHourly() && !(request.rules.basic_rules.hour_type_calculation==='hybrid'))">
+       <app-config-common-listing mainIcon="calculate" itemLevel="parent" subtitle="Disable Rule Validate" description=""
+        toggleSwitch="true" [updatedToggleValue]="request?.rules?.basic_rules?.disable_validate_rule"
+        (onValueChange)="onDisableRuleValidate()">
+      </app-config-common-listing>
+      </div>
+
+      <!-- <div class="config-item d-flex align-items-center justify-content-between sticky-header">
+        <p class="font-weight-medium blue-color">{{ 'manual_upload_timesheet' | i18next }}</p>
+        <div class="toggle-panel">
+          <div class="toggle-panel-inner" [ngClass]="manualUpload?.value ? 'if-active' : 'if-inactive'">
+            <span class="toggle-switch" [ngClass]="manualUpload?.value ? 'toggle-on' : 'toggle-off'"
+              (click)="onClickToggleManualUpload()"></span>
+          </div>
+        </div>
+      </div> -->
+      <!-- <div *ngIf="manualUpload?.value">
+        <app-config-common-listing itemLevel="child" subtitle="{{'Select file' | i18next}}"
+        description="{{'Enter MSP partner timesheet fee' | i18next}}" buttonInput="Upload"
+        buttonIcon="file_upload"></app-config-common-listing>
+        <app-config-common-listing itemLevel="child" subtitle="{{'NOTE FOR UI DEVELOPER' | i18next}}"
+        description="{{'This is the not for UI developer once you load any file the layout needs to be like this' | i18next}}" filePath="true"></app-config-common-listing>
+    </div> -->
+  </div>
+  
+<div class="p-24">
+  <div class="c-form-group-row" *ngIf="isHourly() && !isDayTimesheet()">
+    <div class="c-form-group">
+      <label>{{ 'time_format' | i18next }} <span class="require">*</span></label>
+      <ng-select [disabled]="mode === configurationMode.View || mode === configurationMode.Edit" [clearable]="true" [placeholder]="'select_format_type' | i18next"
+      [searchable]="false" [(ngModel)]="request.rules.basic_rules.hours_input_type.type"
+      (change)="request.rules.basic_rules.hours_input_type.format=null; selectFormatValue(request.rules.basic_rules.hours_input_type.type)">
+      <ng-option *ngFor="let format of options.hoursInputTypes | keysort:'name'" [value]="format.value">{{format.name}}</ng-option>
+    </ng-select> 
+    </div>
+
+    <div class="c-form-group" *ngIf="request?.rules?.basic_rules?.hours_input_type?.type === 'decimal' && !isDayTimesheet()">
+      <label>{{'decimal_format'|i18next}} <span class="require">*</span></label>
+      <ng-select [disabled]="mode === configurationMode.View || mode === configurationMode.Edit" [clearable]="true" [placeholder]="'select_decimal_format' | i18next"
+        [searchable]="false" [(ngModel)]="request.rules.basic_rules.hours_input_type.format">
+        <ng-option *ngFor="let format of options.decimalInputTypeFormat" [value]="format.value">{{format.name}}
+        </ng-option>
+      </ng-select>
+    </div>
+
+    <div class="form-group" *ngIf="request?.rules?.basic_rules?.hours_input_type?.type === 'hour'">
+      <label>{{'hour_format'|i18next}} <span class="require">*</span></label>
+      <ng-select [disabled]="mode === configurationMode.View || mode === configurationMode.Edit" [clearable]="true" [placeholder]="'select_hour_format' | i18next"
+        [searchable]="false" [(ngModel)]="request.rules.basic_rules.hours_input_type.format">
+        <ng-option *ngFor="let format of hourFormat" [value]="format.value">{{format.name}}
+        </ng-option>
+      </ng-select>
+    </div>
+    <div class="c-form-group position-relative">&nbsp;</div>
+  </div>
+</div>
+
+  </section>
+</div>
+<app-break-rule [request]="request" [options]="options" [mode]="mode" [configurationMode]="configurationMode" (selectBreakType)="selectBreakType($event)" (toggleValue)="toggleValue($event)"></app-break-rule>

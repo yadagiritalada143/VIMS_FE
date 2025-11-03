@@ -1,0 +1,80 @@
+<svms-sidebar [title]="title | i18next" [dataVisibility]="isCreateComplianceRule" (onClose)="sidebarClose()">
+    <svms-sidebar-body>
+
+      <form [formGroup]="complianceRuleForm">
+        <div class="addnew-distribution-schedule">
+          <label i18n>{{ 'rule_title' | i18next }} <span class="require">*</span></label>
+          <div class="d-flex">
+            <div class="pl-0 w-100">
+              <div class="form-group">
+                <input type="text" class="form-control"  placeholder="{{ 'enter_rule_title' | i18next }}"
+                  [readOnly]="isViewMode ? true : false" formControlName="name">
+              </div>
+            </div>
+          </div>
+          <div class="form-group-row">
+            <div class="form-group position-relative">
+                <label>{{ 'from' | i18next }} <span class="require">*</span></label>
+                <svms-datepicker [disabled]="isViewMode ? true : false" [inputdateFormat]="dateFormat" id="start_date" I18n
+                  [(ngModel)]="start_date" [ngModelOptions]="{standalone: true}"
+                  [options]="calendarOptions">
+                </svms-datepicker>
+            </div>
+            <div class="form-group position-relative">
+                <label>{{ 'to' | i18next }} <span class="require">*</span></label>
+                <svms-datepicker [disabled]="isViewMode ? true : false" [inputdateFormat]="dateFormat" id="end_date" I18n
+                  [(ngModel)]="end_date" [ngModelOptions]="{standalone: true}"
+                  [options]="calendarOptions">
+                </svms-datepicker>
+            </div>
+        </div>
+
+        <div class="form-group-row" [ngClass]="{'disableDiv': isViewMode ? true : false}">
+          <div class="form-group">
+              <label>{{ 'select_vendors' | i18next }} </label>
+              <ng-select formControlName="vendor" bindLabel="vendor.name"
+                (search)="searchVendor($event)" [loading]="vendorLoading" loadingText="Loading..."
+                [clearable]="true"  [multiple]="true"
+                [items]="vendorData"   autofocus bindValue="id"
+                placeholder="{{ 'choose_vendor' | i18next }}" ngDefaultControl>
+              </ng-select>
+          </div>
+          <div class="form-group" >
+              <label>{{ 'select_status' | i18next }} <span class="require">*</span> </label>
+              <ng-select  formControlName="status" bindLabel="statusData"
+                [clearable]="true" [searchable]="true" [multiple]="true"
+                [items]="statusData"   autofocus bindValue="statusData"
+                placeholder="{{ 'choose_status' | i18next }}" ngDefaultControl>
+              </ng-select>
+          </div>
+        </div>
+        <div class="form-group-row" *ngIf="monthYearCheck?.is_allow">
+            <div class="form-group" *ngIf="monthYearCheck?.options?.month">
+                <label>{{ 'month' | i18next }} <span class="require">*</span></label>
+                <ng-select  placeholder="{{ 'select_month' | i18next }}" [clearable]="false" formControlName="month">
+                    <ng-option *ngFor="let month of months" [value]="month.value">{{month.name}}</ng-option>
+                </ng-select>
+            </div>
+            <div class="form-group" *ngIf="monthYearCheck?.options?.year">
+                <label>{{ 'year' | i18next }} <span class="require">*</span></label>
+                <ng-select placeholder="{{ 'select_year' | i18next }}" [clearable]="false" formControlName="year">
+                    <ng-option *ngFor="let year of years" [value]="year">{{year}}</ng-option>
+                </ng-select>
+            </div>
+          </div>
+        </div>
+      </form>
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+      <button type="submit" [hidden]="isViewMode" [disabled]="complianceRuleForm.invalid || start_date == null || end_date == null"
+        class="btn btn-primary float-right" (click)="createRule()" *accessControl>
+        <icon size="20px" name="check_circle" type="material" class="d-flex mr-8" cuClass="icon-cu">
+        </icon> {{isUpdateReq ? 'update' : 'save'|i18next}}
+      </button>
+      <!-- <button type="submit" [hidden]="!isViewMode" [disabled]="complianceRuleForm.invalid"
+      class="btn btn-primary float-right" (click)="editRule()">
+      <icon size="20px" name="check_circle" type="material" class="d-flex mr-8" cuClass="icon-cu">
+      </icon> {{ 'edit' | i18next }}
+    </button> -->
+    </svms-sidebar-footer>
+  </svms-sidebar>

@@ -1,0 +1,40 @@
+<div class="view-detail-page">
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <i (click)="onBackClick($event)" class="material-icons back-arrow-icon back-arrow-icon cursor-pointer" tooltip="{{'Back'}}" placement="bottom">arrow_back</i>
+            <div class="ml-16">
+                <h3 class="font-weight-semibold mb-0">{{ costComponentData.name }}</h3>
+                <p> {{ commonViewService.getTimeStamp(costComponentData.created_on, costComponentData.modified_on) }} </p>
+            </div>
+        </div>
+
+        <div *accessControl>
+            <button *authorize="'cost_component_manage'" (click)="onEditClick($event)" class="c-btn c-btn-secondary-medium-left-icon">
+                <i class="material-icons">drive_file_rename_outline</i>
+                {{ 'edit' | i18next }}
+            </button>
+        </div>
+    </header>
+    <section class="section-body-content">
+        <div class="px-32 py-16">
+            <div class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'name' | i18next }}</div>
+                <div class="item-value font-weight-medium">{{ costComponentData.name }}</div>
+            </div>
+
+            <div class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'status' | i18next }}</div>
+                <div class="item-value">
+                    <span class="c-status-ui" [ngClass]="{'active': costComponentData.is_enabled, 'inactive': !costComponentData.is_enabled}">
+                        {{(costComponentData.is_enabled ? 'Active': 'Inactive') | i18nextEager }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'code' | i18next }}</div>
+                <div class="item-value font-weight-medium">{{ costComponentData.code }}</div>
+            </div>
+        </div>
+    </section>
+</div>

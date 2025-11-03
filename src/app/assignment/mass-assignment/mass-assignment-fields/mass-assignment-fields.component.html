@@ -1,0 +1,38 @@
+  <div *ngIf="field?.type === 'HUMAN_DROPDOWN'">
+    <ng-select
+      [ngClass]="(renderForm.get(field?.slug)?.invalid && renderForm.get(field?.slug)?.touched) ? 'error' : ''"
+      placeholder="{{field?.placeholder | i18nextEager}}" [clearable]="true"
+      (search)="getDropDownData($event , true)" notFoundText="{{ 'no_items_found' | i18next }}" (scrollToEnd)="loadMoreFieldData($event)" [clearOnBackspace]="false" (clear)="getDropDownData({term  :''});resetValue()" [loading]="isLoading" (change)="onDateTimeChange(field , dTime)"  [(ngModel)]="calculatedValue" #dTime="ngModel" ngModel>
+      <ng-option *ngFor="let item of (field?.datasource?.type === 'url' ? dropDownList : field?.datasource?.options)"
+        [value]="item[field?.bind_value]">
+        <!-- <span *ngFor="let option of field?.bind_label;let last= last;let first= first">
+           {{item[option] | titlecase}} <span *ngIf="field?.separator && !last">{{field?.separator}}</span>
+        </span> -->
+        <span *ngIf="field?.bind_label?.length > 0">
+           <span *ngFor="let option of field?.bind_label">
+            {{option !== 'code' ? (item[option] | titlecase) : ''}} {{field?.separator || ''}} {{item?.code}}
+           </span>
+        </span> 
+        <!-- {{(item[field?.bind_label] || item?.name)|titlecase}} {{item?.middle_name|titlecase}}
+        {{item?.last_name|titlecase}} {{field?.separator || ''}} {{item?.code}} -->
+      </ng-option>
+      <ng-option *ngIf="isLoading">
+        <span >{{ 'loading_more_results...' | i18next }}</span>
+      </ng-option>
+    </ng-select>
+    <p *ngIf="(renderForm.get(field?.slug)?.invalid && renderForm.get(field?.slug)?.touched)" class="error-text mt-4">
+      {{ errorMessage[field?.slug]|i18next }}
+    </p>
+  </div>
+
+  <div *ngIf="field?.type === 'DATE'">
+    <svms-datepicker [inputdateFormat]="field?.date_format || 'yy-mm-dd'" [placeholder]="field.placeholder | i18nextEager" I18n
+      [ngClass]="(renderForm.get(field?.slug)?.invalid && renderForm.get(field?.slug)?.touched) ? 'error' : ''"
+      [ngModelOptions]="{standalone: true}" (onDateChange)="onDateTimeChange(field , dTime)" #dTime="ngModel" ngModel>
+    </svms-datepicker>
+    <p *ngIf="(renderForm.get(field?.slug)?.invalid && renderForm.get(field?.slug)?.touched)" class="error-text mt-4">
+      {{ errorMessage[field?.slug]|i18next }}
+    </p>
+
+  </div>
+

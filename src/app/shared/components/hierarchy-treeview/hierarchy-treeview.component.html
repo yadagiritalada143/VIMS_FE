@@ -1,0 +1,32 @@
+<div class="form-group">
+    <label>
+        {{ (label + ' ') | i18next }}
+        <span *ngIf="mandatory" class="require"> * </span>
+        <i *ngIf="hierarchySupportText" class="tooltip-icon material-icons" tooltip="{{ hierarchySupportText |i18next }}" placement="right">help</i>
+    </label>
+    <ngx-dropdown-treeview class='hierarchy-tree'
+        buttonClass='btn-outline-light'
+        [config]='treeViewOptions'
+        [items]='treeViewInput'
+        (selectedChange)='changeSelections($event)'>
+    </ngx-dropdown-treeview>
+  </div>
+
+
+<div [ngClass]="{'disableDiv': disabled}" class="d-flex flex-wrap align-items-center">
+    <div *ngFor='let id of selected' class="badge badge-light mb-12 rounded-sm mr-8">
+        <div *ngIf="allowDefaultSelection" class='flag' (click)='changeDefaultOption(id)'
+            [ngStyle]='{ "color": (defaults.includes(id))? "#5E71FE": "black" }'>
+            <icon *ngIf='defaults.includes(id)' size="14px" name="flag" type="material" cuClass="d-flex"
+                [tooltip]='(defaults.includes(id)?"This is default hierarchy":"Click flag to make default hierarchy") | i18next'
+                placement="bottom"></icon>
+            <icon *ngIf='!defaults.includes(id)' size="14px" name="outlined_flag" type="material" cuClass="d-flex"
+                [tooltip]='(defaults.includes(id)?"This is default hierarchy":"Click flag to make default hierarchy" )| i18next'
+                placement="bottom"></icon>
+        </div>
+        <div class="px-8"> {{ (treeViewMap.get(id) || 'Undefined') | i18next }} </div>
+        <div *ngIf="!disabled" class="close" (click)='removeSelection(id)'>
+            &#x02A2F;
+        </div>
+    </div>
+</div>

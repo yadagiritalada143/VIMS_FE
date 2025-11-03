@@ -1,0 +1,100 @@
+<div class="item-wrapper d-flex mb-16">
+    <div class="p-12 d-flex justify-content-center flex-column" [ngClass]="getStatusStyleClass(profile?.status)">
+        <div class="item-box column-direction d-flex align-items-center justify-content-between position-relative" [ngClass]="{'inactive': !profile?.is_active}">
+          <div class="d-flex">
+            <figure class="initials initials-profile mr-8">
+              {{ profile?.first_name | slice: 0:1 }}{{ profile?.last_name | slice: 0:1 }}
+            </figure>
+            <div>
+              <span class="text-dark font-weight-medium approver-name">
+                <span>{{profile?.first_name | titlecase}} {{profile?.last_name | titlecase}}</span>
+                <span *ngIf="!profile?.is_active">{{" (Inactive)"}}</span>
+              </span>
+              <span *ngIf="profile?.title"><i>{{profile?.title}}</i></span>
+              <span *ngIf="profile?.is_impersonated" class="font-weight-bold approver-name">
+                (Impersonated by:
+                {{profile?.impersonated_data?.impersonated_by?.first_name}}
+                {{profile?.impersonated_data?.impersonated_by?.middle_name}}
+                {{profile?.impersonated_data?.impersonated_by?.last_name}})
+              </span>
+            </div>
+          </div>
+              <div class="d-flex align-items-center">
+                <div *ngIf="profile?.status?.toLowerCase() == approvalStatus.approved">
+                    <icon name="check_circle" color="#079A12" size="16px" class="mr-8"></icon> <span class="text-green font-weight-medium">{{ profile?.status | titlecase | i18next}} </span>
+                    <span *ngIf="profile?.status_modified_by?.first_name && profile.id !== profile?.status_modified_by?.id"> by {{profile?.status_modified_by?.first_name}}</span>
+                </div>
+                <ng-container *ngIf="approval?.status?.toLowerCase() != approvalStatus.approved && profile?.is_active">
+                    <div *ngIf="(profile?.status?.toLowerCase() == approvalStatus.pending && jobStatus?.toLowerCase() !== approvalStatus.rejected) && !(jobStatus?.toLowerCase() == approvalStatus.approved)">
+                        <icon name="hourglass_bottom" color="#D19F00" size="16px" class="mr-8"></icon> <span class="text-brown font-weight-medium">{{ profile?.status | titlecase | i18next }} </span>
+                      </div>
+                </ng-container>
+                <ng-container *ngIf="approval?.status?.toLowerCase() != approvalStatus.approved && !profile?.is_active">
+                  <div *ngIf="(profile?.status?.toLowerCase() == approvalStatus.pending && jobStatus?.toLowerCase() !== approvalStatus.rejected) && !(jobStatus?.toLowerCase() == approvalStatus.approved)">
+                      <icon name="info" color="BBBBC2" size="16px" class="mr-8" [tooltip]="getNotActiveProfileMessage(profile)" placement="right" delay="500"></icon> <span class="font-weight-medium">{{ 'inactive' | i18next }}</span>
+                    </div>
+              </ng-container>
+                <div *ngIf="profile?.status?.toLowerCase() == approvalStatus.rejected">
+                  <icon name="check_circle" color="#C72F43" size="16px" class="mr-8"></icon> <span class="text-red font-weight-medium">{{ profile?.status | titlecase | i18next }} </span>
+                  <span *ngIf="profile?.status_modified_by?.first_name && profile.id !== profile?.status_modified_by?.id"> by {{profile?.status_modified_by?.first_name}}</span>
+                </div>
+                <div class="not-needed" *ngIf="profile?.status?.toLowerCase() == approvalStatus.not_needed">
+                  <icon name="block" color="#5f6d89" size="16px" class="mr-8"></icon> <span class="text-grey font-weight-medium">{{ profile?.status | titlecase | i18next }} </span>
+                </div>
+                
+              </div>
+              <div class="d-flex align-items-center justify-content-end">
+                <div *ngIf="profile?.status?.toLowerCase() === approvalStatus.approved">
+                    <icon name="event" color="#536476" size="14px" class="mr-8"></icon>
+                    <span>
+                      {{ (profile?.status_modified_on | localDateFormat) || '-' }}
+                      {{ (profile?.status_modified_on | localDateFormat: 'hh:mm:ss a z') || '' }}
+                    </span>
+                </div>
+                <span class="replace-approvers"
+                    *ngIf="hasReplaceApprovalPermission && approval?.status?.toLowerCase() === approvalStatus.pending"
+                    [ngClass]="{'deactivate-mouse-event': !profile?.is_active}">
+                    <ng-container *accessControl>
+                    <app-approval-replace [profile]="profile" [role]="approval?.role?.name"
+                        (replaceApprover)="replaceApprover($event)" *ngIf="profile?.status?.toLowerCase() == approvalStatus.pending">
+                    </app-approval-replace>
+                    </ng-container>
+                </span>
+                <div
+                *ngIf="profile?.is_approval_allowed"
+                  class="d-flex ml-24 align-items-center justify-content-end">
+                  <button class="btn btn-success small" (click)="openApprovalPanel(approvalStatus.approved, profile?.id,profile?.is_program_admin)">
+                    <icon size="16px" name="check_circle" color="#ffffff" type="material" class="icon--on-left"> </icon>
+                    {{ 'approve' | i18next }}
+                  </button>
+                  <button class="btn btn-danger small ml-16" (click)="openApprovalPanel(approvalStatus.rejected, profile?.id,profile?.is_program_admin)">
+                    <icon size="16px" name="block" type="material" color="#ffffff" class="icon--on-left"> </icon>{{ 'reject' | i18next }}
+                  </button>
+                </div>
+                <div  *ngIf="profile?.status?.toLowerCase() === approvalStatus.rejected">
+                    <icon name="event" color="#536476" size="14px" class="mr-8"></icon>
+                    <span>
+                      {{ (profile?.status_modified_on | localDateFormat) || '-' }}
+                      {{ (profile?.status_modified_on | localDateFormat: 'hh:mm:ss a z') || '' }}
+                    </span>
+                  </div>
+              </div>
+        </div>
+        <div *ngIf="profile?.status?.toLowerCase() === approvalStatus.approved">
+            <div class="member-note mt-8" *ngIf="profile?.status_note">
+              {{ 'notes:' | i18next }} {{(readMore) ? profile?.status_note : profile?.status_note | slice:0:50}}
+              <span *ngIf="(profile?.status_note.length > 50) && (readMore==false)">...&nbsp;</span>
+              <a *ngIf="(profile?.status_note.length > 50) && (readMore==false)" (click)="readMore=true">{{ 'read_more' | i18next }}</a>
+              <a *ngIf="readMore" (click)="readMore=false">{{ 'view_less' | i18next }}</a>
+              </div>
+          </div>
+          <div *ngIf="profile?.status?.toLowerCase() === approvalStatus.rejected">
+            <div class="member-note mt-8" *ngIf="profile?.status_note">
+              {{ 'notes:' | i18next }} {{(readMore) ? profile?.status_note : profile?.status_note | slice:0:50}}
+              <span *ngIf="(profile?.status_note.length > 50) && (readMore==false)">...&nbsp;</span>
+              <a *ngIf="(profile?.status_note.length > 50) && (readMore==false)" (click)="readMore=true">{{ 'read_more' | i18next }}</a>
+              <a *ngIf="readMore" (click)="readMore=false">{{ 'view_less' | i18next }}</a>
+            </div>
+          </div>
+    </div>
+</div>

@@ -1,0 +1,40 @@
+<div class="copy-widget-modal" [ngClass]="{'active' : showCopywidget}">
+  <app-logs [log]="logs"></app-logs>
+    <div class="p-24">
+      <div class="d-flex justify-content-between mb-24">
+        <h4 class="font-weight-medium">{{ 'copy_timesheet' | i18next }}</h4>
+        <a (click)="copyTimesheetInSelectedWeek(false)">
+          <icon name="close" size="24px" type="material"></icon>
+        </a>
+      </div>
+      <div class="available-week-wrap mb-16 position-relative" *ngFor="let timesheet of previousTimesheets">
+        <input type="radio" name="availableweek" [(ngModel)]="selectedTimesheet"  [value]="timesheet.payload" >
+        <div class="available-week  p-16">
+          <div class="float-left mr-16 mt-8">
+            <div class="radio-wrapper">
+                <span class="checkmark"></span>
+            </div>
+          </div>
+          <div class="float-left">
+            <p class="font-weight-medium">{{timesheet?.duration | i18next }}</p>
+            <p class="small">{{'total ' + timeType |i18next }} : <span class="font-weight-medium">{{timesheet?.hours || '0.00'}} {{timeType | slice:0:1}}</span></p>
+          </div>
+          <div class="float-right mt-8">
+            <span class="status-ui "
+            [ngClass]="{'approved': (timesheet?.status === 'approved' || timesheet?.status == 'approved modified'),
+          'withdrawn': timesheet?.status == 'withdrawn' ,
+          'pending-approval': (timesheet?.status == 'pending' || timesheet?.status == 'pending approval'),
+          'rejected': timesheet?.status == 'rejected',
+          'draft': timesheet?.status == 'draft',
+          'deferred': timesheet?.status == 'deferred'}">{{timesheet?.status | i18next }}</span>
+          </div>
+          <div class="clearfix"></div>
+        </div>
+      </div>
+
+    </div>
+    <footer class="copy-widget-modal-footer">
+      <button class="float-right btn btn-primary" (click)="copyTimesheetInSelectedWeek(true)">{{ 'copy_timesheet' | i18next }}</button>
+    </footer>
+  </div>
+  <div class="copy-widget-overlay" [ngClass]="{'active' : showCopywidget}"></div>

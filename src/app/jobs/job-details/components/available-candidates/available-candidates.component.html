@@ -1,0 +1,19 @@
+
+  <div class="available-candidate-list description-card p-24 detail-page-responsive-list pl-m-0 pr-m-0">
+    <div class="dotloader" *ngIf="loadingData"></div>
+    <div class="overflow-box" *ngIf="!loadingData">
+      <vms-table *ngIf="tableLoaded" [vmsTableConfig]="tableConfig" (onSort)="onSortClick($event)"
+        [vmsDataSource]="vmsData?.candidate" [loading]="loadingData" [open]="isExpand"
+        [totalItem]="totalRecords" [currentPage]="pageNo" [itemsPerPage]="limit" (onExpandClick)="onExpandClick($event)"
+        (onEditClick)="onEditClick($event)" (changePage)="onPaginationClick($event)" (onCreate)="onCreateClick($event)"
+        (onDisableClicked)="disableClicked($event)" (onDeleteClick)="onDeleteClick($event)"
+        (numberBadgeClicked)="columnClicked($event)" (onWithdrawProfileClick)="onWithdrawProfileClick($event)"
+        (cloneClicked)="cloneClicked($event)" (onViewProfileClick)="viewProfileClicked($event)"
+        (changeRecords)="onClickRecords($event)" (search)="onSearch($event)" (onListFilter)="onListFilter($event)"
+        (onSubmittedCandidateClick)="onSubmitedCandidate($event)" (clickOnNext)="onClickNext($event)"
+        (previewClicked)="previewClicked($event)" [rotuterLinkOnClick]='true' [rotuterLinkParams]='rotuterLinkParams'
+        [rotuterLinkParseFn]='rotuterLinkParseFn' [currentOptStatus]="currentOptStatus">
+      </vms-table>
+    </div>
+  </div>
+  <app-view-profile></app-view-profile>

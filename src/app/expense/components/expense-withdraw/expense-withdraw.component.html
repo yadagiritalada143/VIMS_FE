@@ -1,0 +1,35 @@
+<svms-sidebar-ng title="{{ 'withdraw_expense' | i18nextEager }}" [dataVisibility]="withDrawExpenses" (onClose)="sidebarClose()">
+  <app-logs [log]="logs"></app-logs>
+  <form [formGroup]="withdrawForm" (ngSubmit)="onSubmitForm()" autocomplete="off">
+    <svms-sidebar-body-ng [active]="true">
+      <div class="p-24">
+        <div class="form-group-row">
+          <div class="form-group">
+            <label>{{ 'withdraw_reason' | i18nextEager }} <span class="require">*</span></label>
+            <ng-select formControlName="withdraw_reason" placeholder="{{ 'select_reason_for_withdrawal' | i18nextEager }}">
+              <ng-option *ngFor="let reason of withDrawReasons | async" [value]="reason.name">{{ reason.name }}
+              </ng-option>
+            </ng-select>
+            <p *ngIf="withdrawForm.get('withdraw_reason').touched && withdrawForm.get('withdraw_reason').errors"
+               class="validation-msg">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'withdraw_reason_is_required' | i18nextEager }}.
+            </p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="withdraw_notes">{{ 'notes' | i18nextEager }}</label>
+          <textarea id="withdraw_notes" name="notes" rows="4" placeholder="{{ 'enter_notes' | i18nextEager }}" class="form-control textarea-without-resize" formControlName="withdraw_notes"></textarea>
+        </div>
+      </div>
+    </svms-sidebar-body-ng>
+    <svms-sidebar-footer-ng>
+      <div class="d-flex justify-content-end">
+        <button *accessControl class="btn btn-primary btn-orange ml-16" type="submit" [disabled]="!withdrawForm.valid || isLoadingWithdraw">
+          <span *ngIf="isLoadingWithdraw" class="mr-8"><button-loader></button-loader></span>
+          {{ 'withdraw' | i18nextEager }}
+        </button>
+      </div>
+    </svms-sidebar-footer-ng>
+  </form>
+</svms-sidebar-ng>

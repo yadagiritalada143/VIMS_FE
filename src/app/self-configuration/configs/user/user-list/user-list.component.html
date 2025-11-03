@@ -1,0 +1,48 @@
+<div class="program-user-list">
+<ng-template #status let-value="value">
+  <span class="c-status-ui active" *ngIf="value">
+    {{ 'active' | i18next }}
+  </span>
+  <span class="c-status-ui inactive" *ngIf="!value">
+    {{ 'inactive' | i18next }}
+  </span>
+</ng-template>
+<ng-template #count let-value="value">
+  <span class="initial-bg">{{(value ?? 0) | i18next}}</span>
+</ng-template>
+<ng-template #showData let-value="value">
+  {{value | i18next}}
+</ng-template>
+
+<ng-template #reassignTemplate let-rowdata>
+  <a href="javascript:void()">
+    <span class="text-visibility" (click)="onClickView(rowdata)">
+      {{rowdata?.full_name}}
+    </span>
+    <span class="reassign_user_icon">
+      <i *ngIf="rowdata?.status == 'inprogress' && !permission"  [tooltip]="progress" placement="right" (click)="reasignUserStatus(rowdata)" class="material-icons">sync</i>
+      <i *ngIf="rowdata?.status == 'failed' && !permission"  [tooltip]="failed" placement="right" (click)="reasignUserStatus(rowdata)" class="material-icons-outlined failed">cancel</i>
+      <i *ngIf="do_not_rehire" class="material-icons do_not_rehire" [tooltip]="doNotRehireValue" placement="top">no_accounts</i>
+    </span>
+  </a>
+  <!--  -->
+</ng-template>
+
+<app-svms-table [tableOptions]="tableOptions" [coloumnDefintions]="tableColumnConfig"
+  [dataSource]="vmsData"></app-svms-table>
+
+<ng-template #emptyDataTemplate></ng-template>
+
+</div>
+
+
+<vms-add-user-to-program [list_or_create]="list_or_create" (onClose)="createUserToggle($event)"
+  [createUser]="createUser" type="program" [isEditClicked]="editClick" [editData]="editData"
+  (onAddDone)="handleUpdate()"></vms-add-user-to-program>
+
+<app-create-role *ngIf="(!viewData || !editData)" [createRole]="createRole"></app-create-role>
+
+<app-remove-do-not-rehire-sidepanel [rehireData]="rehireData" [showRehire]="showremoveDoNotRehire"
+  (rehireToggle)="rehireToggle($event)" (handleUpdate)="handleUpdate()"></app-remove-do-not-rehire-sidepanel>
+
+<app-reassign-items [userInfo]="userInfo" (modelclose)="closeReassignModel()" *ngIf="reassignUser"></app-reassign-items>

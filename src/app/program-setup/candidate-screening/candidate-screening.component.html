@@ -1,0 +1,78 @@
+<div class="detail-page-wrapper">
+  <section class="description-panel hiring-process p-32 position-relative">
+    <a *ngIf="!isSelfConfiguration" class="back-btn back-mobile" (click)="backToSetting()">
+      <icon class="d-inline-block" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon>
+      <span>{{ 'back_to_settings' | i18next }}</span>
+    </a>
+    <div class="card bg-light mt-24">
+      <header class="detail-page-header position-relative">
+        <h3>
+          {{ 'hiring_process' | i18next }}
+        </h3>
+      </header>
+      <nav class="detail-nav position-relative pl-24 pr-24">
+        <ul class="primary">
+          <!-- <li>
+            <a class="" href="javascript:void(0)">
+              {{ 'workflow' | i18next }}
+            </a>
+          </li> -->
+          <li>
+            <a [ngClass]="{'active' : tab == '0'}" href="javascript:void(0)" (click)="showTab(0)">
+              {{'job'|i18next}}
+            </a>
+          </li>
+          <li>
+            <a [ngClass]="{'active' : tab == '1'}" href="javascript:void(0)" (click)="showTab(1)">
+              {{ 'shortlisting' | i18next }}
+            </a>
+          </li>
+          <li>
+            <a [ngClass]="{'active' : tab == '2'}" href="javascript:void(0)" (click)="showTab(2)">
+              {{ 'interview' | i18next }}
+            </a>
+          </li>
+          <li>
+            <a [ngClass]="{'active' : tab == '3'}" href="javascript:void(0)" (click)="showTab(3)">
+              {{ 'submission' | i18next }}
+            </a>
+          </li>
+          <!-- <li>
+            <a class="" href="javascript:void(0)">
+              {{ 'credentialing' | i18next }}
+            </a>
+          </li> -->
+          <li>
+            <a [ngClass]="{'active' : tab == '6'}" class="" href="javascript:void(0)" (click)="showTab(6)">
+              {{ 'offers' | i18next }}
+            </a>
+          </li>
+          <li>
+            <a [ngClass]="{'active' : tab == '7'}" class="" href="javascript:void(0)" (click)="showTab(7)">
+              {{ 'onboarding' | i18next }}
+            </a>
+          </li>
+        </ul>
+        <div class="clearfix"></div>
+      </nav>
+      <div *ngIf="tab == '0'">
+        <app-job [ngClass]="!disableDiv?'disableDiv':''"></app-job>
+      </div>
+      <div *ngIf="tab == '1'">
+        <app-shortlisting [ngClass]="!disableDiv?'disableDiv':''"></app-shortlisting>
+      </div>
+      <div *ngIf="tab == '2'">
+        <app-interview [ngClass]="!disableDiv?'disableDiv':''"></app-interview>
+      </div>
+      <div *ngIf="tab == '3'">
+        <app-submission [ngClass]="!disableDiv?'disableDiv':''"></app-submission>
+      </div>
+      <div *ngIf="tab == '6'">
+        <app-offer [ngClass]="!disableDiv?'disableDiv':''"></app-offer>
+      </div>
+      <div *ngIf="tab == '7'">
+        <app-onboarding [ngClass]="!disableDiv?'disableDiv':''"></app-onboarding>
+      </div>
+    </div>
+  </section>
+</div>

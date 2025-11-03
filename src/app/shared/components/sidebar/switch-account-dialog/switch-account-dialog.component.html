@@ -1,0 +1,57 @@
+<svms-dialog id="switch-account-dialog" width="480px" [height]="dialogHeight + 'px'" [visibility]="visibility">
+    <svms-dialog-header (close)="toggleVisibility($event)">
+        <div class="d-flex">
+            <div class="switch-icon">
+                <icon class="material-outlined" name="swap_horiz" color="#4C7FF0">
+                </icon>
+            </div>
+            <div class="dialog-header">
+                <h4 class="mb-4"> {{ 'switch_account' | i18next }} </h4>
+                <p> {{ 'please_select_an_account_to_switch' | i18next }} </p>
+            </div>
+        </div>
+    </svms-dialog-header>
+    <svms-dialog-body class="h-100">
+        <div *ngIf="hideSearchbar" class="user-search">
+            <div class="form-control d-flex">
+                <icon size="16px" class="material-outlined" name="search"></icon>
+                <input [(ngModel)]="searchInput" type="text" class="custom-form-control ml-8"
+                    placeholder="{{ 'search' | i18next }}" (keyup)="searchAccount($event)" />
+                <icon *ngIf="showClear" size="16px" class="material-outlined cursor-pointer" name="clear"
+                    (onClick)="searchAccount($event); searchInput = null"></icon>
+            </div>
+        </div>
+        <div *ngIf="!hideSearchbar || !linkedAccounts.length" class="no-record-panel">
+            <p>
+                {{ 'no_records_found' | i18next }}
+            </p>
+        </div>
+        <div *ngIf="linkedAccounts.length > 0" class="result-panel accounts-scrollbar mt-16">
+            <div *ngFor="let linkAccount of linkedAccounts; let i = index;" class="d-flex user-entry"
+                [ngClass]="linkAccount?.selectedSwitchAcount ? 'active' : ''" (click)="toggleAccount(i)">
+                <div class="circle">
+                    <div class="avatar-icon ml-0">
+                        <i class="material-icons-outlined"> email </i>
+                    </div>
+                </div>
+                <div class="user-details d-flex flex-grow text-left ml-16">
+                    <div class="user-metadata flex-grow">
+                        <h4 class="mb-0" [title]="linkAccount.contact_email"> {{ linkAccount.contact_email }} </h4>
+                        <p class="blue-text"> {{ linkAccount.user_type | i18next }} </p>
+                    </div>
+                    <div class="user-type ml-16 centered">
+                        <icon size="23px" class="material-outlined"
+                            [ngClass]="linkAccount?.selectAccount ? 'active' : 'inactive'"
+                            [name]="linkAccount?.selectAccount? 'star' : 'star_outline'"
+                            (click)="toggleStar(i, $event)"></icon>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </svms-dialog-body>
+    <svms-dialog-footer>
+        <button [disabled]="enableSwitch" (click)="switchToLinkedUser()" *accessControl class="btn btn-primary w-100">
+            {{ 'switch_account' | i18next }}
+        </button>
+    </svms-dialog-footer>
+</svms-dialog>

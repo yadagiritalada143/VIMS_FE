@@ -1,0 +1,101 @@
+<label I18n>{{ 'program_configurations' | i18next }}</label>
+<div class="configuration mt-24">
+
+  <div class="toggles">
+    <div class="toggle-panel">
+      <div class="toggle-panel-inner" [ngClass]="readOnly? 'if-active' : 'if-inactive'">
+        <span>{{toggles.vendor_neutral_program.title | i18next}}</span>
+        <span class="toggle-switch" [ngClass]="toggles?.vendor_neutral_program?.value ? 'toggle-on' : 'toggle-off'"
+              (click)="onClickToggle('vendor_neutral_program')"></span>
+
+      </div>
+    </div>
+    <div class="toggle-panel">
+      <div class="toggle-panel-inner" [ngClass]="readOnly ? 'if-active' : 'if-inactive'">
+        <span>{{toggles.hide_images.title | i18next}}</span>
+        <span class="toggle-switch"
+              [ngClass]="toggles.hide_images?.value ? 'toggle-on' : 'toggle-off'"
+              (click)="onClickToggle('hide_images')"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="rate-model d-flex mt-24">
+    <label I18n>{{ 'rate_model_for_program' | i18next }}<span class="require">*</span></label>
+
+    <div class="d-flex">
+      <div class="radio">
+        <input type="radio" id="bill_rate" [value]="'BILL_RATE'" [(ngModel)]="rateModel" name="rateModel" (change)="onSelectRateModel('BILL_RATE')" [disabled]='!readOnly'>
+        <label for="bill_rate">{{ 'bill_rate_(no_markup)' | i18next }}</label>
+      </div>
+      <div class="radio">
+        <input type="radio" id="pay_rate" [value]="'PAY_RATE'" [(ngModel)]="rateModel" name="rateModel" (change)="onSelectRateModel('PAY_RATE')" [disabled]='!readOnly'>
+        <label for="pay_rate">{{ 'pay_rate_(markup)' | i18next }}</label>
+      </div>
+      <div class="radio">
+        <input type="radio" id="markup" [value]="'MARKUP'" [(ngModel)]="rateModel" name="rateModel" (change)="onSelectRateModel('MARKUP')" [disabled]='!readOnly'>
+        <label for="markup">{{ 'bill_rate_(markup)' | i18next }}</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group-row date-format mt-24">
+    <!-- <div class="form-group">
+      <label>{{ 'select_date_format' | i18next }} <span class="require">*</span></label>
+      <ng-select placeholder="{{ 'select' | i18next }}" [searchable]="false" [readonly]="isViewMode" (change)="onChangeDateFormat()" [(ngModel)]="dateFormat" [readonly]='!readOnly'>
+        <ng-option *ngFor="let format of dateFormats" [value]="format">{{format}}</ng-option>
+      </ng-select>
+    </div>
+     -->
+    <div class="form-group">
+      <div class="toggle-panel">
+        <div class="toggle-panel-inner" [ngClass]="readOnly? 'if-active' : 'if-inactive'">
+          <span>{{toggles.is_work_location_read_only.title | i18next}}</span>
+          <span class="toggle-switch" [ngClass]="toggles?.is_work_location_read_only?.value ? 'toggle-on' : 'toggle-off'"
+            (click)="onClickToggle('is_work_location_read_only')"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rate-model d-flex mt-24">
+
+    <label I18n>{{ 'job_budget_calculation' | i18next }}</label>
+
+    <div class="d-flex">
+      <div class="radio">
+        <input type="radio" value='max_budget' [(ngModel)]="rateBudget" name="rateBudget" (change)="changeJobBudget()"
+          [disabled]='!readOnly' class='bottom-4'/>
+        <label> {{ 'max_rate' | i18next }}</label>
+      </div>
+      <div class="radio">
+        <input type="radio" value='average_budget' [(ngModel)]="rateBudget" name="rateBudget" (change)="changeJobBudget()"
+          [disabled]='!readOnly' class='bottom-4'/>
+        <label> {{ 'average_rate' | i18next }}</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div class="form-group-row date-format">
+    <div class="form-group">
+      <div class="toggle-panel">
+        <div class="toggle-panel-inner" [ngClass]="readOnly? 'if-active' : 'if-inactive'">
+          <span>{{toggles.show_associated_locations_only.title | i18next}}</span>
+          <span class="toggle-switch" [ngClass]="toggles?.show_associated_locations_only?.value ? 'toggle-on' : 'toggle-off'"
+            (click)="onClickToggle('show_associated_locations_only')"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="form-group-row date-format">
+    <div class="form-group">
+      <div class="toggle-panel">
+        <div class="toggle-panel-inner" [ngClass]="readOnly? 'if-active' : 'if-inactive'">
+          <span>{{toggles.allow_multiple_default_values.title | i18next}}</span>
+          <span class="toggle-switch" [ngClass]="toggles?.allow_multiple_default_values?.value ? 'toggle-on' : 'toggle-off'"
+            (click)="onClickToggle('allow_multiple_default_values')"></span>
+        </div>
+      </div>
+    </div>
+  </div> -->
+</div>

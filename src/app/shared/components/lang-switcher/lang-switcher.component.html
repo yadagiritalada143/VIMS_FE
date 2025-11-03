@@ -1,0 +1,43 @@
+<!-- Login panel language component start here -->
+<!-- <div class="language-switcher" *ngIf="standalone"> 
+  <ng-select [multiple]="false" [(ngModel)]="language" [clearable]="false" (change)="switchLang()" bindValue="language">
+    <ng-option *ngFor="let language of translate.getLangs()" [value]="language">{{ language }}</ng-option>
+  </ng-select>
+</div> -->
+
+<!-- header panel language component start here -->
+<a [ngClass]="{'disableDiv': !languageDropdown}" href="javascript:void(0)" class="lang-modal-cta"  (click)="openModalLanguage()" #langTrigger>
+  <icon name="public" color="inherit" size="19px" type="material"></icon>
+  <span>{{selectedLang}}</span>
+</a>
+<div class="language-switcher-modal"  [ngClass]="{'active': langShowHide }" #langSwitcherPanel>
+  <h4>
+    <icon name="public" size="20px" type="material"></icon> {{ 'language' | i18next }}
+  </h4>
+  <a href="javascript:void(0)" class="close-lang-modal" (click)="closeLang()">
+    <icon name="clear" size="20px" type="material"></icon>
+  </a>
+  <div class="language-content p-16">
+    <input type="text" placeholder="{{ 'search' | i18next }}" name="search" *ngIf="langSearch" [(ngModel)]="searchText">
+    <input type="text" placeholder="{{ 'search' | i18next }}" name="search" class="form-control" [(ngModel)]="searchText">
+    <ul *ngIf="filteredLanguages?.length > 0; else noResults">
+      <li *ngFor="let lang of filteredLanguages">
+        <label class="radio-container" *ngIf="lang != 'en'">
+          <input type="radio" [(ngModel)]="language" [value]="lang.locale" name="langgroup" (click)="changeLang($event, lang)">
+          <span class="checkmark"></span>
+          {{lang?.language}}
+          <img src="{{lang?.flagUrl}}" alt="">
+        </label>
+      </li>
+    </ul>
+    <ng-template #noResults>
+      <p>{{ 'language_not_available_for' | i18next }} "{{searchText}}".</p>
+    </ng-template>
+  </div>
+  <div class="lang-footer">
+    <a href="javascript:void(0)">
+      <icon name="contact_support" size="24px" type="material"></icon>
+      {{ 'help' | i18next }}
+    </a>
+  </div>
+</div>

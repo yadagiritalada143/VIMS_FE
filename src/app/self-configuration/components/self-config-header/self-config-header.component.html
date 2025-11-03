@@ -1,0 +1,59 @@
+<header class="c-header-panel pt-12 pb-12">
+    <div class="d-flex align-items-center justify-content-end">
+      <!-- Just Uncomment below code for Breadcrumbs and add justify-content-between in parent div -->
+        <!-- <ul class="breadcrumb">
+            <li>{{ getProgramTitle | titlecase | i18next }}</li>
+            <ng-container *ngIf="currentPageName?.length">
+                <ng-container *ngFor="let path of currentPageName">
+                    <li>
+                        <i class="material-icons">arrow_right</i>
+                    </li>
+                    <li>
+                        {{ path | titlecase | i18next }}
+                    </li>
+                </ng-container>
+            </ng-container>
+        </ul> -->
+        <div class="d-flex align-items-center">
+            <div class="mr-24 position-relative">
+                <i class="material-icons cursor-pointer" size="24px" #appsLink>apps</i>
+                <ul class="dropdown-menu right-align" [ngClass]="{'active' : appDropdown}" #appsDropdown>
+                    <li (click)="redirectToDashboard()">
+                        <a href="javascript:void(0)">{{ 'open_program' | i18next }}</a>
+                    </li>
+                    <li *ngIf="!loginService.impersonationSession && isSVMSUser" (click)="openControlPanel()">
+                        <a href="javascript:void(0)">{{ 'simplify_control_panel' | i18next }}</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="position-relative" #userLink>
+                <figure class="user-avatar" *ngIf="userProfile; else avatar">
+                    <img [src]="userProfile" class="cursor-pointer" alt="Profile image"/>
+                </figure>
+                <ng-template #avatar>
+                    <figure class="d-flex align-items-center justify-content-center rounded-circle position-relative mb-0 text-center">
+                        <span *ngIf="userAvatar" class="text-uppercase"> {{userAvatar | shortName: 'last'}}</span>
+                        <span *ngIf="!userAvatar" class="text-uppercase"> {{user?.initials}}</span>
+                        <span *ngIf="!userAvatar && !user?.initials" class="text-uppercase"> {{user?.first_name |shortName: 'last'}}</span>
+                    </figure>
+                </ng-template>
+                <ul class="dropdown-menu right-align" [ngClass]="{'active' : userDropdown}" #userDropdownMenu>
+                    <li>
+                        <a href="javascript:void(0)" (click)="userLogout()">
+                            {{ 'log_out' | i18next }}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div *ngIf="loginService?.impersonationSession" class="position-relative ml-24">
+                <a class="cursor-pointer impersonation" (click)="loginService?.exitImpersonation()"
+                    [tooltip]='"click_here_to_end_the_impersonation_and_navigate_back_to_your_dashboard" | i18next'
+                    placement="bottom">
+                    <icon name="theater_comedy" size="19px" type="material"></icon> 
+                    {{'exit_impersonation'|i18next}}
+                </a>
+            </div>
+            
+        </div>
+    </div>
+</header>

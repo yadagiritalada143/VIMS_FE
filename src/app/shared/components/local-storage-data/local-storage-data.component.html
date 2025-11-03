@@ -1,0 +1,27 @@
+<a class="local-storage" href="javascript:void(0)" (click)="openLocalStorageModal()">
+    <div>
+        <icon name="storage" size="20px" type="material"></icon>
+    </div>
+</a>
+
+<div *ngIf="localStorageModal" class="local-storage-modal p-24">
+    <h3>{{'local_storage_data' | i18next}}</h3>
+    <a href="javscript:void(0)" class="close-trigger" (click)="localStorageModal = false;">
+        <icon name="close" size="24px" type="material"></icon>
+    </a>
+    <div class="main-data">
+        <table class="fs-12">
+            <tr>
+                <th>Label</th>
+                <th>Value</th>
+            </tr>
+            <tr *ngFor="let data of dataList">
+                <td>{{data.label}}</td>
+                <td>
+                    <pre><p>{{data.value | json}}</p></pre>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div *ngIf="localStorageModal" class="local-storage-overlay" (click)="localStorageModal = false;"></div>

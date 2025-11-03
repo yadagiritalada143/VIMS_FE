@@ -1,0 +1,155 @@
+.self-config-wrapper {
+    min-height: 100vh;
+    background-color: colors(primary, 1);
+    -webkit-font-smoothing: antialiased;
+    font-family: $font-family;
+    font-weight: $font-weight-regular;
+    font-size: $font-primary;
+    color: colors(primary, 9);
+
+    a {
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .sidebar-menu-toggle {
+        position: fixed;
+        top: 19px;
+        left: 17px;
+        z-index: 10;
+    }
+
+    &.sidebar-menu-active {
+        .nav-bar {
+            ::ng-deep {
+                nav {
+                    position: static;
+                    max-width: 354px;
+    
+                    ul {
+                        &.short-view {
+                            display: none !important;
+                        }
+        
+                        &.full-view {
+                            opacity: 1;
+                            visibility: visible;
+                            transform: translateX(0);
+                        }
+                    }
+                }
+            }
+        }
+
+        .c-content {
+            margin-left: 360px;
+
+            ::ng-deep {
+                .c-header-panel {
+                    left: 354px !important;
+                    width: calc(100% - 378px);
+                }
+
+                .section-header {
+                    left: 360px !important;
+                }
+
+                .program-config-page {
+                    .tab-menu {
+                        left: 360px !important;
+                    }
+                }
+            }
+
+            &.shadow-enabled {
+                ::ng-deep {
+                    .section-header {
+                        box-shadow: 0px 9px 10px -14px #0000006b;
+                    }
+                }
+            }
+        }
+
+        ::ng-deep {
+            .c-listing-header, .c-listing-footer, .c-search-panel {
+                width: calc(100% - 384px);
+                left: 360px;
+            }
+          .c-listing-table-wrapper {
+            perfect-scrollbar {
+              .ps__rail-x {
+                left: 360px !important;
+              }
+            }
+
+            &.scrlled-bottom {
+              perfect-scrollbar {
+                .ps-content {
+                  padding-bottom: 15px;
+                }
+
+                >.ps {
+                  &.ps--active-x {
+                    >.ps__rail-x {
+                      position: absolute;
+                      left: 0px !important;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+    }
+
+    ::ng-deep {
+        p {
+            font-size: 13px;
+    
+            &.large {
+                font-size: 16px;
+            }
+            &.small{
+                font-size: $font-small;
+            }
+        }
+    
+        perfect-scrollbar {
+            >.ps {
+                overflow: hidden !important;
+            }
+        } 
+    } 
+
+    .c-content {
+        &.shadow-enabled {
+            ::ng-deep {
+                .section-header {
+                    box-shadow: 0px 9px 10px -14px #0000006b;
+                }
+            }
+        }
+
+        ::ng-deep {
+            .table-bg {
+                .content-area-inner {
+                    .fixed-header {
+                        display: none;
+                    }
+
+                    .listing-wrap {
+                        max-height: inherit;
+                        margin-bottom: 0;
+                    }
+
+                    .total-result {
+                        padding-bottom: 0;
+                        .temp-total-result-box, .total-result-box {
+                            display: none;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,19 @@
+<div class="svms-form-builder" [attr.data-visibility]="dataVisibility">
+  <div class="svms-toolbox-property">
+    <app-toolbox *ngIf="isToolboxVisible" (dragstart)="dragStarted($event)"></app-toolbox>
+    <app-property-editor [roleList]="roleList" (closePropertyEditor)="close()"></app-property-editor>
+    <!-- <app-property-editor [field]="field" (closePropertyEditor)="close()"></app-property-editor> -->
+  </div>
+  <div class="svms-property-editor">
+    <div class="svms-editor-header">
+      <h4>
+        {{ 'edit_form' | i18next }}
+      </h4>
+      <span class="cursor-pointer" (click)="onCloseClick()">
+        <img src="../../../assets/images/custom-fields-icons/close.svg">
+      </span>
+    </div>
+    <app-form-editor  [roleList]="roleList" ></app-form-editor>
+  </div>
+</div>
+<div id="svmsformbuilderBackdrop" class="svms-backdrop position-fixed" [attr.data-visibility]="dataVisibility"></div>

@@ -1,0 +1,212 @@
+<div class="billable" *ngIf="billing_data?.length > 0">
+  <perfect-scrollbar [config]="{ suppressScrollX: false, suppressScrollY: true }">
+    <table class="fixed-table">
+      <thead>
+        <tr>
+          <th>
+            {{ 'time' | i18next }}
+          </th>
+          <th *ngIf="billing_data[0]?.hours >= 0">
+            {{'Total Billable ' + totalBillableType() |i18next }}
+          </th>
+          <th *ngIf="billing_data[0]?.client_amount >= 0">
+            {{ 'total_client_amount' | i18next }}
+          </th>
+          <th *ngIf="billing_data[0]?.client_tax_amount >= 0 && !is_tax_hidden">
+            {{ 'total_tax' | i18next }}
+          </th>
+          <th *ngIf="billing_data[0]?.client_total_amount >= 0">
+            {{ 'total_client_billable_amount' | i18next }}
+          </th>
+          <th *ngIf="billing_data[0]?.msp_amount >= 0">
+            {{ 'total_msp_amount' | i18next }}
+          </th>
+          <th *ngIf="billing_data[0]?.msp_tax_amount >= 0 && !is_tax_hidden">
+            {{ 'msp_tax' | i18next }}
+          </th>
+          <th *ngIf="billing_data[0]?.msp_total_amount >= 0">
+            {{ 'total_msp_amount' | i18next }}.
+          </th>
+          <th *ngIf="billing_data[0]?.vendor_amount >= 0">
+            {{ 'total_vendor_amount' | i18next }}
+          </th>
+          <th *ngIf="billing_data[0]?.vendor_tax_amount >= 0 && !is_tax_hidden" >
+            {{ 'vendor_tax_amount' | i18next }}
+          </th>
+          <th *ngIf="billing_data[0]?.vendor_total_amount >= 0">
+            {{ 'total_vendor_bill' | i18next }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let bill of billing_data">
+          <td *ngIf="bill?.type">{{(bill.type === 'regular' ? 'Straight' : bill.type) | titlecase | i18next }}</td>
+          <td *ngIf="bill?.hours >= 0">{{bill.hours | accuracy : accuracyConfig?.HOUR | i18next }}</td>
+          <td *ngIf="bill?.client_amount >= 0">
+            <div class="d-flex align-items-center justify-content-center">
+              <span class="mr-4" tooltip="{{showTooltip(bill?.client_amount , accuracyConfig?.AMOUNT) | i18next }}" placement="right" delay="100">{{bill.client_amount|
+                accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}{{bill?.client_per_hour_rate ? '(' + (bill?.client_per_hour_rate| accuracy :
+                accuracyConfig?.AMOUNT : {currencyCode:currency}) + '/HR)' : ''  | i18next }}</span>
+                <icon *ngIf="bill?.client_tooltip" class="cursor-pointer" name="info" color="#aaabb5" size="16px" type="material"
+              tooltip="{{bill?.client_tooltip | i18next }}" placement="right" delay="100"></icon>
+            </div>
+          </td>
+          <td *ngIf="bill?.client_tax_amount >= 0 && !is_tax_hidden">
+            <span tooltip="{{showTooltip(bill?.client_tax_amount , accuracyConfig?.TAX) | i18next }}" placement="right" delay="100">
+              {{bill.client_tax_amount| accuracy : accuracyConfig?.TAX : {currencyCode:currency}  | i18next }}
+            </span>
+          </td>
+          <td *ngIf="bill?.client_total_amount >= 0">
+            <span tooltip="{{showTooltip(bill?.client_total_amount , accuracyConfig?.AMOUNT) | i18next }}" placement="right" delay="100">
+              {{bill.client_total_amount | accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}
+            </span>
+          </td>
+          <td *ngIf="bill?.msp_amount >= 0">
+            <span tooltip="{{showTooltip(bill?.msp_amount , accuracyConfig?.AMOUNT) | i18next }}" placement="right" delay="100">
+              {{bill.msp_amount| accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}{{bill?.msp_per_hour_rate ? '(' + (bill?.msp_per_hour_rate |
+              accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency})+ '/HR)' : ''  | i18next }}
+            </span>
+          </td>
+          <td *ngIf="bill?.msp_tax_amount >= 0 && !is_tax_hidden">
+            <span tooltip="{{showTooltip(bill?.msp_tax_amount , accuracyConfig?.TAX) | i18next }}" placement="right" delay="100">
+              {{bill.msp_tax_amount | accuracy : accuracyConfig?.TAX : {currencyCode:currency}  | i18next }}
+              <!-- {{bill?.type_taxes === 'percentage' ? '(' + bill?.rate_taxes +
+              '%)' : ''  | i18next }} -->
+            </span>
+          </td>
+          <td *ngIf="bill?.msp_total_amount >= 0">
+            <span tooltip="{{showTooltip(bill?.msp_total_amount , accuracyConfig?.AMOUNT) | i18next }}" placement="right" delay="100">
+              {{bill.msp_total_amount | accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}
+            </span>
+          </td>
+          <td *ngIf="bill?.vendor_amount >= 0">
+            <div class="d-flex align-items-center justify-content-center">
+              <span class="mr-4" tooltip="{{showTooltip(bill?.vendor_amount , accuracyConfig?.AMOUNT) | i18next }}" placement="right"
+              delay="100">
+              {{bill.vendor_amount | accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}{{bill?.vendor_per_hour_rate ? '(' + (bill?.vendor_per_hour_rate
+              | accuracy : accuracyConfig?.HOUR) + '/HR)' : ''  | i18next }}
+            </span>
+            <icon *ngIf="bill?.vendor_tooltip" class="cursor-pointer" name="info" color="#aaabb5" size="16px" type="material"
+              tooltip="{{bill?.vendor_tooltip | i18next }}" placement="right" delay="100"></icon>
+            </div>
+          </td>
+          <td *ngIf="bill?.vendor_tax_amount >= 0 && !is_tax_hidden">
+            <span tooltip="{{showTooltip(bill?.vendor_tax_amount , accuracyConfig?.TAX) | i18next }}" placement="right" delay="100">
+              {{bill.vendor_tax_amount | accuracy : accuracyConfig?.TAX : {currencyCode:currency}  | i18next }}
+              <!-- {{bill?.type_taxes === 'percentage' ? '(' +
+              bill?.rate_taxes + '%)' : ''  | i18next }} -->
+            </span>
+          </td>
+          <td *ngIf="bill?.vendor_total_amount >= 0">
+            <span tooltip="{{showTooltip(bill?.vendor_total_amount , accuracyConfig?.AMOUNT) | i18next }}" placement="right" delay="100">
+              {{bill.vendor_total_amount | accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  <table>
+    <thead>
+      <tr>
+        <th>
+          {{ 'time' | i18next }}
+        </th>
+        <th *ngIf="billing_data[0]?.hours >= 0">
+          {{'Total Billable ' + totalBillableType() |i18next }}
+        </th>
+        <th *ngIf="billing_data[0]?.client_amount >= 0">
+          {{ 'client_amount' | i18next }}
+        </th>
+        <th *ngIf="billing_data[0]?.client_tax_amount >= 0 && !is_tax_hidden" >
+          {{ 'total_tax' | i18next }}
+        </th>
+        <th *ngIf="billing_data[0]?.client_total_amount >= 0" class="bolt-text">
+          {{ 'total_client_billable_amount' | i18next }}
+        </th>
+        <th *ngIf="billing_data[0]?.msp_amount >= 0">
+          {{ 'msp_amount' | i18next }}
+        </th>
+        <th *ngIf="billing_data[0]?.msp_tax_amount >= 0 && !is_tax_hidden" >
+          {{ 'msp_tax' | i18next }}
+        </th>
+        <th *ngIf="billing_data[0]?.msp_total_amount >= 0" class="bolt-text">
+          {{ 'total_msp_amount' | i18next }}.
+        </th>
+        <th *ngIf="billing_data[0]?.vendor_amount >= 0">
+          {{ 'vendor_amount' | i18next }}
+        </th>
+        <th *ngIf="billing_data[0]?.vendor_tax_amount >= 0 && !is_tax_hidden" >
+          {{ 'vendor_tax_amount' | i18next }}
+        </th>
+        <th *ngIf="billing_data[0]?.vendor_total_amount >= 0" class="bolt-text">
+          {{ 'total_vendor_bill' | i18next }}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let bill of billing_data">
+        <td *ngIf="bill?.type">{{(bill.type === 'regular' ? 'Straight' : bill.type) | titlecase | i18next }}</td>
+        <td *ngIf="bill?.hours >= 0">{{bill.hours | accuracy : accuracyConfig?.HOUR | i18next }}
+        </td>
+        <td *ngIf="bill?.client_amount >= 0">
+          <div class="d-flex align-items-center justify-content-center">
+            <span class="mr-4" tooltip="{{showTooltip(bill?.client_amount , accuracyConfig?.AMOUNT) | i18next }}" placement="right" delay="100">{{bill.client_amount|
+              accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}{{bill?.client_per_hour_rate ? '(' + (bill?.client_per_hour_rate| accuracy :
+              accuracyConfig?.HOUR ) + '/HR)' : ''  | i18next }}</span>
+            <icon *ngIf="bill?.client_tooltip" class="cursor-pointer" name="info" color="#aaabb5" size="16px" type="material"
+              tooltip="{{bill?.client_tooltip | i18next }}" placement="right" delay="100"></icon>
+          </div>
+        </td>
+        <td *ngIf="bill?.client_tax_amount >= 0 && !is_tax_hidden"><span tooltip="{{showTooltip(bill?.client_tax_amount , accuracyConfig?.TAX) | i18next }}"
+            placement="right" delay="100">
+            {{bill.client_tax_amount| accuracy : accuracyConfig?.TAX : {currencyCode:currency}  | i18next }}</span></td>
+        <td *ngIf="bill?.client_total_amount >= 0" class="bolt-text">
+          <span tooltip="{{showTooltip(bill?.client_total_amount , accuracyConfig?.AMOUNT) | i18next }}" placement="right" delay="100">
+            {{bill.client_total_amount | accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}
+          </span>
+        </td>
+        <td *ngIf="bill?.msp_amount >= 0">
+          <span tooltip="{{showTooltip(bill?.msp_amount , accuracyConfig?.AMOUNT) | i18next }}" placement="right" delay="100">
+            {{bill.msp_amount| accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}{{bill?.msp_per_hour_rate ? '(' + (bill?.msp_per_hour_rate |
+            accuracy : accuracyConfig?.HOUR)+ '/HR)' : ''  | i18next }}
+          </span>
+        </td>
+        <td *ngIf="bill?.msp_tax_amount >= 0 && !is_tax_hidden">
+          <span tooltip="{{showTooltip(bill?.msp_tax_amount , accuracyConfig?.TAX) | i18next }}" placement="right" delay="100">
+            {{bill.msp_tax_amount | accuracy : accuracyConfig?.TAX : {currencyCode:currency}  | i18next }}
+            <!-- {{bill?.type_taxes === 'percentage' ? '(' + bill?.rate_taxes
+            + '%)' : ''  | i18next }} -->
+          </span>
+        </td>
+        <td *ngIf="bill?.msp_total_amount >= 0" class="bolt-text">
+          <span tooltip="{{showTooltip(bill?.msp_total_amount , accuracyConfig?.AMOUNT) | i18next }}" placement="right" delay="100">
+            {{bill.msp_total_amount | accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}
+          </span>
+        </td>
+        <td *ngIf="bill?.vendor_amount >= 0">
+          <div class="d-flex align-items-center justify-content-center">
+            <span class="mr-4" tooltip="{{showTooltip(bill?.vendor_amount , accuracyConfig?.AMOUNT) | i18next }}" placement="right" delay="100">
+              {{bill.vendor_amount | accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}{{bill?.vendor_per_hour_rate ? '(' +
+              (bill?.vendor_per_hour_rate | accuracy : accuracyConfig?.HOUR) + '/HR)' : ''  | i18next }}
+            </span>
+            <icon *ngIf="bill?.vendor_tooltip" class="cursor-pointer" name="info" color="#aaabb5" size="16px" type="material"
+                tooltip="{{bill?.vendor_tooltip | i18next }}" placement="right" delay="100"></icon>
+          </div>
+        </td>
+        <td *ngIf="bill?.vendor_tax_amount >= 0 && !is_tax_hidden">
+          <span tooltip="{{showTooltip(bill?.vendor_tax_amount , accuracyConfig?.TAX) | i18next }}" placement="right" delay="100">
+            {{bill.vendor_tax_amount | accuracy : accuracyConfig?.TAX : {currencyCode:currency}  | i18next }}
+            <!-- {{bill?.type_taxes === 'percentage' ? '(' +
+            bill?.rate_taxes + '%)' : ''  | i18next }} -->
+          </span>
+        </td>
+        <td *ngIf="bill?.vendor_total_amount >= 0" class="bolt-text">
+          <span tooltip="{{showTooltip(bill?.vendor_total_amount , accuracyConfig?.AMOUNT) | i18next }}" placement="right" delay="100">
+            {{bill.vendor_total_amount | accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  </perfect-scrollbar>
+</div>

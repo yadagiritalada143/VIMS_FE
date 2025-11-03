@@ -1,0 +1,78 @@
+@import "../../../../assets/sass/abstracts/variables";
+
+.svms-sidebar {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1001;
+  max-width: 768px;
+  transition: $transition;
+  transform: translateX(768px);
+  visibility: hidden;
+  opacity: 0;
+  width: 100%;
+
+  &.small {
+    max-width: 500px;
+    transform: translateX(500px);
+  }
+
+  &.large {
+    max-width: 1024px;
+    transform: translateX(1024px);
+  }
+
+  &.full-screen {
+    max-width: 100%;
+    transform: translateX(100%);
+  }
+
+  .svms-header {
+    background: $color-secondary;
+    color: $color-assets-light;
+
+    icon {
+      height: 24px;
+      overflow: hidden;
+      vertical-align: top;
+    }
+
+    a {
+      color: $color-assets-light;
+    }
+  }
+
+  &[data-visibility="visible"] {
+    visibility: visible;
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  &[data-extended="extended"] {
+    .svms-header {
+      padding-left: 316px !important;
+    }
+
+    ::ng-deep .svms-body {
+      padding-left: 304px;
+      box-shadow: 0px 3px 19px #0000000F;
+    }
+  }
+}
+
+.svms-backdrop {
+  background: $color-secondary;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  transition: $transition;
+  opacity: 0;
+  visibility: hidden;
+
+  &[data-visibility="visible"] {
+    visibility: visible;
+    opacity: .8;
+  }
+}

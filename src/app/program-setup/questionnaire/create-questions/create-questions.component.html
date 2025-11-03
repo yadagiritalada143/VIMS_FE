@@ -1,0 +1,373 @@
+<svms-sidebar title="{{title | i18next}}" [dataVisibility]="cretequestion" (onClose)="sidebarClose()">
+  <form [formGroup]="createQuestionForm">
+    <svms-sidebar-body>
+      <div [ngClass]="{'disableDiv' : showType === 'isview'}"
+        class="sidebar-height d-flex align-items-center justify-content-center" *ngIf="!questionConfig">
+        <div>
+          <h3 class="mb-24">{{ 'choose_question_type' | i18next }}</h3>
+          <ul class="question-type-list">
+            <li *ngFor="let d of questionType;let i = index" (click)="selectQuetionType(d,i)"
+              [class.active]="selectedItems === i">
+              <a href="javascript:void(0)">
+                <img src="assets/images/custom-fields-icons/{{d?.icon}}" alt="">
+                <p>{{d?.label}}</p>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="question-config p-24" *ngIf="questionConfig">
+        <div class="form-group">
+          <label>
+            {{ 'field_type' | i18next }}
+          </label>
+          <div class="field-type d-flex justify-content-between">
+            <div class="d-flex align-items-center">
+              <img class="mr-8" src="assets/images/custom-fields-icons/{{selectedQuestionType?.icon}}" alt="">
+              <p>{{selectedQuestionType?.label}}</p>
+            </div>
+            <button (click)="changeFieldType()">{{ 'change_field_type' | i18next }}</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{{ 'field_name' | i18next }} <span class="require">*</span></label>
+          <input
+            onkeypress="return (event.charCode > 64 &&
+        event.charCode < 91) || (event.charCode > 96 && event.charCode < 123) || event.charCode === 32 || (event.charCode >= 48 && event.charCode <= 57) "
+            [readonly]="showType === 'isedit' || showType === 'isview'" type="text" formControlName="name"
+            placeholder="{{ 'workflow' | i18next }}" class="form-control">
+        </div>
+        <div class="toggle-group d-flex mb-24" [ngClass]="{'disableDiv' : showType === 'isview'}">
+          <div class="mr-64">
+            <div class="toggle-inner d-flex align-items-center justify-content-between">
+              <div class="toggle d-flex align-items-center" [ngClass]="questionActive ? 'if-active' : 'if-inactive'">
+                <icon size="40px" [name]="questionActive ? 'toggle_on' : 'toggle_off'" type="material"
+                  cuClass="d-flex cursor-pointer" class="d-flex" (click)="questionActiveToggle()">
+                </icon>
+                <span class="ml-4 toggle-name">{{ 'active' | i18next }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="mr-64">
+            <div class="toggle-inner d-flex align-items-center justify-content-between">
+              <div class="toggle d-flex align-items-center" [ngClass]="questionRequired ? 'if-active' : 'if-inactive'">
+                <icon size="40px" [name]="questionRequired ? 'toggle_on' : 'toggle_off'" type="material"
+                  cuClass="d-flex cursor-pointer" class="d-flex" (click)="questionRequiredToggle()">
+                </icon>
+                <span class="ml-4 toggle-name">{{ 'required' | i18next }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="mr-64" *ngIf="selectedQuestionType?.meta_data?.datasource">
+            <div class="toggle-inner d-flex align-items-center justify-content-between">
+              <div class="toggle d-flex align-items-center" [ngClass]="questionDependent ? 'if-active' : 'if-inactive'">
+                <icon size="40px" [name]="questionDependent ? 'toggle_on' : 'toggle_off'" type="material"
+                  cuClass="d-flex cursor-pointer" class="d-flex" (click)="questionDependentToggle()">
+                </icon>
+                <span class="ml-4 toggle-name">{{ 'dependent' | i18next }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'label' | i18next }} <span class="require">*</span></label>
+          <input
+            onkeypress="return (event.charCode > 64 &&
+        event.charCode < 91) || (event.charCode > 96 && event.charCode < 123) || event.charCode === 32 || (event.charCode >= 48 && event.charCode <= 57) "
+            [readonly]="showType === 'isview'" type="text" formControlName="label" placeholder="{{ 'workflow' | i18next }}"
+            class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'description' | i18next }}</label>
+          <textarea [readonly]="showType === 'isview'" formControlName="description" class="form-control" rows="4"
+            placeholder="{{ 'filled_description' | i18next }}"></textarea>
+        </div>
+        <div class="form-group" *ngIf="selectedQuestionType?.meta_data?.datasource">
+          <label>{{ 'field_values' | i18next }} <span class="require">*</span></label>
+          <ul class="field-list">
+            <li>
+              <div class="del-btn">
+                <button>
+                  <icon name="remove_circle" size="18px"></icon>
+                </button>
+              </div>
+              <div class="placeholder-box">
+                <input type="text" formControlName="placeholder" placeholder="{{ 'enter_your_placeholder' | i18next }}">
+              </div>
+              <div class="help-box">
+                <icon name="help" color="#A39D9D" size="18px" tooltip="Help text goes here" placement="left"
+                  delay="500"></icon>
+              </div>
+              <div class="clearfix"></div>
+            </li>
+            <li *ngFor="let d of createQuestionForm?.value?.field_values;let i = index">
+              <div class="del-btn">
+                <button class="cursor-pointer" (click)="removeField(i)">
+                  <icon name="remove_circle" size="18px"></icon>
+                </button>
+              </div>
+              <div class="placeholder-box">
+                <input [(ngModel)]="d.label" (ngModelChange)="updateFieldValue(createQuestionForm?.value?.field_values)" [ngModelOptions]="{standalone: true}" type="text"
+                  placeholder="{{ 'enter_your_value_here' | i18next }}">
+              </div>
+              <div class="help-item-box position-relative">
+                <icon class="inactive" [ngClass]="{'active': d?.help_text_type === 'INFO' }" name="info" color="#163EAA" size="18px" (click)="showTooltipInfo(d,'INFO',i)"></icon>
+                <div class="tooltip-box" [ngClass]="{'active' : tooltipinfo && selectedIndex === i}" (mouseleave)="hideTooltipInfo()">
+                  <p class="small float-left">{{ 'tooltip_enabled' | i18next }}</p>
+                  <div class="float-right toogle-switch">
+                    <div class="toggle-inner d-flex align-items-center justify-content-between">
+                      <div class="toggle d-flex align-items-center"
+                        [ngClass]="d?.is_help_text_enabled ? 'if-active' : 'if-inactive'">
+                        <icon size="40px" [name]="d?.is_help_text_enabled ? 'toggle_on' : 'toggle_off'" type="material"
+                          cuClass="d-flex cursor-pointer" class="d-flex" (click)="d.is_help_text_enabled = !d.is_help_text_enabled">
+                        </icon>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="clearfix"></div>
+                  <textarea placeholder="{{ 'enter_tooltip_text' | i18next }}" [(ngModel)]="d.help_text" [ngModelOptions]="{standalone: true}" class="form-control mb-8"></textarea>
+                  <button class="btn btn-primary full-width">{{ 'save' | i18next }}</button>
+                </div>
+              </div>
+              <div class="help-item-box position-relative">
+                <!-- (click)="showTooltipReportProblem()" -->
+                <icon class="inactive" [ngClass]="{'active': d?.help_text_type === 'WARN' }" name="report_problem" color="#C20712" size="18px" (click)="showTooltipInfo(d,'WARN',i)" ></icon>
+                <div class="tooltip-box" [ngClass]="{'active' : tooltipreportproblem && selectedIndex === i}"
+                  (mouseleave)="hideTooltipReportProblem()">
+                  <p class="small float-left">{{ 'tooltip_enabled' | i18next }}</p>
+                  <div class="float-right toogle-switch">
+                    <div class="toggle-inner d-flex align-items-center justify-content-between">
+                      <div class="toggle d-flex align-items-center"
+                        [ngClass]="d.is_help_text_enabled ? 'if-active' : 'if-inactive'">
+                        <icon size="40px" [name]="d.is_help_text_enabled ? 'toggle_on' : 'toggle_off'" type="material"
+                          cuClass="d-flex cursor-pointer" class="d-flex" (click)="d.is_help_text_enabled = !d.is_help_text_enabled" >
+                          <!-- (click)="tooltipActiveMode()" -->
+                        </icon>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="clearfix"></div>
+                  <textarea placeholder="{{ 'enter_tooltip_text' | i18next }}" [(ngModel)]="d.help_text" [ngModelOptions]="{standalone: true}" class="form-control mb-8"></textarea>
+                  <button class="btn btn-primary full-width">{{ 'save' | i18next }}</button>
+                </div>
+              </div>
+              <div class="help-item-box position-relative">
+                <!-- (click)="showTooltipReport()" -->
+                <icon class="inactive" [ngClass]="{'active': d?.help_text_type === 'REPORT' }" name="report" color="#DC913A" size="18px" (click)="showTooltipInfo(d,'REPORT',i)" ></icon>
+                <div class="tooltip-box" [ngClass]="{'active' : tooltipreport && selectedIndex === i}" (mouseleave)="hideTooltipReport()">
+                  <p class="small float-left">{{ 'tooltip_enabled' | i18next }}</p>
+                  <div class="float-right toogle-switch">
+                    <div class="toggle-inner d-flex align-items-center justify-content-between">
+                      <div class="toggle d-flex align-items-center"
+                        [ngClass]="d.is_help_text_enabled ? 'if-active' : 'if-inactive'">
+                        <icon size="40px" [name]="d.is_help_text_enabled ? 'toggle_on' : 'toggle_off'" type="material"
+                          cuClass="d-flex cursor-pointer" class="d-flex" (click)="d.is_help_text_enabled = !d.is_help_text_enabled" >
+                          <!-- (click)="tooltipActiveMode()" -->
+                        </icon>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="clearfix"></div>
+                  <textarea placeholder="{{ 'enter_tooltip_text' | i18next }}" [(ngModel)]="d.help_text" [ngModelOptions]="{standalone: true}" class="form-control mb-8"></textarea>
+                  <button class="btn btn-primary full-width">{{ 'save' | i18next }}</button>
+                </div>
+              </div>
+              <div class="clearfix"></div>
+            </li>
+          </ul>
+          <button class="btn btn-light full-width-btn" (click)="addNewField()">+ {{ 'add_new_field_value' | i18next }}</button>
+        </div>
+
+
+        <!-- <div class="form-group">
+        <div class="d-flex justify-content-between align-items-center">
+          <label>
+            Drop Down Selection <span class="require">*</span>
+          </label>
+          <div class="toggle-group">
+            <div class="toggle-inner d-flex align-items-center justify-content-between">
+              <div class="toggle d-flex align-items-center" [ngClass]="multiSelect ? 'if-active' : 'if-inactive'">
+                <icon size="40px" [name]="multiSelect ? 'toggle_on' : 'toggle_off'" type="material"
+                  cuClass="d-flex cursor-pointer" class="d-flex" (click)="multiSelectToggle()">
+                </icon>
+                <span class="ml-4 toggle-name">Multi-select</span>
+              </div>
+            </div>
+          </div>
+        </div>
+       <table class="dropdown-table">
+         <tr>
+           <td>Yes</td>
+           <td width="10%">
+             <a href="javascript:void(0)" class="disabled">
+              <icon name="info_black" size="20px" color="#DC913A"></icon>
+            </a>
+            <td>
+              <a href="javascript:void(0)"  class="disabled">
+               <icon name="report_problem_black" size="20px" color="#C20712"></icon>
+             </a>
+             <td>
+              <a href="javascript:void(0)" (click)="openTooltipModal()">
+               <icon name="cancel_black" size="20px" color="#163EAA"></icon>
+             </a>
+          </td>
+         </tr>
+         <tr>
+          <td>No</td>
+          <td>
+            <a href="javascript:void(0)"  class="disabled">
+             <icon name="info_black" size="20px" color="#DC913A"></icon>
+           </a>
+           <td>
+             <a href="javascript:void(0)">
+              <icon name="report_problem_black" size="20px" color="#C20712"></icon>
+            </a>
+            <td>
+             <a href="javascript:void(0)"  class="disabled">
+              <icon name="cancel_black" size="20px" color="#163EAA"></icon>
+            </a>
+         </td>
+        </tr>
+        <tr>
+          <td>Sometimes</td>
+          <td>
+            <a href="javascript:void(0)">
+             <icon name="info_black" size="20px" color="#DC913A"></icon>
+           </a>
+           <td>
+             <a href="javascript:void(0)"  class="disabled">
+              <icon name="report_problem_black" size="20px" color="#C20712"></icon>
+            </a>
+            <td>
+             <a href="javascript:void(0)"  class="disabled">
+              <icon name="cancel_black" size="20px" color="#163EAA"></icon>
+            </a>
+         </td>
+        </tr>
+       </table>
+      </div> -->
+        <div class="form-group">
+          <label>{{ 'add_to_questionaire' | i18next }}(s)</label>
+          <ng-select [readonly]="showType === 'isview'" [items]="questionnaires" bindValue="id" bindLabel="name"
+            formControlName="questionnires" (search)="questionariesearch.next($event)" [searchable]="true"
+            multiple="true" placeholder="{{ 'choose' | i18next }}">
+          </ng-select>
+        </div>
+
+
+        <!-- Dependent field -->
+        <div *ngIf="questionDependent">
+          <h4 class="font-weight-medium mb-16">{{ 'dependent_field_configuration' | i18next }}</h4>
+          <div class="dependend-wrapper mb-12" *ngFor="let dq of createQuestionForm?.value?.dependent_questions">
+            <div class="form-group">
+              <label>
+                {{ 'drop_down_from_selection' | i18next }}
+              </label>
+              <!-- <ng-select [readonly]="showType === 'isview'" [items]="createQuestionForm?.value?.field_values"
+                bindLabel="label" bindValue="label" [(ngModel)]="dq.condition" [ngModelOptions]="{standalone: true}" [searchable]="true" placeholder="Drop Down From Selection">
+              </ng-select> -->
+
+              <ng-select *ngIf="isupdate" [readonly]="showType === 'isview'" (change)="checkSelected(createQuestionForm?.value?.dependent_questions)"
+                bindLabel="label" bindValue="label" [(ngModel)]="dq.condition" [ngModelOptions]="{standalone: true}" [searchable]="true" placeholder="{{ 'drop_down_from_selection' | i18next }}">
+              <ng-option *ngFor="let fv of createQuestionForm?.value?.field_values;let i = index" [disabled]="fv?.isselected" [value]="fv?.label" [hidden]="!fv?.label">{{fv?.label}}</ng-option>
+              </ng-select>
+
+            </div>
+            <label>{{ 'resulting_question' | i18next }} <span class="require">*</span></label>
+            <div class="fields">
+              <div class="form-group-row" >
+                <div class="form-group">
+                  <ng-select [readonly]="showType === 'isview'" [items]="quastionList" bindValue="id" bindLabel="name"
+                    [(ngModel)]="dq.questions" [ngModelOptions]="{standalone: true}"
+                    (search)="questionariesearch.next($event)" [searchable]="true" multiple="true"
+                    placeholder="{{ 'choose' | i18next }}">
+                  </ng-select>
+                  <!-- <ng-select placeholder="Choose" [(ngModel)]="questions.question"
+                    [ngModelOptions]="{standalone: true}">
+                    <ng-option value="'Resulting question 1'">Resulting question 1</ng-option>
+                    <ng-option value="'Resulting question 2'">Resulting question 2</ng-option>
+                  </ng-select> -->
+                </div>
+                <!-- <div class="d-flex">
+                  <a href="javascript:void(0)" (click)="addQuestion(i)" class="mt-8">
+                    <icon name="add_circle" size="24px" type="material" color="#C10611"></icon>
+                  </a>
+                  <a href="javascript:void(0)" (click)="removeQuestion(i)" class="remove-btn mt-8">
+                    <icon name="remove_circle" size="24px" type="material" color="#C10611"></icon>
+                  </a>
+                </div> -->
+              </div>
+            </div>
+
+            <!-- <label>Resulting Field <span class="require">*</span></label>
+            <div class="fields">
+              <div class="form-group-row" *ngFor="let field of resultingField, let i = index">
+                <div class="form-group">
+                  <ng-select placeholder="Choose" [(ngModel)]="field.field" [ngModelOptions]="{standalone: true}">
+                    <ng-option value="'Resulting Field 1'">Resulting Field 1</ng-option>
+                    <ng-option value="'Resulting Field 2'">Resulting Field 2</ng-option>
+                  </ng-select>
+                </div>
+                <div class="d-flex">
+                  <a href="javascript:void(0)" (click)="addresultingField(i)" class="mt-8">
+                    <icon name="add_circle" size="24px" type="material" color="#C10611"></icon>
+                  </a>
+                  <a href="javascript:void(0)" (click)="removeresultingField(i)" class="remove-btn mt-8">
+                    <icon name="remove_circle" size="24px" type="material" color="#C10611"></icon>
+                  </a>
+                </div>
+              </div>
+            </div> -->
+          </div>
+
+          <div class="add-field mb-24" *ngIf="showType != 'isview'">
+            <button class="add-btn" (click)="addDependentValue()">
+              <icon name="add" size="34px" type="material" color="#000000"></icon>
+            </button>
+          </div>
+        </div>
+        <!-- end -->
+
+
+
+      </div>
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+      <button class="btn btn-outine float-left" (click)="cancel()">{{ 'cancel' | i18next }}</button>
+      <button class="btn btn-primary float-right" (click)="continue()" *ngIf="!questionConfig"
+        [disabled]="!selectedQuestionType">{{ 'continue' | i18next }}</button>
+      <button [ngClass]="{'disableDiv' : showType === 'isview'}" class="btn btn-primary float-right"
+        *ngIf="questionConfig" (click)="saveQuestion()"
+        [disabled]="createQuestionForm?.invalid || showType === 'isview' || isSaveLoader">
+        <icon name="check_circle" size="20px" type="material" color="#ffffff" cuclass="icon-cu" class="icon--on-left">
+        </icon>{{ 'save' | i18next }}
+      </button>
+      <div class="clearfix"></div>
+    </svms-sidebar-footer>
+  </form>
+</svms-sidebar>
+<div class="tooltip-modal" [ngClass]="{'active': tooltipModal}">
+  <div class="toggle-group mb-16">
+    <div class="toggle-inner d-flex align-items-center justify-content-between">
+      <div class="toggle d-flex align-items-center" [ngClass]="tooltipActive ? 'if-active' : 'if-inactive'">
+        <icon size="40px" [name]="tooltipActive ? 'toggle_on' : 'toggle_off'" type="material"
+          cuClass="d-flex cursor-pointer" class="d-flex" (click)="tooltipActiveToggle()">
+        </icon>
+        <span class="ml-4 toggle-name">{{ 'active' | i18next }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{ 'tool_tip' | i18next }} <span class="require">*</span></label>
+    <input type="text" class="form-control">
+  </div>
+  <div class="overflow-hidden">
+    <button class="btn btn-primary float-right">
+      <icon name="check_circle" size="20px" type="material" color="#ffffff" cuclass="icon-cu" class="icon--on-left">
+      </icon>{{ 'save' | i18next }}
+    </button>
+  </div>
+</div>
+<div class="tooltip-overlay" [ngClass]="{'active': tooltipModal}"></div>

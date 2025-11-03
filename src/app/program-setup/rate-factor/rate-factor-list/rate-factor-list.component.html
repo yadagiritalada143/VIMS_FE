@@ -1,0 +1,26 @@
+<vms-table 
+    [hidden]="!isListingMode" 
+    [vmsTableConfig]="tableConfig" 
+    [vmsDataSource]="vmsData?.rate_factors"
+    [totalItem]="totalRecords" 
+    [itemsPerPage]="itemPerPage" 
+    (search)="onSearch($event)"
+    (onListFilter)="onListFilter($event)" 
+    (changePage)="onPaginationClick($event)"
+    (onDisableClicked)="onDisabledClicked($event)" 
+    (onCreate)="onCreateClick()" 
+    (onViewClick)="onViewClick($event)" 
+    (onEditClick)="onEditClick($event)" 
+    (onSort)="onSortClick($event)"
+>
+</vms-table>
+
+<app-create-rate-factor-list 
+    [hidden]="!(isViewMode || isEditMode || createMode)" 
+    [title]="title"
+    [buttonTitle]="buttonTitle" 
+    [createMode]="createMode" 
+    [isEditMode]="isEditMode" 
+    [isViewMode]="isViewMode"
+    [isListingMode]="isListingMode">
+</app-create-rate-factor-list>

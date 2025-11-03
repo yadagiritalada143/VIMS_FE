@@ -1,0 +1,41 @@
+<form [formGroup]="dependentForm">
+  <ng-container formArrayName="resultingFields">
+    <div class="form-group dependent-group" *ngFor="let resField of resultingFields.controls; let i = index">
+      <label class="text-lightgray">{{ 'resulting_field' | i18next }} <span class="require ml-8">*</span></label>
+      <div [formGroupName]="i" class="d-flex align-items-center">
+        <ng-select
+          formControlName="label"
+          [clearable]="false"
+          [placeholder]="'Select Field' | i18next"
+          [virtualScroll]="true"
+          [readonly]="!isEditMode"
+          class="type-select mr-16"
+          (change)="selectChange($event, i)"
+          (scrollToEnd)="loadMoreFields()"
+        >
+          <ng-option *ngFor="let field of fields" [value]="field.label"> {{ field.label }} </ng-option>
+        </ng-select>
+        <button
+          class="btn btn-primary rounded icon border-0 small mr-8"
+          [disabled]="!isEditMode"
+          (click)="addDependentField()"
+          *ngIf="i === resultingFields.length - 1"
+        >
+          <icon size="16px" name="add" type="material" cuClass="icon d-flex"></icon>
+        </button>
+        <button
+          *ngIf="resultingFields.length !== 1"
+          class="btn btn-primary rounded icon border-0 small"
+          [disabled]="!isEditMode"
+          (click)="removeDependentField(i)"
+        >
+          <icon size="16px" name="remove" type="material" cuClass="icon d-flex"></icon>
+        </button>
+      </div>
+      <p *ngIf="resField.invalid" class="validation-msg">
+        <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+        {{ 'field_is_configured_for_unselected_hierarchy' | i18next }}
+      </p>
+    </div>
+  </ng-container>
+</form>

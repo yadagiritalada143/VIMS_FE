@@ -1,0 +1,50 @@
+<!--File Upload Sction -->
+<form [formGroup]="orgCreate">
+  <div class="Upload_box_wrapper column-direction">
+    <svms-upload-avatar [image]="orgCreate?.controls?.logo?.value" [ngClass]="{'disable':isViewClicked}" (hideError)="getCropImage($event)"></svms-upload-avatar>
+    <div class="upload-panel-body">
+      <h5 *ngIf="!logoComponent?.logoUrl || !isImagePresent">{{ 'msp_logo' | i18next }}</h5>
+      <div *ngIf="(!logoComponent?.logoUrl || !isImagePresent) && !isViewClicked" class="error-text">
+        {{ 'only' | i18next }} .{{ 'png' | i18next }}, .{{ 'jpg_formats_file_size' | i18next }} 3 {{ 'mb' | i18next }}</div>
+    </div>
+
+    <div class="toggle-panel" [ngClass]="{'disable':isViewClicked}">
+      <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+        <span class="status-text">{{toggle?.title}}</span>
+        <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+          (click)="onClickToggle()"></span>
+      </div>
+    </div>
+  </div>
+  <!--File Upload Sction -->
+  <div class="form-group">
+    <label>{{ 'msp_name' | i18next }}<span class="require">*</span></label>
+    <input type="text" class="form-control" placeholder="{{ 'msp_organization_name' | i18next }}" formControlName="org_name" required [readonly]= "isViewClicked"
+      [ngClass]="{'error':
+  orgCreate.controls['org_name'].invalid && (orgCreate.controls['org_name'].dirty || orgCreate.controls['org_name'].touched)}" minlength="2">
+    <p class="validation-msg"
+      *ngIf="orgCreate.controls.org_name.touched && orgCreate.controls['org_name'].invalid && orgCreate.controls['org_name'].errors?.required">
+      <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'msp_name_is_required' | i18next }}
+    </p>
+    <p class="validation-msg" *ngIf="orgCreate.controls.org_name.errors?.minlength">
+      {{ 'msp_name_must_be_at_least' | i18next }} 2 {{ 'characters_long' | i18next }}.
+    </p>
+    <p class="validation-msg"  *ngIf="!isNameValid">{{duplicateOrg}}</p>
+  </div>
+
+  <div class="form-group">
+    <label>{{ 'organization_type' | i18next }} <span class="require">*</span></label>
+    <input type="text" class="form-control" placeholder="{{ 'msp' | i18next }}" formControlName="org_type" readonly>
+  </div>
+
+  <div *ngIf="orgCreate?.controls?.org_type?.value?.toLowerCase() != 'client' && orgCreate?.controls?.org_type?.value?.toLowerCase() != 'msp'" class="form-group">
+    <label>{{ 'industry' | i18next }} <span class="require">*</span></label>
+    <ng-select bindLabel="name" [clearable]="false" placeholder="{{ 'industry' | i18next }}" [multiple]=" true" ngDefaultControl
+      formControlName="vendor_industry" [readonly]="isViewClicked">
+      <ng-option [value]="data.id" *ngFor="let data of vendor_industries">{{data.name}}</ng-option>
+    </ng-select>
+    <p class="validation-msg" *ngIf="orgCreate.controls.vendor_industry.touched && orgCreate.controls['vendor_industry'].errors">
+      <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'industry_is_required' | i18next }}
+    </p>
+  </div>
+</form>

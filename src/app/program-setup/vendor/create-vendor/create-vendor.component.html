@@ -1,0 +1,649 @@
+<svms-sidebar title="{{title | i18next}}" [clickOutside]="clickOutside" [icon]="" [dataVisibility]="createManageVendor" (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <form [formGroup]="createVendorForm">
+      <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)">
+        <vms-tab label="{{ 'basic_info' | i18next }}">
+          <div class="create-vendor-data-form">
+            <label i18n>{{ 'vendor' | i18next }} <span class="require">*</span></label>
+            <div class="d-flex">
+              <div class="pl-0 create-client w-100">
+                <div class="form-group">
+                  <ng-select
+                    [ngClass]="(isViewMode || toUPdateIteamId)?'hide-arrow':''"
+                    [loading] = 'vendorLoading'
+                    loadingText = '{{"Loading"|i18next}}....'
+                    formControlName="vendor_id"
+                    (change)="selectVendor($event)"
+                    [clearable]="true"
+                    [searchable]="true"
+                    [typeahead]="vendorsearchManager$"
+                    [multiple]="false"
+                    [items]="vendorData"
+                    bindLabel="name"
+                    bindValue="id"
+                    placeholder="{{ 'select_vendor' | i18next }}"
+                    ngDefaultControl
+                    [readonly]="isViewMode || toUPdateIteamId"
+                  >
+                  </ng-select>
+                </div>
+              </div>
+              <div class="ml-8" *ngIf="!isCompleteVendorSetup">
+                <div class="toggle-panel" [ngClass]="{ disableDiv: isViewMode ? true : false }">
+                  <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+                    <span class="status-text">{{ toggle?.title | i18next }}</span>
+                    <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'" (click)="onClickToggle()"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="org-summary" *ngIf="selectedVendor">
+              <div class="logo">
+                <img *ngIf="selectedVendor?.logo_url" src="{{ selectedVendor?.logo_url }}" class="img-fluid" width="100" />
+                <img *ngIf="!selectedVendor?.logo_url" src="../../../assets/images/no-logo.svg" class="img-fluid" width="100" />
+              </div>
+              <div class="labor-category" *ngIf="selectedVendor?.labor_categories">
+                <span class="font-weight-medium">{{ 'labor_category' | i18next }}</span>
+                <p class="txt-11" *ngIf="selectedVendor && selectedVendor?.labor_categories[0]?.name">
+                  {{ selectedVendor?.labor_categories[0]?.name }}
+                </p>
+              </div>
+
+              <div class="client">
+                <div class="logo mb-32 ml-16 d-flex align-items-center">
+                  <div class="initials initials-profile initials__green d-flex align-justify-center mr-8 text-uppercase">
+                    {{ selectedVendor?.name | slice: 0:2 }}
+                  </div>
+                  <div class="d-flex flex-column text-capitalize">
+                    <span class="subtitle-2 font-weight-medium">{{ 'contact_person' | i18next }}</span>
+                    <span class="txt-11">{{ selectedVendor?.name }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="client"></div>
+            </div>
+
+            <!-- <div class="row" [ngClass]="{ disableDiv: (isViewMode || !selectedVendor) ? true : false }">
+              <div class="col-md-6">
+                <div class="checkbox">
+                  <div class="checkbox-box">
+                    <div class="checkbox-wrapper">
+                      <label class="checkbox-container pb-8">
+                        <input formControlName="is_invitation_required" (change)="invitationRequiredChange()" type="checkbox" name=""/>
+                        <span class="checkmark"></span>
+                        <p>{{ 'invite_vendor_to_complete_profile' | i18next }}</p>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6" *ngIf="vendorFormControl?.is_invitation_required?.value">
+                <div class="checkbox">
+                  <div class="checkbox-box">
+                    <div class="checkbox-wrapper">
+                      <label class="checkbox-container pb-8">
+                        <input type="checkbox" name="" formControlName="is_reference_required" />
+                        <span class="checkmark"></span>
+                        <p>{{ 'vendor_references_required' | i18next }}</p>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div> -->
+
+            <div class="row">
+              <div class="col-12">
+                <div class="form-group">
+                  {{ 'vendor_type' | i18next }}
+                    <span class="require">*</span>
+                  <div class="d-flex checkbox-row"
+                    [ngClass]="{ disableDiv: isViewMode ? true : false }">
+                    <div class="checkbox-box">
+                      <div class="checkbox-wrapper">
+                        <label class="checkbox-container mb-0">
+                          <input type="checkbox"
+                            formControlName="sourced" value="SOURCED" (click)="vendorTypeChanged($event)"/>
+                          <span class="checkmark"></span>
+                          <p>{{ 'sourced' | i18next }}</p>
+                        </label>
+                      </div>
+                    </div>
+                    <div class="checkbox-box">
+                      <div class="checkbox-wrapper">
+                        <label class="checkbox-container mb-0">
+                          <input type="checkbox"
+                            formControlName="payrolled" value="PAYROLLED" (click)="vendorTypeChanged($event)"/>
+                          <span class="checkmark"></span>
+                          <p>{{ 'payrolled' | i18next }}</p>
+                        </label>
+                      </div>
+                    </div>
+                    <div class="checkbox-box" *ngIf="showDirectSourching">
+                      <div class="checkbox-wrapper" [ngClass]="{'disableDiv' : showErrorMessage && !this.createVendorForm.get('direct_sourcing_payroller').value }">
+                        <label class="checkbox-container mb-0">
+                          <input type="checkbox"
+                            formControlName="direct_sourcing" (click)="vendorTypeChanged($event)" value="DIRECT_SOURCING"/>
+                          <span class="checkmark"></span>
+                          <p>{{ 'direct_sourcing' | i18next }}</p>
+                        </label>
+                      </div>
+                      <span class="require" *ngIf="showErrorMessage">One Direct Sourcing Vendor is already allowed for a Program.</span>
+                    </div>
+                    <!-- <div class="checkbox-box">
+                      <div class="checkbox-wrapper">
+                        <label class="checkbox-container mb-0">
+                          <input type="radio" formControlName="vendor_type" value="BOTH">
+                          <span class="checkmark"></span>
+                          <p>Both</p>
+                        </label>
+                      </div>
+                    </div> -->
+                  </div>
+                </div>
+                <div class="form-group" *ngIf="showPayrollerField">
+                  <label>
+                    {{ 'direct_sourcing_payroller' | i18next }}
+                    <span class="require">*</span>
+                  </label>
+                  <ng-select
+                    [readonly]="isViewMode"
+                    formControlName="direct_sourcing_payroller"
+                    placeholder="{{ 'direct_sourcing_payroller' | i18next }}"
+                    [items]="payroller_vendors"
+                    bindValue="id"
+                    bindLabel="name">
+                  </ng-select>
+                </div>
+                <div class="form-group">
+                  <label>
+                    {{ 'supplier_reference_id' | i18next }}
+                  </label>
+                  <input type="text"
+                    class="form-control"
+                    formControlName="supplier_ref_id"
+                    [readonly]="isViewMode"
+                    placeholder="{{ 'enter_supplier_reference_id' | i18next }}"
+                    [disabled]="isViewMode"
+                    [mandatePattern]="alphaNumeric"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>
+                    {{ 'labor_category' | i18next }}
+                  </label>
+                  <ng-select
+                    [readonly]="isViewMode"
+                    [multiple]="true"
+                    formControlName="labor_categories"
+                    placeholder="{{ 'labor_category' | i18next }}"
+                    [items]="labor_categories"
+                    bindValue="id"
+                    bindLabel="name"
+                  >
+                  </ng-select>
+                </div>
+                <div class="form-group">
+                  <label class="font-weight-medium">{{ 'work_locations' | i18next }} </label>
+                    <div class="toggle-panel toggle-work-location mb-8" [ngClass]="{ disableDiv: isViewMode ? true : false }">
+                      <div class="toggle-panel-inner" [ngClass]="is_all_work_locations ? 'if-active' : 'if-inactive'">
+                        <span class="toggle-switch" [ngClass]="is_all_work_locations ? 'toggle-on' : 'toggle-off'" (click)="onClickToggleLocation()"></span>
+                        <span class="status-text ml-12">{{ 'associate_to_all_work_locations' | i18next }} <i class="tooltip-icon material-icons" tooltip="{{ 'when_enabled_vendor_will_be_associated_to_all_work_locations_for_the_program.' | i18next }}" placement="right">help</i></span>
+                      </div>
+                    </div>
+                  <div *ngIf="!is_all_work_locations">
+                    <label>
+                      {{ 'work_location(s)' | i18next }}
+                      <span class="require">*</span>
+                      <i class="tooltip-icon material-icons align-middle ml-4" tooltip="{{ 'vendor_can_be_associated_to_specific_work_location(s)_selected_for_the_program.' | i18next }}" placement="right">help</i>
+                    </label>
+                    <ng-select
+                            [readonly]="is_all_work_locations"
+                            placeholder="{{ 'select_work_location' | i18next }}"
+                            (search)="this.usersearchLocation.next($event)"
+                            formControlName="work_locations"
+                            (clear)="getWorkLocations('', true)"
+                            [multiple]='true'
+                          >
+                            <!-- <ng-option [value]="'All'| i18next">{{ 'all' | i18next }}</ng-option> -->
+                            <ng-option [value]="location?.id" *ngFor="let location of locations">
+                              <span class="text-capitalize"
+                                >{{ location?.name }} <span *ngIf="location?.code">- {{ location?.code }}</span></span
+                              >
+                    </ng-option>
+                    </ng-select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>
+                    {{ 'assign_to_vendor_group' | i18next }}
+                  </label>
+                  <ng-select
+                    #vendorGroup
+                    [readonly]="isViewMode"
+                    formControlName="vendor_groups"
+                    placeholder="{{ 'vendor_group' | i18next }}"
+                    (keyup)="vendorGroupSearch(vendorGroup?.searchTerm)"
+                  >
+                    <ng-option *ngFor="let vendor of vendorGroupList" [value]="vendor.id">{{ vendor?.name }}</ng-option>
+                  </ng-select>
+                </div>
+                <div class="form-group">
+                  <label>
+                    {{ 'compliance_document_group' | i18next }}
+                  </label>
+                  <ng-select
+                    [readonly]="isViewMode"
+                    formControlName="compliance_document_group"
+                    placeholder="{{ 'compliance_document_group' | i18next }}"
+                    [items]="requiredDocGroup"
+                    bindValue="id"
+                    bindLabel="name"
+                  >
+                    <ng-option *ngFor="let item of requiredDocGroup" [value]="item.id">{{ item?.name }}</ng-option>
+                  </ng-select>
+                </div>
+
+                <div class='form-group'>
+
+                  <label>
+                    {{ 'business_structure' | i18next }}
+                  </label>
+
+                  <ng-select
+                    [readonly]='isViewMode'
+                    formControlName='business_structure'
+                    placeholder="{{ 'business_structure' | i18next }}">
+
+                      <ng-option value='INDEPENDENT_CONTRACTOR' > {{ 'independent_contractor' | i18next }} </ng-option>
+                      <ng-option value='OUTSOURCED_SERVICE_PROVIDER' > {{ 'outsourced_service_provider' | i18next }} </ng-option>
+                      <ng-option value='PROFESSIONAL_SERVICE_PROVIDER' > {{ 'professional_service_provider' | i18next }} </ng-option>
+
+                  </ng-select>
+                </div>
+
+                <h4 class="mt-32"> {{ 'associations' | i18next }} </h4>
+
+                <div class="form-group">
+                  <label>{{ 'hierarchies' | i18next }}</label>
+                  <ng-select bindLabel="name"
+                             placeholder="{{ 'select_hierarchies' | i18next }}"
+                             multiple="true"
+                             [(ngModel)]="selectedHierarchies"
+                             [ngModelOptions]="{standalone: true}"
+                             [readonly]="isViewMode"
+                             (change)="changedHierarchy($event)"
+                             >
+                    <ng-option *ngFor="let hierarchy of hierarchyListData" [value]="hierarchy.id">
+                        {{hierarchy.name}}
+                    </ng-option>
+                  </ng-select>
+                </div>
+
+                <div *ngIf="jobTypeAllowed" class="form-group">
+                  <label>
+                    {{ 'job_type' | i18next }}
+                    <icon style="vertical-align: middle;" class="pl-4" name="help" placement="right" size="16px" color="#A3B0C0"
+                      tooltip="If Job Type defined for a Vendor, then system filters Vendor based on respective Job Type and associated Labour Categories while distributing a Job.">
+                    </icon>
+                  </label>
+                  <ng-select [loading]="jobTypesLoading"
+                    placeholder="{{ 'select_job_types' | i18next }}"
+                    multiple="true" [(ngModel)]="selectedJobTypes"
+                    [ngModelOptions]="{standalone: true}"
+                    [readonly]="isViewMode">
+                    <ng-option *ngFor="let type of jobTypesList" [value]="type?.id">
+                      {{ type?.name }}
+                    </ng-option>
+                  </ng-select>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="createManageVendor === 'visible'" class="custom-fields"
+              [ngClass]="{ disableDiv: isViewMode ? true : false }">
+              <app-custom-fields
+                moduleName="VENDORS"
+                (isCustomFieldsFormValid)="isCFValid = $event"
+                [custom_fields]="recievedCFs"
+                showLabel="true" isCreate="true"
+                (customFieldUpdated)="this.updatedCFs = $event"
+              ></app-custom-fields>
+            </div>
+            <!-- <div class="row">
+              <div class="col-12">
+                <div class="resume-wrapper p-24">
+                  <div class="drop-zone my-16 cursor-pointer">
+                    <icon size="24px" name="publish" type="material" cuClass="d-flex"></icon>
+                  </div>
+                  <h4 class="pt-4 mb-4">Drag &amp; Drop file or <a>Browse</a></h4>
+                  <input hidden type="file">
+                  <p class="file-format mb-32">Only .pdf, .doc files with maximum size
+                    of 10 MB</p>
+                </div>
+              </div>
+            </div> -->
+            <!-- <app-modules [moduleData]="moduleGroup" (moduleDataChange)="onClickModule($event)"></app-modules> -->
+
+              <!-- <div class="text-center w-100">
+                <div class="border-top p-0 negative-mr24"></div>
+                <button class="btn custom-btn">CUSTOM FIELDS</button>
+              </div>
+
+              <h4 class="mb-24"> Custom Field Sample Heading </h4>
+              <div class="form-group-row">
+                <div class="form-group">
+                  <label>Work Flow</label>
+                  <ng-select [clearable]="false" [readonly]="isViewMode" ngDefaultControl formControlName="workflow"
+                    placeholder="Choose client">
+                    <ng-option [value]="'STANDARD'">STANDARD</ng-option>
+                  </ng-select>
+                  <p class="validation-msg"
+                    *ngIf="createVendorForm.controls.workflow.touched && createVendorForm.controls['workflow'].errors">
+                    <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                    Client is Required
+                  </p>
+                </div>
+              </div>
+              <div class="form-group-row">
+                <div class="form-group">
+                  <label>Preferred Language</label>
+                  <ng-select [clearable]="false" placeholder="Select Language" [readonly]="isViewMode"
+                    formControlName="preferred_language">
+                    <ng-option *ngFor="let lang of languages | keyvalue" [value]="lang.key">{{lang.value}}</ng-option>
+                  </ng-select>
+                  <p class="validation-msg"
+                    *ngIf="createVendorForm.controls.preferred_language.touched && createVendorForm.controls['preferred_language'].errors">
+                    <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                    Language is Required
+                  </p>
+                </div>
+                <div class="form-group">
+                  <label>Preferred Currency</label>
+                  <ng-select [clearable]="false" placeholder="Select Currency" [readonly]="isViewMode"
+                    formControlName="preferred_currency">
+                    <ng-option *ngFor="let cur of currency" [value]="cur">{{cur}}</ng-option>
+                  </ng-select>
+                  <p class="validation-msg"
+                    *ngIf="createVendorForm.controls.preferred_currency.touched && createVendorForm.controls['preferred_currency'].errors">
+                    <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                    Currency is Required
+                  </p>
+                </div>
+              </div> -->
+          </div>
+        </vms-tab>
+        <vms-tab label="{{ 'mark_up' | i18next }}">
+          <p class="level font-weight-medium mb-24">{{ 'add_mark_up' | i18next }}</p>
+          <ng-container formArrayName="markup_config">
+            <ng-container *ngFor="let markupForm of markupConfigControl.controls; let i = index">
+              <ng-container [formGroupName]="i">
+                <div class="mt-16 container radio-type">
+                  <div *ngFor="let radioitem of markupRadioitems" class="m-12">
+                    <label [for]="radioitem.value"  class="radio-inline">
+                      <input
+                        type="radio"
+                        [id]="radioitem.value"
+                        [value]="radioitem.value"
+                        formControlName="rate_model"
+                        [attr.disabled]="isViewMode ? true : null"
+                      />
+                      <span class="m-2">
+                        {{ radioitem.label | i18next }}
+                      </span>
+                    </label>
+                  </div>
+
+                  <div class="toggle-reminder">
+                    <span *ngIf="!isViewMode && i > 0" (click)="removeMarkup(i)" class="addremove on-select remove-markup material-icons">remove_circle </span>
+                    <div class="toggle-panel-inner toggle-background">
+                      <span class="enableReminders-text">{{ 'sliding_scale' | i18next }}</span>
+                      <span
+                        (click)="onMarkupSlide(markupForm)"
+                        class="toggle-switch"
+                        [ngClass]="markupForm.get('is_sliding_scale').value ? 'toggle-on' : 'toggle-off'"
+                      ></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="bordered mt-12">
+
+                  <div class="form-group-row" *ngIf="i === 0 && markupForm.get('is_sliding_scale').value">
+                    <div class="col">
+                      <div class="form-group m-8">
+                      <p class="level font-weight-medium ms-3">{{ 'default_markup' | i18next }}</p>
+                      <p class="initial-paragraph small">{{ 'define_the_default_markup_which_enables_the_system_to_pick_up_while_submitting_candidate_/_creating_quick_assignment_in_case_there_is_no_markup_found_matching_with_job/job_template_s_program_industry.' | i18next }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div *ngIf="markupForm.get('is_sliding_scale').value" formArrayName="markups">
+                    <ng-container *ngFor="let markupsForm of markupForm.get('markups').controls; let markupsIndex = index">
+                      <div class="form-group-row" [formGroupName]="markupsIndex">
+                        <div class="col">
+                          <div class="form-group m-8">
+                            <label *ngIf="markupsIndex === 0" >
+                              {{ ((markupForm.get('rate_model').value === 'BILL_RATE' ? 'Bill' : 'Pay') + ' Rate Greater Than') | i18next }}
+                              <span class="require">*</span>
+                            </label>
+                            <input type="number" class="form-control" type="number" [readonly]="isViewMode" formControlName="min" placeholder="{{ 'enter_$' | i18next }}" inputAccuracy="rate" />
+                          </div>
+                        </div>
+                        <div class="col">
+                          <div class="form-group m-8">
+                            <label *ngIf="markupsIndex === 0" >
+                              {{ 'and_less_than_or_equal_to' | i18next }}
+                              <span class="require">*</span>
+                            </label>
+                            <input class="form-control" [readonly]="isViewMode" formControlName="max" placeholder="{{ 'enter_$' | i18next }}" inputAccuracy="rate" type="number"/>
+                          </div>
+                        </div>
+                        <div class="col">
+                          <div class="form-group m-8" [ngClass]="{ disableDiv: createVendorForm.get('sourced').value == false || !createVendorForm.get('sourced').value }">
+                            <label *ngIf="markupsIndex === 0">
+                              {{ 'sourced_mark_up' | i18next }}
+                              <!-- <span class="require" *ngIf="createVendorForm.get('sourced').value == true">*</span> -->
+                            </label>
+                            <input type="number" class="form-control" [readonly]="isViewMode" formControlName="sourced_markup" placeholder="{{ 'enter_%' | i18next }}" inputAccuracy="markup_percentage" />
+                            <!-- <div *ngIf="markupsForm.controls.sourced_markup.errors?.max" class="invalid">
+                              {{ 'cannot_be_greater_than_100' | i18next }}
+                            </div> -->
+                          </div>
+                        </div>
+                        <div class="col">
+                          <div class="form-group m-8" [ngClass]="{ disableDiv: createVendorForm.get('payrolled').value == false || !createVendorForm.get('payrolled').value}">
+                            <label *ngIf="markupsIndex === 0">
+                              {{ 'payrolled_mark_up' | i18next }}
+                              <!-- <span class="require" *ngIf="createVendorForm.get('payrolled').value == true">*</span> -->
+                            </label>
+                            <input type="number" class="form-control" [readonly]="isViewMode" formControlName="payrolled_markup" placeholder="{{ 'enter_%' | i18next }}" inputAccuracy="markup_percentage" />
+                            <!-- <div *ngIf="markupsForm.controls.payrolled_markup.errors?.max" class="invalid">
+                              {{ 'cannot_be_greater_than_100' | i18next }}
+                            </div> -->
+                          </div>
+                        </div>
+                        <div *ngIf="!isViewMode" class="col-auto">
+                          <div class="form-group on-select m-8" [ngClass]="markupsIndex == '0' ? 'mt-40' : 'mt-16'">
+                            <span (click)="addSlidingMarkup(markupForm, markupsIndex)" class="addremove material-icons mr-2"> add_circle </span>
+                            <span (click)="removeSlidingMarkup(markupForm, markupsIndex)" class="addremove material-icons"> remove_circle </span>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-container>
+                  </div>
+
+                  <div class="form-group-row" *ngIf="i === 0 && !markupForm.get('is_sliding_scale').value">
+                    <div class="col">
+                      <div class="form-group m-8">
+                      <p class="level font-weight-medium ms-3">{{ 'default_markup' | i18next }}</p>
+                      <p class="initial-paragraph small">{{ 'define_the_default_markup_which_enables_the_system_to_pick_up_while_submitting_candidate_/_creating_quick_assignment_in_case_there_is_no_markup_found_matching_with_job/job_template_s_program_industry.' | i18next }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div formGroupName="markups" *ngIf="!markupForm.get('is_sliding_scale').value" class="form-group-row mt-12">
+
+                    <div class="col" [ngClass]="{ disableDiv: createVendorForm.get('sourced').value == false || !createVendorForm.get('sourced').value }">
+
+                      <div class="form-group m-8">
+                        <label>
+                          {{ 'sourced_mark_up' | i18next }}
+                          <!-- <span class="require" *ngIf="createVendorForm.get('sourced').value == true">*</span> -->
+                        </label>
+                        <input type="number" class="form-control" [readonly]="isViewMode || createVendorForm.get('sourced').value == false || !createVendorForm.get('sourced').value" formControlName="sourced_markup" placeholder="{{ 'enter_%' | i18next }}" inputAccuracy="markup_percentage" />
+                        <!-- <div *ngIf="markupForm.controls.markups.controls.sourced_markup.errors?.max" class="invalid">
+                          {{ 'cannot_be_greater_than_100' | i18next }}
+                        </div> -->
+                      </div>
+                    </div>
+                    <div class="col" [ngClass]="{ disableDiv: createVendorForm.get('payrolled').value == false || !createVendorForm.get('payrolled').value }">
+                      <div class="form-group m-8">
+                        <label>
+                          {{ 'payrolled_mark_up' | i18next }}
+                          <!-- <span class="require" *ngIf="createVendorForm.get('payrolled').value == true">*</span> -->
+                        </label>
+                        <input type="number" class="form-control" [readonly]="isViewMode || createVendorForm.get('payrolled').value == false || !createVendorForm.get('payrolled').value" formControlName="payrolled_markup" placeholder="{{ 'enter_%' | i18next }}" inputAccuracy="markup_percentage" />
+                        <!-- <div *ngIf="markupForm.controls.markups.controls.payrolled_markup.errors?.max" class="invalid">
+                          {{ 'cannot_be_greater_than_100' | i18next }}
+                        </div> -->
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group-row mt-12">
+                    <div class="col">
+                      <div class="form-group">
+                        <label>
+                          {{ 'labor_category' | i18next }} <span class="require" *ngIf="i != 0">*</span>
+                        </label>
+                        <ng-select
+                          [readonly]="isViewMode || i==0"
+                          formControlName="labor_category"
+                          placeholder="{{ 'labor_category' | i18next }}"
+                          [items]="i === 0 ? markupLaborCategories : markupLaborCategoriesWithoutAll"
+                          bindValue="id"
+                          bindLabel="name"
+                        >
+                        </ng-select>
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="form-group">
+                        <label>
+                          {{ 'hierarchy' | i18next }} <span class="require" *ngIf="i != 0">*</span>
+                        </label>
+                        <ng-select
+                          [readonly]="isViewMode || i==0"
+                          placeholder="{{ 'hierarchy' | i18next }}"
+                          formControlName="hierarchy_id"
+                          [items]="rendererData"
+                          bindLabel="name"
+                          bindValue="id"
+                        >
+                        </ng-select>
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="form-group">
+                        <label>
+                          {{ 'work_location' | i18next }} <span class="require" *ngIf="i != 0">*</span>
+                        </label>
+                        <ng-select
+                          [readonly]="isViewMode || i==0"
+                          placeholder="{{ 'select_work_location' | i18next }}"
+                          (search)="this.usersearchLocation.next($event)"
+                          formControlName="work_location_id"
+                          (clear)="getWorkLocations('', true)"
+                        >
+                          <ng-option [value]="'All'| i18next">{{ 'all' | i18next }}</ng-option>
+                          <ng-option [value]="location?.id" *ngFor="let location of locations">
+                            <span class="text-capitalize"
+                              >{{ location?.name }} <span *ngIf="location?.code">- {{ location?.code }}</span></span
+                            >
+                          </ng-option>
+                        </ng-select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+            </ng-container>
+          </ng-container>
+          <div *ngIf="!isViewMode" class="icon-row mt-64">
+            <div (click)="addMarkup()" class="icon-round">
+              <p id="addRow">+</p>
+            </div>
+          </div>
+        </vms-tab>
+        <!-- <vms-tab label="{{'Vendor Group' | i18next }}">
+          <div class="form-group">
+
+            <label> {{ 'Select Vendor Group' | i18next }} </label>
+            <ng-select
+              formControlName="vendor_groups"
+              (change)="addVendorGroup()"
+              bindLabel="name"
+              [clearable]="false"
+              [hideSelected]="true"
+              [searchable]="true"
+              [multiple]="true"
+              [items]="vendorGroupList"
+              bindLabel="name"
+              bindValue="id"
+              placeholder="{{ 'add_vendor_group_by_their_name_or_email_address' | i18next }}"
+              ngDefaultControl
+              [readonly]="isViewMode"
+            >
+            </ng-select>
+            <table class="w-100 table vendor-manager" *ngIf="vendorGroupName">
+              <thead>
+                <tr>
+                  <th colspan="2" class="level">
+                    {{ 'vendor_group_name' | i18next }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let u of vendorListData; let i = index">
+                  <td class="text-capitalize">
+                    <span class="initials initials__green text-uppercase">{{ u?.name | slice: 0:2 }}</span>
+                    {{ u?.name }}
+                  </td>
+                  <td class="text-right cursor" [ngClass]="{ disableDiv: isViewMode ? true : false }">
+                    <icon
+                      size="18px"
+                      name="cancel"
+                      *ngIf="!isViewMode"
+                      type="material"
+                      cuClass="icon-close"
+                      (click)="removeVendor(u.id, i)"
+                      class="icon-close"
+                    ></icon>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </vms-tab> -->
+      </vms-tab-group>
+    </form>
+  </svms-sidebar-body>
+  <svms-sidebar-footer *accessControl>
+    <button
+      type="submit"
+      class="btn btn-primary float-right"
+      *ngIf="tabIndex < 1 && !isViewMode"
+      (click)="goToNext()"
+      [disabled]="isContinueDisabled || (!JOB.value && !SOW.value) || (!createVendorForm.get('sourced').value && !createVendorForm.get('payrolled').value && !createVendorForm.get('direct_sourcing').value)">
+      {{ 'continue' | i18next }} <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu"> </icon>
+    </button>
+
+    <!--show this in hierarchy tabs -->
+    <button type="submit" class="btn btn-primary float-right" *ngIf="tabIndex === 1 && !isViewMode" (click)="addVendor()">
+      <icon *ngIf="!isSaveLoader" size="20px" name="check_circle" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+      <span *ngIf="isSaveLoader" class="ml-8">
+        <button-loader></button-loader>
+      </span>
+      &nbsp;&nbsp;{{ isUpdateReq?'update':'save' | i18next }}
+    </button>
+  </svms-sidebar-footer>
+</svms-sidebar>

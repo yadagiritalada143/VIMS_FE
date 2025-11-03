@@ -1,0 +1,338 @@
+<div class="position-relative" [ngClass]="{'parent-item': itemLevel==='parent', 'child-item': itemLevel==='child'}">
+    <div class="tab-inner-parent">
+    <div class="tab-inner invoice-inner position-relative d-flex justify-content-between" [ngClass]="{'align-items-center': (!textArea && !addRemoveFieldItem) }">
+        <div class="tab-left-content d-flex">
+            <i class="material-icons-outlined invoice-icon" [ngClass]="{'remove-invoice-icon': isHideButton}"  *ngIf="mainIcon">{{mainIcon}}</i>
+            <div class="c-text-content">
+                <div class="c-text-content-inner position-relative">
+                    <h4>{{subtitle | i18next}} <span class="require" *ngIf="required">*</span></h4>
+                    <p>{{description | i18next}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="tab-right-content d-flex justify-content-end" *ngIf="multiSelectBox">
+                <ng-select  bindValue="id" [readonly]="!disabled"
+                bindLabel="label" [items]="options" multiple="true" placeholder="{{ 'select_values' | i18next }}" [(ngModel)]="updatedMultiSelectDropdown" (change)="multiSelectValueChanged($event)">
+                </ng-select>
+                <!-- renamed bindLabel name to label for assignment config -->
+        </div>
+        <div class="tab-right-content d-flex justify-content-end" *ngIf="selectBox && !isDisabed">
+            <ng-select placeholder="{{ 'select' | i18next }}" [(ngModel)]="updatedSelectBoxValue" (change)="valueChanged($event)">
+                <ng-option [value]="item.value" multiple="true" *ngFor="let item of options">{{item.name | i18next}}</ng-option>
+            </ng-select>
+        </div>
+        <div class="tab-right-content d-flex justify-content-end" *ngIf="selectBox && isDisabed">
+            <ng-select [readonly]="true" placeholder="{{ 'select' | i18next }}" [(ngModel)]="updatedSelectBoxValue" (change)="valueChanged($event)">
+                <ng-option [value]="item.value" multiple="true" *ngFor="let item of options">{{item.name | i18next}}</ng-option>
+            </ng-select>
+        </div>
+            <div class="ng-select-input-inner d-flex justify-content-end" *ngIf="multipleOption">
+                <ng-select multiple="true"  placeholder="{{'Select'|i18next}}" [(ngModel)]="updatedSelectBoxValue" (change)="valueChanged($event)">
+                     <ng-option [value]="item.value || item.key" *ngFor="let item of options">{{item.label || item.name | i18next}}</ng-option>
+                </ng-select>
+        </div>
+        <div class="tab-right-content d-flex justify-content-end" *ngIf="toggleSwitch">
+            <toggle-button class="c-toggle-button-switch" (changed)="toggleChanged($event)" [disabled]="toggleDisabled" [checked]="updatedToggleValue"></toggle-button>
+        </div>
+        <div class="tab-right-content d-flex justify-content-end" *ngIf="selectTimeBox">
+            <ngb-timepicker class="c-timepicker" (ngModelChange)="timeValueChanges($event)" [(ngModel)]="time"></ngb-timepicker>
+        </div>
+        <div class="tab-right-content d-flex justify-content-end" *ngIf="cInputBox">
+            <input type="text" class="c-form-control" placeholder="{{ '8_hours' | i18next }}" >
+        </div>
+        <div class="tab-right-content d-flex justify-content-end" *ngIf="radioToggle">
+            <div class="c-switch-tabs d-flex align-items-center ml-24">
+                <label class="c-input-radio ml-16" *ngFor="let item of options">
+                    <input type="radio" [value]="item.value" [(ngModel)]="updatedSelectBoxValue" (ngModelChange)="valueChanged($event)" />
+                    <span class="cb-ui"></span>
+                    <span class="cb-label">{{item.name}}</span>
+                </label>
+            </div>
+        </div>
+        <div class="tab-right-content d-flex justify-content-end" *ngIf="textArea">
+            <textarea class="c-textarea" [(ngModel)]="updatedSelectBoxValue" rows="4" (ngModelChange)="valueChanged($event)"></textarea>
+        </div>
+        <div class="tab-right-content ng-select-input d-flex justify-content-end" *ngIf="toggleOptionsInput">
+            <div class="d-flex ng-select-input-inner justify-content-end mb-16 group-input span-input" >
+                <input type="text"  class="c-form-control" [ngClass]="{'no-left-border' : toggleOptionsInputValue}" [(ngModel)]="uInputValue" (ngModelChange)="onToggleOptionsInputValue($event)" />
+                <span *ngIf="toggleOptionsInputValue" class="bg-lightblue px-16 d-flex align-items-center border text-nowrap"
+                    (change)="onToggleOptionsInputValue($event)">
+                    {{toggleOptionsInputValue}}
+                </span>
+            </div>
+        </div>
+        <div class="tab-right-content ng-select-input d-flex justify-content-end" *ngIf="multioptionInput">
+            <div class="ng-select-input-inner d-flex justify-content-end">
+                <ng-select  placeholder="{{ 'client_code' | i18next }}" [readonly]="!disabled" [(ngModel)]="uCode" (change)="selectMultiOptionInputValue($event,'code')">
+                     <ng-option [value]="item.value" *ngFor="let item of options">{{item.label || item.name}}</ng-option>
+                </ng-select>
+                <ng-container *ngIf="!onlyText; else onlyTextDev">
+                    <input type="text" class="c-form-control no-left-border focussed-left-bord" [(ngModel)]="uInput" [readonly]="!disabled" (ngModelChange)="selectMultiOptionInputValue($event,'data')" placeholder="AGST"/>
+                </ng-container>
+                <ng-template #onlyTextDev>
+                    <input type="text" class="c-form-control no-left-border focussed-left-bord" appAlphabetOnly [(ngModel)]="uInput" [readonly]="!disabled" (ngModelChange)="selectMultiOptionInputValue($event,'data')" placeholder="AGST"/>
+                </ng-template>
+                
+                
+        </div>
+        </div>
+
+        <div [attr.disabled]="viewMode" class="tab-right-content ng-select-input d-flex justify-content-end" *ngIf="numberSelectOption">
+            <div class="ng-select-input-inner ng-select-input-numb-inner d-flex justify-content-end">
+                <input onlyNumber type="number" class="c-form-control numberSelectOption"   [(ngModel)]="value" (ngModelChange)="valueChanged($event)"  placeholder="0" [readonly]="disabled"/>
+                <ng-select [readonly]="disabled" placeholder="{{ 'select' | i18next }}" [(ngModel)]="selectedValue" (change)="optionChanged($event)" >
+                     <ng-option [value]="item.value" *ngFor="let item of options">{{item.label??item.name}}</ng-option>
+                </ng-select>
+            </div>
+        </div>
+        <div class="tab-right-content ng-select-input d-flex justify-content-end" *ngIf="inputAndSelectOption">
+            <div [formGroup]="form" class="ng-select-input-inner ng-select-input-numb-inner d-flex justify-content-end">
+                <input id="hourlyMinBill" type="number" class="c-form-control numberSelectOption" formControlName="count"
+                    [readonly]="disabled" />
+                <ng-select placeholder="{{ 'select' | i18next }}" [searchable]="false" [clearable]="false" formControlName="units"
+                    [readonly]="disabled">
+                    <ng-option *ngFor="let period of periodOptions" [value]="period">{{ period | i18next }}</ng-option>
+                </ng-select>
+            </div>
+        </div>
+        <div class="tab-right-content ng-select-input d-flex justify-content-end" *ngIf="numberSelectNumber">
+            <div [formGroup]="form" class="ng-select-input-inner ng-select-input-numb-inner d-flex justify-content-end">
+                <input type="number" placeholder="06" class="c-form-control numberSelectOption" />
+                <ng-select class="input-both-side" placeholder="{{ 'select' | i18next }}" [searchable]="false" [clearable]="false">
+                    <ng-option>&gt;</ng-option>
+                </ng-select>
+                <input type="number" class="c-form-control wo-border-left" placeholder="{{ 'max_hours' | i18next }}" />
+            </div>
+        </div>
+        <div class="tab-right-content ng-select-input-ng-select d-flex justify-content-end" *ngIf="selectNumberSelect">
+            <div [formGroup]="form" class="ng-select-input-inner ng-select-input-numb-inner d-flex justify-content-end">
+                <ng-select class="input-right" placeholder="{{ 'select' | i18next }}" [searchable]="false" [clearable]="false">
+                    <ng-option></ng-option>
+                </ng-select>
+                <input type="number" placeholder="06" class="c-form-control numberSelectOption" />
+                <ng-select class="input-left" placeholder="{{ 'select' | i18next }}" [searchable]="false" [clearable]="false">
+                    <ng-option></ng-option>
+                </ng-select>
+            </div>
+        </div>
+        <div class="tab-right-content ng-select-input-ng-select" *ngIf="addRemoveFieldItem && !(selectedInputOption?.length || secoundSelectedInputOption?.length)">
+            <div class="user-control-box d-flex align-items-center mb-12" *ngFor="let loopitem of userData; let i = index">
+                <div class="ng-select-input-inner ng-select-input-numb-inner d-flex justify-content-end">
+                    <ng-select (change)="onDropdownChange()" (change)="emitUserData($event)" [(ngModel)]="loopitem.userType" [items]="userType | keysort:'label'" class="input-right" placeholder="{{ 'select' | i18next }}" [searchable]="false" [clearable]="false">
+                    </ng-select>
+                    <input type="number" (ngModelChange)="emitUserData($event)" [(ngModel)]="loopitem.period" placeholder="06" class="c-form-control numberSelectOption" />
+                    <ng-select (change)="emitUserData($event)" [items]="periodOptions | keysort" [(ngModel)]="loopitem.type" class="input-left" placeholder="{{ 'select' | i18next }}" [searchable]="false" [clearable]="false">
+                    </ng-select>
+                </div>
+                <div class="add-remove-box d-flex align-item-center justify-content-start ml-8">
+                    <i class="material-icons remove cursor-pointer" (click)="removeMoreItem(i)" *ngIf="userData?.length != 1" [ngClass]="{'disabled': userData?.length === 1 }">remove_circle</i>
+                    <i class="material-icons add cursor-pointer" (click)="addMoreItem(i)" *ngIf="userData?.length < 3">add_circle</i>
+                </div>
+            </div>
+        </div>
+        <div class="tab-right-content ng-select-input-ng-select" *ngIf="addRemoveFieldItem && (selectedInputOption?.length || secoundSelectedInputOption?.length)">
+            <div class="user-control-box d-flex align-items-center mb-12" *ngFor="let loopitem of dynamicUserData; let i = index">
+                <div class="ng-select-input-inner ng-select-input-numb-inner d-flex justify-content-end">
+                    <ng-select *ngIf="selectedInputOption?.length" (change)="emitUserData($event , true)" bindLabel="key" bindValue="value" [(ngModel)]="loopitem.unit" [items]="selectedInputOption" class="input-right" placeholder="{{ 'select' | i18next }}" [searchable]="false" [clearable]="false">
+                    </ng-select>
+                    <input type="number" onwheel="return false" (ngModelChange)="emitUserData($event , true)" [(ngModel)]="inputPropertyChange ? loopitem.consumed_budget : loopitem.period" placeholder="06" class="c-form-control numberSelectOption" />
+                    <ng-select (change)="emitUserData($event , true)" [items]="secoundSelectedInputOption" bindLabel="key" bindValue="value" [(ngModel)]="loopitem.type" class="input-left" placeholder="{{ 'select' | i18next }}" [searchable]="false" [clearable]="false">
+                    </ng-select>
+                </div>
+                <div class="add-remove-box d-flex align-item-center justify-content-start ml-8">
+                    <i class="material-icons remove cursor-pointer" (click)="removeMoreItem(i , true)" *ngIf="dynamicUserData?.length != 1" [ngClass]="{'disabled': dynamicUserData?.length === 1 }">remove_circle</i>
+                    <i class="material-icons add cursor-pointer" (click)="addMoreItem(i , true)" *ngIf="dynamicUserData?.length < 10">add_circle</i>
+                </div>
+            </div>
+        </div>
+        <div class="tab-right-content d-flex justify-content-end" *ngIf="bulletedList">
+            <ul class="view-list">
+                <li>
+                    0 Days
+                </li>
+                <li>
+                    Before 2 Days
+                </li>
+            </ul>
+        </div>
+        <div class="tab-right-content d-flex justify-content-end" *ngIf="inputText">
+            <input [disabled]="viewMode" type="text" class="c-form-control" [(ngModel)]="updatedTextInput" (ngModelChange)="inputTextValueChange($event)" (keypress)="onKeyPress($event,updatedTextInput)" placeholder=""/>
+        </div>
+        <div class="tab-right-content d-flex justify-content-end" *ngIf="inputNumber">
+            <input type="number" class="c-form-control"  [(ngModel)]="updatedNumberInput" (ngModelChange)="inputNumberValueChange($event)" placeholder=""/>
+        </div>
+        <div class="tab-right-content d-flex justify-content-end" *ngIf="buttonInput && !isHideButton">
+            <button class="c-btn" [ngClass]="buttonIcon? 'c-btn-secondary-medium-left-icon' : 'c-btn-secondary-medium'" (click)="buttonClicked($event)"><i class="material-icons-outlined" *ngIf="buttonIcon">{{buttonIcon}}</i> {{buttonInput | i18next}}</button>
+        </div>
+        <div class="tab-right-content d-flex justify-content-end" *ngIf="checkboxInput">
+             <ul class="checkbox-item">
+                <li  *ngFor="let item of options">
+                    <label class="c-input-checkbox">
+                        <input type="checkbox" [checked]="item?.isSelected"  [(ngModel)]="item.isSelected" [value]="item?.value"
+                        (change)="onClickCheckbox(options)">
+                        <span class="cb-ui"></span>
+                        <span  class="cb-label">{{item?.label | i18next}}</span>
+                    </label>
+                </li>
+            </ul>
+        </div>
+        <div class="tab-right-content percentage-input ng-select-input d-flex justify-content-end" *ngIf="percentInput">
+            <div class="d-flex ng-select-input-inner justify-content-end mb-16 group-input position-relative">
+                <span *ngIf="showPercentage" class="bg-lightblue px-16 d-flex align-items-center border position-absolute text-nowrap">
+                    %
+                </span>
+                <input type="text" [mandatePattern]="numberPattern"
+                    class="c-form-control" [ngClass]="{'no-left-border' : showPercentage}"
+                    [(ngModel)]="feesValueInput" (ngModelChange)="valueChanged($event)"
+                />
+            </div>
+        </div>
+        <div class="tab-right-content ng-select-input d-flex justify-content-end" *ngIf="filePath">
+            <div class="upload-box d-flex justify-content-between align-items-center">
+                <p class="file-type">{{ 'pdf' | i18next }}</p>
+                <p class="path-container position-relative">
+                    {{ 'filename_or_filepath_' | i18next }}
+                    <i class="material-icons">delete</i>
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- <p>{{breakType?.options | json}}</p> -->
+    <div *ngIf="restBreak && breakType?.options.length > 0" class="pb-24">
+        <div *ngFor="let break of breakType?.options">
+        <div class="break-ui" *ngIf="break.type">
+            <div class="d-flex align-items-center justify-content-between mb-16">
+                <div class="d-flex align-items-center">
+                    <p class="dark font-weight-medium mr-16">{{break.type | titlecase}} {{ isShowBreak(break?.type) | i18next }}</p>
+                    <p *ngIf="break.is_paid_inclusive" class="small d-flex align-items-center mr-16"><i class="material-icons green mr-4">check_circle</i> {{ 'paid_break' | i18next }}</p>
+                    <p *ngIf="break.is_mandatory" class="small d-flex align-items-center mr-16"><i class="material-icons red mr-4">new_releases</i> {{ 'mandatory' | i18next }}</p>
+                </div>
+                <div>
+                    <!-- <i class="material-icons">more_horiz</i> -->
+                </div>
+            </div>
+            <div class="d-flex">
+                <div class="mr-64 pr-24" *ngFor="let rules of break.break_rule">
+                    <p class="dark font-weight-medium small text-uppercase">{{ 'rules' | i18next }}</p>
+                    <p>- {{ 'hours' | i18next }} &gt; {{rules.min_hours}} {{ 'and_hours' | i18next }} &lt; {{rules.max_hours}} {{ 'then_maximum_break' | i18next }} {{rules.max_duration}} {{ 'hours' | i18next }}</p>
+                    <!-- <p>- Hours &lt; 2 AND Hours &gt; 3 then Maximum Break 10 Min</p> -->
+                </div>
+                <div *ngIf="break?.penality_rule?.is_allow">
+                    <p class="dark font-weight-medium small text-uppercase">{{ 'penalty_rules' | i18next }}</p>
+                    <p>{{ 'number_of_missed_breaks' | i18next }} <strong>{{break.penality_rule.limit}}</strong></p>
+                    <p>{{ 'applied_penalty_rate_hours' | i18next }}<strong>{{break.penality_rule.value}} {{break.penality_rule.rate}} {{ 'hours' | i18next }}</strong></p>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+<div *ngIf="addRuleTime && ruleConfigs?.length > 0 ">
+  <div *ngFor="let addruleconfig of ruleConfigs; index as i">
+    <div  class="pb-24" *ngIf="addruleconfig?.name">
+        <div class="break-ui ml-24" >
+            <div *ngFor="let rule of addruleconfig.rules; index as j">
+            <div *ngIf="addruleconfig?.name" class="d-flex align-items-center justify-content-between mb-4">
+                <div class="d-flex align-items-center">
+                    <p class="dark font-weight-medium mr-16">{{ addruleconfig?.name}}</p>
+                </div>
+                <div class="position-relative" *ngIf="!isHideButton">
+                    <i class="material-icons cursor-pointer" (click)="showActionDropdown(i)">more_horiz</i>
+                    <div class="c-action-dropdown align-right" (mouseleave)="hideActionDropdown(i)" [ngClass]="{'active' : actionDropdown[i]?.status}">
+                        <ul>
+                            <li>
+                                <a href="javascript:void(0)" (click)="openEditModel()">{{ 'edit' | i18next }}</a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)" (click)="deleteRule(i)">{{ 'delete' | i18next }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex mb-16" *ngIf="rule?.periodicity">
+                <div class="d-flex mr-32">
+                    <p class="small">{{ 'rule_duration' | i18next }} : <span class="values">{{getRuleDuration(rule?.periodicity,addruleconfig?.apply_on)}}</span></p>
+                </div>
+                <div class="d-flex mr-32">
+                    <p class="small">{{ 'rule_apply' | i18next }} : <span class="values">{{getRuleApply(addruleconfig?.apply_on)}}</span></p>
+                </div>
+                <div class="d-flex mr-32" *ngIf="addruleconfig?.slug">
+                    <p class="small">{{'weekend_days'| i18next}} : <span class="values">{{getRuleApply(addruleconfig?.apply_on)?.toLowerCase() == 'weekend' ? getWeekendDay(addruleconfig?.slug) : 'All' }}</span></p>
+                </div>
+                <div class="d-flex">
+                    <p class="small">{{ 'apply_rate' | i18next }} : <span class="values">{{getRateFactorName(rule?.rate_factor)}}
+                        <!-- (<a href="javscript:void(0)" class="text-underline">View Rate Factor</a>) -->
+                    </span></p>
+                </div>
+            </div>
+            <div class="d-flex" *ngIf="rule?.conditions?.length > 0 && rule?.conditions[0].type">
+                <div class="mr-64 pr-24">
+                    <p class="dark font-weight-medium small text-uppercase">{{ 'conditions' | i18next }}</p>
+                    <div *ngFor="let condition of rule.conditions; index as k">
+                        <p *ngIf="condition?.type">{{getConditionType(condition?.type)}} {{getConditionOperator(condition?.operator)}} {{condition?.value}} {{condition?.logical_operator}} </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+    <div class="header-layout mb-24" *ngIf="addressLayout">
+        <p class="header-layout-title small text-uppercase mb-12">{{ 'preview' | i18next }}</p>
+        <!--- style 1-->
+        <div class="header-layout-box d-flex p-16">
+            <div class="address-box  d-flex">
+                <div class="addrss-logo mr-16"></div>
+                <div class="addres-line">
+                    <p>{{ 'from' | i18next }}</p>
+                    <p>{{ 'address' | i18next }}</p>
+                </div>
+            </div>
+            <div class="address-box d-flex">
+                <div class="addrss-logo mr-16"></div>
+                <div class="addres-line">
+                    <p>{{ 'to' | i18next }}</p>
+                    <p>{{ 'address' | i18next }}</p>
+                </div>
+            </div>
+        </div>
+        <!--- style 2-->
+        <!-- <div class="header-layout-box d-flex p-16">
+            <div class="address-box  d-flex">
+                <div class="addrss-logo mr-16"></div>
+                <div class="addres-line">
+                    <p>To</p>
+                    <p>Address</p>
+                </div>
+            </div>
+            <div class="address-box d-flex">
+                <div class="addrss-logo mr-16"></div>
+                <div class="addres-line">
+                    <p>From</p>
+                    <p>Address</p>
+                </div>
+            </div>
+        </div> -->
+        <!--- style 3-->
+        <!-- <div class="header-layout-box p-16">
+            <div class="address-box d-flex mb-16">
+                <div class="addrss-logo mr-16"></div>
+                <div class="addres-line">
+                    <p>From</p>
+                    <p>Address</p>
+                </div>
+            </div>
+            <div class="address-box d-flex">
+                <div class="addrss-logo mr-16"></div>
+                <div class="addres-line">
+                    <p>To</p>
+                    <p>Address</p>
+                </div>
+            </div>
+        </div> -->
+    </div>
+</div>
+</div>

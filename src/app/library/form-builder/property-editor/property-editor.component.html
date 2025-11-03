@@ -1,0 +1,276 @@
+<div class="svms-property-header">
+  <h4>
+    <a class="cursor-pointer" (click)="goBack()"><img src="../../../../assets/images/custom-fields-icons/west-24px.svg"
+        width="19px" alt="west-24" /></a>
+    <span> {{ 'properties' | i18next }}</span>
+  </h4>
+</div>
+<div class="svms-property-content">
+  <ng-container *ngFor="let property of baseModel?.properties">
+    <div class="toggle">
+      <div class="toggle-panel" *ngIf="property === 'enabled'">
+        <div class="toggle-panel-inner" [ngClass]="fieldProperties.is_enabled ? 'if-active' : 'if-inactive'">
+          <span class="toggle-switch" [ngClass]="fieldProperties.is_enabled ? 'toggle-on' : 'toggle-off'"
+            (click)="onClickToggle('is_enabled')" name="enabled" ngDefaultControl
+            [(ngModel)]="fieldProperties.is_enabled"></span>
+          <span class="status-text">{{ 'enabled' | i18next }}</span>
+        </div>
+      </div>
+      <div class="toggle-panel" *ngIf="property === 'required'">
+        <div class="toggle-panel-inner" [ngClass]="fieldProperties.is_required ? 'if-active' : 'if-inactive'">
+          <span class="toggle-switch" [ngClass]="fieldProperties.is_required ? 'toggle-on' : 'toggle-off'"
+            (click)="onClickToggle('is_required')" name="required" ngDefaultControl
+            [(ngModel)]="fieldProperties.is_required"></span>
+          <span class="status-text">{{ 'required_field' | i18next }}</span>
+        </div>
+      </div>
+
+      <div class="toggle-panel" *ngIf="property === 'allow_multiple'">
+        <div class="toggle-panel-inner"
+          [ngClass]="fieldProperties.meta_data.allow_multiple ? 'if-active' : 'if-inactive'">
+          <span class="toggle-switch" [ngClass]="fieldProperties.meta_data.allow_multiple ? 'toggle-on' : 'toggle-off'"
+            (click)="onMetaClickToggle('allow_multiple')" name="required" ngDefaultControl
+            [(ngModel)]="fieldProperties.allow_multiple"></span>
+          <span class="status-text">{{ 'allow_multi_select' | i18next }}</span>
+        </div>
+      </div>
+      <!--  <div class="toggle-panel" *ngIf="fieldProperties.type === fieldTypes.dropdown">
+      <div class="toggle-panel-inner" [ngClass]="fieldProperties.enableMultiSelect ? 'if-active' : 'if-inactive'">
+        <span class="toggle-switch" [ngClass]="fieldProperties.enableMultiSelect ? 'toggle-on' : 'toggle-off'"
+          name="enableMultiSelect" ngDefaultControl (click)="onClickToggle('enableMultiSelect')"
+          [(ngModel)]="fieldProperties.enableMultiSelect"></span>
+        <span class="status-text">Enable Multi Select</span>
+      </div>
+    </div>-->
+    </div>
+    <div class="form-group" *ngIf="property === 'name'">
+      <label>{{ 'field_name' | i18next }}<span class="require">*</span></label>
+      <input type="text" class="form-control" name="name" maxlength="100" ngDefaultControl
+        [ngClass]="{'error_class': !fieldProperties.name}" [(ngModel)]="fieldProperties.name"
+        (change)="modelChange($event, 'name')" placeholder="{{ 'workflow' | i18next }}">
+    </div>
+    <div class="form-group" *ngIf="property === 'label'">
+      <label>{{ 'label' | i18next }}<span class="require">*</span></label>
+      <input type="text" class="form-control" maxlength="20" placeholder="{{ 'field_label' | i18next }}"
+        [ngClass]="{'error_class': !fieldProperties.label}" [(ngModel)]="fieldProperties.label"
+        (change)="modelChange($event, 'label')">
+    </div>
+    <div class="form-group" *ngIf="property === 'placeholder'">
+      <label>{{ 'placeholder' | i18next }}<span class="require">*</span></label>
+      <input type="text" class="form-control" maxlength="20" placeholder="{{ 'placeholder' | i18next }}"
+        [(ngModel)]="fieldProperties.placeholder" (change)="modelChange($event, 'placeholder')">
+    </div>
+    <div *ngIf="property === 'description'">
+      <textarea type="textarea" placeholder="{{ 'description' | i18next }}" maxlength="2000" cols="12" rows="4"
+        class="form-control"></textarea>
+    </div>
+    <div class="form-group" *ngIf="property === 'validation_text'">
+      <label>{{ 'validation_text' | i18next }}</label>
+      <input type="text" class="form-control" placeholder="{{ 'please_select_a_valid_option' | i18next }} ">
+    </div>
+    <div *ngIf="property == 'currency'">
+      <div class="svms-custom-header">
+        <label class="mb-0">{{ 'currency_type' | i18next }}<span class="require">*</span></label>
+      </div>
+      <ng-select placeholder="Search by title" (change)="currencyChange($event, 'currencyType')"
+        [(ngModel)]="fieldProperties.currencyType">
+        <ng-option *ngFor="let type of currencyType" [value]="type">
+          {{type}}
+        </ng-option>
+      </ng-select>
+    </div>
+    <!-- <app-picklist *ngIf="fieldProperties.type === fieldTypes.dropdown">
+  </app-picklist>
+  <app-custom-data></app-custom-data> -->
+    <!-- <div class="form-group" *ngIf="property === 'file_type'">
+      <label>Allowed Types<span class="require">*</span></label>
+      <input type="text" class="form-control" name="file_type" maxlength="100" ngDefaultControl
+        [(ngModel)]="fieldProperties.meta_data.file_type" (change)="metaDataModelChange($event, 'file_type')"
+        placeholder="Allowed file types">
+    </div> -->
+    <div class="form-group" *ngIf="property === 'file_size'">
+      <div class="svms-custom-header">
+        <label class="mb-0">{{ 'file_size' | i18next }}</label>
+      </div>
+      <ng-select placeholder="Search by title" (change)="metaDataModelChange($event, 'file_size')"
+        [(ngModel)]="fieldProperties.meta_data.file_size">
+        <ng-option *ngFor="let size of sizeList" [value]="size">
+          {{size}} MB
+        </ng-option>
+      </ng-select>
+    </div>
+
+    <div class="form-group" *ngIf="property === 'file_type'">
+      <div class="svms-custom-header">
+        <label class="mb-0">{{ 'allowed_type' | i18next }}</label>
+      </div>
+      <ng-select [multiple]="true" placeholder="{{ 'search_by_title' | i18next }}" (change)="metaDataModelChange($event, 'file_type')"
+        [(ngModel)]="fieldProperties.meta_data.file_type">
+        <ng-option *ngFor="let type of supportedFileType" [value]="type">
+          {{type}}
+        </ng-option>
+      </ng-select>
+    </div>
+
+    <!-- for checkbox  and radio DropDown  -->
+    <div class="form-group" *ngIf="property === 'checkbox'|| property === 'radio'">
+      <div class="svms-picklist-header">
+        <label class="mb-0">{{ 'values' | i18next }}<span class="require">*</span></label>
+        <a *ngIf="!isCreatePickList" href="javascript:void()" (click)="loadFrom()" class="small-text text-blue">{{ 'add_custom_data' | i18next }}</a>
+        <a *ngIf="isCreatePickList" href="javascript:void()" (click)="loadFrom()" class="small-text text-green">{{ 'load_from_picklist' | i18next }}</a>
+      </div>
+      <div *ngIf="isCreatePickList">
+        <div class="svms-picklist">
+          <ul>
+            <li *ngFor="let data of values; let i= index">
+              <input type="checkbox">
+              <input type="text" class="form-control border-0 shadow-0" maxlength="20"
+                placeholder="{{ 'enter_your_values_here' | i18next }}" [(ngModel)]="data.value" (change)="addOption($event, data.value)">
+              <img (click)="removeMoreOption(i)" class="ml-auto cursor-pointer"
+                src="../../../../../assets/images/custom-fields-icons/Path 16711.svg" width="15" />
+            </li>
+          </ul>
+          <div class="svms-picklist-btn">
+            <a class="cursor-pointer" (click)="saveToPickList()">{{ 'save_to_pick_list' | i18next }}</a>
+            <a class="cursor-pointer" (click)="addMoreOption()">+{{ 'add_more' | i18next }}</a>
+          </div>
+        </div>
+        <div *ngIf="showPickListName" class="mt-8">
+          <label>{{ 'picklist_name' | i18next }}<span class="require">*</span></label>
+          <div class="svms-picklist-name">
+            <input type="text" class="form-control" placeholder="{{ 'picklist_name' | i18next }}" [(ngModel)]="pickList.name">
+            <icon (click)="savePicklist()" [ngStyle]="{'color':isSubmitted ? 'green': 'black'}" size="19px"
+              name="check_circle" type="2 " cuClass="ml-4" class="d-flex cursor-pointer"></icon>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="!isCreatePickList">
+        <app-custom-data [pickListData]="pickListData"></app-custom-data>
+      </div>
+    </div>
+
+    <!-- for Toggle  -->
+    <div class="form-group" *ngIf="property === 'toggle'">
+      <div class="svms-picklist-header">
+        <label class="mb-0">{{ 'values' | i18next }}<span class="require">*</span></label>
+      </div>
+      <div class="svms-picklist">
+        <ul>
+          <li>
+            <input class="cursor-pointer" type="radio" name="selecto" value="Yes/No"  [(ngModel)]="fieldProperties.selectedToggle" (change)="selectedRadio($event, 'yes_no')">
+            <span class="ml-16">{{ 'yes' | i18next }} / {{ 'no' | i18next }}</span>
+          </li>
+          <li>
+            <input class="cursor-pointer" type="radio" name="selecto" value="On/Off"  [(ngModel)]="fieldProperties.selectedToggle" (change)="selectedRadio($event, 'on_off')">
+            <span class="ml-16">{{ 'on' | i18next }} / {{ 'off' | i18next }}</span>
+          </li>
+          <li>
+            <input class="cursor-pointer" type="radio" name="selecto" value="True/False"  [(ngModel)]="fieldProperties.selectedToggle" (change)="selectedRadio($event, 'true_false')">
+            <span class="ml-16">{{ 'true' | i18next }} / {{ 'false' | i18next }}</span>
+          </li>
+        </ul>
+        <!-- <div class="svms-picklist-btn">
+          <a class="cursor-pointer">Save to Pick List</a>
+          <a class="cursor-pointer" (click)="addMoreOption()">+ ADD MORE</a>
+        </div> -->
+      </div>
+    </div>
+    <!-- <div class="form-group">
+    <div class="svms-custom-header">
+      <label class="mb-0">Values<span class="require">*</span></label>
+      <a href="" class="text-blue small-text">Add option</a>
+    </div>
+
+    <div class="svms-custom-data mt-12">
+      <ul>
+        <li>
+          Option 1
+          <img src="../../../../../assets/images/custom-fields-icons/Path 16711.svg" width="15" />
+        </li>
+        <li>
+          Option 2
+        </li>
+        <li>
+          Option 3
+        </li>
+      </ul>
+      <div class="svms-custom-btn">
+        <a href="" class="text-green">+4 more Values</a>
+        <a href="" class="text-blue text-underline">View All</a>
+      </div>
+    </div>
+  </div> -->
+
+    <!-- for date range toggle  timepicker
+range -->
+    <div class="toggle">
+      <div class="toggle-panel" *ngIf="property === 'range'">
+        <div class="toggle-panel-inner"
+          [ngClass]="fieldProperties.meta_data?.options.range ? 'if-active' : 'if-inactive'">
+          <span class="toggle-switch" [ngClass]="fieldProperties.meta_data?.options.range ? 'toggle-on' : 'toggle-off'"
+            (click)="onClickToggleOptions('range')"></span>
+          <span class="status-text">{{ 'enabled_date_range_picker' | i18next }}</span>
+        </div>
+      </div>
+      <div class="toggle-panel" *ngIf="property === 'timepicker'">
+        <div class="toggle-panel-inner"
+          [ngClass]="fieldProperties.meta_data?.options.timepicker ? 'if-active' : 'if-inactive'">
+          <span class="toggle-switch"
+            [ngClass]="fieldProperties.meta_data?.options.timepicker ? 'toggle-on' : 'toggle-off'"
+            (click)="onClickToggleOptions('timepicker')"></span>
+          <span class="status-text">{{ 'enabled_time' | i18next }}</span>
+        </div>
+      </div>
+    </div>
+    <!-- heading text -->
+    <!-- <div class="form-group" *ngIf="property == 'heading'">
+    <label>Heading Text<span class="require">*</span></label> 
+    <input type="text" class="form-control" maxlength="20" placeholder="Heading" [(ngModel)]="fieldProperties.heading"
+      (change)="modelChange($event, 'heading')">
+  </div>
+  <div class="form-group" *ngIf="property == 'subheading'">
+    <label>Sub Heading Text<span class="require">*</span></label>
+    <input type="text" class="form-control" maxlength="20" placeholder="Sub heading" [(ngModel)]="fieldProperties.subheading"
+    (change)="modelChange($event, 'subheading')">
+  </div> -->
+    <!--<div class="toggle">
+    <div class="toggle-panel">
+      <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+        <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+          (click)="onClickToggles()"></span>
+        <span class="status-text">Hide Fields</span>
+      </div>
+    </div>
+
+  </div>
+  <div class="form-group">
+    <label>Text Alignment</label>
+    <div class="radio-wrapper">
+      <label class="radio-container"><input type="radio"> <span class="checkmark"></span>Left </label>
+      <label class="radio-container"><input type="radio"> <span class="checkmark"></span>Center </label>
+      <label class="radio-container"><input type="radio"> <span class="checkmark"></span>Right </label>
+    </div>
+  </div> -->
+  </ng-container>
+  <div>
+
+    <div class="form-group">
+      <label>{{ 'user_role' | i18next }}<span class="require">*</span></label>
+      <div class="user-role-checkbox">
+        <div *ngFor="let userRole of fieldProperties.roles" class="user-role-ceckbox-panel">
+          <input type="checkbox" (change)="updatePropertiesEvent()"
+            [(ngModel)]="userRole.selected"><span>{{userRole?.name}}</span></div>
+      </div>
+    </div>
+
+    <!-- <div class="svms-custom-header">
+    <label class="mb-0">User Role<span class="require">*</span></label>
+  </div>
+    <ng-select bindLabel="name" [clearable]="false" [searchable]="true" [multiple]="true" bindLabel="name" autofocus
+      placeholder="Select role" ngDefaultControl>
+      <ng-option *ngFor="let role of rolesData" [value]="role">
+        <input class="checkbox mr-4" checked type="checkbox"> {{role?.name}}
+      </ng-option>
+    </ng-select> -->
+  </div>
+</div>

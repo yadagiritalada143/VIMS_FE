@@ -1,0 +1,130 @@
+<svms-sidebar [title]="'job_history'" [dataVisibility]="viewHistoryPanel" (onClose)="closehistoryView()">
+    <div class="cursor-default">
+        <svms-sidebar-body>
+            <div class="px-32 py-24">
+                <h4 class="font-weight-medium">
+                    {{'update_job' | i18next}}
+                </h4>
+                <div
+                    class="d-flex align-items-center justify-content-between mt-24 info column-direction worker-update-history">
+                    <div class="d-flex align-items-center">
+                        <div class="initials initials-light">
+                            <icon class="d-flex" size="14px" name="mail" type="material" theme="outlined"
+                                cuClass="d-flex"></icon>
+                        </div>
+                        <div class="d-flex justify-items-center flex-column ml-4">
+                            <p class="mb-0 small">{{ 'updated_on' | i18next }}</p>
+                            <span>{{historyData?.modified_date_time}}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="initials initials-green">
+                            {{historyData?.modified_by_initials}}
+                        </div>
+                        <div class="d-flex justify-items-center flex-column ml-4">
+                            <p class="mb-0 small">{{ 'updated_by' | i18next }}</p>
+                            <span>{{historyData?.modified_by}}</span>
+                            <span *ngIf="historyData?.impersonated_by" class="d-flex subtitle-2 font-weight-bold">
+                                <p>{{ 'impersonated_by' | i18next }}:</p>&nbsp;{{historyData?.impersonated_by}}
+                            </span>
+                        </div>
+                    </div>
+                    <div *ngIf="historyData?.reason" class="d-flex align-items-center">
+                        <div class="initials initials-green">
+                            <icon class="d-flex" size="18px" name="label" type="material" theme="outlined"
+                                cuClass="d-flex"></icon>
+                        </div>
+                        <div class="d-flex justify-items-center flex-column ml-4">
+                            <p class="mb-0 small">{{ 'reason' | i18next }}</p>
+                            <span>{{historyData?.reason}}</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Notes: START -->
+                <h4 class="font-weight-medium d-flex align-items-center mt-32">
+                    <icon class="d-flex mr-16" size="20px" name="note" type="material"></icon>
+                    {{ getNotesStatus(historyData) + 'notes' | i18next}}
+                </h4>
+                <p class="mt-10">{{ historyData?.reason_notes ? historyData?.reason_notes : (historyData?.review_notes ? historyData?.review_notes : "N/A") }}</p>
+                <!-- Notes: END -->
+                <!-- Summary of Differences -->
+                <h4 class="font-weight-medium d-flex align-items-center mt-24">
+                    <icon class="d-flex mr-16" size="20px" name="sort" type="material" cuClass="d-flex"></icon>
+                    {{ 'summary' | i18next }}
+                </h4>
+                <div class="mt-12">
+                    <div class="border-bottom d-flex justify-content-between py-16 summary"
+                        *ngFor="let data of historyDetailedList" [hidden]="data?.oldValue === data?.newValue">
+                        <p class="w-50">{{data?.label | snakeToTitleCase | titlecase}}</p>
+                        <p *ngIf="data?.key?.toLowerCase()!=='description' && !(data?.oldValFile || data.newValFile)"
+                            class="w-50 text-right">
+                            <span class="d-block" *ngIf="data?.oldValue && !isArray(data?.oldValue)"><del>{{data?.oldValue}}</del></span>
+                            <span class="d-block" *ngIf="data?.newValue && !isArray(data?.newValue)">{{data?.newValue}}</span>
+                        </p>
+                        <div *ngIf="isArray(data?.newValue) || isArray(data?.oldValue)" class="description-download">
+                            <div *ngFor="let file of data?.oldValue; let i=index" class="d-flex justify-content-between">
+                                <span *ngIf="file" class="d-block mb-12">
+                                    <a *ngIf="file?.key" (click)="downloadS3Attachment(file)" class="d-flex">
+                                        <icon size="24px" name="file_download" type="material" cuClass="d-flex"></icon>
+                                        <span><del>{{ file?.name + (i == data?.oldValue?.length - 1 ? '' : ', ') || '-'}}</del></span>
+                                    </a>
+                                </span>
+                            </div>
+                            <div *ngFor="let file of data?.newValue; let i=index" class="d-flex justify-content-between">
+                                <span *ngIf="file" class="d-block">
+                                    <a *ngIf="file?.key" (click)="downloadS3Attachment(file)" class="d-flex">
+                                        <icon size="24px" name="file_download" type="material" cuClass="d-flex"></icon>
+                                        <span>{{ file?.name + (i == data?.newValue?.length - 1 ? '' : ', ') || '-'}}</span>
+                                    </a>
+                                </span>
+                            </div>
+                        </div>
+                        <p *ngIf="data?.newValFile || data?.oldValFile" class="description-download">
+                            <span class="d-block mb-12" *ngIf="data?.oldValue">
+                                <a *ngIf="data?.oldValFile?.key" class="d-flex"
+                                    (click)="downloadS3Attachment(data?.oldValFile)">
+                                    <icon size="24px" name="file_download" type="material" cuClass="d-flex"></icon>
+                                    <span><del>{{ data?.oldValue || '-' }}</del></span>
+                                </a>
+                            </span>
+
+                            <span class="d-block" *ngIf="data?.newValue">
+                                <a *ngIf="data?.newValFile?.key" class="d-flex"
+                                    (click)="downloadS3Attachment(data?.newValFile)">
+                                    <icon size="24px" name="file_download" type="material" cuClass="d-flex"></icon>
+                                    <span>{{ data?.newValue || '-' }}</span>
+                                </a>
+                            </span>
+                        </p>
+                        <div class="description-text-body" *ngIf="data?.key?.toLowerCase()==='description'">
+                            <ng-container *ngIf="data?.oldValue">
+                                <p>
+                                    <span class="description mr-4"
+                                        [ngClass]="{'short-view' : !toggleDescription.oldDescription && (data?.oldValue?.length > maxContentLength)}"
+                                        [innerHTML]="toggleDescription.oldDescription ? data?.oldValue : (data?.oldValue?.substr(0, maxContentLength) + (data?.oldValue?.length > maxContentLength ? '...': ''))">
+                                    </span>
+                                    <button *ngIf="data?.oldValue?.length > maxContentLength" class="download-btn mb-24"
+                                        (click)="contentViewToggle('oldDescription')">
+                                        {{ toggleDescription.oldDescription ? 'View Less' : 'Read more'}}
+                                    </button>
+                                </p>
+                            </ng-container>
+                            <ng-container *ngIf="data?.newValue">
+                                <p>
+                                    <span class="description mr-4"
+                                        [ngClass]="{'short-view' : !toggleDescription.newDescription && (data?.newValue?.length > maxContentLength)}"
+                                        [innerHTML]="toggleDescription.newDescription ? data?.newValue : (data?.newValue?.substr(0, maxContentLength) + (data?.newValue?.length > maxContentLength ? '...': ''))">
+                                    </span>
+                                    <button *ngIf="data?.newValue?.length > maxContentLength" class="download-btn"
+                                        (click)="contentViewToggle('newDescription')">
+                                        {{ toggleDescription.newDescription ? 'View Less' : 'Read more'}}
+                                    </button>
+                                </p>
+                            </ng-container>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </svms-sidebar-body>
+    </div>
+</svms-sidebar>

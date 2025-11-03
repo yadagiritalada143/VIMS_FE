@@ -1,0 +1,19 @@
+ <section class="detail-page-wrapper pending-action-section-item" [ngClass]="clickedClassName">
+  <div class="description-panel p-32">
+    <a class="back-btn back-mobile d-md-none" (click)="toggleBackDiv()">
+      <icon class="d-inline-block" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon>
+     </a>
+    <aside class="prog-detail card bg-light">
+      <div class="px-16 py-16 d-flex align-items-center border-bottom">
+        <icon size="20px" name="pending_actions" type="material" cuClass="d-flex"></icon>
+        <p class="text-dark font-weight-medium mb-0 ml-4">Pending Action ({{totalCount}})</p>
+      </div>
+      <div class="pending-action-sidebar-wrapper p-12 pt-0">
+        <app-pending-action-sidebar (click)="toggleRightDiv('pending-action-section')" [sideBarSections]="sideBarSections"></app-pending-action-sidebar>
+      </div>
+    </aside>
+    <div class="program-content-area card bg-light" [ngClass]="{'active': isRightDivOpen}">
+        <router-outlet (activate)="subscribeToEmitter($event)" (deactivate)="unsubscribe()"></router-outlet>
+    </div>
+  </div>
+  </section>

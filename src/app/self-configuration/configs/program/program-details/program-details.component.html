@@ -1,0 +1,178 @@
+<header class="program-header section-header p-24 d-flex align-items-center justify-content-between">
+    <div>
+        <p class="large mb-8">{{ 'you_are_in' | i18next }}</p>
+        <h2 class="font-weight-semibold mb-0"> {{ (programDetails?.name || '--') }} </h2>
+    </div>
+    <div *ngIf="!editMode">
+        <ng-container *ngIf="isControlPanel">
+            <button class="c-btn c-btn-secondary-medium-left-icon mr-16" (click)="programSubject.next([programDetails, 'dashboard'])">
+                <i class="material-icons">dashboard</i> {{ 'navigate_to_dashboard' | i18next }}
+            </button>
+            <button class="c-btn c-btn-secondary-medium-left-icon mr-16" (click)="programSubject.next([programDetails, 'self-configuration'])">
+                <i class="material-icons">settings</i> {{ 'settings' | i18next }}
+            </button>
+        </ng-container>
+        <button *authorize="'program_details_manage'" class="c-btn c-btn-secondary-medium-left-icon" (click)="editProgramDetails()" [disabled]="!allowSave">
+            <i class="material-icons">drive_file_rename_outline</i> {{'edit' | i18next}}
+        </button>
+    </div>
+    <div *ngIf="editMode">
+        <button class="c-btn c-btn-secondary-medium mr-16" (click)="cancelEditProgramDetails()">{{ 'cancel' | i18next }}</button>
+        <button *accessControl [disabled]="!allowSave" 
+            class="c-btn c-btn-success-medium" (click)="saveProgramDetails()">
+            {{ 'save' | i18next }}
+        </button>
+    </div>
+</header>
+<section class="program-body-content section-body-content d-flex justify-content-between">
+    <aside class="prog-detail p-24" [ngClass]="{'edit-mode' : editMode}">
+        <div *ngIf="!editMode">
+            <h4 class="font-weight-medium mb-16">{{ 'program_details' | i18next }}</h4>
+            <p class="small mb-4">{{ 'status' | i18next }}</p>
+            <ng-container *ngIf="programStatus === 'Active'; else inactive">
+                <span class="program-status active"> {{ 'active' | i18next }} </span>
+            </ng-container>
+            <ng-template #inactive>
+                <span class="program-status inactive"> {{ 'inactive' | i18next }} </span>
+            </ng-template>
+
+            <p class="small mt-24">{{ 'program_name' | i18next }}</p>
+            <p class="dark"> {{ (programDetails?.name || '--') }} </p>
+
+            <p class="small mt-24">{{ 'program_code' | i18next }}</p>
+            <p class="dark"> {{ (programDetails?.unique_id || '--') | i18next }} </p>
+
+            <p class="small mt-24">{{ 'program_type' | i18next }}</p>
+            <p class="dark"> {{ serviceType }} </p>
+
+            <ng-container *ngIf="(programDetailForm?.value?.type === 'MSP-MANAGED')" >
+              <p class="small mt-24">{{ 'msp' | i18next }}</p>
+              <p class="dark"> {{ (mspDetails?.name || '--') }} </p>
+            </ng-container>
+
+            <p class="small mt-24">{{'effective_date' | i18next}}</p>
+            <p class="dark"> {{ startDate }} </p>
+
+            <h4 class="font-weight-medium mt-24 mb-16">{{'client_details'|i18next}}</h4>
+            <p class="small">{{'client_name'|i18next}}</p>
+            <p class="dark"> {{ (programDetails?.client?.name || '--') }} </p>
+
+            <h4 *ngIf="customFieldView?.length" class="font-weight-medium mt-24 mb-16">{{'custom_fields'|i18next}}</h4>
+            <div class="pt-8" *ngFor="let item of customFieldView;">
+                <p class="small"> {{ item?.label }} </p>
+                <ng-container *ngIf="item?.displayType === 'text';">
+                    <p class="dark"> {{ (item?.value || '--') }} </p>
+                </ng-container>
+                <ng-container *ngIf="item?.displayType === 'hyperlink';">
+                    <p class="dark"> 
+                       <a [hrefParse]="item?.value"> {{ (item?.value || '--') }} </a>
+                    </p>
+                </ng-container>
+                <ng-container *ngIf="item?.displayType === 'attachment';">
+                    <p class="dark"> 
+                       <a [downloadFile]="item?.value"> {{ (item?.value?.name || '--') }} </a>
+                    </p>
+                </ng-container>
+            </div>
+        </div>
+        <div [formGroup]="programDetailForm" *ngIf="editMode">
+            <h4 class="font-weight-medium mb-16">{{ 'program_details' | i18next }}</h4>
+            <p class="small mb-4">{{ 'status' | i18next }}</p>
+            <div class="edit-status position-relative">
+                <span class="program-status" [ngClass]="[programStatus === 'Active' ? 'active' : 'inactive']" #editStatusBtn>{{ programStatus?.toLowerCase() | i18next}} <i class="material-icons">expand_more</i></span>
+                <div class="c-action-dropdown" [ngClass]="{'active' : programEditStatus}">
+                    <ul>
+                        <li [ngClass]="{'active' : programStatus === 'Active'}">
+                            <a href="javascript:void(0)" (click)="changeStatus('Active')">{{ 'active' | i18next }}</a>
+                        </li>
+                        <li [ngClass]="{'active' : programStatus === 'Inactive'}">
+                            <a href="javascript:void(0)" (click)="changeStatus('Inactive')">{{ 'inactive' | i18next }}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="c-form-group mt-24">
+                <label class="small">
+                    {{ 'program_name' | i18next }}
+                    <span class="requires">*</span>
+                </label>
+                <input I18n  type="text" class="c-form-control"
+                    placeholder="{{'program_name' | i18next}}"
+                    formControlName="name"
+                />
+            </div>
+            <div class="c-form-group mt-24">
+                <label class="small">
+                    {{ 'program_code' | i18next }}
+                    <span class="require">*</span>
+                </label>
+                <input I18n type="text" class="c-form-control"
+                   placeholder="{{'program_code' | i18next}}"
+                   formControlName="code" disabled
+                />
+            </div>
+            <div class="c-form-group mt-24">
+                <label class="small">
+                    {{ 'program_type' | i18next }}
+                    <span class="require">*</span>
+                </label>
+                <ng-select I18n formControlName="type" placeholder="{{'program_type' | i18next}}">
+                    <ng-option value="MSP-MANAGED"> {{ 'msp-managed' | i18next }} </ng-option>
+                    <ng-option value="SELF-SERVICED"> {{ 'self-serviced' | i18next }} </ng-option>
+                </ng-select>
+            </div>
+            <div *ngIf="(programDetailForm?.value?.type === 'MSP-MANAGED')"
+                class="c-form-group mt-24">
+                <label class="small">
+                    {{ 'msp' | i18next }}
+                    <span class="require">*</span>
+                </label>
+                <ng-select placeholder="{{ 'msp' | i18next }}" formControlName="msp" I18n required
+                  (search)="mspsearchManager.next({ term: ($event?.term ?? ''), page: 1 })"
+                  (scrollToEnd)="loadMoreMSP()" (open)="mspsearchManager.next({ term: '', page: 1 })"
+                  [loading]='mspLoading' loadingText="{{ 'loading' | i18next}}" [searchable]="true">
+                    <ng-option [value]="msp?.id" *ngFor="let msp of mspList">{{msp?.name || '--'}}</ng-option>
+                </ng-select>
+            </div>
+            <div class="c-form-group position-relative mt-24">
+                <label class="small">
+                    {{ 'effective_date' | i18next }}
+                    <span class="require">*</span>
+                </label>
+                <svms-datepicker I18n
+                    formControlName="date"
+                    [inputdateFormat]="dateFormat"
+                >
+                </svms-datepicker>
+            </div>
+
+            <h4 class="font-weight-medium mt-24 mb-16">{{'client_details' | i18next}}</h4>
+            <p class="small">{{'client_name'|i18next}}</p>
+            <p class="dark"> {{ (programDetails?.client?.name || '--') }} </p>
+
+            <div class="c-form-group position-relative mt-24">
+                <app-custom-fields moduleName="PROGRAM_DETAILS" 
+                    (isCustomFieldsFormValid)="isCFValid = $event" 
+                    [custom_fields]="recievedCFs"
+                    showLabel="true" [isCreate]="false" 
+                    (customFieldUpdated)="this.updatedCFs = $event">
+                </app-custom-fields>
+            </div>
+        </div>
+    </aside>
+    <div class="program-content-area">
+        <div class="panel panel-light mb-24 pt-0 p-16 tabs h-100 detail-tab">
+            <vms-tab-group>
+                <!-- <vms-tab label="{{ 'program_members' | i18next }}" iconLeft="people_alt">
+                    <app-program-manage [edit]="editMode" (showCreateUser)="addUserToProgram($event)"></app-program-manage>
+                </vms-tab> -->
+                <vms-tab label="{{ 'modules' | i18next }}" iconLeft="category">
+                    <app-modules [readOnly]='editMode' 
+                        [hideHiddenModules]="true"
+                        [moduleData]="moduleGroup"
+                        (moduleDataChange)="onClickModule($event)"></app-modules>
+                </vms-tab>
+            </vms-tab-group>
+        </div>
+    </div>
+</section>

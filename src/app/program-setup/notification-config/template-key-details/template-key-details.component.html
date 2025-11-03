@@ -1,0 +1,48 @@
+<div class="notification-page-wrapper">
+    <div class="create-key">
+      <h3 class="font-weight-medium mb-24">{{ templateKeyId ? ('Edit'|i18next) : ('Create'|i18next)}} {{ 'template_key' | i18next }}</h3>
+      <div class="card">
+        <form [formGroup]="templateKeyForm">
+          <div class="p-24">
+            <div class="form-group">
+              <label>{{ 'field_name' | i18next }} <span class="require">*</span></label>
+              <input type="text" class="form-control" formControlName="field_name" placeholder="{{ 'enter_field_name' | i18next }}">
+            </div>
+
+            <div class="form-group">
+              <label>{{ 'field_slug' | i18next }} <span class="require">*</span></label>
+              <input type="text" class="form-control" formControlName="field_slug" placeholder="{{ 'enter_field_slug' | i18next }}">
+            </div>
+
+            <div class="form-group">
+              <label>{{ 'module' | i18next }} <span class="require">*</span></label>
+              <input type="text" class="form-control" formControlName="module" placeholder="{{ 'enter_module_name' | i18next }}">
+            </div>
+
+            <div class="form-group">
+              <label>{{ 'module_slug' | i18next }} <span class="require">*</span></label>
+              <input type="text" class="form-control" formControlName="module_slug" placeholder="{{ 'enter_field_slug' | i18next }}">
+            </div>
+            <div class="form-group-row">
+              <div class="form-group">
+                <input type="checkbox" name="header-panel" class="mr-8" formControlName="is_recipient"> {{ 'recipient' | i18next }}
+              </div>
+              <div class="form-group">
+                <div class="toggle-panel">
+                  <div class="toggle-panel-inner" [ngClass]="templateKeyForm?.controls['is_enabled']?.value ? 'if-active' : 'if-inactive'">
+                    <span class="status-text mr-12">{{ templateKeyForm?.controls['is_enabled']?.value ? ('Enabled'|i18next) : ('Disabled'|i18next) }}</span>
+                    <span class="toggle-switch"  [ngClass]="templateKeyForm?.controls['is_enabled']?.value ? 'toggle-on' : 'toggle-off'"
+                    (click)="toggleIsEnableValue()"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-footer p-24 overflow-hidden">
+            <button *accessControl type="button" class="btn btn-primary float-right" (click)="saveTemplateKey()" [disabled]="templateKeyForm.invalid">{{ 'save' | i18next }}</button>
+            <button type="button" class="btn btn-primary float-right mr-12" (click)="backTemplateKey()">{{ 'back' | i18next }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>

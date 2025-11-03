@@ -1,0 +1,40 @@
+
+<div class="view-detail-page">
+  <header class="section-header p-24 d-flex align-items-center justify-content-between">
+      <div class="d-flex">
+          <i tooltip="Back" placement="bottom" class="material-icons back-arrow-icon cursor-pointer" (click)="backtoList()">arrow_back</i>
+          <div class="ml-16">
+              <h3 class="font-weight-semibold mb-0">{{vendorInviteData?.vendor?.name|i18next}}</h3>
+              <p class="small"> {{ commonViewService.getTimeStamp(vendorInviteData?.invited_on, vendorInviteData?.modified_on,null,'vendor-invite-view') | i18next }}</p>
+          </div>
+      </div>
+      <div *ngIf="this.vendorInviteData?.status != 'ACCEPTED'">
+          <div >
+              <button class="c-btn c-btn-secondary-medium-left-icon ml-12" (click)="editVendorInvite()">
+                <i class="material-icons">drive_file_rename_outline</i>
+                  Edit
+              </button>
+              <button class="c-btn c-btn-3-dot-actions ml-8"  #actionTrigger id="action"  data-toggle="dropdown" >
+                <i class="material-icons">more_horiz</i>
+              </button>
+              <section class="c-action-dropdown position-fixed"  id="c-action-dropdown" *ngIf="actionDropdownBox" #actionDropdown>
+                <ul>
+                  <li >
+                    <a  href="javascript:void(0)" (click)="navigateToResendInvitation()">
+                      {{ 'resend_invitation' | i18next }}
+                    </a>
+                  </li>
+                </ul>
+              </section>
+          </div>
+      </div>
+  </header>
+  <section class="section-body-content">
+      <div class="px-32 py-16">
+          <app-common-view-rule-flow [details]="details" *ngIf="details?.length > 0"></app-common-view-rule-flow>
+      </div>
+  </section>
+</div>
+
+
+

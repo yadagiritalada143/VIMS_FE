@@ -1,0 +1,71 @@
+<header class="timesheet-header py-16 px-24">
+    <div class="float-left">
+    <figure class="user-avatar rounded-circle overflow-hidden  float-left mt-4">
+      <img [src]="basicDetails?.worker?.avatar"  *ngIf="basicDetails?.worker?.avatar"  alt="{{basicDetails?.worker?.initials | i18next }}">
+      <span class="initials initials__purple  text-uppercase" *ngIf="!basicDetails?.worker?.avatar">{{basicDetails?.worker?.initials || '' | i18next }}</span>
+    </figure>
+    <div class="header-item-info">
+      <p class="mb-0 font-weight-medium" tooltip="{{basicDetails?.worker?.name || '' | i18next }}"  placement="top" delay="500">{{basicDetails?.worker?.name || '' | removePrefixSuffix | i18next }}</p>
+      <p class="small" *ngIf="basicDetails?.work_location?.name" tooltip="{{basicDetails?.work_location?.name | i18next }}"  placement="top" delay="500">
+        <icon name="location_on" theme="outlined" size="16px" class="mr-4"></icon> {{basicDetails?.work_location?.name | i18next }}
+      </p>
+    </div>
+  </div>
+  <div class="float-left large">
+    <icon class="bg-color rounded-circle float-left" color="#7F6FC1" name="assignment"  theme="outlined" size="18px"></icon>
+    <div class="header-item-info">
+      <p class="paragraph-label mb-4">
+       {{ 'assignment_title(id)' | i18next }}
+      </p>
+      <p class="font-weight-medium" tooltip="{{assignmentName  | i18next }}"  placement="top" delay="500" (click)="openAssignmentDetailPanel()">
+        <a>{{ assignmentName  | i18next }}</a>
+      </p>
+    </div>
+  </div>
+  <div  class="float-left">
+    <figure class="user-avatar small rounded-circle overflow-hidden float-left mt-8">
+      <!-- <img src="../../../assets/images/5.jpg" alt=""> -->
+      <span class="initials initials__purple text-uppercase">{{basicDetails?.manager?.initials || '' | i18next }}</span>
+    </figure>
+    <div class="header-item-info">
+      <p class="paragraph-label mb-4">
+        {{ 'timesheet_manager' | i18next }}
+      </p>
+      <p class="font-weight-medium" tooltip="{{basicDetails?.manager?.name | i18next }}"  placement="top" delay="500">
+        {{(basicDetails?.manager?.name || "-") | removePrefixSuffix | i18next }}
+      </p>
+    </div>
+  </div>
+  <div class="float-left mr-0">
+    <icon class="bg-color rounded-circle float-left"  color="#7F6FC1" name="corporate_fare" theme="outlined" size="18px"></icon>
+    <div class="header-item-info">
+      <p class="paragraph-label mb-4">
+        {{ 'vendor' | i18next }}
+      </p>
+      <p class="font-weight-medium" tooltip="{{basicDetails?.vendor?.name | i18next }}"  placement="top" delay="500">
+        {{basicDetails?.vendor?.name | i18next }}
+      </p>
+    </div>
+  </div>
+  <div class="clearfix"></div>
+  <!-- <div class="w-100">
+    <p class="small paragraph-label mb-4">
+      Wipro Project Location Type
+    </p>
+    <div class="location-select form-group mb-0"
+      *ngIf="!checkForStatus('approved') && !checkForStatus('rejected') && !checkForStatus('pending'); else showLocation">
+      <ng-select [clearable]="false" placeholder="Client Location" [(ngModel)]="selectedLocation"
+        (change)="changeLocation($event)">
+        <ng-option *ngFor="let l of locationData" value="{{l?.label | i18next }}">
+          {{l?.label | i18next }}
+        </ng-option>
+      </ng-select>
+    </div>
+    <ng-template #showLocation>
+      <p class="font-weight-medium">
+        {{selectedLocation | i18next }}
+      </p>
+    </ng-template>
+
+  </div> -->
+</header>

@@ -1,0 +1,59 @@
+<ng-select
+  [multiple]="true"
+  [clearable]="false"
+  [disabled]="disabled"
+  [loading]="loading"
+  [placeholder]="placeholder"
+  [(ngModel)]="selected"
+  (search)="emitSearchTerm($event)"
+  (open)="emitSearchTerm({ term: '' })"
+  (change)="emitChangeEvent($event)"
+  (scrollToEnd)="emitScrollToEnd($event)"
+  (close)="(inputTerm = '')"
+>
+
+    <ng-template ng-multi-label-tmp="items">
+        <label [ngClass]="inputTerm?'d-none':''" class="holder"> 
+            {{ (selected?.length || 0) + " option(s) selected"  | i18next}} 
+        </label>
+    </ng-template>
+
+    <ng-option
+      *ngFor="let item of items;"
+      [value]="item.id"
+    >
+      {{ item.name }}
+    </ng-option>
+
+</ng-select>
+
+<div class="chip-holder d-flex flex-wrap" [ngClass]="{'mt-8' : selected?.length > 0}">
+    <div 
+      *ngFor="let entry of selected;" 
+      class="chip-item d-flex py-4 px-8 m-4 rounded-sm"
+    >
+      <div *ngIf="defaultAllow" class="w-8 cursor-pointer" 
+        [tooltip]="isDefault(entry)?('marked_as_default'|i18next):('select_to_mark_as_default'|i18next)"
+        [placement]="'bottom'"  
+      >
+        <icon size="16px" type="material"
+          [color]="isDefault(entry)?'#187BD2':'#000000'"
+          [name]="isDefault(entry)?'flag':'outlined_flag'"
+          (click)="!disabled && markAsDefault(entry)">
+        </icon>
+      </div>
+      <div *ngIf="editableAllow"
+      [tooltip]="isEditable(entry)?('Edit Enabled'|i18next):('Click Pen to make Edit Enable'|i18next)"
+      [placement]="'bottom'"
+      >
+        <icon size="16px" type="material" class="px-8"
+          [color]="isEditable(entry)?'#187BD2':'#000000'"
+          [theme]="!isEditable(entry)?'outlined':''"
+          [name]="'edit'"
+          (click)="!disabled && updateEditable(entry)">
+        </icon>
+      </div>
+      <div class="ml-8 mr-8"> {{ getItemName(entry) }} </div>
+      <div *ngIf="!disabled" class="cursor-pointer" (click)="removeSelection(entry)"> &#10006; </div>
+   </div>
+</div>

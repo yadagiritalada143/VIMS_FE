@@ -1,0 +1,55 @@
+<div class="view-detail-page">
+  <header class="section-header p-24 d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center">
+          <i (click)="goBack()" class="material-icons back-arrow-icon back-arrow-icon cursor-pointer" tooltip="Back" placement="bottom">arrow_back</i>
+          <div class="ml-16">
+              <h3 class="font-weight-semibold mb-0">{{vendorDocumentData?.name | i18next}}</h3>
+              <p class="small">{{ commonViewService.getTimeStamp(vendorDocumentData?.created_on, vendorDocumentData?.modified_on) | i18next}}</p>
+              <!-- <p class="small" *ngIf="vendorDocumentData?.created_on?.less_than_24">{{'Created ' +
+                  (vendorDocumentData?.created_on?.hours > 0 ? vendorDocumentData?.created_on?.hours + ' hours ago' :
+                  vendorDocumentData?.created_on?.minutes +' minutes ago') | i18next }}</p>
+              <p class="small" *ngIf="!vendorDocumentData?.created_on?.less_than_24">{{'Created on ' +
+                  vendorDocumentData?.created_on?.date | i18next }}</p> -->
+          </div>
+      </div>
+
+      <div *accessControl>
+          <button class="c-btn c-btn-secondary-medium-left-icon" (click)="editPage()">
+              <i class="material-icons">drive_file_rename_outline</i>
+              {{'edit'|i18next}}
+          </button>
+      </div>
+  </header>
+  <section class="section-body-content">
+      <div class="px-32 py-16">
+          <h4 class="font-weight-medium mb-16">{{'basic_details'|i18next}}</h4>
+          <!-- <div class="detail-item d-flex  mb-16">
+              <div class="item-label">{{ 'Vendors' | i18next }}</div>
+              <div class="item-value">
+                  <ul>
+                      <li *ngFor="let vendor of vendorDocumentData?.vendors">{{vendor?.name | i18next}}</li>
+                  </ul>
+              </div>
+          </div> -->
+          <app-common-view-rule-flow [details]="viewConfig">
+        </app-common-view-rule-flow>
+          <div class="detail-item d-flex  mb-16">
+            <div class="item-label">{{ 'applicable_locations' | i18next }}</div>
+            <div class="item-value">
+                <ul>
+                    <li *ngFor="let location of vendorDocumentData?.work_locations">{{location?.name | i18next}}</li>
+                </ul>
+            </div>
+          </div>
+          <!-- <div class="detail-item d-flex  mb-16">
+            <div class="item-label">{{ 'Attachments' | i18next }}</div>
+            <div class="item-value">
+                <ul *ngIf="vendorDocumentData?.uploaded_document">
+                    <li *ngFor="let attachment of vendorDocumentData?.uploaded_document">{{attachment?.file_name | i18next}}</li>
+                </ul>
+            </div>
+          </div> -->
+          
+      </div>
+  </section>
+</div>

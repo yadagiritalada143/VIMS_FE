@@ -1,0 +1,65 @@
+<div class="view-detail-page">
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <i (click)="onBackClick($event)" class="material-icons back-arrow-icon back-arrow-icon cursor-pointer"
+                tooltip="{{'Back'}}" placement="bottom">arrow_back</i>
+            <div class="ml-16">
+                <h3 class="font-weight-semibold mb-0">{{detailData?.name | i18next}}</h3>
+                <p class="small">{{commonViewService.getTimeStamp(detailData?.created_on, detailData?.modified_on) | i18next}}</p>
+            </div>
+        </div>
+
+        <div *accessControl>
+            <button *authorize="'cost_component_manage'" (click)="onEditClick($event)"
+                class="c-btn c-btn-secondary-medium-left-icon">
+                <i class="material-icons">drive_file_rename_outline</i>
+                {{ 'edit' | i18next }}
+            </button>
+        </div>
+    </header>
+    <section class="section-body-content">
+        <div class="px-32 py-16">
+            <div class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'group_name' | i18next }}</div>
+                <div class="item-value font-weight-medium">{{ detailData?.name }}</div>
+            </div>
+
+            <div class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'status' | i18next }}</div>
+                <div class="item-value">
+                    <span class="c-status-ui" [ngClass]="{'active': detailData?.is_enabled, 'inactive': !detailData?.is_enabled}">
+                        {{(detailData?.is_enabled ? 'Active': 'Inactive') | i18nextEager }}
+                    </span>
+                </div>
+            </div>
+            <ng-container *ngIf="detailData?.meta_data?.length > 0">
+                <div class="border p-16 pl-24 info-bg-color">
+                    <div class="info-color font-weight-medium mb-4">{{ 'cost_component(s)' | i18next }}</div>
+                </div>
+                <table class="cost-component-group-table border no-border-top">
+                    <thead>
+                        <tr class="border-bottom info-bg-color">
+                            <th class="text-left w-150">{{ 'level' | i18next }}</th>
+                            <th class="text-left">{{ 'name' | i18next }}</th>
+                            <th class="text-left">{{ 'code' | i18next }}</th>
+                            <th class="text-left w-25">{{ 'unit_type' | i18next }}</th>
+                            <th class="text-left">{{ 'value' | i18next }}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <ng-container *ngFor="let component of detailData?.meta_data">
+                            <tr class="border-bottom">
+                                <td>{{component.level}}</td>
+                                <td>{{component.component_name}}</td>
+                                <td>{{component.code}}</td>
+                                <td>{{component.unit}} </td>
+                                <td>{{component.value}}</td>
+                            </tr>
+                        </ng-container>
+                    </tbody>
+                </table>
+            </ng-container>
+        </div>
+    </section>
+</div>

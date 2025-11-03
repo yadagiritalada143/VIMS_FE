@@ -1,0 +1,100 @@
+<div class="generic-list-page doc-list">
+  <app-svms-table
+    [tableOptions]="tableOptions"
+    [coloumnDefintions]="svmstableColomnDefn"
+    [dataSource]="svmsData">
+  </app-svms-table>
+
+  <ng-template #emptyDataTemplate>
+    <app-no-listing-page
+      [headingmsg]="'No Files yet.'"
+      #emptyDataTemplate
+    >
+    </app-no-listing-page>
+  </ng-template>
+</div>
+
+<app-svms-modal size="medium" title="{{ 'Upload' | i18nextEager }}" [visibility]="libraryModal" (onClose)="onCloseModal()" *ngIf="!renameFile">
+  <app-svms-modal-body>
+    <div class="document-upload">
+      <div class="form-group">
+        <label>{{ 'new_file_name' | i18nextEager }} <span class="require">*</span></label>
+        <input type="text" id="fileName" name="fileName" #fileName="ngModel" [(ngModel)]="fileObj.fileName" class="form-control">
+      </div>
+      <div class="form-group mb-0">
+        <label>{{ 'attachments' | i18nextEager }} <span class="require">*</span></label>
+        <div class="upload-zone p-16" (click)="uploadFileInput.click()">
+          <div class="drop-zone mb-4 text-center">
+            <icon size="24px" name="publish" type="material" cuClass="d-flex"></icon>
+          </div>
+          <div class="drop-zone-text">
+            <p class="small">{{'drag'|i18next}} &amp; {{'drop_file_or'|i18next}} <a href="javascript:void(0)">{{'browse'|i18next}}</a></p>
+            <input hidden type="file" [accept]='"."+ ["docx","doc","txt","xlsx","xls","csv","pptx","ppt","jpg","jpeg","png","gif","pdf"].join(", .")' #uploadFileInput (change)="uploadDocument($event)">
+            <p class="file-format">{{'only_.docx,_doc,_txt,_xlsx,_xls,_csv,_pptx,_ppt,_jpg,_jpeg,_png,_gif,_pdf_files.' | i18nextEager}}</p>
+          </div>
+        </div>
+
+        <ul class="uploaded-list">
+          <li *ngIf="uploadedFileName">
+            <figure *ngIf="uploadedFileExt == 'pdf'">
+              <img src="/assets/images/pdf.svg" alt="">
+            </figure>
+            <figure *ngIf="uploadedFileExt == 'docx' || uploadedFileExt == 'doc' ">
+              <img src="/assets/images/word.svg" alt="">
+            </figure>
+            <figure *ngIf="uploadedFileExt == 'jpg' || uploadedFileExt == 'jpeg' ">
+              <img src="/assets/images/img-jpg.svg" alt="">
+            </figure>
+            <figure *ngIf="uploadedFileExt == 'png'">
+              <img src="/assets/images/img-png.svg" alt="">
+            </figure>
+            <div class="item-description">
+              {{uploadedFileName}}
+              <icon class="d-inline-block ml-8" size="18px" name="check_circle" type="material" cuClass="d-flex"></icon>
+              <p class="upload-size" *ngIf="fileSize || mbKbFileSize">
+                {{fileSize}} {{mbKbFileSize}}
+              </p>
+            </div>
+            <a (click)="uploadFileInput.value = null; uploadedFileName = '';uploadedFileExt = ''" class="delete-file">
+              <icon class="d-flex" size="24px" name="delete_forever" type="material" cuClass="d-flex">
+              </icon>
+            </a>
+          </li>
+        </ul>
+        <ul class="uploaded-list error" *ngIf="fileSize > 10">
+          <li>
+            <div class="item-description">
+              <icon class="d-inline-block mr-8" size="18px" name="error" type="material" cuClass="d-flex"></icon>
+              <p class="d-inline-block upload-size">
+                {{'file_size_must_be_less_than'|i18next}} 10{{'mb'|i18next}}
+              </p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </app-svms-modal-body>
+  <app-svms-modal-footer>
+    <div class="d-flex justify-content-end">
+        <button class="btn btn-primary" type="button" [disabled]="!fileObj.fileName || !formData.get('file') || !uploadedFileName"
+          *accessControl (click)="createFile()">{{ 'create' | i18nextEager }}</button>
+    </div>
+</app-svms-modal-footer>
+</app-svms-modal>
+
+<app-svms-modal size="medium" title="{{ 'rename_file' | i18nextEager }}" [visibility]="libraryModal" (onClose)="onCloseModal()" *ngIf="renameFile">
+  <app-svms-modal-body>
+    <div>
+      <div class="form-group">
+        <label>{{ 'file_name' | i18nextEager }} <span class="require">*</span></label>
+        <input type="text" id="fileName" fileName="fileName" #fileName="ngModel" [(ngModel)]="fileObj.fileName" class="form-control" placeholder="{{ 'new_file_name' | i18nextEager }}">
+      </div>
+    </div>
+  </app-svms-modal-body>
+  <app-svms-modal-footer>
+    <div class="d-flex justify-content-end">
+        <button class="btn btn-primary" type="button" [disabled]="!fileObj.fileName"
+          *accessControl (click)="clickRenameFile()">{{ 'save' | i18nextEager }}</button>
+    </div>
+</app-svms-modal-footer>
+</app-svms-modal>

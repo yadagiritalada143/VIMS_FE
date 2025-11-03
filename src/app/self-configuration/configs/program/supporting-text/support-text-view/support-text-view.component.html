@@ -1,0 +1,103 @@
+  <div class="view-detail-page">
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+      <div class="d-flex">
+        <i (click)="backClicked()" class="material-icons back-arrow-icon cursor-pointer" tooltip="{{'back' | i18next}}"
+          placement="bottom">arrow_back</i>
+        <div class="ml-16">
+          <h3 class="font-weight-semibold mb-0">{{'supporting_text_details' | i18next}}</h3>
+          <p class="small">{{ lastUpdated| i18next }}</p>
+        </div>
+      </div>
+
+      <div *authorize="'supporting_text_manage'">
+        <button *ngIf="!editPage" (click)="onEdit()"
+          class="c-btn c-btn-secondary-medium-left-icon"><i class="material-icons">drive_file_rename_outline</i>
+          {{'edit'|i18next}}</button>
+        <button *ngIf="editPage" (click)="onUpdate()"
+          class="c-btn c-btn-success-medium">{{'update'|i18next}}</button>
+      </div>
+    </header>
+    <section class="section-body-content">
+      <div class="px-24 py-16">
+        <app-common-view-rule-flow [details]="details" *ngIf="details.length > 0"></app-common-view-rule-flow>
+        <div class="table-view mt-32">
+          <div class="p-16">
+            <p class="blue-color font-weight-medium">{{ 'supporting_texts' | i18next }}</p>
+            <p class="small">{{'define_supporting_text_to_show_at_module_level_and/or_page_level_for_each_event_and_organization_category_who_performs_the_event_in_the_selected_module_so_that_it_will_appear_while_performing_the_respective_event_in_the_module._for_example,_in_case_supporting_text_is_defined_for_an_event_in_a_module_for_buyer_(msp_and_client)_or_vendor,_then_the_system_will_show_it_at_the_respective_level_or_the_page_(based_on_what_has_been_configured).' | i18next}}</p>
+          </div>
+          <table>
+              <thead>
+                  <tr>
+                      <th>{{'placement_level' | i18next}}</th>
+                      <th>{{'supporting_text' | i18next}}</th>
+                      <th *ngIf="editPage">&nbsp;</th>
+                  </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of tableData">
+                  <td>
+                    {{item.default_support_text?.default_actions?.name | i18next}}
+                  </td>
+                  <td>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <collapsible-text class="w-60">
+                        {{item.description ? item.description : '--'}}
+                      </collapsible-text>
+                      <button *ngIf="item.url && item.label" (click)="openVideoInNewTab(item?.url)" class="c-btn c-btn-primary-medium small">{{item.label | i18next}}</button>
+
+                    </div>
+                  </td>
+                  <td *ngIf="editPage">
+                    <i class="edit-icon material-icons cursor-pointer" (click)="editItem(item)">drive_file_rename_outline</i>
+                  </td>
+                </tr>
+              </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+
+    <app-svms-modal [title]="editedItem?.default_support_text?.default_actions?.name | i18next" [visibility]="modalVisibility" (onClose)="onCloseModal()">
+      <form [formGroup]="modalForm" (ngSubmit)="Submit()">
+          <app-svms-modal-body>
+              <div class="c-form-group-row">
+                  <div class="c-form-group">
+                      <label>{{ 'supporting_text' | i18next }}</label>
+                      <textarea class="c-form-control" formControlName="description" placeholder="{{'put_supporting_text'| i18next}}" maxlength="1000"></textarea>
+                  </div>
+              </div>
+              <div class="c-form-group-row">
+                  <div class="c-form-group">
+                      <label>{{ 'url' | i18next | uppercase }}
+                        <icon class="field-info-icon" theme="outlined" name="help_outline" type="material" size="13.5px" tooltip="Provide the url in the format https://www.name-of-website-with-domain-name. E.g., https://www.simplifyvms.com If https:// is not entered, system will add it to the given URL automatically." placement="right" delay="100"></icon>
+                      </label>
+                      <input type="text" class="c-form-control" formControlName="url" placeholder="Put URL" (blur)="modalValidationValid">
+                      <div *ngIf="modalForm?.controls?.url?.errors?.invalidUrl && modalForm?.controls?.url?.touched" class="error mt-4">
+                          {{'please_enter_a_valid_url'|i18next}}
+                      </div>
+                  </div>
+              </div>
+
+              <div *ngIf="modalForm?.value?.url" class="c-form-group-row">
+                  <div class="c-form-group mb-0">
+                      <label>{{ 'button_label_for_url' | i18next }} <span class="require">*</span></label>
+                      <input type="text" class="c-form-control" formControlName="label" required placeholder="{{'put_button_label_for_url' | i18next}}" [maxlength]="characterLimit" >
+                      <div *ngIf="modalForm.controls.label.errors?.required && modalForm.controls.url.dirty" class="error mt-4">
+                        {{'video_label_is_required_when_a_video_url_is_provided'|i18next}}
+                    </div>
+
+                  </div>
+              </div>
+
+              <p *ngIf="modalForm?.value?.url" class="small text-right">{{ remainingCharacters }} {{'characters_remaining'| i18next}}</p>
+
+          </app-svms-modal-body>
+          <app-svms-modal-footer>
+              <div class="d-flex justify-content-end">
+                  <button class="c-btn c-btn-primary-medium" type="submit"
+                  [disabled]="!modalValidationValid">{{ 'update' | i18next }}</button>
+              </div>
+          </app-svms-modal-footer>
+      </form>
+  </app-svms-modal>

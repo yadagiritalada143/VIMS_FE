@@ -1,0 +1,91 @@
+<!-- Picklist header -->
+<div class="space-between mt-8">
+    <div class="picklist-header">
+        <h4 class="bolder"> {{ 'picklist_values' | i18next }} </h4>
+    </div>
+    <div class="header-right d-flex justify-content-end">
+        <div *ngIf="showFilter" class="form-control space-between" style="width: 240px;">
+            <icon class='search-relative' type="material" name="search"></icon>
+            <input [(ngModel)]="filterTerm" type="text" placeholder="{{ 'search' | i18next }}" class='no-outline w-100'/>
+        </div>
+        <div *ngIf="showMultiselect" class="space-between pl-12" style="width: 124px">
+            <div class="centered">
+                <toggle-button [checked]="multiselect"
+                    (changed)="toggleSelection($event)" [disabled]="readonly">
+                </toggle-button>
+            </div>
+            <p> {{ 'multi-select' | i18next }} </p>
+        </div>
+    </div>
+</div>
+
+<!-- Picklist entry -->
+<div *ngIf="!readonly && !disableEntry" class="space-between mt-12">
+    <div class="form-control space-between">
+        <input [(ngModel)]="picklistInput" type="text" placeholder="{{ 'enter_value' | i18next }}" class='no-outline w-80' (keyup)="addPicklistItem($event)"/>
+        <button (click)="addPicklistItem()" class="btn btn-sm-input btn-primary">
+            {{ '+_add' | i18next }}
+        </button>
+    </div>
+</div>
+
+<!-- Picklist table -->
+<table class="mt-16">
+    <thead class="table-header">
+        <tr>
+            <th>
+                {{ 'value_' | i18next }}
+                <span class="require"> * </span>
+            </th>
+            <th> {{ 'label' | i18next }} </th>
+            <th> {{ 'defined_by' | i18next }} </th>
+            <th> {{ 'status' | i18next }} </th>
+        </tr>
+    </thead>
+    <tbody>
+        <ng-container *ngIf="searchFilter(selections)?.length; else emptyTable">
+            <tr *ngFor="let entry of searchFilter(selections); index as it;">
+                <td> {{ entry?.value | i18next }} </td>
+                <td class="label-description">
+                    <textarea [placeholder]="!readonly?'Enter label':'--'" [rows]="getRowLength(entry.label.length)" 
+                        wrap="hard" [(ngModel)]="entry.label" [cols]="32" class='no-outline w-100 text-value' 
+                        [disabled]="readonly" maxlength="1000">
+                    </textarea>
+                </td>
+                <td> {{ entry?.defined_by | snakeToTitleCase | i18next }} </td>
+                <td>
+                    <div class="space-between w-100-h-100 no-gutters">
+                        <div class="no-gutters checkbox-row">
+                            <div class="checkbox-box">
+                                <div class="checkbox-wrapper">
+                                    <label class="checkbox-container">
+                                        <input [disabled]="readonly" [checked]="entry?.is_enabled" type="radio" />
+                                        <span class="checkmark"
+                                            [ngClass]='[
+                                                entry.is_enabled?"checkmark-active":"",
+                                                readonly?"disableDiv":""
+                                            ]'
+                                            (click)="changeCheckboxStatus(entry, !entry.is_enabled)">
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div *ngIf="!readonly && (entry?.defined_by?.toUpperCase() !== 'PREDEFINED')" class="centered">
+                            <icon name="close" type="material"
+                                (onClick)="removePicklistItem(entry)" size="16px">
+                            </icon>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </ng-container>
+        <ng-template #emptyTable>
+            <tr>
+                <td style="text-align: center;" colspan='4'>
+                    {{ 'no_records_found' | i18next }}
+                </td>
+            </tr>
+        </ng-template>
+    </tbody>
+</table>

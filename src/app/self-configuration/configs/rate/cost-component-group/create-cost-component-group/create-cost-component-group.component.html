@@ -1,0 +1,117 @@
+<header class="section-header page-title-main p-24 d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+        <i (click)="backToList()" class="material-icons back-arrow-icon mr-16 cursor-pointer"
+            tooltip="{{'back' | i18next}}" placement="bottom">arrow_back</i>
+        <h3 class="font-weight-semibold mb-0">{{ (isEdit ? 'edit' : 'create_new') | i18next }} {{ 'cost_component_group'
+            | i18next }}</h3>
+    </div>
+    <div>
+        <button class="c-btn c-btn-success-medium" (click)="submit()">{{'save' | i18next}}</button>
+    </div>
+</header>
+
+<section class="section-body-content">
+    <div class="row no-gutters program-details-mobile">
+        <app-logs class="w-100 mx-24 mt-12" [log]="logs"></app-logs>
+        <div class="col-12 p-24">
+            <form class="cost-component-form">
+                <div class="c-form-group-row justify-content-between">
+                    <div class="c-form-group">
+                        <label>{{ 'group_name' | i18next }}<span class="require">*</span></label>
+                        <input type="text" class="c-form-control" name="group_name" [(ngModel)]="detailData.name">
+                    </div>
+
+                    <div
+                        class="c-form-group toggle-width toggle-panel active-inactive-toggle mt-24 d-flex justify-content-between">
+                        <div class="toggle-panel-inner" [ngClass]="detailData.is_enabled ? 'if-active' : 'if-inactive'">
+                            <span class="is_active-text">{{ (detailData.is_enabled ? 'active' : 'inactive') | i18next }}</span>
+                            <span class="toggle-switch" [ngClass]="detailData.is_enabled ? 'toggle-on' : 'toggle-off'"
+                                (click)="toggleActive()"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="cost-component-container">
+                    <div class="c-form-group-row justify-content-between border pt-16 pl-24 info-bg-color">
+                        <div class="mt-12">
+                            <div class="info-color font-weight-medium mb-4">{{ 'cost_component(s)' | i18next }}</div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div (click)="openTryOut()" class="cursor-pointer text-underline text-primary mr-16 mb-16">
+                                {{'try_out' | i18next}}
+                            </div>
+                            <!-- add button -->
+                            <svms-selector-modal 
+                                [title]="'select_cost_component(s)'" 
+                                [showEditable]="false" 
+                                [hideItemBadge]="true" 
+                                [(options)]="costComponents"
+                                [loading]="searchLoading"
+                                (search)="searchCostComponents($event)"
+                                (open)="searchCostComponents('')"
+                                (optionsChange)="addCostComponents($event)" 
+                                (scrollToEnd)="showMore()">
+                            </svms-selector-modal> 
+                        </div>
+                    </div>
+                    <ng-container *ngIf="detailData.meta_data.length > 0; else noData">
+                        <table class="cost-component-group-table border no-border-top">
+                            <thead>
+                                <tr class="border-bottom info-bg-color">
+                                    <th class="text-left w-150">{{ 'level' | i18next }}</th>
+                                    <th class="text-left">{{ 'name' | i18next }}</th>
+                                    <th class="text-left">{{ 'code' | i18next }}</th>
+                                    <th class="text-left w-25">{{ 'unit_type' | i18next }}</th>
+                                    <th class="text-left">{{ 'value' | i18next }}</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-container *ngFor="let component of detailData.meta_data; let i = index">
+                                    <tr class="border-bottom">
+                                        <td>
+                                            <input name="component_level_{{component.component_name}}" class="c-form-control" type="number" [(ngModel)]="component.level">
+                                        </td>
+                                        <td>{{component.component_name}}</td>
+                                        <td>{{component.code}}</td>
+                                        <td>
+                                            <ng-select name="component_unit_{{component.component_name}}" [(ngModel)]="component.unit"
+                                                [searchable]="false" [clearable]="false">
+                                                <ng-option value="PERCENTAGE">{{'percentage' | i18next}}</ng-option>
+                                                <ng-option value="FLAT AMOUNT">{{'flat_amount' | i18next}}</ng-option>
+                                            </ng-select>
+                                        </td>
+                                        <td>
+                                            <input name="component_value_{{component.component_name}}" class="c-form-control" type="number" [(ngModel)]="component.value">
+                                        </td>
+                                        <td>
+                                            <span class="cursor-pointer" (click)="deleteCostComponent(i)">
+                                                <icon variationSettings="'wght' 400" color='red' size="24px"
+                                                    name="cancel" type="symbols"></icon>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                            </tbody>
+                        </table>
+                    </ng-container>
+                    <ng-template #noData>
+                        <div class="no-matches-found text-center p-64 border border-top">
+                            <div class="content-area ui-content-wrapper no-content">
+                                <div class="no-data">
+                                    <img src="./assets/images/no-records.svg" alt="no cost" width="100"
+                                        class="img-fluid" />
+                                    <h4 class="pt-16">{{'no_cost_component_added'|i18next}}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-template>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<app-calculate-cost-component-group 
+    [isShowTryOutModal]="isShowTryOutModal"
+    [selectedCostComponents]="detailData.meta_data" (close)="closeTryOut()">
+</app-calculate-cost-component-group>

@@ -1,0 +1,38 @@
+<vms-table [vmsTableConfig]="tableConfig" [vmsDataSource]="vmsData" [totalItem]="totalRecords" [itemsPerPage]="itemPerPage" (changePage)="onPaginationClick($event)" (search)="onSearch($event)" (onListFilter)="onListFilter($event)" (onViewClick)="onClickView($event)"
+  (onDeleteClick)="onDeleteClick($event)" (onDisableClicked)="onDisableClicked($event)" (onEditClick)="onEditClick($event)"  (onCreate)="onCreateClick($event)" (cloneClicked)="onCloneClicked($event)" (numberBadgeClicked)="columnClicked($event)">
+</vms-table>
+
+<app-create-role [list_or_create]="list_or_create" [createRole]="createRole"></app-create-role>
+
+<app-user-assigned 
+  [roleName]="roleName"
+  [roleId]="roleId"
+  [usersAssigned]="usersAssigned"
+  (onClose)="sidebarClose()"
+></app-user-assigned>
+
+
+<app-svms-modal 
+  title="{{ 'clone_user_role' | i18next }}" 
+  [visibility]="modalVisibility"
+  (onClose)="resetModal()"
+>
+  <app-svms-modal-body>
+    <div class="c-form-group mt-24">
+      <label>
+        {{ 'user_role_name' | i18next }}
+        <span class="require"> * </span>
+      </label>
+      <input type="text" class="form-control" [(ngModel)]="modalInputText"
+        placeholder="{{ 'enter_user_role_name' | i18next }}"
+      />
+    </div>
+  </app-svms-modal-body>
+  <app-svms-modal-footer>
+    <div class="d-flex justify-content-end">
+      <button [disabled]="!modalInputText" class="btn btn-primary" type="button" (click)="cloneUserRole()">
+        {{ 'clone' | i18next }}
+      </button>
+  </div>
+  </app-svms-modal-footer> 
+</app-svms-modal>

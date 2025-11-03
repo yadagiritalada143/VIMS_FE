@@ -1,0 +1,21 @@
+<form [formGroup]="formGroup">
+  <ng-container *ngFor="let config of programControls">
+    <app-program-config-control
+      [directoryIcon]="config?.directoryIcon"
+      [subDirectoryIcon]="config?.subDirectoryIcon"
+      [isRequired]="config?.isRequired"
+      [title]="config?.title"
+      [subtitle]="config?.subtitle"
+      [description]="config?.description"
+      [type]="config?.type"
+      [dropdownItems]="config.dropDrownData"
+      [selectedValue]="config?.selectedValue"
+      [formControlName]="config?.formControlName"
+      (emitOptionChanged)="optionChanged($event, config)"
+      (click)="onToggleChange(config)"
+      [mandatePattern]="config?.mandatePattern"
+      [disabled]="config?.disabled"
+      [hidden]="config?.hidden"
+    ></app-program-config-control>
+  </ng-container>
+</form>

@@ -1,0 +1,292 @@
+<svms-sidebar (onClose)="sidebarClose()" title="{{title | i18next}}" [dataVisibility]="addRateVisibility">
+  <svms-sidebar-body class="sidebarBody">
+    <div [formGroup]="jobForm" class="sidebarContent m-24">
+      <div class="sidebarContent form-group">
+        <label for='job-category-title'>
+          {{ 'job_category_-_job_title' | i18next }}
+        </label>
+        <div class='d-flex justify-content-between'>
+          <ng-select formControlName='jobCategoryTitle' id='job-category-title' [readonly]='true' placeholder="{{getJobInformation() | i18next}}">
+          </ng-select>
+          <div class='toggle-panel'>
+            <div class='toggle-panel-inner toggle-background'>
+              {{ 'status' | i18next }} <toggle-button [checked]='isRateEnabled' (changed)="setToggleValue($event)"></toggle-button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sidebarContent form-group">
+        <label for="job-template">{{ 'job_template' | i18next }}</label>
+        <ng-select [clearable]="false" [loading]="templateLoading"
+          formControlName="jobTemplate" id="job-template" (search)="searchTemplate($event)"
+          placeholder="{{((selectedJobTemplate === 'Undefined')?'Undefined':'Search Job Template') | i18next}}"
+          [readonly]="jobTemplateDisabled" ngDefaultControl>
+          <ng-option *ngFor="let jobTemplate of jobTemplates" [value]="jobTemplate?.id">{{jobTemplate?.template_name}}</ng-option>
+        </ng-select>
+      </div>
+      <div class="sidebarContent form-group">
+        <hierarchy-treeview I18n
+          [filter]="true"
+          [treeInput]="hierarchyTree"
+          [selected]="jobForm.get('hierarchy').value"
+          (changed)='updateHierarchySelections($event)'
+        >
+        </hierarchy-treeview>
+      </div>
+      <div class="sidebarContent form-group">
+        <label for="work-location">{{ 'work_location' | i18next }}</label>
+        <ng-select [clearable]="false" [loading]="locationLoading"
+          formControlName="workLocation" [multiple]="true" id="work-location"
+          placeholder="{{ 'work_location' | i18next }}" (search)="searchLocation($event)" ngDefaultControl>
+          <ng-option *ngFor="let location of locations" [value]="location.id">{{location.name}}</ng-option>
+        </ng-select>
+      </div>
+    </div>
+    <div class="rateCardContent m-24">
+      <div class="rateCardContentTitle">
+        <h4>{{ 'set_default_rates_for_this_rate_card' | i18next }}</h4>
+        <p>{{ 'unit_of_measure' | i18next }}</p>
+      </div>
+      <div class="rateCardContentToggles">
+        <div *ngIf="showUOM('hourly')" class="toggle-panel">
+          <div *ngIf="activeUnits.includes('hourly')" class="toggle-panel-inner toggle-background">
+            <span>{{ 'hourly' | i18next }}</span>
+            <span id="hourly" [ngClass]="toggles?.hourly?.value ? 'toggle-on' : 'toggle-off'" (click)="onClickToggle($event)" class="toggle-switch"></span>
+          </div>
+        </div>
+        <div *ngIf="showUOM('hourly') && toggles.hourly.value" class="toggleContent d-flex">
+          <div class="minBill">
+            <div class="form-group">
+              <label for="hourlyMinBill">{{ 'min_rate' | i18next }}</label>
+              <div class="d-flex">
+                <span class='input-text'> {{ '0' | currency: currency | slice:0:1 }} </span>
+                <input
+                  [inputAccuracy]="'rate'"
+                  id="hourlyMinBill"
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="toggles.hourly.minBill"
+                >
+                <ng-select class="w-100" [(ngModel)]="toggles.hourly.minBillSetting" [searchable]="false" [clearable]="false">
+                  <ng-option [value]="'Can Change'">{{ 'can_change' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Reduce'">{{ 'cannot_reduce' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Change'">{{ 'cannot_change' | i18next }}</ng-option>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+          <div class="maxBill ml-64">
+            <div class="form-group">
+              <label for="hourlyMaxBill">{{ 'max_rate' | i18next }}</label>
+              <div class="d-flex">
+                <span class='input-text'> {{ '0' | currency: currency | slice:0:1 }} </span>
+                <input
+                  [inputAccuracy]="'rate'"
+                  id="hourlyMaxBill"
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="toggles.hourly.maxBill"
+                >
+                <ng-select class="w-100" [(ngModel)]="toggles.hourly.maxBillSetting" [searchable]="false" [clearable]="false">
+                  <ng-option [value]="'Can Change'">{{ 'can_change' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Increase'">{{ 'cannot_increase' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Change'">{{ 'cannot_change' | i18next }}</ng-option>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="showUOM('daily')" class="toggle-panel">
+          <div *ngIf="activeUnits.includes('daily')" class="toggle-panel-inner toggle-background">
+            <span>{{ 'daily' | i18next }}</span>
+            <span id="daily" [ngClass]="toggles?.daily?.value ? 'toggle-on' : 'toggle-off'" (click)="onClickToggle($event)" class="toggle-switch"></span>
+          </div>
+        </div>
+        <div *ngIf="showUOM('daily') && toggles.daily.value" class="toggleContent d-flex">
+          <div class="minBill">
+            <div class="form-group">
+              <label for="dailyMinBill">{{ 'min_rate' | i18next }}</label>
+              <div class="d-flex">
+                <span class='input-text'> {{ '0' | currency: currency | slice:0:1 }} </span>
+                <input [inputAccuracy]="'rate'"
+                  id="dailyMinBill"
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="toggles.daily.minBill"
+                >
+                <ng-select class="w-100" [(ngModel)]="toggles.daily.minBillSetting" [searchable]="false" [clearable]="false">
+                  <ng-option [value]="'Can Change'">{{ 'can_change' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Reduce'">{{ 'cannot_reduce' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Change'">{{ 'cannot_change' | i18next }}</ng-option>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+          <div class="maxBill ml-64">
+            <div class="form-group">
+              <label for="dailyMaxBill">{{ 'max_rate' | i18next }}</label>
+              <div class="d-flex">
+                <span class='input-text'> {{ '0' | currency: currency | slice:0:1 }} </span>
+                <input [inputAccuracy]="'rate'"
+                  id="dailyMaxBill"
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="toggles.daily.maxBill"
+                >
+                <ng-select class="w-100" [(ngModel)]="toggles.daily.maxBillSetting" [searchable]="false" [clearable]="false">
+                  <ng-option [value]="'Can Change'">{{ 'can_change' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Increase'">{{ 'cannot_increase' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Change'">{{ 'cannot_change' | i18next }}</ng-option>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="showUOM('weekly')" class="toggle-panel">
+          <div *ngIf="activeUnits.includes('weekly')" class="toggle-panel-inner toggle-background">
+            <span>{{ 'weekly' | i18next }}</span>
+            <span id="weekly" [ngClass]="toggles?.weekly?.value ? 'toggle-on' : 'toggle-off'" (click)="onClickToggle($event)" class="toggle-switch"></span>
+          </div>
+        </div>
+        <div *ngIf="showUOM('weekly') && toggles.weekly.value" class="toggleContent d-flex">
+          <div class="minBill">
+            <div class="form-group">
+              <label for="weeklyMinBill">{{ 'min_rate' | i18next }}</label>
+              <div class="d-flex">
+                <span class='input-text'> {{ '0' | currency: currency | slice:0:1 }} </span>
+                <input [inputAccuracy]="'rate'"
+                  id="weeklyMinBill"
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="toggles.weekly.minBill"
+                >
+                <ng-select class="w-100" [(ngModel)]="toggles.weekly.minBillSetting" [searchable]="false" [clearable]="false">
+                  <ng-option [value]="'Can Change'">{{ 'can_change' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Reduce'">{{ 'cannot_reduce' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Change'">{{ 'cannot_change' | i18next }}</ng-option>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+          <div class="maxBill ml-64">
+            <div class="form-group">
+              <label for="weeklyMaxBill">{{ 'max_rate' | i18next }}</label>
+              <div class="d-flex">
+                <span class='input-text'> {{ '0' | currency: currency | slice:0:1 }} </span>
+                <input [inputAccuracy]="'rate'"
+                  id="weeklyMaxBill"
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="toggles.weekly.maxBill"
+                >
+                <ng-select class="w-100" [(ngModel)]="toggles.weekly.maxBillSetting" [searchable]="false" [clearable]="false">
+                  <ng-option [value]="'Can Change'">{{ 'can_change' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Increase'">{{ 'cannot_increase' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Change'">{{ 'cannot_change' | i18next }}</ng-option>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="showUOM('monthly')" class="toggle-panel">
+          <div *ngIf="activeUnits.includes('monthly')" class="toggle-panel-inner toggle-background">
+            <span>{{ 'monthly' | i18next }}</span>
+            <span id="monthly" [ngClass]="toggles?.monthly?.value ? 'toggle-on' : 'toggle-off'" (click)="onClickToggle($event)" class="toggle-switch"></span>
+          </div>
+        </div>
+        <div *ngIf="showUOM('monthly') && toggles.monthly.value" class="toggleContent d-flex">
+          <div class="minBill">
+            <div class="form-group">
+              <label for="monthlyMinBill">{{ 'min_rate' | i18next }}</label>
+              <div class="d-flex">
+                <span class='input-text'> {{ '0' | currency: currency | slice:0:1 }} </span>
+                <input [inputAccuracy]="'rate'"
+                  id="monthlyMinBill"
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="toggles.monthly.minBill"
+                >
+                <ng-select class="w-100" [(ngModel)]="toggles.monthly.minBillSetting" [searchable]="false" [clearable]="false">
+                  <ng-option [value]="'Can Change'">{{ 'can_change' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Reduce'">{{ 'cannot_reduce' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Change'">{{ 'cannot_change' | i18next }}</ng-option>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+          <div class="maxBill ml-64">
+            <div class="form-group">
+              <label for="monthlyMaxBill">{{ 'max_rate' | i18next }}</label>
+              <div class="d-flex">
+                <span class='input-text'> {{ '0' | currency: currency | slice:0:1 }} </span>
+                <input [inputAccuracy]="'rate'"
+                  id="monthlyMaxBill"
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="toggles.monthly.maxBill"
+                >
+                <ng-select class="w-100" [(ngModel)]="toggles.monthly.maxBillSetting" [searchable]="false" [clearable]="false">
+                  <ng-option [value]="'Can Change'">{{ 'can_change' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Increase'">{{ 'cannot_increase' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Change'">{{ 'cannot_change' | i18next }}</ng-option>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="showUOM('yearly')" class="toggle-panel">
+          <div *ngIf="activeUnits.includes('yearly')" class="toggle-panel-inner toggle-background">
+            <span>{{ 'yearly' | i18next }}</span>
+            <span id="yearly" [ngClass]="toggles?.yearly?.value ? 'toggle-on' : 'toggle-off'" (click)="onClickToggle($event)" class="toggle-switch"></span>
+          </div>
+        </div>
+        <div *ngIf="showUOM('yearly') && toggles.yearly.value" class="toggleContent d-flex">
+          <div class="minBill">
+            <div class="form-group">
+              <label for="yearlyMinBill">{{ 'min_rate' | i18next }}</label>
+              <div class="d-flex">
+                <span class='input-text'> {{ '0' | currency: currency | slice:0:1 }} </span>
+                <input [inputAccuracy]="'rate'"
+                  id="yearlyMinBill"
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="toggles.yearly.minBill"
+                >
+                <ng-select class="w-100" [(ngModel)]="toggles.yearly.minBillSetting" [searchable]="false" [clearable]="false">
+                  <ng-option [value]="'Can Change'">{{ 'can_change' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Reduce'">{{ 'cannot_reduce' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Change'">{{ 'cannot_change' | i18next }}</ng-option>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+          <div class="maxBill ml-64">
+            <div class="form-group">
+              <label for="yearlyMaxBill">{{ 'max_rate' | i18next }}</label>
+              <div class="d-flex">
+                <span class='input-text'> {{ '0' | currency: currency | slice:0:1 }} </span>
+                <input [inputAccuracy]="'rate'"
+                  id="yearlyMaxBill"
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="toggles.yearly.maxBill"
+                >
+                <ng-select class="w-100" [(ngModel)]="toggles.yearly.maxBillSetting" [searchable]="false" [clearable]="false">
+                  <ng-option [value]="'Can Change'">{{ 'can_change' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Increase'">{{ 'cannot_increase' | i18next }}</ng-option>
+                  <ng-option [value]="'Cannot Change'">{{ 'cannot_change' | i18next }}</ng-option>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </svms-sidebar-body>
+  <svms-sidebar-footer>
+    <button (click)="onSave()" [disabled]="jobForm.invalid" type="submit" class="btn btn-primary float-right" *accessControl>
+      <icon size="20px" name="check_circle" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+      &nbsp;&nbsp;{{ 'save' | i18next }}
+    </button>
+  </svms-sidebar-footer>
+</svms-sidebar>

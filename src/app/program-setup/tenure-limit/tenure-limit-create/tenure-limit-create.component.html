@@ -1,0 +1,127 @@
+<header class="section-header page-title-main p-24 d-flex align-items-center justify-content-between">
+    <div class="page-title font-weight-semibold d-flex align-items-center" I18n>
+        <a routerLink="/self-configuration/tenure-limit/config/list"><i class="material-icons back-arrow-icon mr-16" tooltip="Back" placement="bottom">arrow_back</i></a>
+        {{ 'create_new' | i18next }} {{ 'tenure_configuration' | i18next }}
+    </div>
+    <div>
+        <button class="c-btn c-btn-success-medium d-none">{{ 'action' | i18next }}</button>
+        <button *accessControl class="c-btn c-btn-success-medium" (click)="onSave()">{{ 'save' | i18next }}</button>
+    </div>
+</header>
+<section class="tenure-config section-body-content">
+    <div class="row no-gutters program-details-mobile">
+        <div class="col-12">
+            <div class="invoice-config p-24">
+                <form>
+                    <div  class="invoice-form c-form-group-row">
+                        <div class="c-form-group invoice-c-input">
+                            <label>{{ 'tenure_configuration_name_' | i18next }}<span class="require">*</span></label>
+                            <input type="text" class="c-form-control" name="title" [(ngModel)]="request.name">
+                        </div>
+                        
+                        <div class="c-form-group toggle-width toggle-panel active-inactive-toggle mt-24">
+                            <div class="toggle-panel-inner">
+                                <span>{{request?.is_active === 1 ? 'Active' :'Inactive'}}</span>
+                               
+                                <span class="toggle-switch"
+                                [ngClass]="request?.is_active === 1  ? 'toggle-on' : 'toggle-off'"
+                                  (click)="updateStatus()"></span>
+                            </div>
+                        </div> 
+                    </div>
+                    <!-- <div class="c-form-group-row">
+                        <div class="c-form-group">
+                            <label>{{ 'hierarchy' | i18next }}<span class="require">*</span></label>
+                            <ng-select placeholder="{{ 'select' | i18next }}" [(ngModel)]="request.hierarchy_levels" name="hierarchy" [multiple]="true">
+                                <ng-option [value]="hierarchy.id" *ngFor="let hierarchy of hierarchyList"> {{ hierarchy.name }}</ng-option>
+                            </ng-select>
+                        </div>
+                    </div> -->
+                    <div class="c-form-group-row">
+                        <div class="c-form-group">
+                        <hierarchy-treeview
+                          label="Hierarchies"
+                          [treeInput]="hierarchyList"
+                          [allowDefaultSelection]="true"
+                          [allowDefaultClear]="false"
+                          [selected]="selections"
+                          [initialDefaults]="defaultSelections"
+                          [mandatory]="true"
+                          (changed)="hierarchySelectionChanged($event)"
+                        >
+                        </hierarchy-treeview>
+                      </div>
+                      </div>
+                    <div class="c-form-group-row">
+                        <div class="c-form-group">
+                            <label class="mb-12">{{ 'sourcing_model' | i18next }} <span class="require">*</span></label>
+                            <div class="d-flex align-items-center">
+                                <div class="mr-24">
+                                  <label class="mb-0 c-input-radio">
+                                      <input class="mr-4" type="radio" name="sourcingModel" value="CONTINGENT" [(ngModel)]="request.sourcing_model">
+                                    <span class="cb-ui"></span>
+                                    <span class="cb-label">{{ 'contingent' | i18next }}</span>
+                                  </label>
+                                </div>
+                                <div>
+                                  <label class="mb-0 c-input-radio">
+                                      <input class="mr-4" type="radio" name="sourcingModel" value="SOW" [(ngModel)]="request.sourcing_model">
+                                    <span class="cb-ui"></span>
+                                    <span class="cb-label">{{ 'sow' | i18next }}</span>
+                                  </label>
+                                </div>
+                              </div>
+                        </div>
+                    </div>
+                    <div class="c-form-group-row">
+                        <div class="c-form-group mb-0">
+                            <label class="mb-12">{{ 'module' | i18next }} 
+                                <a (click)="selectAllModules()" href="javascript: void(0);" class="select-unselect" *ngIf="modulesSelectionLabel == 'Select all'">( {{modulesSelectionLabel}} )</a> 
+                                <a (click)="unSelectAllModules()" href="javascript: void(0);" class="select-unselect" *ngIf="modulesSelectionLabel == 'Unselect all'">( {{modulesSelectionLabel}} )</a>
+                                <span class="require">*</span></label>
+                            <label class="c-input-checkbox mr-24" *ngFor="let item of modules">
+                                <input type="checkbox" [value]="item.isSelected" [(ngModel)]="item.isSelected" [ngModelOptions]="{standalone: true}">
+                                <span class="cb-ui"></span>
+                                <span class="cb-label">{{item.name}}</span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div> 
+    
+            <div class="invoice-config-inner">
+                <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center">
+                    <p class="font-weight-medium">{{ 'tenure_management' | i18next }}</p>
+                </div>
+                <app-config-common-listing mainIcon="event" itemLevel="parent"  subtitle="{{ 'maximum_consecutive_tenure_duration_length' | i18next }}" required = true
+                description="{{ 'this_layout_we_can_use_for_the_configuration_with_toggle_on/off_button' | i18next }}" 
+                numberSelectOption="true" [options]="span"  (onValueChange)="tenureLengthChange($event)"
+                (onOptionValueChange)="tenureSpanChange($event)"></app-config-common-listing>
+                <app-config-common-listing mainIcon="task_alt" itemLevel="parent" subtitle="{{ 'allow_flexibility_in_tenure_duration_length_with_approval' | i18next }}" 
+                description="{{ 'here_you_can_define_the_assignment_fields_while_updating' | i18next }}" 
+                toggleSwitch="true"  (onValueChange)="tenureToggleClicked()"></app-config-common-listing>
+                <app-config-common-listing itemLevel="child" subtitle="{{ 'select_approval_group' | i18next }}" 
+                description="{{ 'here_you_can_define_the_assignment_fields_while_updating' | i18next }}" 
+                selectBox="true" [options]="approveList" (onValueChange)="tenureApprovalChange($event)"></app-config-common-listing>
+            </div>
+    
+            <div class="invoice-config-inner">
+                <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center">
+                    <p class="font-weight-medium">{{ 'gap_management' | i18next }}</p>
+                </div>
+                <app-config-common-listing mainIcon="event" itemLevel="parent"  subtitle="{{ 'maximum_consecutive_gap_duration_length' | i18next }}" required = true
+                description="{{ 'this_layout_we_can_use_for_the_configuration_with_toggle_on/off_button' | i18next }}" 
+                numberSelectOption="true" [options]="span" (onValueChange)="assignmentLengthChange($event)"
+                (onOptionValueChange)="assignmentSpanChange($event)"></app-config-common-listing>
+                <app-config-common-listing mainIcon="task_alt" itemLevel="parent" subtitle="{{ 'allow_flexibility_in_gap_duration_length_with_approval' | i18next }}" 
+                description="{{ 'here_you_can_define_the_assignment_fields_while_updating' | i18next }}" 
+                toggleSwitch="true" (onValueChange)="tenureAssignmentToggleClicked()"></app-config-common-listing>
+                <app-config-common-listing itemLevel="child" subtitle="{{ 'select_approval_group' | i18next }}" 
+                description="{{ 'here_you_can_define_the_assignment_fields_while_updating' | i18next }}" 
+                selectBox="true" [options]="approveList" (onValueChange)="assignmentApprovalgroupChange($event)"></app-config-common-listing>
+            </div>
+
+           
+        </div>
+      </div>
+</section>

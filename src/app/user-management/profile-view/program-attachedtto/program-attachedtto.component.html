@@ -1,0 +1,187 @@
+<div class="preference-body section mt-16 rounded-sm p-24">
+  <ng-container *ngIf="programLength == 0">
+  <h4 class="font-weight-medium text-dark">{{ 'programs' | i18next }}</h4>
+  <div class="d-flex align-justify-center flex-column h-100">
+    <img src="assets/images/program-empty.png" class="img-fluid mb-16" />
+    <h4 class="text-black font-weight-medium">{{ 'this_user_is_not_associated_with_any_programs_yet' | i18next }}</h4>
+    <a href="javascript:void(0)" class="btn btn-primary small mt-12"
+    (click)="createUserToggle('visible')">{{ 'add_to_program' | i18next }}</a>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="programLength != 0">
+
+    <div class="d-flex align-item-center">
+      <h4 class="text-dark font-weight-medium">{{ 'programs' | i18next }}</h4>
+      <button type="button" class="btn small btn-primary ml-8 rounded-circle add-btn"
+        (click)="createUserToggle('visible')">
+        <icon size="20px" name="add" type="material" cuClass="d-flex" class="d-flex">
+        </icon>
+      </button>
+    </div>
+    <div>
+      <div class="row no-gutters px-16 mt-16">
+        <p class="text-uppercase text-gray small col-2 text-left">{{ 'program_name' | i18next }}</p>
+        <p class="text-uppercase text-gray small col-2 text-left">{{ 'organization' | i18next }}</p>
+        <p class="text-uppercase text-gray small col-2 text-left">{{ 'program_type' | i18next }}</p>
+        <p class="text-uppercase text-gray small col-2 text-left">{{ 'role' | i18next }}</p>
+        <p class="text-uppercase text-gray small col-4 text-left">{{ 'associated_on' | i18next }}</p>
+      </div>
+      <ng-container *ngFor="let item of programsList; let index = index;">
+        <div class="row no-gutters border p-16 mt-12">
+          <div class="col-md-2 text-left">{{ item.name ? item.name : '--' }}</div>
+          <div class="col-md-2 text-left">{{item.client ? item.client.name ? item.client.name : '--' : '--'}}</div>
+          <div class="col-md-2 text-left">{{item.service_type ? item.service_type : '--'}}</div>
+          <div class="col-md-2 text-left">{{item.role ? item.role.name : '--'}}</div>
+          <div class="col-md-4 text-left d-flex align-items-center justify-content-between">
+            <span>{{item.added_on ? (item.added_on| localDateFormat) : '--'}}
+            </span>
+            <div class="d-flex align-item-center justify-content-end">
+              <span *ngIf="'false'" class="mr-8" (click)='onEditClick(item, $event)'>
+                <icon class="d-flex cursor-pointer" color="#5E71FE" name="border_color" size="18px" type="material">
+                </icon>
+              </span>
+              <span *ngIf="'false'" class="mr-8" (click)='onDeleteClick($event, item.id)'>
+                <icon *accessControl class="d-flex cursor-pointer" name="delete" color="#EB3E3E" size="18px" type="material"></icon>
+              </span>
+              <span class="mr-8" (click)="onclickArrow(item, index)" *ngIf="showDropdownIcon">
+                <icon *ngIf="visibleAccordion == item?.id === false" class="d-flex cursor-pointer" color="#000000" name="keyboard_arrow_right" size="18px"
+                  type="material"></icon>
+                  <icon *ngIf="visibleAccordion == item?.id === true" class="d-flex cursor-pointer" color="#000000" name="keyboard_arrow_down" size="18px"
+                  type="material"></icon>
+              </span>
+            </div>
+          </div>
+
+        </div>
+        <div class="accordion-item-body mb-12 p-24" *ngIf="visibleAccordion == item?.id">
+          <div>
+            <p class="text-gray-50 text-uppercase small font-weight-medium mb-16">{{ 'hierarchies' | i18next }}<p>
+            <div class="d-flex flex-wrap align-items-canter" *ngIf="!!item?.hierarchyView?.length">
+              <div class="badge badge-lightblue rounded-sm mr-12 mb-12 font-weight-normal" *ngFor="let hierarchy of item?.hierarchyView">
+                {{ hierarchy }}
+              </div>
+            </div>
+            <p class="text-center text-dark" *ngIf="!item?.hierarchyView?.length">
+             {{ 'no_hierarchy_data_attached' | i18next }}
+            </p>
+            <div class="mt-24" *ngIf="categoryORG === 'Client' || categoryORG === 'CLIENT'">
+              <p class="text-gray-50 text-uppercase small font-weight-medium mb-16">{{ 'work_locations' | i18next }}</p>
+              <div class="row mt-50 pl-10">
+                <div class="d-flex flex-wrap align-items-canter" *ngIf="!!item?.locationView?.length">
+                  <div class="badge badge-lightblue rounded-sm mr-12 mb-12 font-weight-normal" *ngFor="let location of item?.locationView">
+                    {{ location }}
+                  </div>
+                </div>
+                <p class="text-center text-dark w-100" *ngIf="!item?.locationView?.length">
+                  {{ 'no_work_locations_selected' | i18next }}
+                </p>
+              </div>
+            </div>
+            <p class="text-gray-50 text-uppercase small font-weight-medium mb-16 mt-24">{{ 'master_data' | i18next }}</p>
+            <p  class="text-center text-dark" *ngIf='objectKeys(item.defaultValues).length == 0'> {{ 'no_master_data_attached' | i18next }}
+            </p>
+            <ng-container *ngIf="objectKeys(item.defaultValues).length !== 0">
+              <div class="row no-gutters mt-24">
+              <div class="col-md-4" *ngFor="let type of objectKeys(item.defaultValues)">
+                <div class="value-group" >
+                  <label class="value-head"> {{ type }} </label>
+                  <p class="value-content" *ngFor="let val of item.defaultValues[type]">
+                    {{val.name}}
+                    <ng-container *ngIf="val.code">
+                      {{ "(" + val.code + ")" }}
+                    </ng-container>
+                  </p>
+                </div>
+              </div>
+            </div>
+            </ng-container>
+            <!-- <ng-container *ngIf="item?.defaults?.length !== 0">
+              <div class="mt-24">
+              <div *ngFor="let type of item?.defaults">
+                <div class="value-group" >
+                  <label class="value-head mb-12"> {{ type?.associated_foundational_data?.name }} </label>
+                  <div class="d-flex flex-wrap align-items-canter">
+                    <div class="badge badge-lightblue rounded-sm mr-12 mb-12 font-weight-normal" *ngFor="let val of type?.associated_foundational_data?.foundational_data">
+                      {{val.name}}
+                      <ng-container *ngIf="val.code">
+                        {{ "(" + val.code + ")" }}
+                      </ng-container>
+                    </div>
+                    <div class="badge badge-lightblue rounded-sm mr-12 mb-12 font-weight-normal" *ngIf="type?.entity_object?.code">
+                      {{type?.entity_object?.name}}
+                      <ng-container *ngIf="type?.entity_object?.code">
+                        {{ "(" + type?.entity_object?.code + ") (Default)" }}
+                      </ng-container>
+                    </div>
+                    <div *ngIf="type?.associated_foundational_data?.is_all_mdt_association" class="badge badge-lightblue rounded-sm mr-12 mb-12 font-weight-normal text-black">Associated to all {{ type?.associated_foundational_data?.name }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            </ng-container> -->
+            <p class="text-gray-50 text-uppercase small font-weight-medium mb-16 mt-24">{{ 'custom_fields' | i18next }}</p>
+            <p class="text-center text-dark" *ngIf='item?.custom_field_view === true'> {{ 'loading' | i18next }}...
+            <p class="text-center text-dark" *ngIf='item?.custom_field_view?.length === 0'> {{ 'no_custom_fields_attached' | i18next }}
+            <div *ngIf="!!item?.custom_field_view?.length">
+              <div class="row no-gutters mt-24">
+                <div class="col-md-4" *ngFor="let cf of item?.custom_field_view">
+                  <div class="value-group">
+                    <label class="value-head"> {{ cf?.label }} </label>
+                    <ng-container *ngIf="cf?.displayType === 'text'">
+                      <p class="value-content"> {{ cf?.value }} </p>
+                    </ng-container>
+                    <ng-container *ngIf="cf?.displayType === 'hyperlink'">
+                      <p class="value-content"> 
+                        <a [hrefParse]="cf?.value"> {{ cf?.value || "--" }} </a>
+                      </p>
+                    </ng-container>
+                    <ng-container *ngIf="cf?.displayType === 'attachment'">
+                      <p class="value-content"> 
+                        <a [downloadFile]="cf?.value"> {{ cf?.value?.name || "--" }} </a>
+                      </p>
+                    </ng-container>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="categoryORG === 'Client' || categoryORG === 'CLIENT'">
+              <p class="text-gray-50 text-uppercase small font-weight-medium mb-16">{{ 'financial_authority' | i18next }}</p>
+              <div class="row mt-50 p-20">
+                <div class="col-4">
+                  <label>{{ 'min_limit' | i18next }}</label>
+                  <div class="row">
+                    <icon class="d-flex" size="16px" name="attach_money"
+                      type="material"></icon>
+                    <span>{{item?.financial_approval_authority?.min_amount_limit | number : '1.2-2'}}</span>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <label>{{ 'max_limit' | i18next }}</label>
+                  <div class="row">
+                    <icon class="d-flex" size="16px" name="attach_money"
+                      type="material"></icon>
+                    <span>{{item?.financial_approval_authority?.amount_limit | number : '1.2-2'}}</span>
+                  </div>
+                </div>
+                <div class="row mt-5 col-4">
+                  <input type="checkbox" [checked]="item?.financial_approval_authority?.is_financial_authority_unlimited" [disabled]="true">
+                  <label class="pl-10">{{ 'unlimited_authority' | i18next }}</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+
+</ng-container>
+
+
+
+</div>
+
+<vms-add-user-to-program *ngIf="showFlyout" [list_or_create]="list_or_create"
+  (onClose)="createUserToggle($event)" [editData]='progDetail' [createUser]="createUser" type="org"
+  (onAddDone)="handleUpdate()"></vms-add-user-to-program>

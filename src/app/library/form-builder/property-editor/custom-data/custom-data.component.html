@@ -1,0 +1,36 @@
+<div class="form-group">
+  <ng-select (change)="selectedPickListName($event)" bindLabel="name" [clearable]="false" [searchable]="true"
+    [multiple]="false" bindLabel="name" autofocus placeholder="{{ 'select_role' | i18next }}" ngDefaultControl>
+    <ng-option *ngFor="let picklist of pickListData" [value]="picklist">
+      {{picklist?.name}}
+    </ng-option>
+  </ng-select>
+  <div class="svms-custom-data mt-12">
+    <ul>
+      <li *ngFor="let item of pickListItemsData | slice:0:3;let i = index">
+        {{item.label|i18next}}
+      </li>
+      <span *ngIf="isShowAllItems">
+        <li *ngFor="let item of pickListItemsData | slice:3;let i = index">
+          {{item.label|i18next}}
+        </li>
+      </span>
+    </ul>
+    <div class="svms-custom-btn" *ngIf="pickListItemsData.length > 0">
+      <a *ngIf="!isShowAllItems" href="javascript:void()" class="text-green">+{{pickListItemsData.length - 3}} {{ 'more_values' | i18next }}</a>
+      <a *ngIf="!isShowAllItems" href="javascript:void()" class="text-blue text-underline ml-auto" (click)="showAllItems()">{{ 'view_all' | i18next }}</a>
+      <a *ngIf="isShowAllItems" href="javascript:void()" class="text-blue text-underline ml-auto" (click)="hideAllItems()">{{ 'hide_all' | i18next }}</a>
+    </div>
+  </div>
+  <div *ngIf="pickListItemsData.length > 0" class="form-group mt-12">
+    <label>
+      {{ 'select_default_value' | i18next }}
+    </label>
+    <ng-select   bindLabel="name" [clearable]="false" [searchable]="true"
+    [multiple]="false" bindLabel="name" autofocus placeholder="{{ 'select_role' | i18next }}" ngDefaultControl>
+    <ng-option *ngFor="let picklist of pickListItemsData" [value]="picklist">
+      {{picklist?.label|i18next}}
+    </ng-option>
+  </ng-select>
+  </div>
+</div>

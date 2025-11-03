@@ -1,0 +1,23 @@
+<svms-sidebar title="{{((actionName + ' Timesheet' | titlecase ) | i18next) }}" [dataVisibility]="panelVisibility" size="small" (onClose)="sidebarClose()">
+  <app-logs [log]="logs"></app-logs>
+  <svms-sidebar-body>
+    <div class="p-24" [formGroup]="actionForm">
+      <div class="form-group">
+        <label>{{ 'reason_for' | i18next }} {{((actionName | titlecase)| i18next) }}  <span class="require">*</span></label>
+        <ng-select [clearable]="false" placeholder="{{ 'select' | i18next }}" formControlName="reason">
+          <ng-option [value]="reason.id" *ngFor="let reason of reasonList">
+            {{reason.name | i18next }}
+          </ng-option>
+        </ng-select>
+      </div>
+      <div class="form-group month-selector">
+        <label>{{ 'notes' | i18next }}</label>
+        <textarea class="form-control no-resize" rows="10" formControlName="note" maxlength="1000"></textarea>
+      </div>
+    </div>
+  </svms-sidebar-body>
+  <svms-sidebar-footer>
+    <button class="btn btn-outine float-left" (click)="sidebarClose()">{{ 'cancel' | i18next }}</button>
+    <button class="btn btn-primary float-right" [disabled]="isSubmitted" (click)="submitAction()"><icon size="20px" name="check_circle" type="material" class="icon--on-left" cuClass="icon-cu"></icon>{{((actionName | titlecase) | i18next) }}</button>
+  </svms-sidebar-footer>
+</svms-sidebar>

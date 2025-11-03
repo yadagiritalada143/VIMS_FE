@@ -1,0 +1,35 @@
+<div class="mt-16">
+    <div *ngFor="let entry of taxDetailsList; index as it;"
+        class="tax-detail-panel px-24 py-16">
+
+        <h4 class="blue-text"> {{ entry.name | i18next }} </h4>
+        <div class="row mt-8">
+            <div class="col-sm-4">
+                <label> {{ (entry.tax_type === 'FLAT'?'Flat':'Percentage (%)') | i18next }} </label>
+                <p> {{ 'tax_type' | i18next }} </p>
+            </div>
+            <div class="col-sm-4">
+                <label> {{ entry.min_value + ' - ' + entry.max_value | i18next }} </label>
+                <p> {{ 'applicable_range_(min_&_max)' | i18next }} </p>
+            </div>
+            <div class="col-sm-4 d-flex justify-content-between">
+                <div>
+                    <label> {{ (entry.start_date | localDateFormat) + ' - ' + (entry.end_date | localDateTimeFormat) | i18next }} </label>
+                    <p> {{ 'start_date_&_end_date' | i18next }} </p>
+                </div>
+                <div *ngIf="!disabled" class="icons">
+                    <icon (click)="editEntry(it)"
+                        class="mr-16" size="24px"
+                        name="edit" type="material"
+                    >
+                    </icon>
+                    <icon (click)="removeEntry(it)"
+                        class="mr-16" theme="outlined"
+                        size="24px" name="delete" type="material"
+                    >
+                    </icon>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,100 @@
+<svms-sidebar
+  [title]="sidebarTitle"
+  [dataVisibility]="sidebarVisibility"
+  (onClose)="sidebarClose($event)"
+>
+  <svms-sidebar-body *ngIf="historyDetails$ | async as details">
+    <h4 class="font-weight-medium m-24 mb-0">
+      {{ details.history_message }}
+    </h4>
+    <div class="d-flex flex-row justify-content-between p-24 updated-row">
+      <div class="d-flex flex-row align-items-center">
+        <figure class="flex-row mr-12">
+          <img src="../../../../../assets/images/calendar_today.svg" />
+        </figure>
+        <div class="d-flex flex-column mr-64">
+          <p class="font-weight-normal font-12">
+            {{ details.log_name === ExpenseModification.Created ? 'Created' : 'Updated' }} On
+          </p>
+          <span class="font-13">{{
+            details.activity_time | localDateFormat }}</span>
+          <span class="font-13">{{
+            details.activity_time | localDateFormat: "hh:mm:ss a" }}</span>
+        </div>
+      </div>
+      <div
+        class="d-flex flex-row align-items-center"
+        *ngIf="details.activity_by.name"
+      >
+        <figure class="float-left mr-12 flex-row">
+          <img
+            *ngIf="details.activity_by.avatar"
+            [src]="details.activity_by.avatar"
+            alt=""
+          />
+          <div *ngIf="!details.activity_by.avatar" class="text-capitalize">
+            {{ details.activity_by.initials }}
+          </div>
+          <div
+            *ngIf="!details.activity_by.avatar && !details.activity_by.initials"
+            class="text-capitalize"
+          >
+            {{ details.activity_by.name | shortName: "last" }}
+          </div>
+        </figure>
+        <div class="d-flex flex-column mr-64">
+          <p class="font-weight-normal font-12">
+            {{ details.log_name === ExpenseModification.Created ? 'Created' : 'Updated' }} By
+          </p>
+          <span class="font-13">{{ details.activity_by.name }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex ml-24 mb-16">
+      <icon
+        name="subject"
+        type="material"
+        size="24px"
+        class="mr-12 full-height"
+      ></icon>
+      <h4 class="font-weight-medium">{{ 'summary' | i18next }}</h4>
+    </div>
+    <ng-container *ngFor="let config of historyDetailConfig">
+      <app-history-changes-row
+        *ngIf="hasChanges(details, config)"
+        [label]="config.label"
+        [oldValue]="
+          details.log_name === ExpenseModification.Created
+          ? details.old
+          : config.nested_key
+            ? details.old[config.key][config.nested_key]
+            : details.old[config.key]
+        "
+        [newValue]="
+          config.nested_key
+            ? details.new[config.key][config.nested_key]
+            : details.new[config.key]
+        "
+        [isDate]="config.key === 'expense_start_date'"
+        [longLabel]="isAccessKey(config)"
+        [daysFromEnd]="isAccessKey(config)"
+      ></app-history-changes-row>
+      <app-history-changes-row
+        *ngIf="periodHasChanges(details, config)"
+        [label]="config.label"
+        [oldValue]="details.old[config.key][config.nested_key]?.value +
+          ' ' +
+          details.old[config.key][config.nested_key]?.type
+        "
+        [newValue]="
+          details.new[config.key][config.nested_key]?.value +
+          ' ' +
+          details.new[config.key][config.nested_key]?.type
+        "
+        [longLabel]="true"
+      >
+      </app-history-changes-row>
+    </ng-container>
+    <div *ngIf="isNoChanges" class="ml-24">{{ 'no_changes' | i18next }}</div>
+  </svms-sidebar-body>
+</svms-sidebar>

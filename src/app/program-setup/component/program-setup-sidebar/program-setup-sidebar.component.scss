@@ -1,0 +1,557 @@
+@import '../../../../assets/sass/abstracts/variables';
+
+.sidebar {
+  width: 225px;
+  color: $navigation-text;
+  will-change: min-height;
+  transition: width 0.2s;
+  background: $light;
+  z-index: 4;
+
+  .logo-mini {
+    display: none;
+  }
+
+  .sidebar-inner {
+    background: $light;
+    min-height: 100vh;
+    z-index: 99;
+    border-right: 1px solid $border-color;
+    position: relative;
+  }
+
+  .logo {
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+
+  .prog-nav-outer {
+    margin-top: 58px;
+    height: calc(100vh - 130px);
+    overflow: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .main-nav {
+    list-style-type: none;
+
+    >li {
+      >a {
+        line-height: 40px;
+        color: $navigation-text;
+        display: block;
+        overflow: hidden;
+        transition: $transition;
+        cursor: pointer;
+
+        &:after {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 5px;
+          background: $color-assets-primary;
+          content: '.';
+          text-indent: -9999px;
+          overflow: hidden;
+          display: block;
+          visibility: hidden;
+          z-index: 1;
+        }
+
+        icon {
+          z-index: 2;
+          height: 38px;
+
+          ::ng-deep.sidebar-icon {
+            line-height: 38px;
+            color: $navigation-icon;
+          }
+        }
+
+        label {
+          font-weight: $font-weight-medium;
+          color: $navigation-text;
+          cursor: pointer;
+        }
+
+        &.nav-item {
+          &:before {
+            content: "keyboard_arrow_right";
+            position: absolute;
+            top: 2px;
+            right: 10px;
+            background: transparent;
+            font-family: 'Material Icons';
+            height: auto;
+            width: auto;
+            border-radius: inherit;
+            text-indent: inherit;
+            font-size: 19px;
+            color: $color-gray-70;
+            opacity: .5;
+          }
+
+          &:hover,
+          &.active {
+            &:before {
+              opacity: 1;
+            }
+          }
+        }
+
+        &:hover,
+        &.active {
+          label {
+            color: $color-assets-primary;
+          }
+
+          &:after {
+            visibility: visible;
+          }
+
+          icon {
+            ::ng-deep.sidebar-icon {
+              color: $color-assets-primary;
+            }
+          }
+        }
+      }
+    }
+  }
+
+}
+
+.user-settings {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  border-top: 1px solid $border-color;
+  border-bottom: 1px solid transparent;
+  margin: 0;
+  width: 199px;
+  z-index: 5;
+  background: $light;
+
+  a {
+    padding: $p12 $p16;
+    overflow: hidden;
+    display: block;
+
+    figure {
+      float: left;
+      width: 30px;
+      line-height: 30px;
+      color: $light;
+
+      img {
+        width: 100%;
+        height: 100%;
+        vertical-align: top;
+        object-fit: cover;
+      }
+
+      .availability {
+        position: absolute;
+        right: -4px;
+        bottom: 0;
+        width: 11px;
+        height: 11px;
+        border: 1px solid $light;
+
+        &.online {
+          background: $navigation-user-online;
+        }
+      }
+    }
+
+    .current-user-info {
+      width: 121px;
+
+      span {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font: $font-weight-medium 14px/18px $font-family;
+        color: $color-assets-secondary;
+      }
+
+      p {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font: $font-weight-regular 12px/15px $font-family;
+        color: $text-secondary;
+      }
+    }
+
+    &:after {
+      display: none;
+    }
+
+    &:hover,
+    &.active {
+      background: $bg-default;
+    }
+  }
+}
+
+.sidenav {
+  left: 200px;
+  height: 100%;
+  top: 0;
+  width: 305px;
+  transform: translateX(-50px);
+  transition: $transition;
+  visibility: hidden;
+  opacity: 0;
+  z-index: 10;
+  background-color: $light;
+  box-shadow: 8px 0px 11px #00000008;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-title {
+    width: 100%;
+    border-bottom: 1px solid $border-color;
+
+    h4 {
+      line-height: 34px;
+      color: $text-default;
+    }
+
+    .closebtn {
+      color: $color-assets-secondary-tint;
+      line-height: 24px;
+      height: 24px;
+    }
+  }
+
+  .user-title {
+    border-bottom: 1px solid $border-color;
+    padding: 10px $p24;
+    position: relative;
+
+    .closebtn {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      color: $color-assets-secondary-tint;
+
+      &:hover {
+        background: transparent;
+      }
+    }
+
+    figure {
+      width: 30px;
+      line-height: 30px;
+      color: $light;
+
+      img {
+        width: 100%;
+        height: 100%;
+        vertical-align: top;
+        object-fit: cover;
+      }
+    }
+
+    h4 {
+      width: 198px;
+      line-height: 30px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: $text-default;
+    }
+  }
+
+  ul {
+    list-style-type: none;
+
+    ::ng-deepli {
+      a {
+        font-weight: $font-weight-medium;
+        font-size: $font-primary;
+        line-height: 45px;
+        color: $navigation-text;
+        transition: $transition;
+
+        icon {
+          font-weight: $font-weight-regular;
+          font-size: 21px;
+          line-height: 45px;
+
+          ::ng-deep.sidebar-icon-submenu {
+            line-height: 45px;
+            color: $navigation-icon;
+          }
+
+          &.toggle-off {
+            height: 45px;
+
+            ::ng-deep.sidebar-icon-submenu {
+              line-height: 45px;
+              color: $color-assets-secondary-tint;
+            }
+          }
+        }
+
+        &:hover {
+          background: $border-color;
+          border-radius: $border-radius;
+          text-decoration: none;
+        }
+        &.active {
+          background: $border-color;
+          border-radius: $border-radius;
+          text-decoration: none;
+        }
+      }
+
+      &.seperationlabel {
+        font-weight: $font-weight-medium;
+        font-size: 13px;
+        line-height: 35px;
+        color: $color-gray-70;
+        text-transform: uppercase;
+      }
+    }
+  }
+
+  &.sidenav-active {
+    transform: translateX(0);
+    visibility: visible;
+    opacity: 1;
+    z-index: 10;
+    left: 200px;
+  }
+
+  .nav-search {
+    margin: $p16 $p8 0 $p8;
+
+    input {
+      width: 100%;
+      background: $border-color;
+      border: 0;
+      outline: none;
+      border-radius: $border-radius;
+      font-weight: $font-weight-regular;
+      font-size: $font-primary;
+      line-height: 16px;
+      font-family: $font-family;
+      color: $color-assets-secondary-tint;
+    }
+  }
+}
+
+.sidenav-reason{
+  left: 504px !important;
+  height: 100%;
+  top: 0;
+  width: 100%;
+  transform: translateX(-50px);
+  transition: $transition;
+  visibility: hidden;
+  opacity: 0;
+  z-index: 10;
+  background-color: $light;
+  box-shadow: 8px 0px 11px #00000008;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-title {
+    width: 100%;
+
+    h4 {
+      font-weight: bold;
+      line-height: 34px;
+      color: $text-default;
+    }
+  }
+  &.sidenav-active {
+    transform: translateX(0);
+    visibility: visible;
+    opacity: 1;
+    z-index: 10;
+    left: 200px;
+  }
+  .reason-content {
+    box-shadow: 7px 7px 7px 0px #ccc;
+    position: relative;
+    top: 20px;
+    left: 25px;
+    width: 559px;
+    height: 100%;
+    input {
+      width: 430px;
+      height: 35px;
+      outline: none;
+      border-radius: 5px;
+      padding-left: 10px;
+      border: solid 1px #ccc;
+      &:focus{
+        background: #F2F3FF50;
+      }
+    }
+    button{
+      background: #C20000;
+      height: 35px;
+      width: 78px;
+      border-radius: 5px;
+      border: none;
+      color: white;
+      margin-left: 7px;
+      outline: none;
+      cursor: pointer;
+      &:hover{
+        font-weight: bold;
+      }
+    }
+  }
+
+  .reasons {
+    padding: 15px;
+    position: relative;
+    left: 600px;
+    bottom: 100%;
+
+    .add-new-reason {
+      padding: 20px;
+      width: 520px;
+      border: 1px dashed #776DE0;
+      border-radius: 10px;
+      color: #776DE0;
+      background: transparent;
+      cursor: pointer;
+    }
+    .reasons_ {
+      padding: 20px;
+      border: 1px solid lightgray;
+      border-radius: 15px;
+      margin-bottom: 10px;
+
+      .status.active {
+        color: green;
+      }
+      .status.inactive {
+        color:gray;
+      }
+
+      .edit-reason {
+        top: 25px;
+        padding: 1px 15px;
+        position: absolute;
+        right: 30px;
+        cursor: pointer;
+      }
+    }
+  }
+  .edit-view-content {
+    position: relative;
+    top: 20px;
+    width: 525px;
+    p{
+      font-size: 12px;
+    }
+    .edit-view {
+      width: 100%;
+      border: solid 1px #ccc;
+      height: 55px;
+      border-radius: 5px;
+      margin-top: 5px;
+      cursor: pointer;
+      input{
+        cursor: pointer;
+        margin-left: 10px;
+        margin-top: 10px;
+        width: 96%;
+        border: none;
+        &::placeholder{
+          color: black;
+        }
+      }
+      .btn-view{
+        width: 110px;
+        height: 20px;
+        background: black;
+        font-size: 11px;
+        left: 325px;
+        position: absolute;
+        top: 20px;
+      }
+      span {
+        color: #776DE0;
+        position: relative;
+        left: -14px;
+        top: 17px;
+        font-size: 21px;
+      }
+    }
+  }
+.edit-view-content.active {
+  .edit-view.active {
+    background: #F2F3FF50;
+    border-left: solid 2px #776DE0;
+    input {
+      background: #F2F3FF50;
+    }
+  }
+    }
+}
+
+.program-config-title {
+  background-color: $color-gray-30;
+  color: $text-secondary;
+  text-transform: uppercase;
+  height: 35px;
+}
+
+.program-name-initials {
+  color: $color-white;
+  background-color: $color-blue;
+  height: 40px;
+  width: 40px;
+}
+
+.status {
+  width: 72px;
+  height: 21px;
+
+  font-size: 12px;
+
+  &-inactive {
+    color: $color-gray-70;
+    background-color: $color-gray-30;
+
+    icon {
+      color: inherit !important;
+    }
+  }
+
+  &-active {
+    background-color: $color-green;
+    color: $color-white;
+
+    icon {
+      color: inherit !important;
+    }
+  }
+}
+
+::ng-deep .table-listing {
+  tbody {
+    .actions {
+      right: auto;
+      left: 8px;
+    }
+  }
+}

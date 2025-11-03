@@ -1,0 +1,31 @@
+<ng-template #flowStatus let-row let-value="value">
+  <span class="c-status-ui active" *ngIf="value">
+    {{ 'active' | i18next }}
+  </span>
+  <span class="c-status-ui inactive" *ngIf="!value">
+    {{ 'inactive' | i18next }}
+  </span>
+</ng-template>
+
+<app-svms-table
+  [tableOptions]="tableOptions"
+  [coloumnDefintions]="svmstableColomnDefn"
+  [dataSource]="svmsData">
+</app-svms-table>
+
+<ng-template #emptyDataTemplate>
+  <app-no-listing-page
+    clickHere="click here"
+    btnClickUrl="FOUNDATION_DATA_TYPE_CREATE"
+    btnmsg="Create Your First Flow"
+    pmsg="If you would like to add Flow,"
+    headingmsg="No Flow found for the selected program."
+    (onCreateClick)="onCreateClick(true)"
+    #emptyDataTemplate
+  >
+  </app-no-listing-page>
+</ng-template>
+
+
+
+

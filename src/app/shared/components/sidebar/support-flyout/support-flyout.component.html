@@ -1,0 +1,72 @@
+<svms-sidebar
+    [dataVisibility]="visibility"
+    title="{{ 'contact_us' | i18next }}"
+    (onClose)="emitCloseEvent()"
+>
+
+    <svms-sidebar-body>
+
+        <div class="row m-12 contact-us">
+            <div class="col-sm-6 mt-24">
+                <label> {{ 'your_detail' | i18next }} </label>
+                <p> {{ userName + " (" + userEmail + ")" }} </p>
+            </div>
+            <div class="col-sm-12 mt-24">
+                <label> {{ 'support_email' | i18next }} </label>
+                <p> {{ supportEmail }} </p>
+            </div>
+        </div>
+
+        <br/>
+
+        <div [formGroup]="customerFeedbackForm" class="row m-12" *ngIf="customerFeedbackForm">
+
+            <div class="form-group col-sm-12">
+                <label> {{ 'subject' | i18next }} <span class="require">*</span> </label>
+                <input class="form-control" type="text"
+                    maxlength="100" placeholder="{{ 'enter_subject' | i18next }}"
+                    formControlName='subject'/>
+            </div>
+
+            <div class="form-group col-sm-12">
+              <label> {{ 'url' | i18next }} </label>
+              <textarea rows="4" placeholder="{{ 'enter_url' | i18next }}"
+                    maxlength="2000" formControlName='url'
+                    class="form-control"
+                    [ngClass]="{'error': customerFeedbackForm?.get('url')?.errors?.urlError}">
+                </textarea>
+                <p *ngIf="customerFeedbackForm?.get('url')?.errors?.urlError" class="text-red">
+                    {{'only_simplify_domain_url_is_allowed.'|i18next}}
+                </p>
+            </div>
+
+            <div class="form-group col-sm-12 mt-12">
+                <label> {{ 'message' | i18next }} <span class="require">*</span> </label>
+                <textarea rows="4" placeholder="{{ 'enter_message' | i18next }}"
+                    maxlength="2000" formControlName='message'
+                    class="form-control" [ngClass]="{'error': customerFeedbackForm?.get('message')?.errors?.messageError}">
+                </textarea>
+                <p *ngIf="customerFeedbackForm?.get('message')?.errors?.messageError" class="text-red">
+                    {{'only_simplify_domain_url_is_allowed.'|i18next}}
+                </p>
+            </div>
+
+        </div>
+
+    </svms-sidebar-body>
+
+    <svms-sidebar-footer>
+        <div class="d-flex spread">
+            <button (click)="emitCloseEvent()"
+              class="fs-14 font-weight-normal btn btn-default">
+                {{ 'cancel' | i18next }}
+            </button>
+            <button (click)="sendSupportEmail()" [disabled]="customerFeedbackForm?.invalid"
+              class="fs-14 font-weight-normal btn btn-primary">
+                {{ 'send' | i18next }}
+                <span class="material-icons ml-4">keyboard_arrow_right</span>
+            </button>
+          </div>
+    </svms-sidebar-footer>
+
+</svms-sidebar>

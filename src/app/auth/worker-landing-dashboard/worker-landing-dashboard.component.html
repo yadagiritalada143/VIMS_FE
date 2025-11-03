@@ -1,0 +1,74 @@
+<div class="landing-wrapper">
+    <div class="card bg-light text-center pt-24 pb-16">
+        <ng-container>
+            <figure *ngIf="account?.avatar" class="landing-logo mb-12">
+                <img [src]="account?.avatar" alt="" alt="" width="69" height="69" />
+            </figure>
+            <figure *ngIf="!account?.avatar"
+                class="rounded-circle mb-0 text-center position-relative mb-0 d-flex justify-content-center align-items-center">
+                <span *ngIf="account?.initials" class="text-capitalize">
+                    {{account?.initials}}</span>
+                <span class="availability rounded-circle online d-none"></span>
+            </figure>
+
+        </ng-container>
+        <h4 class="mb-12">{{ 'welcome' | i18nextEager }}, {{account?.full_name}}</h4>
+        <p class="font-weight-medium mb-32">{{ 'choose_as_assignment_to_continue' | i18nextEager }}</p>
+        <div class="program-search">
+            <input type="text" placeholder="{{ 'search..' | i18nextEager }}" [(ngModel)]="searchValue"
+                (keyup.enter)="searchProgram()" (keyup)="searchProgram()">
+            <icon class="search-icon material-icons" cuClass="d-flex" name="search" size="18px"></icon>
+            <icon class="clear-search material-icons" cuClass="d-flex" name="cancel" size="18px" color="#0044C5"
+                [ngClass]="{'show-clear-icon': clearIcon}" (click)="clearSearch()"></icon>
+        </div>
+        <div class="list-available">
+            <perfect-scrollbar>
+                <div>
+                    <div class="list-item d-flex align-items-center justify-content-between cursor-pointer"
+                        *ngFor="let a of assignment" (click)="navigateToDashboard(a?.assignment_uuid)">
+                        <div class="d-flex align-items-center">
+                            <figure>{{a?.assignment_title?.title | slice: 0 : 1}}</figure>
+                            <div class="assigment-title ml-16">
+                                <p>{{a?.assignment_title?.title}}</p>
+                                <span class="d-flex align-items-center">
+                                    <i class="material-icons cursor-pointer mr-8">label</i>
+                                    {{a?.code}}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="status-ui" [ngClass]="{'active': a?.status === 'Active', 'inactive': a?.status === 'In-Active'}">{{a?.status | i18nextEager}}</div>
+                            <icon name="arrow_forward_ios" size="18px"
+                                class="material-icons cursor-pointer d-flex ml-16"></icon>
+                        </div>
+                    </div>
+
+                    <!-- <div *ngIf="dataLoader" class="mb-12">
+                        <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                          width: '32px',
+                          height: '32px',
+                          float: 'left',
+                          'margin-bottom': '0px',
+                          'margin-right': '10px',
+                          'background-color': '#ECEDFF',
+                          'border-top': '0'
+                        }">
+                        </ngx-skeleton-loader>
+                        <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                            width: '85%',
+                            height: '14px',
+                            float: 'left',
+                            'margin-top': '12px',
+                            'border-radius': '0',
+                            'margin-bottom': '4px',
+                            'background-color': '#ECEDFF',
+                            'border-top': '0'
+                        }">
+                        </ngx-skeleton-loader>
+                        <div class="clearfix"></div>
+                    </div> -->
+                </div>
+            </perfect-scrollbar>
+        </div>
+    </div>
+</div>

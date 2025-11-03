@@ -1,0 +1,1112 @@
+<h3 *ngIf="!showNoWorkflow || !showPreviousWorkflow" class="font-weight-medium">{{'current_workflow'|i18next }}</h3>
+<section class="workflow-page">
+
+    <ng-template [ngIf]="!showNoWorkflow || !showPreviousWorkflow">
+        <!-- breadcrumb Start -->
+        <nav class="d-flex">
+        <div *ngFor="let tab of tabs;let i = index">
+            <div (click)="changeTab(tab,i,true,true)" class="nav-item cursor-pointer position-relative" [ngClass]="{'active': i == activeTabInd, 'done' : (tab?.data?.status?.toUpperCase() == StatusEnum.approved || tab?.data?.status?.toUpperCase() == StatusEnum.reviewed), 'rejected': tab?.data?.status?.toUpperCase() == StatusEnum.rejected, 'lock': (tab?.data?.status?.toUpperCase() == StatusEnum.notstarted || tab?.isDisabled), 'pending':tab?.data?.status?.toUpperCase() === StatusEnum?.pending}">
+                <span>{{  tab?.name | titlecase | i18next }}</span>
+            </div>
+        </div>
+        </nav>
+        <!-- breadcrumb End -->
+      <ng-container *ngFor="let workflow of tabs[activeTabInd]?.data?.approvers; let i = index">
+        <div (click)="openDetailApproval(i)" (clickOutside)="isHideApproversClicked = false;" class="workflow-accordion-title cursor-pointer d-flex justify-content-between align-items-center align-items-start-m" [ngClass]="{'active' : selectedIndex === i}">
+          <div class="item-label d-flex align-items-center align-items-start-m">
+              <icon *ngIf="selectedIndex === i" class="active-label mr-16" name="keyboard_arrow_down"></icon>
+              <icon *ngIf="selectedIndex != i" class="mr-16" name="keyboard_arrow_right"></icon>
+              <p class="small"><span [ngClass]="{'active-label' : selectedIndex === i}">Level  {{workflow?.level}}</span> -  {{ current_workflow_type | titlecase}} Completion Rule - {{workflow?.approval_type | titlecase}} Approvals
+                <span *ngIf="isNotNeededStatus(workflow?.members) && selectedIndex === i" (click)="hideApproversClick(workflow)"
+                (clickOutside)="isHideApproversClicked = false;" class="show-hide-approver">
+                    ({{workflow?.hideApprovers ? 'Hide' : 'Show'}} Approvers Not Needed)
+                </span>
+            </p>
+          </div>
+          <div [ngClass]="{'completed':(workflow?.status === StatusEnum?.approved || workflow?.status === StatusEnum?.reviewed),'pending':workflow?.status === StatusEnum?.pending,'cancel':workflow?.status === StatusEnum?.cancelled,'rejected':workflow?.status === StatusEnum?.rejected, 'by-passed': workflow?.status === StatusEnum?.bypassed}" class="status  position-relative">
+            {{(workflow?.status?.toUpperCase() == 'APPROVED' ? 'Completed' : (workflow?.status?.toUpperCase() == 'REJECTED' ? 'Completed' : workflow?.status )) | titlecase}}
+          </div>
+        </div>
+        <div class="workflow-accordion-content" *ngIf="selectedIndex === i">
+            <table appResizableElement>
+              <tbody>
+                <tr *ngFor="let member of workflow?.members; let j = index" [hidden]="!workflow?.hideApprovers && member?.status?.toUpperCase() === StatusEnum?.not_needed?.toUpperCase()">
+                <ng-container *ngIf="!(workflow?.members.length == 1 && ((member?.action?.toUpperCase() == 'BYPASSED_APPROVAL') || (member?.action?.toUpperCase() == 'SKIPPED_APPROVAL')))">
+                   <td [hidden]="moduleName==='offers'">
+                    <div class="users d-flex position-relative">
+                      <ng-template #approverList>
+                        <!-- replace user  start-->
+                        <ng-container *ngIf="member?.is_replaced_approver && member?.approver_replaced_by">                            
+                            <div class="d-flex align-items-center">
+                                <figure class="mr-12">
+                                    <img [src]="member?.approver_replaced_by?.replaced_from?.avatar" *ngIf="member?.approver_replaced_by?.replaced_from?.avatar;"
+                                        alt="{{member?.approver_replaced_by?.replaced_from?.first_name | i18next }}">
+                                    <ng-template [ngIf]="!member?.approver_replaced_by?.replaced_from?.avatar && member?.approver_replaced_by?.replaced_from?.initials">
+                                        <span class="initials initials__purple  text-uppercase">{{member?.approver_replaced_by?.replaced_from?.initials || '' |
+                                            i18nextEager }}</span>
+                                    </ng-template>
+                                    <span *ngIf="!member?.approver_replaced_by?.replaced_from?.initials && !member?.approver_replaced_by?.replaced_from?.avatar"
+                                        class="initials initials__purple text-uppercase"> {{member?.approver_replaced_by?.replaced_from?.first_name + ' ' + member?.approver_replaced_by?.replaced_from?.last_name |shortName:
+                                        'last'}}</span>
+                                </figure>
+                                <div class="workflow-user-detail" [ngClass]="{'disable-text': (!member?.is_active)}">
+                                    <p class="font-weight-medium">{{member?.approver_replaced_by?.replaced_from?.first_name}}
+                                        {{member?.approver_replaced_by?.replaced_from?.last_name}}</p>
+                                    <!-- <p class="small">{{workflow?.role?.name}}</p> -->
+                                    <p class="small">{{getUserDetails(member?.approver_replaced_by?.replaced_from)}}</p>
+                                </div>
+                            </div>
+                            <!--show replaced icon when pending-->
+                            <div class="deligated-img" class="position-relative replace-member-icon" *ngIf="member?.status === StatusEnum?.pending">
+                                <img src="../../../../assets/images/group-icon.svg" alt="" class="replaced-icon px-24 22">
+                                <div class="replace-ui reassign-user position-absolute" >
+                                    <div class="replace-info p-12">
+                                        <p class="small"><span class="font-weight-semibold">{{member?.approver_replaced_by?.replaced_from?.first_name  + ' ' + member?.approver_replaced_by?.replaced_from?.last_name}} &nbsp;
+                                               </span> has been replaced by <span
+                                                class="font-weight-semibold">{{member?.first_name}} &nbsp; {{member?.last_name}}</span> </p>
+                                        <p class="small">
+                                            {{ member?.modified_on ? ' on
+                                            '+(member?.modified_on | localDateFormat) : '' | i18nextEager }}
+                                            {{ member?.modified_on ? 'at
+                                            '+(member?.modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+                                    </div>
+                                    <div class="replace-note p-12">
+                                        <p class="small font-weight-medium">Replacement Notes</p>
+                                        <p class="small">{{member?.replace_approver_notes}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                        <ng-container *ngIf="member?.is_reassigned_user">
+                            <div class="d-flex align-items-center">
+                                <figure class="mr-12">
+                                    <span class="initials initials__purple text-uppercase"> {{member?.user_reassigned_by?.reassigned_from?.first_name + ' ' + member?.user_reassigned_by.reassigned_from?.last_name |shortName:
+                                        'last'}}</span>
+                                </figure>
+                                <div class="workflow-user-detail" [ngClass]="{'disable-text': (!member?.is_active)}">
+                                    <p class="font-weight-medium">{{member?.user_reassigned_by?.reassigned_from?.first_name}}
+                                        {{member?.user_reassigned_by?.reassigned_from?.last_name}}</p>
+                                    <p class="small">{{getUserDetails(member?.user_reassigned_by?.reassigned_from)}}</p>
+                                </div>
+                            </div>
+                            <div class="deligated-img" class="position-relative">
+                                <img src="../../../../assets/images/group-icon.svg" alt="" class="replaced-icon px-24">
+                                <div class="replace-ui reassign-user position-absolute">
+                                    <div class="replace-info p-12">
+                                        <p class="small"><span class="font-weight-semibold">{{member?.user_reassigned_by?.reassigned_from?.first_name  + ' ' + member?.user_reassigned_by.reassigned_from?.last_name}} &nbsp;
+                                               </span> has been reassigned by <span
+                                                class="font-weight-semibold">{{member?.first_name}} &nbsp; {{member?.last_name}}</span> </p>
+                                        <p class="small">
+                                            {{ member?.user_reassigned_by?.reassigned_on ? ' on
+                                            '+(member?.user_reassigned_by?.reassigned_on | localDateFormat) : '' | i18nextEager }}
+                                            {{ member?.user_reassigned_by?.reassigned_on ? 'at
+                                            '+(member?.user_reassigned_by?.reassigned_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                        <!-- replace user  end-->
+                        <div class="d-flex align-items-center replace-member-ui" *ngIf="(!member?.is_replaced_approver) || (member?.is_replaced_approver && member?.status === StatusEnum?.pending)">
+                            <figure class="mr-12">
+                                <img [src]="member?.impersonated_to?.avatar" *ngIf="member?.impersonated_to?.avatar;" alt="{{member?.impersonated_to?.first_name | i18next }}">
+                                <ng-template [ngIf]="!member?.impersonated_to?.avatar && member?.impersonated_to?.initials">
+                                      <span class="initials initials__purple  text-uppercase">{{member?.impersonated_to?.initials || '' | i18next }}</span>
+                                </ng-template>
+                                <span *ngIf="!member?.initials && !member?.avatar" class="initials initials__purple text-uppercase"> {{member?.first_name + ' ' + member?.last_name |shortName: 'last'}}</span>
+                            </figure>
+                            <div class="workflow-user-detail" [ngClass]="{'auto-width': ((!member?.delegated_to || member?.delegated_to?.length === 0) && (!member?.is_impersonated || member?.is_impersonated === 0)) || (member?.status?.toUpperCase() === StatusEnum?.not_needed?.toUpperCase()), 'disable-text': (!member?.is_active)}">
+                                <p class="font-weight-medium">
+                                    <span>{{member?.first_name}} {{member?.last_name}}</span>
+                                    <span *ngIf="!member?.is_active">{{ " (Inactive)" }}</span>
+                                </p>
+                                <p class="small">{{getUserDetails(member)}}</p>
+                            </div>
+                        </div>
+                        <div class="deleate-icon" *ngIf="member?.delegated_to && member?.delegated_to?.length > 0 && member?.status === StatusEnum?.pending">
+                            <div class="px-24 pr-m-0">
+                                <img src="../../../../assets/images/user-icon.png" alt="delegated icon">
+                            </div>
+                        </div>
+
+                        <!-- delegated pending -->
+                        <div class="position-relative delegate-to"
+                          *ngIf="(member?.delegated_to && member?.delegated_to?.length > 0)  && member?.status === StatusEnum?.pending">
+                          <div class="text-truncate d-flex align-items-center justify-content-center manager-images-list-multi-approvl">
+                            <ng-container *ngFor="let delegate of member?.delegated_to | slice:0:4; let j = index">
+                              <div
+                                class="manager-avatar-list-multi-approvl overflow-hidden d-flex align-items-center justify-content-center initials initials__purple border-none"
+                                tooltip="{{delegate?.first_name |shortName: 'last'}}" placement="top">
+                                <img [src]="delegate?.avatar" *ngIf="delegate?.avatar;" alt="{{delegate?.first_name | i18nextEager }}">
+                                <ng-template [ngIf]="!delegate?.avatar && delegate?.initials">
+                                  {{delegate?.initials || '' | i18nextEager }}
+                                </ng-template>
+                                <span *ngIf="!delegate?.initials && !delegate?.avatar">
+                                  {{delegate?.first_name |shortName: 'last'}}</span>
+                              </div>
+                            </ng-container>
+                            <div class="workflow-user-detail ml-32" *ngIf="member?.delegated_to?.length === 1">
+                                <p class="font-weight-medium">{{member?.delegated_to[0]?.first_name + ' ' + member?.delegated_to[0]?.last_name}}</p>
+                                <p class="small">{{getUserDetails(member?.delegated_to[0])}}</p>
+                            </div>
+
+                            <div *ngIf="member?.delegated_to?.length > 4" class="manager-avatar-list-multi-approvl overflow-hidden d-flex align-items-center justify-content-center more-name cursor-pointer" tooltip="+{{member?.delegated_to?.length - 4}}" placement="top" (click)="showMoreName()">
+                                +{{member?.delegated_to?.length - 4}}
+                            </div>
+                          </div>
+                          <div class="more-name-list-multi-approval" [ngClass]="{'active' : managerListDropdown}" (mouseleave)="hideMoreName()">
+                            <h6>{{current_workflow_type == 'review' ? 'Review Managers' : 'Approval Managers'}}</h6>
+                            <ul>
+                                <li *ngFor="let delegate of member?.delegated_to" class="d-flex align-items-center" [ngClass]="{'disable-text': (!member?.is_active)}">
+                                    <div class="name-avatar">
+                                        <span *ngIf="!delegate?.avatar && !delegate?.initials"> {{delegate?.first_name |shortName: 'last'}}</span>
+                                        <ng-template class="name-avatar" [ngIf]="!delegate?.avatar && delegate?.initials">
+                                            {{delegate?.initials || '' | i18nextEager }}
+                                        </ng-template>
+                                        <img [src]="delegate?.avatar" *ngIf="delegate?.avatar;" alt="{{delegate?.first_name | i18nextEager }}">
+                                    </div>
+                                    <div>{{delegate?.first_name}}</div>
+                                </li>
+                            </ul>
+                          </div>
+                        </div>
+                        <!-- delegated pending  end-->
+                       <!-- impersonated pending -->
+                        <ng-container *ngIf="member?.is_impersonated && member?.status === StatusEnum?.pending">
+                            <ng-container *ngIf="member?.impersonated_to">
+                                <icon name="theater_comedy" color="#D8834B"></icon>
+                                <div class="d-flex align-items-center min-width-div">
+                                    <figure class="mr-12">
+                                        <img [src]="member?.impersonated_to?.avatar" *ngIf="member?.impersonated_to?.avatar;" alt="{{member?.impersonated_to?.first_name | i18nextEager }}">
+                                        <ng-template [ngIf]="!member?.impersonated_to?.avatar && member?.impersonated_to?.initials">
+                                              <span class="initials initials__purple  text-uppercase">{{member?.impersonated_to?.initials || '' | i18nextEager }}</span>
+                                        </ng-template>
+                                        <span *ngIf="!member?.impersonated_to?.initials && !member?.impersonated_to?.avatar" class="initials initials__purple text-uppercase"> {{member?.impersonated_to?.first_name+' '+member?.impersonated_to?.last_name |shortName: 'last'}}</span>
+                                    </figure>
+                                    <div class="workflow-user-detail" [ngClass]="{'disable-text': (!member?.is_active)}">
+                                        <p class="font-weight-medium">{{member?.impersonated_to?.first_name}}</p>
+                                        <p class="small">{{member?.impersonated_to?.role?.name || 'BA'}}</p>
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </ng-container>
+                         <!-- impersonated pending end-->
+                       </ng-template>
+                       <ng-container *ngTemplateOutlet="approverList"></ng-container>  
+                    </div>
+                   </td>
+                   <td *ngIf="moduleName==='offers'">
+                        <div class="users d-flex position-relative offer-workflow">
+                            <ng-container *ngIf="member?.is_replaced_approver && member?.approver_replaced_by">
+                                <ng-container *ngTemplateOutlet="replacedApprover;context:{member:member}"></ng-container>
+                            </ng-container>
+                            <ng-container *ngIf="!(member?.is_replaced_approver && member?.approver_replaced_by)&&
+                            member?.is_reassigned_user">
+                                <ng-container *ngTemplateOutlet="reassignedUser;context:{member:member}"></ng-container>
+                            </ng-container>
+                            <ng-container *ngIf="!(member?.is_replaced_approver && member?.approver_replaced_by)&&
+                            !member?.is_reassigned_user">
+                                <ng-container *ngTemplateOutlet="approver;context:{member:member}"></ng-container>
+                            </ng-container>
+                            <div class="more-offers" *ngIf="showMoreBtn(member)">
+                                    <div class="position-relative">
+                                        <button class="btn small btn-light bordered text-primary px-8" (click)="toggleOptions(j)">
+                                            <icon name="visibility" cuClass="d-flex" class="icon--on-left" theme="outlined" size="18px"></icon>
+                                            {{'more' | i18next}}
+                                        </button>
+                                    </div>
+                            </div>
+                            <app-svms-modal size="large" title="approver_list" [visibility]="approverModal === j" (onClose)="onCloseModal()">
+                                <app-svms-modal-body>
+                                    <div class="approver-list-modal">
+                                        <div class="users d-flex position-relative">
+                                            <ng-container *ngTemplateOutlet="approverList"></ng-container>
+                                        </div>    
+                                    </div>
+                                </app-svms-modal-body>
+                            </app-svms-modal>
+                        </div>        
+                   </td>
+                   <td class="column-right">
+                    <span class="drag-handle"></span>
+                    <ng-container *ngIf="member?.status === StatusEnum?.notstarted">
+                        <div class="approval-ui d-flex justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <p class="approval not-started small">Not Started</p>
+                            </div>
+                        </div>
+                      </ng-container>
+                      <ng-container *ngIf="member?.status === StatusEnum?.pending">
+                        <div class="approval-ui d-flex justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <p class="approval pending small">{{member?.status | titlecase}}</p>
+                            </div>
+                            <!-- replace on permisstion based -->
+                        <div *ngIf="tabs[activeTabInd]?.isReplaceMember && moduleStatus!=StatusEnum?.rejected && moduleStatus!=StatusEnum?.closed && workflow?.status === StatusEnum?.pending && hasReplaceApprovalPermission && (!member?.delegated_to || member?.delegated_to?.length == 0)" class="d-flex align-items-center">
+                            <a *ngIf="member?.status?.toUpperCase() == StatusEnum.pending" class="replace-btn" (click)="openReplaceScreen(member,workflow?.role?.name,workflow)">{{'replace' | i18nextEager }}</a>
+                        </div>
+                        </div>
+                      </ng-container>
+                      <ng-container *ngIf="member?.status === StatusEnum?.cancelled">
+                        <div class="approval-ui d-flex justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <p class="approval cancelled small">{{member?.status | titlecase}}</p>
+                            </div>
+                        </div>
+                      </ng-container>
+
+                      <ng-container *ngIf="member?.status?.toUpperCase() === StatusEnum?.not_needed?.toUpperCase()">
+                        <div class="approval-ui d-flex justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <p class="approval not-needed small">{{member?.status | titlecase}}</p>
+                            </div>
+                        </div>
+                      </ng-container>
+                      <!-- Approved -->
+                    <ng-container *ngIf="member?.status === StatusEnum?.approved || workflow?.status === StatusEnum?.reviewed">
+                        <div *ngIf="!member?.is_impersonated && !member?.is_delegated_approval && !member?.is_admin_override && !member?.is_replaced_approver" class="approval-ui">
+                            <div *ngIf="member?.status_modified_by" class="d-flex align-items-center align-items-unset column-direction">
+                                <p class="approval approved">{{(member?.status?.toUpperCase() == 'APPROVED' ? (this.current_workflow_type == 'review' ? 'Reviewed' : 'Approved') : member?.status ) | titlecase}} </p>
+                                <p> {{ member?.status_modified_on ? ' on
+                                    '+(member?.status_modified_on | localDateFormat) : '' | i18nextEager }}
+                                    {{ member?.status_modified_on ? 'at
+                                    '+(member?.status_modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+                            </div>
+                            <div *ngIf="member?.status_note" class="reason">
+                                <p class="small"><span class="font-weight-medium">Notes:</span> {{(member?.toggleNotes || member?.status_note?.length <= 100) ? member?.status_note : (member?.status_note?.substr(0, 100) + "...")}}
+                                    <a class="text-primary" *ngIf="member?.status_note?.length> 100"
+                                        (click)="member.toggleNotes = !member.toggleNotes">
+                                        {{ member?.toggleNotes ? ' Read Less' : ' Read more'}}
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    <div *ngIf="!member?.is_delegated_approval && member?.is_impersonated"  class="approval-ui">
+                        <div class="d-flex justify-content-between">
+                            <div *ngIf="member?.impersonated_data" class="d-flex align-items-center align-items-unset column-direction mb-4">
+                                <p class="approval approved small">{{(member?.status?.toUpperCase() == 'APPROVED' ? (this.current_workflow_type == 'review' ? 'Reviewed' : 'Approved') : member?.status ) | titlecase}} </p>
+                                <div class="d-flex align-items-center">
+                                    <p class="small mr-4">by</p>
+                                    <figure class="mr-4">
+                                        <img [src]="member?.impersonated_data?.impersonated_by?.avatar" *ngIf="member?.impersonated_data?.impersonated_by?.avatar;" alt="{{member?.impersonated_data?.impersonated_by?.first_name | i18nextEager }}">
+                                            <ng-template [ngIf]="!member?.impersonated_data?.impersonated_by?.avatar && member?.impersonated_data?.impersonated_by?.initials">
+                                                <span class="initials initials__purple  text-uppercase">{{member?.impersonated_data?.impersonated_by?.initials || '' | i18nextEager }}</span>
+                                            </ng-template>
+                                            <span *ngIf="!member?.impersonated_data?.impersonated_by?.initials && !member?.impersonated_data?.impersonated_by?.avatar" class="initials initials__purple text-uppercase"> {{member?.impersonated_data?.impersonated_by?.first_name+' '+member?.impersonated_data?.impersonated_by?.last_name |shortName: 'last'}}</span>
+                                    </figure>
+                                    <p>{{member?.impersonated_data?.impersonated_by?.first_name}} {{member?.impersonated_data?.impersonated_by?.last_name}} (Impersonated User)
+
+                                        {{ member?.status_modified_on ? ' on
+                                        '+(member?.status_modified_on | localDateFormat) : '' | i18nextEager }}
+                                        {{ member?.status_modified_on ? 'at
+                                        '+(member?.status_modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+                                </div>
+                            </div>
+                            <icon name="theater_comedy" color="#D8834B"></icon>
+                        </div>
+                        <div *ngIf="member?.status_note" class="reason">
+                            <p class="small"><span class="font-weight-medium">Notes:</span> {{(member?.toggleNotes || member?.status_note?.length <= 100) ? member?.status_note : (member?.status_note?.substr(0, 100) + "...")}}
+                                <a class="text-primary" *ngIf="member?.status_note?.length> 100"
+                                    (click)="member.toggleNotes = !member.toggleNotes">
+                                    {{ member?.toggleNotes ? ' Read Less' : ' Read more'}}
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                        <div *ngIf="!member?.is_impersonated && (member?.is_delegated_approval || member?.is_admin_override || member?.is_replaced_approver)"
+                            class="approval-ui">
+                            <div class="d-flex justify-content-between">
+                            <div *ngIf="member?.status_modified_by" class="d-flex align-items-center align-items-unset column-direction mb-4">
+                                <p class="approval approved">{{(member?.status?.toUpperCase() == 'APPROVED' ? (this.current_workflow_type == 'review' ? 'Reviewed' : 'Approved') : member?.status ) | titlecase}} </p>
+                                <div class="d-flex align-items-center">
+                                    <p class="small mr-4">by</p>
+                                    <figure class="mr-4">
+                                        <img [src]="member?.status_modified_by?.avatar" *ngIf="member?.status_modified_by?.avatar;"
+                                            alt="{{member?.status_modified_by?.first_name | i18nextEager }}">
+                                        <ng-template [ngIf]="!member?.status_modified_by?.avatar && member?.status_modified_by?.initials">
+                                            <span class="initials initials__purple  text-uppercase">{{member?.status_modified_by?.initials || '' |
+                                                i18nextEager }}</span>
+                                        </ng-template>
+                                        <span *ngIf="!member?.status_modified_by?.initials && !member?.status_modified_by?.avatar"
+                                            class="initials initials__purple text-uppercase"> {{member?.status_modified_by?.first_name + ' ' + member?.status_modified_by?.last_name |shortName:
+                                            'last'}}</span>
+                                    </figure>
+                                    <p>{{member?.status_modified_by?.first_name}} {{member?.status_modified_by?.last_name}} <span
+                                            *ngIf="member?.is_delegated_approval">(Delegated User) </span> <span
+                                            *ngIf="member?.is_admin_override">(Admin Override) </span> <span
+                                            *ngIf="member?.is_replaced_approver">(Replaced User) </span>
+                                        {{ member?.status_modified_on ? ' on
+                                        '+(member?.status_modified_on | localDateFormat) : '' | i18next }}
+                                        {{ member?.status_modified_on ? 'at
+                                        '+(member?.status_modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18next }}</p>
+                                </div>
+                            </div>
+                            <div class="deligated-img" *ngIf="member?.is_delegated_approval"> <img src="../../../../assets/images/user-icon.png"
+                                    alt="delegated icon"></div>
+                            <icon *ngIf="member?.is_admin_override" name="admin_panel_settings" color="#7a89fd"></icon>
+
+                            <!-- replace UI below will be on condition start-->
+                            <div class="deligated-img" *ngIf="member?.is_replaced_approver" class="position-relative">
+                                <img src="../../../../assets/images/group-icon.svg" alt="" class="replaced-icon px-24">
+                                <div class="replace-ui position-absolute">
+                                    <div class="replace-info p-12">
+                                        <p class="small"><span class="font-weight-semibold">{{member?.approver_replaced_by?.replaced_from?.first_name  + ' ' + member?.approver_replaced_by?.replaced_from?.last_name}} &nbsp;
+                                               </span> has been replaced by <span
+                                                class="font-weight-semibold">{{member?.first_name}} &nbsp; {{member?.last_name}}</span> </p>
+                                        <p class="small">
+                                            {{ member?.status_modified_on ? ' on
+                                            '+(member?.status_modified_on | localDateFormat) : '' | i18nextEager }}
+                                            {{ member?.status_modified_on ? 'at
+                                            '+(member?.status_modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+                                    </div>
+                                    <div class="replace-note p-12">
+                                        <p class="small font-weight-medium">Replacement Notes</p>
+                                        <p class="small">{{member?.replace_approver_notes}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- replace UI below will be on condition end -->
+                        </div>
+                        <div *ngIf="member?.status_note" class="reason">
+                            <p class="small"><span class="font-weight-medium">Notes:</span> {{(member?.toggleNotes || member?.status_note?.length <= 100) ? member?.status_note : (member?.status_note?.substr(0, 100) + "...")}}
+                                <a class="text-primary" *ngIf="member?.status_note?.length> 100"
+                                    (click)="member.toggleNotes = !member.toggleNotes">
+                                    {{ member?.toggleNotes ? ' Read Less' : ' Read more'}}
+                                </a>
+                            </p>
+                        </div>
+                        </div>
+                    </ng-container>
+
+                    <!-- Rejected -->
+                    <ng-container *ngIf="member?.status === StatusEnum?.rejected">
+                        <div *ngIf="!member?.is_impersonated && !member?.is_delegated_approval && !member?.is_admin_override && !member?.is_replaced_approver" class="approval-ui">
+                            <div *ngIf="member?.status_modified_by"  class="d-flex align-items-center">
+                                <p class="approval rejected">{{member?.status | titlecase}} </p>
+                                <p>{{ member?.status_modified_on ? ' on
+                                    '+(member?.status_modified_on | localDateFormat) : '' | i18nextEager }}
+                                    {{ member?.status_modified_on ? 'at
+                                    '+(member?.status_modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+                            </div>
+                            <div class="reason">
+                                <p class="small"><span class="font-weight-medium">Rejected Reason:</span> {{member?.status_reason_text || member?.status_reason}}</p>
+                                <p *ngIf="member?.status_note" class="small"><span class="font-weight-medium">Notes:</span> {{(member?.toggleNotes || member?.status_note?.length <= 100) ? member?.status_note : (member?.status_note?.substr(0, 100) + "...")}}
+                                    <a class="text-primary" *ngIf="member?.status_note?.length > 100"
+                                        (click)="member.toggleNotes = !member.toggleNotes">
+                                        {{ member?.toggleNotes ? ' Read Less' : ' Read more'}}
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                        <div *ngIf="!member?.is_delegated_approval && member?.is_impersonated" class="approval-ui">
+                        <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div *ngIf="member?.impersonated_data?.impersonated_by" class="d-flex align-items-center align-items-unset column-direction">
+                                <p class="approval rejected">{{member?.status | titlecase}}</p>
+                                <div class="d-flex align-items-center">
+                                <p class="small mr-4">by</p>
+                                <figure class="mr-4">
+                                    <img [src]="member?.impersonated_data?.impersonated_by?.avatar" *ngIf="member?.impersonated_data?.impersonated_by?.avatar;" alt="{{member?.impersonated_data?.impersonated_by?.first_name | i18nextEager }}">
+                                    <ng-template [ngIf]="!member?.impersonated_data?.impersonated_by?.avatar && member?.impersonated_data?.impersonated_by?.initials">
+                                          <span class="initials initials__purple  text-uppercase">{{member?.impersonated_data?.impersonated_by?.initials || '' | i18nextEager }}</span>
+                                    </ng-template>
+                                    <span *ngIf="!member?.impersonated_data?.impersonated_by?.initials && !member?.impersonated_data?.impersonated_by?.avatar" class="initials initials__purple text-uppercase"> {{member?.impersonated_data?.impersonated_by?.first_name + ' ' + member?.impersonated_data?.impersonated_by?.last_name |shortName: 'last'}}</span>
+                                </figure>
+                                <p>{{member?.impersonated_data?.impersonated_by?.first_name}} {{member?.impersonated_data?.impersonated_by?.last_name}} (Impersonated User)
+                                    {{ member?.status_modified_on ? ' on
+                                    '+(member?.status_modified_on | localDateFormat) : '' | i18nextEager }}
+                                    {{ member?.status_modified_on ? 'at
+                                    '+(member?.status_modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+
+                                </div>
+                            </div>
+                        </div>
+                        <icon name="theater_comedy" color="#D8834B"></icon>
+                        </div>
+                        <div class="reason">
+                            <p class="small"><span class="font-weight-medium">Rejected Reason:</span> {{member?.status_reason_text || member?.status_reason}}</p>
+                            <p *ngIf="member?.status_note" class="small"><span class="font-weight-medium">Notes:</span> {{(member?.toggleNotes || member?.status_note?.length <= 100) ? member?.status_note : (member?.status_note?.substr(0, 100) + "...")}}
+                                <a class="text-primary" *ngIf="member?.status_note?.length > 100"
+                                    (click)="member.toggleNotes = !member.toggleNotes">
+                                    {{ member?.toggleNotes ? ' Read Less' : ' Read more'}}
+                                </a>
+                            </p>
+                        </div>
+                        </div>
+                        <div *ngIf="!member?.is_impersonated && (member?.is_delegated_approval || member?.is_admin_override || member?.is_replaced_approver)" class="approval-ui">
+                        <div class="d-flex align-items-center align-items-unset justify-content-between">
+                            <div>
+                                <div *ngIf="member?.status_modified_by" class="d-flex align-items-center align-items-unset column-direction">
+                                    <p class="approval rejected">{{member?.status | titlecase}}</p>
+                                    <div class="d-flex align-items-center">
+                                        <p class="small mr-4">by</p>
+                                        <figure class="mr-4">
+                                            <img [src]="member?.status_modified_by?.avatar" *ngIf="member?.status_modified_by?.avatar;" alt="{{member?.status_modified_by?.first_name | i18nextEager }}">
+                                            <ng-template [ngIf]="!member?.status_modified_by?.avatar && member?.status_modified_by?.initials">
+                                                <span class="initials initials__purple  text-uppercase">{{member?.status_modified_by?.initials || '' | i18nextEager }}</span>
+                                            </ng-template>
+                                            <span *ngIf="!member?.status_modified_by?.initials && !member?.status_modified_by?.avatar" class="initials initials__purple text-uppercase"> {{member?.status_modified_by?.first_name + ' ' + member?.status_modified_by?.last_name |shortName: 'last'}}</span>
+                                        </figure>
+                                        <p>{{member?.status_modified_by?.first_name}} {{member?.status_modified_by?.last_name}}
+                                            <span *ngIf="member?.is_delegated_approval">(Delegated User)</span>
+                                            <span *ngIf="member?.is_admin_override">(Admin Override)</span>
+                                            <span *ngIf="member?.is_replaced_approver">(Replaced User) </span>
+                                            {{ member?.status_modified_on ? ' on
+                                            '+(member?.status_modified_on | localDateFormat) : '' | i18nextEager }}
+                                            {{ member?.status_modified_on ? 'at
+                                            '+(member?.status_modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div *ngIf="member?.is_delegated_approval">
+                                <img src="../../../../assets/images/group-icon.svg" alt="">
+                            </div>
+                            <icon *ngIf="member?.is_admin_override" name="admin_panel_settings" color="#7a89fd"></icon>
+                            <div class="deligated-img" *ngIf="member?.is_replaced_approver" class="position-relative">
+                                <img src="../../../../assets/images/group-icon.svg" alt="" class="replaced-icon px-24">
+                                <div class="replace-ui position-absolute">
+                                    <div class="replace-info p-12">
+                                        <p class="small"><span class="font-weight-semibold">{{member?.approver_replaced_by?.replaced_from?.first_name  + ' ' + member?.approver_replaced_by?.replaced_from?.last_name}} &nbsp;
+                                               </span> has been replaced by <span
+                                                class="font-weight-semibold">{{member?.first_name}} &nbsp; {{member?.last_name}}</span> </p>
+                                        <p class="small">
+                                            {{ member?.status_modified_on ? ' on
+                                            '+(member?.status_modified_on | localDateFormat) : '' | i18nextEager }}
+                                            {{ member?.status_modified_on ? 'at
+                                            '+(member?.status_modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+                                    </div>
+                                    <div class="replace-note p-12">
+                                        <p class="small font-weight-medium">Replacement Notes</p>
+                                        <p class="small">{{member?.replace_approver_notes}}</p>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="reason">
+                        <p class="small"><span class="font-weight-medium">Rejected Reason:</span> {{member?.status_reason_text || member?.status_reason}}</p>
+                        <p *ngIf="member?.status_note" class="small"><span class="font-weight-medium">Notes:</span> {{(member?.toggleNotes || member?.status_note?.length <= 100) ? member?.status_note : (member?.status_note?.substr(0, 100) + "...")}}
+                            <a class="text-primary" *ngIf="member?.status_note?.length > 100"
+                                (click)="member.toggleNotes = !member.toggleNotes">
+                                {{ member?.toggleNotes ? '  Read Less' : ' Read more'}}
+                            </a>
+                        </p>
+                    </div>
+                </div>
+                    </ng-container>
+                   </td>
+                </ng-container>
+                <ng-container *ngIf="(workflow?.members.length == 1 && ((member?.action?.toUpperCase() == 'BYPASSED_APPROVAL') || (member?.action?.toUpperCase() == 'SKIPPED_APPROVAL')))">
+                    <td>
+                        <div  *ngIf="member?.action?.toUpperCase() == 'BYPASSED_APPROVAL'" class="bypassed-content p-16">
+                            <p *ngIf="current_workflow_type.toLowerCase() == 'review'; else bypassedApproved" class="text-center text-dark">{{'bypass_duplicate_reviewer' | i18next }}</p>
+                            <ng-template #bypassedApproved>
+                                <p class="text-center text-dark">{{'bypass_duplicate_approver' | i18next}}</p>
+                            </ng-template>
+                        </div>
+                        <div  *ngIf="member?.action?.toUpperCase() == 'SKIPPED_APPROVAL'" class="bypassed-content p-16">
+                            <p *ngIf="current_workflow_type.toLowerCase() == 'review'; else skippedApproved" class="text-center text-dark">{{'skipped_reviwer' | i18next }}</p>
+                            <ng-template #skippedApproved>
+                               <p class="text-center text-dark">{{'skipped_approver' | i18next }}</p>
+                            </ng-template>
+                        </div>
+                    </td>
+                </ng-container>
+                </tr>
+              </tbody>
+            </table>
+
+        </div>
+      </ng-container>
+    </ng-template>
+      <section *ngIf="!tabs[activeTabInd]?.data || (showNoWorkflow && showPreviousWorkflow)" class="no-workflow d-flex align-items-center justify-content-center  workflow-h">
+        <div class="text-center my-24">
+          <img src="../../../assets/images/no-workflow.png" alt="No Appruval Found" width="70" >
+          <h4 class="font-weight-medium mt-12">{{'no_current_workflows' | i18next }}</h4>
+          <p>{{'no_workflows_defined' | i18next }}</p>
+        </div>
+      </section>
+</section>
+
+
+
+
+<!-- previous workflows section start here -->
+<div *ngIf="showPreviousWorkflow">
+<div *ngIf="groupedWorkflowsArray?.length">
+<h3 class="font-weight-medium mt-32">{{'Previous Workflows' | i18next }}</h3>
+<div class="previous-workflows-wrapper">
+    <section *ngFor="let iteration of groupedWorkflowsArray; let itr = index" class="workflow-page">
+        <div class="workflow-accordion-title cursor-pointer d-flex justify-content-between align-items-center align-items-start-m" [ngClass]="{'active' : previousWorkflowContent === itr}" (click)="previousWorkflowAccordion(itr)">
+            <div class="item-label d-flex align-items-center align-items-start-m">
+                <icon *ngIf="previousWorkflowContent === itr" class="active-label mr-16" name="keyboard_arrow_down"></icon>
+                <icon *ngIf="previousWorkflowContent != itr" class="mr-16" name="keyboard_arrow_right"></icon>
+                <p class="small"><span>Iteration {{iteration[0]?.version}}</span>
+                </p>
+            </div>
+            <div class="reviewed-ui">
+                <div class="d-flex align-items-center align-items-unset column-direction">
+                        <p [ngClass]="{'active': true, 'done' : (iteration[iteration?.length-1]?.status?.toUpperCase() == StatusEnum.approved || iteration[iteration?.length-1]?.status?.toUpperCase() == StatusEnum.reviewed), 'rejected': iteration[iteration?.length-1]?.status?.toUpperCase() == StatusEnum.rejected, 'lock': (iteration[iteration?.length-1]?.status?.toUpperCase() == StatusEnum.notstarted), 'pending':iteration[iteration?.length-1]?.status?.toUpperCase() === StatusEnum?.pending}" class="approval approved">{{iteration[iteration?.length-1]?.status | titlecase}} </p>
+                        <p class="small">{{ iteration[iteration?.length-1]?.modified_on ? ' on '+(iteration[iteration?.length-1]?.modified_on | localDateFormat) : '' | i18nextEager }}
+                                            {{ iteration[iteration?.length-1]?.modified_on ? ' at '+(iteration[iteration?.length-1]?.modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}
+                        </p>
+                </div>
+            </div>
+        </div>
+        <div class="workflow-accordion-content" *ngIf="previousWorkflowContent === itr">
+             <!-- breadcrumb Start -->
+        <nav class="d-flex">
+            <div *ngFor="let tab of iteration;let ind = index">
+                <div (click)="changePreviousWorkflowTab(ind)" class="nav-item cursor-pointer position-relative" [ngClass]="{'active': ind == previousWorkflowTabIndex, 'done' : (tab?.status?.toUpperCase() == StatusEnum.approved || tab?.status?.toUpperCase() == StatusEnum.reviewed), 'rejected': tab?.status?.toUpperCase() == StatusEnum.rejected, 'lock': (tab?.status?.toUpperCase() == StatusEnum.notstarted || tab?.isDisabled), 'pending':tab?.status?.toUpperCase() === StatusEnum?.pending}">
+                    <span>{{  tab?.flow_type | titlecase | i18next }}</span>
+                </div>
+            </div>
+            </nav>
+            <!-- breadcrumb End -->
+              <ng-container *ngFor="let workflow of iteration[previousWorkflowTabIndex]?.approvers; let i = index">
+                <div (click)="openPreviousWorkflow(i)" (clickOutside)="isHideApproversClicked = false;" class="workflow-accordion-title cursor-pointer d-flex justify-content-between align-items-center align-items-start-m" [ngClass]="{'active' : selectedPreviousIndex === i}">
+                  <div class="item-label d-flex align-items-center align-items-start-m">
+                      <icon *ngIf="selectedPreviousIndex === i" class="active-label mr-16" name="keyboard_arrow_down"></icon>
+                      <icon *ngIf="selectedPreviousIndex != i" class="mr-16" name="keyboard_arrow_right"></icon>
+                      <p class="small"><span [ngClass]="{'active-label' : selectedPreviousIndex === i}">Level  {{workflow?.level}}</span> - {{iteration[previousWorkflowTabIndex]?.flow_type | titlecase}}  Completion Rule - {{workflow?.approval_type | titlecase}} Approvals
+                        <span *ngIf="isNotNeededStatus(workflow?.members) && selectedPreviousIndex === i" (click)="hideApproversClick(workflow)"
+                        (clickOutside)="isHideApproversClicked = false;" class="show-hide-approver">
+                            ({{workflow?.hideApprovers ? 'Hide' : 'Show'}} Approvers Not Needed)
+                        </span>
+                    </p>
+                  </div>
+                  <div [ngClass]="{'completed':(workflow?.status === StatusEnum?.approved || workflow?.status === StatusEnum?.reviewed),'pending':workflow?.status === StatusEnum?.pending,'cancel':workflow?.status === StatusEnum?.cancelled,'rejected':workflow?.status === StatusEnum?.rejected, 'by-passed': workflow?.status === StatusEnum?.bypassed}" class="status  position-relative">
+                    {{(workflow?.status?.toUpperCase() == 'APPROVED' ? 'Completed' : (workflow?.status?.toUpperCase() == 'REJECTED' ? 'Completed' : workflow?.status )) | titlecase}}
+                  </div>
+                </div>
+                <div class="workflow-accordion-content" *ngIf="selectedPreviousIndex === i">
+                    <table appResizableElement>
+                      <tbody>
+                        <tr *ngFor="let member of workflow?.members; let j = index" [hidden]="!workflow?.hideApprovers && member?.status?.toUpperCase() === StatusEnum?.not_needed?.toUpperCase()">
+                        <ng-container *ngIf="!(workflow?.members?.length == 1 && ((member?.action?.toUpperCase() == 'BYPASSED_APPROVAL') || (member?.action?.toUpperCase() == 'SKIPPED_APPROVAL')))">
+                           <td [hidden]="moduleName==='offers'">
+                            <div class="users d-flex">
+                              <ng-template #previousApproverList>
+                                <!-- replace user  start-->
+                                <ng-container *ngIf="member?.is_replaced_approver && member?.approver_replaced_by">
+                                    <div class="d-flex align-items-center">
+                                        <figure class="mr-12">
+                                            <img [src]="member?.approver_replaced_by?.replaced_from?.avatar" *ngIf="member?.approver_replaced_by?.replaced_from?.avatar;"
+                                                alt="{{member?.approver_replaced_by?.replaced_from?.first_name | i18next }}">
+                                            <ng-template [ngIf]="!member?.approver_replaced_by?.replaced_from?.avatar && member?.approver_replaced_by?.replaced_from?.initials">
+                                                <span class="initials initials__purple  text-uppercase">{{member?.approver_replaced_by?.replaced_from?.initials || '' |
+                                                    i18nextEager }}</span>
+                                            </ng-template>
+                                            <span *ngIf="!member?.approver_replaced_by?.replaced_from?.initials && !member?.approver_replaced_by?.replaced_from?.avatar"
+                                                class="initials initials__purple text-uppercase"> {{member?.approver_replaced_by?.replaced_from?.first_name + ' ' + member?.approver_replaced_by?.replaced_from?.last_name |shortName:
+                                                'last'}}</span>
+                                        </figure>
+                                        <div class="workflow-user-detail" [ngClass]="{'disable-text': (!member?.is_active)}">
+                                            <p class="font-weight-medium">{{member?.approver_replaced_by?.replaced_from?.first_name}}
+                                                {{member?.approver_replaced_by?.replaced_from?.last_name}}</p>
+                                            <!-- <p class="small">{{workflow?.role?.name}}</p> -->
+                                            <p class="small">{{getUserDetails(member?.approver_replaced_by?.replaced_from)}}</p>
+                                        </div>
+                                    </div>
+                                    <img src="../../../../assets/images/group-icon.svg" *ngIf="member?.status === StatusEnum?.pending" alt="" class="replaced-icon px-24">
+                                </ng-container>
+                                <ng-container *ngIf="member?.is_reassigned_user">
+                                    <div class="d-flex align-items-center">
+                                        <figure class="mr-12">
+                                            <span class="initials initials__purple text-uppercase"> {{member?.user_reassigned_by?.reassigned_from?.first_name + ' ' + member?.user_reassigned_by.reassigned_from?.last_name |shortName:
+                                                'last'}}</span>
+                                        </figure>
+                                        <div class="workflow-user-detail" [ngClass]="{'disable-text': (!member?.is_active)}">
+                                            <p class="font-weight-medium">{{member?.user_reassigned_by?.reassigned_from?.first_name}}
+                                                {{member?.user_reassigned_by?.reassigned_from?.last_name}}</p>
+                                            <p class="small">{{getUserDetails(member?.user_reassigned_by?.reassigned_from)}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="deligated-img" class="position-relative">
+                                        <img src="../../../../assets/images/group-icon.svg" alt="" class="replaced-icon px-24">
+                                        <div class="replace-ui reassign-user position-absolute">
+                                            <div class="replace-info p-12">
+                                                <p class="small"><span class="font-weight-semibold">{{member?.user_reassigned_by?.reassigned_from?.first_name  + ' ' + member?.user_reassigned_by.reassigned_from?.last_name}} &nbsp;
+                                                       </span> has been reassigned by <span
+                                                        class="font-weight-semibold">{{member?.first_name}} &nbsp; {{member?.last_name}}</span> </p>
+                                                <p class="small">
+                                                    {{ member?.user_reassigned_by?.reassigned_on ? ' on
+                                                    '+(member?.user_reassigned_by?.reassigned_on | localDateFormat) : '' | i18nextEager }}
+                                                    {{ member?.user_reassigned_by?.reassigned_on ? 'at
+                                                    '+(member?.user_reassigned_by?.reassigned_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                                <!-- replace user  end-->
+
+                                <div class="d-flex align-items-center" *ngIf="(!member?.is_replaced_approver) || (member?.is_replaced_approver && member?.status === StatusEnum?.pending)">
+                                    <figure class="mr-12">
+                                        <img [src]="member?.impersonated_to?.avatar" *ngIf="member?.impersonated_to?.avatar;" alt="{{member?.impersonated_to?.first_name | i18next }}">
+                                        <ng-template [ngIf]="!member?.impersonated_to?.avatar && member?.impersonated_to?.initials">
+                                              <span class="initials initials__purple  text-uppercase">{{member?.impersonated_to?.initials || '' | i18next }}</span>
+                                        </ng-template>
+                                        <span *ngIf="!member?.initials && !member?.avatar" class="initials initials__purple text-uppercase"> {{member?.first_name + ' ' + member?.last_name |shortName: 'last'}}</span>
+                                    </figure>
+                                    <div class="workflow-user-detail" [ngClass]="{'auto-width': ((!member?.delegated_to || member?.delegated_to?.length === 0) && (!member?.is_impersonated || member?.is_impersonated === 0)) || (member?.status?.toUpperCase() === StatusEnum?.not_needed?.toUpperCase()), 'disable-text': (!member?.is_active)}">
+                                        <p class="font-weight-medium">
+                                            <span>{{member?.first_name}} {{member?.last_name}}</span>
+                                            <span *ngIf="member?.is_active != undefined && !member?.is_active">{{ " (Inactive)" }}</span>
+                                        </p>
+                                        <p class="small">{{getUserDetails(member)}}</p>
+                                    </div>
+                                </div>
+                                <div *ngIf="member?.delegated_to && member?.delegated_to?.length > 0 && member?.status === StatusEnum?.pending">
+                                    <div class="px-24 pr-m-0">
+                                        <img src="../../../../assets/images/user-icon.png" alt="delegated icon">
+                                    </div>
+                                </div>
+
+                                <!-- delegated pending -->
+                                <div class="position-relative"
+                                  *ngIf="(member?.delegated_to && member?.delegated_to?.length > 0)  && member?.status === StatusEnum?.pending">
+                                  <div class="text-truncate d-flex align-items-center justify-content-center manager-images-list-multi-approvl">
+                                    <ng-container *ngFor="let delegate of member?.delegated_to | slice:0:4; let j = index">
+                                      <div
+                                        class="manager-avatar-list-multi-approvl overflow-hidden d-flex align-items-center justify-content-center initials initials__purple border-none"
+                                        tooltip="{{delegate?.first_name |shortName: 'last'}}" placement="top">
+                                        <img [src]="delegate?.avatar" *ngIf="delegate?.avatar;" alt="{{delegate?.first_name | i18nextEager }}">
+                                        <ng-template [ngIf]="!delegate?.avatar && delegate?.initials">
+                                          {{delegate?.initials || '' | i18nextEager }}
+                                        </ng-template>
+                                        <span *ngIf="!delegate?.initials && !delegate?.avatar">
+                                          {{delegate?.first_name |shortName: 'last'}}</span>
+                                      </div>
+                                    </ng-container>
+                                    <div class="workflow-user-detail ml-32" *ngIf="member?.delegated_to?.length === 1">
+                                        <p class="font-weight-medium">{{member?.delegated_to[0]?.first_name + ' ' + member?.delegated_to[0]?.last_name}}</p>
+                                        <p class="small">{{getUserDetails(member?.delegated_to[0])}}</p>
+                                    </div>
+
+                                    <div *ngIf="member?.delegated_to?.length > 4" class="manager-avatar-list-multi-approvl overflow-hidden d-flex align-items-center justify-content-center more-name cursor-pointer" tooltip="+{{member?.delegated_to?.length - 4}}" placement="top" (click)="showMoreName()">
+                                        +{{member?.delegated_to?.length - 4}}
+                                    </div>
+                                  </div>
+                                  <div class="more-name-list-multi-approval" [ngClass]="{'active' : managerListDropdown}" (mouseleave)="hideMoreName()">
+                                    <h6>{{current_workflow_type == 'review' ? 'Review Managers' : 'Approval Managers'}}</h6>
+                                    <ul>
+                                        <li *ngFor="let delegate of member?.delegated_to" class="d-flex align-items-center" [ngClass]="{'disable-text': (!member?.is_active)}">
+                                            <div class="name-avatar">
+                                                <span *ngIf="!delegate?.avatar && !delegate?.initials"> {{delegate?.first_name |shortName: 'last'}}</span>
+                                                <ng-template class="name-avatar" [ngIf]="!delegate?.avatar && delegate?.initials">
+                                                    {{delegate?.initials || '' | i18nextEager }}
+                                                </ng-template>
+                                                <img [src]="delegate?.avatar" *ngIf="delegate?.avatar;" alt="{{delegate?.first_name | i18nextEager }}">
+                                            </div>
+                                            <div>{{delegate?.first_name}}</div>
+                                        </li>
+                                    </ul>
+                                  </div>
+                                </div>
+                                <!-- delegated pending  end-->
+                               <!-- impersonated pending -->
+                                <ng-container *ngIf="member?.is_impersonated && member?.status === StatusEnum?.pending">
+                                    <ng-container *ngIf="member?.impersonated_to">
+                                        <icon name="theater_comedy" color="#D8834B"></icon>
+                                        <div class="d-flex align-items-center min-width-div">
+                                            <figure class="mr-12">
+                                                <img [src]="member?.impersonated_to?.avatar" *ngIf="member?.impersonated_to?.avatar;" alt="{{member?.impersonated_to?.first_name | i18nextEager }}">
+                                                <ng-template [ngIf]="!member?.impersonated_to?.avatar && member?.impersonated_to?.initials">
+                                                      <span class="initials initials__purple  text-uppercase">{{member?.impersonated_to?.initials || '' | i18nextEager }}</span>
+                                                </ng-template>
+                                                <span *ngIf="!member?.impersonated_to?.initials && !member?.impersonated_to?.avatar" class="initials initials__purple text-uppercase"> {{member?.impersonated_to?.first_name+' '+member?.impersonated_to?.last_name |shortName: 'last'}}</span>
+                                            </figure>
+                                            <div class="workflow-user-detail" [ngClass]="{'disable-text': (!member?.is_active)}">
+                                                <p class="font-weight-medium">{{member?.impersonated_to?.first_name}}</p>
+                                                <p class="small">{{member?.impersonated_to?.role?.name || 'BA'}}</p>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                </ng-container>
+                                 <!-- impersonated pending end-->
+                              </ng-template>
+                              <ng-container *ngTemplateOutlet="previousApproverList"></ng-container>  
+                              </div>
+                           </td>
+                            <td *ngIf="moduleName==='offers'">
+                                <div class="users d-flex position-relative offer-workflow">
+                                    <ng-container *ngIf="member?.is_replaced_approver && member?.approver_replaced_by">
+                                        <ng-container *ngTemplateOutlet="replacedApprover;context:{member:member}"></ng-container>
+                                    </ng-container>
+                                    <ng-container *ngIf="!(member?.is_replaced_approver && member?.approver_replaced_by)&&
+                                    member?.is_reassigned_user">
+                                        <ng-container *ngTemplateOutlet="reassignedUser;context:{member:member}"></ng-container>
+                                    </ng-container>
+                                    <ng-container *ngIf="!(member?.is_replaced_approver && member?.approver_replaced_by)&&
+                                    !member?.is_reassigned_user">
+                                        <ng-container *ngTemplateOutlet="approver;context:{member:member}"></ng-container>
+                                    </ng-container>
+                                    <div class="more-offers" *ngIf="showMoreBtn(member)">
+                                            <div class="position-relative">
+                                                <button class="btn small btn-light bordered text-primary px-8" (click)="toggleOptions(j)">
+                                                    <icon name="visibility" cuClass="d-flex" class="icon--on-left" theme="outlined" size="18px"></icon>
+                                                    {{'more' | i18next}}
+                                                </button>
+                                            </div>
+                                    </div>
+                                    <app-svms-modal size="large" title="approver_list" [visibility]="approverModal === j" (onClose)="onCloseModal()">
+                                        <app-svms-modal-body>
+                                            <div class="approver-list-modal">
+                                                <div class="users d-flex position-relative">
+                                                    <ng-container *ngTemplateOutlet="previousApproverList"></ng-container>
+                                                </div>    
+                                            </div>
+                                        </app-svms-modal-body>
+                                    </app-svms-modal>
+                                </div>        
+                            </td>
+                           <td class="column-right">
+                            <span class="drag-handle"></span>
+                            <ng-container *ngIf="member?.status === StatusEnum?.notstarted">
+                                <div class="approval-ui d-flex justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <p class="approval not-started small">Not Started</p>
+                                    </div>
+                                </div>
+                              </ng-container>
+                              <ng-container *ngIf="member?.status === StatusEnum?.pending">
+                                <div class="approval-ui d-flex justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <p class="approval pending small">{{member?.status | titlecase}}</p>
+                                    </div>
+                                    <!-- replace on permisstion based -->
+                                <div *ngIf="tabs[activeTabInd]?.isReplaceMember && moduleStatus!=StatusEnum?.rejected && moduleStatus!=StatusEnum?.closed && workflow?.status === StatusEnum?.pending && hasReplaceApprovalPermission && (!member?.delegated_to || member?.delegated_to?.length == 0)" class="d-flex align-items-center">
+                                    <a *ngIf="member?.status?.toUpperCase() == StatusEnum.pending" class="replace-btn" (click)="openReplaceScreen(member,workflow?.role?.name,workflow)">{{'replace' | i18nextEager }}</a>
+                                </div>
+                                </div>
+                              </ng-container>
+                              <ng-container *ngIf="member?.status === StatusEnum?.cancelled">
+                                <div class="approval-ui d-flex justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <p class="approval cancelled small">{{member?.status | titlecase}}</p>
+                                    </div>
+                                </div>
+                              </ng-container>
+
+                              <ng-container *ngIf="member?.status?.toUpperCase() === StatusEnum?.not_needed?.toUpperCase()">
+                                <div class="approval-ui d-flex justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <p class="approval not-needed small">{{member?.status | titlecase}}</p>
+                                    </div>
+                                </div>
+                              </ng-container>
+                              <!-- Approved -->
+                            <ng-container *ngIf="member?.status === StatusEnum?.approved || workflow?.status === StatusEnum?.reviewed">
+                                <div *ngIf="!member?.is_impersonated && !member?.is_delegated_approval && !member?.is_admin_override && !member?.is_replaced_approver" class="approval-ui">
+                                    <div *ngIf="member?.status_modified_by" class="d-flex align-items-center align-items-unset column-direction">
+                                        <p class="approval approved">{{(member?.status?.toUpperCase() == 'APPROVED' ? (iteration[previousWorkflowTabIndex]?.flow_type?.toLowerCase() == 'review' ? 'Reviewed' : 'Approved') : member?.status ) | titlecase}} </p>
+                                        <p> {{ member?.status_modified_on ? ' on
+                                            '+(member?.status_modified_on | localDateFormat) : '' | i18nextEager }}
+                                            {{ member?.status_modified_on ? 'at
+                                            '+(member?.status_modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+                                    </div>
+                                    <div *ngIf="member?.status_note" class="reason">
+                                        <p class="small"><span class="font-weight-medium">Notes:</span> {{(member?.toggleNotes || member?.status_note?.length <= 100) ? member?.status_note : (member?.status_note?.substr(0, 100) + "...")}}
+                                            <a class="text-primary" *ngIf="member?.status_note?.length> 100"
+                                                (click)="member.toggleNotes = !member.toggleNotes">
+                                                {{ member?.toggleNotes ? ' Read Less' : ' Read more'}}
+                                            </a>
+                                        </p>
+                                    </div>
+                                </div>
+                            <div *ngIf="!member?.is_delegated_approval && member?.is_impersonated"  class="approval-ui">
+                                <div class="d-flex justify-content-between">
+                                    <div *ngIf="member?.impersonated_data" class="d-flex align-items-center align-items-unset column-direction mb-4">
+                                        <p class="approval approved">{{(member?.status?.toUpperCase() == 'APPROVED' ? (iteration[previousWorkflowTabIndex]?.flow_type?.toLowerCase() == 'review' ? 'Reviewed' : 'Approved') : member?.status ) | titlecase}} </p>
+                                        <div class="d-flex align-items-center">
+                                            <p class="small mr-4">by</p>
+                                            <figure class="mr-4">
+                                                <img [src]="member?.impersonated_data?.impersonated_by?.avatar" *ngIf="member?.impersonated_data?.impersonated_by?.avatar;" alt="{{member?.impersonated_data?.impersonated_by?.first_name | i18nextEager }}">
+                                                    <ng-template [ngIf]="!member?.impersonated_data?.impersonated_by?.avatar && member?.impersonated_data?.impersonated_by?.initials">
+                                                        <span class="initials initials__purple  text-uppercase">{{member?.impersonated_data?.impersonated_by?.initials || '' | i18nextEager }}</span>
+                                                    </ng-template>
+                                                    <span *ngIf="!member?.impersonated_data?.impersonated_by?.initials && !member?.impersonated_data?.impersonated_by?.avatar" class="initials initials__purple text-uppercase"> {{member?.impersonated_data?.impersonated_by?.first_name+' '+member?.impersonated_data?.impersonated_by?.last_name |shortName: 'last'}}</span>
+                                            </figure>
+                                            <p>{{member?.impersonated_data?.impersonated_by?.first_name}} {{member?.impersonated_data?.impersonated_by?.last_name}} (Impersonated User)
+
+                                                {{ member?.status_modified_on ? ' on
+                                                '+(member?.status_modified_on | localDateFormat) : '' | i18nextEager }}
+                                                {{ member?.status_modified_on ? 'at
+                                                '+(member?.status_modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+                                        </div>
+                                    </div>
+                                    <icon name="theater_comedy" color="#D8834B"></icon>
+                                </div>
+                                <div *ngIf="member?.status_note" class="reason">
+                                    <p class="small"><span class="font-weight-medium">Notes:</span> {{(member?.toggleNotes || member?.status_note?.length <= 100) ? member?.status_note : (member?.status_note?.substr(0, 100) + "...")}}
+                                        <a class="text-primary" *ngIf="member?.status_note?.length> 100"
+                                            (click)="member.toggleNotes = !member.toggleNotes">
+                                            {{ member?.toggleNotes ? ' Read Less' : ' Read more'}}
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                                <div *ngIf="!member?.is_impersonated && (member?.is_delegated_approval || member?.is_admin_override || member?.is_replaced_approver)"
+                                    class="approval-ui">
+                                    <div class="d-flex justify-content-between">
+                                    <div *ngIf="member?.status_modified_by" class="d-flex align-items-center align-items-unset column-direction mb-4">
+                                        <p class="approval approved">{{(member?.status?.toUpperCase() == 'APPROVED' ? (iteration[previousWorkflowTabIndex]?.flow_type?.toLowerCase() == 'review' ? 'Reviewed' : 'Approved') : member?.status ) | titlecase}} </p>
+                                        <div class="d-flex align-items-center">
+                                            <p class="small mr-4">by</p>
+                                            <figure class="mr-4">
+                                                <img [src]="member?.status_modified_by?.avatar" *ngIf="member?.status_modified_by?.avatar;"
+                                                    alt="{{member?.status_modified_by?.first_name | i18nextEager }}">
+                                                <ng-template [ngIf]="!member?.status_modified_by?.avatar && member?.status_modified_by?.initials">
+                                                    <span class="initials initials__purple  text-uppercase">{{member?.status_modified_by?.initials || '' |
+                                                        i18nextEager }}</span>
+                                                </ng-template>
+                                                <span *ngIf="!member?.status_modified_by?.initials && !member?.status_modified_by?.avatar"
+                                                    class="initials initials__purple text-uppercase"> {{member?.status_modified_by?.first_name + ' ' + member?.status_modified_by?.last_name |shortName:
+                                                    'last'}}</span>
+                                            </figure>
+                                            <p>{{member?.status_modified_by?.first_name}} {{member?.status_modified_by?.last_name}} <span
+                                                    *ngIf="member?.is_delegated_approval">(Delegated User) </span> <span
+                                                    *ngIf="member?.is_admin_override">(Admin Override) </span> <span
+                                                    *ngIf="member?.is_replaced_approver">(Replaced User) </span>
+                                                {{ member?.status_modified_on ? ' on
+                                                '+(member?.status_modified_on | localDateFormat) : '' | i18next }}
+                                                {{ member?.status_modified_on ? 'at
+                                                '+(member?.status_modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18next }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="deligated-img" *ngIf="member?.is_delegated_approval"> <img src="../../../../assets/images/user-icon.png"
+                                            alt="delegated icon"></div>
+                                    <icon *ngIf="member?.is_admin_override" name="admin_panel_settings" color="#7a89fd"></icon>
+
+                                    <!-- replace UI below will be on condition start-->
+                                    <div class="deligated-img" *ngIf="member?.is_replaced_approver" class="position-relative">
+                                        <img src="../../../../assets/images/group-icon.svg" alt="" class="replaced-icon px-24">
+                                        <div class="replace-ui position-absolute">
+                                            <div class="replace-info p-12">
+                                                <p class="small"><span class="font-weight-semibold">{{member?.approver_replaced_by?.replaced_from?.first_name  + ' ' + member?.approver_replaced_by?.replaced_from?.last_name}} &nbsp;
+                                                       </span> has been replaced by <span
+                                                        class="font-weight-semibold">{{member?.first_name}} &nbsp; {{member?.last_name}}</span> </p>
+                                                <p class="small">
+                                                    {{ member?.status_modified_on ? ' on
+                                                    '+(member?.status_modified_on | localDateFormat) : '' | i18nextEager }}
+                                                    {{ member?.status_modified_on ? 'at
+                                                    '+(member?.status_modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+                                            </div>
+                                            <div class="replace-note p-12">
+                                                <p class="small font-weight-medium">Replacement Notes</p>
+                                                <p class="small">{{member?.replace_approver_notes}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- replace UI below will be on condition end -->
+                                </div>
+                                <div *ngIf="member?.status_note" class="reason">
+                                    <p class="small"><span class="font-weight-medium">Notes:</span> {{(member?.toggleNotes || member?.status_note?.length <= 100) ? member?.status_note : (member?.status_note?.substr(0, 100) + "...")}}
+                                        <a class="text-primary" *ngIf="member?.status_note?.length> 100"
+                                            (click)="member.toggleNotes = !member.toggleNotes">
+                                            {{ member?.toggleNotes ? ' Read Less' : ' Read more'}}
+                                        </a>
+                                    </p>
+                                </div>
+                                </div>
+                            </ng-container>
+
+                            <!-- Rejected -->
+                            <ng-container *ngIf="member?.status === StatusEnum?.rejected">
+                                <div *ngIf="!member?.is_impersonated && !member?.is_delegated_approval && !member?.is_admin_override && !member?.is_replaced_approver" class="approval-ui">
+                                    <div *ngIf="member?.status_modified_by"  class="d-flex align-items-center">
+                                        <p class="approval rejected">{{member?.status | titlecase}} </p>
+                                        <p>{{ member?.status_modified_on ? ' on
+                                            '+(member?.status_modified_on | localDateFormat) : '' | i18nextEager }}
+                                            {{ member?.status_modified_on ? 'at
+                                            '+(member?.status_modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+                                    </div>
+                                    <div class="reason">
+                                        <p class="small"><span class="font-weight-medium">Rejected Reason:</span> {{member?.status_reason_text || member?.status_reason}}</p>
+                                        <p *ngIf="member?.status_note" class="small"><span class="font-weight-medium">Notes:</span> {{(member?.toggleNotes || member?.status_note?.length <= 100) ? member?.status_note : (member?.status_note?.substr(0, 100) + "...")}}
+                                            <a class="text-primary" *ngIf="member?.status_note?.length > 100"
+                                                (click)="member.toggleNotes = !member.toggleNotes">
+                                                {{ member?.toggleNotes ? ' Read Less' : ' Read more'}}
+                                            </a>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div *ngIf="!member?.is_delegated_approval && member?.is_impersonated" class="approval-ui">
+                                <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div *ngIf="member?.impersonated_data?.impersonated_by" class="d-flex align-items-center align-items-unset column-direction">
+                                        <p class="approval rejected">{{member?.status | titlecase}}</p>
+                                        <div class="d-flex align-items-center">
+                                        <p class="small mr-4">by</p>
+                                        <figure class="mr-4">
+                                            <img [src]="member?.impersonated_data?.impersonated_by?.avatar" *ngIf="member?.impersonated_data?.impersonated_by?.avatar;" alt="{{member?.impersonated_data?.impersonated_by?.first_name | i18nextEager }}">
+                                            <ng-template [ngIf]="!member?.impersonated_data?.impersonated_by?.avatar && member?.impersonated_data?.impersonated_by?.initials">
+                                                  <span class="initials initials__purple  text-uppercase">{{member?.impersonated_data?.impersonated_by?.initials || '' | i18nextEager }}</span>
+                                            </ng-template>
+                                            <span *ngIf="!member?.impersonated_data?.impersonated_by?.initials && !member?.impersonated_data?.impersonated_by?.avatar" class="initials initials__purple text-uppercase"> {{member?.impersonated_data?.impersonated_by?.first_name + ' ' + member?.impersonated_data?.impersonated_by?.last_name |shortName: 'last'}}</span>
+                                        </figure>
+                                        <p>{{member?.impersonated_data?.impersonated_by?.first_name}} {{member?.impersonated_data?.impersonated_by?.last_name}} (Impersonated User)
+                                            {{ member?.status_modified_on ? ' on
+                                            '+(member?.status_modified_on | localDateFormat) : '' | i18nextEager }}
+                                            {{ member?.status_modified_on ? 'at
+                                            '+(member?.status_modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <icon name="theater_comedy" color="#D8834B"></icon>
+                                </div>
+                                <div class="reason">
+                                    <p class="small"><span class="font-weight-medium">Rejected Reason:</span> {{member?.status_reason_text || member?.status_reason}}</p>
+                                    <p *ngIf="member?.status_note" class="small"><span class="font-weight-medium">Notes:</span> {{(member?.toggleNotes || member?.status_note?.length <= 100) ? member?.status_note : (member?.status_note?.substr(0, 100) + "...")}}
+                                        <a class="text-primary" *ngIf="member?.status_note?.length > 100"
+                                            (click)="member.toggleNotes = !member.toggleNotes">
+                                            {{ member?.toggleNotes ? ' Read Less' : ' Read more'}}
+                                        </a>
+                                    </p>
+                                </div>
+                                </div>
+                                <div *ngIf="!member?.is_impersonated && (member?.is_delegated_approval || member?.is_admin_override || member?.is_replaced_approver)" class="approval-ui">
+                                <div class="d-flex align-items-center align-items-unset justify-content-between">
+                                    <div>
+                                        <div *ngIf="member?.status_modified_by" class="d-flex align-items-center align-items-unset column-direction">
+                                            <p class="approval rejected">{{member?.status | titlecase}}</p>
+                                            <div class="d-flex align-items-center">
+                                                <p class="small mr-4">by</p>
+                                                <figure class="mr-4">
+                                                    <img [src]="member?.status_modified_by?.avatar" *ngIf="member?.status_modified_by?.avatar;" alt="{{member?.status_modified_by?.first_name | i18nextEager }}">
+                                                    <ng-template [ngIf]="!member?.status_modified_by?.avatar && member?.status_modified_by?.initials">
+                                                        <span class="initials initials__purple  text-uppercase">{{member?.status_modified_by?.initials || '' | i18nextEager }}</span>
+                                                    </ng-template>
+                                                    <span *ngIf="!member?.status_modified_by?.initials && !member?.status_modified_by?.avatar" class="initials initials__purple text-uppercase"> {{member?.status_modified_by?.first_name + ' ' + member?.status_modified_by?.last_name |shortName: 'last'}}</span>
+                                                </figure>
+                                                <p>{{member?.status_modified_by?.first_name}} {{member?.status_modified_by?.last_name}}
+                                                    <span *ngIf="member?.is_delegated_approval">(Delegated User)</span>
+                                                    <span *ngIf="member?.is_admin_override">(Admin Override)</span>
+                                                    <span *ngIf="member?.is_replaced_approver">(Replaced User) </span>
+                                                    {{ member?.status_modified_on ? ' on
+                                                    '+(member?.status_modified_on | localDateFormat) : '' | i18nextEager }}
+                                                    {{ member?.status_modified_on ? 'at
+                                                    '+(member?.status_modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div *ngIf="member?.is_delegated_approval">
+                                        <img src="../../../../assets/images/group-icon.svg" alt="">
+                                    </div>
+                                    <icon *ngIf="member?.is_admin_override" name="admin_panel_settings" color="#7a89fd"></icon>
+                                    <div class="deligated-img" *ngIf="member?.is_replaced_approver" class="position-relative">
+                                        <img src="../../../../assets/images/group-icon.svg" alt="" class="replaced-icon px-24">
+                                        <div class="replace-ui position-absolute">
+                                            <div class="replace-info p-12">
+                                                <p class="small"><span class="font-weight-semibold">{{member?.approver_replaced_by?.replaced_from?.first_name  + ' ' + member?.approver_replaced_by?.replaced_from?.last_name}} &nbsp;
+                                                       </span> has been replaced by <span
+                                                        class="font-weight-semibold">{{member?.first_name}} &nbsp; {{member?.last_name}}</span> </p>
+                                                <p class="small">
+                                                    {{ member?.status_modified_on ? ' on
+                                                    '+(member?.status_modified_on | localDateFormat) : '' | i18nextEager }}
+                                                    {{ member?.status_modified_on ? 'at
+                                                    '+(member?.status_modified_on | localDateFormat:'hh:mm:ss a z') : '' | i18nextEager }}</p>
+                                            </div>
+                                            <div class="replace-note p-12">
+                                                <p class="small font-weight-medium">Replacement Notes</p>
+                                                <p class="small">{{member?.replace_approver_notes}}</p>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="reason">
+                                <p class="small"><span class="font-weight-medium">Rejected Reason:</span> {{member?.status_reason_text || member?.status_reason}}</p>
+                                <p *ngIf="member?.status_note" class="small"><span class="font-weight-medium">Notes:</span> {{(member?.toggleNotes || member?.status_note?.length <= 100) ? member?.status_note : (member?.status_note?.substr(0, 100) + "...")}}
+                                    <a class="text-primary" *ngIf="member?.status_note?.length > 100"
+                                        (click)="member.toggleNotes = !member.toggleNotes">
+                                        {{ member?.toggleNotes ? '  Read Less' : ' Read more'}}
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                            </ng-container>
+                           </td>
+                        </ng-container>
+                        <ng-container *ngIf="(workflow?.members?.length == 1 && ((member?.action?.toUpperCase() == 'BYPASSED_APPROVAL') || (member?.action?.toUpperCase() == 'SKIPPED_APPROVAL')))">
+                            <div  *ngIf="member?.action?.toUpperCase() == 'BYPASSED_APPROVAL'" class="bypassed-content p-16">
+                                <p *ngIf="iteration[previousWorkflowTabIndex]?.flow_type?.toLowerCase() == 'review'; else bypassedApproval" class="text-center text-dark">{{'bypass_duplicate_reviewer' | i18next }}</p>
+                                <ng-template #bypassedApproval>
+                                    <p class="text-center text-dark">{{'bypass_duplicate_approver' | i18next }}</p>
+                                </ng-template>
+                            </div>
+                            <div  *ngIf="member?.action?.toUpperCase() == 'SKIPPED_APPROVAL'" class="bypassed-content p-16">
+                                <p *ngIf="iteration[previousWorkflowTabIndex]?.flow_type?.toLowerCase() == 'review'; else skippedApproval" class="text-center text-dark">{{'skipped_reviwer' | i18next }}</p>
+                                <ng-template #skippedApproval>
+                                    <p class="text-center text-dark">{{'skipped_approver' | i18next }}</p>
+                                </ng-template>
+                            </div>
+                        </ng-container>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                </div>
+              </ng-container>
+        </div>
+    </section>
+</div>
+</div>
+</div>
+
+<!-- previous workflows section end here -->
+
+<app-replace-approver *ngIf="profile && replace_role" [profile]="profile" [role]="replace_role"
+(replaceApprover)="replaceApprover($event)" (closeSidebar)="closeSidebar()" [replaceType]="current_workflow_type" [replaceUsersList]="replaceUsersList"></app-replace-approver>
+
+<ng-template #replacedApprover let-member="member">
+    <div class="d-flex align-items-center">
+        <figure class="mr-12">
+            <img [src]="member?.approver_replaced_by?.replaced_from?.avatar" *ngIf="member?.approver_replaced_by?.replaced_from?.avatar;"
+                alt="{{member?.approver_replaced_by?.replaced_from?.first_name | i18next }}">
+            <ng-template [ngIf]="!member?.approver_replaced_by?.replaced_from?.avatar && member?.approver_replaced_by?.replaced_from?.initials">
+                <span class="initials initials__purple  text-uppercase">{{member?.approver_replaced_by?.replaced_from?.initials || '' |
+                    i18nextEager }}</span>
+            </ng-template>
+            <span *ngIf="!member?.approver_replaced_by?.replaced_from?.initials && !member?.approver_replaced_by?.replaced_from?.avatar"
+                class="initials initials__purple text-uppercase"> {{member?.approver_replaced_by?.replaced_from?.first_name + ' ' + member?.approver_replaced_by?.replaced_from?.last_name |shortName:
+                'last'}}</span>
+        </figure>
+        <div class="workflow-user-detail" [ngClass]="{'disable-text': (!member?.is_active)}">
+            <p class="font-weight-medium">{{member?.approver_replaced_by?.replaced_from?.first_name}}
+                {{member?.approver_replaced_by?.replaced_from?.last_name}}</p>
+            <p class="small">{{getUserDetails(member?.approver_replaced_by?.replaced_from)}}</p>
+        </div>
+        </div>
+</ng-template>
+<ng-template #reassignedUser let-member="member">
+    <div class="d-flex align-items-center">
+        <figure class="mr-12">
+            <span class="initials initials__purple text-uppercase"> {{member?.user_reassigned_by?.reassigned_from?.first_name + ' ' + member?.user_reassigned_by.reassigned_from?.last_name |shortName:
+                'last'}}</span>
+        </figure>
+        <div class="workflow-user-detail" [ngClass]="{'disable-text': (!member?.is_active)}">
+            <p class="font-weight-medium">{{member?.user_reassigned_by?.reassigned_from?.first_name}}
+                {{member?.user_reassigned_by?.reassigned_from?.last_name}}</p>
+            <p class="small">{{getUserDetails(member?.user_reassigned_by?.reassigned_from)}}</p>
+        </div>
+    </div>
+</ng-template>
+<ng-template #approver let-member="member">
+    <div class="d-flex align-items-center replace-member-ui" *ngIf="(!member?.is_replaced_approver) || (member?.is_replaced_approver && member?.status === StatusEnum?.pending)">
+        <figure class="mr-12">
+            <img [src]="member?.impersonated_to?.avatar" *ngIf="member?.impersonated_to?.avatar;" alt="{{member?.impersonated_to?.first_name | i18next }}">
+            <ng-template [ngIf]="!member?.impersonated_to?.avatar && member?.impersonated_to?.initials">
+                    <span class="initials initials__purple  text-uppercase">{{member?.impersonated_to?.initials || '' | i18next }}</span>
+            </ng-template>
+            <span *ngIf="!member?.initials && !member?.avatar" class="initials initials__purple text-uppercase"> {{member?.first_name + ' ' + member?.last_name |shortName: 'last'}}</span>
+        </figure>
+        <div class="workflow-user-detail" [ngClass]="{'auto-width': ((!member?.delegated_to || member?.delegated_to?.length === 0) && (!member?.is_impersonated || member?.is_impersonated === 0)) || (member?.status?.toUpperCase() === StatusEnum?.not_needed?.toUpperCase()), 'disable-text': (!member?.is_active)}">
+            <p class="font-weight-medium">
+                <span>{{member?.first_name}} {{member?.last_name}}</span>
+                <span *ngIf="!member?.is_active">{{ " (Inactive)" }}</span>
+            </p>
+            <p class="small">{{getUserDetails(member)}}</p>
+        </div>
+    </div>
+</ng-template>

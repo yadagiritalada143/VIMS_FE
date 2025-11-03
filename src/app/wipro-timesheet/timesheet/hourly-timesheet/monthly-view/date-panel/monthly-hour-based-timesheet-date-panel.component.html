@@ -1,0 +1,161 @@
+
+<div class="calendar-popup" *ngIf="editTimesheetModal; else addNewSection" (click)="$event.stopPropagation();"
+[ngClass]="{'active' : editTimesheetModal, 'fix-right': selectedWeekIndex === 6}">
+<header class="calendar-popup-header px-24 pt-24 pb-16">
+  <h4 class="float-left font-weight-medium color-black mb-0">
+    <icon class="mr-12" name="access_time_filled" color="#5E71FE" size="22px"></icon>
+    {{selectedDate | localDateFormat: 'MMM d, y':"":"":true | i18next }}
+     <!-- <span class="tag">Full Day</span> -->
+  </h4>
+  <div class="float-right timesheet-tool">
+    <icon name="close" theme="outlined" color="#000000" size="20px" (click)="$event.stopPropagation();cancelDayTimesheet(undefined)"></icon>
+  </div>
+  <div class="clearfix"></div>
+</header>
+<div class="p-24">
+  <div class="timesheet-detail text-left">
+    <p class="font-weight-medium mb-24">
+      <icon class="mr-12" name="work_outline" theme="outlined" color="#6C757D" size="14px"></icon>
+      {{currentTimesheetData?.assignment_title  | i18next }}
+    </p>
+
+    <div>
+      <div class="mb-8 d-flex item-width">
+        <icon class="mr-12 mt-4" name="schedule" theme="outlined" color="#6C757D" size="14px"></icon>
+        <p>{{ 'projects/hours' | i18next }}</p>
+      </div>
+      <ul class="project-hour" *ngIf="selectedTimeSheet?.timesheet?.projects?.length > 0">
+        <li *ngFor="let project of selectedTimeSheet?.timesheet?.projects;">
+          <span>{{project?.project_name | i18next }}</span> {{project?.hours | i18next }}
+        </li>
+
+      </ul>
+    </div>
+
+
+    <p class="mb-24 leave-description">
+      <icon class="mr-12 mt-4 float-left" name="sticky_note_2" theme="outlined" color="#6C757D" size="14px"></icon>
+      <span class="float-left">
+        {{selectedTimeSheet?.timesheet?.notes || ' N/A ' | i18next }}
+        <!-- I am taking additional 30 min for Lunch Break -->
+      </span>
+    </p>
+    <p class="mb-24 leave-description attachment" *ngIf="document?.filename">
+      <icon class="mr-12 float-left" name="attach_file" theme="outlined" color="#6C757D" size="14px"></icon>
+      <span class="float-left">
+        <a (click)="downloadAttachment(document)">{{document?.filename | i18next }}</a>
+      </span>
+    </p>
+  </div>
+</div>
+<footer class="confirmation-box d-flex justify-content-between py-12 px-16" *ngIf="confirmBox">
+  <p>
+    {{ 'are_you_sure_you_want_to_delete_the_time_for_the_day' | i18next }}?
+  </p>
+  <button class="mr-8" (click)="confirmDelete()">{{ 'yes' | i18next }}</button>
+  <button class="no" (click)="cancelDelete()">{{ 'no' | i18next }}</button>
+</footer>
+<footer class="calendar-popup-footer py-12 px-16" *ngIf="!confirmBox">
+  <ng-container *accessControl>
+  <button class="footer-btn float-left mr-12"
+    *ngIf="isAuthorizedToCreate && !isAssignmentClosed"
+    (click)="deleteTimesheet()">
+    <icon class="mr-8" name="delete_sweep" size="20px"></icon> {{ 'delete' | i18next }}
+  </button>
+  <button class="footer-btn edit float-left"
+    *ngIf="isAuthorizedToCreate && !isAssignmentClosed"
+    (click)="editTimesheet(selectedTimeSheet?.timesheet)">
+    <icon name="create" class="mr-8" size="18px"></icon> {{ 'edit' | i18next }}
+  </button>
+  </ng-container>
+  <h4 class="total-value float-right mb-0" >{{ 'total_hours' | i18next }}:
+    {{selectedTimeSheet?.timesheet?.total || 0 }} H</h4>
+  <div class="clearfix"></div>
+</footer>
+</div>
+<ng-template #addNewSection>
+<div class="calendar-popup" [ngClass]="{'fix-right': selectedWeekIndex === 6}" (click)="$event.stopPropagation();"
+*ngIf="isAuthorizedToCreate && !isAssignmentClosed">
+<app-timesheet-actions-alerts [timeSheet]="timeSheet" [isAssignmentClosed]="isAssignmentClosed" [isTimesheetEnabled]="isTimesheetEnabled">
+</app-timesheet-actions-alerts>
+<app-timesheet-supporting-text [timesheetStatus]="timeSheet?.data?.status"></app-timesheet-supporting-text>
+<header class="calendar-popup-header px-24 pt-24 pb-16">
+  <h4 class="float-left font-weight-medium mb-0">
+    <icon class="mr-12" name="more_time" color="#5E71FE" size="22px"></icon> {{selectedDate | localDateFormat: 'MMM d, y':"":"":true | i18next }}
+  </h4>
+  <div class="clearfix"></div>
+</header>
+<div class="p-24">
+  <div *ngIf="(configuration?.project?.is_allow || configuration?.hour_type_calculation === timesheetWeeklyType?.MANUAL);then showDropdownSection else showNoDropdownSection"></div>
+  <ng-template #showDropdownSection>
+    <div class="form-group-row"  *ngFor="let project of selectedTimeSheet?.timesheet?.projects;let i= index;first as isFirst;">
+      <div class="form-group with-icon date has-max-width">
+        <ng-select class="popup-selectbox" placeholder="Select Project" clearable="false" [(ngModel)]="project.project_name" (change)="projectChanged(project)">
+          <ng-option value="" disabled="true">{{ 'select_project' | i18next }}</ng-option>
+          <ng-option [value]="inv?.project_name" *ngFor="let inv of projects">
+            <span class="option-custom-label" title="{{inv?.project_name | i18next }}">{{inv?.project_name | i18next }}</span>
+          </ng-option>
+        </ng-select>
+      </div>
+      <div class="form-group with-icon date" [ngClass]="{'disabled-add' : (isFirst && projects?.length == selectedTimeSheet?.timesheet?.projects?.length)}">
+        <div class="d-flex justify-content-between">
+          <div class="date-pickers position-relative dir-left">
+          </div>
+        </div>
+        <icon name="hourglass_empty" size="14px"></icon>
+        <input type="text" [placeholder]="placeholder" [(ngModel)]="project.hours"
+          class="form-control" (change)="validateHoursFormat(project)">
+      </div>
+      <div class="add-remove-container pt-8">
+        <a class="add-more-item" *ngIf="isFirst && projects?.length > selectedTimeSheet?.timesheet?.projects?.length" (click)="addProject()">
+          <icon  name="add" size="16px"></icon>
+        </a>
+
+        <a  *ngIf="!isFirst" class="remove-item" (click)="removeProject(i)">
+          <icon  name="close" size="14px"></icon>
+        </a>
+      </div>
+    </div>
+  </ng-template>
+  <ng-template #showNoDropdownSection>
+    <div class="form-group-row">
+      <div class="form-group with-icon date">
+        <div class="d-flex justify-content-between">
+          <div class="date-pickers position-relative dir-left">
+          </div>
+        </div>
+        <icon name="schedule" size="14px" ng-reflect-name="schedule" ng-reflect-size="14px"><i
+             class="icon-default material-icons" style="font-size: 14px;">schedule</i>
+        </icon>
+        <input type="text" placeholder="04:00"
+          class="form-control">
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- <p class="small text-left mb-12" *ngIf="breakLimit">{{breakLimit | i18next }}</p> -->
+  <div class="form-group" *ngIf="configuration?.notes?.option?.day_level?.is_allow">
+    <label class="small">{{ 'notes' | i18next }}<span *ngIf="configuration?.notes?.option?.day_level?.is_mandatory" class="require" >*</span></label>
+    <textarea class="form-control" rows="4"  [(ngModel)]="selectedTimeSheet.timesheet.notes"></textarea>
+  </div>
+  <input hidden type="file" accept="image/jpeg,image/gif,image/png,application/pdf,application/msg" #fileInput
+    (change)="fileChangeEvent($event)">
+  <button class="upload-btn"  (click)="fileInput.click()"  *ngIf="configuration?.upload?.option?.day_level?.is_allow">
+    <icon name="cloud_upload" size="24px" color="#000000"></icon>
+    <span *ngIf="!document?.filename"> {{ 'upload_document' | i18next }}</span>
+    <span *ngIf="document?.filename"> {{document?.filename | i18next }}</span>
+    <icon class="close-opt float-right" *ngIf="document?.filename" name="close" size="24px" color="#000000"
+      (click)="document = {}"></icon>
+  </button>
+</div>
+<footer class="calendar-popup-footer dark-bg py-12 px-16">
+  <button class="cancel float-left" (click)="$event.stopPropagation();cancelDayTimesheet(undefined)">{{ 'cancel' | i18next }}</button>
+  <ng-container *accessControl>
+  <button [disabled]="disableSave" class="save-btn float-right" [ngClass]="{'show-loader' : disableButton}" (click)="saveDayTimesheet()">
+    <div class="mini-loader"></div> {{ 'save' | i18next }}
+  </button>
+  </ng-container>
+</footer>
+</div>
+</ng-template>
+<div class="backdrop-Overlay"></div>

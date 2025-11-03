@@ -1,0 +1,23 @@
+<form [formGroup]="formGroup">
+    <app-program-config-control 
+        subtitle="Show All Submitted Candidates to Client Users"
+        description="If 'Yes' then the system will show all submitted candidates to client users. If 'No' then only shortlisted candidates will be shown to client users."
+        [type]="ControlType.TOGGLE" 
+        formControlName='can_client_view_non_shortlisted_candidates'>
+    </app-program-config-control>
+    <app-program-config-control *ngIf="allow_client_bill_rate"
+        subtitle='Allow Vendor to Enter Client Bill Rate'
+        description="By enabling this setting, instead of Vendors entering the Vendor Bill Rate (System Default) they will be entering the Client Bill Rate while submitting candidates and making counter offers. This setting will only be applicable for Bill Rate (No Markup) Model."
+        [type]="ControlType.TOGGLE"
+        formControlName="is_allow_vendor_to_enter_client_bill_rate"
+    >
+    </app-program-config-control>     
+
+    <!-- Commenting the below ("Allow Higher Submission Rate") as part of V2M-13355 -->
+    <!-- <app-program-config-control 
+        subtitle="Allow Higher Submission Rate"
+        description="When enabled, the system allows to define Max Bill Rate greater than job submission rate value while submitting candidates."
+        [type]="ControlType.TOGGLE" 
+        formControlName='is_higher_submission_rate_allowed'>
+    </app-program-config-control> -->
+</form>

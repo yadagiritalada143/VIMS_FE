@@ -1,0 +1,87 @@
+<ng-template #optionalCol let-value="value">
+    <p *ngIf="value == 'REQUIRED'" class="hierarchy-required">
+      <span class="red">{{ 'required' | i18next }}</span>
+    </p>
+    <p *ngIf="value == 'OPTIONAL'" class="hierarchy-required">
+      <span class="violet">{{ 'optional' | i18next }}</span>
+    </p>
+    <p *ngIf="value == 'OFF'" class="hierarchy-required">
+      <span class="grey">{{ 'off' | i18next }}</span>
+    </p>
+  </ng-template>
+
+  <ng-template #moduleIcons let-value="value">
+
+    <ng-container *ngFor="let item of value | keyvalue">
+
+      <p class="module-icon-display" *ngIf="item.key !== 'hierarchy_included'">
+        <span>
+          <span *ngIf="item.value !== 'OFF'">
+            <icon *ngIf="item.key == 'module_sow'" size="20px" name="article" type="material" cuClass="module-icon  mr-24">
+          </icon>
+            <icon *ngIf="item.key == 'module_jobs'" size="20px" name="work_outline" type="material" cuClass="module-icon  mr-24">
+            </icon>
+          </span>
+        </span>
+        <span *ngIf="item.value == true">
+          <span class="phone-talk" *ngIf="item.key == 'audio'">
+            <icon size="16px" color="#AC54F7" name="phone_in_talk" type="material" cuClass="module-icon  mr-4"> </icon> {{ 'phone' | i18next }}
+          </span>
+
+          <span class="video-call" *ngIf="item.key == 'video'">
+            <icon size="16px" color="#5E71FE" name="videocam" type="material" cuClass="module-icon  mr-4"> </icon> {{ 'virtual' | i18next }}
+          </span>
+
+          <span class="face-to-face" *ngIf="item.key == 'face_to_face'">
+            <icon size="16px" color="#1B6BBC" name="people_alt" type="material" cuClass="module-icon  mr-4"> </icon> {{ 'in_person' | i18next }}
+          </span>
+        </span>
+      </p>
+    </ng-container>
+  </ng-template>
+
+  <ng-template #masterTypeStatus let-value="value">
+    <span class="c-status-ui active" *ngIf="value">
+      {{ 'active' | i18next }}
+    </span>
+    <span class="c-status-ui inactive" *ngIf="!value">
+      {{ 'inactive' | i18next }}
+    </span>
+  </ng-template>
+
+  <app-svms-table [tableOptions]="tableOptions"
+                  [coloumnDefintions]="svmstableColomnDefn"
+                  [dataSource]="svmsData"></app-svms-table>
+
+  <ng-template #emptyDataTemplate>
+    <app-no-listing-page
+      clickHere="click here"
+      btnClickUrl="FOUNDATION_DATA_TYPE_CREATE"
+      btnmsg="Create Your First Master data type"
+      pmsg="If you would like to add Master data type,"
+      headingmsg="No Master data type found for the selected program."
+      (onCreateClick)="onCreateClick($event)"
+      #emptyDataTemplate
+    >
+    </app-no-listing-page>
+  </ng-template>
+
+  <app-no-listing-page
+    *ngIf="false"
+    clickHere="click here"
+    title="Master Data Types"
+    btnClickUrl="FOUNDATION_DATA_TYPE_CREATE"
+    btnmsg="Create Your First Master data type"
+    pmsg="If you would like to add Master data type,"
+    headingmsg="No Master data type found for the selected program."
+    (onCreateClick)="onCreateClick($event)"
+  >
+  </app-no-listing-page>
+
+  <app-reorder-flyout
+    [page]="vmsTable?.currentPage || 1"
+    [limit]="itemPerPage || 10"
+    [visibility]="reorderFlyoutVisibility"
+    [dataList]="this.svmsData || []"
+    (onClose)="closeReorderFlyout()"
+  ></app-reorder-flyout>

@@ -1,0 +1,18 @@
+<ng-template #masterTypeStatus let-row let-value="value">
+    <span class="c-status-ui active" *ngIf="value">
+      {{ 'active' | i18next }}
+    </span>
+    <span class="c-status-ui inactive" *ngIf="!value">
+      {{ 'inactive' | i18next }}
+    </span>
+  </ng-template>
+  <ng-template #moduleName let-value="value">
+    <ng-container *ngFor="let model  of  value">
+      <span class="highlighted-bg" *ngIf="model == 'CONTINGENT'">{{ 'contingent' | i18next }}</span>
+      <span class="highlighted-bg" *ngIf="model == 'SOW'">{{ 'sow' | i18next }}</span>
+      <span class="highlighted-bg" *ngIf="model == 'DIRECT_SOURCING'">{{ 'direct_sourcing' | i18next }}</span>
+    </ng-container>
+  </ng-template>
+  <app-svms-table [tableOptions]="tableOptions"
+  [coloumnDefintions]="svmstableColomnDefn"
+  [dataSource]="fees"></app-svms-table>

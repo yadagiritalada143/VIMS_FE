@@ -1,0 +1,600 @@
+@import "src/assets/sass/abstracts/variables";
+
+.calendar-popup {
+  position: fixed;
+  top: 50%;
+  left: 50.01%;
+  width: 572px;
+  background-color: $light;
+  box-shadow: 0px 8px 39px #0000001a;
+  z-index: 99991;
+  transition: $transition;
+  opacity: 1;
+  transform: translate(-50%, -50%);
+  border-radius: $border-radius;
+  cursor: auto;
+  max-height: 90%;
+  overflow: auto;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .calendar-popup-header {
+    border-bottom: 1px solid $color-border-primary;
+  }
+
+  .not_allowed {
+    cursor: not-allowed !important;
+  }
+  
+  .alert_message {
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 12px;
+    text-align: left;
+
+    icon {
+      margin-top: 0px;
+    }
+  }
+
+  .alert_error {
+    border: 1px solid #e68f9a;
+    color: #fd556b;
+    margin-top: -14px;
+    margin-bottom: 7px;
+    background: #ffc8cf;
+  }
+
+  .warn {
+    border: 1px solid #ffc40900;
+    color: #fff;
+    margin-top: -14px;
+    margin-bottom: 7px;
+    background: #EFB64B;
+  }
+
+  .mark {
+    font-size: 12px;
+    color: $color-dark;
+
+    input {
+      vertical-align: middle;
+      margin-right: $m8;
+      height: 17px;
+    }
+
+    &.error {
+      border: 2px solid #eb445a !important;
+      border-radius: 4px;
+    }
+
+  }
+
+  .item-width {
+    flex-basis: 48%;
+
+    p {
+      span {
+        display: block;
+        font-size: 12px;
+        color: $color-gray-80;
+      }
+    }
+  }
+
+  h4 {
+    color: $color-assets-primary;
+    margin-bottom: $m24;
+    line-height: 20px;
+
+    &.color-black {
+      color: $color-black;
+    }
+
+    icon {
+      ::ng-deep i {
+        vertical-align: middle;
+      }
+    }
+
+    span {
+      &.tag {
+        background-color: #F4F0FF;
+        color: #7966D9;
+        padding: $p4 6px;
+        border-radius: $border-radius;
+        font-size: 12px;
+        font-weight: 400;
+        margin-left: $m8;
+      }
+    }
+  }
+
+  .with-icon {
+    position: relative;
+
+    icon {
+      position: absolute;
+      top: 14px;
+      left: 12px;
+    }
+
+    input,
+    textarea {
+      padding-left: 37px;
+    }
+
+    textarea {
+      resize: none;
+    }
+
+    &.date {
+
+      // icon {
+      //   top: 37px;
+      // }
+
+      input {
+        padding-right: 40px;
+      }
+    }
+
+    &.disabled-add {
+      margin-right: 41px;
+    }
+  }
+
+  textarea {
+    resize: none;
+  }
+
+  label {
+    &.small {
+      font-size: 12px;
+      text-align: left;
+    }
+  }
+
+  .upload-btn {
+    background-color: $light;
+    border: 1px solid $color-border-secondary;
+    width: 100%;
+    outline: none;
+    cursor: pointer;
+    padding: 0 $p16;
+    color: $color-gray-80;
+    text-align: left;
+    line-height: 39px;
+
+    .close-opt {
+      position: relative;
+      left: 12px;
+    }
+
+    icon {
+      float: left;
+      padding-right: 6px;
+
+      ::ng-deep i {
+        vertical-align: middle;
+      }
+    }
+
+    span {
+      width: 75%;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      float: left;
+      overflow: hidden;
+    }
+  }
+
+  .radio-group {
+    vertical-align: middle;
+  }
+
+  .select-with-icon {
+    .ng-select {
+      ::ng-deep .ng-value-container {
+        padding-left: 41px;
+
+        &:before {
+          position: absolute;
+          top: 12px;
+          left: 17px;
+          content: "work_off";
+          font-family: "Material Icons Outlined";
+          font-weight: normal;
+          font-style: normal;
+          font-size: 14px;
+          display: block;
+          visibility: visible;
+        }
+      }
+    }
+  }
+
+  .calendar-popup-footer {
+    background-color: #FBFAFF;
+    overflow: hidden;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+
+    &.dark-bg {
+      background-color: #5050A2; 
+    }
+
+    button {
+      color: $light;
+      border: 0;
+      outline: none;
+      line-height: 40px;
+      cursor: pointer;
+
+      &.cancel {
+        background: transparent;
+        color: #fff;
+        padding: 0 $p24;
+        border-radius: $border-radius;
+      }
+
+      &.save-btn {
+        background-color: #252564;
+        border-radius: $border-radius;
+        padding: 0 $p24;
+      }
+    }
+
+    .total-label {
+      color: $color-black;
+    }
+
+    .total-value {
+      color: $color-black;
+      line-height: 30px;
+    }
+
+    .footer-btn {
+      background-color: #E34646;
+      border-radius: 18px;
+      color: $light;
+      height: 30px;
+      line-height: 30px;
+      padding: 0 $p16;
+      cursor: pointer;
+      outline: none;
+      border: 0;
+
+      icon {
+        ::ng-deep i {
+          vertical-align: middle;
+          color: $light;
+        }
+      }
+
+      &.edit {
+        background-color: $color-assets-primary;
+      }
+    }
+  }
+
+  .confirmation-box {
+    background-color: #FFC9C9;
+    overflow: hidden;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+
+    p {
+      color: #C43545;
+      flex-basis: 74%;
+      text-align: left;
+      line-height: 30px;
+    }
+
+    button {
+      background-color: #F72949;
+      border-radius: 18px;
+      border: 0;
+      color: $light;
+      font-size: 12px;
+      outline: 0;
+      cursor: pointer;
+      height: 30px;
+      padding: 0 20px;
+      transition: $transition;
+
+      &:hover {
+        background-color: #d8233f;
+      }
+
+      &.no {
+        background-color: $color-gray-80;
+
+        &:hover {
+          background-color: #555e65;
+        }
+      }
+    }
+  }
+
+  &.active {
+    max-height: 500px;
+    opacity: 1;
+    visibility: visible;
+    overflow: auto;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .timesheet-tool {
+    icon {
+      cursor: pointer;
+    }
+  }
+
+  .timesheet-detail {
+    h4 {
+      color: $color-black;
+    }
+
+    p {
+      color: $color-black;
+    }
+
+    icon {
+      vertical-align: middle;
+    }
+
+    .leave-description {
+      overflow: hidden;
+
+      span {
+        width: 493px;
+        max-height: 210px;
+        overflow: auto;
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
+      }
+
+      &.attachment {
+        icon {
+          ::ng-deep i {
+            vertical-align: middle;
+          }
+        }
+
+        a {
+          text-decoration: underline;
+          color: $color-link;
+        }
+      }
+    }
+  }
+
+  .project-hour {
+    list-style-type: none;
+    margin: 0 0 $m12 $m24;
+
+    li {
+      display: inline-block;
+      background-color: #FAF4FD;
+      border-radius: $border-radius;
+      padding: $p12;
+      margin-right: 14px;
+      margin-bottom: 11px;
+      font-weight: 500;
+      line-height: 24px;
+
+      span {
+        text-transform: uppercase;
+        font-size: 12px;
+        color: #6C757D;
+        display: inline-block;
+        max-width: 170px;
+        min-width: 40px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        line-height: 24px;
+        vertical-align: middle;
+        font-weight: 400;
+      }
+    }
+  }
+
+  .has-max-width {
+    max-width: 234px;
+
+    ng-select {
+      ::ng-deep .option-custom-label {
+        white-space: nowrap;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+}
+
+.mini-loader {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  display: none;
+}
+
+.mini-loader:after {
+  content: " ";
+  display: block;
+  width: 12px;
+  height: 12px;
+  /* margin: 8px; */
+  border-radius: 50%;
+  border: 2px solid #fff;
+  border-color: #fff transparent #fff transparent;
+  -webkit-animation: lds-dual-ring 1.2s linear infinite;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.show-loader .mini-loader {
+  display: inline-block;
+}
+
+.show-loader.save-btn {
+  background: #4a528c !important;
+  color: #abacb3 !important;
+}
+
+.date-pickers {
+  flex-basis: 50%;
+
+  ::ng-deep .datepicker--imgdate {
+    .datepicker--imagesize {
+      top: 25px;
+      right: 3px;
+      left: auto;
+      padding: 9px;
+      cursor: pointer;
+    }
+
+    &:before {
+      position: absolute;
+      top: 25px;
+      right: 40px;
+      content: '.';
+      text-indent: -9999px;
+      overflow: hidden;
+      display: block;
+      visibility: visible;
+      border-left: 1px solid $color-border-secondary;
+      height: 40px;
+      width: 1px;
+    }
+
+    .datepicker-- {
+      border: 0;
+      padding: 0 !important;
+      text-align: right;
+      box-shadow: inherit;
+      height: 15px;
+      font-size: 12px;
+      color: #ADB5BD;
+      font-weight: $font-weight-regular;
+    }
+
+    ::-webkit-input-placeholder {
+      color: #ADB5BD;
+      font-size: 12px;
+      font-weight: $font-weight-regular;
+    }
+    
+    :-ms-input-placeholder {
+      color: #ADB5BD;
+      font-size: 12px;
+      font-weight: $font-weight-regular;
+    }
+    
+    ::placeholder {
+      opacity: 1;
+      color: #ADB5BD;
+      font-size: 12px;
+      font-weight: $font-weight-regular;
+    }
+    
+    :-ms-input-placeholder {
+      color: #ADB5BD;
+      font-size: 12px;
+      font-weight: $font-weight-regular;
+    }
+    
+    ::-ms-input-placeholder {
+      color: #ADB5BD;
+      font-size: 12px;
+      font-weight: $font-weight-regular;
+    }
+  }
+
+  &.dir-left {
+    ::ng-deep .datepicker-inline {
+      right: 0;
+    }
+  } 
+}
+
+.popup-selectbox {
+  ::ng-deep .ng-select-container {
+    text-align: left;
+  }
+}
+
+.add-remove-container {
+  .add-more-item {
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    background-color: #ffffff;
+    border-radius: $rounded-circle;
+    border: 1px solid $color-assets-primary;
+    display: block;
+    text-align: center;
+    transition: $transition;
+  
+    icon {
+
+      ::ng-deep i {
+        color:  $color-assets-primary;
+        vertical-align: text-top;
+      }
+    }
+
+    &:hover {
+      background-color: $color-assets-primary;
+
+      icon {
+  
+        ::ng-deep i {
+          color:  $light;
+        }
+      }
+    }
+  }
+
+  .remove-item {
+    cursor: pointer;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    background-color: #FFC9C9;
+    border-radius: $rounded-circle;
+    display: block;
+    text-align: center;
+
+    icon {
+      line-height: 26px;
+      vertical-align: middle;
+
+      ::ng-deep i {
+        color: #F72949;
+      }
+    }
+  }
+}
+

@@ -1,0 +1,64 @@
+
+  <div class="submitted-candidate-listing-root">
+
+    <div class="description-card">
+      <div class="dotloader" *ngIf="dataLoader"></div>
+      <div *ngIf="viewGrid"  [hidden]="dataLoader" class="overflow-box">
+        <vms-table
+          *ngIf="tableLoaded"
+          [vmsTableConfig]="tableConfig"
+          [vmsDataSource]="vmsData?.candidate"
+          [loading]="dataLoading"
+          [open]="isExpand"
+          [count]="countData"
+          [currentTab]="selectedTab"
+          (onTabClick)="onTabClick($event)"
+          [totalItem]="totalRecords"
+          [itemsPerPage]="limit"
+          [rotuterLinkOnClick] = 'true'
+          [rotuterLinkParams] = 'rotuterLinkParams'
+          [rotuterLinkParseFn] = 'rotuterLinkParseFn'
+          (onExpandClick)="onExpandClick($event)"
+          (onEditClick)="onEditClick($event)"
+          (changePage)="onPaginationClick($event)"
+          [currentPage]="pageNumber"
+          (onCreate)="onCreateClick($event)"
+          (onDisableClicked)="disableClicked($event)"
+          (onDeleteClick)="onDeleteClick($event)"
+          (numberBadgeClicked)="columnClicked($event)"
+          (cloneClicked)="cloneClicked($event)"
+          (search)="onSearch($event)"
+          (onListFilter)="onListFilter($event)"
+          (onWithdrawProfileClick)="withdrawalClicked($event)"
+          (onSelectAllClick)="selectAllClicked($event)"
+          (onSelectClick)="selectClicked($event)"
+          (clickOnNext)="onClickNext($event)"
+          (onViewSubmittedCandidateClick)="clickViewSubmittedCandidate($event)"
+          (onUpdateRecord)="onUpdateRecordClick($event)"
+          (onScheduleInterviewClick)="clickToScheduleInterview($event)"
+          (onRehireCheckClick)="clickTorRehireCheck($event)"
+          (onCreateOfferClick)="clickToCreateOffer($event)"
+          (onRejectCandidateClick)="clickToRejectCandidate($event)"
+          (previewClicked)="previewClicked($event)"
+          (changeRecords)="onClickRecords($event)"
+          (onSort)="onSortClick($event)"
+          (onCancelOfferClick)="clickToCancelOfferReview($event)"
+          (onOfferReviewClick)="clickToOfferReview($event)"
+          (onEditOfferClick)="clickToEditOfferReview($event)"
+          (shortlistReviewClick)="clickToShortListReviewReject($event)"
+          (onshortListReviewClick)="clickToShortListReview($event)"
+          (openMTPLinkingModal)="openLinkingModal($event)"
+          [offerNewWorkflow]="offerNewWorkflow"
+        >
+        </vms-table>
+      </div>
+
+    </div>
+  </div>
+  <app-withdraw-candidate
+  (onWithdrawnCandidate)="onClickWithdrawnCandidate($event)"
+></app-withdraw-candidate>
+<app-view-submitted-candidate></app-view-submitted-candidate>
+<app-schedule-interview></app-schedule-interview>
+  <app-job-details-sidebar-view></app-job-details-sidebar-view>
+  <app-master-talent-profile-details [profileId]="profileId" (modelclose)="closemtpModal()" *ngIf="mtpDetails"></app-master-talent-profile-details>

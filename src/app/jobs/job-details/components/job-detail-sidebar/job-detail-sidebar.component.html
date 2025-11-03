@@ -1,0 +1,121 @@
+<aside class="job-sidebar position-fixed pb-32" *ngIf="jobData?.id">
+    <div class="candidate-personal-info p-32" *ngIf="isSubmit && candidateInfo?.id">
+        <figure class="float-left mr-24 rounded-circle">
+            <img src="../../../../../assets/images/5.jpg" alt="">
+        </figure>
+        <div class="title-location float-left">
+            <h4 class="mb-0">{{candidateInfo?.first_name}} {{candidateInfo?.last_name}}</h4>
+            <h4 class="mb-0 font-weight-normal">{{candidateInfo?.title}}</h4>
+            <p>{{candidateInfo?.addresses[0]?.state}} {{candidateInfo?.addresses[0]?.country ? ', ' + candidateInfo?.addresses[0]?.country : ''}}</p>
+            <div class="social-profile mt-8" *ngFor="let social of candidateInfo?.social_profiles">
+                <a [href]="social.link" target="_blank" class="mr-12" *ngIf="social.type == 'facebook'">
+                    <img src="../../../assets/images/facebook-icon.svg" alt="" width="20"/>
+                </a>
+                <a [href]="social.link" target="_blank" class="mr-12"  *ngIf="social.type == 'linkedin'">
+                    <img src="../../../assets/images/linked.svg" alt="" width="20"/>
+                </a>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+        <p class="contact-info mt-24"><span class="d-inline-block">{{ 'email' | i18next }}</span> <a>{{candidateInfo?.email}}</a></p>
+        <p class="contact-info mt-12"><span class="d-inline-block">{{ 'phone' | i18next }}</span> <a>{{candidateInfo?.phone_isdcode}} {{candidateInfo?.phone_number}}</a></p>
+    </div>
+    <div class="sidebar-title pl-32 pt-24 pr-32 pb-24">
+      <p class="font-weight-medium">
+        <icon class="mr-16" size="18px" name="work" type="material" cuClass="icon-cu"></icon> {{ (isSubmit ? 'Basic Info' : 'Job Detail') | i18next}}
+      </p>
+    </div>
+    <div class="info-item pl-32 pt-16 pr-32 pb-16">
+       <h4>{{jobData.title.title}}</h4>
+       <span class="job-type position-relative d-inline-block mr-24 font-weight-normal rounded-sm">{{jobStatus | titlecase | i18next}}</span>
+       <p class="d-inline-block job-meta">
+        <icon size="16px" class="tag mr-8" name="label" type="material" cuClass="icon-cu"></icon> <span
+          class="mr-24">{{jobData?.id}}</span>
+      </p>
+      </div>
+    <div class="info-item pl-32 pt-16 pr-32 pb-16">
+      <span class="d-block mb-12">{{ 'job_location' | i18next }}</span>
+      <p class="font-weight-medium">
+        <icon class="mr-4" size="14px" name="location_on" type="material" cuClass="icon-cu"></icon> {{jobData.location ? jobData.location : '-'}}
+      </p>
+    </div>
+    <div class="info-item pl-32 pr-32 d-flex">
+      <div class="child-item pt-16 pb-16">
+        <span class="d-block mb-12">{{ 'category' | i18next }}</span>
+        <p class="font-weight-medium">
+          {{jobData.category.category_name}}
+        </p>
+      </div>
+      <div class="child-item pt-16 pb-16 left-border pl-24">
+        <span class="d-block mb-12">{{ 'job_type' | i18next }}</span>
+        <p class="font-weight-medium">
+          {{jobData.type}}
+        </p>
+      </div>
+    </div>
+    <div class="info-item pl-32 pr-32 d-flex">
+      <div class="child-item pt-16 pb-16">
+        <span class="d-block mb-12">{{ 'opening' | i18next }}</span>
+        <p class="font-weight-medium">
+          {{jobData.no_of_openings}}
+        </p>
+      </div>
+      <div class="child-item pt-16 pb-16 left-border pl-24">
+        <span class="d-block mb-12">{{ 'work_duration' | i18next }}</span>
+        <p class="font-weight-medium">
+          5 {{ 'weeks' | i18next }}, 2 {{ 'days' | i18next }}
+        </p>
+      </div>
+    </div>
+    <div class="info-item pl-32 pt-16 pr-32 pb-16">
+      <span class="d-block mb-12">{{ 'job_duration' | i18next }}</span>
+      <p class="font-weight-medium">
+        {{jobData.start_date | localDateFormat:"MM/dd/yyyy"}} - {{jobData.end_date | localDateFormat:"MM/dd/yyyy"}}
+      </p>
+    </div>
+    <div class="info-item pl-32 pr-32 d-flex">
+      <div class="child-item pt-16 pb-16">
+        <span class="d-block mb-12">{{ 'responded_by_date' | i18next }}</span>
+        <p class="font-weight-medium">
+          {{jobData.response_by_date ? (jobData.response_by_date | localDateFormat:"MM/dd/yyyy") : '-'}}
+        </p>
+      </div>
+      <div class="child-item pt-16 pb-16 left-border pl-24">
+        <span class="d-block mb-12">{{ 'job_manager' | i18next }}</span>
+        <figure class="avatar float-left mr-8 rounded-circle">
+          <img src="../../../assets/images/5.jpg" alt="">
+        </figure>
+        <p class="font-weight-medium">
+          {{jobData.job_manager.first_name ? jobData.job_manager.first_name : '-'}} {{jobData.job_manager.last_name}}
+        </p>
+      </div>
+    </div>
+    <div class="sidebar-title no-border pl-32 pt-24 pr-32 pb-24">
+      <p class="font-weight-medium">
+        <icon class="mr-16" size="18px" name="payments" type="material" cuClass="icon-cu"></icon> {{ 'financial_info' | i18next }}
+      </p>
+    </div>
+    <ul class="financial-info pl-32 pb-32 overflow-hidden">
+      <li class="float-left bg-light p-12 mr-16 mb-16 border-sm">
+        <figure class="mb-8">
+          <img src="../../../assets/images/fin-1.svg" alt="">
+        </figure>
+        <h4 class="mb-4">{{jobData.min_bill_rate ?  jobData.min_bill_rate : '0.00' | customcurrency}}</h4>
+        <p>{{ 'min_bill_rate' | i18next }}</p>
+      </li>
+      <li class="float-left  bg-light p-12 mr-16 mb-16 border-sm">
+        <figure class="mb-8">
+          <img src="../../../assets/images/fin-2.svg" alt="">
+        </figure>
+        <h4 class="mb-4">{{jobData.max_bill_rate ?  jobData.max_bill_rate : '0.00' | customcurrency}}</h4>
+        <p>{{ 'max_bill_rate' | i18next }}</p>
+      </li>
+      <li class="float-left bg-light p-12 mr-16 mb-16 border-sm">
+        <figure class="mb-8">
+          <img src="../../../assets/images/fin-3.svg" alt="">
+        </figure>
+        <h4 class="mb-4">{{jobData.budget_estimate ? jobData.budget_estimate : '0.00' | customcurrency}}</h4>
+        <p>{{ 'estimated_budget' | i18next }}</p>
+      </li>
+    </ul>
+  </aside>

@@ -1,0 +1,199 @@
+<div class="p-24 pt-32">
+    <div class="edit-rules-wrap">
+        <a class="back-btn d-flex align-items-center" >
+            <span class="wrap-inner-container" (click)="goToSettings()">
+                <icon class="d-flex" cuclass="d-flex" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon>
+                <span class="ml-4 mt-4"> {{ 'back_to_listing_edit_rules' | i18nextEager }} </span>
+            </span>
+        </a>
+    </div>
+    <div class="edit-rules-basic-wrap ml-8 mt-16">
+        <div class="row no-gutters p-16">
+            <h5 class="head">{{ 'configure_edit_rules' | i18nextEager }}</h5>
+        </div>
+        <div class="row border no-gutters p-16">
+            <div class="row col-9 pl-16 mt-8">
+                <icon type="material" name="check_circle_outline" class="d-flex" cuClass="d-flex mt-8"></icon>
+                <div class="ml-16">
+                    <p class="edit-title">{{ 'allow_edit' | i18nextEager }}</p>
+                    <span class="small">{{ 'here_you_can_active_or_inactive_the_rule(s)' | i18nextEager }}</span>
+                </div>
+            </div>
+            <div class="mt-8 col-3 toggle-panel">
+                <div class="toggle-panel-inner">
+                    <span>{{toggleAllowEdit.title | i18nextEager}}</span>
+                    <span class="toggle-switch"
+                          [ngClass]="toggleAllowEdit?.value ? 'toggle-on' : 'toggle-off'"
+                          (click)="onClickToggle()"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row border no-gutters p-16">
+            <div class=" row col-8 pl-16">
+                <icon type="material" name="calendar_view_month" class="d-flex" cuClass="d-flex mt-8"></icon>
+                <div class="ml-16">
+                    <p class="edit-title ">{{ 'module' | i18nextEager }} <span class="required">*</span></p>
+                    <span class="small">{{ 'please_select_your_module' | i18nextEager }}</span>
+                </div>
+            </div>
+            <div class=" col-4 mt-4">
+                <ng-select
+                  placeholder="{{ 'select_module' | i18nextEager }}"
+                  multiple="true"
+                  [readonly]="isView"
+                  [ngClass]="(selectedModules?.length == 0 && validationCheck) ? 'invalid' : null"
+                  (change)="onChangeModuleValue()"
+                  [(ngModel)]="selectedModules">
+                    <ng-option *ngFor="let module of moduleList" [value]="module.id">{{module.module}}</ng-option>
+                </ng-select>
+            </div>
+        </div>
+        <div class="row border no-gutters p-16">
+            <div class="row col-8 pl-16">
+                <icon type="material" name="manage_accounts" class="d-flex" cuClass="d-flex mt-8"></icon>
+                <div class="ml-16">
+                    <p class="edit-title">{{ 'roles' | i18nextEager }} <span class="required">*</span></p>
+                    <span class="small">{{ 'select_the_user_roles_that_apply_to_these_rules,_you_can_choose_multiple_values' | i18nextEager }}</span>
+                </div>
+            </div>
+            <div class=" col-4 mt-4">
+                <ng-select
+                  placeholder="{{ 'select_roles' | i18nextEager }}"
+                  multiple="true"
+                  [readonly]="isView"
+                  [ngClass]="(selectedRoles?.length == 0 && validationCheck) ? 'invalid' : null"
+                  (change)="onChangeRoleValue()"
+                  (search)="searchRoles($event)"
+                  [loading] = 'roleLoading'
+                  loadingText = "{{ 'loading' | i18nextEager }}"
+                  [(ngModel)]="selectedRoles">
+                    <ng-option *ngFor="let role of roleList" [value]="role.id">{{role.name}}
+                    </ng-option>
+                </ng-select>
+            </div>
+        </div>
+        <div class="row border no-gutters p-16">
+            <div class="row col-8 pl-16">
+                <icon type="material" name="label_outline" class="d-flex" cuClass="d-flex mt-8"></icon>
+                <div class="ml-16">
+                    <p class="edit-title">{{ 'object_status' | i18nextEager }} <span class="required">*</span></p>
+                    <span class="small">{{ 'select_the_permissions_that_apply_to_these_rules,_you_can_choose_multiple_values' | i18nextEager }}</span>
+                </div>
+            </div>
+            <div class=" col-4 mt-4">
+                <ng-select
+                  placeholder="{{ 'select_object_status' | i18nextEager }}"
+                  multiple="true"
+                  [readonly]="isView"
+                  [ngClass]="(selectedStatuses?.length == 0 && validationCheck) ? 'invalid' : null"
+                  (change)="onChangeObjectStatusValue()"
+                  [(ngModel)]="selectedStatuses">
+                    <ng-option *ngFor="let status of statusList" [value]="status">{{status | titlecase}}</ng-option>
+                </ng-select>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="validationCheck" class="validation-message row mt-16 ml-8 p-24">
+        <div class="row col-12 pl-16">
+            <icon type="material" name="report" class="d-flex" color="#FD1F1F" cuClass="d-flex mt-8"></icon>
+            <div class="ml-16">
+                <p class="error-title">{{ 'please_select_required_fields' | i18nextEager }}</p>
+                <span class="small">{{ 'please_select_the_above_required_fields_to_add_a_rule' | i18nextEager }}</span>
+            </div>
+        </div>
+    </div>
+    <ng-container class="ml-8 mt-16" *ngFor="let rule of ruleList; let index = index;">
+        <div class="row no-gutters border p-16 mt-12 ml-8">
+            <div class="d-flex col-10">
+              <span class="mr-8" (click)="onclickArrow(index)">
+                <icon *ngIf="visibleAccordion == index === true" class="d-flex cursor-pointer" color="#4C7FF0" name="remove" size="18px"
+                  type="material"></icon>
+                  <icon *ngIf="visibleAccordion == index === false" class="d-flex cursor-pointer" color="#4C7FF0" name="add" size="18px"
+                  type="material"></icon>
+              </span>
+              <span class="rule-title pl-4">{{ 'rule' | i18nextEager }} <span class="pl-4">{{index+1}}</span></span>
+            </div>
+            <div class="d-flex align-item-center justify-content-end col-2">
+                <span class="mr-8 delete cursor-pointer" (click)="deleteRule(index)">X</span>
+            </div>
+        </div>
+        <div class="accordion-item-body mb-12 ml-8" *ngIf="visibleAccordion == index">
+            <div class="row border no-gutters p-16">
+                <div class="row col-8 pl-16">
+                    <div class="ml-16">
+                        <p class="edit-rule-title">{{ 'field_name' | i18nextEager }}</p>
+                        <span class="rule-small">{{ 'you_need_to_choose_the_field_name_first_to_create_the_rule' | i18nextEager }}</span>
+                    </div>
+                </div>
+                <div class=" col-4 mt-4">
+                    <ng-select
+                      class="field"
+                      placeholder="{{ 'select_field_name' | i18nextEager }}"
+                      (change)="onChangeFieldNameValue($event,index)"
+                      [(ngModel)]="rule.field_id"
+                      [clearable]="false"
+                      [readonly]="isView"
+                      multiple="true">
+                        <!-- [disabled]="selectedFieldList?.indexOf(field.id)>-1? 'none':null" -->
+                        <ng-option *ngFor="let field of fieldList" [value]="field.id">{{field.name |i18next}}</ng-option>
+                    </ng-select>
+                    <div *ngIf='rule.field_id.length !== 0' class='chip-holder mt-4'>
+                        <ng-container *ngFor='let fieldId of rule.field_id; index as it'>
+                          <div class='custom-chip d-flex space-between'>
+                            <div class='chip-name' [ngStyle]='{ "color": "black" }'>
+                              {{ getFieldNameById(fieldId) }}
+                            </div>
+                            <div *ngIf="!isView" [id]='fieldId' class="close" (click)='onChangeFieldNameValue(getSpliced(it,rule.field_id),index)'>
+                              &#x02A2F;
+                            </div>
+                          </div>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+            <div class="row border no-gutters p-16 rule-row-setting">
+                <p class="setting-head pl-16">{{ 'define_settings_for_rule' | i18nextEager }} {{index+1}}</p>
+            </div>
+            <div class="row border no-gutters p-16">
+                <div class="row col-11 pl-16 pt-8">
+                    <div class="ml-16">
+                        <p class="edit-rule-title">{{ 'required_atachment' | i18nextEager }}</p>
+                    </div>
+                </div>
+                <div class="mt-8 col-1 toggle-panel">
+                    <div class="toggle-panel-inner">
+                        <span class="toggle-switch"
+                              [ngClass]="rule.attachemnt_required ? 'toggle-on' : 'toggle-off'"
+                              (click)="onChangeAttachment(index)"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row border no-gutters p-16">
+                <div class="row col-11 pl-16 pt-8">
+                    <div class="ml-16">
+                        <p class="edit-rule-title">{{ 'required_notes' | i18nextEager }}</p>
+                    </div>
+                </div>
+                <div class="mt-8 col-1 toggle-panel">
+                    <div class="toggle-panel-inner">
+                        <span class="toggle-switch"
+                              [ngClass]="rule.notes_required ? 'toggle-on' : 'toggle-off'"
+                              (click)="onChangeNotes(index)"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+    <div class="row ml-8 mt-16">
+        <div class="col-10" *ngIf="!isView">
+            <button class="btn btn-success p-8 button-width" (click)="addRule()">
+                <span>+</span>
+                <span class="pl-4">{{ 'add_rule' | i18nextEager }}</span>
+            </button>
+        </div>
+
+        <button *ngIf="showSave && !isView" class="btn btn-primary p-8 col-2" (click)="onSubmit()">
+            <span class="p-4">{{ 'save' | i18nextEager }}</span>
+        </button>
+    </div>
+</div>

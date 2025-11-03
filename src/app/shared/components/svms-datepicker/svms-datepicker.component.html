@@ -1,0 +1,385 @@
+<div appCalendarResponsive>
+  <div class="datepicker--imgdate position-relative" *ngIf="!hideDisplayValue">
+    <img *ngIf="!isScheduled" src="../../../../assets/images/calendar_today.svg"
+      class="datepicker--imagesize position-absolute" id="datepicker">
+    <span *ngIf="isScheduled" class="material-icons datepicker--imagesize-right position-absolute" id="datepicker">
+      {{ 'today' | i18next }}
+    </span>
+    <input type="text" [value]="value" [id]="id" placeholder="{{placeholdervalue|i18next}}"
+      [ngClass]="{red: isRequired && !value}" class="datepicker-- form-control pl-32 text-truncate" autocomplete="false"
+      (change)="onFocusOut($event)" (keydown)="validateInput($event)" (keyup)="validateDate($event)"
+      [readonly]="readonlyFlag">
+  </div>
+  <div class="datepicker-main-wrapper"
+    [ngClass]="{'datepicker-single': !options.range ,
+  'datepicker-responsive' : responsiveDatepicker, 'always-visible': options.alwaysVisible, 'hide': !(options.alwaysVisible ), 'flip-trigger' : (flip === true)}">
+    <div class="daterangepicker-wrapper" [ngClass]="{'show-picker' : alwaysVisible}">
+      <div class="ranges range-lists" *ngIf="options.range && options.showRangeOption">
+        <ul>
+          <li *ngFor="let dateRangeOption of dateRangeOptions" (click)="changeDateRange(dateRangeOption)"
+            [attr.data-range-key]="dateRangeOption" tabindex="0" class="">{{dateRangeOption}}</li>
+        </ul>
+      </div>
+      <div class="daterangepicker-container">
+        <div class="datepicker-inline" *ngIf="!options.range" [class.rangepicker]="options?.range">
+          <div [ngSwitch]="mode" class="datepicker" [class.left-rangepicker-right--border--hide]="options?.range">
+            <div *ngSwitchCase="'datepicker'">
+              <nav class="datepicker--nav">
+                <div class="datepicker--nav-action" (click)="previousMonth()" *ngIf="!alwaysVisible">
+                  <svg>
+                    <path d="M 17,12 l -5,5 l 5,5"></path>
+                  </svg>
+                </div>
+                <div (click)="mode = 'monthpicker'" class="datepicker--nav-title" *ngIf="inputdateFormat !== 'mm/dd'"
+                  [ngClass]="{'month-picker-left' : alwaysVisible}">
+                  <p>{{pickerLanguage.months[pickerCalendar.month]|i18next}}</p> <i>{{pickerCalendar.year}}</i>
+                </div>
+                <div (click)="mode = 'monthpicker'" class="datepicker--nav-title" *ngIf="inputdateFormat == 'mm/dd'"
+                  [ngClass]="{'month-picker-left' : alwaysVisible}">
+                  <p>{{pickerLanguage.months[pickerCalendar.month]|i18next}}</p>
+                </div>
+                <div class="datepicker--nav-action" (click)="previousMonth()" *ngIf="alwaysVisible">
+                  <svg>
+                    <path d="M 17,12 l -5,5 l 5,5"></path>
+                  </svg>
+                </div>
+                <div class="datepicker--nav-action" (click)="pickerCalendar.setMonth(pickerCalendar.month + 1)">
+                  <svg *ngIf="!options.range" class="datepicker--">
+                    <path d="M 14,12 l 5,5 l -5,5"></path>
+                  </svg>
+                </div>
+              </nav>
+              <div class="datepicker--content">
+                <div class="datepicker--days datepicker--body active">
+                  <div class="datepicker--days-names">
+                    <div *ngFor="let day of [0,1,2,3,4,5,6]" class="datepicker--day-name"
+                      [class.-weekend-]="day == 0 || day == 6" I18n>
+                      {{pickerLanguage[options.fullDays ? 'days' : 'daysMin'][day]|i18next}}</div>
+                  </div>
+                  <div class="datepicker--cells datepicker--cells-days">
+                    <div *ngFor="let airDay of pickerCalendar.airDays; let i=index"
+                      class="datepicker--cell datepicker--cell-day"
+                      [ngClass]="{ '-weekend-': airDay.weekend,
+                                   '-other-month-': airDay.other,
+                                   '-current-': airDay.current,
+                                   '-disabled-': airDay.disabled,
+                                   '-selected-': !airDay.disabled && (isCalendarDate(startDate, airDay) || isCalendarDate(endDate, airDay) || isCalendarDate(airDateSim, airDay) || isCalendarDate(airEndDateSim, airDay)),
+                                   '-in-range-': options.range && !airDay.disabled && isInRange(airDay),
+                                   '-range-from-': options.range && !airDay.disabled && ((!airDateSim && isCalendarDate(startDate, airDay)) || isCalendarDate(airDateSim, airDay)),
+                                   '-range-to-': options.range && !airDay.disabled && (isCalendarDate(endDate, airDay) || isCalendarDate(airEndDateSim, airDay)) }"
+                      (click)="setDate(i, pickerCalendar)" (mouseenter)="options.range ? simulate(airDay) : ''"
+                      (mouseleave)="options.range ? resetSim() : ''"><span>{{airDay.date}}</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!--Calender Duration Section-->
+              <div class="datepicker--footer" *ngIf="allowDuration">
+                <p class="font-weight-medium datepicker-footer-heading">{{ 'svms_date_picker_duration_title' | i18next }}</p>
+                <p class="small mt-4 mb-16 datepicker-content">{{ 'svms_date_picker_duration_desc' | i18next }}</p>
+                  <form class="form-inline d-flex" >
+                    <input type="number"
+                            class="form-control total-days"
+                            placeholder="{{ 'enter' | i18next }}"
+                            min="0"
+                            step="1"
+                            (keypress)="preventCharacters($event)"
+                            id="calender_duration_days"
+                            [(ngModel)]="calenderDuration.duration"
+                            [ngModelOptions]="{standalone: true}"
+                            (ngModelChange)="onChangeDuration()" [disabled]="!enableDurationSection"/>
+                    <div class="input-group mr-8">
+                      <ng-select [clearable]="true"
+                            id="calender_duration_dropdown"
+                            class="medium data-picker-select"
+                            placeholder="{{ 'select' | i18next }}"
+                            [searchable]="false"
+                            [clearable]="false"
+                            [items]="calenderDurationOption"
+                            [disabled]="!enableDurationSection"
+                            [(ngModel)]="calenderDuration.type"
+                            [ngModelOptions]="{standalone: true}"
+                            (ngModelChange)="onChangeDuration()">
+
+                            <ng-template ng-option-tmp let-item="item">
+                              <span class="calender-duration-value">{{ item | i18nextEager }} </span>
+                            </ng-template>
+
+                      </ng-select>
+                    </div>
+                    <button type="apply" class="btn btn-primary mb-2"
+                                (click)="onApplyDuration()" [disabled]="!enableDurationSection">{{ 'apply' | i18next }}
+                    </button>
+                  </form>
+              </div>
+              <!--End Calender Duration Section-->
+
+            </div>
+            <div *ngSwitchCase="'monthpicker'">
+              <nav class="datepicker--nav">
+                <div class="datepicker--nav-action" (click)="pickerCalendar.setYear(pickerCalendar.year - 1)"><svg>
+                    <path d="M 17,12 l -5,5 l 5,5"></path>
+                  </svg></div>
+                <div (click)="mode = 'yearpicker'" class="datepicker--nav-title">{{pickerCalendar.year}}</div>
+                <div class="datepicker--nav-action" (click)="pickerCalendar.setYear(pickerCalendar.year + 1)"><svg>
+                    <path d="M 14,12 l 5,5 l -5,5"></path>
+                  </svg></div>
+              </nav>
+              <div class="datepicker--content">
+                <div class="datepicker--months datepicker--body active">
+                  <div class="datepicker--cells datepicker--cells-months">
+                    <div *ngFor="let month of pickerLanguage.months; let i=index"
+                      (click)="pickerCalendar.setMonth(i);mode = 'datepicker'"
+                      class="datepicker--cell datepicker--cell-month"
+                      [ngClass]="{ '-current-': pickerCalendar.year == pickerCalendar.currentYear && i == pickerCalendar.currentMonth }"
+                      I18n>{{month}}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div *ngSwitchCase="'yearpicker'">
+              <nav class="datepicker--nav">
+                <div class="datepicker--nav-action" (click)="previous()">
+                  <svg>
+                    <path d="M 17,12 l -5,5 l 5,5"></path>
+                  </svg>
+                </div>
+                <div class="datepicker--nav-title">
+                  {{ pickCalyears[1] }} - {{ pickCalyears[pickCalyears.length - 2] }}
+                </div>
+                <div class="datepicker--nav-action" (click)="next()">
+                  <svg>
+                    <path d="M 14,12 l 5,5 l -5,5"></path>
+                  </svg>
+                </div>
+              </nav>
+              <div class="datepicker--content">
+                <div class="datepicker--cells datepicker--cells-years">
+                  <div *ngFor="let year of pickCalyears; let i = index"
+                    (click)="pickerCalendar.setYear(year);mode = 'monthpicker'"
+                    class="datepicker--cell datepicker--cell-year" [ngClass]="{
+             '-current-': year == pickerCalendar.currentYear,
+             '-other-decade-': i == 0 || i == pickCalyears.length - 1
+           }">
+                    {{ year }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="datepicker-inline" *ngIf="options.range" [class.rangepicker]="options?.range">
+          <div [ngSwitch]="mode" class="datepicker" [class.left-rangepicker-right--border--hide]="options?.range">
+            <div *ngSwitchCase="'datepicker'">
+              <nav class="datepicker--nav">
+                <div class="datepicker--nav-action" (click)="pickerCalendar.setMonth(pickerCalendar.month - 1)">
+                  <svg>
+                    <path d="M 17,12 l -5,5 l 5,5"></path>
+                  </svg>
+                </div>
+                <div (click)="mode = 'monthpicker'" class="datepicker--nav-title">
+                  <p>{{ pickerLanguage.months[pickerCalendar.month] }}</p> <i>{{ pickerCalendar.year }}</i>
+                </div>
+                <div class="datepicker--nav-action" (click)="pickerCalendar.setMonth(pickerCalendar.month + 1)">
+                  <svg class="datepicker--">
+                    <path d="M 14,12 l 5,5 l -5,5"></path>
+                  </svg>
+                </div>
+              </nav>
+              <div class="datepicker--content">
+                <div class="datepicker--days datepicker--body active">
+                  <div class="datepicker--days-names">
+                    <div *ngFor="let day of [0,1,2,3,4,5,6]" class="datepicker--day-name"
+                      [class.-weekend-]="day == 0 || day == 6" I18n>
+                      {{pickerLanguage[options.fullDays ? 'days' : 'daysMin'][day]}}</div>
+                  </div>
+                  <div class="datepicker--cells datepicker--cells-days">
+                    <div *ngFor="let airDay of pickerCalendar.airDays; let i=index"
+                      class="datepicker--cell datepicker--cell-day"
+                      [ngClass]="{ '-weekend-': airDay.weekend,
+                                   '-other-month-': airDay.other,
+                                   '-current-': airDay.current,
+                                   '-disabled-': airDay.disabled,
+                                   '-selected-': !airDay.disabled && (isCalendarDate(startDate, airDay) || isCalendarDate(endDate, airDay) || isCalendarDate(airDateSim, airDay) || isCalendarDate(airEndDateSim, airDay)),
+                                   '-in-range-': options.range && !airDay.disabled && isInRange(airDay),
+                                   '-range-from-': options.range && !airDay.disabled && ((!airDateSim && isCalendarDate(startDate, airDay)) || isCalendarDate(airDateSim, airDay)),
+                                   '-range-to-': options.range && !airDay.disabled && (isCalendarDate(endDate, airDay) || isCalendarDate(airEndDateSim, airDay)) }"
+                      (click)="setDate(i, pickerCalendar)" (mouseenter)="options.range ? simulate(airDay) : ''"
+                      (mouseleave)="options.range ? resetSim() : ''">{{airDay.date}}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div *ngSwitchCase="'monthpicker'">
+              <nav class="datepicker--nav">
+                <div class="datepicker--nav-action" (click)="pickerCalendar.setYear(pickerCalendar.year - 1)"><svg>
+                    <path d="M 17,12 l -5,5 l 5,5"></path>
+                  </svg></div>
+                <div (click)="mode = 'yearpicker'" class="datepicker--nav-title">{{pickerCalendar.year}}</div>
+                <div class="datepicker--nav-action" (click)="pickerCalendar.setYear(pickerCalendar.year + 1)"><svg>
+                    <path d="M 14,12 l 5,5 l -5,5"></path>
+                  </svg></div>
+              </nav>
+              <div class="datepicker--content">
+                <div class="datepicker--months datepicker--body active">
+                  <div class="datepicker--cells datepicker--cells-months">
+                    <div *ngFor="let month of pickerLanguage.months; let i=index"
+                      (click)="pickerCalendar.setMonth(i);mode = 'datepicker'"
+                      class="datepicker--cell datepicker--cell-month"
+                      [ngClass]="{ '-current-': pickerCalendar.year == pickerCalendar.currentYear && i == pickerCalendar.currentMonth }"
+                      I18n>{{month}}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div *ngSwitchCase="'yearpicker'">
+              <nav class="datepicker--nav">
+                <div class="datepicker--nav-action" (click)="previous()">
+                  <svg>
+                    <path d="M 17,12 l -5,5 l 5,5"></path>
+                  </svg>
+                </div>
+                <div class="datepicker--nav-title">
+                  {{ pickCalyears[1] }} - {{ pickCalyears[pickCalyears.length - 2] }}
+                </div>
+                <div class="datepicker--nav-action" (click)="next()">
+                  <svg>
+                    <path d="M 14,12 l 5,5 l -5,5"></path>
+                  </svg>
+                </div>
+              </nav>
+              <div class="datepicker--content">
+                <div class="datepicker--cells datepicker--cells-years">
+                  <div *ngFor="let year of pickCalyears; let i = index"
+                    (click)="pickerCalendar.setYear(year);mode = 'monthpicker'"
+                    class="datepicker--cell datepicker--cell-year" [ngClass]="{
+             '-current-': year == pickerCalendar.currentYear,
+             '-other-decade-': i == 0 || i == pickCalyears.length - 1
+           }">
+                    {{ year }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div [ngSwitch]="mode" class="datepicker" *ngIf="options.range"
+            [class.right-rangepicker-left--border--hide]="options?.range">
+            <div *ngSwitchCase="'datepicker'">
+              <nav class="datepicker--nav">
+                <div class="datepicker--nav-action" (click)="pickerCalendarTwo.setMonth(pickerCalendarTwo.month - 1)">
+                  <svg>
+                    <path d="M 17,12 l -5,5 l 5,5"></path>
+                  </svg>
+                </div>
+                <div (click)="mode = 'monthpicker'" class="datepicker--nav-title">
+                  <p>{{ pickerLanguage.months[pickerCalendarTwo.month] }}</p> <i>{{ pickerCalendarTwo.year }}</i>
+                </div>
+                <div class="datepicker--nav-action" (click)="pickerCalendarTwo.setMonth(pickerCalendarTwo.month + 1)">
+                  <svg class="datepicker--">
+                    <path d="M 14,12 l 5,5 l -5,5"></path>
+                  </svg>
+                </div>
+              </nav>
+              <div class="datepicker--content" [ngClass]="{'disabled-calendar': isDisabledCalendarTwo()}">
+                <div class="datepicker--days datepicker--body active">
+                  <div class="datepicker--days-names">
+                    <div *ngFor="let day of [0,1,2,3,4,5,6]" class="datepicker--day-name"
+                      [class.-weekend-]="day == 0 || day == 6" I18n>
+                      {{pickerLanguage[options.fullDays ? 'days' : 'daysMin'][day]}}</div>
+                  </div>
+                  <div class="datepicker--cells datepicker--cells-days">
+                    <div *ngFor="let airDay of pickerCalendarTwo.airDays; let i=index"
+                      class="datepicker--cell datepicker--cell-day"
+                      [ngClass]="{ '-weekend-': airDay.weekend,
+                                   '-other-month-': airDay.other,
+                                   '-current-': airDay.current,
+                                   '-disabled-': airDay.disabled,
+                                   '-selected-': !airDay.disabled && (isCalendarDate(startDate, airDay) || isCalendarDate(endDate, airDay) || isCalendarDate(airDateSim, airDay) || isCalendarDate(airEndDateSim, airDay)),
+                                   '-in-range-': options.range && !airDay.disabled && isInRange(airDay),
+                                   '-range-from-': options.range && !airDay.disabled && ((!airDateSim && isCalendarDate(startDate, airDay)) || isCalendarDate(airDateSim, airDay)),
+                                   '-range-to-': options.range && !airDay.disabled && (isCalendarDate(endDate, airDay) || isCalendarDate(airEndDateSim, airDay)) }"
+                      (click)="setDate(i, pickerCalendarTwo)" (mouseenter)="options.range ? simulate(airDay) : ''"
+                      (mouseleave)="options.range ? resetSim() : ''">{{airDay.date}}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div *ngSwitchCase="'monthpicker'">
+              <nav class="datepicker--nav">
+                <div class="datepicker--nav-action" (click)="pickerCalendarTwo.setYear(pickerCalendarTwo.year - 1)">
+                  <svg>
+                    <path d="M 17,12 l -5,5 l 5,5"></path>
+                  </svg>
+                </div>
+                <div (click)="mode = 'yearpicker'" class="datepicker--nav-title">{{pickerCalendarTwo.year}}</div>
+                <div class="datepicker--nav-action" (click)="pickerCalendarTwo.setYear(pickerCalendarTwo.year + 1)">
+                  <svg>
+                    <path d="M 14,12 l 5,5 l -5,5"></path>
+                  </svg>
+                </div>
+              </nav>
+              <div class="datepicker--content">
+                <div class="datepicker--months datepicker--body active">
+                  <div class="datepicker--cells datepicker--cells-months">
+                    <div *ngFor="let month of pickerLanguage.months; let i=index"
+                      (click)="pickerCalendarTwo.setMonth(i);mode = 'datepicker'"
+                      class="datepicker--cell datepicker--cell-month"
+                      [ngClass]="{'-current-': pickerCalendarTwo.year == pickerCalendarTwo.currentYear && i == pickerCalendarTwo.currentMonth }"
+                      I18n>{{month}}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div *ngSwitchCase="'yearpicker'">
+              <nav class="datepicker--nav">
+                <div class="datepicker--nav-action" (click)="previous()">
+                  <svg>
+                    <path d="M 17,12 l -5,5 l 5,5"></path>
+                  </svg>
+                </div>
+                <div class="datepicker--nav-title">
+                  {{ pickCalyears[1] }} - {{ pickCalyears[pickCalyears.length - 2] }}
+                </div>
+                <div class="datepicker--nav-action" (click)="next()">
+                  <svg>
+                    <path d="M 14,12 l 5,5 l -5,5"></path>
+                  </svg>
+                </div>
+              </nav>
+              <div class="datepicker--content">
+                <div class="datepicker--cells datepicker--cells-years">
+                  <div *ngFor="let year of pickCalyears; let i = index"
+                    (click)="pickerCalendarTwo.setYear(year);mode = 'monthpicker'"
+                    class="datepicker--cell datepicker--cell-year"
+                    [ngClass]="{'-current-': year == pickerCalendarTwo.currentYear, '-other-decade-': i == 0 || i == pickCalyears.length - 1}">
+                    {{ year }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="daterangepicker-footer" *ngIf="options.range">
+      <div class="d-flex justify-content-end align-items-center">
+        <span class="date-selected">{{ startDate | localDateFormat:'':'':'':true }} <span *ngIf="endDate"> - {{
+            endDate
+            | localDateFormat:'':'':'':true }}</span></span>
+        <button type="button" class="btn small btn-light mr-16 datepicker-apply-btn" (click)="closeDatePicker()">
+          <icon size="24px" name="highlight_off" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+          {{ 'cancel' | i18next }}
+        </button>
+        <button type="button" class="btn small btn-primary datepicker-apply-btn" (click)="applySelectedDate()"
+          [disabled]="!startDate || !endDate">
+          <icon size="24px" name="check_circle" type="material" class="icon--on-left no-pointer" cuClass="icon-cu">
+          </icon>
+          {{ 'apply' | i18next }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="position-relative" *ngIf="clearInputDate && value">
+    <button class="clear-date" (click)="clearInput()">×</button>
+  </div>
+</div>

@@ -1,0 +1,240 @@
+  <svms-sidebar-ng
+  size="medium"
+  [dataVisibility]="viewHistoryPanel"
+  (onClose)="closehistoryView()">
+  <div class="cursor-default">
+      <svms-sidebar-body>
+          <app-candidate-profile-sidebar *ngIf="entity_ref ==='candidates' && !oldData" [data]="candidateData">
+          </app-candidate-profile-sidebar>
+          <app-submission-details *ngIf="entity_ref ==='submission'" [data]="candidateData"></app-submission-details>
+          <app-interview-details-sidebar *ngIf="entity_ref ==='interviews'" [data]="candidateData"></app-interview-details-sidebar>
+          <app-offer-details *ngIf="entity_ref ==='offers'" [data]="candidateData"></app-offer-details>
+        <ng-container *ngIf="entity_ref ==='candidates' && oldData">
+            <div class="px-32 py-24">
+                <h4 class="font-weight-medium">
+                    {{'update Candidate' | titlecase}}
+                </h4>
+                <div
+                    class="d-flex align-items-center justify-content-between mt-24 info column-direction worker-update-history">
+                    <div class="d-flex align-items-center">
+                        <div class="initials initials-light">
+                            <icon class="d-flex" size="20px" name="schedule" type="material" theme="outlined"
+                                cuClass="d-flex"></icon>
+                        </div>
+                        <div class="d-flex justify-items-center flex-column ml-4">
+                            <p class="mb-0 small">{{ 'updated_on' | i18next }}</p>
+                            <span>{{candidateData?.modified_date}} {{candidateData?.modified_time}}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="initials initials-green">
+                            <icon class="d-flex" size="20px" name="account_circle" type="material" theme="outlined"
+                                cuClass="d-flex"></icon>
+                        </div>
+                        <div class="d-flex justify-items-center flex-column ml-4">
+                            <p class="mb-0 small">{{ 'updated_by' | i18next }}</p>
+                           <span> {{ currentProgram?.config?.is_vendor_neutral && user_type ==='client' && candidateData?.actor_type ==='vendor' ? 'Vendor': candidateData?.actor_fullname }} </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary of Differences -->
+                <h4 class="font-weight-medium d-flex align-items-center mt-24">
+                    <icon class="d-flex mr-16" size="20px" name="sort" type="material" cuClass="d-flex"></icon>
+                    {{ 'summary' | i18next }}
+                </h4>
+                <div class="mt-12">
+                  <ng-container *ngFor="let data of historyDetailedList">
+                    <div class="border-bottom d-flex justify-content-between py-4 summary"
+                         *ngIf="data?.oldValue != data?.newValue">
+
+                         <!-- {{data | json}} -->
+                        <p class="w-50">{{data?.label | snakeToTitleCase | titlecase}}</p>
+                        <p class="w-50 text-right" *ngIf="data?.key != 'primary_address' || data?.key == 'secondary_address' ">
+                            <span class="d-block" *ngIf="data?.oldValue"><del class="red-color">{{data?.oldValue}}</del></span>
+                            <span class="d-block green-color" *ngIf="data?.newValue">{{data?.newValue}}</span>
+                        </p>
+
+                        <div class="description-text-body" >
+
+                          <!-- {{data?.oldValue | json}}
+                          {{data?.newvalue | json}} -->
+                          <ng-container *ngIf="data?.oldValue && data?.key == 'primary_address'">
+                              <p>
+                                <del class="red-color">
+                                  {{data?.oldValue?.street_1}}{{data?.oldValue?.street_2}}
+                                  {{data?.oldValue?.city}}{{data?.oldValue?.country}}
+                                  {{data?.oldValue?.state}} {{data?.oldValue?.zipcode}}
+                                </del>
+                              </p>
+                              <p class="green-color">
+                                {{data?.newValue?.street_1}}{{data?.newValue?.street_2}}
+                                {{data?.newValue?.city}}{{data?.newValue?.country}}
+                                {{data?.newValue?.state}} {{data?.newValue?.zipcode}}
+                              </p>
+                           </ng-container>
+                           <ng-container *ngIf="data?.newValue && data?.key == 'secondary_address'">
+                            <p>
+                              <del class="red-color">
+                                {{data?.oldValue?.street_1}}{{data?.oldValue?.street_2}}
+                                {{data?.oldValue?.city}}{{data?.oldValue?.country}}
+                                {{data?.oldValue?.state}} {{data?.oldValue?.zipcode}}
+                              </del>
+                            </p>
+                            <p class="green-color">
+                              {{data?.newValue?.street_1}}{{data?.newValue?.street_2}}
+                              {{data?.newValue?.city}}{{data?.newValue?.country}}
+                              {{data?.newValue?.state}} {{data?.newValue?.zipcode}}
+                            </p>
+                          </ng-container>
+                          </div>
+                    </div>
+                  </ng-container>
+                </div>
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="entity_ref ==='offer_reassigned' || entity_ref === 'interview_reassigned' && oldData">
+          <div class="p-32 pt-24 sidebar-view-wrapper interview-detail-view" *ngIf="entity_ref==='offer_reassigned'">
+            <div class="sp-head-module-info">
+              <div class="d-flex mb-12">
+                <h4 class="mr-8 mb-0">{{'offer_details' | i18next}}</h4>
+                <span class="status-ui open">{{ getStatus(offerData?.status) | titlecase | i18next }}</span>
+              </div>
+              <div class="sp-sub-head-info">
+                <label class="mdid float-left d-flex">
+                  <icon size="20px" class="mr-4" name="label" color="#FFC409" type="material" cuClass="d-flex"></icon>
+                  <span>{{ offerData?.unique_id }}</span>
+                </label>
+                <label class="publish-date-time float-left">
+                  <icon size="18px" name="update" color="#536476" type="material" cuClass="d-flex"></icon>
+                  <span>{{'created_on' | i18next}} :
+                    {{ offerData?.created_on | localDateFormat }}
+                    <span *ngIf="!(isVendorNeutral && (userRole == 'vendor') && (offerData?.status.toLowerCase() == 'released' || offerData?.status.toLowerCase() == 'countered' || offerData?.status.toLowerCase() == 'withdrawn'))"> 
+                      by {{ (offerData?.created_by?.user?.first_name ? offerData?.created_by?.user?.first_name : '' ) + " " + (offerData?.created_by?.user?.last_name ? offerData?.created_by?.user?.last_name : '' ) }}
+                    </span>
+                  </span>
+                </label>
+              </div>
+            </div>
+            <div class="clearfix"></div>
+
+            <div class="d-flex  justify-content-between interview-info">
+              <div class="d-flex align-items-center grid-data-wrap">
+                <icon class="mr-8" size="18px" name="today" theme="outlined" color="#495057" type="material" cuClass="d-flex">
+                </icon>
+                <div class="grid-data">
+                  <span class="small">{{'start_date'|i18next}}</span>
+                  <label>{{ offerData?.start_date | localDateFormat :'':'':'':true}}</label>
+                  <label class="strike-through"
+                    *ngIf="!(offerData?.start_date)">---</label>
+                </div>
+              </div>
+              <div class="d-flex align-items-center grid-data-wrap">
+                <icon class="mr-8" size="18px" name="event" theme="outlined" color="#495057" type="material" cuClass="d-flex">
+                </icon>
+                <div class="grid-data">
+                  <span class="small">{{'end_date'|i18next}}</span>
+                  <label>{{ offerData?.end_date | localDateFormat :'':'':'':true}}</label>
+                  <label class="strike-through"
+                    *ngIf="!(offerData?.end_date)">---</label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="d-flex justify-content-between offer-info">
+              <div class="d-flex align-items-center grid-data-wrap">
+                <div class="grid-data">
+                  <label class="d-flex align-items-center">
+                    <ng-container *ngIf="isVendorNeutral && user_type.toLowerCase() === 'vendor';else noVendorNeutral">
+                      {{'--'}}
+                    </ng-container>
+                    <ng-template #noVendorNeutral>
+                     <p class="initials initials__purple">{{(offerData?.created_by?.user?.first_name?.[0] || '' ) + (offerData?.created_by?.user?.last_name?.[0] || '' )}}</p> 
+                     <div>
+                      <span class="small">{{'job_manager' | i18next}}</span>
+                     {{ (offerData?.created_by?.user?.first_name || '' ) + " " + (offerData?.created_by?.user?.middle_name || '' ) + " " + (offerData?.created_by?.user?.last_name || '' ) }}
+                     </div>
+                    </ng-template>
+                  </label>
+                </div>
+              </div>
+
+              <div class="d-flex align-items-center grid-data-wrap">
+                <icon class="mr-8" size="18px" name="schedule" theme="outlined" color="#495057" type="material"
+                  cuClass="d-flex"></icon>
+                <div class="grid-data">
+                  <span class="small">{{'timesheet_type' | i18next}}</span>
+                  <label class="text-capitalize">{{ offerData?.timesheet_type || '--' }}</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-32 pt-24 sidebar-view-wrapper interview-detail-view" *ngIf="entity_ref==='interview_reassigned'">
+            <div class="sp-head-module-info">
+              <div class="row">
+                <div class="col-md-7">
+                  <h4>{{ 'interviewer_reassigned' | i18next}}</h4>
+                </div>
+              </div>
+            </div>
+            <div class="clearfix"></div>
+
+            <div class="d-flex  justify-content-between interview-info">
+              <div class="d-flex align-items-center">
+                <div class="icon-wrapper initials initials-green">
+                  <icon class="d-flex" size="16px" name="today" type="material" theme="outlined" cuClass="d-flex">
+                  </icon>
+                </div>
+                <div class=" grid-data-wrap">
+                  <div class="grid-data">
+                    <span class="small">{{'updated_on'|i18next}}</span>
+                    <label>{{ interviewData?.updated_on | localDateFormat :'':'':'':true}}</label>
+                    <label class="strike-through"
+                      *ngIf="!(interviewData?.updated_on)">---</label>
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex align-items-center grid-data-wrap">
+                <div class="grid-data">
+                  <label class="d-flex align-items-center">
+                    <ng-container *ngIf="isVendorNeutral && user_type.toLowerCase() === 'vendor';else noVendorNeutral">
+                      {{'--'}}
+                    </ng-container>
+                    <ng-template #noVendorNeutral>
+                     <p class="initials initials__purple">{{(interviewData?.updated_by?.first_name?.[0] || '' ) + (interviewData?.updated_by?.last_name?.[0] || '' )}}</p> 
+                     <div>
+                      <span class="small">{{'updated_by' | i18next}}</span>
+                      {{ (interviewData?.updated_by?.first_name || '' ) + " " + (interviewData?.updated_by?.middle_name || '' ) + " " +(interviewData?.updated_by?.last_name || '' ) }}
+                     </div>
+                    </ng-template>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+            <div class="px-32 py-24">
+                <!-- Summary of Differences -->
+                <h4 class="font-weight-medium d-flex align-items-center mt-24">
+                    <icon class="d-flex mr-16" size="20px" name="sort" type="material" cuClass="d-flex"></icon>
+                    {{ 'summary' | i18next }}
+                </h4>
+                <div class="mt-12">
+                  <ng-container *ngFor="let data of historyDetailedList">
+                    <div class="border-bottom d-flex justify-content-between py-4 summary"
+                         *ngIf="data?.oldValue != data?.newValue">
+                        <p class="w-50">{{data?.label | snakeToTitleCase | titlecase}}</p>
+                        <p class="w-50 text-right">
+                            <span class="d-block" *ngIf="data?.oldValue"><del class="red-color">{{data?.oldValue}}</del></span>
+                            <span class="d-block green-color" *ngIf="data?.newValue">{{data?.newValue}}</span>
+                        </p>
+                    </div>
+                  </ng-container>
+                </div>
+            </div>
+        </ng-container>
+      </svms-sidebar-body>
+    </div>
+</svms-sidebar-ng>

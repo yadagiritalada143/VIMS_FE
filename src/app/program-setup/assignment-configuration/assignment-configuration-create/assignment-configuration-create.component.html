@@ -1,0 +1,607 @@
+<div class="assignment-management p-24">
+  <a (click)="goBack()" class="back-button">
+    <icon size="24px" name="keyboard_backspace" type="material" cuClass="d-flex"></icon>
+  </a>
+  <div class="assignment-management-inner">
+    <div class="page-title my-24 text-center font-weight-medium">
+      {{ 'assignment_configuration' | i18next }}
+    </div>
+    <div class="create">
+      <div class="panel panel-light mb-24 py-24 px-16">
+        <div class="d-flex align-items-center justify-content-between">
+          <h4 class="my-24 text-black font-weight-medium">{{ 'assignment_active_upon' | i18next }}</h4>
+        </div>
+
+        <div class="checkbox-loop" *ngFor="let data of options?.activeOnData; let i=index">
+          <div class="form-group">
+            <div class="d-flex">
+              <div class="checkbox-wrapper d-inline-block">
+                <label class="checkbox-container">
+                  <input type="checkbox" [value]="data.value" [(ngModel)]="data.isEnabled">
+                  <span class="checkmark"></span>
+                </label>
+              </div>
+              <p class="text-gray">{{data.label | i18next}}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between mt-24">
+          <h4 class="text-black font-weight-medium">{{ 'create_quick_assignment_title_driven_by.' | i18next }}</h4>
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner">
+              <span class="status-text mr-12">{{ 'allow' | i18next }}</span>
+              <toggle-button [checked]="config?.config?.assignment_title?.is_allow"
+                (changed)="toggleChanged('assignment_title', undefined)">
+              </toggle-button>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center">
+          <div class="checkbox-wrapper d-inline-block">
+            <label class="checkbox-container mb-16">
+              <input type="checkbox" [(ngModel)]="config?.config?.assignment_title.search_by_job">
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <p class="text-gray">{{ 'existing_job_title' | i18next }} </p>
+        </div>
+        <div class="d-flex align-items-center">
+          <div class="checkbox-wrapper d-inline-block">
+            <label class="checkbox-container mb-16">
+              <input type="checkbox" [(ngModel)]="config?.config?.assignment_title.search_by_job_template">
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <p class="text-gray">{{ 'job_template' | i18next }}</p>
+        </div>
+        <!-- <div class="d-flex align-items-center justify-content-between mt-24">
+                  <p class="text-black font-weight-medium">{{ 'update_assignment_allow_to_update,_job_title_on_update_assignment' | i18next }} </p>
+                  <div class="toggle-panel">
+                    <div class="toggle-panel-inner">
+                      <span class="status-text mr-12">{{ 'allow' | i18next }}</span>
+                      <toggle-button [checked]="config?.config?.update_assignment_title?.is_allow"
+                        (changed)="toggleChanged('update_assignment_title', undefined)">
+                      </toggle-button>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center mt-16">
+                  <div class="checkbox-wrapper d-inline-block">
+                    <label class="checkbox-container mb-16">
+                      <input type="checkbox" [disabled]="!config?.config?.update_assignment_title?.is_allow"
+                        [(ngModel)]="config.config.update_assignment_title.search_by_job_template">
+                      <span class="checkmark"></span>
+                    </label>
+                  </div>
+                  <p class="text-gray">{{ 'allow_selecting_job_template_title' | i18next }}</p>
+                </div>
+                <div class="d-flex align-items-center mt-16">
+                  <div class="checkbox-wrapper d-inline-block">
+                    <label class="checkbox-container mb-16">
+                      <input type="checkbox" [disabled]="!config?.config?.update_assignment_title?.is_allow"
+                      [(ngModel)]="config.config.update_assignment_title.search_by_job">
+                      <span class="checkmark"></span>
+                    </label>
+                  </div>
+                  <p class="text-gray">{{ 'allow_selecting,_existing_job' | i18next }}</p>
+                </div> -->
+        <!-- V2M-5360 -->
+        <!-- <div class="d-flex align-items-center justify-content-between mt-24">
+                  <p class="text-black font-weight-medium">{{ 'update_assignment_allow_to_update,_job_title_on_update_assignment' | i18next }} </p>
+                  <div class="toggle-panel">
+                    <div class="toggle-panel-inner">
+                      <span class="status-text mr-12">{{ 'allow' | i18next }}</span>
+                      <toggle-button [checked]="config?.config?.update_assignment_title?.is_allow"
+                        (changed)="toggleChanged('update_assignment_title', undefined)">
+                      </toggle-button>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center mt-16">
+                  <div class="checkbox-wrapper d-inline-block">
+                    <label class="checkbox-container mb-16">
+                      <input type="checkbox" [disabled]="!config?.config?.update_assignment_title?.is_allow"
+                        [(ngModel)]="config.config.update_assignment_title.search_by_job_template">
+                      <span class="checkmark"></span>
+                    </label>
+                  </div>
+                  <p class="text-gray">{{ 'allow_selecting_job_template_title' | i18next }}</p>
+                </div>
+                <div class="d-flex align-items-center mt-16">
+                  <div class="checkbox-wrapper d-inline-block">
+                    <label class="checkbox-container mb-16">
+                      <input type="checkbox" [disabled]="!config?.config?.update_assignment_title?.is_allow"
+                      [(ngModel)]="config.config.update_assignment_title.search_by_job">
+                      <span class="checkmark"></span>
+                    </label>
+                  </div>
+                  <p class="text-gray">{{ 'allow_selecting,_existing_job' | i18next }}</p>
+                </div> -->
+        <div class="d-flex align-items-center justify-content-between mt-24">
+          <h4 class="text-black font-weight-medium">{{ 'edit_rate_factor_on_create_&_update_assignment' | i18next }}</h4>
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner">
+              <span class="status-text mr-12">{{ 'allow' | i18next }}</span>
+              <toggle-button [checked]="config?.config?.rate_factors_editable?.is_allow"
+                (changed)="toggleChanged('rate_factors_editable','undefined')"></toggle-button>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-24">
+          <h4 class="text-black font-weight-medium mr-8">{{ 'update_assignment_after_the_assignment_is_closed' | i18next }}</h4>
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner">
+              <span class="status-text mr-12">{{ 'allow' | i18next }}</span>
+              <toggle-button [checked]="config?.config?.re_open?.is_allow"
+                (changed)="toggleChanged('re_open',undefined)"></toggle-button>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-24 mb-24">
+          <h4 class="text-black font-weight-medium">{{ 'assignment_mass_update' | i18next }}</h4>
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner">
+              <span class="status-text mr-12">{{ 'allow' | i18next }}</span>
+              <toggle-button [checked]="config?.config?.mass_update?.is_allow"
+                (changed)="toggleChanged('mass_update','options')"></toggle-button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group project-option">
+          <label>{{ 'assignment_mass_update' | i18next }}</label>
+          <ng-select [disabled]="!config?.config?.mass_update?.is_allow" [clearable]="true" placeholder="{{ 'add_new' | i18next }}"
+            multiple="true" [searchable]="true" [(ngModel)]="config.config.mass_update.options">
+            <ng-option *ngFor="let option of options.massUpdateOptions" [value]="option.key">{{option.label}}
+            </ng-option>
+          </ng-select>
+        </div>
+
+        <h4 class="my-24 text-black font-weight-medium">{{ 'quick_assignment_budget' | i18next }}</h4>
+
+        <div class="form-group">
+          <label>{{ 'budget_calculated_from' | i18next }}</label>
+          <ng-select [clearable]="true" placeholder="{{ 'add_new' | i18next }}" [searchable]="true"
+            [(ngModel)]="config.config.budget.value">
+            <ng-option *ngFor="let option of options.budgetOptions" [value]="option.value">{{option.name}}</ng-option>
+          </ng-select>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-24 mb-24">
+          <h4 class="text-black font-weight-medium">{{ 'budget_management' | i18next }}</h4>
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner">
+              <span class="status-text mr-12">{{ 'allow' | i18next }}</span>
+              <toggle-button [checked]="config?.config?.additional_budget?.is_allow"
+                (changed)="toggleChanged('additional_budget','options','options',false,'is_enabled')"></toggle-button>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center">
+          <div class="checkbox-wrapper d-inline-block">
+            <label class="checkbox-container mb-16">
+              <input [disabled]="!config?.config?.additional_budget?.is_allow" type="checkbox"
+                [(ngModel)]="config.config.additional_budget.options[0].is_enabled">
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <p class="text-gray">{{ 'allow_adding/reducing_budget' | i18next }}</p>
+          <input type="text" allowUptoNDigitDecimalNumber class="form-control w-50 ml-12" [disabled]="!config?.config?.additional_budget?.is_allow"
+            [(ngModel)]="config.config.additional_budget.options[0].options.period">
+          <ng-select class="ml-12 w-100" [disabled]="!config?.config?.additional_budget?.is_allow"
+            [(ngModel)]="config.config.additional_budget.options[0].options.type">
+            <ng-option *ngFor="let option of options.additionalBudgetAddTypeOptions" [value]="option.value">
+              {{option.name}}</ng-option>
+          </ng-select>
+          <p class="text-gray ml-12">{{ 'after_the_assignment_end_date' | i18next }}</p>
+        </div>
+        <div class="d-flex align-items-center mt-16">
+          <div class="checkbox-wrapper d-inline-block">
+            <label class="checkbox-container mb-16">
+              <input type="checkbox" [disabled]="!config?.config?.additional_budget?.is_allow"
+                [(ngModel)]="config.config.additional_budget.options[2].is_enabled">
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <p class="text-gray">{{ 'restrict_the_timesheet(s)_&_expense(s)_approval_if_assignment_budget_is_insufficient' | i18next }}</p>
+        </div>
+        <!-- <div class="d-flex align-items-center mt-16">
+          <div class="checkbox-wrapper d-inline-block">
+            <label class="checkbox-container mb-16">
+              <input type="checkbox" [disabled]="!config?.config?.additional_budget?.is_allow"
+                [(ngModel)]="config.config.additional_budget.options[3].is_enabled">
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <p class="text-gray">{{ 'auto_close_assignment_after_budget_consumption_threshold' | i18next }}</p>
+          <ng-select class="ml-12 w-100" [disabled]="!config?.config?.additional_budget?.is_allow"
+            [(ngModel)]="config.config.additional_budget.options[3].options.operator">
+            <ng-option *ngFor="let option of options.budgetConsumptionOperators" [value]="option.value">{{option.name}}
+            </ng-option>
+          </ng-select>
+          <input type="number" class="form-control w-50 ml-12" [disabled]="!config?.config?.additional_budget?.is_allow"
+            [(ngModel)]="config.config.additional_budget.options[3].options.value">
+          <ng-select class="ml-12 w-100" [disabled]="!config?.config?.additional_budget?.is_allow"
+            [(ngModel)]="config.config.additional_budget.options[3].options.type">
+            <ng-option *ngFor="let option of options.consumptionThresholdOptions" [value]="option.value">{{option.name}}
+            </ng-option>
+          </ng-select> -->
+          <!-- <div class="radio-group ml-12">
+                <div class="radio-container">
+                  <input type="radio">
+                  <span class="checkmark align-justify-center">
+                    <icon size="24px" name="chevron_right" type="material" color="inherit" cuclass="d-flex"
+                      class="d-flex">
+                    </icon>
+                  </span>
+                </div>
+                <div class="radio-container">
+                  <input type="radio">
+                  <span class="checkmark align-justify-center">
+                    <icon size="24px" name="expand_more" type="material" color="inherit" cuclass="d-flex" class="d-flex">
+                    </icon>
+                  </span>
+                </div>
+              </div> -->
+          <!-- <input type="text" class="form-control w-50 ml-12">
+              <ng-select class="ml-12 w-100">
+                <ng-option>Days</ng-option>
+                <ng-option>option 1</ng-option>
+              </ng-select> -->
+        <!-- </div> -->
+        <!-- <div class="d-flex align-items-center mt-16">
+          <div class="checkbox-wrapper d-inline-block">
+            <label class="checkbox-container mb-16">
+              <input [disabled]="!config?.config?.additional_budget?.is_allow" type="checkbox"
+                [(ngModel)]="config.config.additional_budget.options[1].is_enabled">
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <p class="text-gray">{{ 'auto_close_the_assignment_after_the_assignment_budget' | i18next }} {{ 'is_consumed_but_allow_approval_to_the_pending_timesheet_&_the_pending_expense' | i18next }}
+          </p>
+        </div> -->
+         <div class="d-flex align-items-center justify-content-between mt-24">
+          <h4 class="my-24 text-black font-weight-medium">{{ 'impact_of_financial_update_on_assignment_for_approved_&_invoiced_status_timesheet(s)' | i18next }}</h4>
+        </div>
+        <div class="d-flex align-items-center mt-16">
+          <div class="radio-wrapper">
+            <div class="radio-container  mb-0">
+              <label class="mb-0">
+                <input type="radio" name="impactRadioGroup" [(ngModel)]="config.config.update_impact_approved_ts.options[0].is_enabled"
+              [value]="false" checked>
+              <span class="checkmark"></span>
+            {{ 'approver_approves_impacted_timesheet(s)_(default)' | i18next }}</label>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center mt-16">
+          <div class="radio-wrapper">
+            <div class="radio-container mb-0">
+              <label class="mb-0">
+                <input type="radio" name="impactRadioGroup" [(ngModel)]="config.config.update_impact_approved_ts.options[0].is_enabled"
+          [value]="true">
+              <span class="checkmark"></span>
+              {{ 'system_auto-approves_impacted_timesheet(s)' | i18next }}</label>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="config?.config?.show_managers">
+          <div class="d-flex align-items-center justify-content-between mt-24">
+            <h4 class="my-24 text-black font-weight-medium">{{ 'hm_' | i18next }}{{'Users:Assignment Manager, Timesheet Manager, Expense Manager to Display all Managers under Picklist'}}</h4>
+          </div>
+          <div class="d-flex align-items-center mt-16" *ngIf="config?.config?.show_managers?.create">
+            <div class="checkbox-wrapper d-inline-block">
+              <label class="checkbox-container mb-16">
+                <input type="checkbox" [checked]="config.config.show_managers.create.is_enabled"
+                [ngModel]="config.config.show_managers.create.is_enabled"
+                (ngModelChange)="config.config.show_managers.create.is_enabled = !config.config.show_managers.create.is_enabled">
+                <span class="checkmark"></span>
+              </label>
+            </div>
+            <p class="text-gray">{{ 'create_quick__assignment' | i18next }}
+            </p>
+          </div>
+          <div class="d-flex align-items-center mt-16" *ngIf="config?.config?.show_managers?.update">
+            <div class="checkbox-wrapper d-inline-block">
+              <label class="checkbox-container mb-16">
+                <input type="checkbox" [checked]="config.config.show_managers.update.is_enabled"
+                [ngModel]="config.config.show_managers.update.is_enabled"
+                (ngModelChange)="config.config.show_managers.update.is_enabled = !config.config.show_managers.update.is_enabled">
+                <span class="checkmark"></span>
+              </label>
+            </div>
+            <p class="text-gray">{{ 'update_assignment' | i18next }}
+            </p>
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-24">
+          <h4 class="text-black font-weight-medium">{{ 'onboarding_document_update_after_assignment_end' | i18next }}</h4>
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner">
+              <span class="status-text mr-12">{{ 'allow' | i18next }}</span>
+              <toggle-button [checked]="config?.config?.onboarding?.is_allow"
+                (changed)="toggleChanged('onboarding',undefined)"></toggle-button>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-24">
+          <h4 class="text-black font-weight-medium">{{ 'evaluation' | i18next }}</h4>
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner">
+              <span class="status-text mr-12">{{ 'allow' | i18next }}</span>
+              <toggle-button [checked]="config?.config?.evaluate?.is_allow"
+                (changed)="toggleChanged('evaluate',undefined)"></toggle-button>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-24">
+          <h4 class="my-24 text-black font-weight-medium">{{ 'do_not_rehire' | i18next }}</h4>
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner">
+              <span class="status-text mr-12">{{ 'allow' | i18next }}</span>
+              <toggle-button [checked]="config?.config?.do_not_rehire?.is_allow"
+              (changed)="toggleChanged('do_not_rehire','options',null,false,'is_enabled'); allowAssignmentCreation()">
+              </toggle-button>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center mt-16">
+          <div class="radio-wrapper">
+            <div class="radio-container  mb-0">
+              <label class="mb-0">
+                <input type="radio" name="impactRadio" [(ngModel)]="config.config.do_not_rehire.options[0].is_enabled"
+              [value]="true" [disabled]="!config?.config?.do_not_rehire?.is_allow">
+              <span class="checkmark"></span>
+            {{ 'allow_assignment_creation' | i18next }}</label>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center mt-16">
+          <div class="radio-wrapper">
+            <div class="radio-container mb-0">
+              <label class="mb-0">
+                <input type="radio" name="impactRadio"
+          [value]="false" [disabled]="!config?.config?.do_not_rehire?.is_allow || true">
+              <span class="checkmark"></span>
+              {{ 'restrict_assignment_creation' | i18next }}</label>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-24">
+          <h4 class="text-black font-weight-medium">{{ 'secondary/additional_assignment(s)' | i18next }}</h4>
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner">
+              <span class="status-text mr-12">{{ 'allow' | i18next }}</span>
+              <toggle-button [checked]="config?.config?.secondary_assignment?.is_allow"
+                (changed)="toggleChanged('secondary_assignment','value')"></toggle-button>
+            </div>
+          </div>
+        </div>
+        <div class="form-group mt-24">
+          <label>{{ 'select_the_assignmnet_status_on_which_secondary/additional_assignment_can_be_created' | i18next }}</label>
+          <ng-select [disabled]="!config?.config?.secondary_assignment?.is_allow" placeholder="{{ 'add_new' | i18next }}"
+            [(ngModel)]="config.config.secondary_assignment.value">
+            <ng-option *ngFor="let option of options.secondaryAssignmentOptions" [value]="option.value">{{option.name}}
+            </ng-option>
+          </ng-select>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-24">
+          <h4 class="text-black font-weight-medium">{{ 'additional_special_temporary_access_to_the_vendor' | i18next }}</h4>
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner">
+              <span class="status-text mr-12">{{ 'allow' | i18next }}</span>
+              <toggle-button [checked]="config?.config?.temp_access_data?.is_allow"
+                (changed)="toggleChanged('temp_access_data','options','options',false,'is_enabled')"></toggle-button>
+            </div>
+          </div>
+        </div>
+        <div class="alert rounded-sm p-12 my-24">
+          <p class="text-black">{{ 'pmo_to_provide_special_temporary_access_to_the_vendor_as_an_exception_after_the_initial_access_is_revoked.' | i18next }}</p>
+        </div>
+        <div class="d-flex align-items-center">
+          <div class="checkbox-wrapper d-inline-block">
+            <label class="checkbox-container mb-16">
+              <input [disabled]="!config?.config?.temp_access_data?.is_allow" type="checkbox"
+                [(ngModel)]="config.config.temp_access_data.timesheet.submit.is_allow">
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <p class="text-gray ">{{ 'special_access_to_submit_timesheet' | i18next }}</p>
+          <input [disabled]="!config?.config?.temp_access_data?.is_allow" type="number" class="form-control ml-12 w-50"
+            [(ngModel)]="config.config.temp_access_data.timesheet.submit.period">
+          <ng-select [disabled]="!config?.config?.temp_access_data?.is_allow" class="ml-12" placeholder="{{ 'add_new' | i18next }}"
+            [(ngModel)]="config.config.temp_access_data.timesheet.submit.type">
+            <ng-option *ngFor="let option of options.temporaryAccessTypeOptions" [value]="option.value">{{option.name}}
+            </ng-option>
+          </ng-select>
+          <p class="text-gray ml-12">{{ 'after_initial_extended_vendor_access_is_revoked.' | i18next }}</p>
+        </div>
+        <div class="d-flex align-items-center mt-16">
+          <div class="checkbox-wrapper d-inline-block">
+            <label class="checkbox-container mb-16">
+              <input [disabled]="!config?.config?.temp_access_data?.is_allow" type="checkbox"
+                [(ngModel)]="config.config.temp_access_data.timesheet.modify.is_allow">
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <p class="text-gray">{{ 'special_access_for_timesheet_modification' | i18next }}</p>
+          <input [disabled]="!config?.config?.temp_access_data?.is_allow" type="number" class="form-control ml-12 w-50"
+            [(ngModel)]="config.config.temp_access_data.timesheet.modify.period">
+          <ng-select [disabled]="!config?.config?.temp_access_data?.is_allow" class="ml-12" placeholder="{{ 'add_new' | i18next }}"
+            [(ngModel)]="config.config.temp_access_data.timesheet.modify.type">
+            <ng-option *ngFor="let option of options.temporaryAccessTypeOptions" [value]="option.value">{{option.name}}
+            </ng-option>
+          </ng-select>
+          <p class="text-gray ml-12">{{ 'after_initial_extended_vendor_access_is_revoked.' | i18next }}</p>
+        </div>
+        <div class="d-flex align-items-center mt-16">
+          <div class="checkbox-wrapper d-inline-block">
+            <label class="checkbox-container mb-16">
+              <input [disabled]="!config?.config?.temp_access_data?.is_allow" type="checkbox"
+                [(ngModel)]="config.config.temp_access_data.expense.submit.is_allow">
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <p class="text-gray">{{ 'special_access_to_submit_expense' | i18next }}</p>
+          <input type="number" class="form-control ml-12 w-50" [disabled]="!config?.config?.temp_access_data?.is_allow"
+            [(ngModel)]="config.config.temp_access_data.expense.submit.period">
+          <ng-select class="ml-12" placeholder="{{ 'add_new' | i18next }}" [disabled]="!config?.config?.temp_access_data?.is_allow"
+            [(ngModel)]="config.config.temp_access_data.expense.submit.type">
+            <ng-option *ngFor="let option of options.temporaryAccessTypeOptions" [value]="option.value">{{option.name}}
+            </ng-option>
+          </ng-select>
+          <p class="text-gray ml-12">{{ 'after_initial_extended_access_provided_for_vendor_is_over' | i18next }}</p>
+        </div>
+        <div class="d-flex align-items-center mt-16">
+          <div class="checkbox-wrapper d-inline-block">
+            <label class="checkbox-container mb-16">
+              <input [disabled]="!config?.config?.temp_access_data?.is_allow" type="checkbox"
+                [(ngModel)]="config.config.temp_access_data.expense.modify.is_allow">
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <p class="text-gray">{{ 'special_expense_modification_access' | i18next }}</p>
+          <input type="number" class="form-control ml-12 w-50" [disabled]="!config?.config?.temp_access_data?.is_allow"
+            [(ngModel)]="config.config.temp_access_data.expense.modify.period">
+          <ng-select class="ml-12" placeholder="{{ 'add_new' | i18next }}" [disabled]="!config?.config?.temp_access_data?.is_allow"
+            [(ngModel)]="config.config.temp_access_data.expense.modify.type">
+            <ng-option *ngFor="let option of options.temporaryAccessTypeOptions" [value]="option.value">{{option.name}}
+            </ng-option>
+          </ng-select>
+          <p class="text-gray ml-12">{{ 'after_initial_extended_access_provided_for_vendor_is_over' | i18next }}</p>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-24">
+          <h4 class="text-black font-weight-medium">{{ 'activity_/project_based_pricing' | i18next }}</h4>
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner">
+              <span class="status-text mr-12">{{ 'allow' | i18next }}</span>
+              <toggle-button [checked]="config?.config?.project_based?.is_allow"
+                (changed)="toggleChanged('project_based',undefined)"></toggle-button>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-24">
+          <h4 class="text-black font-weight-medium">{{ 'quick_extension_feature' | i18next }}</h4>
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner">
+              <span class="status-text mr-12">{{ 'allow' | i18next }}</span>
+              <toggle-button [checked]="config?.config?.quick_extension?.is_allow"
+                (changed)="toggleChanged('quick_extension',undefined)"></toggle-button>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-24">
+          <h4 class="text-black font-weight-medium">{{ 'quick_rate_change_feature' | i18next }}</h4>
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner">
+              <span class="status-text mr-12">{{ 'allow' | i18next }}</span>
+              <toggle-button [checked]="config?.config?.quick_rate_change?.is_allow"
+                (changed)="toggleChanged('quick_rate_change',undefined)"></toggle-button>
+            </div>
+          </div>
+        </div>
+        <!-- from here-->
+        <div class="d-flex align-items-center justify-content-between mt-24">
+          <h4 class="text-black font-weight-medium">{{ 'special_access_provided_to_submit_archived/restricted/blocked_timesheet(s)' | i18next }}</h4>
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner">
+              <span class="status-text mr-12">{{ 'allow' | i18next }} </span>
+              <toggle-button [checked]="config?.config?.temp_access_data?.timesheet?.past_period_allow"
+                (changed)="updatePastPeriod()">
+              </toggle-button>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center">
+          <!-- <div class="checkbox-wrapper d-inline-block">
+            <label class="checkbox-container mb-16">
+              <input [disabled]="!config?.config?.temp_access_data?.timesheet?.past_period_allow" type="checkbox"
+                [(ngModel)]="config.config.temp_access_data.timesheet.past_period.is_allow">
+              <span class="checkmark"></span>
+            </label>
+          </div> -->
+          <p class="text-gray ">{{ 'access_for' | i18next }}</p>
+          <input [disabled]="!config?.config?.temp_access_data?.timesheet?.past_period_allow" type="number"
+            class="form-control ml-12 w-50" [(ngModel)]="config.config.temp_access_data.timesheet.past_period.period">
+          <ng-select [disabled]="!config?.config?.temp_access_data?.timesheet?.past_period_allow" class="ml-12"
+            placeholder="Add new" [(ngModel)]="config.config.temp_access_data.timesheet.past_period.type">
+            <ng-option *ngFor="let option of options.temporaryAccessTypeOptions" [value]="option.value">{{option.name}}
+            </ng-option>
+          </ng-select>
+          <p class="text-gray ml-12">{{ 'max.' | i18next }}</p>
+        </div>
+        <!--till here-->
+        <div class="d-flex align-items-center justify-content-between mt-24">
+          <h4 class="text-black font-weight-medium">{{ 'update_assignment_start_date' | i18next }}</h4>
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner">
+              <span class="status-text mr-12">{{ 'allow' | i18next }}</span>
+              <toggle-button [checked]="config.config.update_start_date?.is_allow "
+                (changed)="updateStartDate()"></toggle-button>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center">
+          <!-- <div class="checkbox-wrapper d-inline-block">
+            <label class="checkbox-container mb-16">
+              <input [disabled]="!config?.config?.update_start_date?.is_allow" type="checkbox"
+                [(ngModel)]="config?.config?.update_start_date.is_allow">
+              <span class="checkmark"></span>
+            </label>
+          </div> -->
+          <p class="text-gray">
+           {{ 'access_to_update_assignment_start_date_for_' | i18next }}</p>
+          <input [disabled]="!config?.config?.update_start_date?.is_allow" type="number"
+            class="form-control ml-12 w-50" [(ngModel)]="config.config.update_start_date.period">
+          <ng-select [disabled]="!config.config?.update_start_date.is_allow" class="ml-12"
+            placeholder="{{ 'add_new' | i18next }}" [(ngModel)]="config.config.update_start_date.type">
+            <ng-option *ngFor="let option of options.updateStartDate" [value]="option.value">{{option.name}}
+            </ng-option>
+          </ng-select>
+          <p class="text-gray ml-12">{{ 'from_current_assignment_start_date' | i18next }}</p>
+        </div>
+        <!-- <div class="d-flex align-items-center">
+          <div class="checkbox-wrapper d-inline-block">
+            <label class="checkbox-container mb-16">
+              <input [disabled]="!config?.config?.update_start_date?.is_allow" type="checkbox"
+                [(ngModel)]="config?.config?.update_start_date?.monthly.is_allow">
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <p class="text-gray">
+            Update Monthly Start Date</p>
+          <input [disabled]="!config?.config?.update_start_date?.is_allow" type="number"
+            class="form-control ml-12 w-50" [(ngModel)]="config.config.update_start_date?.monthly.period">
+          <ng-select [disabled]="!config.config?.update_start_date?.is_allow" class="ml-12"
+            placeholder="Add new" [(ngModel)]="config.config.update_start_date?.monthly.type">
+            <ng-option *ngFor="let option of options.updateStartDate" [value]="option.value">{{option.name}}
+            </ng-option>
+          </ng-select>
+          <p class="text-gray ml-12">{{'from Assignment Start date'|i18next=""}}</p>
+        </div> -->
+        <!-- <div class="d-flex align-items-center mt-16">
+          <div class="checkbox-wrapper d-inline-block">
+            <label class="checkbox-container mb-16">
+              <input [disabled]="!config.config.update_start_date?.is_allow" type="checkbox"
+                [(ngModel)]="config.config.update_start_date?.weekly.is_allow">
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <p class="text-gray ">
+           {{ 'update_weekly_start_date' | i18next }}</p>
+          <input [disabled]="!config.config.update_start_date?.is_allow" type="number"
+            class="form-control ml-12 w-50" [(ngModel)]="config.config.update_start_date?.weekly.period">
+          <ng-select [disabled]="!config.config.update_start_date?.is_allow" class="ml-12"
+            placeholder="Add new" [(ngModel)]="config.config.update_start_date?.weekly.type">
+            <ng-option *ngFor="let option of options.updateStartDate" [value]="option.value">{{option.name}}
+            </ng-option>
+          </ng-select>
+          <p class="text-gray ml-12">{{ 'from_assignment_start_date' | i18next }}</p>
+          </div> -->
+      </div>
+      <div class="d-flex justify-content-end my-24">
+        <button class="btn btn-primary" (click)="saveConfiguration()" *accessControl>{{ 'save' | i18next }}</button>
+      </div>
+    </div>
+  </div>
+</div>

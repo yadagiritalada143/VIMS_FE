@@ -1,0 +1,19 @@
+<div class="tab-menu">
+  <ul class="d-flex ">
+    <ng-container *ngFor="let tab of tabs">
+      <li [ngClass]="tab?.disabled?'tab-disable':''" (click)="selectTab(tab, true)">
+        <a  [class.active]="tab.active" class="d-flex align-items-center">
+          <icon *ngIf="tab?.iconLeft" size="20px" [theme]="theme" [name]="tab?.iconLeft" type="material"
+            class="icon--on-left d-flex mr-12" cuClass="cu-icon d-flex">
+          </icon>
+          {{ tab.label | i18next}}
+          <icon *ngIf="tab?.iconRight" size="20px" [name]="tab?.iconRight" type="material"
+            class="icon--on-right d-flex ml-12" cuClass="cu-icon d-flex">
+          </icon>
+        </a>
+
+      </li>
+    </ng-container>
+  </ul>
+</div>
+<ng-content></ng-content>

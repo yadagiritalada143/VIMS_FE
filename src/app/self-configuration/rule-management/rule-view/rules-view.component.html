@@ -1,0 +1,291 @@
+<div class="view-detail-page">
+  <header class="section-header p-24 d-flex align-items-center justify-content-between">
+    <div class="d-flex">
+      <i tooltip="{{'Back' | i18next}}" placement="bottom" class="material-icons back-arrow-icon cursor-pointer" (click)="goBackWarning($event)">arrow_back</i>
+      <div class="ml-16">
+        <h3 class="font-weight-semibold mb-0">{{ruleData?.ruleName|i18next}}</h3>
+        <p class="small">
+          {{ commonViewService.getTimeStamp(ruleData?.createdAt, ruleData?.createdAt) | i18next}}
+        </p>
+      </div>
+    </div>
+    <!-- <div *accessControl>
+      <button *authorize="'rule_builder_manage'" class="c-btn c-btn-secondary-medium-left-icon" (click)="editRule()">
+        <i class="material-icons">drive_file_rename_outline</i> {{'Edit'|i18next}}
+      </button>
+    </div> -->
+ </header>
+<section class="section-body-content">
+  <div class="px-32 py-16">
+    <h4 class="font-weight-medium mb-16">{{ 'rule_details' | i18next }}</h4>
+
+    <app-common-view-rule-flow [details]="details" *ngIf="details.length > 0"></app-common-view-rule-flow>
+
+    <div class="warning-info-box my-16 px-16 py-8 position-relative">
+      <p class="font-weight-medium d-flex align-items-center"><i class="material-icons mr-16">info</i> {{ 'Information' | i18next }}</p>
+      <ul class="ratecard-information-box">
+        <li class="small">{{ 'rule_builder_view_info_line_1' | i18next }}</li>
+        <li class="small">{{ 'rule_builder_view_info_line_2' | i18next }}</li>
+        <li class="small">{{ 'rule_builder_view_info_line_3' | i18next }}</li>
+        <li class="small">{{ 'rule_builder_view_info_line_4' | i18next }}</li>
+        <li class="small">{{ 'rule_builder_view_info_line_5' | i18next }}</li>
+        <li class="small">{{ 'rule_builder_view_info_line_6' | i18next }}</li>
+        <li class="small">{{ 'rule_builder_view_info_line_7' | i18next }}</li>
+      </ul>
+    </div>
+
+    <div class="table-view disable-overflow">
+      <div class="p-16 d-flex align-items-center justify-content-between">
+        <div class="table-heading">
+          <p class="blue-color font-weight-medium">{{ (editMode ? 'edit_decision_table' : 'decision_table') | i18next }}</p>
+          <p class="small">{{ 'decision_table_is_generated_based_on_the_rule_logic_you_have_created' | i18next }}</p>
+        </div>
+        <div [ngClass]="underProcess ? 'd-none' : ''">
+          <button class="c-btn c-btn-secondary-medium-left-icon" [ngClass]="disabledDownloadButton || editMode ? 'd-none' : ''" (click)="downloadAttachment(ruleData?.decisionTableTemplate?.url)">
+            <i class="material-icons">file_download</i>
+            {{ downloadButtonText | i18next }}
+          </button>
+          <button class="c-btn c-btn-primary-medium-left-icon ml-12" [ngClass]="editMode ? 'd-none' : ''" [disabled]="UploadButtonText == 'Uploading Rule File'" (click)="uploadFileInput.click()">
+            <i class="material-icons">file_upload</i>
+            {{ UploadButtonText | i18next }}
+            <input hidden type="file" accept=".xls,.xlsx" (click)="uploadFileInput.value = null" #uploadFileInput (change)="uploadDocument($event)">
+          </button>
+          <!-- <button type="submit" class="c-btn c-btn-secondary-medium-left-icon ml-12" *ngIf="editMode" (click)="cancelClicked()">
+             {{ 'Cancel' | i18next }}
+          </button> -->
+          <button type="submit" class="c-btn c-btn-secondary-medium-left-icon ml-12" *ngIf="editMode" (click)="cancelWarning($event)">
+            {{ 'Cancel' | i18next }}
+         </button>
+          <!-- <button type="submit" class="c-btn c-btn-secondary-medium-left-icon ml-12" *ngIf="editMode" (click)="editModeClicked()">
+            {{ 'add' | i18next }}
+          </button> -->
+          <button type="submit" class="c-btn c-btn-primary-medium ml-12 addRecordBtn" *ngIf="editMode" (click)="addRecord($event)">
+            <i class="material-icons cursor-pointer mr-8">add</i> {{ 'add' | i18next }}
+          </button>
+
+
+          <button type="submit" class="c-btn c-btn-secondary-medium-left-icon ml-12" *ngIf="!editMode && ruleData?.fileSubmissionStatus?.fileUploadStatus != 'FAILED'" (click)="editModeClicked()">
+            <i class="material-icons">drive_file_rename_outline</i>
+            {{ 'edit' | i18next }}
+          </button>
+
+          <button type="submit" class="c-btn c-btn-success-medium ml-12" [ngClass]="!tableData?.rules?.length || !editMode ? 'd-none' : ''" (click)="saveFile()" *accessControl>
+            {{ 'Update' | i18next }}
+          </button>
+          <button class="c-btn c-btn-secondary-medium-left-icon ml-12 d-none">
+            <i class="material-icons">more_horiz</i>
+          </button>
+          <!-- <button class="c-btn c-btn-secondary-medium-left-icon" *ngIf="ruleData?.dtFile" (click)="downloadAttachment(ruleData?.dtFile?.url)">
+            <i class="material-icons">file_download</i>
+            {{ 'download_dt_file' | i18next }}
+          </button> -->
+        </div>
+      </div>
+      <div class="rule-table-overflow position-relative">
+        <perfect-scrollbar [config]="scrollConfig">
+          <table class="decision-table">
+            <thead *ngIf="UploadButtonText != 'Uploading Rule File'">
+              <tr>
+                <th *ngFor="let key of tableKeys;let i = index"><div class="rule-table-key">{{ key }}</div>
+                  <ng-select *ngIf="dataConfig[key].fieldType == 'DROPDOWN'"
+                      #searchText
+                      [items]="dataConfig[key].searchItems"
+                      [multiple]="true"
+                      (change)="onSearchChange($event,key)"
+                      loadingText = "{{ 'loading....' | i18next }}"
+                      notFoundText = "{{ 'no_data_found' | i18next }}"
+                      bindLabel="name"
+                      appendTo=".rule-table-overflow"
+                      bindValue="id"  placeholder="{{'search' | i18next}}" >
+                    </ng-select>
+                  <input #searchText *ngIf="dataConfig[key].fieldType == 'STR'" type="text" (keyup)="onSearchChange(searchText.value, key)" class="c-form-control small mt-4" id="searchText" name="searchText" placeholder="{{'search' | i18next}}" />
+                  <input #searchText *ngIf="dataConfig[key].fieldType == 'NUMBER'" type="number" (keypress)="preventCharacters($event)" (keyup)="onSearchChange(searchText.value, key)" class="c-form-control small mt-4" id="searchText" name="searchText" placeholder="{{'search' | i18next}}" min="0" />
+                </th>
+                <th *ngIf="editMode"></th>
+              </tr>
+            </thead>
+            <tbody *ngIf="tableData && tableData?.rules?.length > 0 && UploadButtonText != 'Uploading Rule File'">
+
+
+              <tr *ngFor="let row of tableData?.rules;let rowIndex = index">
+                <!-- Note : Add 'edit-bg-gray' this class name to td in min & max columns  -->
+                <td *ngFor="let key of tableKeys;let keyIndex=index" [ngClass]="outputColumns.includes(key) ? 'edit-bg-gray' : ''">
+                  <div *ngIf="!editMode">
+                    {{ !dataConfig[key].isAccuracyDependent ? row[key] : row[key] | accuracy : dataConfig[key].accuracyKey :{isEdit:true} }}
+                  </div>
+                  <div *ngIf="editMode">
+                    <ng-select *ngIf="dataConfig[key].fieldType == 'DROPDOWN'"
+                      #dropdownSearch
+                      [items]="dataConfig[key].items"
+                      [loading]="row[key+'Loading']"
+                      loadingText = "{{ 'loading....' | i18next }}"
+                      notFoundText = "{{ 'no_data_found' | i18next }}"
+                      (change)="onDataChange($event,key,row)"
+                      (keyup)="searchValues(dropdownSearch.searchTerm,key,row)"
+                      bindLabel="name"
+                      appendTo=".rule-table-overflow"
+                      bindValue="id"  id="tabData{{keyIndex}}" name="tabData{{keyIndex}}" #tabData="ngModel" placeholder="{{'search' | i18next}}" [maxlength]="100" [(ngModel)]="row['ND_'+key]">
+                    </ng-select>
+                    <input *ngIf="dataConfig[key].fieldType == 'STR'" (keypress)="preventEqualtoCharacters($event)" (click)="getTableData(row.sequence)" type="text" class="form-control" id="tabData{{keyIndex}}" name="tabData{{keyIndex}}" #tabData="ngModel"  [maxlength]="100" [(ngModel)]="row['ND_'+key]"/>
+                    <input *ngIf="dataConfig[key].fieldType == 'NUMBER' && dataConfig[key].isAccuracyDependent"  [inputAccuracy]="dataConfig[key].accuracyKey" onlyNumber (click)="getTableData(row.sequence)" type="text" class="form-control" id="tabData{{keyIndex}}" name="tabData{{keyIndex}}" #tabData="ngModel"  [maxlength]="100" [(ngModel)]="row['ND_'+key]"/>
+                    <input *ngIf="dataConfig[key].fieldType == 'NUMBER' && !dataConfig[key].isAccuracyDependent" onlyNumber (keypress)="preventCharacters($event)" (click)="getTableData(row.sequence)" type="text" class="form-control" id="tabData{{keyIndex}}" name="tabData{{keyIndex}}" #tabData="ngModel"  [maxlength]="100" [(ngModel)]="row['ND_'+key]"/>
+                    <p class="validation-msg" *ngIf="(dataConfig[key].fieldType != 'NUMBER' && !row['ND_'+key]) || (dataConfig[key].fieldType == 'NUMBER' && !row['ND_'+key].toString())">{{ (dataConfig[key].fieldType == 'NUMBER' || dataConfig[key].fieldType == 'STR' ? 'Please Enter': 'Please Select' ) | i18next }} </p>
+                  </div>
+                </td>
+                <!-- <td><i class="material-icons cursor-pointer remove-record" (click)="removeFromTable(row.sequence)">highlight_off</i></td> -->
+                <td *ngIf="editMode"><i class="material-icons cursor-pointer remove-record" (click)="removeRecord($event,row.sequence)">highlight_off</i></td>
+
+              </tr>
+            </tbody>
+            <tbody *ngIf="UploadButtonText == 'Uploading Rule File'">
+              <tr>
+                <div class="dotloader"></div>
+              </tr>
+            </tbody>
+            <tbody *ngIf="(!alltableData || !alltableData?.length) && UploadButtonText != 'Uploading Rule File' && !underProcess">
+              <tr>
+                <td class="text-center py-32" [attr.colspan]="tableKeys.length">
+                  <img src="/assets/images/no-records.svg" alt="">
+                  <div *ngIf="!disabledDownloadButton && !underProcess">
+                    <h4 class="font-weight-medium mt-24">
+                      {{ 'no_record_added_to_the_decision_table' | i18next }}
+                    </h4>
+                    <p class="mt-8">
+                      {{'download_decision_table_from' | i18next}} <a href="javascript:void(0)" (click)="downloadAttachment(ruleData?.decisionTableTemplate?.url)">{{'here'|i18next}}</a> & <a href="javascript:void(0)" (click)="uploadFileInput.click()">{{'upload'|i18next}}</a> {{'it_back'|i18next}}
+                    </p>
+                  </div>
+                  <div *ngIf="disabledDownloadButton && ruleData?.fileSubmissionStatus?.fileUploadStatus == 'FAILED' && !underProcess">
+                    <h4 class="font-weight-medium mt-24">
+                      {{ ruleData.fileSubmissionStatus.reason | i18next }}
+                    </h4>
+                    <p class="mt-8">
+                      {{'download_error_file_from'|i18next}} <a href="javascript:void(0)" (click)="downloadAttachment(ruleData.failedDecisionTableFile?.url)">{{'here'|i18next}}</a> & <a href="javascript:void(0)" (click)="uploadFileInput.click()">{{'upload'|i18next}}</a> {{'it_back'|i18next}}
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+            <tbody *ngIf="underProcess">
+              <tr>
+                <td class="text-center py-32" [attr.colspan]="tableKeys.length">
+                  <img src="/assets/images/no-records.svg" alt="">
+                  <div >
+                    <h4 class="font-weight-medium mt-24">
+                      {{ ruleData.fileSubmissionStatus.reason | i18next }}
+                    </h4>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </perfect-scrollbar>
+      </div>
+      <footer class="c-listing-footer table-view-footer rule-builder-footer px-24" [ngClass]="!showPageSettingData ? 'c-listing-table-dialog' : ''">
+        <app-svms-table-paginator
+          *ngIf="tableData?.rules?.length > 0"
+          [itemsPerPage]="itemsPerPage"
+          [recordsPerPageSetting]="recordsPerPageSetting"
+          [currentPage]="currentPage"
+          (changeRecords)="onClickRecords($event)"
+          [maxPages]="totalPages"
+          [showPageSettingData]="showPageSettingData"
+          (changePage)="onPaginationClick($event,alltableData)">
+        </app-svms-table-paginator>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+<!--  Cancel Modal :STARTS -->
+<app-svms-modal title="{{ 'warning' | i18next }}" [visibility]="cancelWarningModal" (onClose)="cancelWarningClose()">
+  <app-svms-modal-body>
+    Are you sure you want to cancel? This action will revert your decision table changes. Do you want to continue?
+    <div class="text-right mt-24">
+      <button type="submit" class="c-btn c-btn-secondary-medium-left-icon width70 ml-12" (click)="cancelWarningClose()">
+        {{ 'No' | i18next }}
+      </button>
+      <button class="c-btn c-btn-primary-medium width70 ml-12" (click)="cancelClicked()">{{ 'Yes' | i18next }}</button>
+    </div>
+  </app-svms-modal-body>
+</app-svms-modal>
+<!--  Cancel Modal :ENDS -->
+
+<!--  GoBack Modal :STARTS -->
+<app-svms-modal title="{{ 'warning' | i18next }}" [visibility]="goBackWarningModal" (onClose)="goBackWarningClose()">
+  <app-svms-modal-body>
+        You have unsaved changes. Are you sure you want to leave?
+    <div class="text-right mt-24">
+      <button type="submit" class="c-btn c-btn-secondary-medium-left-icon width70 ml-12" (click)="goBackWarningClose()">
+        {{ 'No' | i18next }}
+      </button>
+      <button class="c-btn c-btn-primary-medium width70 ml-12" (click)="backtoList()">{{ 'Yes' | i18next }}</button>
+    </div>
+  </app-svms-modal-body>
+</app-svms-modal>
+<!--  GoBack Modal :ENDS -->
+
+<!--  Add Record Modal :STARTS -->
+<app-svms-modal title="{{ 'add_new_record' | i18next }}" [visibility]="addRecordModal" (onClose)="addRecordClose()">
+  <app-svms-modal-body class="add-record-popup">
+    <h4 class="font-weight-medium">Input</h4>
+    <div class="c-form-group-row" *ngFor="let key of tableKeys;let keyIndex=index">
+        <div class="c-form-group" *ngIf="dataConfig[key].ruleType == 'input' ">
+            <label class="rule-field-label"> {{ key | i18next }} <span class="require">*</span></label>
+            <ng-select *ngIf="dataConfig[key].fieldType == 'DROPDOWN'"
+            #adddropdownSearch
+            [items]="dataConfig[key].items"
+            (keyup)="addNewDataSearchValues(adddropdownSearch.searchTerm,key)"
+            [loading]="newlyAddedData[key+'Loading']"
+            loadingText = "{{ 'loading....' | i18next }}"
+            notFoundText = "{{ 'no_data_found' | i18next }}"
+            bindLabel="name"
+            bindValue="id"  #tabData="ngModel" placeholder="{{'search' | i18next}}" [(ngModel)]="newlyAddedData['ND_'+key]">
+          </ng-select>
+          <input  *ngIf="dataConfig[key].fieldType == 'NUMBER' && dataConfig[key].isAccuracyDependent" [inputAccuracy]="dataConfig[key].accuracyKey" type="number" onlyNumber class="c-form-control" [(ngModel)]="newlyAddedData['ND_'+key]" min="0" />
+          <input  *ngIf="dataConfig[key].fieldType == 'NUMBER' && !dataConfig[key].isAccuracyDependent" type="number" onlyNumber class="c-form-control" [(ngModel)]="newlyAddedData['ND_'+key]" min="0"/>
+          <input  *ngIf="dataConfig[key].fieldType == 'STR'" type="text"  class="c-form-control"  [(ngModel)]="newlyAddedData['ND_'+key]" />
+        </div>
+    </div>
+
+    <h4 class="font-weight-medium mt-12">Output</h4>
+    <div class="c-form-group-row" *ngFor="let key of tableKeys;let keyIndex=index">
+      <div class="c-form-group" *ngIf="dataConfig[key].ruleType == 'output' ">
+          <label class="rule-field-label">{{ key | i18next }} <span class="require">*</span></label>
+          <ng-select *ngIf="dataConfig[key].fieldType == 'DROPDOWN'"
+          #adddropdownSearch
+          [items]="dataConfig[key].items"
+          loadingText = "{{ 'loading....' | i18next }}"
+          notFoundText = "{{ 'no_data_found' | i18next }}"
+          bindLabel="name"
+          bindValue="id"  #tabData="ngModel" placeholder="{{ 'search' | i18next }}" [(ngModel)]="newlyAddedData['ND_'+key]">
+        </ng-select>
+        <input  *ngIf="dataConfig[key].fieldType == 'NUMBER' && dataConfig[key].isAccuracyDependent" [inputAccuracy]="dataConfig[key].accuracyKey" type="number" onlyNumber class="c-form-control" [(ngModel)]="newlyAddedData['ND_'+key]" min="0"/>
+        <input  *ngIf="dataConfig[key].fieldType == 'NUMBER' && !dataConfig[key].isAccuracyDependent" type="number" onlyNumber class="c-form-control" [(ngModel)]="newlyAddedData['ND_'+key]" min="0"/>
+        <input *ngIf="dataConfig[key].fieldType == 'STR'" type="text"  class="c-form-control"  [(ngModel)]="newlyAddedData['ND_'+key]" />
+      </div>
+  </div>
+  </app-svms-modal-body>
+  <app-svms-modal-footer>
+    <div class="text-right">
+      <button (click)="addNewData()" class="c-btn c-btn-primary-medium ml-12 addRecordBtn"><i class="material-icons cursor-pointer mr-8">add</i>{{ 'Add' | i18next }}</button>
+    </div>
+  </app-svms-modal-footer>
+</app-svms-modal>
+
+<!--  Add Record Modal :ENDS -->
+
+
+<!--  Remove Record Modal :STARTS -->
+<app-svms-modal title="{{ 'warning' | i18next }}" [visibility]="removeRecordModal" (onClose)="removeRecordClose()">
+  <app-svms-modal-body>
+    Are you sure you want to remove this record from the decision table?
+    <div class="text-right mt-24">
+      <button type="submit" class="c-btn c-btn-secondary-medium-left-icon width70 ml-12" (click)="removeRecordClose()">
+        {{ 'No' | i18next }}
+      </button>
+      <button class="c-btn c-btn-primary-medium width70 ml-12" (click)="removeFromTable()">{{ 'Yes' | i18next }}</button>
+    </div>
+  </app-svms-modal-body>
+</app-svms-modal>
+<!--  Remove Record Modal :ENDS -->

@@ -1,0 +1,164 @@
+
+<app-logs [log]="logs"></app-logs>
+  <div *ngIf="timeSheet?.data?.actions_by?.rejected_by?.user" class="alert_message alert_error my-24">
+    <div class="d-flex align-items-center w-100">
+      <div class="d-flex align-items-center justify-content-start ">
+        <icon class="d-flex mr-8" size="24px" name="not_interested" type="material" cuClass="d-flex"></icon>
+      </div>
+      <div class="pl-8">
+        <div class="font-weight-bold mb-4 medium-font">{{ 'rejected_by' | i18next }} :
+          {{timeSheet?.data?.actions_by?.rejected_by?.user?.name | i18next }}
+          <ng-template [ngIf]="timeSheet?.data?.actions_by?.rejected_by?.delegate?.by?.name">({{ 'on_behalf_of' | i18next }} {{timeSheet?.data?.actions_by?.rejected_by?.delegate?.by?.name | i18next }})</ng-template>
+          {{ timeSheet?.data?.actions_by?.rejected_by?.action_at ? 'On
+          '+(timeSheet?.data?.actions_by?.rejected_by?.action_at | localDateFormat) : '' | i18next }}
+          {{ timeSheet?.data?.actions_by?.rejected_by?.action_at ? 'at
+          '+(timeSheet?.data?.actions_by?.rejected_by?.action_at | localDateFormat:'hh:mm:ss a z') : '' | i18next }}
+          <ng-template [ngIf]="timeSheet?.data?.actions_by?.rejected_by?.impersonate?.by?.name">(Impersonated by {{ timeSheet?.data?.actions_by?.rejected_by?.impersonate?.by?.name + ' - ' + timeSheet?.data?.actions_by?.rejected_by?.impersonate?.by?.role + ' (' + timeSheet?.data?.actions_by?.rejected_by?.impersonate?.by?.organization_category + ')'  | i18next }})</ng-template>
+          <!-- {{ getFormattedDate(timeSheet?.data?.actions_by?.rejected_by?.action_at) ? 'On ' +
+          getFormattedDate(timeSheet?.data?.actions_by?.rejected_by?.action_at) : '' | i18next }}
+          {{ getFormattedTime(timeSheet?.data?.actions_by?.rejected_by?.action_at) ? ' at '+
+          getFormattedTime(timeSheet?.data?.actions_by?.rejected_by?.action_at) : '' | i18next }} -->
+        </div>
+        <div class="mb-4"> <span class="font-weight-bold">{{ 'reason_for_reject' | i18next }} :</span>
+          {{timeSheet?.data?.actions_by?.rejected_by?.action_reason || ' - ' | i18next }}</div>
+        <div> <span class="font-weight-bold">{{ 'notes' | i18next }} :</span>
+          {{ timeSheet?.data?.actions_by?.rejected_by?.action_note || 'N/A' | i18next }}</div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="timeSheet?.data?.actions_by?.approved_by?.user" class="alert_message alert_success my-24">
+    <div class="d-flex align-items-center w-100">
+      <div class="d-flex align-items-center justify-content-start ">
+        <icon class="d-flex mr-8" size="24px" name="check_circle" type="material" cuClass="d-flex"></icon>
+      </div>
+      <div class="pl-8">
+        <div class="font-weight-bold mb-0 medium-font">{{ 'approved_by' | i18next }} :
+          {{timeSheet?.data?.actions_by?.approved_by?.user?.name | i18next }}
+          <ng-template [ngIf]="timeSheet?.data?.actions_by?.approved_by?.delegate?.by?.name">({{ 'on_behalf_of' | i18next }}  {{timeSheet?.data?.actions_by?.approved_by?.delegate?.by?.name | i18next }})</ng-template>
+          {{ timeSheet?.data?.actions_by?.approved_by?.action_at ? 'On
+          '+(timeSheet?.data?.actions_by?.approved_by?.action_at | localDateFormat) : '' | i18next }}
+          {{ timeSheet?.data?.actions_by?.approved_by?.action_at ? 'at
+          '+(timeSheet?.data?.actions_by?.approved_by?.action_at | localDateFormat:'hh:mm:ss a z') : '' | i18next }}
+          <ng-template [ngIf]="timeSheet?.data?.actions_by?.approved_by?.impersonate?.by?.name">(Impersonated by {{ timeSheet?.data?.actions_by?.approved_by?.impersonate?.by?.name + ' - ' + timeSheet?.data?.actions_by?.approved_by?.impersonate?.by?.role + ' (' + timeSheet?.data?.actions_by?.approved_by?.impersonate?.by?.organization_category + ')'  | i18next }})</ng-template>
+          <!-- {{getFormattedDate(timeSheet?.data?.actions_by?.approved_by?.action_at) ? 'On
+          '+getFormattedDate(timeSheet?.data?.actions_by?.approved_by?.action_at) : '' | i18next }}
+          {{ getFormattedTime(timeSheet?.data?.actions_by?.approved_by?.action_at)?' at '+
+          getFormattedTime(timeSheet?.data?.actions_by?.approved_by?.action_at) : '' | i18next }} -->
+        </div>
+        <div class="mb-4"></div>
+        <div *ngIf="timeSheet?.data?.actions_by?.approved_by?.action_note"> <span class="font-weight-bold">{{ 'notes' | i18next }} :</span>
+          {{ timeSheet?.data?.actions_by?.approved_by?.action_note || 'N/A' | i18next }}</div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="timeSheet?.data?.actions_by?.modification_by?.user" class="alert_message alert_success my-24">
+    <div class="d-flex align-items-center w-100">
+      <div class="d-flex align-items-center justify-content-start ">
+        <icon class="d-flex mr-8" size="24px" name="check_circle" type="material" cuClass="d-flex"></icon>
+      </div>
+      <div class="pl-8">
+        <div class="font-weight-bold mb-0 medium-font">{{ 'modified_by' | i18next }} :
+          {{timeSheet?.data?.actions_by?.modification_by?.user?.name | i18next }}
+          <ng-template [ngIf]="timeSheet?.data?.actions_by?.modification_by?.delegate?.by?.name">({{ 'on_behalf_of' | i18next }}  {{timeSheet?.data?.actions_by?.modification_by?.delegate?.by?.name | i18next }})</ng-template>
+          {{ timeSheet?.data?.actions_by?.modification_by?.action_at ? 'On
+          '+(timeSheet?.data?.actions_by?.modification_by?.action_at | localDateFormat) : '' | i18next }}
+          {{ timeSheet?.data?.actions_by?.modification_by?.action_at ? 'at
+          '+(timeSheet?.data?.actions_by?.modification_by?.action_at | localDateFormat:'hh:mm:ss a z') : '' | i18next }}
+          <ng-template [ngIf]="timeSheet?.data?.actions_by?.modification_by?.impersonate?.by?.name">(Impersonated by {{ timeSheet?.data?.actions_by?.modification_by?.impersonate?.by?.name + ' - ' + timeSheet?.data?.actions_by?.modification_by?.impersonate?.by?.role + ' (' + timeSheet?.data?.actions_by?.modification_by?.impersonate?.by?.organization_category + ')'  | i18next }})</ng-template>
+          <!-- {{getFormattedDate(timeSheet?.data?.actions_by?.modification_by?.action_at) ? 'On
+          '+getFormattedDate(timeSheet?.data?.actions_by?.modification_by?.action_at) : '' | i18next }}
+          {{ getFormattedTime(timeSheet?.data?.actions_by?.modification_by?.action_at)?' at '+
+          getFormattedTime(timeSheet?.data?.actions_by?.modification_by?.action_at) : '' | i18next }} -->
+        </div>
+        <div class="mb-4"> <span class="font-weight-bold">{{ 'reason_for_modify' | i18next }} :</span>
+          {{timeSheet?.data?.actions_by?.modification_by?.action_reason || ' - ' | i18next }}</div>
+        <div> <span class="font-weight-bold">{{ 'notes' | i18next }} :</span>
+          {{ timeSheet?.data?.actions_by?.modification_by?.action_note || 'N/A' | i18next }}</div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="timeSheet?.data?.actions_by?.withdrawn_by?.user" class="alert_message alert_pending my-24">
+    <div class="d-flex align-items-center w-100">
+      <div class="d-flex align-items-center justify-content-start ">
+        <icon class="d-flex mr-8" size="24px" name="check_circle" type="material" cuClass="d-flex"></icon>
+      </div>
+      <div class="pl-8">
+        <div class="font-weight-bold mb-0 medium-font">{{ 'withdrawn_by' | i18next }} :
+          {{timeSheet?.data?.actions_by?.withdrawn_by?.user?.name | i18next }}
+          <ng-template [ngIf]="timeSheet?.data?.actions_by?.withdrawn_by?.delegate?.by?.name">({{ 'on_behalf_of' | i18next }}  {{timeSheet?.data?.actions_by?.withdrawn_by?.delegate?.by?.name | i18next }})</ng-template>
+          {{ timeSheet?.data?.actions_by?.withdrawn_by?.action_at ? 'On
+          '+(timeSheet?.data?.actions_by?.withdrawn_by?.action_at | localDateFormat) : '' | i18next }}
+          {{ timeSheet?.data?.actions_by?.withdrawn_by?.action_at ? 'at
+          '+(timeSheet?.data?.actions_by?.withdrawn_by?.action_at | localDateFormat:'hh:mm:ss a z') : '' | i18next }}
+          <ng-template [ngIf]="timeSheet?.data?.actions_by?.withdrawn_by?.impersonate?.by?.name">(Impersonated by {{ timeSheet?.data?.actions_by?.withdrawn_by?.impersonate?.by?.name + ' - ' + timeSheet?.data?.actions_by?.withdrawn_by?.impersonate?.by?.role + ' (' + timeSheet?.data?.actions_by?.withdrawn_by?.impersonate?.by?.organization_category + ')'  | i18next }})</ng-template>
+          <!-- {{getFormattedDate(timeSheet?.data?.actions_by?.withdrawn_by?.action_at) ? 'On
+          '+getFormattedDate(timeSheet?.data?.actions_by?.withdrawn_by?.action_at) : '' | i18next }}
+          {{getFormattedTime(timeSheet?.data?.actions_by?.withdrawn_by?.action_at) ? ' at '+
+          getFormattedTime(timeSheet?.data?.actions_by?.withdrawn_by?.action_at) :'' | i18next }} -->
+        </div>
+        <div class="mb-4"> <span class="font-weight-bold">{{ 'reason_for_withdraw' | i18next }} :</span>
+          {{timeSheet?.data?.actions_by?.withdrawn_by?.action_reason || ' - ' | i18next }}</div>
+        <div> <span class="font-weight-bold">{{ 'notes' | i18next }} :</span>
+          {{ timeSheet?.data?.actions_by?.withdrawn_by?.action_note || 'N/A' | i18next }}</div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="timeSheet?.data?.actions_by?.deleted_by?.user" class="alert_message alert_error my-24">
+    <div class="d-flex align-items-center w-100">
+      <div class="d-flex align-items-center justify-content-start ">
+        <icon class="d-flex mr-8" size="24px" name="not_interested" type="material" cuClass="d-flex"></icon>
+      </div>
+      <div class="pl-8">
+        <div class="font-weight-bold mb-4 medium-font">{{ 'deleted_by' | i18next }} :
+          {{timeSheet?.data?.actions_by?.deleted_by?.user?.name | i18next }}
+          <ng-template [ngIf]="timeSheet?.data?.actions_by?.deleted_by?.delegate?.by?.name">({{ 'on_behalf_of' | i18next }}  {{timeSheet?.data?.actions_by?.deleted_by?.delegate?.by?.name | i18next }})</ng-template>
+          {{ timeSheet?.data?.actions_by?.deleted_by?.action_at ? 'On
+          '+(timeSheet?.data?.actions_by?.deleted_by?.action_at | localDateFormat) : '' | i18next }}
+          {{ timeSheet?.data?.actions_by?.deleted_by?.action_at ? 'at
+          '+(timeSheet?.data?.actions_by?.deleted_by?.action_at | localDateFormat:'hh:mm:ss a z') : '' | i18next }}
+          <ng-template [ngIf]="timeSheet?.data?.actions_by?.deleted_by?.impersonate?.by?.name">(Impersonated by {{ timeSheet?.data?.actions_by?.deleted_by?.impersonate?.by?.name + ' - ' + timeSheet?.data?.actions_by?.deleted_by?.impersonate?.by?.role + ' (' + timeSheet?.data?.actions_by?.deleted_by?.impersonate?.by?.organization_category + ')'  | i18next }})</ng-template>
+          <!-- {{ getFormattedDate(timeSheet?.data?.actions_by?.deleted_by?.action_at) ? 'On ' +
+          getFormattedDate(timeSheet?.data?.actions_by?.deleted_by?.action_at) : '' | i18next }}
+          {{ getFormattedTime(timeSheet?.data?.actions_by?.deleted_by?.action_at) ? ' at '+
+          getFormattedTime(timeSheet?.data?.actions_by?.deleted_by?.action_at) : '' | i18next }} -->
+        </div>
+        <div class="mb-4"> <span class="font-weight-bold">{{ 'reason_for_delete' | i18next }} :</span>
+          {{timeSheet?.data?.actions_by?.deleted_by?.action_reason || ' - ' | i18next }}</div>
+        <div> <span class="font-weight-bold">{{ 'notes' | i18next }} :</span>
+          {{ timeSheet?.data?.actions_by?.deleted_by?.action_note || 'N/A' | i18next }}</div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="isAssignmentClosed" class="alert_message alert_warning my-24">
+    <div class="d-flex align-items-center w-100">
+      <div class="d-flex align-items-center justify-content-start ">
+        <icon class="d-flex mr-8" size="24px" name="warning" type="material" cuClass="d-flex"></icon>
+      </div>
+      <div class="pl-8">
+        <div class="font-weight-bold mb-0 medium-font">{{ 'assignment_is_closed' | i18next }}. {{ 'please_contact_program_administrator' | i18next }}.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="timeSheet?.data?.actions_allow?.action_alert?.message" class="alert_message alert_warning my-24">
+    <div class="d-flex align-items-center w-100">
+      <div class="d-flex align-items-center justify-content-start ">
+        <icon class="d-flex mr-8" size="24px" name="warning" type="material" cuClass="d-flex"></icon>
+      </div>
+      <div class="pl-8">
+        <div class="font-weight-bold mb-0 medium-font">{{ timeSheet?.data?.actions_allow?.action_alert?.message  | i18next }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="isTimesheetEnabled != undefined && !isTimesheetEnabled" class="alert_message alert_warning my-24">
+    <div class="d-flex align-items-center w-100">
+      <div class="d-flex align-items-center justify-content-start ">
+        <icon class="d-flex mr-8" size="24px" name="warning" type="material" cuClass="d-flex"></icon>
+      </div>
+      <div class="pl-8">
+        <div class="font-weight-bold mb-0 medium-font">{{ 'timesheet_is_not_enabled_for_this_assignment' | i18next }}. {{ 'please_contact_program_administrator' | i18next }}.
+        </div>
+      </div>
+    </div>
+  </div>

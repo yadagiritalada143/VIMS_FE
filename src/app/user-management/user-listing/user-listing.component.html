@@ -1,0 +1,41 @@
+<div class="position-relative">
+    <div *ngIf="show_org" class="org-pos row px-24">
+        <div class="col col-4">
+            <div class="form-group">
+                <label>{{ 'organizations_category' | i18next }}</label>
+                <ng-select [(ngModel)]="selectedcatgs" (change)="selectCategory()" [clearable]="false"
+                    placeholder="{{ 'organizations_category' | i18next }}">
+                    <ng-option *ngFor="let orgCat of org_catgs" [value]="orgCat">{{orgCat}}</ng-option>
+                </ng-select>
+            </div>
+        </div>
+        <div class="col col-8">
+            <div class="form-group">
+                <label>{{ 'organizations' | i18next }}</label>
+                <ng-select [clearable]="false" placeholder="{{ 'select_organization' | i18next }}" [(ngModel)]="selectedorg"
+                    (change)="selectOrganization()" (search)='searchOrg($event)' [loading]="orgLoading" (scrollToEnd)="showMoreOrg()">
+                    <ng-option *ngFor="let org of orgLists" [value]="org.id">{{org.name}}</ng-option>
+                </ng-select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<vms-table [vmsTableConfig]="tableConfig" [vmsDataSource]="vmsData?.members" [totalItem]="totalRecords"
+    [itemsPerPage]="itemPerPage" (changePage)="onPaginationClick($event)" (search)="onSearch($event)"
+    (onListFilter)="onListFilter()" (onTabClick)="onTabClick()" (onViewClick)="onClickView($event)"
+    (onCreate)="onCreateClick($event)" (onSubmittedCandidateClick)="onSubmittedCandidateClick()"
+    (onEditClick)="onEditClick($event)" (columnClicked)="onColumnClick($event)" (onDeleteClick)="onDeleteClick($event)"
+    (onDisableClicked)="onDisableClicked($event)" [showOrg]=true>
+</vms-table>
+
+<vms-create-new-user 
+    [org]="orgId"
+    [list_or_create]="list_or_create"
+    [createUser]="createUser" 
+    (onUpdate)="handleUpdate()" 
+    [category]="selectedcatgs"
+>
+</vms-create-new-user>
+
+<app-create-role [createRole]="createRole" [list_or_create]="list_or_create"></app-create-role>

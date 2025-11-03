@@ -1,0 +1,172 @@
+<div class="billing-details-widget card bg-light mt-24 mt-m-0 seperation-border-m" *ngIf="((billing_data && billing_data?.length > 0) || (additional_billing_data && additional_billing_data?.length > 0))">
+    <div class="d-flex align-items-center py-16 px-24 px-m-16 d-block-m">
+        <h4 class="font-weight-medium">{{'billing_details'|i18next}}</h4>
+        <div class="value-breakup" *ngIf="totalBilling?.hours">
+            <p class="font-weight-medium">{{'Billable ' + totalBillableType() |i18next}}</p>
+            <p class="small">{{'total' | i18next}} {{':'}} {{totalBilling?.billable_hours | accuracy : accuracyConfig?.HOUR | i18next }}</p>
+        </div>
+
+        <div class="value-breakup" *ngIf="totalBilling?.hours">
+            <p class="font-weight-medium">{{'Non-Billable ' + totalBillableType() |i18next}}</p>
+            <p class="small">{{'total' | i18next}} {{':'}} {{totalBilling?.non_billable_hours | accuracy : accuracyConfig?.HOUR | i18next }}</p>
+        </div>
+
+        <div class="value-breakup" *ngIf="totalBilling?.client_total_amount">
+            <p class="font-weight-medium">{{'total_client_amount'|i18next}}</p>
+            <p class="small">{{'total' | i18next}} {{':'}} <span tooltip="{{showTooltip(totalBilling?.client_total_amount , accuracyConfig?.AMOUNT)}}" placement="right" delay="100">{{totalBilling?.client_total_amount | accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency} | i18next }}</span></p>
+            
+        </div>
+        <div class="value-breakup" *ngIf="totalBilling?.total_adjustment_fee_amount && is_adjustment_fee_allowed">
+            <p class="font-weight-medium">{{'total_adjustment_amount'|i18next}}</p>
+            <p class="small">{{'total' | i18next}} {{':'}} <span tooltip="{{showTooltip(totalBilling?.total_adjustment_fee_amount , accuracyConfig?.AMOUNT)}}" placement="right" delay="100">{{totalBilling?.total_adjustment_fee_amount | accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency} | i18next }}</span></p>  
+        </div>
+
+        <div class="value-breakup" *ngIf="totalBilling?.msp_total_amount">
+            <p class="font-weight-medium">{{'total_msp_amount'|i18next}}</p>
+            <p class="small">{{'total' | i18next}} {{':'}} <span tooltip="{{showTooltip(totalBilling?.msp_total_amount , accuracyConfig?.AMOUNT)}}" placement="right" delay="100"> {{ totalBilling?.msp_total_amount | accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next}}</span></p>
+            
+        </div>
+        <div class="value-breakup" *ngIf="totalBilling?.vendor_total_amount">
+            <p class="font-weight-medium">{{'total_vendor_amount'|i18next}}</p>
+            <p class="small">{{'total' | i18next}} {{':'}} <span tooltip="{{showTooltip(totalBilling?.vendor_total_amount , accuracyConfig?.AMOUNT)}}" placement="right" delay="100">{{ totalBilling?.vendor_total_amount | accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next}}</span></p>
+        </div>
+        <div class="value-breakup" *ngIf="totalBilling?.total_tax_amount && totalBilling?.total_tax_amount !=='0.00' ">
+            <p class="font-weight-medium">{{'total_tax_amount'|i18next}}</p>
+            <p class="small">{{'total' |i18next}} {{':'}} <span tooltip="{{showTooltip(totalBilling?.total_tax_amount , accuracyConfig?.AMOUNT)}}" placement="right" delay="100">{{ totalBilling?.total_tax_amount | accuracy : accuracyConfig?.TAX : {currencyCode:currency}  | i18next}}</span></p>
+        </div>
+    </div>
+    <div>
+        <perfect-scrollbar [config]="{ suppressScrollX: false, suppressScrollY: true }">
+            <table>
+                <thead>
+                    <tr>
+                        <ng-container *ngFor="let h of billingHeader">
+                        <th [hidden]="shouldHideHeader(h?.key)" class="text-uppercase">{{h?.name | i18next}}</th>
+                        </ng-container>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let data of row_data">
+                        <ng-container *ngIf="data?.data?.length > 0 && data?.slug === 'additional_billing_data'">
+                            <tr>
+                                <td class="font-weight-medium pl-24">
+                                <h4 class="pl-26 m-8 ml-16 font-weight-medium">{{data?.label | i18next}}</h4>
+                                </td>
+                            </tr>
+                        </ng-container>
+                    <ng-container *ngFor="let parent of data?.data">
+                        <tr>
+                            <td *ngFor="let h of billingHeader; let i = index" [hidden]="shouldHideHeader(h?.key)"
+                                (click)="parent.collapsed = !parent.collapsed" [class.collapsed]="parent.collapsed">
+                                <div class="d-flex align-items-center" [ngClass]="parent?.sub_data &&  i === 0? 'justify-content-start' : 'justify-content-between'">
+                                    <i class="material-icons"
+                                        *ngIf="!parent?.collapsed && i === 0 && parent?.sub_data">chevron_right</i>
+                                    <i class="material-icons"
+                                        *ngIf="parent?.collapsed && i === 0 && parent?.sub_data">expand_more</i>
+                                    <span class="font-weight-medium"
+                                        [ngClass]="{'pl-24' : !parent?.sub_data &&  i === 0}">
+                                        <span *ngIf="h?.isAmount; else elseBlock" tooltip="{{showTooltip(parent[h?.key] , accuracyConfig?.AMOUNT)}}" [placement]="alignment(h?.key)" delay="100">
+                                            {{parent[h?.key] | accuracy : accuracyConfig?.AMOUNT :
+                                            {currencyCode:currency} | i18next }}
+                                        </span>
+                                        <ng-template #elseBlock>
+                                            {{ !isNumeric(parent[h?.key]) ? parent?.label : (parent[h?.key] | accuracy
+                                            : accuracyConfig?.HOUR | i18next)}}
+                                        </ng-template>
+                                    </span>
+
+                                    <span *ngFor="let item of icons" [hidden]="h?.key != item.key" class="ml-8">
+                                        <icon  cuClass="d-flex pr-0" *ngIf="h?.key === item.key" class="cursor-pointer mt-0"
+                                            name="info" color="#aaabb5" size="16px" type="material"
+                                            [tooltip]="parent[item?.tooltip]" [placement]="alignment(h?.key)" delay="100"></icon>
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr *ngIf="parent.collapsed && parent?.sub_data?.length">
+                            <td style="padding: 0;" *ngFor="let h of billingHeader; let i = index" [hidden]="shouldHideHeader(h?.key)">
+                                <table>
+                                    <tbody>
+                                        <ng-container *ngFor="let child of parent.sub_data">
+                                            <tr>
+                                                <td (click)="child.collapsed = !child.collapsed"
+                                                    [class.collapsed]="child.collapsed">
+                                                    <div class="d-flex align-items-center" [ngClass]="i === 0? 'justify-content-start' : 'justify-content-between'">
+                                                        <span [ngClass]="{'left-space d-flex align-items-center': i === 0}">
+                                                            <i class="material-icons cursor-pointer"
+                                                                *ngIf="!child?.collapsed && i === 0 && child?.sub_data">chevron_right</i>
+                                                            <i class="material-icons cursor-pointer"
+                                                                *ngIf="child?.collapsed && i === 0 && child?.sub_data">expand_more</i>
+                                                            <span [ngClass]="{'no-child' : !child?.sub_data &&  i === 0}">
+                                                                <span *ngIf="h?.isAmount; else elseBlock" tooltip="{{showTooltip(child[h?.key] , accuracyConfig?.AMOUNT)}}" [placement]="alignment(h?.key)" delay="100">
+                                                                    {{child[h?.key] | accuracy : accuracyConfig?.AMOUNT :
+                                                                    {currencyCode:currency} | i18next }}
+                                                                </span>
+                                                                <ng-template #elseBlock>
+                                                                    {{ !isNumeric(child[h?.key]) ? child?.label:
+                                                                    (child[h?.key] | accuracy : accuracyConfig?.HOUR |
+                                                                    i18nextEager)}}
+                                                                </ng-template>
+                                                            </span>
+                                                        </span>
+    
+                                                        <span *ngFor="let item of icons" [hidden]="h?.key != item.key">
+                                                            <icon  cuClass="d-flex pr-0" *ngIf="h?.key === item.key"
+                                                                class="cursor-pointer" name="info"
+                                                                color="#aaabb5" size="16px" type="material"
+                                                                [tooltip]="child[item?.tooltip]"  [placement]="alignment(h?.key)"
+                                                                delay="100"></icon>
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr *ngIf="child.collapsed && child?.sub_data?.length">
+                                                <td style="padding: 0px;">
+                                                    <table>
+                                                        <tbody>
+                                                            <tr *ngFor="let grandchild of child.sub_data" [hidden]="shouldHideHeader(h?.key)">
+                                                                <td>
+                                                                    <div class="d-flex align-items-center" [ngClass]="i === 0? 'justify-content-start' : 'justify-content-between'">
+                                                                        <span [ngClass]="{'left-space-double': i === 0}">
+                                                                            <i class="material-icons"
+                                                                                *ngIf="i === 0">remove</i>
+                                                                            <span *ngIf="h?.isAmount; else elseBlock" tooltip="{{showTooltip(grandchild[h?.key] , accuracyConfig?.AMOUNT)}}" [placement]="alignment(h?.key)" delay="100">
+                                                                                {{grandchild[h?.key] | accuracy :
+                                                                                accuracyConfig?.AMOUNT :
+                                                                                {currencyCode:currency} | i18next }}
+                                                                            </span>
+                                                                            <ng-template #elseBlock>
+                                                                                {{ !isNumeric(grandchild[h?.key]) ?
+                                                                                grandchild?.label : (grandchild[h?.key] |
+                                                                                accuracy : accuracyConfig?.HOUR |
+                                                                                i18nextEager)}}
+                                                                            </ng-template>
+                                                                        </span>
+    
+                                                                        <span *ngFor="let item of icons" [hidden]="h?.key != item.key">
+                                                                            <icon cuClass="d-flex pr-0" *ngIf="h?.key === item.key"
+                                                                                class="cursor-pointer"
+                                                                                name="info" color="#aaabb5" size="16px"
+                                                                                type="material"
+                                                                                [tooltip]="grandchild[item?.tooltip]"
+                                                                                [placement]="alignment(h?.key)" delay="100"></icon>
+                                                                        </span>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </ng-container>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </ng-container> 
+                </ng-container>
+                </tbody>
+            </table>
+        </perfect-scrollbar>
+    </div>
+</div>

@@ -1,0 +1,217 @@
+@import '../../../assets/sass/abstracts/variables';
+
+.program-manager {
+  &-tab {
+    display: flex;
+  }
+
+  &-table {
+    font-weight: 500;
+    width: 100%;
+
+    thead {
+      background-color: $bg-default;
+
+      th {
+        color: $text-secondary;
+        border-bottom-width: 0px;
+        padding: $p16;
+      }
+    }
+
+    tbody {
+      tr {
+        &:not(:last-child) {
+          border-bottom: 1px solid $border-color;
+        }
+
+        td {
+          vertical-align: middle;
+          padding-top: $p12;
+          padding-bottom: $p12;
+          border-color: $border-color;
+
+          &:last-child {
+            text-align: right;
+            font-weight: $font-weight-bold;
+
+          }
+
+          &:first-child {
+            display: flex;
+            align-items: center;
+          }
+
+          &:nth-of-type(2) {
+            color: $color-assets-secondary-shade;
+          }
+        }
+      }
+    }
+
+  }
+}
+
+.org-summary {
+  display: flex;
+  align-items: center;
+  background-color: $alert-info;
+  font-size: $font-primary;
+  justify-content: space-between;
+  padding: $p16 $p24;
+  margin-bottom: $m32;
+  position: relative;
+  color: $color-assets-secondary-shade;
+  border-radius: $border-radius;
+
+  &:after {
+    content: "";
+    background-color: $alert-info;
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    top: -8px;
+    transform: rotate(45deg);
+  }
+
+  .client,
+  .industry {
+    display: flex;
+    flex-direction: column;
+
+    span {
+      &:first-child {
+        color: $color-assets-secondary-shade;
+
+      }
+    }
+  }
+
+  .icons {
+    a {
+      &:not(:last-child) {
+        margin-right: $m8;
+      }
+    }
+  }
+}
+
+.create-client {
+  width: 67%;
+}
+
+.modal-backdrop {
+  background: $color-secondary;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  transition: $transition;
+  opacity: 0;
+  visibility: hidden;
+  transition: $transition;
+
+  &.active {
+    visibility: visible;
+    opacity: .8;
+  }
+}
+
+.success-modal {
+  width: 478px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50.1%);
+  z-index: 1001;
+  transition: $transition;
+  opacity: 0;
+  visibility: hidden;
+
+  .close-success-modal {
+    position: absolute;
+    top: 13px;
+    right: 16px;
+
+    icon {
+      display: inline-block;
+
+      ::ng-deep i {
+        color: $color-dark;
+      }
+    }
+  }
+
+  .success-modal-body {
+    .success-icon {
+      display: inline-block;
+
+      ::ng-deep i {
+        color: $color-green;
+      }
+    }
+
+    h3 {
+      line-height: 32px;
+      max-width: 202px;
+      margin: auto;
+      color: $color-dark;
+    }
+  }
+
+  .modal-footer {
+    background: $color-gray-10;
+    border-top: 1px solid $color-gray-50;
+
+    .user-avatar {
+      background: $initials-purple;
+      color: $light;
+      line-height: 40px;
+      width: 40px;
+      font-size: 16px;
+    }
+
+    .user-info {
+      color: $color-body-txt-default;
+
+      p {
+        line-height: 16px;
+      }
+
+      .user-status {
+        line-height: 21px;
+        font-size: 12px;
+
+        span {
+          width: 7px;
+          height: 7px;
+        }
+
+        &.inactive {
+          background: $color-gray-30;
+          color: $color-gray-70;
+
+          span {
+            background: $color-gray-70;
+          }
+        }
+      }
+    }
+  }
+
+  &.active {
+    visibility: visible;
+    opacity: 1;
+  }
+}
+
+.option-icon {
+  color: $color-secondary-shade;
+  font-size: 19px;
+}
+
+.select-option-icon {
+  color: $color-secondary-shade;
+  font-size: 32px;
+  ;
+}

@@ -1,0 +1,124 @@
+<div class="edit-accuracy">
+    <div class="accuracy-wrapper-inner">
+        <header class="section-header p-24 d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <i (click)="intialScopeSetup(); backClicked()" tooltip="{{'back' | i18next}}" placement="bottom"
+                    class="material-icons back-arrow-icon mr-16 cursor-pointer">arrow_back</i>
+                <h3 class="font-weight-semibold mb-0">{{'Edit Accuracy Configuration' |
+                    i18nextEager }}</h3>
+            </div>
+            <div>
+                <button class="c-btn c-btn-success-medium" [disabled]="!accuracyForm.valid" *accessControl
+                    (click)="saveConfiguration()">
+                    {{ btnTxt | i18next }}
+                </button>
+            </div>
+        </header>
+    </div>
+    <section class="section-body-content">
+        <div class="px-32 py-24">
+            <app-try-out></app-try-out>
+            <div class="create" [formGroup]="accuracyForm">
+                <div *ngFor="let config of accuracyConfig" class="mb-16 block-container">
+                    <div class="mb-16 d-flex align-items-center">
+                        <h4 class="font-weight-medium mb-0">
+                            {{config?.main_scope_label | i18next }}
+                        </h4>
+                        <i class="info-icon material-icons ml-8" tooltip="{{config?.supporting_text | i18next }}"
+                            placement="right">help</i>
+                    </div>
+                    <div *ngFor="let scope of config?.scopes; let idx=index" class="" [formGroupName]="scope">
+                        <label *ngIf="config?.scopes?.length > 1 || scope === 'adjustment'"
+                            class="accuracy-form-label font-weight-medium mb-16 d-flex" [ngClass]="{'divider': idx}">
+                            {{getLabel(scope) | i18next | snakeToTitleCase | titlecase }}
+                            {{idx ? ('(' + ('percentage' | i18next | snakeToTitleCase | titlecase) + ')') : ('(' +
+                            ('fixed' | i18next | snakeToTitleCase | titlecase) + ')')}}
+                        </label>
+                        <div class="c-form-group-row">
+                            <!-- <div *ngFor="let propertyName of propertyNames" [formGroupName]="propertyName"> -->
+                            <div class="c-form-group">
+                                <span [tooltip]="'Scaling Type' | i18next" placement="right">
+                                    <span class="text-custom-grey">{{ 'scaling_type' | i18next }}</span>
+                                    <span class="text-red pl-4">*</span>
+                                </span>
+                                <div class="mt-8">
+                                    <ng-select [items]="scalingType" bindLabel="name" bindValue="value"
+                                        placeholder="{{ 'select' | i18next }} {{ 'scaling_type' | i18next }}"
+                                        formControlName="precisiontype" [(ngModel)]="this[scope].precision_type"
+                                        [readonly]="!isEditMode" (change)="changePrecisionType(scope)"
+                                        [ngClass]="accuracyForm.get(scope)?.get('precisiontype')?.touched && accuracyForm.get(scope)?.get('precisiontype')?.errors?.required?'error':''">
+                                    </ng-select>
+                                </div>
+                                <div
+                                    *ngIf="accuracyForm.get(scope)?.get('precisiontype')?.touched && accuracyForm.get(scope)?.get('precisiontype')?.errors?.required">
+                                    <div [ngStyle]="{display: 'flex'}">
+                                    <icon name="info" type="material" color="#EB445A" size="15px" class="error-icon"></icon>
+                                    <div class="require">&nbsp;{{ 'this_field_is_required' | i18next}}</div>.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="c-form-group">
+                                <span [tooltip]="'Scaling Limit (0 - 8)' | i18next" placement="right">
+                                    <span class="text-custom-grey">{{ 'scaling_limit' | i18next }}</span>
+                                    <span class="text-custom-grey">{{ ' (0-8)' | i18next }}</span>
+                                    <span class="text-red pl-4">*</span>
+                                </span>
+                                <div class="mt-8">
+                                    <input formControlName="scale" type="number" class="c-form-control" min="0" max="8"
+                                        placeholder="{{ 'enter_a_number_between_0_to_8' | i18next }}"
+                                        [(ngModel)]="this[scope].scale" [readonly]="!isEditMode"
+                                        (keyup)="changeInput(scope, 'scale', 8)" required pattern="[0-8]+"
+                                        [ngClass]="accuracyForm.get(scope)?.get('scale')?.errors?.required && accuracyForm.get(scope)?.get('scale')?.touched?'error':''">
+                                </div>
+                                <div
+                                    *ngIf="accuracyForm.get(scope)?.get('scale')?.errors?.required && accuracyForm.get(scope)?.get('scale')?.touched">
+                                    <div [ngStyle]="{display: 'flex'}">
+                                    <icon name="info" type="material" color="#EB445A" size="20px" class="error-icon"></icon>
+                                    <div class="require">&nbsp;{{ 'this_field_is_required' | i18next}}</div>.
+                                    </div>
+                                </div>
+                                <div
+                                    *ngIf="accuracyForm.get(scope)?.get('scale')?.errors?.pattern && accuracyForm.get(scope)?.get('scale')?.touched">
+                                    <div [ngStyle]="{display: 'flex'}">
+                                        <icon name="info" type="material" color="#EB445A" size="20px" class="error-icon"></icon>
+                                        <div class="require"> Enter number between 0-8.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="c-form-group">
+                                <ng-container *ngIf="this[scope].precision_type !== 'truncate'">
+                                    <span [tooltip]="'Scaling Threshold (0 - 9)' | i18next" placement="right">
+                                        <span class="text-custom-grey">{{ 'scaling_threshold' | i18next }}</span>
+                                        <span class="text-custom-grey">{{ ' (0-9)' | i18next }}</span>
+                                        <span class="text-red pl-4">*</span>
+                                    </span>
+                                    <div class="mt-8">
+                                        <input formControlName="threshold" type="number" class="c-form-control" min="0"
+                                            max="9" placeholder="{{ 'enter_a_number_between_0_to_9' | i18next }}"
+                                            [(ngModel)]="this[scope].threshold" [readonly]="!isEditMode"
+                                            (keyup)="changeInput(scope, 'threshold', 9)" required pattern="[0-9]+"
+                                            [ngClass]="accuracyForm.get(scope)?.get('threshold')?.errors?.required && accuracyForm.get(scope)?.get('threshold')?.touched?'error':''">
+                                    </div>
+                                    <div
+                                        *ngIf="accuracyForm.get(scope)?.get('threshold')?.errors?.required && accuracyForm.get(scope)?.get('threshold')?.touched">
+                                    <div [ngStyle]="{display: 'flex'}">
+                                        <icon name="info" type="material" color="#EB445A" size="20px" class="error-icon"></icon>
+                                        <div class="require">&nbsp;{{ 'this_field_is_required' | i18next}}</div>.
+                                    </div>
+                                    </div>
+                                    <div
+                                        *ngIf="accuracyForm.get(scope)?.get('threshold')?.errors?.pattern && accuracyForm.get(scope)?.get('threshold')?.touched">
+                                    <div class=[ngStyle]="{display: 'flex'}">
+                                        <icon name="info" type="material" color="#EB445A" size="20px" class="error-icon"></icon>
+                                        <div class="require">Enter number between 0-9</div>
+                                    </div>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

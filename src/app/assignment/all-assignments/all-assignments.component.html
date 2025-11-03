@@ -1,0 +1,62 @@
+<vms-table *ngIf="tableLoaded" [vmsTableConfig]="tableConfig" [vmsDataSource]="assignmentList" [loading]="dataLoader"
+  [open]="isExpand" [totalItem]="totalRecords" [count]="countData" [itemsPerPage]="itemPerPage"
+  (onExpandClick)="onExpandClick($event)" (changePage)="onPaginationClick($event)" (onViewClick)="onClickView($event)"
+  (onOpenPanel)="viewSidePanel($event)" (onSort)="onSortClick($event)" (onCreate)="onCreateClick($event)"
+  [currentTab]="selectedTab" (search)="onSearch($event)" (onListFilter)="onListFilter($event , 0)"
+  (onTabClick)="onTabClick($event)"  (onSelectClick)="onRowChecked($event)" (onActionButtonClick)="actionButtonClicked($event)" (onRowChecked)="onRowChecked($event)"
+  (onPendingIconClick)="navigateToApproval($event)" [isMultipleSelectionDropdown] ="true" [availableCountForSelect]="availableCountForSelect" [manuallySelectedCount]="selectedAssignmentCount" (selectedRecords)="selectedRecord($event)" [selectedRecordslist]="selectedIds" (onAllRecordsSelected)="onAllRecordsSelected($event)" (onSelectAllClick)="onselectAllClick($event)"  (changeRecords)="onClickRecords($event)">
+  <div class="expanded-col" *ngFor="let data of assignmentList"  [hidden]="expandId != data?.assignment_uuid">
+    <div class="expanded-chips selected-expanded">
+      <div class="profiles-img">
+        <span class="initials">{{data?.assignment_title?.name?.substring(0,2)}}</span>
+      </div>
+      <div class="chip-content">
+        <span class="name">
+          {{data?.vendor?.name | i18nextEager}}
+        </span>
+        <span class="designation">
+          {{data?.work_location | i18nextEager}}
+        </span>
+      </div>
+    </div>
+    <div class="expanded-chips">
+      <div>
+        <span class="more">
+          <icon size="17px" name="event_available" type="material" cuClass="icon d-flex pr-16"></icon>
+        </span>
+      </div>
+      <div class="chip-content">
+        <span class="name">
+          {{data?.start_date}} - {{data?.end_date}}
+        </span>
+        <span class="designation">
+          {{ 'duration' | i18nextEager }}
+        </span>
+      </div>
+    </div>
+    <div class="expanded-chips">
+      <div>
+        <span class="more">
+          <icon size="17px" name="payments" type="material" cuClass="icon d-flex pr-16"></icon>
+        </span>
+      </div>
+      <div class="chip-content">
+        <span class="name">
+          {{data?.finance?.expense_budget | accuracy : accuracyConfig.amount : {currencyCode : data?.finance?.currency} }}
+        </span>
+        <span class="designation">
+          {{ 'total' | i18nextEager }}
+        </span>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="(assignmentList | json) == '[]'">
+    {{ 'data_not_available' | i18nextEager }}
+  </div>
+</vms-table>
+<!-- added worker profile flyout -->
+<app-view-profile></app-view-profile>
+<!-- <app-mass-update-assignment [fieldsList]="fields"></app-mass-update-assignment> -->
+<app-summary-page-info></app-summary-page-info>
+<assignment-details-sidebar-view></assignment-details-sidebar-view>
+

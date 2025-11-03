@@ -1,0 +1,417 @@
+<div class="create-rate-factor">
+  <div class="page-header p-8">
+    <div class="cancel-page-button">
+      <button (click)="onCancel()" type="button" class="btn add">
+        <icon size="24px" name="keyboard_backspace" type="material" cuClass="d-flex"></icon>
+      </button>
+    </div>
+    <div class="page-title my-12 text-center font-weight-medium">{{title | i18next}}</div>
+  </div>
+
+  <form *ngIf="rateFactorForm" [formGroup]="rateFactorForm" class="sidebarContent mt-32">
+      <div class="create-content panel panel-light py-24 px-32">
+        <div class="w-100 d-flex">
+            <div class="from-group w-50 mr-16">
+              <label for='type'>
+                {{ 'rate_type'  | i18next }}
+                <span class='require'>*</span>
+              </label>
+              <ng-select
+                placeholder="{{ 'type' | i18next }}"
+                formControlName='rate_factor_type'
+                [clearable]='true'
+                [searchable]='true'
+                [multiple]='false'
+                [readonly]='!(createMode || isEditMode)'
+                [disabled]='!(createMode || isEditMode)'
+                (change)="changeAbbreviation($event)"
+                >
+                <ng-option
+                  *ngFor='let entry of rateFactorTypeOptions | keysort;'
+                  [value]='getKeyValueType(entry)'
+                >
+                   {{ entry }}
+                </ng-option>
+              </ng-select>
+              <div *ngIf="!(isViewMode || isEditMode)">
+                <p *ngIf="rateFactorForm.get('rate_factor_type').invalid && rateFactorForm.get('rate_factor_type').touched"
+                  class="validation-msg">
+                  <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'this_field_is_required' | i18next }}
+                </p>
+              </div>
+            </div>
+            <div class="form-group w-50">
+              <label for="name">
+                {{'rate_type_name' | i18next}} 
+                <span class="require">*</span>
+              </label>
+            <input type="text" placeholder="{{'rate_type_name'|i18next}}" id="name" formControlName="name"
+              [readonly]="isViewMode" ngDefaultControl class="form-control" maxlength="40">
+            <div *ngIf="!(isViewMode || isEditMode)">
+              <p *ngIf="rateFactorForm.get('name').invalid && rateFactorForm.get('name').touched"
+                class="validation-msg">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'this_field_is_required' | i18next }}
+            </p>
+            </div>
+            </div>
+
+          </div>
+        <div class="d-flex">
+        <div class="w-100 d-flex">
+          <div class="form-group w-50 mr-16">
+            <label>
+              {{ 'abbreviation' | i18next }} 
+              <span class="require">*</span>
+            </label>
+              <input type="text" id="abbreviation" formControlName="abbreviation"
+                [readOnly]="isViewMode || rateFactorForm.get('rate_factor_type').value === 'STANDARD'"
+                ngDefaultControl class="form-control" maxLength="7" placeholder="Abbreviation">
+              <div *ngIf="!(isViewMode || isEditMode)" id="abbreviation-field">
+                <p *ngIf="rateFactorForm.get('abbreviation').invalid && rateFactorForm.get('abbreviation').touched"
+                  class="validation-msg">
+                  <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'this_field_is_required' | i18next }}
+              </p>
+              </div>
+          </div>
+        </div>
+        <div *ngIf='isEditMode' [ngClass]="{'ml-16': isEditMode}">
+          <div class="toggle-panel mt-24" id="toggle-panel">
+            <div class="toggle-panel-inner toggle-background">
+              <span class="status-text">{{toggle?.is_enabled.title | i18next}}</span>&nbsp;
+                <span class="toggle-switch" [ngClass]="toggle?.is_enabled.value ? 'toggle-on' : 'toggle-off'"
+                (click)="isViewMode ? null : onClickToggle('is_enabled')"></span>
+            </div>
+          </div>
+        </div>
+        </div>
+        <div class="form-group-row">
+          <div class="col-6 mr-16">
+            <div class="form-group with-icon">
+              <label>{{ 'job_template' | i18next }}</label>
+              <input formControlName='template' [readonly]="isViewMode || isEditMode" [ngClass]='isEditMode?"white":""' class="form-control template" type="text" placeholder="{{ 'select_job_templates' | i18next }}"
+                (click)="isViewMode ? null : jobTemplateClick()">
+                <icon name="content_paste" size="18px" type="material"></icon>
+            </div>
+            <div *ngIf='jobTemplates.length !== 0' class='chip-holder'>
+              <ng-container *ngFor='let id of jobTemplates; index as it'>
+                <div class='custom-chip d-flex space-between'>
+                  <div class='chip-name' [ngStyle]='{ "color": "black" }'>
+                    {{ (rateFactorService.jobTemplateMap.get(id) || '') | i18next }}
+                  </div>
+                  <div *ngIf="!isViewMode" [id]='id' class="close" (click)='removeSelectedTemplate(id, it)'>
+                    &#x02A2F;
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group with-icon">
+              <label>
+                {{ 'hierarchy' | i18next }} 
+                <span class='require'>*</span>
+              </label>
+              <input formControlName='hierarchy' [readonly]="isViewMode || isEditMode" [ngClass]='isEditMode?"white":""' class="form-control" type="text" placeholder="{{ 'select_hierarchies' | i18next }}"
+                (click)="isViewMode ? null : hierarchyClick()">
+                <icon name="account_tree" size="18px" type="material"></icon>
+            </div>
+            <div *ngIf='selectedHierarchies.length !== 0' class='chip-holder'>
+              <ng-container *ngFor='let id of selectedHierarchies; index as it'>
+                <div class='custom-chip d-flex space-between'>
+                  <div class='chip-name' [ngStyle]='{ "color": "black" }'>
+                    {{ (rateFactorService.hierarchyMap.get(id) || '') | i18next }}
+                  </div>
+                  <div *ngIf="!isViewMode" [id]='id' class="close" (click)='removeSelectedHierarchies(id, it)'>
+                    &#x02A2F;
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+        <div class="form-group-row row pb-24">
+          <div class="col-sm-6">
+            <div class="toggle-panel mt-24 enforce-rate-card-toggle" [ngClass]="{'disable':isViewMode || lockedRateType}">
+              <div class="toggle-panel-inner" [ngClass]="toggle.billable?.value ? 'if-active' : 'if-inactive'">
+                <span class="status-text">{{toggle.billable?.title | i18next}}</span>
+                <span class="toggle-switch" [ngClass]="toggle.billable?.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickToggle('billable')"></span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="isBillable" class="col-sm-6">
+            <div class="toggle-panel mt-24 enforce-rate-card-toggle" [ngClass]="{'disable':isViewMode}">
+              <div class="toggle-panel-inner" [ngClass]="toggle.hide_rate_factors?.value ? 'if-active' : 'if-inactive'">
+                <span class="status-text">{{toggle.hide_rate_factors?.title | i18next}}</span>
+                <span class="toggle-switch" [ngClass]="toggle.hide_rate_factors?.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickToggle('hide_rate_factors')"></span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="isBillable" class="col-sm-6">
+            <div class="toggle-panel mt-24 enforce-rate-card-toggle" [ngClass]="{'disable':isViewMode || toggle.hide_rate_factors?.value}">
+              <div class="toggle-panel-inner" [ngClass]="toggle.edit_rate_factors?.value ? 'if-active' : 'if-inactive'">
+                <span class="status-text">{{toggle.edit_rate_factors?.title | i18next}}</span>
+                <span class="toggle-switch" [ngClass]="toggle.edit_rate_factors?.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickToggle('edit_rate_factors')"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="isBillable" class="rates">
+          <div class="flex">
+            <h4 class="font-weight-medium">{{ formValue?.name.value }} {{ 'bill_rate' | i18next }}</h4>
+            <!-- <icon id="lock" name="lock" size="16px" type="material" class="ml-12"></icon> -->
+          </div>
+          <div class="bill-rate d-flex mt-10 align-items-center" formGroupName="bill_rate">
+            <div class="d-flex first-rate">
+              <div class="position-relative">
+                <label for="factor">{{ 'factor' | i18next }}</label>
+                <input [readonly]="isViewMode || isStandardFactor" type="number" id="factor" formControlName="first_factor" min="0.01" max="10"
+                  class="form-control factor" name="factor" inputAccuracy="rate">
+                <small
+                  *ngIf="rateFactorForm.get('bill_rate.first_factor').invalid && rateFactorForm.get('bill_rate.first_factor').touched"
+                  class="error-text">{{ 'the_factor_should_be_' | i18next }} 0.01 - 10.</small>
+              </div>
+              <div>
+                <label for="rate">{{ 'select_rate' | i18next }}</label>
+                <ng-select [readonly]="isViewMode || isStandardFactor" id="rate" class="rate-select" formControlName="first_rate" [clearable]="false"
+                  (change)="onRateChange($event, 'bill_rate', 'first_rate')">
+                  <ng-option *ngFor="let rate of rateItems" [value]="rate.id">{{rate?.name | i18next}}</ng-option>
+                </ng-select>
+              </div>
+            </div>
+
+            <ng-container *ngIf="!isStandardFactor">
+              <div class="add-new-rate mt-24 ml-16" *ngIf="showAddBillRateBtn, else addFactor"
+                (click)="addNewBillRate('add')">
+                <ng-container *ngIf="!isViewMode">
+                  <icon name="add" class="mr-8" size="16px" type="material"></icon>
+                  <span>{{ 'add_rate' | i18next }}</span>
+                </ng-container>
+              </div>
+            </ng-container>
+
+            <ng-template #addFactor>
+              <div class="add-factor mt-24 ml-16">
+                <div class="btn-group d-flex mr-16" role="group" aria-label="First group">
+                  <button type="button" class="btn add" (click)="!isViewMode && addToFactor('first_bill')">
+                    <i size="small" class="material-icons">{{'add'}}</i>
+                  </button>
+                  <div *ngIf='isViewMode'>&nbsp;</div>
+                </div>
+              </div>
+            </ng-template>
+
+            <ng-template [ngIf]="!showAddBillRateBtn && !isStandardFactor">
+              <div class="d-flex second-rate mr-16">
+                <div class="position-relative">
+                  <label for="second_factor">{{ 'factor' | i18next }}</label>
+                  <input [readonly]="isViewMode" type="number" id="second_factor" formControlName="second_factor" min="0.01" max="10"
+                    class="form-control factor" name="factor" inputAccuracy="rate">
+                  <small
+                    *ngIf="rateFactorForm.get('bill_rate.second_factor').invalid && rateFactorForm.get('bill_rate.second_factor').touched"
+                    class="error-text">{{ 'the_factor_should_be' | i18next }} 0.01 - 10.</small>
+                </div>
+                <div>
+                  <label for="second_rate">{{ 'select_rate' | i18next }}</label>
+                  <ng-select [readonly]="isViewMode" id="second_rate" class="rate-select" formControlName="second_rate" [clearable]="false"
+                    (change)="onRateChange($event, 'bill_rate', 'second_rate')">
+                    <ng-option *ngFor="let rate of rateItems" [value]="rate.id">{{rate?.name | i18next}}</ng-option>
+                  </ng-select>
+                </div>
+              </div>
+
+              <div *ngIf='!isViewMode' class="remove-new-rate mt-24" (click)="addNewBillRate('remove')">
+                <icon name="delete" class="mr-8" size="16px" type="material"></icon>
+                <span>{{ 'remove' | i18next }}</span>
+              </div>
+            </ng-template>
+
+            <div *ngIf="!addBillAdjustment && !isViewMode" class="remove-new-rate mt-24 ml-24" (click)="toggleAdjustment('bill_rate')">
+              <icon name="add" class="mr-8" size="16px" type="material"></icon>
+              <span> {{ 'add_adjustment' | i18next }} </span>
+            </div>
+
+            <ng-container *ngIf="addBillAdjustment">
+
+              <div class="add-factor mt-24 ml-24">
+                <div class="btn-group d-flex mr-16" role="group" aria-label="Adjustment">
+                  <button type="button" class="btn add" (click)="!isViewMode && addToFactor('second_bill')">
+                    <i size="small" class="material-icons">{{'add'}}</i>
+                  </button>
+                  <div>&nbsp;</div>
+                </div>
+              </div>
+
+              <div class="d-flex ml-8">
+                <div class="position-relative expand">
+                  <label> {{ 'adjustment' | i18next }} </label>
+                  <ng-select [multiple]="false" [readonly]="isViewMode" placeholder="{{ 'select_adjustment' | i18next }}"
+                    [formControl]="rateFactorForm.get('bill_rate').get('adjustment_type')" (change)="changeAdjustmentType('bill_rate',$event)">
+                    <ng-option *ngIf="!isStandardFactor" value="PERCENTAGE"> {{ getPercentageLabel + "Bill Rate" | i18next }}  </ng-option>
+                    <ng-option value="FLAT"> {{ 'flat' | i18next }}  </ng-option>
+                  </ng-select>
+                </div>
+                <div>
+                  <label> {{ '&nbsp;' }} </label>
+                  <div class="d-flex">
+                    <span class="no-width dollar" *ngIf="isFlatAdjustment('bill_rate')"> $ </span>
+                    <input [readonly]="isViewMode" type="number" [inputAccuracy]="rateFactorForm.get('bill_rate').get('adjustment_type')?.value?.toLowerCase() == 'flat' ? 'amount' : 'amount_percentage'"
+                      [formControl]="rateFactorForm.get('bill_rate').get('adjustment_value')" class="form-control center-text"
+                      [ngStyle]="getWidth(rateFactorForm.get('bill_rate').get('adjustment_value').value)" />
+                    <span class="no-width percentage" *ngIf="!isFlatAdjustment('bill_rate')"> % </span>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+
+            <div *ngIf="addBillAdjustment && !isViewMode" class="remove-new-rate mt-24 ml-24" (click)="toggleAdjustment('bill_rate')">
+              <icon name="delete" class="mr-8" size="16px" type="material"></icon>
+              <span> {{ 'adjustment' | i18next }} </span>
+            </div>
+
+          </div>
+
+          <div class="flex mt-24">
+            <h4 class="font-weight-medium">{{ formValue?.name?.value}} {{ 'pay_rate' | i18next }}</h4>
+            <!-- <icon id="lock-open" name="lock_open" size="16px" type="material" class="ml-12"></icon> -->
+          </div>
+          <div class="bill-rate d-flex align-items-center mt-10" formGroupName="pay_rate" >
+            <div class="d-flex first-rate">
+              <div class="position-relative">
+                <label for="factor2">{{ 'factor' | i18next }}</label>
+                <input [readonly]="isViewMode || isStandardFactor" type="number" id="factor2" formControlName="first_factor" min="0.01" max="10"
+                  class="form-control factor" name="factor" inputAccuracy="rate">
+                <small
+                  *ngIf="rateFactorForm.get('pay_rate.first_factor').invalid && rateFactorForm.get('pay_rate.first_factor').touched"
+                  class="error-text">{{ 'the_factor_should_be' | i18next }} 0.01 - 10.</small>
+              </div>
+              <div>
+                <label for="rate2">{{ 'select_rate' | i18next }}</label>
+                <ng-select [readonly]="isViewMode || isStandardFactor" id="rate2" class="rate-select" formControlName="first_rate" [clearable]="false"
+                  (change)="onRateChange($event, 'pay_rate', 'first_rate')">
+                  <ng-option *ngFor="let rate of rateItems" [value]="rate.id">{{rate?.name | i18next}}</ng-option>
+                </ng-select>
+              </div>
+            </div>
+
+            <ng-container *ngIf="!isStandardFactor">
+              <div class="add-new-rate mt-24 ml-16" *ngIf="showAddPayRateBtn, else addPayFactor"
+                (click)="addNewPayRate('add')">
+                <ng-container *ngIf="!isViewMode">
+                  <icon name="add" class="mr-8" size="16px" type="material"></icon>
+                  <span>{{ 'add_rate' | i18next }}</span>
+                </ng-container>
+              </div>
+            </ng-container>
+
+            <ng-template #addPayFactor>
+              <div class="add-factor mt-24 ml-16">
+                <div class="btn-group d-flex mr-16" role="group" aria-label="First group">
+                  <button type="button" class="btn add" (click)="!isViewMode && addToFactor('first_pay')">
+                    <i size="small" class="material-icons">{{'add'}}</i>
+                  </button>
+                  <div *ngIf='isViewMode'>&nbsp;</div>
+                </div>
+              </div>
+            </ng-template>
+
+            <ng-template [ngIf]="!showAddPayRateBtn && !isStandardFactor">
+              <div class="d-flex second-rate mr-16">
+                <div class="position-relative">
+                  <label for="second_factor2">{{ 'factor' | i18next }}</label>
+                  <input [readonly]="isViewMode" type="number" id="second_factor2" formControlName="second_factor" min="0.01" max="10"
+                    class="form-control factor" name="factor" inputAccuracy="rate">
+                  <small
+                    *ngIf="rateFactorForm.get('pay_rate.second_factor').invalid && rateFactorForm.get('pay_rate.second_factor').touched"
+                    class="error-text">{{ 'the_factor_should_be' | i18next }} 0.01 - 10. </small>
+                </div>
+                <div>
+                  <label for="second_rate2">{{ 'select_rate' | i18next }}</label>
+                  <ng-select [readonly]="isViewMode" id="second_rate2" class="rate-select" formControlName="second_rate" [clearable]="false"
+                    (change)="onRateChange($event, 'pay_rate', 'second_rate')">
+                    <ng-option *ngFor="let rate of rateItems" [value]="rate.id">{{rate?.name}}</ng-option>
+                  </ng-select>
+                </div>
+              </div>
+
+              <div *ngIf='!isViewMode' class="remove-new-rate mt-24" (click)="addNewPayRate('remove')">
+                <icon name="delete" class="mr-8" size="16px" type="material"></icon>
+                <span>{{ 'remove' | i18next }}</span>
+              </div>
+            </ng-template>
+
+            <div *ngIf="!addPayAdjustment && !isViewMode" class="remove-new-rate mt-24 ml-24" (click)="toggleAdjustment('pay_rate')">
+              <icon name="add" class="mr-8" size="16px" type="material"></icon>
+              <span> {{ 'add_adjustment' | i18next }} </span>
+            </div>
+
+            <ng-container *ngIf="addPayAdjustment">
+
+              <div class="add-factor mt-24 ml-24">
+                <div class="btn-group d-flex mr-16" role="group" aria-label="Adjustment">
+                  <button type="button" class="btn add" (click)="!isViewMode && addToFactor('second_pay')">
+                    <i size="small" class="material-icons">{{'add'}}</i>
+                  </button>
+                  <div>&nbsp;</div>
+                </div>
+              </div>
+
+              <div class="d-flex flex-grow ml-8">
+                <div class="position-relative expand">
+                  <label> {{ 'adjustment' | i18next }} </label>
+                  <ng-select [multiple]="false" [readonly]="isViewMode"
+                    placeholder="{{ 'select_adjustment' | i18next }}" [formControl]="rateFactorForm.get('pay_rate').get('adjustment_type')" (change)="changeAdjustmentType('pay_rate',$event)">
+                    <ng-option value="PERCENTAGE"> {{ getPercentageLabel + 'Pay Rate' | i18next }}  </ng-option>
+                    <ng-option value="FLAT"> {{ 'flat' | i18next }}  </ng-option>
+                  </ng-select>
+                </div>
+
+                <div>
+                  <label> {{ '&nbsp;' }} </label>
+                  <div class="d-flex">
+                    <span class="no-width dollar" *ngIf="isFlatAdjustment('pay_rate')"> $ </span>
+                    <input [inputAccuracy]="rateFactorForm.get('pay_rate').get('adjustment_type')?.value?.toLowerCase() == 'flat' ? 'amount' : 'amount_percentage'" [readonly]="isViewMode" class="form-control center-text"
+                      type="number" [formControl]="rateFactorForm.get('pay_rate').get('adjustment_value')"
+                      [ngStyle]="getWidth(rateFactorForm.get('pay_rate').get('adjustment_value').value)">
+                    <span class="no-width percentage" *ngIf="!isFlatAdjustment('pay_rate')"> % </span>
+                  </div>
+                </div>
+
+              </div>
+            </ng-container>
+
+            <div *ngIf="addPayAdjustment && !isViewMode" class="remove-new-rate mt-24 ml-24" (click)="toggleAdjustment('pay_rate')">
+              <icon name="delete" class="mr-8" size="16px" type="material"></icon>
+              <span> {{ 'adjustment' | i18next }} </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <div class="cancel-save-buttons py-32" *accessControl>
+        <button class="btn btn-outine float-left" (click)="onCancel()" *ngIf='!isViewMode'>
+          {{ 'cancel' | i18next }}
+        </button>
+        <button *ngIf='!isViewMode' type="submit" class="btn btn-primary float-right" (click)="onSave()"
+          [disabled]="isViewMode || saveBtnDisabled">
+          {{ ((isEditMode) ? 'Update' : 'Save') | i18next }}
+        </button>
+        <button *ngIf='isViewMode'
+          type="submit" class="btn btn-primary float-right" (click)="swapToEditMode()">
+          {{ 'edit' | i18next }}
+        </button>
+        <div class="clearfix"></div>
+      </div>
+  </form>
+</div>
+
+<app-job-hierarchy-create
+  [title]="title"
+  [(tabIndex)]="tabIndex"
+  [visibility]="sidebarVisibility"
+  [readonly]='!createMode && !isEditMode'
+  (close)="onClose($event)"
+>
+</app-job-hierarchy-create>

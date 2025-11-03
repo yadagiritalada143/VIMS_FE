@@ -1,0 +1,60 @@
+<div class="form-group mb-0">
+  <label *ngIf="_showLabel">{{uploadLabel}}</label>
+  <div class="upload-zone text-center p-16 " [ngClass]="{'disabled':isDisable}" (click)="uploadFileInput.click()">
+    <div class="drop-zone mb-4">
+      <icon size="24px" name="publish" type="material" cuClass="d-flex"></icon>
+    </div>
+    <p class="small pt-4 mb-4">{{ 'drag' | i18next }} &amp; {{ 'drop_file_or' | i18next }}  <a href="javascript:void(0)">{{ 'browse' | i18next }}</a></p>
+    <input hidden type="file" [accept]="acceptFileTypes" #uploadFileInput (change)="uploadFile($event)" [disabled]="isDisable">
+    <!-- <p class="file-format mb-32">Only .png, .jpg, .pdf, .doc files with maximum size of 10 MB</p> -->
+    <p class="file-format">{{ 'only' | i18next }}
+      <span *ngFor="let format of formatAllowed;let last = last;">
+        {{format}}<span *ngIf="!last">, </span>
+      </span>
+      <span> {{'files_with_maximum_size_of'| i18next }}{{maxFileSize}} {{ 'mb' | i18next }}</span>
+    </p>
+  </div>
+
+  <ul class="uploaded-list" *ngFor="let file of uploadedFileArr, let i = index">
+    <li *ngIf="file">
+      <figure *ngIf="file.ext && !fileNotSupportAlert">
+        <img [src]="getFileImageSRC(file.ext)" alt="">
+      </figure>
+      <div class="item-description text-capitalize">
+        {{file.name || file.file_name}}
+        <icon class="d-inline-block ml-8" size="18px" name="check_circle" type="material" cuClass="d-flex"></icon>
+        <p class="upload-size" *ngIf="fileSize || file.time">
+          {{fileSize}} {{ 'mb' | i18next }}<span>|</span>{{file.time | localDateFormat:'d MMM'}}
+        </p>
+      </div>
+      <span *ngIf="file.key" class="material-icons ml-8 download-file" (click)="downloadAttachment(file)">
+        <icon class="d-flex" size="24px" name="file_download" type="material" cuClass="d-flex">
+        </icon>
+      </span>
+      <a (click)="deleteFile(i)" class="delete-file">
+        <icon class="d-flex" size="24px" name="delete_forever" type="material" cuClass="d-flex">
+        </icon>
+      </a>
+    </li>
+  </ul>
+  <ul class="uploaded-list error" *ngIf="!isValidFileSize">
+    <li>
+      <div class="d-flex item-description">
+        <icon class="d-inline-block m-auto mr-8" size="18px" name="error" type="material" cuClass="d-flex"></icon>
+        <p class="d-inline-block upload-size">
+          {{ 'error_:_file_size_must_be_less_than_or_equals_to' | i18next }} {{maxFileSize}} {{ 'mb' | i18next }}
+        </p>
+      </div>
+    </li>
+  </ul>
+  <ul class="uploaded-list error" *ngIf="fileNotSupportAlert">
+    <li>
+      <div class="d-flex item-description">
+        <icon class="d-inline-block m-auto mr-8" size="18px" name="error" type="material" cuClass="d-flex"></icon>
+        <p class="upload-size">
+          {{ 'error_:_file_type_is_not_supported._please_upload_the_documents_either_in' | i18next }} {{formatAllowed.join(', ')}}.
+        </p>
+      </div>
+    </li>
+  </ul>
+</div>

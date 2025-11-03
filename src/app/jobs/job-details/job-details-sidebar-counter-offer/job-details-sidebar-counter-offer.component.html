@@ -1,0 +1,104 @@
+<ng-container *ngIf="isSidebarVisible">
+  <svms-sidebar-ng
+    [dataVisibility]="isSidebarVisible"
+    dataProfilePanel="profilepanel"
+    (onClose)="sidebarClose()"
+  >
+    <svms-sidebar-profile
+      [profileVisibility]="profilevisible"
+      helpText=""
+      [avatar]="candidateDetails?.candidate?.avatar"
+      [userName]="candidateName"
+      userPosition="Senior UX/UI Designer">
+      <div class="d-flex flex-column address-wrapper">
+        <div class="d-flex flex-column my-8">
+          <div class="address d-flex">
+            <icon
+              size="17px"
+              name="fmd_good"
+              type="material"
+              cuClass="icon d-flex pr-16"
+            ></icon>
+            <div class="d-flex flex-column">
+              <span class="pb-8">{{ 'current_location' | i18next }}</span>
+              <span>{{
+                candidateAddress?.state && candidateAddress?.country
+                  ? candidateAddress?.state + ", " + candidateAddress?.country
+                  : candidateAddress?.country
+                  ? candidateAddress?.country
+                  : "--"
+              }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex flex-column my-8">
+          <div class="address d-flex">
+            <icon
+              size="17px"
+              name="corporate_fare"
+              type="material"
+              cuClass="icon d-flex pr-16"
+            ></icon>
+            <div class="d-flex flex-column">
+              <span class="pb-8">{{ 'vendor' | i18next }}</span>
+              <span>{{
+                candidateDetails?.candidate?.vendor?.name || "--"
+              }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex flex-column my-8">
+          <div class="address d-flex">
+            <icon
+              size="17px"
+              name="tag"
+              type="material"
+              cuClass="icon d-flex pr-16"
+            ></icon>
+            <div class="d-flex flex-column">
+              <span class="pb-8">{{ 'master_data' | i18next }}</span>
+              <span>--</span>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex flex-column my-8">
+          <div class="address d-flex">
+            <icon
+              size="17px"
+              name="account_tree"
+              type="material"
+              cuClass="icon d-flex pr-16"
+            ></icon>
+            <div class="d-flex flex-column">
+              <span class="pb-8">{{ 'hierarchy_level' | i18next }}</span>
+              <span>--</span>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex flex-column my-8">
+          <div class="address d-flex">
+            <icon
+              size="17px"
+              name="business"
+              type="material"
+              cuClass="icon d-flex pr-16"
+            ></icon>
+            <div class="d-flex flex-column">
+              <span class="pb-8">{{ 'address' | i18next }}</span>
+              <span>{{ getCandidateAddress() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </svms-sidebar-profile>
+    <div class="createoffer-wrapper">
+      <div>
+        <counter-offer *ngIf="candidateId"
+          [candidateId]="candidateId"
+          [isopen]="isopen"
+          [offerId]="offerId"
+        ></counter-offer>
+      </div>
+    </div>
+  </svms-sidebar-ng>
+</ng-container>

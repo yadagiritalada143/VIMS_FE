@@ -1,0 +1,225 @@
+<svms-sidebar [title]="title" [dataVisibility]="assignmentDetail" (onClose)="sidebarClose($event)">
+  <app-logs [log]="logs"></app-logs>
+  <svms-sidebar-body *ngIf="budget">
+    <app-status-message *ngIf="additionalBudget && approveDetails" [data]="approveDetails"
+      [type]="StatusMessageTypes.Assignment"></app-status-message>
+    <form [formGroup]="addBudgetForm" class="p-24">
+      <div class="row">
+        <div *ngIf="transition_type_option" class="col-md-6">
+          <div class="form-group">
+            <label>{{ 'reason_for_budget_adjustment_' | i18nextEager }} <span class="require">*</span></label>
+            <input *ngIf="additionalBudget; else reasonSelect" [value]="additionalBudget?.reason_code?.name"
+              class="form-control" readonly />
+            <ng-template #reasonSelect>
+              <ng-select placeholder="{{ 'select' | i18nextEager }}" formControlName="request_reason">
+                <ng-option *ngFor="let reason of additionalBugdetReason" [value]="reason?.id">{{ reason?.name }}</ng-option>
+              </ng-select>
+              <p *ngIf="getRequestReason()?.touched && getRequestReason()?.errors" class="validation-msg">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                {{ 'reason_for_budget_adjustment_is_required' | i18nextEager }}.
+              </p>
+            </ng-template>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label>{{ 'add/reduce_budget_(+/-)' | i18nextEager }} <span class="require">*</span></label>
+          <div class="form-group-row budget-add-reduce">
+            <div class="form-group mr-0 select-budget-option">
+                <ng-select *ngIf="!additionalBudget; else transactionType" placeholder="{{ 'select' | i18nextEager }}" formControlName="transaction_type" [clearable]="false" (ngModelChange)="updatedValue()">
+                  <ng-option *ngFor="let reason of transition_type_option" [value]="reason.value">{{ reason?.key }}</ng-option>
+                </ng-select>
+                <ng-template #transactionType>
+                  <ng-select placeholder="{{ 'select' | i18nextEager }}" formControlName="transaction_type" [ngModel]="additionalBudget?.transaction_type?.toLowerCase() === 'credit' ? 'Add(+)' : 'Reduce(-)'" [clearable]="false" readonly="true">
+                  </ng-select>
+                </ng-template>
+            </div>
+            <div class="form-group">
+              <input *ngIf="additionalBudget; else budgetInput" [value]="additionalBudget.requested_additional_budget_amount | accuracy :  accuracyConfig.amount : { currencyCode: currency }"
+                class="form-control" readonly />
+              <ng-template #budgetInput>
+                <div class="position-relative with-left-text">
+                  <span>
+                    {{'' | accuracy : accuracyConfig?.amount : { currencyCode: currency , display: 'symbol' } }}
+                  </span>
+                  <input type="text"  onlyNumber autocomplete="new-value" name="value" inputAccuracy="{{accuracyConfig?.amount}}" placeholder="0.00" class="form-control" id="value" formControlName="value" (change)="updateControlValue('value' , 'amount' , true)">
+                </div>
+                <p *ngIf="(!(+addBudgetForm?.get('value')?.value))"
+                  class="validation-msg">
+                  {{ 'Cannot add 0 budget' | i18nextEager }}
+                </p>
+                  <p *ngIf="((+addBudgetForm?.get('value')?.value) > +budget?.left_budget) && addBudgetForm?.get('transaction_type')?.value === 'debit'" class="validation-msg" >
+                    {{ 'amount_entered_not_be_greater_than_remaining_budget' | i18nextEager }}
+                  </p>
+                <p *ngIf="getValue()?.touched && getValue()?.errors" class="validation-msg">
+                  <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                  <ng-container *ngIf="getValue()?.errors?.required; else minError">
+                    {{ 'new_budget_is_required' | i18nextEager }}.
+                  </ng-container>
+                  <ng-template #minError>
+                    {{ 'budget_should_be_positive_number' | i18nextEager }}.
+                  </ng-template>
+                </p>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center justify-content-start column-direction total-budget">
+        <div class="d-flex align-items-center mr-64 mr-m-0">
+          <icon name="credit_score" class="circle-icon d-flex mr-8" cuclass="d-flex" color="#5B6874" size="18px"></icon>
+          <div class="d-flex flex-column">
+            <h4 class="text-black mt-4 font-weight-medium mb-0" tooltip="{{showToolTip(budget?.total_allocated_budget)}}" placement="top">{{
+              (budget.total_allocated_budget &&
+              budget.total_allocated_budget !== 0
+                ? budget.total_allocated_budget
+                : "0.00"
+              ) | accuracy :  accuracyConfig.amount : { currencyCode: currency }
+            }}</h4>
+            <p class="small text-gray text-wrap">{{ 'total_current_approved_budget' | i18nextEager }}</p>
+          </div>
+        </div>
+        <div class="d-flex align-items-center">
+          <icon name="account_balance_wallet" theme="outlined" class="circle-icon green d-flex mr-8" cuclass="d-flex" color="#009514" size="18px"></icon>
+          <div class="d-flex flex-column">
+            <h4 *ngIf="additionalBudget; else calculatedTotal" class="text-green mt-4 font-weight-medium mb-0" tooltip="{{showToolTip(additionalBudget?.total_budget_amount)}}" placement="top">{{ additionalBudget.total_budget_amount | accuracy :  accuracyConfig.amount : { currencyCode: currency } }}</h4>
+            <ng-template #calculatedTotal>
+              <h4 class="text-green mt-4 font-weight-medium mb-0" tooltip="{{showToolTip(newTotalBudget)}}" placement="top">{{ newTotalBudget | accuracy :  accuracyConfig.amount : { view_accurate : true , currencyCode: currency } }}</h4>
+            </ng-template>
+            <p class="small text-gray">{{ 'new_total_approved_budget' | i18nextEager }}</p>
+          </div>
+        </div>
+      </div>
+      <h4 class="font-weight-medium mt-24 mb-24">
+        {{ 'budget_details' | i18nextEager }}
+      </h4>
+      <div class="panel panel-light p-16">
+        <div class="row">
+          <div class="col-md-3 col-chart">
+            <svms-pie-chart
+              [isDoughnut]="true"
+              [chartData]="chartData"
+              [height]="160"
+              [width]="130"
+              [margin]="11.47"
+              [chartRadius]="60"
+              [hideLabels]="true"
+              [smallChart]="true"
+              [colorsScheme]="DonutColorScheme"
+              [currency]="currency"
+              chartId="budget-details-sidepanel"
+              dimension=""
+            ></svms-pie-chart>
+          </div>
+          <div class="col-md-9">
+            <div class="d-flex align-items-start">
+              <div class="d-flex flex-column">
+                <span class="budget-amount mb-4" tooltip="{{showToolTip(budget?.left_budget)}}" placement="top" [ngStyle]="{ color: findColor(BudgetLabels.TotalRemaining) }">
+                  {{
+                    (budget.left_budget && budget.left_budget !== 0
+                      ? budget.left_budget
+                      : "0.00"
+                    ) | accuracy : accuracyConfig.amount : { currencyCode: currency }
+                  }}
+                </span>
+                <span class="text-black">{{ 'remaining_budget' | i18nextEager }}</span>
+              </div>
+              <div class="mx-12">
+                <icon [name]="addBudgetForm?.get('transaction_type')?.value === 'credit' ? 'add' : 'remove'" [color]="findColor(BudgetLabels.TotalRemaining)" class="d-flex" cuclass="d-flex" size="16px">
+                </icon>
+              </div>
+              <div class="d-flex flex-column">
+                <span class="budget-amount mb-4" [ngStyle]="{ color: findColor(BudgetLabels.TotalRemaining) }">
+                  <ng-container *ngIf="additionalBudget; else formValue">
+                    <span tooltip="{{showToolTip(additionalBudget?.requested_additional_budget_amount)}}" placement="top">{{ additionalBudget.requested_additional_budget_amount | accuracy :  accuracyConfig.amount : { currencyCode: currency } }}</span>
+                  </ng-container>
+                  <ng-template #formValue>
+                    <span tooltip="{{showToolTip(getValue()?.value)}}" placement="top">{{ (getValue().value && getValue().value.length !== 0 ? getValue().value : "0.00") | accuracy :  accuracyConfig.amount : { currencyCode: currency } }}</span>
+                  </ng-template>
+                </span>
+                <span class="text-black">{{ 'Add' + '/' + 'Reduce Budget Amount' | i18nextEager }}</span>
+              </div>
+            </div>
+            <div class="d-flex flex-column mt-32 pt-12">
+              <div class="d-flex align-items-center">
+                <icon name="circle" size="12px" [color]="findColor(BudgetLabels.SpendApproved)" cuclass="d-flex"
+                  class="d-flex mr-4"></icon>
+                <p class="small" tooltip="{{showToolTip(budget?.total_spend)}}" placement="top">{{ 'spend_approved' | i18nextEager }} - 
+                  {{
+                    (budget.total_spend &&
+                    budget.total_spend !== 0
+                      ? budget.total_spend
+                      : "0.00"
+                    ) | accuracy : accuracyConfig.amount : { currencyCode: currency }
+                  }}
+                </p>
+              </div>
+              <div class="d-flex align-items-center mt-8">
+                <icon name="circle" size="12px" [color]="findColor(BudgetLabels.AwaitingApproval)" cuclass="d-flex"
+                  class="d-flex mr-4"></icon>
+                <p class="small" tooltip="{{showToolTip(budget?.total_pending_approval)}}" placement="top">{{ 'spend_awaiting_approval' | i18nextEager }} - 
+                  {{
+                    (budget.total_pending_approval &&
+                    budget.total_pending_approval !== 0
+                      ? budget.total_pending_approval
+                      : "0.00"
+                    ) | accuracy : accuracyConfig.amount : { currencyCode: currency }
+                  }}
+                </p>
+              </div>
+              <div class="d-flex align-items-center mt-8" *ngIf="assignmentConfig?.validate_sow_budget?.is_allow && assignment?.sourcing_model?.toLowerCase() === SourcingModel.SOW">
+                <icon name="info" size="12px" [color]="findColor(BudgetLabels.SpendApproved)" cuclass="d-flex"
+                  class="d-flex mr-4"></icon>
+                <p class="small" tooltip="{{showToolTip(sowData?.project?.remaining_budget)}}" placement="top">{{'remaining_milestone_budget'|i18next}} - 
+                  {{
+                    (sowData?.project?.remaining_budget &&
+                    sowData?.project?.remaining_budget !== 0
+                      ? sowData?.project?.remaining_budget
+                      : "0.00"
+                    ) | accuracy : accuracyConfig.amount : { currencyCode: currency }
+                  }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <app-list-of-approvers
+        [programId]="programId"
+        [additionalBudget]="additionalBudget"
+        [entityId]="entityId"
+        [timezone]="assignment?.timezone"
+        [approveId]="approveId"
+        [assignmentId]="assignment?.assignment_uuid"
+        [approversList$]="approversList$"
+        (approverStatusChange)="getApproversList()"
+        (approverReject)="sidebarClose(false)"
+      ></app-list-of-approvers>
+
+      <div class="form-group mt-24">
+        <label>{{ 'notes' | i18nextEager }} <span class="require">*</span></label>
+        <ng-container *ngIf="additionalBudget; else notesInput">
+          <textarea class="form-control textarea-without-resize" rows="4" [value]="additionalBudget.request_notes" readonly>
+          </textarea>
+        </ng-container>
+        <ng-template #notesInput>
+        <textarea class="form-control textarea-without-resize" placeholder="{{ 'enter_additional_notes' | i18nextEager }}"
+          formControlName="request_notes" rows="4"></textarea>
+        <p *ngIf="getRequestNotes()?.touched && getRequestNotes()?.errors" class="validation-msg">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'notes_are_required' | i18nextEager }}.
+        </p>
+      </ng-template>
+      </div>
+    </form>
+  </svms-sidebar-body>
+  <svms-sidebar-footer>
+    <div class="d-flex justify-content-between align-items-center">
+      <button type="button" class="btn btn-outline-secondary small" (click)="sidebarClose(true)">{{ 'cancel' | i18nextEager }}</button>
+      <ng-container *accessControl>
+        <button *ngIf="!additionalBudget" type="button" class="btn btn-primary small" (click)="addAdditionalBudget()" [disabled]="!addBudgetForm.valid || disableSubmit || (+addBudgetForm?.get('value').value > +budget.left_budget) && addBudgetForm?.get('transaction_type').value === 'debit' || (!(+addBudgetForm?.get('value')?.value))">
+          {{ 'submit' | i18nextEager }}
+        </button>
+      </ng-container>
+    </div>
+  </svms-sidebar-footer>
+</svms-sidebar>

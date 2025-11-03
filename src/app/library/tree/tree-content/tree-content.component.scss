@@ -1,0 +1,525 @@
+@import '../../../../assets/sass/abstracts/variables';
+
+.dnone {
+  display: none !important;
+}
+
+.tree-listing-head {
+  background-color: $light;
+
+  .column {
+    float: left;
+    line-height: 56px;
+    padding-left: $p8;
+    padding-right: $p8;
+    color: $text-secondary;
+    font-weight: $font-weight-medium;
+
+    &.show-hide {
+      width: 5%;
+      padding-top: 20px;
+    }
+
+    button {
+      padding: 2px;
+    }
+  }
+}
+
+.tree-rows {
+  ::ng-deep .tree-row-item {
+    background: $color-gray-5;
+    border-top: 1px solid $color-gray-20;
+    transition: $transition;
+    position: relative;
+
+    .column {
+      float: left;
+      padding: $p16 $p12;
+      color: $text-secondary;
+      line-height: 27px;
+      position: relative;
+      min-height: 60px;
+
+      .initials {
+        margin-top: 3px;
+        margin-right: $m8;
+      }
+
+      &.border-right-active {
+        border-right: 1px solid $color-gray-20;
+      }
+
+      &.show-hide {
+        width: 5%;
+        padding-top: 20px;
+        border-right: 1px solid $color-gray-20;
+        min-height: 60px;
+
+        button {
+          padding: 2px;
+
+          &.hide-child {
+            background-color: $color-secondary;
+            color: $light;
+          }
+        }
+      }
+
+      .avatar-list {
+        list-style-type: none;
+        margin-top: 2px;
+
+        li {
+          position: relative;
+          float: left;
+          width: 25px;
+          margin-left: -9px;
+
+          figure {
+            width: 25px;
+            height: 25px;
+            background: $initials-pink;
+            color: $light;
+            text-align: center;
+            border: 1px solid $light;
+            line-height: 24px;
+            font-size: $font-primary;
+
+            img {
+              width: 100%;
+              height: auto;
+            }
+          }
+
+          a {
+            display: block;
+            border-radius: $rounded-circle;
+            border: 1px solid $light;
+            background: $light;
+            box-shadow: 0px 3px 6px #00000029;
+            color: $color-link;
+            font-size: 11px;
+            text-align: center;
+            line-height: 23px;
+          }
+
+          &:first-child {
+            margin-left: 0;
+          }
+
+          .more-item-dropdown {
+            top: 42px;
+            left: -22px;
+            box-shadow: 0px 11px 16px #0000000F;
+            width: 157px;
+            z-index: 4;
+            transition: $transition;
+            opacity: 0;
+            visibility: hidden;
+
+            &:before {
+              background: $light;
+              border: 1px solid $color-gray-30;
+              width: 10px;
+              height: 10px;
+              content: '.';
+              text-indent: -9999px;
+              overflow: hidden;
+              display: block;
+              visibility: visible;
+              position: absolute;
+              top: -7px;
+              left: 30px;
+              z-index: 1;
+              transform: rotate(45deg);
+            }
+
+            &:after {
+              background: $light;
+              width: 13px;
+              height: 1px;
+              content: '.';
+              text-indent: -9999px;
+              overflow: hidden;
+              display: block;
+              visibility: visible;
+              position: absolute;
+              top: 0px;
+              left: 30px;
+              z-index: 2;
+            }
+
+            ul {
+              list-style-type: none;
+              border: 1px solid $color-gray-30;
+              border-radius: $border-radius;
+              overflow: hidden;
+              max-height: 0;
+              position: relative;
+              z-index: 2;
+              background: $light;
+              transition: $transition;
+              padding-left: $p8;
+              padding-right: $p8;
+
+              li {
+                margin-top: $m8;
+                margin-bottom: $m8;
+              }
+            }
+          }
+
+          &:hover {
+            .more-item-dropdown {
+              opacity: 1;
+              visibility: visible;
+
+              ul {
+                max-height: 500px;
+              }
+            }
+          }
+        }
+      }
+
+      .add-fields {
+        cursor: pointer;
+        outline: none;
+        display: none;
+        width: 24px;
+        height: 25px;
+        margin-top: 2px;
+
+        icon {
+          line-height: 25px;
+
+          ::ng-deep i {
+            color: $color-gray-90;
+          }
+        }
+      }
+
+      .status {
+        display: flex;
+        align-items: center;
+
+        icon {
+          margin-right: $m8;
+        }
+      }
+    }
+
+    .actions {
+      display: none;
+      position: absolute;
+      top: 13px;
+      left: 8px;
+    }
+
+    &:hover {
+      background: $light;
+      cursor: pointer;
+
+      .column {
+        .add-fields {
+          display: block;
+        }
+      }
+
+      .actions {
+        display: flex;
+      }
+    }
+  }
+
+  ::ng-deep .child {
+    // .show-hide {
+    //   .btn {
+    //     display: none;
+    //   }
+    // }
+
+    .h-name {
+
+      a {
+        margin-left: 30px;
+        position: relative;
+        &:before {
+          width: 15px;
+          height: 13px;
+          background: url("../../../../assets/images/arrow-sub-item.svg") no-repeat left top;
+          content: '.';
+          text-indent: -9999px;
+          overflow: hidden;
+          display: block;
+          visibility: visible;
+          position: absolute;
+          top: 3px;
+          left: -26px;
+        }
+      }
+    }
+
+    &.level-0 {
+      >.tree-row-item {
+        >.show-hide {
+          .btn {
+            display: flex;
+          }
+        }
+      }
+    }
+
+    &.level-1 {
+      transition: $transition;
+      opacity: 0;
+      visibility: hidden;
+      max-height: 0;
+      overflow: hidden;
+
+      .h-name {
+        a {
+          margin-left: 60px;
+        }
+      }
+
+      &.active {
+        opacity: 1;
+        visibility: visible;
+        max-height: 2000px;
+        overflow: visible;
+      }
+    }
+
+    &.level-2 {
+      .h-name {
+        a {
+          margin-left: 90px;
+        }
+      }
+
+      > .tree-row-item {
+        > .show-hide {
+          .btn {
+            display: block;
+          }
+        }
+      }
+
+
+    }
+
+    &.level-3 {
+      .h-name {
+        a {
+          margin-left: 120px;
+        }
+      }
+    }
+
+    &.level-4 {
+      .h-name {
+        a {
+          margin-left: 150px;
+        }
+      }
+    }
+
+    &.level-5 {
+      .h-name {
+        a {
+          margin-left: 180px;
+        }
+      }
+    }
+
+    &.level-6 {
+      .h-name {
+        a {
+          margin-left: 210px;
+        }
+      }
+    }
+
+    &.level-7 {
+      .h-name {
+        a {
+          margin-left: 240px;
+        }
+      }
+    }
+
+    &.level-8 {
+      .h-name {
+        a {
+          margin-left: 270px;
+        }
+      }
+    }
+
+    &.level-9 {
+      .h-name {
+        a {
+          margin-left: 300px;
+        }
+      }
+    }
+
+    &.level-10 {
+      .h-name {
+        a {
+          margin-left: 330px;
+        }
+      }
+    }
+  }
+}
+
+.fixed-header {
+  position: fixed;
+  top: 50px;
+  left: 200px;
+  right: 0;
+  opacity: 0;
+  visibility: hidden;
+  background-color: $light;
+  z-index: 1;
+  transition: opacity ease-in-out .4s;
+  border-top: 1px solid $color-gray-20;
+
+  .tree-listing-head {
+    box-shadow: 0px 5px 10px #0000000d;
+  }
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+    z-index: 8;
+
+    &.subheader-active {
+      top: 138px;
+      animation: posiitonanim .6s;
+    }
+  }
+}
+
+::ng-deep .option-dropdown {
+  top: 60px;
+  left: -22px;
+  box-shadow: 0px 11px 16px #0000000F;
+  width: 157px;
+  z-index: 4;
+  transition: $transition;
+  opacity: 0;
+  visibility: hidden;
+
+  &:before {
+    background: $light;
+    border: 1px solid $color-gray-30;
+    width: 10px;
+    height: 10px;
+    content: '.';
+    text-indent: -9999px;
+    overflow: hidden;
+    display: block;
+    visibility: visible;
+    position: absolute;
+    top: -7px;
+    right: 30px;
+    z-index: 1;
+    transform: rotate(45deg);
+  }
+
+  &:after {
+    background: $light;
+    width: 13px;
+    height: 1px;
+    content: '.';
+    text-indent: -9999px;
+    overflow: hidden;
+    display: block;
+    visibility: visible;
+    position: absolute;
+    top: 0px;
+    right: 30px;
+    z-index: 2;
+  }
+
+  ul {
+    list-style-type: none;
+    border: 1px solid $color-gray-30;
+    border-radius: $border-radius;
+    overflow: hidden;
+    max-height: 0;
+    position: relative;
+    z-index: 2;
+    background: $light;
+    transition: $transition;
+
+    li {
+      border-top: 1px solid $color-gray-30;
+
+      a {
+        line-height: 46px;
+        padding-left: $p16;
+        padding-right: $p16;
+        color: $color-gray-70;
+        transition: $transition;
+        display: block;
+
+        icon {
+          float: left;
+          margin: $m12 $m12 0 0;
+        }
+
+        &:hover {
+          text-decoration: none;
+          background: $color-gray-5;
+        }
+      }
+
+      button {
+        width: 100%;
+        outline: none;
+        border: 0;
+        background-color: $light;
+        text-align: left;
+        line-height: 46px;
+        padding-left: $p16;
+        padding-right: $p16;
+        color: $color-gray-70;
+        transition: $transition;
+        display: block;
+
+        icon {
+          float: left;
+          margin: $m12 $m12 0 0;
+        }
+
+        &:hover {
+          text-decoration: none;
+          background: $color-gray-5;
+        }
+      }
+      &:first-child {
+        border-top: 0;
+      }
+    }
+  }
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+
+    ul {
+      max-height: 500px;
+    }
+  }
+}
+
+.disable {
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: .5;
+}

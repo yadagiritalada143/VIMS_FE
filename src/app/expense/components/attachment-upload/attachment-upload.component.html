@@ -1,0 +1,70 @@
+<ul *ngIf="displayedUploadedFiles.length" class="uploaded-list-sidebar">
+  <li *ngFor="let file of displayedUploadedFiles" [ngClass]="{
+      error: !file.fileSupported || !file.sizeParams.isValidFileSize
+    }">
+    <figure *ngIf="file.ext?.toLowerCase() == 'pdf'">
+      <img src="/assets/images/pdf.svg" alt="pdf" />
+    </figure>
+    <figure *ngIf="file.ext?.toLowerCase() == 'docx' || file.ext?.toLowerCase() == 'doc'">
+      <img src="/assets/images/word.svg" alt="doc" />
+    </figure>
+    <figure *ngIf="file.ext?.toLowerCase() === 'png'">
+      <img src="/assets/images/img-png.svg" alt="png" />
+    </figure>
+    <figure *ngIf="file.ext?.toLowerCase() === 'jpg'">
+      <img src="/assets/images/img-jpg.svg" alt="jpg" />
+    </figure>
+    <div class="item-description">
+      {{ file.name }}
+      <ng-container *ngIf="
+          file.fileSupported && file.sizeParams.isValidFileSize;
+          else fileErrors
+        ">
+        <icon class="d-inline-block ml-8" size="18px" name="check_circle" type="material" cuClass="d-flex"></icon>
+        <p class="upload-size text-left">
+          {{ file.sizeParams.fileSize }}
+          {{ file.sizeParams.mbKbFileSize }}<span>|</span>{{ file.time | localDateFormat: "d MMM" }}
+        </p>
+      </ng-container>
+      <ng-template #fileErrors>
+        <icon class="d-inline-block ml-8" size="18px" name="error" type="material" cuClass="d-flex"></icon>
+        <p class="upload-size text-left" *ngIf="!file.sizeParams.isValidFileSize">
+          {{ 'error' | i18nextEager }} :
+          {{ 'file_size_must_be_less_than_' | i18nextEager }} 10{{ 'mb' | i18nextEager }}
+        </p>
+        <p class="upload-size text-left" *ngIf="!file.fileSupported">
+          {{ 'error' | i18nextEager }} :
+          {{ 'file_type_is_not_supported._please_upload_the_attachment_either_in' | i18nextEager }}
+          {{ '.pdf_/_.doc_/_.docx_/_.png_/_.jpg' | i18nextEager }}
+          {{ 'format' | i18nextEager }}
+        </p>
+      </ng-template>
+    </div>
+    <a (click)="deleteFile(file.name)" class="delete-resume">
+      <icon class="d-flex" size="20px" name="delete_forever" type="material" cuClass="d-flex">
+      </icon>
+    </a>
+  </li>
+</ul>
+<div class="resume-box">
+  <div class="resume-wrapper p-16" appDragAndDrop (fileDropped)="onFileDropped($event)">
+    <div class="d-flex justify-content-between">
+      <div class="drop-zone">
+        <icon size="20px" name="publish" type="material" cuClass="d-flex"></icon>
+      </div>
+      <div class="browse-zone text-left">
+        <p class="small text-black">
+          {{ 'drag' | i18nextEager }} &amp; {{ 'drop_file_or' | i18nextEager }}
+          <a (click)="fileInput.click()">{{ 'browse' | i18nextEager }}</a><span
+            *ngIf="isAttachmentMandatory" class="require"> *</span>
+        </p>
+        <input hidden type="file" accept=".pdf, .doc, .docx, .png, .jpg" multiple="true" #fileInput
+          (change)="uploadFile($event)" (click)="$event.target.value=null" />
+        <p class="small file-format">
+          {{ 'only' | i18nextEager }} {{ '.pdf,_.doc,_.docx,_.png,_.jpg' | i18nextEager }}
+          {{ 'files_with_maximum_size_of' | i18nextEager }} 10 {{ 'mb' | i18nextEager }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

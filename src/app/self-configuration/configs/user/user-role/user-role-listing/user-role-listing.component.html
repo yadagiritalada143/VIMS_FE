@@ -1,0 +1,45 @@
+<ng-template #activeBadge let-row let-value="value">
+    <span class="initial-bg">{{value | i18next}} </span>
+</ng-template>
+
+<ng-template #statusTemplate let-value="value">
+    <span class="c-status-ui active" *ngIf="value">
+      {{ 'active' | i18next }}
+    </span>
+    <span class="c-status-ui inactive" *ngIf="!value">
+      {{ 'inactive' | i18next }}
+    </span>
+</ng-template>
+
+<ng-template #showData let-value="value">
+    {{value | i18next}}
+</ng-template>
+
+<app-svms-table  [tableOptions]="tableOptions" [coloumnDefintions]="svmstableColomnDefn" [dataSource]="vmsData"></app-svms-table>
+
+<app-create-role [list_or_create]="list_or_create" [createRole]="createRole"></app-create-role>
+
+<app-svms-modal 
+  title="{{ 'clone_user_role' | i18next }}" 
+  [visibility]="modalVisibility"
+  (onClose)="resetModal()"
+>
+  <app-svms-modal-body>
+    <div class="c-form-group mt-24">
+      <label>
+        {{ 'user_role_name' | i18next }}
+        <span class="require"> * </span>
+      </label>
+      <input type="text" class="c-form-control" [(ngModel)]="modalInputText"
+        placeholder="{{ 'enter_user_role_name' | i18next }}"
+      />
+    </div>
+  </app-svms-modal-body>
+  <app-svms-modal-footer>
+    <div class="d-flex justify-content-end">
+      <button [disabled]="!modalInputText" class="btn btn-primary" type="button" (click)="cloneUserRole()">
+        {{ 'clone' | i18next }}
+      </button>
+  </div>
+  </app-svms-modal-footer> 
+</app-svms-modal>

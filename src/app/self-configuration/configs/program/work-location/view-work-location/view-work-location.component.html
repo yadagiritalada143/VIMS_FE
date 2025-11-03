@@ -1,0 +1,30 @@
+<div class="view-work-location view-detail-page" >
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <div class="d-flex">
+            <i tooltip="Back" (click)="backToList()" placement="bottom" class="material-icons back-arrow-icon cursor-pointer">arrow_back</i>
+            <div class="ml-16">
+                <h3 class="font-weight-semibold mb-0">{{ worklocationData?.name }}</h3>
+                <p class="small">{{ commonViewService.getTimeStamp(worklocationData?.created_on, worklocationData?.modified_on) }}</p>
+            </div>
+        </div>
+        <div>
+            <button *authorize="'work_location_manage'" class="c-btn c-btn-secondary-medium-left-icon" (click)="editWorkLocation()" >
+                <i class="material-icons">drive_file_rename_outline </i> Edit
+            </button>
+        </div>
+    </header>
+    <section class="section-body-content">
+        <div *ngIf="viewConfig" class="p-32 py-24">
+            <app-common-view-rule-flow [details]="viewConfig">
+            </app-common-view-rule-flow>
+        </div>
+    </section>
+</div>
+
+<ng-template #currency let-value>
+    <div class="d-flex">
+        <div *ngFor="let data of value" class="box-item px-8 py-4 mr-8">
+            <p class="mx-4" [ngClass]="{'defaultCurrency': data?.is_default}"> {{ data?.code }} {{('('+data?.symbol+')') }} <span *ngIf="data?.is_default">{{ '_default_' | i18next }}</span> </p>
+        </div>
+    </div>
+</ng-template>

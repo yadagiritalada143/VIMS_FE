@@ -1,0 +1,57 @@
+<div class="form-group-row">
+  <div class="form-group" *ngIf="recipientsFields">
+    <label>{{ 'recipient_type' | i18next }} <span class="require">*</span></label>
+    <ng-select
+      [clearable]="true"
+      (change)="changeRecipientTypeData($event);clearMetadataValue()"
+      [(ngModel)]="recipientsFields.recipient_type_id"
+      placeholder="{{ 'select' | i18next }}">
+      <ng-option *ngFor="let recipient of recipientsData" [value]="recipient.id"
+        [disabled]="allSelectedRecipientsData.includes(recipient.id)">
+        {{recipient.name}}
+      </ng-option>
+    </ng-select>
+  </div>
+  <div class="form-group">&nbsp;</div>
+  <div class="form-group">&nbsp;</div>
+</div>
+<div class="form-group-row" *ngIf="recipientsFields.meta_data?.length">
+  <div class="mr-8" *ngFor="let metaData of recipientsFields.meta_data; let i=index">
+    <div class="form-group" *ngIf="metaData.type=='DROPDOWN'">
+        <label>{{metaData.label |i18next}} <span class="require" *ngIf="metaData.required">*</span></label>
+      <div class="mt-8">
+        <ng-select
+          #valuesearch
+          [clearable]="true"
+          [disabled]="!metaData.itemValues || !recipientsFields.recipient_type_id"
+          (keyup)="searchValues(valuesearch?.searchTerm,i,metaData)"
+          [multiple]="metaData.multiselct"
+          [loading]="metaData.valueListLoading"
+          style="width: 200px;"
+          loadingText = "{{ 'loading....' | i18next }}"
+          notFoundText = "{{ 'no_data_found' | i18next }}"
+          (change)="changeData(i,metaData,$event)"
+          (clear)="changeData(i,metaData,$event)"
+          [(ngModel)]="metaData.selectedvalue"
+          [required]="metaData.required"
+          name="{{'selectedvalue'+i}}"
+          [placeholder]="metaData.label | i18next">
+          <ng-option *ngFor="let role of metaData.itemValues" [value]="role.id"> {{role['name']}}</ng-option>
+        </ng-select>
+      </div>
+    </div>
+    <div class="form-group" *ngIf="metaData.type=='NUMBER'">
+      <div class="d-flex align-items-center">
+        <div class="mt-32"  *ngIf="i != 0">
+          <icon name="add" size="12px" color="#A3B0C0"></icon>
+        </div>
+        <div class="ml-8">
+            <label>{{metaData.label|i18next}} <span class="require" *ngIf="metaData.required">*</span></label>
+          <div class="mt-8">
+            <input type="number" (keypress)="preventNonNumericalInput($event)" class="form-control" (keyup)="changeData();" [required]="metaData.required" [disabled]="!recipientsFields.recipient_type_id" id="selectedvalue" name="{{'selectedvalue'+i}}" #selectedvalue="ngModel" [(ngModel)]="metaData.selectedvalue" required >
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

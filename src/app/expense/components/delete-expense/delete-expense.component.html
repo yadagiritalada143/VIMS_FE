@@ -1,0 +1,56 @@
+<svms-sidebar-ng title="{{ 'delete_expense' | i18nextEager }}"
+                 [dataVisibility]="deleteExpense"
+                 (onClose)="sidebarClose()">
+  <app-logs [log]="logs"></app-logs>
+  <svms-sidebar-body-ng [active]="true">
+    <form [formGroup]="deletionForm" class="p-24">
+      <div class="form-group-row">
+        <div class="form-group">
+          <label for="delete_reason">
+            {{ 'delete_reason' | i18nextEager }}
+            <span class="require">*</span>
+          </label>
+          <ng-select formControlName="delete_reason"
+                     placeholder="{{ 'select_reason_for_deletion' | i18nextEager }}"
+                     notFoundText="{{ 'no_items_found' | i18nextEager }}">
+            <ng-option *ngFor="let reason of deleteReasons$ | async"
+                       [value]="reason.name">
+              {{ reason.name }}
+            </ng-option>
+          </ng-select>
+          <p *ngIf="
+              deletionForm.get('delete_reason').touched &&
+              deletionForm.get('delete_reason').errors
+            "
+             class="validation-msg">
+            <icon name="error"
+                  size="14px"
+                  type="material"
+                  cuClass="validation-icon"></icon>
+            {{ 'delete_reason_is_required' | i18nextEager }}.
+          </p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{ 'notes' | i18nextEager }}</label>
+        <textarea name="notes"
+                  rows="4"
+                  [placeholder]="'Enter Notes' | i18nextEager"
+                  class="form-control textarea-without-resize"
+                  formControlName="delete_notes"></textarea>
+      </div>
+    </form>
+  </svms-sidebar-body-ng>
+  <svms-sidebar-footer-ng>
+    <div class="d-flex justify-content-end">
+      <button *accessControl class="btn btn-primary ml-16"
+              (click)="delete()"
+              [disabled]="!deletionForm.valid || isLoading">
+        <span *ngIf="isLoading" class="mr-8">
+          <button-loader></button-loader>
+        </span>
+        {{ 'submit' | i18nextEager }}
+      </button>
+    </div>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

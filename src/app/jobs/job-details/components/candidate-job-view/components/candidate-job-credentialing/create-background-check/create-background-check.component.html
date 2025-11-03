@@ -1,0 +1,33 @@
+<svms-sidebar title="Create Background Check Type" size="small" [dataVisibility]="isCreateCandidate" (onClose)="sidebarClose()">
+    <svms-sidebar-body>
+      <form [formGroup]="createBackgroundCheckForm">
+        <div class="p-24">
+          <div class="form-group">
+            <label I18n>{{ 'background_check_type_name' | i18next }} &nbsp;<span class="require">*</span></label>
+            <input type="text" formControlName="title" maxlength="100" class="form-control" placeholder="{{ 'background_check_type_name' | i18next }}"
+              [ngClass]="{ 'error': submitted && f.title.errors }">
+            <div *ngIf="submitted && f.title.errors" class="validation-msg">
+              <div *ngIf="f.title.errors.required">{{ 'background_check_type_is_required' | i18next }}</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label I18n>{{ 'description' | i18next }} &nbsp;<span class="require">*</span></label>
+            <textarea  formControlName="description" maxlength="100" class="form-control" placeholder="{{ 'description' | i18next }}"
+              [ngClass]="{ 'error': submitted && f.description.errors }"></textarea>
+            <div *ngIf="submitted && f.description.errors" class="validation-msg">
+              <div *ngIf="f.description.errors.required">{{ 'description_is_required' | i18next }}</div>
+            </div>
+          </div> 
+        </div>
+      </form>
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+      <button type="submit" (click)="sidebarClose()" class="btn btn-light float-left">
+        {{ 'cancel' | i18next }}
+      </button>
+      <button type="submit" class="btn btn-primary float-right" (click)="saveCandidate()">
+      {{ 'create' | i18next }}
+      </button>
+    </svms-sidebar-footer>
+  </svms-sidebar>
+  

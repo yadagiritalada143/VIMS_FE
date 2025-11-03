@@ -1,0 +1,207 @@
+<svms-sidebar [title]="panelTitle|i18next" clickOutside="true" [dataVisibility]="viewProfile" size="small" (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <div class="p-24 view-profile-sidebar" *ngIf="!isEditProfile">
+      <div class="d-flex align-items-center justify-content-between">
+      <figure  *ngIf="candidateInfo?.candidate?.avatar !== null" class="profile-avatar rounded-circle overflow-hidden">
+        <img  [src]="candidateInfo?.candidate?.avatar" alt="">
+      </figure>
+      <figure  *ngIf="candidateInfo?.candidate?.avatar === null" class="avatar-initial rounded-circle overflow-hidden">{{candidateInfo?.candidate?.initials}}
+      </figure>
+      <div class="w-50 text-break">
+        <h4 class="mb-0 font-weight-medium">{{candidateInfo?.candidate?.name}}</h4>
+        <p class="custom-font-size">{{candidateInfo?.candidate?.title}}</p>
+      </div>
+      <div class="">
+        <span class="status-ui active">{{candidateInfo?.status| titlecase | i18nextEager}}</span>
+      </div>
+    </div>
+      <div class="clearfix"></div>
+      <div class="d-flex mt-32 pt-12">
+        <div class="d-flex align-items-center">
+          <div class="initials initials-light">
+            <icon class="d-flex" size="14px" name="mail" type="material" theme="outlined" cuClass="d-flex"></icon>
+          </div>
+          <div class="d-flex justify-items-center flex-column ml-4">
+            <p class="mb-0 small">{{ 'official_email' | i18nextEager }}</p>
+            <span>{{candidateInfo?.candidate?.email}}</span>
+          </div>
+        </div>
+        <div class="d-flex align-items-center ml-32">
+          <div class="initials initials-green">
+            <icon class="d-flex" size="18px" name="label" type="material" theme="outlined" cuClass="d-flex"></icon>
+          </div>
+          <div class="d-flex justify-items-center flex-column ml-4">
+            <p class="mb-0 small">{{ 'worker_id' | i18nextEager }}</p>
+            <span>{{candidateInfo?.official_worker_id}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex mt-24 pt-12" *ngIf="assignmentDetails?.worker?.user?.username">
+        <div class="d-flex align-items-center">
+          <div class="initials initials-gray">
+            <icon class="d-flex" size="18px" name="person" type="material" theme="outlined" cuClass="d-flex"></icon>
+          </div>
+          <div class="d-flex justify-items-center flex-column ml-4">
+            <p class="mb-0 small">{{ 'user_name' | i18nextEager }}</p>
+            <span>{{changeCase(assignmentDetails?.worker?.user?.username) || '-'}}</span>
+          </div>
+        </div>
+        </div>
+
+      <h4 class="mt-32 pt-4">
+        <icon class="d-inline-block mr-12" size="18px" name="contact_phone" type="material"></icon>
+      {{ 'contact_details' | i18nextEager }}
+      </h4>
+        <table>
+            <tbody>
+                <tr>
+                    <td class="border-bottom">{{ 'phone' | i18nextEager }}</td>
+                    <td *ngIf="candidateInfo?.candidate?.phone" class="text-right border-bottom">{{candidateInfo?.candidate?.phone_isdcode}}{{candidateInfo?.candidate?.phone }}</td>
+                </tr>
+                <tr>
+                    <td>{{ 'address' | i18nextEager }}</td>
+                    <td class="text-right"><span class="d-block">{{candidateInfo?.candidate?.addresses[0]?.country}}</span>
+                      {{candidateInfo?.candidate?.addresses[0]?.city}}
+                      {{candidateInfo?.candidate?.addresses[0]?.state}}
+                      {{candidateInfo?.candidate?.addresses[0]?.street_1}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <h4 class="mt-32">
+            <icon class="d-inline-block mr-12" size="18px" name="notes" type="material" theme="outlined"></icon>
+            {{ 'summary' | i18nextEager }}</h4>
+            <table>
+                <tbody>
+                    <tr>
+                        <td class="border-bottom">{{ 'worker_source_type' | i18nextEager }}</td>
+                        <td class="text-right border-bottom">{{snakeCaseToTitle(candidateInfo?.source_type) | titlecase}}</td>
+                    </tr>
+                    <tr>
+                        <td class="border-bottom">{{ 'worker_original/tenure_start_date' | i18nextEager }}</td>
+                        <td class="text-right border-bottom">{{getDateFromString(candidateInfo?.original_start_date) | localDateFormat: '': '':'' : true }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ 'sso_id' | i18nextEager }}</td>
+                        <td class="text-right">{{candidateInfo?.sso_id ? candidateInfo?.sso_id : '-'}}</td>
+                    </tr>
+                </tbody>
+            </table>
+    </div>
+    <div class="p-24" *ngIf="isEditProfile">
+      <h4 class="font-weight-medium mb-16">{{ 'personal_information' | i18nextEager }}</h4>
+      <form [formGroup]="candidateForm">
+        <div class="form-group-row">
+          <div class="form-group">
+            <label>{{ 'first_name' | i18nextEager }} <span class="require">*</span></label>
+            <input type="text" class="form-control" placeholder="{{ 'enter_first_name' | i18nextEager }}" formControlName="first_name"
+              [ngClass]="{'error':candidateForm.controls['first_name'].invalid && (candidateForm.controls['first_name'].dirty || candidateForm.controls['first_name'].touched)}">
+          </div>
+          <div class="form-group">
+            <label>{{ 'middle_name' | i18nextEager }} </label>
+            <input type="text" class="form-control" placeholder="{{ 'enter_middle_name' | i18nextEager }}" formControlName="middle_name">
+          </div>
+          <div class="form-group">
+            <label>{{ 'last_name' | i18nextEager }} <span class="require">*</span></label>
+            <input type="text" class="form-control" placeholder="{{ 'enter_last_name' | i18nextEager }}" formControlName="last_name"
+              [ngClass]="{'error':candidateForm.controls['last_name'].invalid && (candidateForm.controls['last_name'].dirty || candidateForm.controls['last_name'].touched)}">
+          </div>
+        </div>
+
+        <div class="form-group-row" *ngIf="!getPrefixSuffixFlag()">
+          <div class="form-group">
+            <label>{{ 'prefix' | i18nextEager }}</label>
+            <ng-select [clearable]="true" placeholder="{{ 'choose' | i18nextEager }}" formControlName="name_prefix"
+              [ngClass]="{'error':candidateForm.controls['name_prefix'].invalid && (candidateForm.controls['name_prefix'].dirty || candidateForm.controls['name_prefix'].touched)}">
+              <ng-option [value]="'Mr'">{{ 'mr' | i18nextEager }}</ng-option>
+              <ng-option [value]="'Mrs'">{{ 'mrs' | i18nextEager }}</ng-option>
+              <ng-option [value]="'Miss'">{{ 'miss' | i18nextEager }}</ng-option>
+              <ng-option [value]="'Dr'">{{ 'dr' | i18nextEager }}</ng-option>
+              <ng-option [value]="'Prof'">{{ 'prof' | i18nextEager }}</ng-option>
+              <ng-option [value]="'MX'">{{ 'mx' | i18nextEager }}</ng-option>
+              <ng-option [value]="'IND'">{{ 'ind' | i18nextEager }}</ng-option>
+              <ng-option [value]="'Misc'">{{ 'misc' | i18nextEager }}</ng-option>
+            </ng-select>
+          </div>
+          <div class="form-group">
+            <label>{{ 'suffix' | i18nextEager }}</label>
+            <ng-select [clearable]="true" placeholder="{{ 'choose' | i18nextEager }}" formControlName="name_suffix">
+              <ng-option [value]="'Jr'">{{ 'jr' | i18nextEager }}</ng-option>
+              <ng-option [value]="'Sr'">{{ 'sr' | i18nextEager }}</ng-option>
+              <ng-option [value]="'III'">{{ 'iii' | i18nextEager }}</ng-option>
+              <ng-option [value]="'IV'">{{ 'iv' | i18nextEager }}</ng-option>
+              <ng-option [value]="'V'">{{ 'v' | i18nextEager }}</ng-option>
+            </ng-select>
+          </div>
+          <div class="form-group"></div>
+        </div>
+        <div class="form-group">
+          <label>{{ 'title' | i18nextEager }}</label>
+          <input type="text" class="form-control" formControlName="title">
+        </div>
+      </form>
+      <h4 class="font-weight-medium mb-16">{{ 'contact_information' | i18nextEager }}</h4>
+      <form [formGroup]="addressForm">
+        <div class="form-group">
+          <label>{{ 'email_address' | i18nextEager }} <span class="require">*</span> </label>
+          <input type="email" class="form-control pr-32" [readonly]="!isVendor" placeholder="{{ 'enter_email_address' | i18nextEager }}" formControlName="email"
+            [ngClass]="{'error':(addressForm.controls['email'].invalid && (addressForm.controls['email'].dirty || addressForm.controls['email'].touched))}">
+        </div>
+
+        <div class="form-group">
+          <label> {{ 'country' | i18nextEager }} </label>
+          <ng-select bindLabel="name" [clearable]="false" placeholder="{{ 'select_country' | i18nextEager }}" formControlName="country"
+            (change)="setCountry()">
+            <ng-option [value]="'USA'">{{ 'usa' | i18nextEager }}</ng-option>
+            <ng-option [value]="'CAN'">{{ 'canada' | i18nextEager }}</ng-option>
+            <ng-option [value]="'IND'">{{ 'india' | i18nextEager }}</ng-option>
+          </ng-select>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'address' | i18nextEager }}</label>
+          <search-address [adressType]="'geocode'" #address2 [country]="countryShortName" formControlName="addresses">
+          </search-address>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'phone' | i18nextEager }}</label>
+          <div class="d-flex align-items-center country-searchable">
+            <ng-select [searchable]="false" [clearable]="false" formControlName="phone_isdcode">
+              <ng-option [value]="'+1'">
+                <img src="../../../assets/images/flag/English (Canada).png" width="20px" class="mr-4" />
+                <span>+1</span>
+              </ng-option>
+              <ng-option [value]="'+1'">
+                <img src="../../../assets/images/flag/us.png" width="20px" class="mr-4" />
+                <span>+1</span>
+              </ng-option>
+              <ng-option [value]="'+91'">
+                <img src="../../../assets/images/flag/हिन्दी.png" width="20px" class="mr-4" />
+                <span>+91</span>
+              </ng-option>
+            </ng-select>
+            <input type="number" (keypress)="keyPressNumbers($event)" class="form-control" maxlength="10" placeholder="{{ 'enter_phone_number' | i18nextEager }}"
+              formControlName="phone_number" [pattern]="mobNumberPattern"
+              [ngClass]="{'error':addressForm.controls['phone_number'].invalid && (addressForm.controls['phone_number'].dirty || addressForm.controls['phone_number'].touched)}">
+          </div>
+        </div>
+      </form>
+    </div>
+  </svms-sidebar-body>
+  <svms-sidebar-footer *ngIf="isClient || isVendor">
+    <button *ngIf="isSendEmailFlag && isVendor" type="button" class="btn float-left" (click)="sendWelcomeEmail()" [disabled]="isWelcomeEmail">
+      {{ 'send_welcome_email' | i18nextEager }}
+    </button>
+    <ng-container *accessControl>
+      <button type="button" *ngIf="isEditProfile" class="btn btn-primary float-right" (click)="onSubmit()" [disabled]="addressForm.invalid || candidateForm.invalid">
+        <icon size="20px" name="how_to_reg" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+        {{ 'save' | i18nextEager }}
+      </button>
+    </ng-container>
+    <button type="button"  *ngIf="!isEditProfile" class="btn btn-primary float-right" (click)="onEdit()">
+      <icon size="20px" name="edit" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+      {{ 'edit' | i18nextEager }}
+    </button>
+  </svms-sidebar-footer>
+</svms-sidebar>

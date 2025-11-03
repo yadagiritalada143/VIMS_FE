@@ -1,0 +1,28 @@
+<div class="program-listing">
+    <vms-table *ngIf="tableConfig" [vmsTableConfig]="tableConfig" [vmsDataSource]="vmsData?.programs" [loading]="dataLoading" [open]="isExpand" [totalItem]="totalPages" [itemsPerPage]="totalRecords" (onExpandClick)="onExpandClick($event)" (changePage)="onPaginationClick($event)"
+        (onCreate)="onCreateClick($event)" (onSort)="onSortClick($event)" (search)="onSearch($event)" (onListFilter)="onListFilter($event)"   (changeRecords)="onClickRecords($event)">
+        <div class="expanded-col">
+            <div class="expanded-chips" *ngFor="let data of programMem">
+                <div class="profiles-img">
+                    <!-- <span><img src="../../../assets/images/5.jpg" alt="" class="pro-pic img-fluid" /></span> -->
+                    <span class="initials initials__purple">{{data.listofUsers[0].substring(0,2)}}</span>
+                    <span class="initials initials__purple" *ngIf="data.listofUsers.length>=2">{{data.listofUsers[1].substring(0,2)}}</span>
+                    <span class="more" *ngIf="data.listofUsers.length>2">
+            <icon size="17px" name="more_horiz" type="material" cuClass="icon d-flex"></icon>
+          </span>
+                </div>
+                <div class="chip-content">
+                    <span class="name">
+            {{data.user}}
+          </span>
+                    <span class="designation">
+            {{data.role}}
+          </span>
+                </div>
+            </div>
+            <div *ngIf="(programMem | json) == '[]'">
+                {{ 'data_not_available' | i18next }}
+            </div>
+        </div>
+    </vms-table>
+</div>

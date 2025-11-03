@@ -1,0 +1,64 @@
+<!-- <a href="javascript:void(0)" class="notify-trigger" (click)="notificationToggle()" #notifyTrigger>
+  <icon cuClass="header-notification-icon" name="notifications_none" size="21px" type="material"></icon>
+  <span class="count">{{totalCount}}</span>
+</a> -->
+<div [hidden]="notifications?.length == 0">
+  <div class="notification-panel" [ngClass]="{'active' : notificationPanel}" #notifyPanel>
+    <a href="javascript:void(0)" class="close-notify" (click)="closeNotification()">
+      <icon name="clear" size="20px" type="material"></icon>
+    </a>
+    <div class="clearfix"></div>
+    <div class="notification-list">
+      <h4 class="notification-title pl-16 font-weight-medium mb-0">
+        {{ 'notification' | i18next }}
+      </h4>
+      <div class="list-outer">
+        <!-- <perfect-scrollbar> -->
+          <ul *ngIf="notifications && notifications?.length > 0;">
+            <li *ngFor="let notification of items$ | async" [ngClass]=
+            "{'active' : notification?.id == options['selected'], 'unread' : !notification.readMessage}" 
+            (click)="selectedNotification(notification)">
+              <p class="item-title">{{ notification?.eventName }}</p>
+              <p class="item-description">{{ notification?.subject || '-' }}</p>
+              <span class="time-stamp">{{ notification.notificationDate | localDateFormat }}</span>
+            </li>
+          </ul>
+        <!-- </perfect-scrollbar> -->
+      </div>
+    </div>
+  
+    <div class="notification-item-preview" *ngIf="notification?.id">
+      <div class="item-preview-title d-flex align-items-center justify-content-between">
+        <h4 class="mb-0 font-weight-medium">{{ notification?.subject }}</h4>
+        <div class="d-flex align-items-center">
+          <p class="small mr-8">{{ notification.notificationDate | localDateFormat }}</p>
+          <icon name="delete" theme="outlined" tooltip="Delete" placement="left" class="delete-item" 
+          (click)="showPopup()"></icon>
+        </div>
+      </div>
+      <div class="notification-email-preview">
+        <perfect-scrollbar>
+          <div class="notification-email-inside">
+            <div [innerHTML]="notification?.messageBody | safeHtml"></div>
+          </div>
+        </perfect-scrollbar>
+      </div>
+    </div>
+    <div class="clearfix"></div>
+  </div>
+</div>
+<div *ngIf="notifications?.length == 0;">
+  <div class="notification-panel small" [ngClass]="{'active' : notificationPanel}" #notifyPanel>
+    <a href="javascript:void(0)" class="close-notify" (click)="closeNotification()">
+      <icon name="clear" size="20px" type="material"></icon>
+    </a>
+    <div class="clearfix"></div>
+    <h4 class="notification-title pl-16 font-weight-medium mb-0">
+      {{ 'notification' | i18next }}
+    </h4>
+    <div>
+        <app-no-data></app-no-data>
+    </div>
+  </div>
+</div>
+<div class="notification-overlay" [ngClass]="{'active' : notificationPanel}"></div>

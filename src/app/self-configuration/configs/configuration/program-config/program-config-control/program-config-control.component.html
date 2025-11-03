@@ -1,0 +1,168 @@
+<div [hidden]="hidden || (subtitle === EnableNotificationType.ENABLE_NOTIFICATION_ENGINE || subtitle == EnableNotificationType.MODULES) && !showEnableNotificationSection">
+  <div class="tab-inner" *ngIf="subtitle !== 'Module Action Buttons'" [ngClass]="subtitle !== EnableNotificationType.MODULES && 'd-flex align-items-center'">
+    <div class="tab-left-content w-100 d-flex align-items-center">
+      <div *ngIf="subDirectoryIcon"class="sub-child-padd" ></div>
+      <i class="material-icons" *ngIf="directoryIcon">subdirectory_arrow_right</i>
+      <div class="c-text-content">
+        <p *ngIf="title" class="small font-weight-medium text-uppercase mb-12">{{ title | i18next}}</p>
+        <p class="subtitle font-weight-medium">{{ subtitle | i18next }} <span class="require" *ngIf="isRequired">*</span></p>
+        <p>{{ description | i18next }}</p>
+      </div>
+    </div>
+    <div class="tab-right-content d-flex justify-content-end" *ngIf="type == controlType.MULTISELECTDROPDOWN">
+      <ng-select
+        [ngClass]="disabled?'disableDiv':''"
+        placeholder="{{placeholderText | i18next}}"
+        multiple="true"
+        [(ngModel)]="Value"
+        [loading]="loading"
+        [items]="(dropdownItems | keysort:'code')"
+        bindValue="code"
+        bindLabel="description"
+        [disabled]="disabled"
+        [readonly]="disabled"
+        [clearable]="false"
+        [hideSelected]="true"
+      >
+
+      <ng-template ng-label-tmp let-item="item" let-clear="clear">
+        <div class="d-flex">
+          <span class="ng-value-label"> {{ item?.description | i18next }} </span>
+          <span *ngIf="!nonEditable.includes(item?.code)"
+            class="ng-value-icon" style="color: black"
+            (click)="clear(item)" aria-hidden="true">×</span>
+        </div>
+      </ng-template>
+
+      </ng-select>
+    </div>
+
+    <div class="tab-right-content d-flex justify-content-end" *ngIf="type == controlType.DROPDOWN">
+      <ng-select
+        placeholder="{{ 'select' | i18next }}"
+        [(ngModel)]="Value"
+        [loading]="loading"
+        [items]="sortNotRequired ? dropdownItems : (dropdownItems | keysort: 'code')"
+        bindValue="code"
+        bindLabel="description"
+        [disabled]="disabled"
+        [readonly]="disabled"
+        [clearable]="false"
+      >
+      </ng-select>
+    </div>
+
+    <div class="tab-right-content d-flex justify-content-end" *ngIf="type == controlType.TOGGLE">
+      <toggle-button [disabled]="disabled" [checked]="Value" (changed)="Value = !Value"></toggle-button>
+    </div>
+
+    <div class="tab-right-content d-flex justify-content-end" *ngIf="type == controlType.NUMERIC">
+      <div class="form-group">
+        <input aria-range type="text" [readOnly]="disabled" [disabled]="disabled"
+          [allowUptoNDigitDecimalNumber]="precision ?? 0" class="c-form-control w-100"
+          placeholder="{{ 'enter_value' | i18next }}" [(ngModel)]="Value"
+          [min]="min" [max]="max"
+        />
+        <div *ngIf="control?.errors" class="error-text pt-4"> {{ "* " + (errorText || "Please provide value within valid range") | i18next }} </div>
+      </div>
+    </div>
+
+    <div class="tab-right-content d-flex justify-content-end" *ngIf="type == controlType.TEXTBOX">
+      <input type="text" [readOnly]="disabled" [disabled]="disabled"
+        class="c-form-control" placeholder="{{(placeholderText || 'enter_value') | i18next}}"
+        [(ngModel)]="Value" [mandatePattern]="mandatePattern"/>
+    </div>
+
+    <div class="tab-right-content d-flex justify-content-end" *ngIf="type == controlType.RADIO">
+      <div class="c-switch-tabs d-flex ml-24">
+        <ng-container *ngFor="let radioItem of radioItems; let index = index">
+          <input type="radio" [disabled]="disabled" [readOnly]="disabled" name="program-check" [id]="index" [value]="radioItem.code" [(ngModel)]="Value" />
+          <label [for]="index">{{ radioItem?.description | i18next}}</label>
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="tab-right-content d-flex justify-content-end" *ngIf="type == controlType.TEXTAREA">
+      <textarea [disabled]="disabled" [readOnly]="disabled"
+        class="c-form-control" rows="4" placeholder="{{(placeholderText || 'enter_value') | i18next}}"
+        [(ngModel)]="Value">
+      </textarea>
+    </div>
+
+    <div class="tab-right-content ng-select-input d-flex" style="flex-direction: column; align-items: end;" *ngIf="type == controlType.NUMBERSELECTOPTION">
+      <div class="ng-select-input-inner ng-select-input-numb-inner d-flex justify-content-end">
+        <input type="text" class="c-form-control numberSelectOption" [(ngModel)]="Value" placeholder="0" [readOnly]="disabled" [disabled]="disabled" [allowUptoNDigitDecimalNumber]="precision ?? 0"/>
+          <ng-select [readonly]="disabled" placeholder="{{'select'|i18next}}" [(ngModel)]="selectedValue" (change)="optionChanged($event)" >
+               <ng-option [value]="item.value??item.code" *ngFor="let item of dropdownItems">{{item.label??item.name}}</ng-option>
+          </ng-select>
+      </div>
+      <div *ngIf="control?.errors && errorText" class="error-text pt-4"> {{ "* " + (errorText) }} </div>
+    </div>
+
+    <div class="tab-right-content d-flex justify-content-end" *ngIf="type == controlType.TIMER">
+      <div class="form-group d-flex" style="width: 65%">
+        <ng-select (change)="updateSecondTimer($event)" class="pr-8" [readonly]="disabled" [clearable]="false" placeholder="{{'--'|i18next}}" [(ngModel)]="firstTimer" (change)="firstTimerChanged($event)" >
+            <ng-option [value]="val" *ngFor="let val of firstTimerOptions"> {{ val }} </ng-option>
+        </ng-select>
+        <ng-select [readonly]="disabled" [clearable]="false" placeholder="{{'--'|i18next}}" [(ngModel)]="secondTimer" (change)="secondTimerChanged($event)" >
+          <ng-container *ngFor="let val of secondTimerOptions">
+            <ng-option *ngIf="renderSecondTimer(val)" [value]="val"> {{ val }} </ng-option>
+          </ng-container>
+        </ng-select>
+      </div>
+    </div>
+
+    <div *ngIf="subtitle == EnableNotificationType.MODULES" [hidden]="subtitle == EnableNotificationType.MODULES && !showEnableNotificationSection">
+      <div class="checkbox-panel p-m-0">
+        <ng-container *ngFor="let toggle of programDetails?.module_configs ; let i = index">
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner">
+              <span class="d-flex align-items-center">
+                <span> {{toggle?.module?.sub_module | i18next}}</span>
+              </span>
+              <span class="toggle-switch" [ngClass]="toggle?.is_enabled ? 'toggle-on' : 'toggle-off'"
+              (click)="changeModuleToggle(toggle)" 
+              ></span>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+  <div class="table-view" *ngIf="type == controlType.TABULARINPUT">
+    <table>
+      <thead>
+        <tr>
+          <th *ngFor="let column of dropdownItems.headerColumns">{{ column.description }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let info of dropdownItems.inputData">
+          <td *ngFor="let column of dropdownItems.headerColumns">
+            <div class="form-group" *ngIf="column.inputDataField == 'inputval' ">
+              <input onlyNumber type="number" class="c-form-control inputwidth numberSelectOption" [(ngModel)]="info.inputval" placeholder="0" [readOnly]="disabled" [disabled]="disabled" (keyup)="optionChanged(dropdownItems.inputData,true)"/>
+            </div>
+            <div *ngIf="column.inputDataField != 'inputval' ">
+              {{ info[column.inputDataField] }}
+            </div>
+
+          </td>
+        </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td *ngFor="let footerColumn of dropdownItems.footerColumns">
+
+          <div *ngIf="footerColumn.description != 'inputvalTotal' ">
+            {{ footerColumn.description }}
+          </div>
+          <div class="form-group" *ngIf="footerColumn.description == 'inputvalTotal' ">
+            <input onlyNumber type="number" class="c-form-control inputwidth numberSelectOption" [(ngModel)]="dropdownItems.total" disabled="disabled" />
+            <div *ngIf="dropdownItems.total != 100" class="error-text pt-4"> {{ "total_should_be_100" | i18next }} </div>
+          </div>
+        </td>
+      </tr>
+    </tfoot>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,269 @@
+<form [formGroup]="jobFormGroup">
+  <div class="job-details">
+    <!--Job details-->
+    <div class="panel panel-light">
+      <div class="panel-head">
+        <div class="d-flex align-items-center justify-content-between">
+          <h4 i18n class="d-flex align-items-center ">
+            <icon size="19px" name="category" theme="outlined" type="material" class="d-flex mr-8" cuClass="d-flex">
+            </icon> {{ 'job_details' | i18next }}
+          </h4>
+        </div>
+      </div>
+      <div class="panel-content">
+        <div class="form-group-row">
+          <div class="form-group">
+            <label I18n>{{ 'job_manager' | i18next }}<span class="require">*</span></label>
+            <ng-select formControlName="job_manager" bindLabel="name" placeholder="{{ 'select_manager' | i18next }}" (change) ="getApprovalList()">
+              <ng-option *ngFor="let option of managerList" [value]="option">{{option?.first_name}}</ng-option>
+            </ng-select>
+          </div>
+
+          <div class="form-group" *ngIf="firstFoundationalType">
+            <label I18n>{{firstFoundationalType?.name}}
+              <span class="require"
+                *ngIf="firstFoundationalType?.configuration?.module_jobs === 'REQUIRED'">*</span></label>
+            <ng-select [formControl]="foundationlGroupForm?.get(firstFoundationalType?.code)" (change) = "makeFoundationDataType($event, foundationlGroupForm?.get(firstFoundationalType?.code))" bindLabel="name"
+              placeholder="{{ 'select_master_data_type' | i18next }}">
+              <ng-option *ngFor="let option of firstFoundationalType?.values" [value]="option.name">{{option.name}}
+              </ng-option>
+            </ng-select>
+          </div>
+        </div>
+
+        <div class="form-group-row" *ngFor="let item of foundationTypeList">
+          <div class="form-group" *ngFor="let subItem of item">
+            <label [hidden]="subItem?.hidden" I18n>{{subItem?.name}}
+              <span class="require" *ngIf="subItem?.configuration?.module_jobs === 'REQUIRED'">*</span></label>
+            <ng-select *ngIf="subItem?.code" [formControl]="foundationlGroupForm?.get(subItem?.code)" (change) = "makeFoundationDataType($event , foundationlGroupForm?.get(subItem?.code))" 
+              [hidden]="subItem?.hidden" bindLabel="name" placeholder="{{ 'select' | i18next }}">
+              <ng-option *ngFor="let option of subItem?.values" [value]="option.name">{{option.name}}
+              </ng-option>
+            </ng-select>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+          </div>
+        </div>
+
+        <div class="form-group-row">
+          <div class="form-group">
+            <div class="toggle-panel w-100 mt-26">
+              <div class="toggle-panel-inner"
+                [ngClass]="jobFormControl?.allow_expense.value ? 'if-active' : 'if-inactive'">
+                <span class="distribution-listing-itemstext">{{toggle?.title}}</span>
+                <span class="toggle-switch" [ngClass]="jobFormControl?.allow_expense.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle()"></span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="">
+              <label I18n>{{ 'respond_by_date' | i18next }} <span class="require">*</span></label>
+              <!-- <div class="datepicker-position"> -->
+              <svms-datepicker [inputdateFormat]="'MM/DD/YY'" id="date1" ngDefaultControl I18n
+                formControlName="respond_by_date" #respond_by_date>
+              </svms-datepicker>
+              <!-- <svms-datepicker  ngDefaultControl id="date1"  I18n #dateFiled>
+                </svms-datepicker> -->
+              <!-- </div> -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!--Job details-->
+
+    <!--Rate details-->
+    <div class="panel panel-light mt-16">
+      <div class="panel-head">
+        <div class="d-flex align-items-center justify-content-between">
+          <h4 i18n class="d-flex align-items-center ">
+            <icon size="19px" name="payments" theme="outlined" type="material" class="d-flex mr-8" cuClass="d-flex">
+            </icon> {{ 'rate_details' | i18next }}
+          </h4>
+        </div>
+      </div>
+      <div class="panel-content">
+        <div class="form-group-row">
+          <div class="form-group">
+            <label I18n>{{ 'minimum_bill_rate' | i18next }}<span class="require">*</span></label>
+            <input type="text" class="form-control text-right mb-16" formControlName="min_bill_rate"
+              placeholder="{{ '$' | i18next }} 40.00" (change) ="getApprovalList()">
+          </div>
+          <div class="form-group">
+            <label I18n>{{ 'maximum_bill_rate' | i18next }}<span class="require">*</span></label>
+            <input type="text" class="form-control text-right mb-16" formControlName="max_bill_rate"
+              placeholder="{{ '$' | i18next }} 40.00" (change)="getResourceBudget() ; getApprovalList()">
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--Rate details-->
+
+    <!--Budget Estimate-->
+    <div class="panel panel-light mt-16">
+      <div class="panel-head">
+        <div class="d-flex align-items-center justify-content-between">
+          <h4 i18n class="d-flex align-items-center ">
+            <icon size="19px" name="request_quote" theme="outlined" type="material" class="d-flex mr-8"
+              cuClass="d-flex">
+            </icon> {{ 'budget_estimate' | i18next }}
+          </h4>
+        </div>
+      </div>
+      <div class="panel-content">
+        <div class="no-gutters row">
+          <div class="col-8">
+
+            <label class="spc"> {{ 'number_of_positions' | i18next }}</label>
+            <label class="spc"> {{ 'estimated_hours' | i18next }} / {{ 'day' | i18next }}</label>
+            <label class="spc"> {{ 'work_days' | i18next }} / {{ 'week' | i18next }}</label>
+            <ng-container *ngIf="showEstimate">
+              <label class="spc"> {{ 'work_duration' | i18next }}</label>
+              <label class="spc"> {{ 'total_working_hours' | i18next }} / Position</label>
+              <label class="spc"> {{ 'amount' | i18next }} / {{ 'position' | i18next }}</label>
+              <label class="spc"> {{ 'additional_amount' | i18next }} / {{ 'position' | i18next }}</label>
+              <label class="spc"> {{ 'sub_total' | i18next }} / {{ 'position' | i18next }}</label>
+              <label class="spc"> {{ 'adjustment' | i18next }} 1 - {{ 'local_tax' | i18next }} / {{ 'position' | i18next }}</label>
+              <label class="spc"> {{ 'sub_total_with_adjustments' | i18next }} / {{ 'position' | i18next }}</label>
+            </ng-container>
+          </div>
+          <div class="col-4">
+            <input type="number" formControlName="num_resources" class="form-control mb-16 text-right"
+              (change)="getWorkingHoursEstimate('resource count')">
+            <input type="number" formControlName="hours_per_day" class="form-control mb-16 text-right"
+              (change)="getWorkingHoursEstimate('estimated hours')">
+              
+            <input type="number" formControlName="week_working_days" class="form-control mb-16 text-right"
+              (change)="getWorkingHoursEstimate('working days')">
+            <ng-container *ngIf="showEstimate">
+              <input type="text" formControlName="formatted_working_days"
+                class="form-control highlight-form mb-16 text-right" disabled>
+              <input type="number" formControlName="working_hours" class="form-control highlight-form mb-16 text-right"
+                disabled>
+              <div class="form-control mb-16 text-right disable-color"> {{jobFormGroup.get('single_initial_budget').value |customcurrency:'USD' }}</div>
+              <!-- <input type="number" formControlName="single_initial_budget"   [value]="jobFormGroup.get('single_initial_budget').value |currency:'USD':'symbol':'4.2-2'"  class="form-control mb-16 text-right"
+                disabled> -->
+              <input type="number" formControlName="additional_amount" class="form-control mb-16 text-right"
+                (change)="getResourceBudget()">
+              <!-- <input type="number" formControlName="single_gross_budget"
+                class="form-control highlight-form mb-16 text-right" disabled> -->
+                <div class="form-control mb-16 text-right disable-color"> {{jobFormGroup.get('single_gross_budget').value |customcurrency:'USD' }}</div>
+              <input type="number" formControlName="adjustment_value" class="form-control mb-16 text-right"
+                (change)="getResourceBudget()">
+                <div class="form-control mb-16 text-right disable-color"> {{jobFormGroup.get('single_net_budget').value |customcurrency:'USD' }}</div>
+              <!-- <input type="number" formControlName="single_net_budget" class="form-control mb-16 text-right"
+               disabled> -->
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow_position">
+        <button type="button" class="btn small btn-light light-bg mt-4 blue font-weight-normal"
+          (click)="showEstimate = !showEstimate">
+          {{showEstimate ? 'Hide': 'Show' }} {{ 'detailed_estimate' | i18next }}
+          <icon size="24px" name="keyboard_arrow_up" type="material" class="icon--on-right blue ml-8" cuClass="cu-icon">
+          </icon>
+        </button>
+      </div>
+
+      <div class="panel-footer">
+        <div class="no-gutters row justify-content-center pt-24">
+          <div class="col-8"><label class="font-weight-medium">{{ 'total_estimated_budget' | i18next }}</label>
+          </div>
+          <div class="col-4"><label class="font-weight-medium text-right">
+              {{jobFormControl?.net_budget?.value | customcurrency }}</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--Budget Estimate-->
+
+    <!--Trigger Approval Workflow-->
+    <div class="panel panel-light mt-16" *ngIf="approvalList?.length > 0">
+      <div class="panel-head">
+        <div class="d-flex align-items-center justify-content-between mb-16">
+          <h4 class="d-flex align-items-center ">
+            <icon class="d-flex mr-8" size="19px" name="add_task" type="material" cuClass="d-flex"></icon>
+            {{ 'trigger_approval_workflow' | i18next }}
+          </h4>
+          <div>
+            <div class="toggle-disable">
+              <div class="toggle-panel-inner">
+                <span class="toggle-switch" [ngClass]="toggleDisable?.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggleDisable()"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-content">
+        <div *ngIf="toggleDisable.value">
+          <label>{{ 'approvers' | i18next }}</label>
+          <div class="panel-info mb-8 p-16" *ngFor="let approver of approvalList; let i = index;">
+            <div class="no-gutters row">
+              <div class="col-8">
+                <div class="d-flex align-items-center">
+                  <div class="initials initials-profile initials__green d-flex mr-8 "
+                    *ngIf="approver && approver?.first_name ">
+                    {{approver?.first_name| shortName: 'first'}}</div>
+                  <div class="d-flex flex-column">
+                    <span class="subtitle-2 font-weight-medium">{{approver?.first_name}}</span>
+                    <span class="x-small">{{approver?.role}}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="justify-content-end">
+                  <div class="toggle-disable">
+                    <div class="toggle-panel-inner">
+                      <span class="toggle-switch"     (click) ="changeToggleValue(approver, i)"   [ngClass]="approver?.value ? 'toggle-on' : 'toggle-off'"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group mb-16">
+            <label> {{ 'note_for_approver(s)' | i18next }} </label>
+            <textarea type="textarea" rows="7" cols="12" formControlName="note_for_approver" maxlength="1000"
+              class="form-control" placeholder="{{ 'add_note' | i18next }}"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--Trigger Approval Workflow-->
+
+    <div class="panel panel-light mt-16" *ngIf="approvalList?.length > 0">
+      <div class="panel-head">
+        <div class="d-flex align-items-center justify-content-between">
+          <h4 class="d-flex align-items-center mb-0">
+            <icon class="d-flex mr-8" size="19px" name="add_task" type="material" cuClass="d-flex"></icon>
+            {{ 'distribute_the_job' | i18next }}
+          </h4>
+          <div>
+            <div class="toggle-disable">
+              <div class="toggle-panel-inner">
+                <span class="toggle-switch" [ngClass]="toggleDisable?.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggleDisable()"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+  </div>
+  <div class="row no-gutters mt-24 mb-16">
+    <div class="col-12 d-flex align-items-center justify-content-between">
+      <button type="button" class="btn btn-outline" (click)="backToQualification()">
+        <icon size="24px" name="keyboard_backspace" theme="outlined" type="material" class="d-flex" cuClass="d-flex">
+        </icon>
+      </button>
+      <button type="button" class="btn btn-primary" (click)="submitJobDetails()">{{ 'save' | i18next }} & {{ 'continue' | i18next }}
+        <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu">
+        </icon>
+      </button>
+    </div>
+  </div>
+</form>

@@ -1,0 +1,68 @@
+<div>
+  <div class="history-listing description-card p-24 history-padd">
+    <div class="pb-16">
+      <h4 class="title font-weight-medium">{{ 'history' | i18next }}</h4>
+    </div>
+    <div *ngIf="candidateHistory.length">
+      <div class="pl-m-24" *ngFor="let candidateHis of candidateHistory, let i = index">
+        <div class="row">
+          <div>
+            <div class="fs-13 font-weight-medium main-text-color pb-4">{{candidateHis?.modified_date}}</div>
+            <div class="fs-12 font-weight-regular sub-text-color">{{candidateHis?.modified_time}}</div>
+          </div>
+          <div class="divider history-divider" [ngClass]="{'divider-w-border': candidateHistory.length - 1 > i }">
+            <div class="circle" [ngClass]="{'circle-w-divider-border': candidateHistory.length - 1 > i }"></div>
+          </div>
+          <div class="col history-detail">
+            <div class="d-flex justify-content-between column-direction">
+              <div>
+                <div class="fs-16 font-weight-medium main-text-color pb-8">
+                  {{candidateHis?.activity | i18next}}
+                </div>
+
+                <div class="pb-4">
+                  <span class="fs-13 font-weight-regular main-text-color">{{ 'updated_by' | i18next }} : </span>
+                  <span class="fs-13 font-weight-regular sub-text-color">
+                    {{ currentProgram?.config?.is_vendor_neutral && user_type ==='client' && candidateHis?.actor_type ==='vendor' ? 'Vendor': candidateHis?.actor_fullname }}
+                  </span>
+                </div>
+                <div class="pb-4" *ngIf="candidateHis?.impersonated_by">
+                  <span class="fs-13 font-weight-regular main-text-color">{{ 'impersonated_by' | i18next }} : </span>
+                  <span class="fs-13 font-weight-regular sub-text-color">
+                    {{ candidateHis?.impersonated_by }}
+                  </span>
+                </div>
+
+                <ng-container *ngIf="showReasons(candidateHis?.activity)">
+                  <div *ngIf="candidateHis?.reason" class="pb-4 mt-8">
+                    <span class="fs-13 font-weight-regular main-text-color">{{ 'reason' | i18next }} : </span>
+                    <span class="fs-13 font-weight-regular sub-text-color">{{candidateHis?.reason | i18next}}</span>
+                  </div>
+                  <div *ngIf="candidateHis?.reason && candidateHis?.reason_notes" class="pb-4">
+                    <span class="fs-13 font-weight-regular main-text-color">{{ 'notes' | i18next }} : </span>
+                    <span class="fs-13 font-weight-regular sub-text-color">{{candidateHis?.reason_notes | i18next}}</span>
+                  </div>
+              </ng-container>
+
+              </div>
+              <button type="button" *ngIf="showViewButton(candidateHis?.activity)" class="my-auto btn primary-outline text-primary small"
+                (click)="viewHistory(candidateHis)">
+                <icon size="16px" name="visibility" type="material" class="icon--on-left" cuClass="icon-cu">
+                </icon>
+                {{ 'view' | i18next }}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <app-logs [log]="logs"> </app-logs>
+  </div>
+</div>
+<app-candidate-history-view *ngIf="viewHistoryDetails" [viewHistoryPanel]="viewHistoryPanel" [historyData]="historyData"
+  (onClose)="sidebarClose()"></app-candidate-history-view>
+
+  <div *ngIf="isLoading" class="d-flex justify-content-center loader-height align-items-center height-vh">
+    <div class="dotloader"></div>
+  </div>

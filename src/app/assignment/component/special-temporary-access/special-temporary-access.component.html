@@ -1,0 +1,92 @@
+<svms-sidebar [title]="'Special Temporary Access'|i18next" [dataVisibility]="specialAccess" (onClose)="sidebarClose()">
+    <svms-sidebar-body>
+        <app-logs [log]="logs"></app-logs>
+        <app-supporting-text *ngIf="supportingDialougVisible" [support_data]="support_text" (closeDialog)="closeDialog($event)"></app-supporting-text>
+        <div class="py-32 px-24 special-access">
+            <table>
+                <ng-container *ngIf="(status?.toLowerCase() == assignmentStatus?.CLOSED || status?.toLowerCase() == 'assignment closed'); else showPastPeriodSection">
+                <tr>
+                    <td><input class="cursor-pointer" [(ngModel)]="temporaryForm.module_action.submit.is_allow"
+                            type="checkbox"></td>
+                    <td>{{'provide_access_to_vendor_to_submit_timesheet_for' | i18nextEager}}
+                        <br>
+                        <span class="text-muted">(Maximum allowable value is {{maxValueTimesheetSubmit?.period}} {{maxValueTimesheetSubmit?.type}})</span>
+                    </td>
+                    <td><input [disabled]="!temporaryForm.module_action.submit.is_allow" [(ngModel)]="temporaryForm.module_action.submit.option.period" type="number" onkeypress="return (event?.charCode >= 48 && event?.charCode <= 57)"
+                            placeholder="" class="form-control"></td>
+                    <td>
+                    <ng-select  [disabled]="!temporaryForm.module_action.submit.is_allow" class="m-width" [(ngModel)]="temporaryForm.module_action.submit.option.type" [clearable]="false" placeholder="{{ 'please_select' | i18nextEager }}">
+                            <ng-option value="hour">{{ 'hour' | i18nextEager }}</ng-option>
+                            <ng-option value="day">{{ 'day' | i18nextEager }}</ng-option>
+                            <ng-option value="week">{{ 'week' | i18nextEager }}</ng-option>
+                            <ng-option value="month">{{ 'month' | i18nextEager }}</ng-option>
+                    </ng-select>
+                    </td>
+                    <td>{{ 'starting_now' | i18nextEager }}</td>
+                </tr>
+                <tr>
+                    <td><input class="cursor-pointer" [(ngModel)]="temporaryForm.module_action.modify.is_allow"
+                            type="checkbox"></td>
+                    <td>{{'provide_access_to_modify_timesheet' | i18nextEager}} <br>
+                        <span class="text-muted">(Maximum allowable value is {{maxValueTimesheetModify?.period}} {{maxValueTimesheetModify?.type}})</span></td>
+                    <td><input [(ngModel)]="temporaryForm.module_action.modify.option.period" onkeypress="return (event?.charCode >= 48 && event?.charCode <= 57)" type="number"
+                            placeholder="" class="form-control" [disabled]="!temporaryForm.module_action.modify.is_allow"></td>
+                    <td>
+                        <ng-select [disabled]="!temporaryForm.module_action.modify.is_allow" [(ngModel)]="temporaryForm.module_action.modify.option.type" [clearable]="false"
+                            placeholder="{{ 'please_select' | i18nextEager }}">
+                            <ng-option value="hour">{{ 'hour' | i18nextEager }}</ng-option>
+                            <ng-option value="day">{{ 'day' | i18nextEager }}</ng-option>
+                            <ng-option value="week">{{ 'week' | i18nextEager }}</ng-option>
+                            <ng-option value="month">{{ 'month' | i18nextEager }}</ng-option>
+                        </ng-select>
+                    </td>
+                    <td>{{ 'starting_now' | i18nextEager }}</td>
+                </tr>
+            </ng-container>
+            <ng-template #showPastPeriodSection>
+                <tr *ngIf="temporaryForm?.module_action?.past_period">
+                    <td><input class="cursor-pointer" [(ngModel)]="temporaryForm.module_action.past_period.is_allow"
+                            type="checkbox">
+                    </td>
+                    <td>{{ 'special_access_to_submit_archived' | i18nextEager }}/ {{ 'restricted_timesheet_for' | i18nextEager }}
+                        <br>
+                            <span class="text-muted">(Maximum allowable value is {{maxValueTimesheetPastPeriod?.period}} {{maxValueTimesheetPastPeriod?.type}})</span>
+                    </td>
+                    <td><input  [disabled]="!temporaryForm.module_action.past_period.is_allow" [(ngModel)]="temporaryForm.module_action.past_period.option.period" type="number" onkeypress="return (event?.charCode >= 48 && event?.charCode <= 57)"
+                            placeholder="" class="form-control">
+                            </td>
+                    <td>
+                    <ng-select [disabled]="!temporaryForm.module_action.past_period.is_allow" class="m-width" [(ngModel)]="temporaryForm.module_action.past_period.option.type" [clearable]="false" placeholder="{{ 'please_select' | i18nextEager }}">
+                        <ng-option value="hour">{{ 'hour' | i18nextEager }}</ng-option>
+                        <ng-option value="day">{{ 'day' | i18nextEager }}</ng-option>
+                        <ng-option value="week">{{ 'week' | i18nextEager }}</ng-option>
+                        <ng-option value="month">{{ 'month' | i18nextEager }}</ng-option>
+                    </ng-select>
+                    </td>
+                    <td>{{ 'starting_now' | i18nextEager }}</td>
+                </tr>
+                </ng-template>
+                <!-- <tr>
+                    <td><input class="cursor-pointer" [(ngModel)]="temporaryForm.module_action.modify.is_allow"
+                            type="checkbox"></td>
+                    <td>{{ 'provide_access_to_modify_timesheet_' | i18nextEager }}</td>
+                    <td><input [(ngModel)]="temporaryForm.module_action.modify.option.period" type="number"
+                            placeholder="2" class="form-control"></td>
+                    <td>
+                        <ng-select [(ngModel)]="temporaryForm.module_action.modify.option.type" [clearable]="false"
+                            placeholder="{{ 'please_select' | i18nextEager }}">
+                            <ng-option value="hour">{{ 'hour' | i18nextEager }}</ng-option>
+                            <ng-option value="day">{{ 'day' | i18nextEager }}</ng-option>
+                            <ng-option value="week">{{ 'week' | i18nextEager }}</ng-option>
+                            <ng-option value="month">{{ 'month' | i18nextEager }}</ng-option>
+                        </ng-select>
+                    </td>
+                    <td>{{ 'starting_now' | i18nextEager }}</td>
+                </tr> -->
+            </table>
+        </div>
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+        <button (click)="onSubmit()" [disabled]="disableSubmit" class="btn btn-primary float-right" *accessControl>{{ 'update' | i18nextEager }}</button>
+    </svms-sidebar-footer>
+</svms-sidebar>

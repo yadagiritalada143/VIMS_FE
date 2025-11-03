@@ -1,0 +1,15 @@
+<div class="toolbox-wrapper">
+  <div class="page-title mb-24 text-center pr-16">
+    {{ 'choose_field_type' | i18next }}
+  </div>
+  <div class="toolbox justify-content-start" *ngIf="supportedFields$ | async as supportedFields">
+    <div
+      *ngFor="let field of showAllowedFields(supportedFields)"
+      [ngClass]="{ 'input-fields-type': true, active: field.type === selected?.type }"
+      (click)="select(field)"
+    >
+      <svg-icon [key]="getSvgName(field.icon)" fontSize="34px" class="input-fields-icon"></svg-icon>
+      <p class="small text-center">{{ field.label | i18next}}</p>
+    </div>
+  </div>
+</div>

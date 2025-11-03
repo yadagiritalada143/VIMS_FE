@@ -1,0 +1,67 @@
+<div class="page-container px-24 py-24 min-height pt-m-0">
+  <div class="row no-gutters space-between">
+    <div class="col-12">
+      <div class="row no-gutters space-between dashboard-header-mobile">
+        <div class="col-4">
+          <!-- <h3 class="dashboard-heading mb-0">{{ 'dashboard' | i18nextEager }} > My {{ 'dashboard' | i18nextEager }}  </h3> -->
+          <div class="dashboard-heading dashboard-heading-root mb-0">{{ 'dashboard' | i18next }}&ensp;</div>
+          <div class="dashboard-heading mb-0">> {{ 'my_dashboard' | i18next }} </div>
+        </div>
+        <div class="wrapper">
+          <!-- <div *ngIf="user?.is_candidate && !editMode" class="assignment d-flex justify-content-end align-items-center">
+            <label class="mr-16 mb-0">
+              <h4 class="mb-0">{{ 'assignment' | i18nextEager }}</h4>
+            </label>
+            <div class="form-group max-length mb-0 pb-0">
+
+              <ng-select [clearable]="false" placeholder="{{ 'select_assignment' | i18nextEager }}" [readonly]="!assignment?.length"
+                [(ngModel)]="assignment_uuid" (change)="changeAssignment(assignment_uuid)">
+                <ng-option *ngFor="let item of assignment" [value]="item?.assignment_uuid">
+                  {{item?.bindLabel || 'Worker'}}
+                </ng-option>
+              </ng-select>
+            </div>
+          </div> -->
+          <div *ngIf="!editMode" class="d-flex justify-content-end align-items-center"
+            [ngClass]="{'pr-24': user?.is_candidate}">
+            <i class="material-icons cursor-pointer" (click)="showMenus()">settings</i>
+            <!-- <i class="material-icons cursor-pointer" (click)="editWidget()">settings </i>-->
+          </div>
+        </div>
+        <div class="d-flex justify-content-end align-items-center float-right dashbard-edit-mobile" *ngIf="editMode">
+          <!-- add new widget -->
+          <!-- <button class="btn btn-primary mr-12" (click)="showWidget()"> <i class="material-icons pr-4">add_circle</i> -->
+          <button class="btn btn-primary mr-9" (click)="editWidget()">
+            <i class="material-icons-outlined mr-8 fs-17">dashboard_customize</i>
+            {{ 'add_new_widget' | i18next }}
+          </button>
+          <!-- Save widgets -->
+          <button (click)="saveDashboard()" class="btn btn-success mr-9"> <i
+              class="material-icons mr-8 fs-15">check_circle</i> {{ 'save' | i18next }}
+          </button>
+          <button id="parent" class="btn btn-dots btn-light bordered" (click)="toggleOptions()"
+            [ngClass]="{'options-opened': optionsOpened }">
+            <!-- <icon class="parent-highlight" name="more_horiz" size="24px"></icon> -->
+            <i class="material-icons fs-24">more_horiz</i>
+          </button>
+        </div>
+      </div>
+      <div *ngIf="optionsOpened" class="options-wrapper">
+        <!-- empty dashboard -->
+        <button (click)="deleteDashboard()" class=" btn  btn-light mr-12 options-button text-left color-red">
+          <i class="material-icons pr-12">delete_sweep</i>
+          {{ 'empty_dashboard' | i18next }}
+        </button>
+        <!-- Reset dashboard -->
+        <button (click)="resetDashboard()" class="btn btn-light mr-12 options-button text-left" id="reset-dashboard">
+          <i class="material-icons pr-12">restart_alt</i>
+          {{ 'reset' | i18next }}</button>
+        <!-- cancel widgets -->
+        <button class="btn btn-light options-button text-left" [ngClass]="{'mr-24': user?.is_candidate}"
+          (click)="hideMenus()">
+          <i class="material-icons pr-12">highlight_off</i>
+          {{ 'close' | i18next }}
+        </button>
+      </div>
+    </div>
+  </div>

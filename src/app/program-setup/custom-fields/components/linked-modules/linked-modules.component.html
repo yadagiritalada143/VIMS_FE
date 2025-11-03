@@ -1,0 +1,51 @@
+<form [formGroup]="linkedModulesForm">
+  <ng-container formArrayName="modules">
+    <div *ngFor="let control of linkedModules.controls; let i = index" class="linked-item d-flex">
+      <div class="tab-body mt-8 border p-24 rounded-sm">
+        <ng-container [formGroupName]="i">
+          <div class="form-group">
+            <label class="text-lightgray">{{ 'linked_module' | i18next }} <span class="require ml-8">*</span></label>
+            <ng-select
+              [clearable]="false"
+              [placeholder]="'Select Field' | i18next"
+              [readonly]="!isEditMode"
+              bindLabel="name"
+              bindValue="code"
+              formControlName="linkedModule"
+              class="type-select"
+              (change)="changeModule()"
+            >
+            <ng-option *ngFor="let module of fields"
+              [value]="module.code"  [disabled]="selectedFieldsData.includes(module.code)">{{module.name}}</ng-option>
+            </ng-select>
+          </div>
+          <app-vendors-fields
+            [programId]="programId"
+            [customField]="customFieldLinkedData.entity_refs ? {entity_refs : [customFieldLinkedData.entity_refs[i]]} : null"
+            [isEditMode]="isEditMode"
+            (changeVendorFields)="changeVendorFields($event, i)"
+          ></app-vendors-fields>
+          <div *ngIf="showLinkedFieldReadOnly" class="form-group">
+            <div class="toggle-panel mt-24 enforce-rate-card-toggle" [ngClass]="{'disable':!isEditMode}">
+              <div class="toggle-panel-inner" [ngClass]="toggle[i].is_readonly?.value ? 'if-active' : 'if-inactive'">
+                <span class="toggle-switch" [ngClass]="toggle[i].is_readonly?.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickToggle('is_readonly',i)"></span>
+                <span class="status-text">{{toggle[i].is_readonly?.title}}</span>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+      <div class="remove-item align-items-center mt-8">
+        <button [disabled]="!isEditMode" ngDefaultControl class="btn btn-primary rounded icon border-0 remove-btn" (click)="removeLinkedModule(i)">
+          <icon size="28px" name="remove" type="material" cuClass="icon d-flex"></icon>
+        </button>
+      </div>
+    </div>
+  </ng-container>
+  <div class="mt-8 d-flex justify-content-center align-items-center add-linked-module rounded-sm">
+    <button [disabled]="!isEditMode" class="btn btn-white rounded icon border-0" (click)="addLinkedModule()">
+      <icon size="30px" name="add" type="material" cuClass="icon d-flex"></icon>
+    </button>
+  </div>
+</form>

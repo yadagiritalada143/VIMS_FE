@@ -1,0 +1,26 @@
+<div class="tab-nav-wrap">
+  <nav class="d-flex align-items-center px-24 justify-content-between bg-light ">
+    <ul class="tabs border-bottom">
+      <li *ngFor="let tab of _tabs; let i=index" [ngClass]="{'active-tab':tab.selected}"
+        class="position-relative d-flex align-items-end active-tab pb-4">
+        <span (click)="selectTab(tab.name);" class="mb-0 font-weight-medium">
+          {{tab.name | i18next}}
+        </span>
+        <span class="rounded-sm ml-12 count pl-4 pr-4" *ngIf="count && count.length > 0">
+          {{count[i]}}
+        </span>
+        <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                  width: '26px',
+                  height: '17px',
+                  'border-radius': '14px',
+                  'background-color': '#e9e6ef',
+                  'margin-bottom': '-3px',
+                  'margin-left': '4px'
+                }">
+        </ngx-skeleton-loader>
+      </li>
+    </ul>
+    <div class="clearfix"></div>
+  </nav>
+</div>
+

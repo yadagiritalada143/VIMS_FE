@@ -1,0 +1,118 @@
+<div class="toggle-box mb-16 py-16 px-24" [ngClass]="{'active' : isTrue,'disableDiv' : isReadOnly}">
+  <div class="d-flex align-items-center justify-content-between" (click)="toggleChange()">
+    <div>
+      <p class="title font-weight-medium" *ngIf="title">{{title | i18next}}</p>
+      <p class="small" *ngIf="subtitle">{{subtitle | i18next}}</p>
+    </div>
+    <div>
+        <toggle-button class="c-toggle-button-switch" [checked]="isTrue"></toggle-button>
+    </div>
+  </div>
+  <div class="form-group mb-0 mt-16" *ngIf="isTrue && showOnlyNgContent">
+    <ng-content select="[slot=qualification]"></ng-content>
+  </div>
+  <div *ngIf="isTrue">
+    <div [ngClass]="{'c-form-group-row' : inputSelect}">
+      <div class="c-form-group mt-12" *ngIf="selectbox && !showMdtInput">
+        <label *ngIf="selectboxlabel">{{selectboxlabel | i18next}} <span class="require" *ngIf="selectrequired">*</span></label>
+        <ng-select  [attr.disabled]="mode === configurationMode.View || !request?.rules?.basic_rules?.project?.is_allow" placeholder="{{ placeholderLabel |i18next}}" [multiple]="isMultiple" [bindLabel]="selectFieldName"
+        (change)="changeSelection($event)" [(ngModel)]="projectTypes">
+        <ng-option *ngFor="let option of projectSource | keysort:'name'" [value]="option.value">{{option.name}}
+        </ng-option>
+      </ng-select>
+    </div>
+    <div class="c-form-group mt-12" *ngIf="selectbox && showMdtInput">
+      <label *ngIf="selectboxlabel">{{selectboxlabel | i18next}} <span class="require" *ngIf="selectrequired">*</span></label>
+      <ng-select  [attr.disabled]="mode === configurationMode?.View || !request?.rules?.basic_rules?.project?.is_allow" placeholder="{{ placeholderLabel |i18next}}" [multiple]="isMultiple" [bindLabel]="selectFieldName"
+      (change)="changeSelection($event)" [(ngModel)]="projectTypes">
+      <ng-option *ngFor="let option of projectSource | keysort:'name'" [value]="option?.id">
+        {{option.name}}
+      </ng-option>
+    </ng-select>
+  </div>
+    <form [formGroup]="toggleForm">
+      <div class="form-group mb-0 mt-16" *ngIf="isSelectedRole">
+        <label *ngIf="selectboxlabel">{{selectboxlabel | i18next}} <span class="require" *ngIf="selectrequired">*</span></label>
+        <ng-select placeholder="{{ placeholderLabel |i18next}}" [multiple]="isMultiple" [bindLabel]="selectFieldName"
+        (change)="changeSelection($event)" formControlName="selectValue" [items]="_items">
+        </ng-select>
+      </div>
+    </form>
+
+      <div class="c-form-group mt-12" *ngIf="projectTypes && !inputSelect && !showMdtInput">
+        <label *ngIf="selectboxlabel">{{'select_option' | i18next}} <span class="require" *ngIf="selectrequired">*</span></label>
+        <ng-select [disabled]="mode === configurationMode.View || !request?.rules?.basic_rules?.project?.is_allow"
+        (change)="changeProjectSelectionoption($event)" [clearable]="true" [placeholder]="'Add new'|i18next" multiple="true" [searchable]="true" [(ngModel)]="secondProjects">
+          <ng-option *ngFor="let option of secondProjectsDropdown | keysort:'name'" [value]="option.name">{{option.name}}</ng-option>
+        </ng-select>
+      </div>
+      <!----show only for define rule modal-->
+      <!-- <div class="c-form-group" *ngIf="inputSelect">
+        <label *ngIf="inputSelectLabel">{{inputSelectLabel}} <span class="require" *ngIf="inputSelectRequired">*</span></label>
+        <div class="input-select d-flex">
+          <input type="text" class="c-form-control">
+          <ng-select [disabled]="mode === configurationMode.View || !request?.rules?.basic_rules?.project?.is_allow"
+          [clearable]="true" [placeholder]="'Add new'|i18next" multiple="true" [searchable]="true" [(ngModel)]="secondProjects" (change)="changeProjectSelectionoption($event)">
+          <ng-option *ngFor="let option of secondProjectsDropdown" [value]="option.name">{{option.name}}</ng-option>
+        </ng-select>
+        </div>
+
+      </div> -->
+      <div class="c-form-group" *ngIf="inputSelect">
+
+        <label *ngIf="inputSelectLabel">{{inputSelectLabel}} <span class="require" *ngIf="inputSelectRequired">*</span></label>
+
+        <div class="input-select d-flex">
+
+          <input type="number" (keypress)="preventSpecialChar($event)" class="c-form-control" [(ngModel)]="value"  (change)="changeText(value)">
+
+          <!-- <ng-select placeholder="Select"> -->
+
+            <ng-select
+             [clearable]="true" [placeholder]="'Add new'|i18next"  [searchable]="true" [(ngModel)]="val" (change)="changeProjectSelectionoption($event)">
+              <ng-option *ngFor="let option of dropDownValue | keysort:'name'" [value]="option.value">{{option.name}}</ng-option>
+            </ng-select>
+
+          <!-- </ng-select> -->
+
+        </div>
+
+
+
+      </div>
+    </div>
+
+      <div *ngIf="checkbox" class="mt-16">
+        {{ 'select_required' | i18next }} {{title | i18next}}? <span class="require" *ngIf="selectrequired">*</span><a href="javascript:void(0)" (click)="selectAll()" *ngIf="isMultipleCheckBox">{{ 'select_all' | i18next }}</a>
+        <div class="box-cb d-flex align-items-center mt-16">
+            <div *ngFor="let item of _patchCheckBoxData;let i=index">
+                <label class="c-input-checkbox">
+                <input type="checkbox" [checked]="item?.[checkBoxIsChecked]" (click)="changeCheckBox(item,i)">
+                <span class="cb-ui"></span> <span class="cb-label">{{item?.[checkBoxFieldName]}}</span>
+            </label>
+            </div>
+        </div>
+      </div>
+  </div>
+  <div *ngIf="subItem && isTrue">
+    <div class="sub-item-box d-flex border-top justify-content-between align-items-center mt-16 pt-16 position-relative" (click)="toggleSubItemChange()">
+      <div class="d-flex align-items-center">
+        <i class="sub-item-arrow material-icons-outlined">subdirectory_arrow_right</i>
+        <div class="ml-16">
+          <p class="title font-weight-medium">{{subItemTitle | i18next}}</p>
+          <p class="small">
+            {{subItemDescription | i18next}}
+          </p>
+        </div>
+      </div>
+      <div class="pr-24">
+        <toggle-button *ngIf="!showInputBox" class="c-toggle-button-switch" [checked]="isSubItemToggleTrue"></toggle-button>
+        <div *ngIf="showInputBox">
+          <ng-content select="[slot=limit-submission]"></ng-content>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+

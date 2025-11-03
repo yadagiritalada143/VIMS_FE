@@ -1,0 +1,204 @@
+@import '../../../../assets/sass/abstracts/variables';
+
+.notify-sidebar {
+  flex-basis: 25%;
+  background-color: $light;
+
+  ul {
+    list-style-type: none;
+
+    li {
+      line-height: 28px;
+      margin-bottom: $m12;
+      border-left: 3px solid transparent;
+
+      a {
+        padding: 0 $p24 0 $p32;
+        text-align: left;
+        transition: $transition;
+
+        span {
+          flex-basis: 70%;
+          color: $color-gray-40;
+          transition: $transition;
+        }
+
+        icon {
+          ::ng-deep i {
+            vertical-align: middle;
+            color: #ADB5BD;
+            transition: $transition;
+          }
+
+          &.off {
+           visibility: hidden;
+          }
+          &.on {
+            visibility:visible !important;
+           }
+        }
+
+        &:hover, &.active {
+           span {
+             color: $color-assets-primary;
+           }
+
+           icon {
+            ::ng-deep i {
+              color:  $color-assets-primary;
+            }
+          }
+        }
+      }
+      &.border-active{
+        border-left: 3px solid $color-assets-primary;
+      }
+    }
+  }
+}
+
+.notify-content {
+  flex-basis: 75%;
+  background-color: $light;
+
+  .toggle-box {
+    margin-top: 2px;
+    .toggle-panel-inner {
+      background-color: transparent;
+      border: 0;
+      padding: 0;
+      height: 24px;
+    }
+  }
+
+  .notification-type {
+    ul {
+      list-style-type: none;
+      border-bottom: 1px solid #E6E6E6;
+      padding-bottom: 12px;
+      margin-bottom: 10px;
+
+      li {
+        display: inline-block;
+        margin-right: 40px;
+
+        a {
+          position: relative;
+          display: block;
+          color: #3A4550;
+          transition: $transition;
+
+          &:before {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -13px;
+            height: 2px;
+            background-color: transparent;
+            content: '.';
+            text-indent: -9999px;
+            overflow: hidden;
+            display: block;
+            visibility: visible;
+            transition: $transition;
+          }
+
+          icon {
+            ::ng-deep i {
+              vertical-align: middle;
+              color: $color-black;
+              transition: $transition;
+            }
+          }
+
+          &:hover, &.active {
+            color: $color-assets-primary;
+
+            &:before {
+              background-color: $color-assets-primary;
+            }
+
+            icon {
+              ::ng-deep i {
+                color: $color-assets-primary;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    table {
+      thead {
+        background-color: $color-gray-1;
+
+        tr {
+          th {
+            font-weight: $font-weight-medium;
+            color: $color-black;
+            height: 43px;
+
+            &:first-child {
+              text-align: left;
+            }
+          }
+        }
+      }
+
+      tbody {
+        tr {
+          td {
+            font-weight: $font-weight-medium;
+            color: #3A4550;
+            border-top: 1px solid $color-gray-0;
+            text-align: center;
+
+            &:first-child {
+              text-align: left;
+            }
+
+            .checkbox-container {
+              .checkmark {
+                border-color: #ADB5BD;
+                border-radius: $rounded-circle;
+                width: 18px;
+                height: 18px;
+
+                &:after {
+                  display: block;
+                  color: #ADB5BD;
+                  font-size: 12px;
+                  top: 2px;
+                  left: 1px;
+                }
+              }
+
+              input {
+                &:checked {
+                  ~ .checkmark {
+                    border-color: #00CC5E;
+                    background-color: #00CC5E;
+
+                    &:after {
+                      color: $light;
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          &:first-child {
+            td {
+              border-top: 0;
+            }
+          }
+        }
+        &.disabled {
+          opacity: .5;
+          pointer-events: none;
+        }
+      }
+    }
+  }
+}

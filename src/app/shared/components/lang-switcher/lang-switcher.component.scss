@@ -1,0 +1,243 @@
+@import '../../../../assets/sass/abstracts/variables';
+
+.language-switcher {
+    border: 0;
+
+    ::ng-deep.ng-select {
+
+        .ng-select-container {
+            border: 0;
+            padding-left: $p24;
+            text-transform: capitalize;
+            color: $color-assets-secondary-shade;
+
+            &:before {
+                position: absolute;
+                top: 6px;
+                left: 0;
+                visibility: visible;
+                overflow: hidden;
+                content: 'public';
+                font-family: 'Material Icons';
+                font-weight: normal;
+                font-style: normal;
+                font-size: 24px;
+                line-height: 1;
+                letter-spacing: normal;
+                text-transform: none;
+                display: block;
+                -webkit-font-feature-settings: 'liga';
+                -webkit-font-smoothing: antialiased;
+            }
+
+            &:hover {
+                box-shadow: none;
+            }
+        }
+
+        .ng-arrow-wrapper {
+            display: none;
+        }
+
+        &.ng-select-focused {
+            &:not(.ng-select-opened) {
+                > .ng-select-container {
+                    box-shadow: none;
+                }
+            }
+        }
+
+        .ng-option-label {
+            text-transform: capitalize;
+        }
+
+        .ng-dropdown-panel {
+            border: 0;
+            box-shadow: -4px 3px 10px #0000001A;
+        }
+    }
+}
+
+.lang-modal-cta {
+    color: $header-icon-color;
+    font-weight: $font-weight-medium;
+    text-transform: capitalize;
+    display: block;
+    line-height: 22px;
+    padding: 6px 11px;
+    margin: 7px 0 7px 7px;
+    border-radius: 4px;
+    font-size: 13px;
+    transition: $transition;
+
+    icon {
+        float: left;
+        margin: 1px $m4 0 0;
+        ::ng-deep i {
+            color: $header-icon-color;
+        }
+    }
+
+    &:hover {
+        text-decoration: none;
+        background-color: $header-icon-hover-color;
+    }
+}
+
+.language-switcher-modal {
+    position: fixed;
+    top: 0;
+    background: $light;
+    right: 0;
+    width: 305px;
+    box-shadow: -8px 0px 11px #00000008;
+    height: 100vh;
+    transition: ease-in-out 0.2s;
+    -ms-transform: translateX(372px);
+    transform: translateX(372px);
+    opacity: 0;
+    z-index: 101;
+
+    &.active {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    h4 {
+        border-bottom: 1px solid $border-color;
+        line-height: 49px;
+        padding: 0 0 0 $p16;
+        position: relative;
+        color: $color-assets-secondary;
+
+        icon {
+            float: left;
+            margin: $m4 $m12 0 0;
+
+            ::ng-deep.icon-default {
+                color: $color-assets-secondary;
+            }
+        }
+    }
+
+    .close-lang-modal {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+    }
+
+    .language-content {
+
+        input {
+            background: $bg-default;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: $p32 0 $p16;
+
+            li {
+                margin: 0 0 $m24;
+
+                .radio-container {
+                    display: block;
+                    position: relative;
+                    padding-left: $p32;
+                    margin-bottom: 0px;
+                    cursor: pointer;
+                    font-weight: $font-weight-regular;
+                    font-size: $font-primary;
+                    line-height: 21px;
+                    -webkit-user-select: none;
+                    -moz-user-select: none;
+                    -ms-user-select: none;
+                    user-select: none;
+                    text-transform: capitalize;
+                    color: $color-assets-secondary;
+                  
+                    input {
+                      position: absolute;
+                      opacity: 0;
+                      cursor: pointer;
+                    }
+                  
+                    .checkmark {
+                      position: absolute;
+                      top: 0;
+                      left: 0;
+                      height: 18px;
+                      width: 18px;
+                      border-radius: $rounded-circle;
+                      border: 1px solid $color-assets-secondary-tint;
+                      background: transparent;
+                  
+                      &:after {
+                        content: ".";
+                        position: absolute;
+                        display: none;
+                        top: 3px;
+                        left: 3px;
+                        width: 10px;
+                        height: 10px;
+                        background: transparent;
+                        border-radius: $rounded-circle;
+                        text-indent: -9999px;
+                        overflow: hidden;
+                      }
+                    }
+                  
+                    input {
+                  
+                      &:checked {
+                  
+                        & ~ .checkmark {
+                            border-color: $color-assets-primary;
+                          
+                  
+                          &:after {
+                            display: block;
+                            background: $color-assets-primary;
+                          }
+                        }
+                      }
+                    }
+
+                    img {
+                        float: right;
+                        width: 25px;
+                        height: auto;
+                    }
+                }
+            }
+        }
+    }
+
+    .lang-footer {
+        position: absolute;
+        left: 15px;
+        bottom: 15px;
+        right: 15px;
+        text-align: right;
+
+        a {
+            font-weight: $font-weight-regular;
+            font-size: $font-primary;
+            line-height: 24px;
+            color: $color-assets-secondary-tint;
+            display: inline-block;
+            transition: $transition;
+
+            icon {
+                float: left;
+                margin: 0 $m8 0 0;
+
+                ::ng-deep.icon-default {
+                    color: $color-assets-secondary-tint;
+                }
+            }
+        }
+    }
+ }
+ .disableDiv{
+    pointer-events:none;
+}

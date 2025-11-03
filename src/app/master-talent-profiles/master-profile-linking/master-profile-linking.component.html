@@ -1,0 +1,114 @@
+<app-svms-modal-body class="linking-modal-body">
+    <div class="profile-linking-main">
+        <div class="profile-linking-sidebar">
+            <div class="side-header btn-primary d-flex align-items-center p-16">
+                <div class="icon-bg d-flex justify-content-center align-items-center mr-8">
+                    <icon name="view_carousel" color="#ffffff"></icon>
+                </div>
+                <h4 class="mb-0 font-weight-semibold">{{'Candidate_Information' | i18next}}</h4>
+            </div>
+            <ul>
+                <li class="small font-weight-medium p-16"><div>First Name : </div><span>{{ candidateData?.first_name }}</span></li>
+                <li class="small font-weight-medium p-16"><div>Middle Name :</div><span>{{ candidateData?.middle_name || '-'}}</span></li>
+                <li class="small font-weight-medium p-16"><div>Last Name :</div><span>{{ candidateData?.last_name }}</span></li>
+                <li class="small font-weight-medium p-16"><div>Phone (Primary) :</div><span>{{ candidateData?.phone_number || '8891301940' }}</span></li>
+                <li class="small font-weight-medium p-16"><div>Email :</div>
+                <span
+                    [tooltip]="candidateData?.email" placement="top">{{ candidateData?.email }}
+                </span></li>
+                <li class="small font-weight-medium p-16"><div>Unique ID :</div><span>{{ candidateData?.unique_id }}</span></li>
+                <li class="small font-weight-medium p-16"><div>Dob :</div><span>{{ candidateData?.dob }}</span></li>
+            </ul>
+        </div>
+        <div class="linking-content-list overflow-hidden">
+            <perfect-scrollbar [config]="scrollConfig">
+                <div class="d-flex mtp-matches" *ngIf="mtpMatches">
+                    <div class="col-md-4 p-0" (click)="setSelectedMtpID.emit(profile.master_talent_profile.id)" *ngFor="let profile of mtpMatches">
+                        <div class="linked-profile-count">{{ profile.master_talent_profile?.linked_profiles || '' }} {{ 'Linked Candidate Profiles' | i18next }}</div>
+                        <div class="profile-link-data" [ngClass]="selectedMasterProfileID === profile.master_talent_profile.id && 'is-active'">
+                            <div class="profile-link-name d-flex align-items-center">
+                                <figure class="rounded-circle mr-16 text-center position-relative mb-0 d-flex justify-content-center align-items-center">
+                                    <!-- <img src="" -->
+                                    <span class="text-uppercase"> {{ profile?.master_talent_profile?.talent_name | slice: 0:2 }}</span>
+                                    <span class="availability rounded-circle online d-none"></span>                                 
+                                </figure>
+                                <div class="profile-link-text w-100">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h4 class="font-weight-medium">{{ profile.master_talent_profile.talent_name | i18next }}</h4>
+                                    </div>
+                                    <label class="d-flex align-items-center">
+                                        <icon class="mr-8" name="label" color="#FFC409" size="18px" type="material"></icon>
+                                        <span class="cursor-pointer" (click)="openLinkingModal(profile.master_talent_profile?.id)">{{ profile.master_talent_profile?.unique_id }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <ul class="mtp-linking">
+                                <li class="small d-flex justify-content-between align-items-center p-16">
+                                    <span>{{ profile?.match_info?.first_name?.value || '-' }}</span>
+                                    <icon 
+                                    [name]="profile.match_info.first_name?.is_matched ? 'done' : 'close'" 
+                                    [color]= "profile.match_info.first_name?.is_matched ? '#27B924' : '#FF0000'"
+                                    ></icon>
+                                </li>
+                                <li class="small d-flex justify-content-between align-items-center p-16">
+                                    <span>{{ profile.match_info?.middle_name.value || '-' }}</span>
+                                    <icon
+                                    [name]="profile.match_info.middle_name?.is_matched ? 'done' : 'close'" 
+                                    [color]= "profile.match_info.middle_name?.is_matched ? '#27B924' : '#FF0000'"
+                                    ></icon>
+                                </li>
+                                <li class="small d-flex justify-content-between align-items-center p-16">
+                                    <span>{{ profile.match_info?.last_name?.value || '-'}}</span>
+                                    <icon 
+                                    [name]="profile.match_info.last_name?.is_matched ? 'done' : 'close'" 
+                                    [color]= "profile.match_info.last_name?.is_matched ? '#27B924' : '#FF0000'"></icon>
+                                </li>
+                                <li class="small d-flex justify-content-between align-items-center p-16">
+                                    <span>{{ profile.match_info?.phone_number?.value  || '-'}}</span>
+                                    <icon
+                                    [name]="profile.match_info.phone_number?.is_matched ? 'done' : 'close'" 
+                                    [color]= "profile.match_info.phone_number?.is_matched ? '#27B924' : '#FF0000'"
+                                    ></icon>
+                                </li>
+                                <li class="small d-flex justify-content-between align-items-center p-16">
+                                    <span
+                                    [tooltip]="profile.match_info?.email?.value" placement="top"
+                                    >{{ profile.match_info?.email?.value  || '-'}}</span>
+                                    <icon
+                                    [name]="profile.match_info.email?.is_matched ? 'done' : 'close'" 
+                                    [color]= "profile.match_info.email?.is_matched ? '#27B924' : '#FF0000'"
+                                    ></icon>
+                                </li>
+                                <li class="small d-flex justify-content-between align-items-center p-16">
+                                    <span>{{ profile?.match_info.unique_id?.value || '-'}}</span>
+                                    <icon name="done" color="#27B924"
+                                    [name]="profile.match_info.unique_id?.is_matched ? 'done' : 'close'" 
+                                    [color]= "profile.match_info.unique_id?.is_matched ? '#27B924' : '#FF0000'"
+                                    ></icon>
+                                </li>
+                                <li class="small d-flex justify-content-between align-items-center p-16">
+                                    <span>{{ profile?.match_info.dob?.value || '-'}}</span>
+                                    <icon name="done" color="#27B924"
+                                    [name]="profile.match_info.dob?.is_matched ? 'done' : 'close'" 
+                                    [color]= "profile.match_info.dob?.is_matched ? '#27B924' : '#FF0000'"
+                                    ></icon>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </perfect-scrollbar>
+        </div>
+    </div>
+
+</app-svms-modal-body>
+<app-svms-modal-footer>
+    <div class="d-flex align-items-center justify-content-end">
+        <button class="btn btn-primary small mr-12" (click)="linkMasterProfile(true)" [disabled]="!selectedMasterProfileID">
+            {{'link_to_master_profile' | i18next}}
+        </button>
+        <button (click)="linkMasterProfile(false)" class="btn btn-light small">
+            I Don't See a Match
+        </button>
+    </div> 
+</app-svms-modal-footer>

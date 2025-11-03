@@ -1,0 +1,172 @@
+<div class="accuracy-wrapper p-24">
+    <a *ngIf="!isSelfConfiguration" (click)="goBack()" class="back-button">
+        <icon size="24px" name="keyboard_backspace" type="material" cuClass="d-flex"></icon>
+    </a>
+    <div class="accuracy-wrapper-inner">
+        <app-logs [log]="logs"></app-logs>
+        <div *ngIf="!accuracyConfigStatus" class="message-banner p-16 fs-16"
+            [ngClass]="{'mt-16': !isSelfConfiguration}">
+            {{ 'accuracy_configuration_is_disabled._please_contact_the_administrator_to_enable_the_same.' | i18next }}
+        </div>
+        <div class="row-container mt-16 mb-16">
+            <div class="page-title font-weight-medium">
+                {{ 'accuracy_configuration' | i18next }}
+            </div>
+            <div class="d-flex">
+                <a class="mx-16 my-auto font-weight-bold try-modal-link" (click)="toggleTryModal()">
+                    {{(openTryModal ? 'X Close' : 'Try out here')|i18next}}
+                </a>
+                    <div *ngIf="accuracyConfigStatus && !isEditMode">
+                        <button *authorize="'accuracy_configuration_manage'" class="btn btn-primary"
+                            (click)="this.isEditMode = true; this.validateData();">
+                            <icon size="16px" class="pr-8" name="edit" type="material" cuClass="d-flex"></icon>
+                            {{ 'edit' | i18next }}
+                        </button>
+                    </div>
+            </div>
+        </div>
+        <div *ngIf="openTryModal" class="panel panel-light pt-16 px-8 row mb-16 block-container">
+            <div class="row col-12 px-12">
+                <div class="col-4 mt-8">
+                    <span [tooltip]="'Scaling Type' | i18next" placement="right">
+                        <span class="text-custom-grey">{{ 'scaling_type' | i18next }}</span>
+                        <span class="text-red pl-4">*</span>
+                    </span>
+                    <div class="mt-8">
+                        <ng-select [items]="scalingType" bindLabel="name" bindValue="value"
+                            placeholder="{{ 'select' | i18next }} {{ 'scaling_type' | i18next }}"
+                            [(ngModel)]="scaleExample.type" (change)="tryInputChange()">
+                        </ng-select>
+                    </div>
+                </div>
+                <div class="col-4 mt-8">
+                    <span [tooltip]="'Scaling Limit (0 - 8)' | i18next" placement="right">
+                        <span class="text-custom-grey">{{ 'scaling_limit' | i18next }}</span>
+                        <span class="text-red pl-4">*</span>
+                    </span>
+                    <div class="mt-8">
+                        <input type="number" class="form-control" min="0" max="8" [ngClass]="{'error': scaleLimitError}"
+                            placeholder="{{ 'enter_a_number_between_0_to_8' | i18next }}"
+                            [(ngModel)]="scaleExample.scale" (ngModelChange)="tryInputChange()">
+                        <div *ngIf="scaleLimitError" class="fs-12 pt-4 error-text">
+                            {{scaleLimitErrorMessage | i18next}}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4 mt-8">
+                    <ng-container *ngIf="scaleExample.type !== 'truncate'">
+                        <span [tooltip]="'Scaling Threshold (0 - 9)' | i18next" placement="right">
+                            <span class="text-custom-grey">{{ 'scaling_threshold' | i18next }}</span>
+                            <span class="text-red pl-4">*</span>
+                        </span>
+                        <div class="mt-8">
+                            <input type="number" class="form-control" min="0" max="9"
+                                [ngClass]="{'error': scaleThresholdError}"
+                                placeholder="{{ 'enter_a_number_between_0_to_9' | i18next }}"
+                                [(ngModel)]="scaleExample.threshold" (ngModelChange)="tryInputChange()">
+                            <div *ngIf="scaleThresholdError" class="fs-12 pt-4 error-text">
+                                {{scaleThresholdErrorMessage | i18next}}
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+                <div class="col-4 mt-8">
+                    <span [tooltip]="'Your Input' | i18next" placement="right">
+                        <span class="text-custom-grey">{{ 'your_input' | i18next }}</span>
+                        <span class="text-red pl-4">*</span>
+                    </span>
+                    <div class="mt-8">
+                        <input type="number" class="form-control" placeholder="{{ 'enter_any_number' | i18next }}"
+                            [(ngModel)]="scaleExample.input" (ngModelChange)="tryInputChange()">
+                    </div>
+                </div>
+                <div class="col-4 mt-8">
+                    <span [tooltip]="'Result' | i18next" placement="right">
+                        <span class="text-custom-grey">{{ 'result' | i18next }}</span>
+                    </span>
+                    <div class="mt-8">
+                        <input type="number" class="form-control" placeholder="{{ 'result' | i18next }}"
+                            [(ngModel)]="scaleExample.result" disabled>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="create">
+            <div *ngFor="let config of accuracyConfig" class="panel panel-light pt-16 px-8 row mb-16 block-container">
+                <label class="col-12 font-weight-medium mb-0 fs-16 d-flex">
+                    {{config?.main_scope_label | i18next | snakeToTitleCase | titlecase}}
+                    <icon *ngIf="config?.scopes.length === 1 && isEditMode" size="14px" type="material"
+                        class="mx-8 icon_height" cuClass="d-flex" [name]="config.validData ? 'check' : 'close'"
+                        [ngClass]="{'valid': config.validData, 'invalid': !config.validData}"></icon>
+                </label>
+                <div *ngFor="let scope of config?.scopes; let idx = index" class="col-12">
+                    <label *ngIf="config?.scopes?.length > 1" class="col-12 font-weight-medium mb-0 mt-8 d-flex"
+                        [ngClass]="{'divider pt-12': idx}">
+                        {{getLabel(scope) | i18next | snakeToTitleCase | titlecase }}
+                        {{idx ? ('(' + ('percentage' | i18next | snakeToTitleCase | titlecase) + ')') : ('(' +
+                        ('fixed' | i18next | snakeToTitleCase | titlecase) + ')')}}
+                        <icon *ngIf="isEditMode" size="14px" type="material" class="mx-8" cuClass="d-flex"
+                            [name]="this[scope].validData ? 'check' : 'close'"
+                            [ngClass]="{'valid': this[scope].validData, 'invalid': !this[scope].validData}"></icon>
+                    </label>
+                    <div class="row px-12">
+                        <div class="col-4 mt-8">
+                            <span [tooltip]="'Scaling Type' | i18next" placement="right">
+                                <span class="text-custom-grey">{{ 'scaling_type' | i18next }}</span>
+                                <span class="text-red pl-4">*</span>
+                            </span>
+                            <div class="mt-8">
+                                <ng-select [items]="scalingType" bindLabel="name" bindValue="value"
+                                    placeholder="{{ 'select' | i18next }} {{ 'scaling_type' | i18next }}"
+                                    [(ngModel)]="this[scope].precision_type" [readonly]="!isEditMode"
+                                    (change)="changePrecisionType(scope)">
+                                </ng-select>
+                            </div>
+                        </div>
+                        <div class="col-4 mt-8">
+                            <span [tooltip]="'Scaling Limit (0 - 8)' | i18next" placement="right">
+                                <span class="text-custom-grey">{{ 'scaling_limit' | i18next }}</span>
+                                <span class="text-red pl-4">*</span>
+                            </span>
+                            <div class="mt-8">
+                                <input type="number" class="form-control" min="0" max="8"
+                                    placeholder="{{ 'enter_a_number_between_0_to_8' | i18next }}"
+                                    [(ngModel)]="this[scope].scale" [readonly]="!isEditMode"
+                                    (keyup)="changeInput(scope, 'scale', 8)">
+                            </div>
+                        </div>
+                        <div class="col-4 mt-8">
+                            <ng-container *ngIf="this[scope].precision_type !== 'truncate'">
+                                <span [tooltip]="'Scaling Threshold (0 - 9)' | i18next" placement="right">
+                                    <span class="text-custom-grey">{{ 'scaling_threshold' | i18next }}</span>
+                                    <span class="text-red pl-4">*</span>
+                                </span>
+                                <div class="mt-8">
+                                    <input type="number" class="form-control" min="0" max="9"
+                                        placeholder="{{ 'enter_a_number_between_0_to_9' | i18next }}"
+                                        [(ngModel)]="this[scope].threshold" [readonly]="!isEditMode"
+                                        (keyup)="changeInput(scope, 'threshold', 9)">
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="isEditMode" class="panel mb-24">
+                <div class="row-container">
+                    <div class="d-flex my-24 pl-24">
+                        <button class="btn btn-outline-primary"
+                            (click)="this.isEditMode=false; this.intialScopeSetup();">
+                            {{ 'cancel' | i18next }}
+                        </button>
+                    </div>
+                    <div class="d-flex my-24 pr-24">
+                        <button class="btn btn-primary" *accessControl (click)="saveConfiguration()" [disabled]="!enableSave">
+                            {{btnTxt | i18next}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

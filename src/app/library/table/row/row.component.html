@@ -1,0 +1,382 @@
+<td *ngIf="isImage && !isMultiUser" [width]="width" [ngClass]="{'pl-24':!isVmsTableExpand && index === 0}">
+  <div *ngIf="!isContact && vmsRowDataSource" class="row">
+    <div class="col-10">
+      <span class="initials initials__purple"
+          [ngClass]="{'initials_blue':!isVmsTableExpand && index === 1}">{{vmsRowDataSource | shortName:'first'}}</span>
+      <a href="javascript:void(0)" class="font-weight-medium text-underline"
+        (click)="clickToView()">{{vmsRowDataSource}}</a>
+    </div>
+    <table-icon *ngIf="doNotRehire && index===0 && programListing && (worker_or_not === 'WORKER' || worker_or_not === 'Worker' || worker_or_not === 'CANDIDATE')" tooltip="{{ 'do_not_rehire' | i18next }}" placement="top" color="	#FF0000" class="col-2" size="24px" name="no_accounts" type="material" cuClass="icon"></table-icon>
+  </div>
+  <p *ngIf="isContact && vmsRowDataSource" class="contact-avatar-list">
+    <span class="initials initials__green">{{vmsRowDataSource}}</span>
+    <span class="initials initials__gray">{{vmsRowDataSource}}</span>
+  </p>
+</td>
+
+<td *ngIf="isImage && isMultiUser" [width]="width">
+  <ng-container *ngIf="vmsRowDataSource?.length == 1">
+    <span class="initials initials__purple">{{vmsRowDataSource[0].first_name   |  shortName:'first'}}</span>
+    {{vmsRowDataSource[0].first_name}}
+  </ng-container>
+  <ng-container *ngIf="vmsRowDataSource?.length == 2">
+    <p *ngIf="vmsRowDataSource" class="contact-avatar-list">
+      <span class="initials initials__green">{{vmsRowDataSource[0].first_name   |  shortName:'first'}}</span>
+      <span class="initials initials__gray">{{vmsRowDataSource[1].first_name |  shortName:'first'}}</span>
+    </p>
+  </ng-container>
+  <ng-container *ngIf="vmsRowDataSource?.length > 2">
+    <ul class="manager-avatar-list">
+      <ng-container *ngFor="let item of vmsRowDataSource; let x = index">
+        <li *ngIf="x < 2">
+          {{item.first_name |  shortName:'first'}}
+        </li>
+      </ng-container>
+      <li class="more-link">
+        {{vmsRowDataSource?.length - 2}}
+        <div class="more-item-dropdown position-absolute bg-light">
+          <ul>
+            <ng-container *ngFor="let item of vmsRowDataSource; let x = index">
+              <li *ngIf="x > 1">
+                {{item.first_name |  shortName:'first'}}
+              </li>
+            </ng-container>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </ng-container>
+</td>
+
+<!-- [ngClass]="{'initial-bg':isNumberBadge}"? -->
+
+<td
+  *ngIf="!isIconSrc && !isImage && (isObject() !== 'number') && (isObject() !== 'boolean') && !isStatusColor && !isIconList && !isProfileMatch && !isCandidateStatus && !isInterview && !_isDescription && !isShowCheckBox && !isRateCard"
+  [width]="width">
+
+  <ng-container *ngIf='notification_type; else notNotification;'>
+    <span *ngIf='vmsRowDataSource && vmsRowDataSource.includes("1")' tooltip="{{ 'reminder_notification' | i18next }}" [placement]="'right'" class="material-icons notification-1">alarm</span>
+    <span *ngIf='vmsRowDataSource && vmsRowDataSource.includes("2")' tooltip="{{ 'reminder_is_enabled' | i18next }}" [placement]="'right'" class="material-icons notification-2">snooze</span>
+    <span *ngIf='vmsRowDataSource && vmsRowDataSource.includes("3")' tooltip="{{ 'actionable_notification' | i18next }}" [placement]="'right'" class="material-icons-outlined notification-3">notifications_active</span>
+    <img  *ngIf='vmsRowDataSource && vmsRowDataSource.includes("4")' tooltip="{{ 'reminder_is_disabled' | i18next }}" [placement]="'right'" class="notification-4" width="24px" src="../../../../assets/images/snooze_grey.png"/>
+  </ng-container>
+
+  <ng-template #notNotification>
+    <span [ngClass]="{'status-active-ui': (vmsRowDataSource == 'SCHEDULED' || vmsRowDataSource == 'Completed' || vmsRowDataSource == 'SUBMITTED') ,'status-cancelled-ui': (vmsRowDataSource == 'CANCELLED' || vmsRowDataSource == 'REJECTED' || vmsRowDataSource == 'WITHDRAWN')   }"
+      *ngIf="vmsRowDataSource !== 'Approved' && vmsRowDataSource !== 'Pending' && vmsRowDataSource !== 'REJECTED'" [innerHTML]="vmsRowDataSource">
+    </span>
+    <span *ngIf="vmsRowDataSource == 'Approved' || vmsRowDataSource == 'Pending'|| vmsRowDataSource == 'REJECTED'"
+          class="status" [ngClass]="{'no-hover': vmsRowDataSource == 'Approved' || vmsRowDataSource == 'Pending'|| vmsRowDataSource == 'REJECTED',
+      'status-active': vmsRowDataSource == 'Approved','status-pending': vmsRowDataSource == 'Pending','status-rejected': vmsRowDataSource == 'REJECTED'}">
+      <table-icon size="10px" name="stop_circle" type="material" cuClass="circle">
+      </table-icon> {{vmsRowDataSource|i18next}}
+    </span>
+    <table-icon *ngIf="vmsRowDataSource === null" size="24px" name="remove" type="material" cuClass="icon"></table-icon>
+  </ng-template>
+
+  </td>
+
+<td *ngIf="(isObject() === 'number') && (vmsRowDataSource > 999999999) && !isInterview" [width]="width">
+  {{vmsRowDataSource | localDateFormat}}
+  <table-icon *ngIf="vmsRowDataSource === undefined" size="24px" name="remove" type="material" cuClass="icon">
+  </table-icon>
+</td>
+<td *ngIf="(isObject() === 'number') && vmsRowDataSource < 999999999" [width]="width">
+  <span (click)="onNumberBadgeClicked()" [ngClass]="{'initial-bg':isNumberBadge}">{{vmsRowDataSource}} </span>
+  <table-icon *ngIf="vmsRowDataSource === undefined" size="24px" name="remove" type="material" cuClass="icon">
+  </table-icon>
+</td>
+
+<td *ngIf="isIconSrc">
+  <img *ngIf="vmsRowDataSource" src="{{ vmsRowDataSource}}" alt="" class="icon-src" />
+  <div *ngIf="!vmsRowDataSource"> {{ 'no image' | titlecase | i18next}}</div>
+
+</td>
+<td *ngIf="_isDescription">
+  <div *ngIf="vmsRowDataSource"> {{ vmsRowDataSource.length > 40 ? vmsRowDataSource.slice(0, 40 - 1) + "…" : vmsRowDataSource}}</div>
+
+</td>
+
+<td *ngIf="isStatusColor" [width]="width">
+  <p *ngIf="vmsRowDataSource == 'REQUIRED'" class="hierarchy-required">
+    <span class="red">{{ 'required' | i18next }}</span>
+  </p>
+  <p *ngIf="vmsRowDataSource == 'OPTIONAL'" class="hierarchy-required">
+    <span class="violet">{{ 'optional' | i18next }}</span>
+  </p>
+  <p *ngIf="vmsRowDataSource == 'OFF'" class="hierarchy-required">
+    <span class="grey">{{ 'off' | i18next }}</span>
+  </p>
+</td>
+<td *ngIf="isShowCheckBox" [width]="width" class="check-required">
+  <div class="checkbox-box">
+    <div class="checkbox-wrapper">
+      <label class="checkbox-container">
+        <input [disabled]="isCheckBoxReadonly" [checked]="vmsRowDataSource" type="checkbox" name="EDIT">
+        <span class="checkmark"></span>
+      </label>
+    </div>
+  </div>
+</td>
+<td *ngIf="isCandidateStatus" [width]="width" class="status-column">
+  <span class="submitted position-relative" *ngIf="vmsRowDataSource == 'Submitted'">{{vmsRowDataSource|i18next}}</span>
+  <span class="sourcing position-relative" *ngIf="vmsRowDataSource == 'Sourcing'">{{vmsRowDataSource|i18next}}</span>
+  <span class="rejected position-relative" *ngIf="vmsRowDataSource == 'Rejeceted'">{{vmsRowDataSource|i18next}}</span>
+</td>
+
+<td *ngIf="isIconList" [width]="width">
+  <ng-container *ngFor="let item of vmsRowDataSource | keyvalue">
+    <p class="module-icon-display" *ngIf="(item.key !== 'hierarchy_included')">
+      <span>
+        <span *ngIf="(item.value !== 'OFF')">
+          <table-icon *ngIf="(item.key == 'module_sow')" size="20px" name="article" type="material"
+                      cuClass="module-icon  mr-24">
+          </table-icon>
+          <table-icon *ngIf="(item.key == 'module_jobs')" size="20px" name="work_outline" type="material"
+                      cuClass="module-icon  mr-24">
+          </table-icon>
+        </span>
+      </span>
+      <span *ngIf="(item.value == true)">
+        <table-icon *ngIf="(item.key == 'audio')" size="20px" name="phone_in_talk" type="material"
+                    cuClass="module-icon  mr-24">
+        </table-icon>
+        <table-icon *ngIf="(item.key == 'video')" size="20px" name="videocam" type="material"
+                    cuClass="module-icon  mr-24">
+        </table-icon>
+        <table-icon *ngIf="(item.key == 'face_to_face')" size="20px" name="people_alt" type="material"
+                    cuClass="module-icon  mr-24">
+        </table-icon>
+      </span>
+    </p>
+  </ng-container>
+</td>
+<td *ngIf="isObject() === 'boolean' && !isShowCheckBox" [width]="width">
+  <span class="status status-active" *ngIf="vmsRowDataSource" [ngClass]="{'showActive': isNoOption}">
+    <table-icon size="10px" name="stop_circle" type="material" cuClass="circle">
+    </table-icon> {{ 'active' | i18next }}
+  </span>
+  <span class="status status-inactive" *ngIf="!vmsRowDataSource">
+    <table-icon size="10px" name="stop_circle" type="material" cuClass="circle">
+    </table-icon> {{ 'inactive' | i18next }}
+  </span>
+
+  <span class="actions" *ngIf="!isNoOption">
+    <button class="btn small btn-secondary" (click)="clickToView()">
+      <table-icon size="14px" name="visibility" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+      </table-icon>
+      {{ 'view' | i18next }}
+    </button>
+
+    <button class="btn small btn-outine rounded-sm ml-4" (click)="showOptionDropdown()">
+      <table-icon size="14px" name="more_horiz" type="material" cuClass="d-flex" class="flex">
+      </table-icon>
+    </button>
+  </span>
+  <nav class="option-dropdown position-absolute" [ngClass]="{'active' : showdropdown}">
+    <ul>
+      <!-- detail button ui -->
+      <li *ngIf="isDetails">
+        <a href="javascript:void(0)" (click)="detailViewClick()">
+          <table-icon size="19px" name="list_alt" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'details' | i18next }}
+        </a>
+      </li>
+      <li *ngIf="isVieworClone">
+        <a href="javascript:void(0)" (click)="clickToClone()">
+          <table-icon size="19px" name="content_copy" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'clone' | i18next }}
+        </a>
+      </li>
+      <li *ngIf="isCreateJob" [ngClass]="{'disable': !vmsRowDataSource}">
+        <a href="javascript:void(0)" (click)="clickToCreateJob()">
+          <table-icon size="19px" name="add" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'create_job' | i18next }}
+        </a>
+      </li>
+
+      <li *ngIf="isVieworEdit" [ngClass]="{'disable': isCustomField && !vmsRowDataSource}">
+        <a href="javascript:void(0)" (click)="clickToEdit()">
+          <table-icon size="19px" name="create" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'edit' | i18next }}
+        </a>
+      </li>
+      <li *ngIf="isDisableorDelete">
+        <a href="javascript:void(0)" (click)="clickTodisable()">
+          <table-icon size="19px" name="label_off" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          <span *ngIf="vmsRowDataSource">{{ 'disable' | i18next }}</span>
+          <span *ngIf="!vmsRowDataSource">{{ 'enable' | i18next }}</span>
+        </a>
+      </li>
+      <li *ngIf="isDelete" [ngClass]="{'disable': isDeleteInVisible || (isCustomField && !vmsRowDataSource)}">
+        <a href="javascript:void(0)" (click)="clickTodelete()">
+          <table-icon size="19px" name="delete" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'delete' | i18next }}
+        </a>
+      </li>
+      <li *ngIf="doNotRehire && programListing && (worker_or_not === 'Worker' || worker_or_not === 'WORKER' || worker_or_not === 'CANDIDATE')">
+        <a href="javascript:void(0)" (click)="clickToRemoveDoNotRehire()">
+          <table-icon size="19px" name="label_off" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'remove_do_not_re_hire' | i18next }}
+        </a>
+      </li>
+      <li *ngIf="isOptOut">
+        <a href="javascript:void(0)" (click)="clickToOptOut()">
+          <table-icon size="19px" name="launch" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'opt_out' | i18next }}
+        </a>
+      </li>
+      <li *ngIf="isSubmitCandidate">
+        <a href="javascript:void(0)" (click)="clickToSubmitCandidate()">
+          <table-icon size="19px" name="publish" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'add' | i18next }} & {{ 'submit_candidate' | i18next }}
+        </a>
+      </li>
+      <li *ngFor="let option of (options || [])" (click)="optionClicked(option)">
+        <a href="javascript:void(0)">
+          <table-icon size="19px" *ngIf="option?.icon" [name]="option?.icon" type="material" class="d-flex"
+                      cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{option?.name|i18next}}
+        </a>
+      </li>
+    </ul>
+  </nav>
+</td>
+<td *ngIf="isProfileMatch" [width]="width" [ngClass]="{'large-width-dropdown' : isWithdrawal}">
+  <div class="match-svg">
+    <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+      <path class="circle-bg" d="M18 2.0845
+          a 15.9155 15.9155 0 0 1 0 31.831
+          a 15.9155 15.9155 0 0 1 0 -31.831" />
+      <path class="circle" [style.strokeDasharray]="svgValue" d="M18 2.0845
+          a 15.9155 15.9155 0 0 1 0 31.831
+          a 15.9155 15.9155 0 0 1 0 -31.831" />
+    </svg>
+  </div>
+  <p class="match-value">{{vmsRowDataSource?.matchValue}}%</p>
+  <span class="actions">
+    <!-- <button *ngIf="vmsRowDataSource.status !== 'SUBMITTED'"
+      class="btn small d-inline-block  btn-secondary font-weight-normal" (click)="clickToView()">
+      Submit Candidate
+    </button> -->
+
+    <button *ngIf="isViewEnabled" class="btn small btn-secondary d-inline-block font-weight-normal"
+            (click)="clickToViewCandidate()">
+      {{ 'view' | i18next }}
+    </button>
+
+    <button class="btn small btn-light d-inline-block rounded-sm ml-4 no-border" (click)="showOptionDropdown()">
+      <table-icon size="20px" name="more_horiz" type="material" cuClass="d-flex" class="flex">
+      </table-icon>
+    </button>
+  </span>
+  <nav class="option-dropdown position-absolute active" [ngClass]="{'active' : showdropdown}">
+    <ul>
+      <li *ngIf="isViewProfile">
+        <a href="javascript:void(0)" (click)="clickToViewProfile()">
+          <table-icon size="19px" name="how_to_reg" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'view_profile' | i18next }}
+        </a>
+      </li>
+      <li *ngIf="isVieworEdit">
+        <a href="javascript:void(0)" (click)="clickToEdit()">
+          <table-icon size="19px" name="create" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'edit' | i18next }}
+        </a>
+      </li>
+      <li *ngIf="isWithdrawal" class="red-color">
+        <a href="javascript:void(0)" (click)="clickWithdrawCandidate()">
+          <table-icon size="19px" name="person_remove" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{vmsRowDataSource.status == 'SUBMITTED' ? 'Withdraw' : 'Submit' | i18next}} {{ 'candidate' | i18next }}
+        </a>
+      </li>
+    </ul>
+  </nav>
+</td>
+<td *ngIf="isRateCard" [width]="width" class="rate-card-td">
+  <span class="status">{{vmsRowDataSource}}</span>
+    <span class="actions" *ngIf="!isNoOption">
+      <button class="btn small btn-secondary" (click)="clickToView()">
+        <table-icon size="14px" name="visibility" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+        </table-icon>
+        {{ 'view' | i18next }}
+      </button>
+
+      <button class="btn small btn-outine rounded-sm ml-4" (click)="showOptionDropdown()">
+        <table-icon size="14px" name="more_horiz" type="material" cuClass="d-flex" class="flex">
+        </table-icon>
+      </button>
+    </span>
+  <nav class="option-dropdown position-absolute rate-card-options" [ngClass]="{'active' : showdropdown}">
+    <ul>
+      <li *ngIf="isDetails">
+        <a href="javascript:void(0)" (click)="detailViewClick()">
+          <table-icon size="19px" name="list_alt" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'rate_card_details' | i18next }}
+        </a>
+      </li>
+      <li *ngIf="isVieworEdit">
+        <a href="javascript:void(0)" (click)="clickToEdit()">
+          <table-icon size="19px" name="create" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'edit_rate_card' | i18next }}
+        </a>
+      </li>
+    </ul>
+  </nav>
+</td>
+<td *ngIf="isInterview" [width]="width">
+  <p *ngIf="(isObject() === 'number') && vmsRowDataSource > 999999999">{{vmsRowDataSource | localDateFormat}}</p>
+  <p *ngIf="(isObject() !== 'number') && (!isIconList)">{{vmsRowDataSource}}</p>
+  <span class="actions" *ngIf="!isNoOption">
+    <button class="btn small btn-secondary" (click)="clickToView()">
+      <table-icon size="14px" name="visibility" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+      </table-icon>
+      {{ 'view' | i18next }}
+    </button>
+
+    <button class="dropdown-trigger btn small btn-light rounded-sm ml-4" (click)="showOptionDropdown()">
+      <table-icon size="24px" name="more_horiz" type="material" cuClass="d-flex" class="flex">
+      </table-icon>
+    </button>
+  </span>
+  <nav class="option-dropdown custom-width position-absolute" [ngClass]="{'active' : showdropdown}">
+    <ul>
+      <li>
+        <a href="javascript:void(0)" (click)="onRescheduleClick()">
+          <table-icon size="19px" name="today" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'reschedule_interview' | i18next }}
+        </a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" (click)="clickToEdit()">
+          <table-icon size="19px" name="create" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'edit_interview' | i18next }}
+        </a>
+      </li>
+      <li class="red-color">
+        <a href="javascript:void(0)" (click)="onCancelClick()">
+          <table-icon size="19px" name="backspace" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'cancel_interview' | i18next }}
+        </a>
+      </li>
+    </ul>
+  </nav>
+</td>

@@ -1,0 +1,296 @@
+<form  [formGroup]="expenseForm" (ngSubmit)="onSubmit()">
+<div class="create-new-expense">
+  <header class="section-header p-24 d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+      <i (click)="backClicked()" class="material-icons back-arrow-icon cursor-pointer mr-16" tooltip="{{'back' | i18next}}" placement="bottom">arrow_back</i>
+    <h3 *ngIf="viewStatus !== configurationMode.Edit && viewStatus !== configurationMode?.View" class="font-weight-semibold mb-0">{{ 'create_new' | i18next }} {{ 'expense_configuration' | i18next }}</h3>
+    <h3 *ngIf="viewStatus === configurationMode.Edit || viewStatus === configurationMode?.View" class="font-weight-semibold mb-0">{{ (viewStatus === configurationMode?.Edit ? 'edit_expense_configuration' : 'view_expense_configuration') | i18next }}</h3>
+
+    </div>
+    <div *accessControl>
+      <button *ngIf="viewStatus !== configurationMode?.View" type="submit" class="c-btn c-btn-success-medium"  [disabled]="!expenseForm.valid">{{(viewStatus === configurationMode.Edit ? 'update' : 'save')|i18next}}</button>
+    </div>
+  </header>
+  <section class="section-body-content">
+    <div class="p-24">
+      <app-logs [log]="logs"></app-logs>
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+          <label>{{ 'configuration_meta_data' | i18next }} <span class="require">*</span></label>
+          <input type="text" class="c-form-control" name="configurationname" maxlength="100"
+          formControlName="config_name" [readonly]="viewStatus === configurationMode?.View">
+        </div>
+        <div class="c-form-group toggle-width toggle-panel pt-24" [ngClass]="{ disable: viewStatus === configurationMode?.View }">
+          <div class="toggle-panel-inner" [ngClass]="titleToggle?.value ? 'if-active' : 'if-inactive'">
+            <span class="status-text">{{(titleToggle?.value ? 'Active': 'Inactive' ) | i18next}}</span>
+            <span class="toggle-switch" [ngClass]="titleToggle?.value ? 'toggle-on' : 'toggle-off'"
+              (click)="onClickToggle()"></span>
+          </div>
+        </div>
+      </div>
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+          <div class="form-group select-hierarchy mb-0" [ngClass]="{ disable: viewStatus === configurationMode?.View }">
+            <hierarchy-treeview [singleSelect]="false" [filter]="true" [selected]="expenseForm.get('hierarchy_uuid')?.value" [mandatory]="true" [treeInput]="hierarchyTree"
+              (changed)="changeSelectedHierarchies($event)"></hierarchy-treeview>
+          </div>
+        </div>
+      </div>
+      <div class="c-form-group-row mb-24">
+        <div class="date-picker c-form-group position-relative mb-0">
+          <label>{{ 'expense_start_date' | i18next }} <span class="require">*</span></label>
+          <svms-datepicker [ngClass]="{ disable: viewStatus === configurationMode?.View }"
+          [inputdateFormat]="dateFormat"
+          [disabled]="false" formControlName="expense_start_date"
+          [placeholder]="'Select Date' | i18next">
+          </svms-datepicker>
+        </div>
+        <div class="c-form-group pt-16 d-flex align-items-center justify-content-center field-toggle mb-0">
+        </div>
+        <!-- <div class="c-form-group pt-16 d-flex align-items-center justify-content-center field-toggle mb-0">
+          <label class="mr-24">{{ 'expense' | i18next }}</label>
+          <div class="toggle-panel pt-0" [ngClass]="{ disable: viewStatus === configurationMode?.View }">
+            <div class="toggle-panel-inner" [ngClass]="toggles.is_expense ? 'if-active' : 'if-inactive'">
+              <span class="toggle-switch" [ngClass]="toggles.is_expense ? 'toggle-on' : 'toggle-off'"
+                (click)="onClickExpenseToggle()"></span>
+            </div>
+          </div>
+        </div> -->
+      </div>
+      <ng-container *ngIf="programDetails?.config?.is_custom_tax_on_assignment">
+      <div class="enable-tax-on-expense-types">
+        <app-config-common-listing [ngClass]="{ disable: viewStatus === configurationMode?.View }" mainIcon="data_saver_on"
+          itemLevel="parent" subtitle="Enable Tax on Expense Types"
+          description="When enabled,individual Expense Types can be configured as taxable or non-taxable." toggleSwitch="true"
+          [updatedToggleValue]="toggles?.is_taxable" (onValueChange)="onClickExpenseTaxToggle()">
+        </app-config-common-listing>
+      </div>
+      <div class="enable-tax-on-expense-types">
+      <app-config-common-listing [ngClass]="{ disable: viewStatus === configurationMode?.View }" mainIcon="data_saver_on"
+        itemLevel="parent" subtitle="Show Only Entered Expense Amount"
+        description="Provide the ability for selected user role(s) to only see the entered expense amount when creating or viewing expenses.Other components, such as taxes,fees,or totals including these values would not be visible to the selected user role(s)."
+        toggleSwitch="true" [updatedToggleValue]="toggles?.exp_amnt_based_on_role?.is_enabled"
+        (onValueChange)="toggleSwitchChange($event,'exp_amnt_based_on_role')">
+      </app-config-common-listing>
+      <div *ngIf="toggles?.exp_amnt_based_on_role?.is_enabled"
+        [ngClass]="{ disable: viewStatus === configurationMode?.View }">
+        <app-config-common-listing [disabled]="viewStatus === configurationMode?.View ? false : true" [options]="roles"
+          [updatedMultiSelectDropdown]="toggles.exp_amnt_based_on_role.value"
+          (onValueMultiSelectChange)="multiSelectValueChanged($event,'exp_amnt_based_on_role')" itemLevel="child"
+          subtitle="Select User Role(s)" [options]="roles"
+          description="Select the user role(s) to only see the entered expense amount when creating or viewing expenses."
+          multiSelectBox="true"></app-config-common-listing>
+      </div>
+        </div>
+      </ng-container>
+     <div class="mb-24">
+      <div class="form-group-row">
+        <div  class="form-group date-picker position-relative">
+          <label>{{ 'expense_weekending_day' | i18next }} <span class="require">*</span> </label>
+          <ng-select [readonly]="viewStatus === configurationMode?.View" [clearable]="false" placeholder="{{ 'select' | i18next }}"  [searchable]="false"
+                        (change)="onSelectionDays($event)"
+                       formControlName="week_end_day">
+              <ng-option *ngFor="let day of weekEndDays" [value]="day?.value">{{day?.name}}</ng-option>
+            </ng-select>
+        </div>
+      </div>
+    </div>
+    <!-- // days impl end-->
+    </div>
+
+    <app-toggle-box [ngClass]="{ disable: viewStatus === configurationMode?.View }" title="MDTs to Display on Expense Header" subtitle="Select any additional Master Data Types to display on Expense Header" selectbox="true" [projectTypes]="masterDataTypes"
+    [selectrequired] = "true"  isMultiple="true" [options]="options" placeholderLabel="Select Values" selectboxlabel="Select Master Data Type" [showMdtInput]="true" [projectSource]="foundationalFields" [request] ="toggles" [mode]="viewStatus"
+           [configurationMode]="configurationMode" [isTrue]="toggles?.header?.foundational_data?.is_allow"
+          (isToggleBtnChecked)="mdtToggle($event)" (selectionChanged)="selectionMasterDataTypes($event)">
+    </app-toggle-box>
+
+    <div class="config-item d-flex align-items-center justify-content-between sticky-header">
+      <p class="font-weight-medium blue-color">{{ 'project' | i18next }}</p>
+      <div class="toggle-panel" [ngClass]="{ disable: viewStatus === configurationMode?.View }">
+        <div class="toggle-panel-inner" [ngClass]="toggles.project?.value ? 'if-active' : 'if-inactive'">
+          <span class="toggle-switch" [ngClass]="toggles.project?.value ? 'toggle-on' : 'toggle-off'"
+            (click)="onClickToggleProject()"></span>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="toggles.project?.value">
+      <!-- master data toggle -->
+      <app-config-common-listing [ngClass]="{ disable: viewStatus === configurationMode?.View }" mainIcon="data_saver_on" itemLevel="parent" subtitle="Master Data"
+        description="This layout we can use for the configuration with toggle on/off button" toggleSwitch="true"
+        [updatedToggleValue]="toggles?.project?.master_data?.value" (onValueChange)="toggleSwitchChange($event,'master_data')">
+      </app-config-common-listing>
+      <div *ngIf="toggles?.project?.master_data?.value" [ngClass]="{ disable: viewStatus === configurationMode?.View }">
+      <app-config-common-listing [disabled]="viewStatus === configurationMode?.View ? false : true" [updatedMultiSelectDropdown]="masterEditData" (onValueMultiSelectChange)="multiSelectValueChanged($event,'master_data')"  [options]="foundationalFields" itemLevel="child" subtitle="Select Master Data Fields"
+          description="Please provide support text" multiSelectBox="true"></app-config-common-listing>
+      </div>
+      <!-- master data toggle  end-->
+
+      <!-- custom data start -->
+
+      <app-config-common-listing [ngClass]="{ disable: viewStatus === configurationMode?.View }" mainIcon="data_saver_on" itemLevel="parent" subtitle="Custom Data"
+        description="This layout we can use for the configuration with toggle on/off button" toggleSwitch="true"
+        [updatedToggleValue]="toggles?.project?.custom_data?.value" (onValueChange)="toggleSwitchChange($event,'custom_data')">
+      </app-config-common-listing>
+      <div *ngIf="toggles?.project?.custom_data?.value" [ngClass]="{ disable: viewStatus === configurationMode?.View }">
+        <app-config-common-listing [disabled]="viewStatus === configurationMode?.View ? false : true" [updatedMultiSelectDropdown]="customEditFields"  (onValueMultiSelectChange)="multiSelectValueChanged($event,'custom_data')"  [options]="customFields" itemLevel="child" subtitle="Select Custom Data"
+          description="Please provide support text" multiSelectBox="true"></app-config-common-listing>
+      </div>
+      <!-- custom data end -->
+
+      <!-- Project Integration toggle  start-->
+      <!-- <app-config-common-listing [ngClass]="{ disable: viewStatus === configurationMode?.View }" mainIcon="data_saver_on" itemLevel="parent" subtitle="Project Integration"
+        description="This layout we can use for the configuration with toggle on/off button" toggleSwitch="true"
+        [updatedToggleValue]="toggles?.project?.project_integration?.value" (onValueChange)="toggleSwitchChange($event,'project_integration')">
+      </app-config-common-listing>
+      <div *ngIf="toggles?.project?.project_integration?.value">
+        <app-config-common-listing [ngClass]="{ disable: viewStatus === configurationMode?.View }" (onValueMultiSelectChange)="multiSelectValueChanged($event,'project_integration')"  [options]="toggles?.project?.project_integration?.projectIntegrationFields" itemLevel="child" subtitle="Select Project Integration"
+          description="Please provide support text" multiSelectBox="true"></app-config-common-listing>
+      </div> -->
+      <!-- Project Integration toggle  end-->
+
+      <!-- worker_code toggle  start-->
+      <app-config-common-listing [ngClass]="{ disable: viewStatus === configurationMode?.View }" mainIcon="data_saver_on" itemLevel="parent" subtitle="Worker Code"
+        description="This layout we can use for the configuration with toggle on/off button" toggleSwitch="true"
+        [updatedToggleValue]="toggles?.project?.worker_code?.value" (onValueChange)="toggleSwitchChange($event,'worker_code')">
+      </app-config-common-listing>
+      <div *ngIf="toggles?.project?.worker_code?.value" [ngClass]="{ disable: viewStatus === configurationMode?.View }">
+        <app-config-common-listing [disabled]="viewStatus === configurationMode?.View ? false : true" [updatedMultiSelectDropdown]="workerEditData" (onValueMultiSelectChange)="multiSelectValueChanged($event,'worker_code')"  [options]="toggles?.project?.worker_code?.workerCodeFields" itemLevel="child" subtitle="Select Worker Code"
+          description="Please provide support text" multiSelectBox="true"></app-config-common-listing>
+      </div>
+      <!-- worker_code toggle  end-->
+
+    </div>
+
+    <div class="config-item d-flex align-items-center justify-content-between sticky-header">
+      <p class="font-weight-medium blue-color">{{ 'permissions' | i18next }}</p>
+      <div class="toggle-panel" [ngClass]="{ disable: viewStatus === configurationMode?.View }">
+        <div class="toggle-panel-inner" [ngClass]="toggles.permissions?.value ? 'if-active' : 'if-inactive'">
+          <span class="toggle-switch" [ngClass]="toggles.permissions?.value ? 'toggle-on' : 'toggle-off'"
+            (click)="onClickTogglePermissions()"></span>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="toggles.permissions?.value">
+        <app-config-common-listing [form]="incurredSubmissionFrom" mainIcon="calculate" itemLevel="parent" subtitle="General Expense Incurred Submission From Current Date"
+        description="This layout we can use for the configuration with toggle on/off button" inputAndSelectOption="true" [disabled]="viewStatus === configurationMode?.View ">
+      </app-config-common-listing>
+      <app-config-common-listing [form]="removeWorkerAccessFrom" mainIcon="calculate" itemLevel="parent" subtitle="Set Duration to Revoke Worker Access After Assignment End Date"
+        description="This layout we can use for the configuration with toggle on/off button" inputAndSelectOption="true" [disabled]="viewStatus === configurationMode?.View ">
+      </app-config-common-listing>
+      <app-config-common-listing [form]="removeVendorAccessFrom" mainIcon="calculate" itemLevel="parent" subtitle="Set Duration to Revoke Vendor Access After Assignment End Date"
+        description="This layout we can use for the configuration with toggle on/off button" inputAndSelectOption="true" [disabled]="viewStatus === configurationMode?.View ">
+      </app-config-common-listing>
+      <app-config-common-listing [form]="removeVendorMiscFrom" mainIcon="calculate" itemLevel="parent" subtitle="Remove Vendor Access to Enter Misc Expense"
+        description="This layout we can use for the configuration with toggle on/off button" inputAndSelectOption="true" [disabled]="viewStatus === configurationMode?.View ">
+      </app-config-common-listing>
+      <app-config-common-listing [form]="removeMspAccessFrom" mainIcon="calculate" itemLevel="parent" subtitle="Remove MSP Access to Enter General Expense"
+        description="This layout we can use for the configuration with toggle on/off button" inputAndSelectOption="true" [disabled]="viewStatus === configurationMode?.View ">
+      </app-config-common-listing>
+      <app-config-common-listing [form]="removeMspAccessMiscFrom" mainIcon="calculate" itemLevel="parent" subtitle="Remove MSP Access to Enter Misc Expense"
+        description="This layout we can use for the configuration with toggle on/off button" inputAndSelectOption="true" [disabled]="viewStatus === configurationMode?.View ">
+      </app-config-common-listing>
+    </div>
+    <div class="config-item d-flex align-items-center justify-content-between sticky-header">
+        <p class="font-weight-medium blue-color">{{ 'general_expense_line_items' | i18next }}</p>
+    </div>
+    <div class="exp-wrapper p-24 pt-8">
+        <div class="exp-items d-flex align-items-center">
+          <ng-container>
+            <div [ngClass]="{'disable': viewStatus === configurationMode?.View || !configId }" class="item add" *ngIf="viewStatus === configurationMode?.Edit || viewStatus === configurationMode?.Create" (click)="addExpenseType(expenseType?.Expense)">
+              <a href="javascript:void(0)">
+                  <i class="material-icons">add_circle</i>
+                  <span>{{ 'add' | i18next }}</span>
+              </a>
+            </div>
+          </ng-container>
+            <div [ngClass]="{'disable':viewStatus === configurationMode?.View}" class="item" (mouseover)="onGenHover(i)" (mouseleave)="onGenLeave(i)"  *ngFor="let item of vmsData; let i = index">
+                <a href="javascript:void(0)" class="more-option" (click)="optionDropdown(i)">
+                  <i *ngIf="genExIndex === i && optionIconGen" class="material-icons">more_horiz</i>
+                  <ng-container *ngIf="genExIndex !== i">
+                    <i class="material-icons"
+                      [ngClass]="item?.is_enabled?'check':'cross'">{{ item?.is_enabled?'check_circle':'cancel' }}</i>
+                  </ng-container>
+                </a>
+                <nav class="action-dropdown-list" [ngClass]="{'active' : optionDropdownVisibility && i == index}" (mouseleave)="hideOptionDropdown()">
+                  <ul>
+                    <li (click)="onViewClick(item)">
+                      <a href="javascript:void(0)">
+                        <i class="material-icons">visibility</i>
+                        {{ 'view' | i18next }}
+                      </a>
+                    </li>
+                    <li *ngIf="viewStatus === configurationMode?.Edit" (click)="onEditClick(item)">
+                      <a href="javascript:void(0)">
+                        <i class="material-icons">edit</i>
+                        {{ 'edit' | i18next }}
+                      </a>
+                    </li>
+                    <li *ngIf="viewStatus === configurationMode?.Edit" (click)="onDisableOrEnableClick(item)">
+                      <a href="javascript:void(0)">
+                        <i class="material-icons" style="width: 20px">{{item?.is_enabled?'label_off':'label_on'}}</i>
+                        {{ item?.is_enabled?'Disable':'Enable' }}
+                      </a>
+                    </li>
+                  </ul>
+                  </nav>
+                <img src="{{item.icon}}" alt="">
+                <p class="exp-name">{{item.expense_name}}</p>
+                <p class="small">{{item.code}}</p>
+            </div>
+        </div>
+    </div>
+    <div class="config-item d-flex align-items-center justify-content-between sticky-header">
+      <p class="font-weight-medium blue-color">{{ 'misc_expense_line_items' | i18next }}</p>
+  </div>
+  <div class="exp-wrapper p-24 pt-8">
+      <div class="exp-items d-flex align-items-center">
+        <ng-container>
+          <div [ngClass]="{'disable': viewStatus === configurationMode?.View || !configId}" class="item add" *ngIf="viewStatus === configurationMode?.Edit || viewStatus === configurationMode?.Create" (click)="addExpenseType(expenseType?.MiscExpense)">
+            <a href="javascript:void(0)">
+                <i class="material-icons">add_circle</i>
+                <span>{{ 'add' | i18next }}</span>
+            </a>
+          </div>
+        </ng-container>
+          <div [ngClass]="{'disable':viewStatus === configurationMode?.View}" (mouseover)="onHover(i)" (mouseleave)="onLeave(i)" class="item"  *ngFor="let item of miscellaneousData;let i = index">
+              <a href="javascript:void(0)"  class="more-option"  (click)="optionSecondDropdown(i)">
+                <i *ngIf="miscExIndex === i && optionIcon" class="material-icons">more_horiz</i>
+                  <ng-container *ngIf="miscExIndex !== i">
+                    <i class="material-icons"
+                      [ngClass]="item?.is_enabled?'check':'cross'">{{ item?.is_enabled?'check_circle':'cancel' }}</i>
+                  </ng-container>
+              </a>
+              <!--  -->
+              <nav class="action-dropdown-list" [ngClass]="{'active' : secondOptionDropdownVisibility && i == indexValue}" (mouseleave)="hideSecondOptionDropdown()">
+                <ul>
+                  <li (click)="onViewClick(item)">
+                    <a href="javascript:void(0)">
+                      <i class="material-icons">visibility</i>
+                      {{ 'view' | i18next }}
+                    </a>
+                  </li>
+                  <li *ngIf="viewStatus === configurationMode?.Edit" (click)="onEditClick(item)">
+                    <a href="javascript:void(0)">
+                      <i class="material-icons">edit</i>
+                      {{ 'edit' | i18next }}
+                    </a>
+                  </li>
+                  <li *ngIf="viewStatus === configurationMode?.Edit" (click)="onDisableOrEnableClick(item)">
+                    <a href="javascript:void(0)">
+                      <i class="material-icons" style="width: 20px">{{item?.is_enabled?'label_off':'label_on'}}</i>
+                      {{ item?.is_enabled?'Disable':'Enable' }}
+                    </a> 
+                  </li>
+                </ul>
+                </nav>
+              <img src="{{item.icon}}" alt="">
+              <p class="exp-name">{{item.expense_name}}</p>
+              <p class="small">{{item.code}}</p>
+          </div>
+      </div>
+  </div>
+  </section>
+</div>
+</form>
+<app-add-expense-type *ngIf="isOpenAddExpenseType" (closeAddExpenseTypeModal)="toggleOpenAddExpenseType()" [configId]="configId">
+</app-add-expense-type>

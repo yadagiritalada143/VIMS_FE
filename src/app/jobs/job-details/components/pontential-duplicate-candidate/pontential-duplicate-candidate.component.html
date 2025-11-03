@@ -1,0 +1,30 @@
+<svms-sidebar [title]="'Potential Duplicate Submittal(s)' | i18nextEager" [dataVisibility]="potentialDuplicateCandidate" (onClose)="SidebarClose()">
+    <svms-sidebar-body>
+        <table class="table potential-duplicate-table">
+            <thead>
+                <tr>
+                    <th>{{'candidate_name' | i18next}}</th>
+                    <th>{{'unique_id' | i18next}}</th>
+                    <th>{{'status' | i18next}}</th>
+                    <th *ngIf="isShowVendorColumn">{{'vendor' | i18next}}</th>
+                    <th>{{'submitted_on' | i18next}}</th>
+                </tr>
+            </thead>
+            <tbody *ngIf="vendorData?.candidate?.length">
+                <tr *ngFor="let item of vendorData?.candidate">
+                    <td (click)="openVendor(item?.id)" class="pl-24 cursor-pointer text-primary">{{item?.name | titlecase}}</td>
+                    <td *ngIf="isMasked" class="mask-vision">
+                        <div class="mask-hide"></div>
+                        <span class="d-none">{{item?.unique_id}}</span>
+                    </td>
+                    <td *ngIf="!isMasked">{{item?.unique_id}}</td>
+                    <td><span class="status-ui " [ngClass]="getStatusClass(item?.status)">
+                        {{ item?.status| snakeToTitleCase | i18next }}
+                    </span></td>
+                    <td *ngIf="isShowVendorColumn">{{item?.vendor_name}}</td>
+                    <td>{{item?.submitted_on}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </svms-sidebar-body>
+</svms-sidebar>

@@ -1,0 +1,29 @@
+<svms-sidebar-ng [title]="replaceHeaderLabel | i18next" [dataVisibility]="isSidebarVisible"  (onClose)="sidebarClose()"
+  [showHeader]="true" [showFooter]="true" [clickOutside]="clickOutside">
+  <div class="p-24">
+
+    <div class="form-group">
+        <label>{{ selectLabel | i18next }}</label>
+        <ng-select bindLabel="name" [searchable]="true" (search)="searchReplacers($event)"
+            [placeholder]="selectPlaceholder | i18next" ngDefaultControl [(ngModel)]="selectedApprover"
+            [loading]='approverLoading' loadingText='Loading...' (clear)="searchReplacers($event)"
+            class="approver-dropdown">
+            <ng-option *ngFor="let option of approverList" [value]="option">
+              <div *ngIf="option?.first_name" class="initials initials__purple text-capitalize">
+                {{ option?.first_name | slice: 0:1 }}{{ option?.last_name | slice: 0:1 }}
+              </div>
+              <span class="text-capitalize user-options">{{ option?.full_name }}</span>
+            </ng-option>
+          </ng-select>
+    </div>
+    <div class="form-group">
+        <label>{{'notes'|i18next}}</label>
+       <textarea [(ngModel)]="notes" class="form-control" rows="6" placeholder="{{'enter_notes'|i18next}}"></textarea>
+    </div>
+  </div>
+  <svms-sidebar-footer-ng>
+    <button (click)="replace()" [disabled]="!selectedApprover" type="submit" class="btn btn-primary float-right"> 
+     {{'replace'|i18next}}
+    </button>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

@@ -1,0 +1,24 @@
+<div class="d-flex mx-24 changes-row align-items-center">
+  <p class="changes-column" [ngClass]="{ 'flex-3': longLabel }">{{ label }}</p>
+  <p *ngIf="!isDate && oldValue" class="changes-column text-right changes-column-deleted">
+    {{ makeValueReadable(oldValue) }}
+  </p>
+  <p
+    *ngIf="!isDate"
+    class="changes-column text-right font-weight-medium changes-column-new-value"
+    [ngClass]="{ 'flex-2': longLabel }"
+  >
+    {{ makeValueReadable(newValue) }}
+    <span *ngIf="daysFromEnd" class="ml-16">{{ 'from_assignment_end' | i18next }}</span>
+  </p>
+  <p *ngIf="isDate"
+    class="changes-column text-right changes-column-deleted">
+    {{ oldValue.length ? (oldValue * 1000 | localDateFormat: "dd/MM/yyyy") : '' }}
+  </p>
+  <p
+    *ngIf="isDate"
+    class="changes-column text-right font-weight-medium changes-column-new-value"
+  >
+    {{ newValue * 1000 | localDateFormat: "dd/MM/yyyy" }}
+  </p>
+</div>

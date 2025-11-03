@@ -1,0 +1,56 @@
+<!-- <app-job-details> -->
+  <div class="offer-listing-item">
+    <div class="description-card p-24 detail-page-responsive-list pl-m-0 pr-m-0">
+      <div class="dotloader" *ngIf="dataLoader"></div>
+      <div *ngIf="viewGrid" class="overflow-box">
+        <vms-table
+          *ngIf="tableLoaded"
+          [vmsTableConfig]="tableConfig"
+          [vmsDataSource]="vmsData?.offer"
+          [loading]="dataLoading"
+          [open]="isExpand"
+          [totalItem]="totalRecords"
+          [itemsPerPage]="itemsPerPage"
+          [offerNewWorkflow]="offerNewWorkflow"
+          (onExpandClick)="onExpandClick($event)"
+          (onEditClick)="onEditClick($event)"
+          (changePage)="onPaginationClick($event)"
+          (onCreate)="onCreateClick($event)"
+          (onDisableClicked)="disableClicked($event)"
+          (onDeleteClick)="onDeleteClick($event)"
+          (numberBadgeClicked)="columnClicked($event)"
+          (search)="onSearch($event)"
+          (onListFilter)="onListFilter($event)"
+          (counterOffer)="openCounterOfferSidebar($event)"
+          (acceptOffer)="checkOverlap($event)"
+          (rejectOffer)="openRejectOfferSidebar($event)"
+          (onboardingCandidate)="onOnboardingCandidate($event)"
+          (onWithdrawProfileClick)="withdrawalClicked($event)"
+          (onRejectCandidateClick)="clickToRejectCandidate($event)"
+          (previewClicked)="previewClicked($event)"
+          [rotuterLinkOnClick] = 'true'
+          [rotuterLinkParams] = 'rotuterLinkParams'
+          [rotuterLinkParseFn] = 'rotuterLinkParseFn'
+          (changeRecords)="changerecords($event)"
+          (editOffer)="openEditOfferSidebar($event)"
+          (onSort)="onSortClick($event)"
+          [currentJobStatus]="currentJobStatus"
+          (onOfferReviewClick)="clickToOfferReview($event)"
+          (onEditOfferClick)="clickToEditOfferReview($event)"
+          (onCancelOfferClick)="clickToCancelOfferReview($event)"
+        >
+        </vms-table>
+      </div>
+      <app-grid-view
+        *ngIf="!viewGrid"
+        [gridData]="gridVewJson"
+        [gridContentType]="gridContentType"
+      ></app-grid-view>
+    </div>
+  </div>
+<!-- </app-job-details> -->
+<job-details-sidebar-counter-offer></job-details-sidebar-counter-offer>
+<app-withdraw-candidate (onWithdrawnCandidate)="onWithdrawnCandidate($event)"></app-withdraw-candidate>
+<app-assignment-overlap-warning [showWarning]="showOverlapWarning" [assignmentData]="overlapAssignmentData" 
+(onWarningClose)="showOverlapWarning=false" >
+</app-assignment-overlap-warning>

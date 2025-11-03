@@ -1,0 +1,25 @@
+<svms-sidebar-profile [showSkelton]="showSkelton" [profileVisibility]="profileVisibility" [helpVisibility]="helpVisible"
+  [helpTitle]="helpTitle" [helpText]="helpText" [avatar]="avatar" [jobData]="jobData" [userName]="userName" [candidateInfo]="candidateInfo"
+  [userPosition]="userPosition" [socialProfiles]="socialProfiles">
+
+  <ul class="profile-bar-nav">
+    <li [class.active]="tab.active" *ngFor="let tab of tabs; let rootIndex = index"
+      [hidden]="showOnlyCandidateProfile && (tab.label!=('Candidate Profile' | i18next) && tab.label!=('Resume' | i18next))" (click)="selectTab(tab, true)">
+      <a [class.active]="tab.active">
+        <sidebar-icon theme="outlined" size="24px" [name]="tab?.icon" type="material"
+          cuClass="icon d-flex material-icons-outlined">
+        </sidebar-icon> <span>{{tab.label|i18next}}</span>
+      </a>
+      <ul *ngIf = 'tab.subMenuItems && tab.subMenuItems.length > 0' class="">
+        <li *ngFor="let subTab of tab.subMenuItems; let subIndex = index"
+        [ngClass] = '{"active" : subTab.isActive}'  (click) = 'selectSubtab(rootIndex, subIndex)'>
+          {{ subTab.name|i18next}}
+        </li>
+      </ul>
+    </li>
+  </ul>
+</svms-sidebar-profile>
+
+<div class="svms-body">
+  <ng-content></ng-content>
+</div>

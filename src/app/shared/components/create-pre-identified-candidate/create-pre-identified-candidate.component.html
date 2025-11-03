@@ -1,0 +1,166 @@
+<svms-sidebar [title]="formTitle | i18next" [dataVisibility]="isCreateCandidate" (onClose)="sidebarClose()">
+    <svms-sidebar-body>
+        <app-alert [log]="logs" *ngIf="logs"></app-alert>
+        <app-alert [log]="mtpLogs" *ngIf="mtpEnabled"></app-alert>
+        <form [formGroup]="createCandidateForm">
+            <div class="p-24">
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label I18n>{{ 'first_name' | i18next }}<span class="require"> *</span></label>
+                        <input type="text" formControlName="first_name" maxlength="100" class="form-control"
+                            placeholder="{{ 'enter_first_name' | i18next }}" [readonly]="isViewOnly" (keyup)="nameValidater(0)"
+                            [ngClass]="{ 'error': (f?.first_name?.errors || nameError[0]) && (f?.first_name?.touched || f?.first_name?.value) }">
+                        <div *ngIf="(f?.first_name?.errors || nameError[0]) && (f?.first_name?.touched || f?.first_name?.value)" class="validation-msg">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon pr-4"></icon>
+                            <span *ngIf="f?.first_name?.errors?.required">{{ 'first_name_is_required' | i18next }}</span>
+                            <span *ngIf="(nameError[0] || f?.first_name?.errors?.pattern)">{{ 'please_enter_only_characters' | i18next }}</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label I18n>{{ 'middle_name' | i18next }}</label>
+                        <input type="text" formControlName="middle_name" maxlength="100" class="form-control"
+                            placeholder="{{ 'enter_middle_name' | i18next }}" [readonly]="isViewOnly" (keyup)="nameValidater(1)"
+                            [ngClass]="{ 'error': (f?.middle_name?.errors || nameError[1]) && (f?.middle_name?.touched || f?.middle_name?.value)  }">
+                            <div *ngIf="(f?.middle_name?.errors || nameError[1]) && (f?.middle_name?.touched || f?.middle_name?.value)" class="validation-msg">
+                                <icon name="error" size="14px" type="material" cuClass="validation-icon pr-4"></icon>
+                                <span *ngIf="nameError[1] || f?.middle_name?.errors?.pattern">{{ 'please_enter_only_characters' | i18next }}</span>
+                            </div>
+                    </div>
+                    <div class="form-group">
+                        <label I18n>{{ 'last_name' | i18next }}<span class="require"> *</span></label>
+                        <input type="text" formControlName="last_name" maxlength="100" class="form-control"
+                            placeholder="{{ 'enter_last_name' | i18next }}" [readonly]="isViewOnly" (keyup)="nameValidater(2)"
+                            [ngClass]="{ 'error': (f?.last_name?.errors || nameError[2]) && (f?.last_name?.touched || f?.last_name?.value) }">
+                        <div *ngIf="(f?.last_name?.errors || nameError[2]) && (f?.last_name?.touched || f?.last_name?.value)" class="validation-msg">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon pr-4"></icon>
+                            <span *ngIf="(f?.last_name?.errors?.required)">{{ 'last_name_is_required' | i18next }}</span>
+                            <span *ngIf="(nameError[2] || f?.last_name?.errors?.pattern)">{{ 'please_enter_only_characters' | i18next }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="!isPreIdCandidateCreation" class="form-group-row">
+                    <div class="form-group position-relative">
+                        <label>{{'Date Of Birth' | i18next}}</label>
+                        <svms-datepicker [inputdateFormat]="'MM/DD'" formControlName="date_of_birth"></svms-datepicker>
+                    </div>
+                    <div class="form-group">
+                        <label>{{'State ID (Last 3 Digits)' | i18next}} <icon name="help_outline" theme="outlined"
+                                color="#ADB5BD" size="14px"></icon></label>
+                        <input formControlName="state_ID" type="text" class="form-control" placeholder="{{'Enter State ID' | i18next}}">
+                    </div>
+                    <div class="form-group">
+                        <label>{{'Vendor' | i18next}} <span class="require">*</span></label>
+                        <ng-select bindLabel="name" placeholder="{{ 'select_vendor' | i18next }}" formControlName="vendorName"
+                            (search)="vendorsearch.next($event)" [searchable]="true" [loading]='vendorLoading'
+                            loadingText="{{ 'loading...' | i18next }}" (clear)="vendorsearch.next($event)" [readonly]="isViewOnly || !isPreIdCandidateCreation"
+                            [ngClass]="{ 'error': submitted && f.vendorName.errors }" (change)="updateVendorId($event)">
+                            <ng-option [value]="v" *ngFor="let v of vendorList.vendors">{{v?.name}}</ng-option>
+                        </ng-select>
+                        <div *ngIf="submitted && f.vendorName.errors" class="validation-msg">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon pr-4"></icon>
+                            <span *ngIf="f.vendorName.errors.required">{{ 'vendor_is_required' | i18next }}</span>
+                        </div>
+                    </div>
+                </div>
+                <h4 *ngIf="!isPreIdCandidateCreation" class="font-weight-medium mt-24 mb-24">{{'Contact Info' | i18next}}</h4>
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label I18n>{{ 'email_address_(primary)' | i18next}}<span class="require">*</span></label>
+                        <div class="d-flex position-relative icon-preidentify">
+                        <icon class="icon-bg d-flex" size="16px" name="mail_outline" type="material"></icon>
+                        <input type="text" class="form-control" formControlName="email" maxlength="254"
+                            [readonly]="isViewOnly" placeholder="{{ 'enter_primary_email_address' | i18next }}"
+                            (blur)="checkIfEmailExists($event)" (focus)="emailExists = false">
+                        </div>    
+                        <div *ngIf="f.email.errors || emailExists" class="validation-msg">
+                            <span *ngIf="f.email.errors?.pattern">{{ 'please_enter_valid_email' | i18next }}</span>
+                            <span *ngIf="emailExists">{{ 'email_already_exists' | i18next }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="!isPreIdCandidateCreation" class="form-group-row">
+                    <div class="form-group position-relative">
+                        <label>{{'Country' | i18next}} <span class="require">*</span></label> 
+                            <ng-select formControlName="country_name" [clearable]="true" placeholder="{{ 'Select' | i18next }}" [ngClass]="{ 'error': submitted && f.last_name.errors }" (change)="changeCountry($event)">
+                            <ng-option *ngFor="let country of allCountryList" [value]="country?.name">{{country?.name|i18next}}</ng-option>
+                        </ng-select>  
+                        <div *ngIf="submitted && f.country_name.errors" class="validation-msg">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon pr-4"></icon>
+                            <span *ngIf="f.country_name.errors.required">{{ 'country_is_required' | i18next }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label I18n>{{ 'phone_number_(primary)' | i18next }}</label>
+                        <div class="d-flex align-items-center position-relative">
+                            <ng-select [searchable]="true" class="w-150" [clearable]="false" ngDefaultControl
+                                formControlName="iso2_code" (change)="setISDcode($event)" [readonly]="isViewOnly">
+                                <ng-option *ngFor="let country of allCountryList" [value]="country.iso_code_2">
+                                    <img src="../../../assets/images/flag/{{country.iso_code_2.toLowerCase()}}.png"
+                                        width="20px" class="mr-4" />
+                                    <span>+{{country.isd_code}}</span>
+                                </ng-option>
+                            </ng-select>
+                            <input type="text" formControlName="phone_number"
+                                [ngClass]="{'error': createCandidateForm.controls['phone_number'].invalid && (createCandidateForm.controls['phone_number'].dirty)}"
+                                class="form-control flex-fill remove-radius" [readonly]="isViewOnly"
+                                placeholder="{{ 'enter_primary_phone_number' | i18next }}">
+                        </div>
+                        <p *ngIf="createCandidateForm.controls['phone_number'].invalid && (createCandidateForm.controls['phone_number'].touched || !isPreIdCandidateCreation)"
+                            class="validation-msg">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                            {{ 'phone_number_not_valid' | i18next }}.
+                        </p>
+                    </div>    
+                </div>
+                <div *ngIf="isPreIdCandidateCreation" class="form-group-row">
+                    <div *ngIf="!isViewOnly" class="form-group">
+                        <label I18n>{{ 'vendor' | i18next }}&nbsp;<span class="require">*</span></label>
+                        <ng-select bindLabel="name" placeholder="{{ 'select_vendor' | i18next }}" formControlName="vendorName"
+                            (search)="vendorsearch.next($event)" [searchable]="true" [loading]='vendorLoading'
+                            loadingText="{{ 'loading...' | i18next }}" (clear)="vendorsearch.next($event)" [readonly]="isViewOnly"
+                            [ngClass]="{ 'error': submitted && f.vendorName.errors }" (change)="updateVendorId($event)">
+                            <ng-option [value]="v" *ngFor="let v of vendorList.vendors">{{v?.name}}</ng-option>
+                        </ng-select>
+                        <div *ngIf="submitted && f.vendorName.errors" class="validation-msg">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon pr-4"></icon>
+                            <span *ngIf="f.vendorName.errors.required">{{ 'vendor_is_required' | i18next }}</span>
+                        </div>
+                    </div>
+                    <div *ngIf="isViewOnly" class="form-group">
+                        <label I18n>{{ 'select_vendor' | i18next }}&nbsp;<span class="require">*</span></label>
+                        <input type="text" class="form-control" [readonly]="isViewOnly"
+                            [defaultValue]="createCandidateForm?.value?.vendorName?.name">
+                    </div> 
+                </div>
+                <div *ngIf="!isPreIdCandidateCreation" class="form-group-row no-block">
+                    <div class="form-group">
+                      <label>{{ 'address' | i18next }} ({{ 'primary' | i18next }})<span class="require">*</span></label>
+                      <div class="d-flex position-relative icon-preidentify">
+                        <icon class="icon-bg d-flex" size="16px" theme="outlined" name="home" type="material"></icon>
+                        <search-address class="address-no-radius" [adressType]="'geocode'" [respType]="'fullAddress'" [country]="countryShortName" id="addressField" formControlName="address" #candidateAddress>
+                        </search-address>
+                      </div>
+                    </div>
+                  </div>
+                <div *ngIf="isPreIdCandidateCreation" class="form-group-row">
+                    <div class="form-group">
+                        <label>{{ 'Notes' | i18next }}</label>
+                        <textarea formControlName="notes" class="form-control no-resize" placeholder="Notes"></textarea>
+                    </div>
+                </div>
+
+                <div *ngIf="!isPreIdCandidateCreation">
+                    <app-duplicate-candidates [duplicateCandidates]="duplicateCandidates" [currentProgram]="currentProgram"
+                    [showDuplicateCandidateLoader]="showDuplicateCandidateLoader" (useThisProfileAction)="useThisProfile($event)"></app-duplicate-candidates>
+                </div>
+            </div>
+        </form>
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+        <button *ngIf="!isViewOnly" type="submit" class="btn btn-primary float-right" (click)="saveCandidate('save')" [disabled]="!this.createCandidateForm.valid || nameError[0] || nameError[1] || nameError[2] || disableFields">
+            {{saveButtonText | i18next}}
+        </button>
+    </svms-sidebar-footer>
+</svms-sidebar>

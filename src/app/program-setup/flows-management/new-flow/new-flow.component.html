@@ -1,0 +1,239 @@
+<div class="create-wrapper p-24 px-m-0 py-m-0">
+  <a class="back-btn cursor-pointer" (click)="backToPage()">
+    <icon class="d-inline-block" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon>
+    {{ 'back_to_list' | i18next }}
+  </a>
+  <div class="create-form pt-32">
+    <div class="d-flex justify-content-between align-items-center">
+      <h3 class="font-weight-medium mb-0 page-title-mobile">{{ isEditMode ? 'edit_workflow' : 'create_new_workflow' | i18next }}</h3>
+      <div class="d-flex align-items-center justify-content-end">
+        <button
+          type="submit"
+          [disabled]="!flow_Obj.name || !flow_Obj.module || !flow_Obj.event_id || !flow_Obj.flow_type || !hierarchyListTags?.length"
+          class="btn btn-primary"
+          (click)="createFlow()"
+        *accessControl>
+          {{ 'save' | i18next }}
+        </button>
+      </div>
+    </div>
+    <div class="card bg-light mt-24 p-32" *ngIf="flow_Obj">
+      <form #f="ngForm">
+        <div class="form-group-row">
+          <div class="form-group title-field">
+            <label>{{ 'workflow_title' | i18next }} <span class="require">*</span></label>
+            <input type="text" class="form-control" id="name" name="name" #name="ngModel" placeholder="Enter Text" [(ngModel)]="flow_Obj.name" required />
+          </div>
+          <div class="form-group flow-state">
+            <div class="toggle-panel mt-24">
+              <div class="toggle-panel-inner" [ngClass]="newFlow?.value ? 'if-active' : 'if-inactive'">
+                <span class="status-text mr-12">{{ newFlow?.title | i18next}}</span>
+                <span class="toggle-switch" [ngClass]="newFlow?.value ? 'toggle-on' : 'toggle-off'" (click)="onClickToggleFlow()"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group-row">
+          <div class="form-group" >
+            <label>{{ 'module' | i18next }} <span class="require">*</span></label>
+            <ng-select
+              [clearable]="isEditMode ? false : true"
+              [ngClass]="isEditMode ? 'disabled-field' : ''"
+              (change)="dataChange($event, 'module')"
+              (search)="loadModules($event)"
+              id="module"
+              name="module"
+              #module="ngModel"
+              [items]="moduleList"
+              bindLabel="name"
+              bindValue="id"
+              [(ngModel)]="flow_Obj.module"
+              placeholder="Select Module"
+            >
+            </ng-select>
+          </div>
+          <div class="form-group">
+            <label>{{ 'event' | i18next }} <span class="require">*</span></label>
+            <ng-select
+              [clearable]="isEditMode ? false : true"
+              [ngClass]="(!flow_Obj.module && !eventList?.length) || isEditMode ? 'disabled-field' : ''"
+              (change)="dataChange($event, 'event')"
+              id="event_id"
+              name="event_id"
+              #event_id="ngModel"
+              [items]="eventList"
+              bindLabel="name"
+              bindValue="id"
+              [(ngModel)]="flow_Obj.event_id"
+              placeholder="Select Event"
+            >
+            </ng-select>
+          </div>
+          <div class="form-group">
+            <label>{{ 'method' | i18next }} <span class="require">*</span></label>
+            <ng-select
+              [clearable]="isEditMode ? false : true"
+              [ngClass]="isEditMode || (!flow_Obj.event_id || !flow_Obj.module) ? 'disabled-field' : ''"
+              id="flow_type"
+              name="flow_type"
+              (change)="dataChange($event, 'flow_type')"
+              [items]="flowMethodsList"
+              bindLabel="name"
+              bindValue="slug"
+              #flow_type="ngModel"
+              [(ngModel)]="flow_Obj.flow_type"
+              placeholder="Select Method"
+            >
+            </ng-select>
+          </div>
+        </div>
+
+        <ng-container>
+          <div class='form-group treeview-group' [ngClass]="{}">
+            <label>
+              {{ 'hierarchy_' | i18next }}
+              <span class="require">*</span>
+            </label>
+            <ngx-dropdown-treeview
+              buttonClass='btn-outline-light'
+              [config]='hierarchyConfig'
+              [items]='treeViewItems'
+              (selectedChange)='observeSelectedChange($event)'
+              class='hierarchy-tree'>
+            </ngx-dropdown-treeview>
+            <div class='chip-holder' *ngIf="hierarchyListTags?.length !== 0">
+              <div *ngFor="let chipData of hierarchyListTags; index as it" class='d-flex chip p-4 m-4 chip-bg'>
+                <p class='chip-name'> {{ chipData?.name }}</p>
+                <icon (click)='removeSelectedHierarchy(chipData?.id)'
+                  class='close' type='material'
+                  name='close' size='16px'>
+                </icon>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+        <div class="initial-condition">
+          <div class="condition-title d-flex justify-content-between align-items-center">
+            <div class="condition-title-box">
+              <p class="title-text d-flex align-items-center"><icon class="d-flex" color="#0044C5" name="start" size="20px"></icon> <span class="ml-16 font-weight-medium">{{ 'initial_trigger' | i18next }}</span></p>
+              <p class="initial-paragraph small"><span [ngClass]="{'full-text' : textVisibility}">{{ 'here_is_where_you_can_define_the_condition(s)_for_triggering_this_workflow.__for_example,_if_the_client_only_wants_this_workflow_to_be_triggered_when_the_currency_is_usd_then_the_trigger_would_be_setup_as_“currency_=_usd”.__it_is_important_to_note_that_this_section_of_the_approval_flow_is_optional_so_if_the_customer_requires_that_the_workflow_be_used_all_the_time_(i.e.,_no_conditions_would_trigger_the_flow)_then_simply_leave_this_section_blank.' | i18next }} </span> <a href="javascript:void(0)" (click)="showHideFullText()">{{linkText}}</a></p>
+            </div>
+            <a href="javascript:void(0)" class="close-condition d-flex align-items-center" *ngIf="condition_group.rootCondition?.length" (click)="outerRemoveGroup(-1)">
+              <icon class="d-flex"  name="delete_sweep"  size="18px"></icon> <span class="ml-12">{{ 'clear_all' | i18next }}</span>
+            </a>
+
+          </div>
+          <div class="condition-body p-16">
+            <div class="parent-wrapper position-relative" *ngIf="flow_Obj">
+              <div *ngIf="condition_group.rootCondition?.length && propertyList?.length > 0">
+                <app-expression-builder-condition
+                  (updatedInnerCondition)="onInnerDataChange($event, 'condition_group')"
+                  (removeInnerOuterGroup)="removeInnerOuterGroup($event)"
+                  [isEditMode]="isEditMode"
+                  [moduleList]="moduleList"
+                  [selectedModuleCode]="flow_Obj.module_code"
+                  [selectedEvent]="flow_Obj.event_id"
+                  [propertyList]="propertyList"
+                  [outerConditionLength]="condition_group.rootCondition?.length"
+                  [condition]="condition"
+                  [fullcondition]="condition_group.rootCondition"
+                  [outerIndex]="outerIndex"
+                  *ngFor="let condition of condition_group.rootCondition; let outerIndex = index"
+                >
+                </app-expression-builder-condition>
+              </div>
+              <div class="add-group position-relative" [ngClass]="{'mt-12 add-more' : condition_group.rootCondition?.length && propertyList?.length > 0}">
+                <button
+                [disabled]="!flow_Obj.module || !flow_Obj.event_id"
+                (click)="addOuterCondition()"
+              >
+                <icon name="add_circle" size="18px" color="#0044C5"></icon> {{ 'group' | i18next }}
+              </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="level-outer"  *ngIf="level_group.rootLevel?.length && flow_Obj">
+          <div class="level-wrapper" *ngFor="let level of level_group.rootLevel; let levelIndex = index">
+            <div class="level-title-wrapper d-flex align-items-center justify-content-between px-24 py-16">
+              <div class="level-title-box">
+                <p class="level-title">
+                  <icon class="d-flex" name="clear_all" size="20px"></icon>
+                  <span class="ml-12">{{ 'level_' | i18next }} {{ levelIndex + 1 }}</span>
+                </p>
+                <p class="initial-paragraph small"><span [ngClass]="{'full-text' : level?.active}">{{ 'define_which_user(s)_the_customer_wants_to_include_for_each_level_within_the_workflow.__workflows_can_have_multiple_levels_and_within_each_level_you_can_include_trigger_conditions.__for_example,_the_customer_requires_that_level_2_of_the_workflow_only_be_triggered_if_the_budget_is_above_$50k.' | i18next }}</span> <a href="javascript:void(0)" (click)="showHideFullLevelText(level)">{{level?.active ? 'View Less' : "View More"}}</a></p>
+              </div>
+              <a href="javascript:void(0)" class="close-condition d-flex align-items-center" [ngClass]="level_group?.rootLevel?.length > 1 ? '' : 'disabled-field'" (click)="removeLevel(levelIndex)">
+                <icon class="d-flex"  name="delete_sweep"  size="18px"></icon>
+              </a>
+            </div>
+            <div class="approver-box">
+              <p class="small mb-12 text-uppercase">{{ 'approver' | i18next }}</p>
+              <div class="recipients-wrapper" *ngIf="recipientsData?.length">
+                <app-expression-builder-recipient
+                  (updatedRecipientsData)="onRecipientLevelDataChange($event, levelIndex)"
+                  [isEditMode]="isEditMode"
+                  [recipientsData]="recipientsData"
+                  [selectedModuleCode]="flow_Obj.module_code"
+                  [selectedEvent]="flow_Obj.event_id"
+                  [level]="level"
+                  [allSelectedRecipientsData]="allSelectedRecipientsData"
+                ></app-expression-builder-recipient>
+              </div>
+            </div>
+            <div class="px-16 pt-12 pb-0">
+              <div class="row small d-flex align-items-center cursor-pointer mb-12">
+                <div class="col-6 d-flex" (click)="toggleCondition()"> <icon class=""  name="{{showCondition? 'expand_more' : 'chevron_right'}}"  size="18px"></icon><span>{{ 'condition' | i18next }}</span></div>
+                <div class="col-6 text-end" style="display:block ruby; text-align: end !important;"><a  class="close-condition d-flex align-items-center justify-content-end"  (click)="outerLevelRemoveGroup(levelIndex,-1)">
+                  <icon name="delete_sweep" size="18px"></icon> <span class="ml-12">{{ 'clear_all' | i18next }}</span>
+                </a></div>
+              </div>
+              <div *ngIf="showCondition">
+                <div class="parent-wrapper position-relative" *ngIf="propertyList?.length > 0">
+                  <app-expression-builder-condition
+                    (updatedInnerCondition)="onInnerDataChange($event, 'level_group', levelIndex)"
+                    (removeOuterGroup)="removeLevelOuterGroup($event, levelIndex)"
+                    (removeInnerOuterGroup)="removeLevelInnerOuterGroup($event, levelIndex)"
+                    [isEditMode]="isEditMode"
+                    [moduleList]="moduleList"
+                    [selectedModuleCode]="flow_Obj.module_code"
+                    [selectedEvent]="flow_Obj.event_id"
+                    [propertyList]="propertyList"
+                    [outerConditionLength]="level.levelConditions?.length"
+                    [condition]="condition"
+                    [fullcondition]="level.levelConditions"
+                    [outerIndex]="levelConditionOuterIndex"
+                    *ngFor="let condition of level.levelConditions; let levelConditionOuterIndex = index"
+                  ></app-expression-builder-condition>
+                  <div class="add-group position-relative mt-12 mb-12 add-more">
+                    <button
+                    (click)="addLevelOuterCondition(levelIndex)"
+                  >
+                    <icon name="add_circle" size="18px" color="#0044C5"></icon> {{ 'group' | i18next }}
+                  </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- <app-flow-level (updatedLevelData)="onLevelDataChange($event)" (removeLevel)="removeLevel($event)" [moduleList]="moduleList" [selectedModule]="flow_Obj.module" [selectedEvent]="flow_Obj.event_id" [propertyList]="propertyList" [operatorList]="operatorList" [level]="level" [levelIndex]="levelIndex" *ngFor="let level of level_group.rootLevel;let levelIndex = index"></app-flow-level> -->
+        </div>
+        <div class="d-flex justify-content-between  mt-24">
+        <button class="btn btn-success " [disabled]="!flow_Obj.module || !flow_Obj.event_id || !flow_Obj?.flow_type" (click)="addLevel()">
+          <icon name="add" color="#ffffff" class="icon--on-left"></icon> {{ 'add_level' | i18next }}
+        </button>
+        <button
+            type="submit"
+            [disabled]="!flow_Obj.name || !flow_Obj.module || !flow_Obj.event_id || !flow_Obj.flow_type || !hierarchyListTags?.length"
+            class="btn btn-primary justify-content-end"
+            (click)="createFlow()"
+          *accessControl>
+            {{ 'save' | i18next }}
+        </button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,32 @@
+<div class="notification-page-wrapper">
+  <div class="card mb-0">
+    <div class="row d-flex align-items-center justify-content-between">
+      <div class="col-md-10 d-flex">
+        <span class="material-icons-outlined cursor-pointer p-24 pr-0" (click)="navigateback()">
+          {{ 'arrow_back' | i18next }}
+        </span>
+        <h4 class="font-weight-medium p-24 pl-12 mb-0">{{ 'template_keys' | i18next }}</h4>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary small mr-24 float-right" type="button" (click)="createTemplateKeyDefinition()">
+          {{ 'add_new' | i18next }}</button>
+      </div>
+    </div>
+    <ul class="list-group" *ngIf="templateKeys && templateKeys?.length > 0;else no_record">
+      <li class="list-group-item px-24 py-12" *ngFor="let key of templateKeys">
+        <div class="d-flex align-items-center justify-content-between">
+          <p>
+            {{ key.field_name | i18next }}
+          </p>
+          <div class="float-right">
+            <a href="javascript:void(0)" class="mr-12" (click)="editTemplateKeyDefinition(key)">{{ 'edit' | i18next }}</a>
+            <a *accessControl href="javascript:void(0)" (click)="deleteTemplateKeyDefinition(key)">{{ 'delete' | i18next }}</a>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <ng-template #no_record>
+      <h4 class="py-16 text-center">{{ 'no_records_found' | i18next }}</h4>
+    </ng-template>
+  </div>
+</div>

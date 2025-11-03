@@ -1,0 +1,13 @@
+<div class="day-view-body">
+    <div class="event-container">
+        <div class="event-items">
+            <div class="event-item" *ngFor='let event of getItemsToDisplay()'>
+                <span *ngIf="showEventTime" class="all-day-round">{{ 'all_day' | i18next }}</span>
+                <span class="event-title" [ngStyle]="{'background-color': event.color}" tooltip="{{ event.title }}" placement="top" delay="0" (click)="onEventClick(event)">
+                    {{ event.title |i18next}}
+                </span>
+            </div>
+        </div>
+        <div class="additional-event-items-info" *ngIf="isOversize()">{{ moreTitle() |i18next}}</div>
+    </div>
+</div>

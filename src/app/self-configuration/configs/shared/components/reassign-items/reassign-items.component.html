@@ -1,0 +1,121 @@
+<app-svms-modal class="reassign-modal" title="{{reassignHeader}}" size="medium" [visibility]="reassignItems" (onClose)="reassignModalClose()">
+    <app-svms-modal-body>
+        <div  class="min-height300 d-flex justify-content-center align-items-center" *ngIf="jobListCopy?.length == 0 && !isItemReassigned && !userInfo?.['inProgress']">
+            <div class="middle-content text-center">
+                <!------------------  No Pending Items  ----------------->
+                <div>
+                <img src="../../../../../../assets/images/no-pending-item.svg" alt="" />
+                <h3 class="font-weight-semibold my-24">There are no items pending to reassign from 
+                    <a href="javascript:void(0)">{{userInfo?.['fullName']}}</a></h3>
+                    </div>
+                <button  (click)="reassignModalClose()" type="button" class="c-btn c-btn-secondary-medium-left-icon">Back to Program Users</button>
+            </div>
+        </div>
+        <!---------------------------Reassign user Completed Status----------------------------->
+        <div class="reassign-status-list"  *ngIf="(isItemReassigned || userInfo?.['inProgress']) && !statusUpdate">
+            <h4 class="font-weight-medium"  *ngIf="subTaskStatus?.success?.length > 0">Completed Items</h4>
+            <div class="mb-24" *ngIf="subTaskStatus?.success?.length > 0">
+                <div class="d-flex align-items-center justify-content-between border-bottom py-12" *ngFor="let completedItems of subTaskStatus?.success">
+                    <p>{{completedItems?.display_text}} <span *ngIf="completedItems?.success_count > 0">({{completedItems?.success_count}})</span></p>
+                    <div class="success d-flex align-items-center">
+                        <i class="material-icons">check_circle</i>
+                        <p class="ml-4">Completed</p>
+                    </div>
+                </div>
+            </div>
+        <!---------------------------Reassign user Progress Status----------------------------->
+
+            <h4 class="font-weight-medium" *ngIf="subTaskStatus?.inprogress?.length > 0">In Progress Items</h4>
+            <div class="mb-24" *ngIf="subTaskStatus?.inprogress?.length > 0">
+                <div class="d-flex align-items-center justify-content-between border-bottom py-12" *ngFor="let pendingItems of subTaskStatus?.inprogress">
+                    <p>{{pendingItems?.display_text}}</p>
+                    <div class="pending d-flex align-items-center">
+                        <i class="material-icons">hourglass_top</i>
+                        <p class="ml-4">Pending</p>
+                    </div>
+                </div>
+            </div>
+        <!---------------------------Reassign user Failed Status----------------------------->
+
+            <h4 *ngIf="subTaskStatus?.failure?.length > 0" class="font-weight-medium">Failed Items</h4>
+            <div *ngIf="subTaskStatus?.failure?.length > 0">
+                <div class="d-flex align-items-center justify-content-between border-bottom py-12" *ngFor="let failedItems of subTaskStatus?.failure">
+                    <div class="d-flex align-items-center">
+                        <label class="c-input-checkbox mb-0">
+                            <input type="checkbox" (change)="selectFailedTask(failedItems)" class="mr-8">
+                            <span class="cb-ui"></span>
+                        </label>
+                        <div>
+                        <p class="ml-8">{{failedItems?.display_text}}</p>
+                        <p class="ml-8 small">Out of {{failedItems?.total_count}} items, {{failedItems?.failed_count}} are failed</p>
+                    </div>
+                    </div>
+                    <div class="failed d-flex align-items-center">
+                        <i class="material-icons-outlined">cancel</i>
+                        <p class="ml-4">Failed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- <div  class="min-height300 d-flex justify-content-center align-items-center" *ngIf="(isItemReassigned || userInfo['inProgress']) && !statusUpdate">
+            <div class="middle-content text-center">
+               
+                <i (click)="checkStatus()" class="material-icons sync-icon">sync</i>
+                  <h3 class="font-weight-semibold my-24">Items are being reassigned. This may take a few minutes. You can safely 
+                    navigate away from this page without disrupting the process.</h3>
+        <button  (click)="reassignModalClose()" type="button" class="c-btn c-btn-secondary-medium-left-icon">Back to Program Users</button>
+        </div>
+
+        </div> -->
+		
+		<div  class="h-100 d-flex justify-content-center align-items-center" *ngIf="statusUpdate">
+            <div class="middle-content text-center">
+			  <!-- ----------------  Successully Reassigned  --------------- -->
+                 <i class="material-icons success-icon">check_circle</i>
+                <h3 class="font-weight-semibold my-24">Successfully reassigned the items </h3>
+        <button  (click)="reassignModalClose()" type="button" class="c-btn c-btn-secondary-medium-left-icon">Back to Program Users</button>
+        </div>
+        </div>
+        
+        <div *ngIf="jobListCopy?.length > 0">
+        <p class="reassign-alert font-weight-medium">Items associated to {{userInfo?.['fullName']}}</p>
+        <div class="reassign-items-list">
+            <ul>
+                <li class="d-flex justify-content-between align-items-center p-16" *ngFor="let data of jobListCopy; let i=index">
+                    <div class="items-name-left">
+                        <p class="font-weight-medium d-flex align-items-center">{{data?.display_text}} <i *ngIf="data?.pending_count > 0" class="material-icons cursor-pointer" tooltip="{{data?.information}}" placement="right">info</i></p>
+                        <span class="small text-red">{{data?.count}}</span>
+                    </div>
+                    <ng-select *ngIf="orgCategory =='MSP' || (orgCategory == 'CLIENT' && data?.slug!=='pending_actions')" placeholder="{{'select_user' | i18nextEager}}" (search)="onSearch($event,data?.slug)" (change)='selectNewMember(i, data,$event)'   [(ngModel)]="data['memberSelected']">
+                        <ng-option *ngFor="let members of memberList" [value]="members.id">{{members?.full_name}}</ng-option>
+                      </ng-select>
+                      <ng-select *ngIf="data?.slug == 'pending_actions' && orgCategory == 'CLIENT'"  placeholder="{{'select_user' | i18nextEager}}" (search)="onSearch($event,data?.slug)" (change)='selectNewMember(i, data,$event)'   [(ngModel)]="data['memberSelected']">
+                        <ng-option *ngFor="let members of memberListForPendingAction" [value]="members.id">{{members?.full_name}}</ng-option>
+                      </ng-select>
+                      
+                </li>
+            </ul>
+        </div>
+        </div>
+    </app-svms-modal-body>
+    <app-svms-modal-footer *ngIf="subTaskStatus?.failure?.length > 0">
+        <div class="d-flex justify-content-end">
+            <button [disabled]="retryTaskPayload?.length ==0" (click)="reassignFailedTask()" class="c-btn c-btn-primary-medium">Retry</button>
+        </div>
+    </app-svms-modal-footer>
+    <app-svms-modal-footer *ngIf="jobListCopy?.length !== 0">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="reassign-checkbox checkbox-wrapper">
+                <label class="checkbox-container" >
+                <input type="checkbox" [(ngModel)]="reassignCheckbox" name="" [disabled]="!isReassign">
+                <span class="checkmark"></span>
+                <span class="checkbox-text">{{ 'I understand that this action cannot be reversed' | i18nextEager }}</span>
+                </label>
+            </div>
+            <button (click)="reassignTask()" class="c-btn c-btn-primary-medium-left-icon" [disabled]="!reassignCheckbox">
+                {{'reassign' | i18next}}
+            </button>
+        </div> 
+    </app-svms-modal-footer>
+</app-svms-modal>

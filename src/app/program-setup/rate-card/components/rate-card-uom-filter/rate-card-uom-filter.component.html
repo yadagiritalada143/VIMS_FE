@@ -1,0 +1,35 @@
+<div class="filter-panel position-fixed bg-light">
+    <a href="javascript:void(0)" class="filter-close" (click)="sidebarClosed()">
+      <icon name="close" size="24px"></icon>
+    </a>
+    <h4 class="pt-16 pl-24 pr-24 font-weight-normal">
+      <app-header-icon size="19px" name="filter_alt" type="material" cuClass="d-flex" class="float-left mr-4"></app-header-icon>
+      {{ 'filters' | i18next }}
+    </h4>
+    <form (submit)="applyFilters()">
+      <div class="filter-content p-24 pt-8">
+        <label>{{ 'unit_of_measure' | i18next }}</label>
+        <ng-select 
+                   placeholder="{{ 'select_uom' | i18next }}"
+                   multiple="true"
+                   [(ngModel)]="UOMSelected"
+                   [ngModelOptions]="{standalone: true}">
+          <ng-option *ngFor="let uom of uoms" [value]="uom">
+              {{uom}}
+          </ng-option>
+        </ng-select>
+      </div>
+  
+      <div class="filter-footer pt-16 pb-16 pl-24 pr-24">
+        <button class="btn btn-outine float-left" type="reset" (click)="clearAllFilters()">
+          <app-header-icon size="20px" name="highlight_off" type="material" cuClass="d-flex" class="icon--on-left d-flex">
+          </app-header-icon> {{ 'clear_all_filter' | i18next }}
+        </button>
+        <button class="btn btn-primary float-right" type="submit">
+          <app-header-icon size="20px" name="check_circle" type="material" cuClass="d-flex" class="icon--on-left d-flex">
+          </app-header-icon> {{ 'apply' | i18next }}
+        </button>
+      </div>
+    </form>
+  </div>
+  <div class="filter-backdrop"></div>

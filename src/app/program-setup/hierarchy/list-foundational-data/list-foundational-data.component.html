@@ -1,0 +1,41 @@
+<vms-table
+  *ngIf="showTable"
+  [vmsTableConfig]="tableConfig"
+  [vmsDataSource]="vmsData?.foundational_data"
+  [open]="isExpand"
+  [totalItem]="totalRecords"
+  [itemsPerPage]="itemsPerPage"
+  (onExpandClick)="onExpandClick($event)"
+  (onEditClick)="onEditClick($event)"
+  (search)="onSearch($event)"
+  (onCreate)="onCreateClick($event)"
+  (onBack)="onBackClicked($event)"
+  (onViewClick)="onViewClick($event)"
+  (onListFilter)="onListFilter($event)"
+  (changePage)="onPaginationClick($event)"
+  (onDeleteClick)="onDeleteClick($event)"
+  (onDisableClicked)="onDisableClicked($event)"
+>
+  <div class="expanded-col">
+    <p> {{ (description || 'Data not available') | i18next }} </p>
+  </div>
+</vms-table>
+
+<app-no-listing-page
+  *ngIf="!showTable"
+  [title]="tableConfig.title"
+  btnClickUrl="FOUNDATION_DATA_CREATE"
+  btnmsg="Create Your First Master data"
+  pmsg="If you would like to add Master data click here"
+  headingmsg="No Master data created for the selected Master data type so far."
+  (onCreateClick)="onCreateClick(true)"
+  >
+</app-no-listing-page>
+
+<app-create-foundational-data
+  title='Add New'
+  icon='library_add'
+  type='TYPE_MSP'
+  [details]="masterDataDetails"
+>
+</app-create-foundational-data>

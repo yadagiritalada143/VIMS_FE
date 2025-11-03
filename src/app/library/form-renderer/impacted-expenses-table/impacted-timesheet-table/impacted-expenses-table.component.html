@@ -1,0 +1,43 @@
+<ng-template [ngIf]="showExpenses">
+    <h3 class="font-weight-medium pl-8 pb-8">{{ 'update_impacted_expense(s)' | i18next }}</h3>
+<div class="p-8">
+<table class="impacted-sheet">
+    <thead>
+    <tr>
+        <th class="font-weight-medium" width="25%">
+        {{ 'expense_id' | i18next }}
+        </th>
+        <th class="pl-16" width="20%">
+            {{ 'submitted_date' | i18next }}
+        </th>
+        <th class="font-weight-medium" width="30%">
+        {{ 'work_period' | i18next }}
+        </th>
+        <th class="font-weight-medium" width="25%">
+        {{ 'status' | i18next }}
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let expense of expenseList">
+        <td>
+            <span class="text-primary"> {{expense?.es_code || '-'}}</span>
+        </td>
+        <td class="pl-16">
+            <span> {{(expense?.submitted_date | localDateFormat: '': '':'' : true) || '-'}}</span>
+        </td>
+        <td>
+        <span>
+            {{expense?.expense_start_date | localDateFormat: '': '':'' : true }} - {{expense?.expense_end_date | localDateFormat: '': '':'' : true}}
+        </span>
+        </td>
+        <td>
+            <span class="status-ui"
+            [ngClass]="{'draft':(expense?.expense_status?.toLowerCase() ==='draft' || expense?.expense_status?.toLowerCase()=='modified'), 'pending-approval':(expense?.expense_status?.toLowerCase() ==='pending' || expense?.expense_status?.toLowerCase() ==='pending approval' || expense?.expense_status?.toLowerCase() ==='submitted' || expense?.expense_status?.toLowerCase() ==='pending_review'), 'rejected': (expense?.expense_status?.toLowerCase() ==='rejected' || expense?.expense_status?.toLowerCase() ==='deleted'),'approved':(expense?.expense_status?.toLowerCase() ==='approved'), 'withdrawn':(expense?.expense_status?.toLowerCase() ==='withdrawn' || expense?.expense_status?.toLowerCase() ==='withdraw')}">
+            {{expense?.expense_status|i18next}}</span>
+        </td>
+    </tr>
+   </tbody>
+</table>
+</div>
+</ng-template>

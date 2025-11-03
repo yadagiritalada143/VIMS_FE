@@ -1,0 +1,89 @@
+<svms-sidebar-ng title="{{interviewObject?.status==='PENDING_ACCEPTANCE' ? 'accept_interview': 'confirm_interview'}}" [dataVisibility]="acceptinterview"
+  (onClose) = 'cancel.emit()' >
+  <div class="pl-24 pr-24 pt-16 pb-32 accept_interview_body" *ngIf= 'interviewObject'>
+    <p>{{ 'select_any_date' | i18next }} & {{ 'time' | i18next }}</p>
+    <ng-container *ngFor = 'let schedule of interviewObject.schedules; let i = index'>
+      <div class="grid row mt-12 no-gutters" *ngIf="schedule?.schedule_status">
+        <div class="col-md-1">
+          <div class="checkbox-wrapper">
+            <label class="checkbox-container">
+              <input type="checkbox" [(ngModel)]='schedule.is_prefered' (change)='onScheduleSelected(i)'>
+              <span class="checkmark"></span>
+            </label>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex align-items-center p-12 pl-0">
+            <span class="date-thumb ">{{ schedule?.date | localDateFormat : 'dd' : '' : '' : true }}</span>
+            <p class="font-weight-medium">{{ schedule?.date | localDateFormat : '' : '' : '' : true }}</p>
+          </div>
+        </div>
+        <div class="col-md-5">
+          <p class="time d-flex align-item-center">{{schedule?.start_time }} - {{schedule?.end_time }}</p>
+        </div>
+      </div>
+    </ng-container>  
+    <form [formGroup] = 'form' *ngIf="interviewObject?.status==='PENDING_ACCEPTANCE'">
+      <div class="form-group mt-32">
+        <label>{{ 'candidate_phone_number' | i18next }} <span class="require">*</span></label>
+        <div class="d-flex align-items-center country-searchable position-relative">
+            <div class="col-md-3 p-0">
+              <ng-select [searchable]="true" [clearable]="false" [(ngModel)]="form.value.phone_isdcode" formControlName="phone_isdcode" ngDefaultControl (change)="phoneLengthValidation()">
+                <ng-option *ngFor="let country of allCountryList" [value]="country.iso_code_2">
+                  <div class="d-flex" [attr.title]="country?.name">
+                  <img src="../../../assets/images/flag/{{country.iso_code_2.toLowerCase()}}.png" width="20px" class="mr-4" />
+                  <span>+{{country.isd_code}}</span>
+                </div>
+                </ng-option>
+              </ng-select>
+            </div>
+
+          <input type="number" class="form-control  no-radius" placeholder="Enter Primary Phone Number"
+          formControlName ="phone" (keypress)="keyPressNumbers($event)">
+        </div>
+        <p class="validation-msg" *ngIf="
+          (form.controls.phone.touched) && form.controls['phone'].errors?.required">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'phone_number_is_required' | i18next }}
+        </p>
+        <p class="validation-msg" *ngIf="
+          (form.controls.phone.touched || form.controls.phone.dirty) && form.controls['phone'].errors?.pattern">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'invalid_phone_number' | i18next }}
+        </p>
+      </div>
+
+      <div *ngIf="interviewObject?.interview_type === 'VIRTUAL'" class="form-group">
+        <label>{{'candidate_email_id' | i18next}}<span class="require">*</span></label>
+        <div class="d-flex position-relative icon-preidentify">
+        <icon class="icon-bg d-flex" size="16px" name="mail_outline" type="material"></icon>
+        <input  type="text" class="form-control" formControlName="candidate_email" maxlength="254"
+             placeholder="{{ 'enter_primary_email_address' | i18next }}"
+            >
+            <p class="validation-msg"
+              *ngIf="((form.controls.candidate_email.touched && form.controls['candidate_email'].errors) || (form.controls['candidate_email'].errors))">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>{{ 'email_address_is_not_valid' | i18next }}.
+        </p>
+            
+        </div>    
+        
+    </div>
+      <div class="form-group">
+        <label>{{ 'interview_notes' | i18next }}</label>
+        <textarea class="form-control" [readonly]="true" formControlName="notes"></textarea>
+      </div>
+      <div class="form-group">
+        <label>{{ 'vendor_notes' | i18next }}</label>
+        <textarea class="form-control" formControlName="vendor_notes"></textarea>
+      </div>
+    </form>
+  </div>
+
+  <svms-sidebar-footer-ng>
+    <button
+    [disabled] = '!ScheduleOpted || (!form.valid && interviewObject?.status==="PENDING_ACCEPTANCE")'
+    type="submit" class="btn btn-success float-right" (click) = 'acceptInterview()'>
+      {{ (interviewObject?.status==='PENDING_ACCEPTANCE' ? 'accept_interview': 'confirm_interview') | i18next }}
+    </button>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

@@ -1,0 +1,28 @@
+<header class="section-header page-title-main p-24 d-flex align-items-center justify-content-between">
+  <div class="d-flex align-items-center">
+    <i class="material-icons back-arrow-icon mr-16 cursor-pointer" tooltip="Back" placement="bottom" (click)="back()">arrow_back</i>
+    <h3 class="font-weight-semibold mb-0">{{title}} </h3>
+  </div>
+  <div>
+    <button class="c-btn c-btn-success-medium"  (click)="saveVendorDistribution()">{{buttonAction}}</button>
+  </div>
+</header>
+
+<section class="section-body-content">
+  <div class="p-24">
+    <div class="c-form-group-row">
+      <div class="c-form-group">
+        <label> {{'name' | i18next}} <span class="require">*</span></label>
+        <input type="text" class="c-form-control" name="title" maxlength="100" placeholder="{{'enter_labor_category_name' | i18next}}"
+          [(ngModel)]="name">
+      </div>
+      <div class="c-form-group toggle-width toggle-panel pt-24">
+        <div class="toggle-panel-inner" [ngClass]="titleToggle?.value ? 'if-active' : 'if-inactive'">
+          <span class="status-text">{{(titleToggle?.value ? 'Active':'Inactive') | i18next}}</span>
+          <span class="toggle-switch" [ngClass]="titleToggle?.value ? 'toggle-on' : 'toggle-off'"
+            (click)="onClickToggle()"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

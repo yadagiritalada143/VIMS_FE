@@ -1,0 +1,398 @@
+@import '../../../assets/sass/abstracts/variables';
+
+.detail-wrapper {
+  background-color: $color-gray-0;
+  min-height: calc(100vh - 57px);
+}
+.description-panel {
+  max-width: 1400px;
+  margin: auto;
+
+  .card {
+    border-radius: $border-radius;
+    border: 1px solid $color-gray-30;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, .02);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: transparent;
+  }
+
+  .job-header {
+    padding: 34px 32px 22px 32px;
+
+    h3 {
+      color: $color-gray-80;
+      font-weight: $font-weight-medium;
+      a:hover{
+        text-decoration: underline;
+      }
+      span {
+        &.title {
+          color: $text-black;
+        }
+
+        &.tag {
+          background-color: $color-yellow;
+          color: $light;
+          display: inline-block;
+          font-size: 14px;
+          padding: 0 12px 0 30px;
+          border-radius: $border-radius;
+          font-weight: $font-weight-regular;
+
+          &:before {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            width: 7px;
+            height: 7px;
+            background-color: $light;
+            content: '.';
+            text-indent: -9999px;
+            overflow: hidden;
+            display: block;
+            border-radius: $rounded-circle;
+            transform: translateY(-50%);
+          }
+        }
+      }
+    }
+
+    p {
+      color: $color-gray-90;
+
+      .job-id {
+
+        ::ng-deep i {
+          color: $color-orange;
+          vertical-align: middle;
+        }
+      }
+
+      .updated {
+        ::ng-deep i {
+          color: $color-blue;
+          vertical-align: middle;
+        }
+      }
+    }
+
+    .actions {
+      top: 47px;
+      right: 32px;
+      button.btn.btn-primary {
+        display: inline-flex;
+        margin-left: 10px;
+      }
+      .edit-btn{
+        background: transparent;
+        color: var(--color-assets-primary);
+      }
+      .action-list {
+        list-style-type: none;
+        width: 245px;
+        top: 47px;
+        right: 0;
+        opacity: 0;
+        visibility: hidden;
+        transition: $transition;
+        max-height: 0;
+        z-index: 1;
+        box-shadow: 0px 12px 13px #00000014;
+        overflow: hidden;
+        border: 1px solid $color-border-secondary;
+        border-radius: $border-radius;
+
+        li {
+
+          a {
+            line-height: 24px;
+            font-weight: $font-weight-medium;
+            display: block;
+            transition: $transition;
+            cursor: pointer;
+            padding: $p12;
+
+            icon {
+              ::ng-deep i {
+                vertical-align: middle;
+              }
+            }
+
+            &:hover {
+              background-color: $color-gray-5;
+            }
+          }
+        }
+
+        &.active {
+          opacity: 1;
+          visibility: visible;
+          max-height: 400px;
+        }
+      }
+    }
+
+    .action-list {
+      list-style-type: none;
+      width: 245px;
+      top: 62px;
+      right: 0;
+      opacity: 0;
+      visibility: hidden;
+      transition: $transition;
+      max-height: 0;
+      z-index: 1;
+      box-shadow: 0px 12px 13px #00000014;
+
+      li {
+
+        a {
+          line-height: 24px;
+          font-weight: $font-weight-medium;
+          display: block;
+          transition: $transition;
+          cursor: pointer;
+
+          icon {
+            ::ng-deep i {
+              vertical-align: middle;
+            }
+          }
+
+          &:hover {
+            background-color: $color-gray-5;
+          }
+        }
+      }
+
+      &.active {
+        opacity: 1;
+        visibility: visible;
+        max-height: 400px;
+      }
+    }
+  }
+
+  .detail-nav {
+    border-bottom: 1px solid $color-border-secondary;
+
+    ul {
+      list-style-type: none;
+
+      li {
+        display: inline-block;
+        margin-right: $m8;
+
+        a {
+          display: block;
+          line-height: 45px;
+          padding: 0 $p16;
+          color: $color-dark;
+          transition: $transition;
+          position: relative;
+
+          &:after {
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            background-color: $color-blue;
+            height: 3px;
+            content: '.';
+            text-indent: -9999px;
+            overflow: hidden;
+            transition: $transition;
+            opacity: 0;
+            visibility: hidden;
+          }
+
+          &:hover {
+            &:after {
+              opacity: 1;
+              visibility: visible;
+            }
+          }
+
+          &.active {
+            &:after {
+              opacity: 1;
+              visibility: visible;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .toggle-section {
+    top: 77px;
+    right: 357px;
+    width: 26px;
+    height: 26px;
+    border-right: 1px solid $color-gray-50;
+    z-index: 17;
+    transition: $transition;
+    display: block;
+
+    icon {
+      ::ng-deep i {
+        line-height: 26px;
+      }
+    }
+  }
+
+  &.expanded {
+    margin-right: 90px;
+
+    ::ng-deep .grid-item {
+      width: 32% !important;
+
+      &:nth-child(2n) {
+        margin-right: 2% !important;
+      }
+
+      &:nth-child(3n) {
+        margin-right: 0 !important;
+      }
+    }
+
+    .job-header {
+      right: 91px;
+    }
+
+    .toggle-section {
+      right: 77px;
+    }
+  }
+}
+
+
+
+.financial-info {
+  list-style-type: none;
+
+  li {
+    width: 144px;
+    border: 1px solid $color-gray-20;
+    box-shadow: 0px 3px 16px #0000000A;
+
+    p {
+      font-size: 12px;
+    }
+  }
+}
+
+::ng-deep .overflow-box {
+  
+  ::ng-deep .table-outer {
+      width: 100%;
+      overflow: auto;
+      position: relative;
+      padding-bottom: 60px;
+
+      .table-listing {
+          min-width: 1244px;
+      }
+  }
+}
+
+::ng-deep .recent-items {
+  .item-paginator {
+    right: 0;
+    top: -48px;
+  }
+
+  ul {
+    list-style-type: none;
+
+    li {
+      width: 49%;
+      float: left;
+      border: 1px solid $color-border-primary;
+      border-radius: $border-radius;
+
+      icon {
+        vertical-align: middle;
+      }
+
+      h4 {
+        color: $text-black;
+      }
+
+      .type {
+        color: $color-blue;
+        font-size: 12px;
+      }
+      
+      .time {
+        border-radius: 15px;
+        line-height: 30px;
+        padding-left: $p8;
+        padding-right: $p8;
+        color: $light;
+
+        &.red {
+          background-color: $color-red-80;
+        }
+
+        &.blue {
+          background-color: $color-blue;
+        }
+
+        i {
+          line-height: 30px;
+        }
+      }
+
+      .other-info {
+
+        p {
+          flex: 1;
+          font-size: 12px;
+
+          span {
+            font-size: $font-primary;
+            color: $text-black;
+          }
+        }
+      }
+
+      .item-footer {
+        background-color: $color-gray-5;
+        border-top: 1px solid $color-gray-50;
+        padding: $p12 $p16;
+
+        p {
+          flex: 1;
+
+          &.posted {
+            font-size: 12px;
+          }
+        }
+
+        figure {
+          width: 26px;
+          height: 26px;
+          overflow: hidden;
+          border-radius: $border-radius;
+          vertical-align: middle;
+
+          img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+          }
+        }
+
+        span {
+          color: $text-black;
+        }
+      }
+
+      &:nth-child(2n) {
+        float: right;
+      }
+    }
+  }
+}

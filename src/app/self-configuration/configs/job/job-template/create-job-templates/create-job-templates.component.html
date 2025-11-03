@@ -1,0 +1,565 @@
+<form [formGroup]="jobTemplateForm">
+<div class="create-job-template">
+  <header class="section-header p-24 d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+      <i class="material-icons back-arrow-icon cursor-pointer" (click)="navigateBack()" tooltip="{{'Back' | i18next}}" placement="bottom">arrow_back</i>
+      <h3 class="font-weight-semibold mb-0 ml-16">{{ templateTitle + ' Job Template' | i18next }}</h3>
+    </div>
+    <button *accessControl class="c-btn c-btn-success-medium" (click)="saveJobTemplate()"
+      [disabled]="btnLoader">{{(visibility === 'isedit' ? 'Update' : 'Save')|i18next}}</button>
+  </header>
+  <section class="section-body-content">
+    <div class="p-32">
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+          <label>{{ 'title' | i18next }} <span class="require">*</span></label>
+          <input type="text" name="jobtemplatetitle" class="c-form-control" formControlName="template_name" (ngModelChange)="this.templateName.next($event)" [readonly]="visibility" placeholder="{{ 'enter_job_template_title.' | i18next }}" [ngClass]="{'error' : (jobTemplateForm?.controls['template_name']?.invalid && (jobTemplateForm?.controls['template_name']?.errors?.required || jobTemplateForm?.controls['template_name']?.errors?.pattern) && (isSubmitted || jobTemplateForm?.controls['template_name']?.touched)) || (jobTemplateInfo?.code == 0 && jobTemplateForm.controls['template_name'].valid)}">
+          <p class="error-message" *ngIf="jobTemplateInfo?.code == 0 && jobTemplateForm.controls['template_name'].valid"><i class="material-icons">error</i> {{ 'job_template_title_already_exists.' | i18next }}</p>
+          <p class="error-message" *ngIf="jobTemplateForm?.controls['template_name']?.invalid && jobTemplateForm?.controls['template_name']?.errors?.pattern && (isSubmitted || jobTemplateForm?.controls['template_name']?.touched)"><i class="material-icons">error</i> {{ 'please_enter_valid_job_title.' | i18next }}</p>
+          <p class="error-message" *ngIf="jobTemplateForm?.controls['template_name']?.invalid && jobTemplateForm?.controls['template_name']?.errors?.required && (isSubmitted || jobTemplateForm?.controls['template_name']?.touched)"><i class="material-icons">error</i> {{ 'job_template_title_is_a_required_field.' | i18next }}</p>
+          </div>
+        </div>
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+          <label>{{ 'job_category_-_title' | i18next }} <span class="require">*</span>
+            <!-- Job Category - Title / O*NET Code -->
+            <!-- <i class="info-icon material-icons ml-8"
+              tooltip="O*NET (or Occupational Information Network) codes will help align this program’s job titles to nationally recognized standard occupational classifications, which can provide a basis for rate cards. To learn more, visit onetcodeconnector.org. If not intent to use this field, select ‘Others’ in the drop down."
+              placement="right">help</i> -->
+            </label>
+          <ng-select placeholder="{{ 'select_job_category' | i18next }}" formControlName="category"
+            onkeypress="return (event.charCode > 64 && event.charCode < 91) || (event.charCode > 96 && event.charCode < 123) || event.charCode === 32 || (event.charCode >= 48 && event.charCode <= 57)"
+            (search)="this.usersearchCategory.next($event)" (change)="updateDescription($event)" [clearable]="false" (change)="updateDescription($event)"
+            [searchable]="true" [multiple]="false" [items]="jobCategoryData" bindLabel="bindLabel" [readonly]="visibility"
+            [ngClass]="{'error' : (jobTemplateForm?.controls['category']?.invalid && (jobTemplateForm?.controls['category']?.errors?.required || jobTemplateForm?.controls['category']?.errors?.pattern) && (isSubmitted || jobTemplateForm?.controls['category']?.touched))}">
+          </ng-select>
+          <p class="error-message" *ngIf="jobTemplateForm?.controls['category']?.invalid && jobTemplateForm?.controls['category']?.errors?.required && (isSubmitted || jobTemplateForm?.controls['category']?.touched)"><i class="material-icons">error</i> {{ 'job_template_category_is_required.' | i18next }}</p>
+        </div>
+      </div>
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+          <label>{{ 'job_template_code' | i18next }} <i class="info-icon material-icons"
+              tooltip="Can be used as an identifier for the job. For informational purpose only."
+              placement="right">help</i></label>
+          <input type="text" name="jobtemplatecode" class="c-form-control" formControlName="template_code" placeholder="{{'Enter Job Template Code'}}">
+        </div>
+        <div class="c-form-group">
+          <label>{{ 'labor_category' | i18next }} <span class="require">*</span> <i class="info-icon ml-8 material-icons"
+              tooltip="{{'This will associate your job template to a specific labor category. In addition,this will also help define the vendor setting for labor category association.' | i18next}}"
+              placement="right">help</i></label>
+          <ng-select placeholder="{{ 'select_labor_category' | i18next }}" [searchable]="true" formControlName="program_industry"
+            [multiple]="false" [searchable]="true" (search)="this.programIndustries.next($event)" [readonly]="visibility=='isview'" [ngClass]="{'error': (jobTemplateForm.controls['program_industry'].invalid || jobTemplateForm.controls['program_industry'].errors?.required) && (isSubmitted || jobTemplateForm.controls['program_industry'].touched)}">
+            <ng-option *ngFor="let option of industries" [value]="option?.id">
+              <span class="text-capitalize">{{ option?.name | i18next}}</span>
+            </ng-option>
+          </ng-select>
+          <p class="error-message" *ngIf="(jobTemplateForm.controls['program_industry'].invalid || jobTemplateForm.controls['program_industry'].errors?.required) && (isSubmitted || jobTemplateForm.controls['program_industry'].touched)"><i class="material-icons">error</i> {{ 'labor_category_is_required.' | i18next }}</p>
+        </div>
+        <div class="c-form-group">
+          <label>{{ 'job_level' | i18next }}</label>
+          <input type="text" name="joblevel" class="c-form-control" [readonly]="visibility" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+          formControlName="level" placeholder="{{ 'enter_job_level' | i18next }}">
+          <p class="error-message" *ngIf="jobTemplateForm.controls['level'].invalid && isSubmitted"><i class="material-icons">error</i> {{ 'job_level_must_be_between' | i18next }} 1 {{ 'to' | i18next }} 255</p>
+        </div>
+      </div>
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+          <label>{{ 'description' | i18next }}</label>
+          <!--<quill-editor [modules]="modules" [styles]="{height: '200px'}" formControlName="description" [readOnly]="visibility=='isview'"></quill-editor>-->
+          <app-quill-uploader (fileData)="getFileData($event)" exts=".pdf, .doc, .docx, .txt"
+                (quillInputEmitter)="getQuillInputText($event)" [quillInputTxt]="jobTemplateForm.value.description"
+                [isUploadBtn]="true" [uploadFileData]="jdParsingFile" [modules]="modules"
+                [readOnly]="visibility=='isview'"
+                [isParsingDone]="isJobParsingDone"
+                (dataBeforeParse)="dataBeforeParseFile($event)"
+                refName="jobs"></app-quill-uploader>
+        </div>
+      </div>
+      <app-toggle-box
+        title="job_template_allow_user_role"
+        subtitle="job_template_allow_user_role_description" isSelectedRole="true" selectboxlabel="Select User Roles" selectrequired="true" isMultiple="true"
+        placeholderLabel="Select User Roles" [items]="userRoles" (selectionChanged)="userRoleChange($event)" [isTrue]="isUserCheckBox" [selectFieldName]="'name'"
+        [patchSelectData]="userRolesPatch" [isEdit]="isEdit" [isReadOnly]="visibility=='isview'" (isToggleBtnChecked)="toggleUserCheckBox($event)">
+      </app-toggle-box>
+      <!-- <h3 class="font-weight-medium mt-32">{{ 'qualifications' | i18next }}</h3> -->
+      <app-toggle-box title="Qualifications" [isReadOnly]="visibility=='isview'" [showOnlyNgContent]="true"
+        [subtitle]="'when_enabled_the_system_will_make_qualifications_available_for_selection_on_this_job_template_and_the_jobs_created_with_this_template' | i18next" 
+        [isTrue]="jobTemplateForm?.value?.is_qualification_enabled" (isToggleBtnChecked)="checkQualification($event)">
+      <div slot="qualification">
+      <p class="small mt-4">
+        {{ 'add_the_qualification_types_which_are_to_be_used_for_this_job_template_by_pressing_the_“add_qualification_types”_below_button.' | i18next }}</p>
+      <p class="small mb-12">
+        {{ 'once_the_application_qualification_types_have_been_added_to_the_template,_you_will_then_be_able_to_select_which_qualifications_(specific_to_each_qualification_type).' | i18next }}</p>
+        <div class="Qualification-type-fields mb-24" *ngFor="let item of jobTemplateForm?.get('qualifications')?.controls;let index=index" [formGroup]="item">
+          <div class="c-form-group-row position-relative">
+            <div class="c-form-group pr-24 mb-8">
+              <div class="d-flex align-items-center justify-content-between">
+                <label>{{ item?.get('qualification_type')?.value | i18next }}</label>
+                <span class="d-flex align-items-center mb-8">
+                  <div class="checkbox-block mr-8 active d-flex align-items-center justify-content-between">
+                    <div>
+                        <label class="c-input-checkbox mb-0">
+                            <input type="checkbox" [checked]="item.get('is_qualification_type_required').value" (change)="updateQualificationRequired(item,$event.target.checked)">
+                            <span class="cb-ui"></span>
+                            <span class="cb-label">{{'mark_as_required' | i18next}}.</span>
+                        </label>
+                    </div>
+                  </div>
+                  <i class="info-icon material-icons" tooltip="{{ 'enabling_this_setting_will_make_this_qualification_type_mandatory_during_job_creation' | i18next }}." placement="left">help</i>
+                </span>
+              </div>
+              <ng-select bindLabel="name" [readonly]="visibility === 'isview'"
+              formControlName="values"
+              (search)="qualificationValuesSearch.next({type:item,term:$event?.term})"
+              [clearable]="false" [searchable]="true" [multiple]="true"
+              bindLabel="name" [loading]="item.get('loading')?.value"
+              clearAllText="Clear" placeholder="{{ 'search_values' | i18next }}" ngDefaultControl>
+              <ng-option *ngIf="!item.get('data')?.value && !item.get('loading')?.value" disabled>
+                <div>{{ 'type_to_search' | i18next }} {{ item.get('qualification_type')?.value }}</div>
+              </ng-option>
+              <ng-option *ngIf="!item.get('data')?.value && item.get('loading')?.value" disabled>
+                <div>{{ 'loading...' | i18next }}</div>
+              </ng-option>
+              <div *ngIf="item.get('data')?.value && !item.get('loading')?.value">
+                <ng-option *ngFor="let option of item.get('data')?.value" [value]="option">
+                  {{ option?.name }}
+                </ng-option>
+              </div>
+            </ng-select>
+            </div>
+            <i _ngcontent-bid-c511="" class="material-icons delete-qulification-field cursor-pointer position-absolute" (click)="removeQualification(index)">highlight_off</i>
+          </div>
+          <!-- this is the ui start for dropdown selected item -->
+          <div class="selected-items-ui d-flex flex-wrap  mb-24" [ngClass]="{'disableDiv' : visibility === 'isview'}">
+            <div class="selected-item p-8" *ngFor="let c of item.get('values')?.value;let i = index">
+              <div class="d-flex justify-content-between align-items-center">
+                <p class="small font-weight-medium">
+                  {{c?.name}}
+                </p>
+                <span class="cursor-pointer" (click)="removeQualificationValues(item,i)">
+                  <i class="material-icons">close</i>
+                </span>
+              </div>
+              <div class="item-code mt-4">{{c?.code}}</div>
+              <div class="d-flex justify-content-left align-items-center mt-8">
+                  <span class="cursor-pointer">
+                    <div class="toggle-panel-inner remove_style">
+                      <span class="toggle-switch" [ngClass]="c?.is_required ? 'toggle-on' : 'toggle-off'"
+                      (click)="c.is_required = ! c?.is_required"></span>
+                    </div>
+                  </span>
+                  <span class="small pl-8">
+                    <span *ngIf="!c?.is_required">{{ 'optional' | i18next }}</span>
+                    <span *ngIf="c?.is_required">{{ 'required' | i18next }}</span>
+                  </span>
+                  <span class="cursor-pointer w-100" [tooltip]="'locking_this_qualification_value_on_the_template_will_ensure_that_it_cannot_be_removed_or_edited_during_job_creation' | i18next" placement="right">
+                    <icon type="symbols" [color]="c?.is_locked ? 'blue' : 'grey'" size="16px" [name]="c?.is_locked ? 'lock' : 'lock_open'" class="float-right" (onClick)="c.is_locked = !c?.is_locked" variationSettings="
+                        'FILL' 1,
+                        'wght' 400,
+                        'GRAD' 0,
+                        'opsz' 24"></icon>
+                  </span>
+              </div>
+              <div *ngIf="item.get('qualification_type')?.value === 'Skill' || item.get('qualification_type')?.value === 'Speciality'" class="strength w-100">
+                <div class="pt-4 strength-bar">
+                  <ul>
+                    <li *ngFor="let r of [1,2,3];let index = index" (click)="clickOnRatings(c,r)"
+                      [ngClass]="{'active': c.level >= r}">
+                    </li>
+                  </ul>
+                </div>
+                <p class="x-small text-right">
+                  <span>
+                    <span *ngIf="c.level == 1">{{ 'beginner' | i18next }}</span>
+                    <span *ngIf="c.level == 2">{{ 'intermediate' | i18next }}</span>
+                    <span *ngIf="c.level == 3">{{ 'expert' | i18next }}</span>
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- dropdown selected item ui end here -->
+        </div>
+        <button class="c-btn c-btn-add d-flex align-items-center mr-8 mb-12"
+        (click)="qualificationModalOpen($event)">
+        <i class="material-icons mr-4">add</i>{{'Add Qualification Types' | i18next}}</button>
+      </div>
+      </app-toggle-box>
+
+      <!-- commenting as part of V2M-12778 -->
+      <!-- <app-toggle-box title="Background Checks"
+        subtitle="Select the background checks that pertain to this job template." checkbox="true"
+        [patchCheckBoxData]="backgroundcheckData" checkBoxFieldName="name" checkBoxIsChecked="is_enabled" (checkBoxChanged)="modifyBGcheck($event)"
+        (isToggleBtnChecked)="toggleBGCheckBox($event)" [isTrue]="isbackgroundChecks" isMultipleCheckBox="true" [isReadOnly]="visibility=='isview'"
+        ></app-toggle-box> -->
+      <app-toggle-box title="Onboarding Checklist"
+        subtitle="Select the onboarding checklist that pertain to this job template. The tasks within each checklist can be found in the 'Checklists' section of the setting menu." checkbox="true"
+        [patchCheckBoxData]="checkListData" checkBoxFieldName="name" checkBoxIsChecked="is_enabled" (checkBoxChanged)="modifyOnboarding($event)" selectrequired="true"
+        (isToggleBtnChecked)="toggleCheckList($event)" [isTrue]="isCheckList" [isReadOnly]="visibility=='isview'"></app-toggle-box>
+        <h3 class="font-weight-medium mt-32">{{ 'default_fields' | i18next }}</h3>
+      <p class="small mb-12">
+        {{ 'fd_fields_default_description_1' | i18next }}</p>
+        <div class="Qualification-type-fields mb-24" *ngFor="let item of jobTemplateForm?.get('foundational_data')?.controls;let index=index" [formGroup]="item">
+          <div class="c-form-group-row position-relative">
+            <div class="c-form-group pr-24 mb-8">
+              <div class="d-flex align-items-center justify-content-between">
+                <label>{{ item?.get('fd_type_name')?.value | i18next }}</label>
+                <div class="d-flex mb-4">
+                  <toggle-button class="c-toggle-button-switch" [disabled]="!item.get('values')?.value" [checked]="item?.get('read_only')?.value" (changed)="updateFDReadOnly(item, item?.get('read_only')?.value)"></toggle-button>
+                  <span class="ml-8">{{ 'read_only' | i18next }}</span>
+                </div>
+              </div>
+              <ng-select [readonly]="visibility === 'isview'"
+              formControlName="values"
+              (clear)="clearFD(item)"
+              (search)="fdValuesSearchValues.next({type:item,term:$event?.term})"
+              [clearable]="true" [searchable]="true" [multiple]="false"
+              bindLabel="name" [loading]="item.get('loading')?.value"
+              clearAllText="Clear" placeholder="{{ 'search_values' | i18next }}" ngDefaultControl>
+              <ng-option *ngIf="!item.get('data')?.value && !item.get('loading')?.value" disabled>
+                <div>{{ 'type_to_search' | i18next }} {{ item.get('fd_type_name')?.value }}</div>
+              </ng-option>
+              <ng-option *ngIf="!item.get('data')?.value && item.get('loading')?.value" disabled>
+                <div>{{ 'loading...' | i18next }}</div>
+              </ng-option>
+              <div *ngIf="item.get('data')?.value && !item.get('loading')?.value">
+                <ng-option *ngFor="let option of item.get('data')?.value" [value]="option">
+                  {{ option?.name + (option?.code ? " - " + option?.code : '') }}
+                </ng-option>
+              </div>
+            </ng-select>
+            </div>
+            <i _ngcontent-bid-c511="" class="material-icons delete-qulification-field cursor-pointer position-absolute" (click)="removeFD(index)">highlight_off</i>
+          </div>
+        </div>
+        <button class="c-btn c-btn-add d-flex align-items-center mr-8 mb-12 mt-12"
+        (click)="foundationalModalOpen($event)">
+        <i class="material-icons mr-4">add</i>{{'add_master_data_types' | i18next}}</button>
+      <h3 class="font-weight-medium mt-32">{{ 'other_settings' | i18next }}</h3>
+      <app-toggle-box title="Limit Submission “Available Start Date” per Job “Start Date”" [isReadOnly]="visibility=='isview'"
+        subtitle="By default, the system allows a submission’s “Available Start Date” to be any date. When this setting is enabled, the allowable dates for the “Available Start Date” on submitted candidates is limited to a maximum number of days before the job “Start Date” based on the defined threshold."
+        (isToggleBtnChecked)="checkLimitSubmissionStartDate($event)" [isTrue]="jobTemplateForm?.value?.is_start_date_limit" [subItem]="true" subItemTitle="Define Threshold" [showInputBox]="true">
+        <div slot="limit-submission" class="tab-right-content d-flex justify-content-end">
+          <input type="number" formControlName="threshold" class="c-form-control">
+          <input type="text" formControlName="threshold_unit" class="c-form-control" [readOnly]="true">
+        </div>
+        <div slot="limit-submission" class="tab-right-content d-flex justify-content-end">
+          <p class="error-message" *ngIf="(jobTemplateForm?.controls['threshold'].invalid && (isSubmitted || jobTemplateForm?.controls['threshold'].touched))"><i class="material-icons">error</i> {{ 'Value must be greater than 0' | i18next }}</p>
+        </div>
+      </app-toggle-box>
+      <app-toggle-box *ngIf="showResumeField" title="resume_mandatory" [isReadOnly]="visibility=='isview'"
+      subtitle="template_resume_mandatory_desc" [isTrue]="isResumeMandatory" (isToggleBtnChecked)="checkResumeMandatory($event)">
+      </app-toggle-box>
+      <app-toggle-box title="Allow Submissions Above Max Bill Rate" [isReadOnly]="visibility=='isview'"
+        subtitle="When enabled the system will allow vendors to submit candidates above the Max Bill Rate on any Jobs created from this template." [isTrue]="visibility && isMaxBillRate" (isToggleBtnChecked)="checkBillRate($event)">
+      </app-toggle-box>
+      <app-toggle-box title="Allow Expenses" [isReadOnly]="visibility=='isview'"
+        subtitle="When enabled the system will show the 'Expense Allowed' option on the job creation screen. This will be defaulted to 'YES'." [isTrue]="allowExpense" [isSubItemToggleTrue]="allowExpenseEdit"  subItem="true" subItemTitle="Allow Users to Edit ‘Expense Allowed’" subItemDescription="When enabled users will be able to edit the 'Expense Allowed' option during job and offer creation screens."
+        (isToggleBtnChecked)="checkAllowExpense($event)" (isToggleSubItemBtnChecked)="checkAllowExpenseEdit($event)">
+      </app-toggle-box>
+      <app-toggle-box title="Allow Express Offer" [isReadOnly]="visibility=='isview'"
+        subtitle="When enabled, the system will automatically create and accept an offer for each submitted candidate, and if no mandatory onboarding items are configured for this template, an assignment will be automatically created and activated for that candidate." [isTrue]="jobTemplateForm?.value?.is_allow_express_offer" (isToggleBtnChecked)="checkAllowExpressOffer($event)">
+      </app-toggle-box>
+      <h3 class="font-weight-medium">{{ 'rate_factor' | i18next }}</h3>
+      <p class="mb-16">
+        {{ 'select_the_rate_factors_that_will_default_for_this_job_template._rate_factors_drive_how_rates_will_be_calculated_(ex._overtime).' | i18next }}
+      </p>
+      <div class="pt-8 mb-32">
+        <div class="c-form-group-row">
+          <div class="c-form-group mb-0 pb-0">
+            <label>{{ 'select_rate_factors' | i18next }}</label>
+            <ng-select placeholder="{{ 'select_rate_factor' | i18next }}" [readonly]="visibility === 'isview'" multiple="true"
+            [items]="rateFactor" bindLabel="name" formControlName="rates" [searchable]="true" (search)="ratecardsearch.next($event)" (clear)="getAllRatefactorList()">
+            </ng-select>
+          </div>
+        </div>
+        <!-- rate factor selected view goes here -->
+        <div class="py-8 px-16 mt-16 border shadow rounded-sm bg-white" *ngFor="let rate of jobTemplateForm.value.rates;let i=index" [ngClass]="{'disableDiv': visibility=='isview'}">
+          <div class="d-flex align-items-center justify-content-between">
+            <p class="text-black font-weight-medium">{{rate?.name}}</p>
+            <span class="d-flex align-items-center">
+              <i class="delete-factor mr-8 material-icons cursor-pointer"
+                (click)="removeRateFactor(rate,i)">delete_outline</i>
+              <i class="toggle-factor cursor-pointer material-icons" (click)="toggleView(rate)">{{rate?.iscollapse ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}}</i>
+            </span>
+          </div>
+          <div class="mt-16" *ngIf="rate?.iscollapse" [hidden]="rate?.hide_rate_factors">
+            <p class="font-weight-medium text-black mt-16 mb-16">{{rate?.name}} {{ 'bill_rate' | i18next }}</p>
+            <div class="row no-gutters" [hidden]="rate?.hide_rate_factors" [ngClass]="{'disableDiv': !rate?.edit_rate_factors}">
+              <ng-container *ngFor="let rb of rate?.bill_rate;let i = index">
+              <div class="col-md-2">
+                <div class="form-group">
+                  <label>{{ 'factor' | i18next }}</label>
+                  <input [disabled]="(!rate?.edit_rate_factors || rate?.abbreviation?.toLowerCase() === 'st')" type="number" min="1" max="10" class="form-control" [value]="rb?.factor" (change)="factorChange($event, rb)">
+                  <!-- error message goes here -->
+                  <p class="error-message" *ngIf="rb?.is_error"><i class="material-icons">error</i> {{ 'the_factor_should_be_1_-_10.' | i18next }}</p>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>{{ 'rate' | i18next }}</label>
+                  <input disabled type="text" class="form-control text-capitalize" value="{{getRate(rb?.rate || rb?.rate_type)}}">
+                </div>
+              </div>
+              <div class="col-md-auto px-8" *ngIf="i===0 && rb?.bill_rate?.length>=2">
+                <label>&nbsp;</label>
+                <div class="radio-group" (click)="addRate(rb)">
+                  <div class="radio-container" [ngClass]="{'disable': !rb?.edit_rate_factors}">
+                    <input type="radio" checked />
+                    <span class="checkmark align-justify-center">
+                      <i class="material-icons">add</i>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              </ng-container>
+            </div>
+            <p class="font-weight-medium text-black mt-16 mb-16" [hidden]="rate?.hide_rate_factors">{{rate.name}}</p>
+            <div class="row no-gutters" [hidden]="rate?.hide_rate_factors" [ngClass]="{'disableDiv': !rate?.edit_rate_factors}">
+            <ng-container *ngFor="let rp of rate?.pay_rate">
+              <div class="col-md-2">
+                <div class="form-group">
+                  <label>{{ 'factor' | i18next }}</label>
+                  <input [disabled]="(!rate?.edit_rate_factors || rate?.abbreviation?.toLowerCase() === 'st')" type="number" min="1" max="10" class="form-control" [value]="rp?.factor" (change)="factorChange($event, rp)">
+                  <!-- error message goes here -->
+                  <p class="error-message" *ngIf="rp?.is_error"><i class="material-icons">error</i> {{ 'the_factor_should_be_1_-_10.' | i18next }}</p>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>{{ 'rate' | i18next }}</label>
+                  <input disabled type="text" class="form-control text-capitalize" value="{{getRate(rp?.rate || rp?.rate_type)}}">
+                </div>
+              </div>
+              <div class="col-md-auto px-8" *ngIf="i===0 && rate?.pay_rate?.length>=2">
+                <label>&nbsp;</label>
+                <div class="radio-group" (click)="addRate(rp)">
+                  <div class="radio-container" [ngClass]="{'disable': !rate?.edit_rate_factors}">
+                    <input type="radio" checked />
+                    <span class="checkmark align-justify-center">
+                      <i class="material-icons">add</i>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h3 class="font-weight-medium">{{ 'distribute_to_vendors' | i18next }}</h3>
+      <div class="c-form-group-row pt-8" [ngClass]="{'disableDiv': visibility=='isview'}">
+        <div class="one-col c-form-group">
+          <label>{{ 'set_submission_limit_for_all_vendors' | i18next }} <span class="require">*</span> <i
+              class="ml-8 info-icon material-icons" tooltip="{{'Submission limit must be between 1 to 65535' | i18next}}"
+              placement="right">help</i></label>
+          <input type="number" class="c-form-control" formControlName="submission_limit_vendor" [ngClass]="{'error' : (jobTemplateForm?.controls['submission_limit_vendor'].invalid && (isSubmitted || jobTemplateForm?.controls['submission_limit_vendor'].touched))}">
+          <p class="error-message" *ngIf="(jobTemplateForm?.controls['submission_limit_vendor'].invalid && (isSubmitted || jobTemplateForm?.controls['submission_limit_vendor'].touched))"><i class="material-icons">error</i> {{ 'submission_limit_must_be_between_1_to_65535' | i18next }}</p>
+        </div>
+      </div>
+      <div class="c-form-group-row pt-8" [ngClass]="{'disableDiv': visibility=='isview'}">
+        <div class="one-col c-form-group">
+          <label>{{ 'distribution_type' | i18next }} <span class="require">*</span></label>
+          <ng-select  placeholder="{{ 'select_value' | i18next }}" [clearable]="false"
+            [multiple]="false" [searchable]="true" (change)="selectDistribution($event)" formControlName="distribution_type"
+            [ngClass]="{'error' : (jobTemplateForm?.controls['distribution_type'].invalid && (isSubmitted || jobTemplateForm?.controls['distribution_type'].touched))}">
+            <ng-option value="is_automatic_distribution">
+              <span class="text-capitalize">{{ 'automatic_distribution' | i18next}}</span>
+            </ng-option>
+            <ng-option value="is_tiered_distribute_schedule">
+              <span class="text-capitalize">{{ 'tiered_distribution_schedule' | i18next}}</span>
+            </ng-option>
+            <ng-option value="is_manual_distribution_job_submit">
+              <span class="text-capitalize">{{ 'manual_distribution_after_job_submit' | i18next}}</span>
+            </ng-option>
+          </ng-select>
+          <p class="error-message" *ngIf="(jobTemplateForm?.controls['distribution_type'].invalid && (isSubmitted || jobTemplateForm?.controls['distribution_type'].touched))"><i class="material-icons">error</i> {{ 'distribution_type_is_required' | i18next }}</p>
+        </div>
+         <div *ngIf="is_tiered_distribute_schedule || is_automatic_distribution" class="one-col c-form-group"  [ngClass]="{'disableDiv': visibility=='isview'}">
+          <label>{{ 'distribution_method' | i18next }} <span class="require">*</span></label>
+          <ng-select placeholder="{{ 'select_value' | i18next }}" [clearable]="false"
+            [multiple]="false" [searchable]="true" (change)="setDistributionMethod($event)" formControlName="distribution_method"
+            [ngClass]="{'error' : (jobTemplateForm?.controls['distribution_method'].invalid && (isSubmitted || jobTemplateForm?.controls['distribution_method'].touched))}">
+            <ng-option value="automatic_distribution_upon_submit">
+              <span class="text-capitalize">{{ 'distribute_upon_submit' | i18next}}</span>
+            </ng-option>
+            <ng-option value="automatic_distribution_upon_final_approval">
+              <span class="text-capitalize">{{ 'distribute_upon_final_approval' | i18next}}</span>
+            </ng-option>
+          </ng-select>
+          <p class="error-message" *ngIf="(jobTemplateForm?.controls['distribution_method'].invalid && (isSubmitted || jobTemplateForm?.controls['distribution_method'].touched))"><i class="material-icons">error</i> {{ 'distribution_method_is_required' | i18next }}</p>
+        </div>
+      </div>
+      <div class="pt-8" *ngIf="is_tiered_distribute_schedule" [ngClass]="{'disableDiv': visibility=='isview'}">
+        <div class="c-form-group-row">
+          <div class="c-form-group mb-0">
+            <label>{{ 'distribution_schedule' | i18next }} <span class="require">*</span></label>
+            <ng-select formControlName="distribute_schedule" [clearable]="false" [searchable]="true" [multiple]="false"
+              placeholder="{{ 'select_distribution_schedule' | i18next }}"
+              [items]="distributionScheduleList?.distribution_schedules" bindLabel="name"
+              (change)="distributionScheduleSelected(jobTemplateForm.value.distribute_schedule)" ngDefaultControl
+              [ngClass]="{'error' : (jobTemplateForm?.controls['distribute_schedule'].invalid && (isSubmitted || jobTemplateForm?.controls['distribute_schedule'].touched))}"
+              >
+            </ng-select>
+            <p class="error-message" *ngIf="(jobTemplateForm?.controls['distribute_schedule'].invalid && (isSubmitted || jobTemplateForm?.controls['distribute_schedule'].touched))"><i class="material-icons">error</i> {{ 'distribution_schedule_is_required' | i18next }}</p>
+          </div>
+        </div>
+
+        <div *ngFor="let vendorSchedule of vendorsList; let ind = index">
+          <p class="text-dark mt-16 font-weight-medium" *ngIf="vendorSchedule?.schedule_unit==='IMMEDIATE'">{{ 'immediately_release_to' | i18next }}</p>
+          <div class="d-flex flex-wrap align-items-center" *ngIf="vendorSchedule?.schedule_unit==='IMMEDIATE'">
+            <div class="badge badge-blue mt-12 mr-8" *ngFor="let item of vendorSchedule?.vendors; let vIndex= index">
+              <span> {{item?.vendor?.name}} </span>
+              <span>
+                <i (click)="deleteVendor(ind, 'vendors', vIndex)" class="material-icons d-flex ml-8 cursor-pointer" cuClass="d-flex">cancel
+                </i>
+              </span>
+            </div>
+          </div>
+          <div class="form-group mt-16 mb-0" (clickOutside)="vendorSearchList = false;searchInput.value= ''"
+          *ngIf="vendorSchedule?.schedule_unit==='IMMEDIATE'"
+          (mouseLeave)="vendorsList[0].vendorSearch = ''">
+            <label>{{ 'add_more_vendors' | i18next }}</label>
+            <input type="text" #searchInput [debounce]="500"
+            (debounceChange)="searchVendor(searchInput.value, 'IMMEDIATE')" class="form-control"  placeholder="{{ 'search_more_vendors' | i18next }}" />
+            <!-- autocomplete ui goes here -->
+            <div class="autocomplete-items" *ngIf="vendorsList.length > 0 && searchInput.value">
+              <div *ngFor="let item of (vendorsList[0]?.vendorSearch || [])"
+              (click)="addMoreVendor(item, vendorsList[0]?.id)">
+              {{item?.vendor?.name}}
+          </div>
+            </div>
+
+          </div>
+          <p class="text-dark mt-16 font-weight-medium" *ngIf="vendorSchedule?.schedule_unit!=='IMMEDIATE'">
+            {{ 'after_immediate_distribution_,_distribute_job_after' | i18next }} {{vendorSchedule?.schedule_value}}
+            {{vendorSchedule?.schedule_unit}}
+          </p>
+          <div class="d-flex flex-wrap align-items-center" *ngIf="vendorSchedule?.schedule_unit!=='IMMEDIATE' &&(vendorSchedule?.vendors?.length > 0 || vendorSchedule?.vendor_groups?.length > 0 )">
+            <div class="d-flex flex-wrap align-items-center">
+              <div class="badge badge-blue mt-12 mr-8" *ngFor="let item of vendorSchedule?.vendors;let vIndex= index">
+                {{item?.vendor?.name}}
+                <i (click)="deleteVendor(ind, 'vendors', vIndex)" class="material-icons d-flex ml-8  cursor-pointer">cancel</i>
+              </div>
+              <div class="badge badge-blue mt-12 mr-8" *ngFor="let item of vendorSchedule?.vendor_groups">
+                {{item?.name}}
+              </div>
+            </div>
+          </div>
+          <div class="form-group mt-16 mb-0" (clickOutside)="vendorSearchList = false;vendorSchedule.searchValue = ''"
+          *ngIf="vendorSchedule?.schedule_unit !== 'IMMEDIATE'" (mouseLeave)="vendorsList = [];">
+            <label>{{ 'add_more_vendors' | i18next }}</label>
+            <input [(ngModel)]="vendorSchedule.searchValue" [ngModelOptions]="{standalone: true}"
+            [debounce]="500"
+            (debounceChange)="searchVendor(vendorSchedule.searchValue, vendorSchedule.id)"
+            type="text" class="form-control position-relative px-32" maxlength="254" type="text"
+            class="form-control"
+            placeholder="{{ 'search_more_vendors' | i18next }}" />
+            <div class="autocomplete-items" *ngIf="vendorsList.length > 0 && vendorSchedule.searchValue">
+              <div *ngFor="let item of (vendorSchedule?.vendorSearch || [])"
+              (click)="addMoreVendor(item, vendorSchedule.id)">
+              {{item?.vendor?.name}}
+              </div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap align-items-center">
+            <div class="badge badge-light mt-12" *ngFor="let item of vendorSchedule?.moreVendors;let vIndex = index">
+              {{item?.vendor?.name}}
+              <i (click)="deleteVendor(ind, 'moreVendors', vIndex)" class="material-icons d-flex ml-8  cursor-pointer">cancel</i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h3 class="font-weight-medium mt-8">{{ 'associations' | i18next }}</h3>
+      <div class="c-form-group-row">
+        <div class="c-form-group" [ngClass]="{'disableDiv': visibility=='isview'}">
+          <hierarchy-treeview
+          [mandatory]="true"
+          [treeInput]="hierarchyData"
+          [allowDefaultSelection]="true"
+          [selected]="defaultHierarchy"
+          (changed)="selectHierarchy($event)"
+          [disabled]="visibility=='isview'"
+          ></hierarchy-treeview>
+          <p class="error-message hierarchy-error" *ngIf="selectedIDs?.length==0 && isSubmitted"><i class="material-icons">error</i>{{ 'hierarchy_is_required.' | i18next }}</p>
+        </div>
+      </div>
+      <div *ngIf="showJobType" class="c-form-group-row">
+        <div class="c-form-group" [ngClass]="{'disableDiv': visibility=='isview'}">
+          <label>{{'job_type' | i18next}}<i class="ml-8 info-icon material-icons" tooltip="{{'job_type_desc' | i18next}}"
+              placement="right">help</i></label>
+          <ng-select multiple="true" [items]="jobTypeItems" placeholder="{{'select_values' | i18next }}" formControlName="job_type"  bindLabel="label"
+          bindValue="value" ></ng-select>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</form>
+<app-svms-modal title="Select Qualification Types" [visibility]="addQualificationVisibility" (onClose)="qualificationModalClose()">
+  <app-svms-modal-body>
+      <div class="c-search-panel-wrapper mb-16 position-relative">
+          <div class="c-search-panel position-absolute">
+              <div class="position-relative" placement="top">
+                  <input type="search" [placeholder]="'Search..' | i18next" (keyup)="qualificationSearch.next(searchtermQualification)" [(ngModel)]="searchtermQualification" [ngModelOptions]="{standalone: true}" (ngModelChange)="clearQualificationSearch($event)">
+                  <i class="material-icons">search</i>
+              </div>
+          </div>
+      </div>
+      <div class="c-form-group-row">
+          <div class="c-form-group">
+              <div *ngFor="let qualification of qualification_types;let i = index">
+                  <div class="checkbox-block active d-flex justify-content-between px-12 py-16">
+                      <div class="mr-24">
+                          <label class="c-input-checkbox mb-0">
+                              <input [checked]="qualification?.selected" type="checkbox" (change)="qualificationSelection(qualification)">
+                              <span class="cb-ui"></span>
+                              <span class="cb-label">{{qualification?.name}}</span>
+                          </label>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </app-svms-modal-body>
+  <app-svms-modal-footer>
+      <div class="text-right">
+          <button class="c-btn c-btn-primary-medium mt-4" (click)="addQualifications()">{{'Add' | i18next}}</button>
+      </div>
+  </app-svms-modal-footer>
+</app-svms-modal>
+
+<app-svms-modal title="select_master_data_types" [visibility]="templateFoundationalData.modal_visible" (onClose)="foundationalModalClose()">
+  <app-svms-modal-body>
+      <div class="c-search-panel-wrapper mb-16 position-relative">
+          <div class="c-search-panel position-absolute">
+              <div class="position-relative" placement="top">
+                  <input type="search" [placeholder]="'Search..' | i18next" [(ngModel)]="templateFoundationalData.search_qualification_type" [ngModelOptions]="{standalone: true}">
+                  <i class="material-icons">search</i>
+              </div>
+          </div>
+      </div>
+      <div class="c-form-group-row">
+          <div class="c-form-group">
+              <div *ngFor="let fd of foundationalDataSearch;let i = index">
+                  <div class="checkbox-block active d-flex justify-content-between px-12 py-16">
+                      <div class="mr-24">
+                          <label class="c-input-checkbox mb-0">
+                              <input [checked]="fd?.selected" type="checkbox" (change)="fdSelection(fd)">
+                              <span class="cb-ui"></span>
+                              <span class="cb-label">{{fd?.name}}</span>
+                          </label>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </app-svms-modal-body>
+  <app-svms-modal-footer>
+      <div class="text-right">
+          <button class="c-btn c-btn-primary-medium mt-4" (click)="addFdTypes()">{{'Add' | i18next}}</button>
+      </div>
+  </app-svms-modal-footer>
+</app-svms-modal>

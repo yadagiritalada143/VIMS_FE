@@ -1,0 +1,99 @@
+<svms-sidebar title="{{ 'add_contact' | i18next }}" size="small" [dataVisibility]="visiblity" (onClose)="sideBaClose()">
+  <form [formGroup]="contactForm" >
+    <svms-sidebar-body>
+      <div class="p-24">
+        <div class="form-group">
+          <label>
+            {{ 'contact_name' | i18next }} <span class="require">*</span>
+          </label>
+          <input formControlName="contact_name" type="text" class="form-control" placeholder="{{ 'contact_person_name' | i18next }}" />
+          <p *ngIf="contactForm.get('contact_name').touched &&
+                (contactForm.get('contact_name').errors?.pattern || contactForm.get('contact_name').errors?.required || contactForm.get('contact_name').invalid)
+              " class="validation-msg">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'contact_name_can_not_be_blank' | i18next }}.
+            </p>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>
+                {{ 'email' | i18next }}
+              </label>
+              <input formControlName="contact_email" type="text" class="form-control"
+                placeholder="{{ 'contact_person_email_add.' | i18next }}" />
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>
+                {{ 'title' | i18next }}
+              </label>
+              <input formControlName="title" type="text" class="form-control"
+                placeholder="{{ 'contact_person_title' | i18next }}" />
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-9">
+            <div class="form-group">
+              <label>
+               {{ 'phone_number' | i18next }} <span class="require">*</span>
+              </label>
+              <div class="d-flex align-items-center country-searchable">
+                <ng-select [searchable]="true" [clearable]="false" [(ngModel)]="contactForm.value.phoneFormat" ngDefaultControl formControlName="phoneFormat"
+                  >
+                  <ng-option *ngFor="let country of allCountryList" [value]="country.iso_code_2">
+                    <img src="../../../assets/images/flag/{{country.iso_code_2.toLowerCase()}}.png" width="20px" class="mr-4" />
+                    <span>+{{country.isd_code}}</span>
+                  </ng-option>
+                </ng-select>
+                <input formControlName="contact_phone" type="number" class="form-control" [pattern]="'^[0-9]{10}$'" placeholder="{{ 'contact_person_phone_number' | i18next }}"
+                  [ngClass]="{'error': contactForm.controls['contact_phone'].invalid && (contactForm.controls['contact_phone'].dirty || contactForm.controls['contact_phone'].touched)
+                }">
+              </div>
+              <p *ngIf="contactForm.get('contact_phone').touched &&
+                (contactForm.get('contact_phone').errors?.pattern || contactForm.get('contact_phone').errors?.required || contactForm.get('contact_phone').invalid)
+              " class="validation-msg">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'phone_number_is_invalid' | i18next }}.
+            </p>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>
+                {{ 'ext' | i18next }}
+              </label>
+              <input formControlName="ext" type="text" class="form-control" placeholder="1245" />
+            </div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end">
+          <div class="d-flex align-items-center">
+            <input formControlName="is_primary" (click)="checkPrimary($event)" type="checkbox">
+            <p class="pl-12">{{ 'primary_contact' | i18next }}</p>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end">
+          <div class="d-flex align-items-center">
+            <p *ngIf="isPrimaryExist" class="validation-msg">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'another_contact_already_selected_as_primary_contact' | i18next }}.
+            </p>
+          </div>
+        </div>
+      </div>
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+      <div class="d-flex align-items-center justify-content-between">
+        <button (click)="sideBaClose()" type="button" class="btn btn-outline-secondary">
+          {{ 'cancel' | i18next }}
+        </button>
+        <button type="button" [disabled]="contactForm.invalid || isPrimaryExist" (click)="contactSubmit(index)" class="btn btn-primary">
+          {{ 'save' | i18next }}
+        </button>
+      </div>
+    </svms-sidebar-footer>
+  </form>
+</svms-sidebar>

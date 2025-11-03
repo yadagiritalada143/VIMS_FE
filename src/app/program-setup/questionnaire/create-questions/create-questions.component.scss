@@ -1,0 +1,327 @@
+@import '../../../../assets/sass/abstracts/variables';
+
+.inactive{
+    opacity: 0.2;
+}
+.active {
+  opacity: 1 !important;
+}
+.sidebar-height {
+    min-height: calc(100vh - 122px);
+    text-align: center;
+    padding-left: $p24;
+    padding-right: $p24;
+    .disableDiv{
+        pointer-events:none;
+      }
+      
+    .question-type-list {
+        list-style-type: none;
+        text-align: center;
+
+        li {
+            display: inline-block;
+            width: 137px;
+            margin: $m4;
+            border: 1px solid #EBEEF3;
+            background-color: $light;
+            padding: $p8;
+            transition: $transition;
+            border-radius: $border-radius;
+
+            a {
+                display: block;
+
+                &:hover {
+                    
+                    p {
+                        color: $color-assets-primary;
+                    }
+                }
+            }
+
+            &:hover {
+                border-color: $color-assets-primary;
+                box-shadow: 0 3px 5px #0000001D;
+            }
+
+            &.active {
+                border-color: $color-assets-primary;
+                box-shadow: 0 3px 5px #0000001D;
+
+                a {
+                    p {
+                        color: $color-assets-primary;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.field-type {
+    background-color: $color-gray-10;
+    border: 1px solid $color-gray-30;
+    padding: $p4;
+
+    p {
+        color: $color-gray-90;
+    }
+
+    button {
+        background-color: #536476;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        color: $light;
+        font-size: 12px;
+        font-weight: $font-weight-medium;
+        padding: 6px 10px;
+        border-radius: $border-radius;
+    }
+}
+
+.toggle-group {
+    .toggle {
+
+        icon {
+            ::ng-deep i {
+                transition: $transition;
+                color: #7F92A3;
+            }
+        }
+        &.if-active {
+            icon {
+                ::ng-deep i {
+                    color: #C20712;
+                }
+            } 
+        }
+    }
+}
+
+.fields {
+   .form-group-row {
+       &:first-child {
+           .remove-btn {
+               pointer-events: none;
+           }
+       }
+   } 
+}
+
+.dependend-wrapper {
+    border: 1px solid #EAECF0;
+    padding: $p24;
+}
+
+.dropdown-table {
+    border: 1px solid #EBEEF3;
+
+    tr {
+        td {
+            padding: $p4 $p8;
+            height: 40px;
+            width: 6.66%;
+            color: #7F92A3;
+
+            &:first-child {
+                width: 80%;
+                border-right: 1px solid #EBEEF3;
+            }
+
+            &:nth-child(2), &:nth-child(3) {
+                border-right: 1px solid #EBEEF3;
+            }
+
+            .disabled {
+                opacity: .6;
+            }
+        }
+    }
+}
+.add-field {
+    background-color: #F6FAFD;
+    border: 1px solid #EBEEF3;
+    text-align: center;
+    padding: $p24;
+
+    button {
+        background-color: $light;
+        width: 57px;
+        height: 57px;
+        border-radius: $rounded-circle;
+        box-shadow: 0px 3px 6px #00000029;
+        border: 0;
+        outline: 0;
+        cursor: pointer;
+    }
+}
+
+.tooltip-modal {
+    position: absolute;
+    top: 50%;
+    right: 11.5%;
+    transform: translateY(-50%);
+    width: 470px;
+    background-color: $light;
+    padding: $p24;
+    border-radius: $border-radius;
+    z-index: 100001;
+    transition: $transition;
+    opacity: 0;
+    visibility: hidden;
+
+    &.active {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+.tooltip-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #3C3D4B;
+    opacity: 0;
+    z-index: 10000;
+    visibility: hidden;
+
+    &.active {
+        opacity: .69;
+        visibility: visible;
+    }
+}
+
+.field-list {
+    list-style-type: none;
+
+    li {
+        border: 1px solid $color-gray-30;
+        margin: $m4 0;
+
+        .del-btn {
+            float: left;
+            border-right: 1px solid $color-gray-30;
+            padding: 14px $p12 10px $p12;
+
+            button {
+                border: 0;
+                outline: none;
+                background-color: transparent;
+
+                icon {
+                    ::ng-deep i {
+                        color: #EB445A;
+                    }
+                }
+            }
+        }
+
+        .placeholder-box {
+            float: left;
+            margin-left: $m12;
+            width: 70%;
+
+            input {
+                border: 0;
+                background-color: transparent;
+                outline: none;
+                padding: $p12 0;
+                width: 100%;
+            }
+        }
+
+        .help-box {
+            float: right;
+            margin: 14px $p12 10px $p12;
+        }
+
+        .help-item-box {
+            float: right;
+            margin: 14px $p12 10px $p12;
+
+            > icon {
+                cursor: pointer;
+            }
+            
+            .tooltip-box {
+                position: absolute;
+                bottom: 45px;
+                right: -10px;
+                width: 230px;
+                background-color: $light;
+                padding: $p12;
+                opacity: 0;
+                visibility: hidden;
+                z-index: 100;
+                transition: $transition;
+                border: 1px solid #EBEEF3;
+                box-shadow: 0px 3px 13px #0000001F;
+
+                &::before {
+                    position: absolute;
+                    right: 10px;
+                    bottom: -10px;
+                    width: 5px;
+                    height: 3px;
+                    border-top: 10px solid $light;
+                    border-left: 10px solid transparent;
+                    border-right: 10px solid transparent;
+                    z-index: 10;
+                    content: '.';
+                    text-indent: -9999px;
+                    overflow: hidden;
+                    display: block;
+                    visibility: visible;
+                }
+
+                .toogle-switch {
+                    position: relative;
+
+                    .toggle-inner {
+                        position: absolute;
+                        top: -10px;
+                        right: 0;
+
+                        .toggle {
+
+                            ::ng-deep i {
+                                color: #7F92A3;
+                            }
+
+                            &.if-active {
+                                ::ng-deep i {
+                                    color: #C20712;
+                                }  
+                            }
+                        }
+                    }
+                }
+
+                textarea {
+                    resize: none;
+                    margin-top: $m12;
+                }
+
+                button {
+                    &.full-width {
+                        width: 100%;
+                    }
+                }
+
+                &.active {
+                    opacity: 1;
+                    visibility: visible;
+                }
+            }
+        }
+    }
+}
+
+.full-width-btn {
+    width: 100%;
+    color: $color-blue;
+}

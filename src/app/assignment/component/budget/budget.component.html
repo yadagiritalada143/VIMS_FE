@@ -1,0 +1,348 @@
+<!-- <div class="content-area ui-content-wrapper no-content" *ngIf="!budget">
+  <div class="no-history">
+    <img src="./assets/images/Handsome2.svg" alt="no history" width="165" class="img-fluid">
+    <h5 class="pt-16">{{ 'there_is_no_update_on_this_assignment' | i18nextEager }}</h5>
+    <h6 class="py-4 small">{{ 'there_is_no_budget_details_found_on_this_assignment' | i18nextEager }}</h6>
+  </div>
+</div> -->
+
+<div *ngIf="budget">
+  <div class="row">
+    <div class="col-md-4 budget-item">
+      <div class="panel panel-light p-16 h-100">
+        <div class="d-flex align-items-center budget-detail">
+          <h4 class="mb-0 mr-16 font-weight-medium budget-detail-head">{{'budgets_detail' | i18nextEager}}</h4>
+            <button
+                    type="button"
+                    class="btn btn-primary small text-nowrap"
+                    (click)="openAddAdditionalBudget()"
+                    *ngIf="assignmentData?.action_allow?.can_add_budget" [disabled]="isLock">
+              <icon class="icon--on-left" size="20px" name="add" type="material" cuClass="icon-cu"> </icon>
+              {{ 'add/reduce_budget' | i18nextEager }}
+            </button>
+        </div>
+        <div class="row card-content">
+          <div class="col-md-8">
+            <div class="d-flex flex-column justify-content-center">
+              <div class="d-flex flex-column mb-16">
+                <span
+                  class="budget-amount mb-4 d-flex align-items-center justify-content-center-m text-red">
+                  <span tooltip="{{showToolTip(checkNullValue(budget?.left_budget), accuracyConfig?.amount)}}" placement="top">
+                  {{
+                    (budget.left_budget && budget.left_budget !== 0 ? budget.left_budget : '0.00')
+                      | accuracy :  accuracyConfig.amount: { currencyCode: assignmentData?.finance?.currency }
+                  }}</span>
+                  <icon *ngIf="budget?.over_spend" class="d-flex ml-4" size="18px" name="warning" type="material" cuClass="d-flex" color="#ce0b25"
+                  tooltip="Over spend : {{showToolTip(checkNullValue(budget?.over_spend), accuracyConfig?.amount)}}" placement="top"></icon>
+                </span>
+                <span class="text-black text-truncate">{{ BudgetLabels.TotalRemaining | i18nextEager }}</span>
+              </div>
+              <div class="d-flex flex-column">
+                <span class="budget-amount mb-4 text-green" tooltip="{{showToolTip(budget?.total_allocated_budget)}}" placement="top">
+                  {{
+                    (budget.total_allocated_budget && budget.total_allocated_budget !== 0 ? budget.total_allocated_budget : '0.00')
+                      | accuracy :  accuracyConfig.amount: { currencyCode: assignmentData?.finance?.currency }
+                  }}
+                </span>
+                <span class="text-black text-truncate">{{ 'total_approved_budget' | i18nextEager }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <svms-pie-chart
+              [isDoughnut]="true"
+              [chartData]="detailsChartData"
+              [height]="160"
+              [width]="130"
+              [margin]="11.47"
+              [chartRadius]="60"
+              [hideLabels]="true"
+              [smallChart]="true"
+              [colorsScheme]="detailsChartColorScheme"
+              [currency]="assignmentData?.finance?.currency"
+              dimension=""
+              chartId="budget-details"
+              class="position-absolute details-chart"
+            >
+            </svms-pie-chart>
+          </div>
+        </div>
+        <div class="p-12 panel-card rounded">
+          <div class="d-flex flex-column">
+            <div class="d-flex align-items-center justify-content-center-m">
+              <icon
+                name="circle"
+                size="12px"
+                [color]="findColor('details', BudgetLabels.SpendApproved)"
+                cuclass="d-flex"
+                class="d-flex mr-4"
+              ></icon>
+              <p class="small" tooltip="{{showToolTip(budget?.total_spend)}}" placement="top">
+                {{ BudgetLabels.SpendApproved | i18nextEager}} -
+                {{
+                  (budget.total_spend && budget.total_spend !== 0 ? budget.total_spend : '0.00')
+                    | accuracy :  accuracyConfig.amount: { currencyCode: assignmentData?.finance?.currency }
+                }}
+              </p>
+            </div>
+            <div class="d-flex align-items-center justify-content-center-m">
+              <icon
+                name="circle"
+                size="12px"
+                [color]="findColor('details', BudgetLabels.AwaitingApproval)"
+                cuclass="d-flex"
+                class="d-flex mr-4"
+              ></icon>
+              <p class="small" tooltip="{{showToolTip(budget?.total_pending_approval)}}" placement="top">
+                {{ BudgetLabels.AwaitingApproval | i18nextEager }} -
+                {{
+                  (budget.total_pending_approval && budget.total_pending_approval !== 0 ? budget.total_pending_approval : '0.00')
+                    | accuracy :  accuracyConfig.amount: { currencyCode: assignmentData?.finance?.currency }
+                }}
+              </p>
+            </div>
+            <div *ngIf="_assignmentConfig?.validate_sow_budget?.is_allow && assignmentData?.assignment?.sourcing_model?.toLowerCase() === SourcingModel.SOW" class="d-flex align-items-center justify-content-center-m">
+              <icon
+                name="info"
+                size="12px"
+                [color]="findColor('details', BudgetLabels.SpendApproved)"
+                cuclass="d-flex"
+                class="d-flex mr-4"
+              ></icon>
+              <p class="small" tooltip="{{showToolTip(assignmentData?.sow?.project?.remaining_budget)}}" placement="top">
+                {{ 'remaining_milestone_budget' | i18nextEager }} -
+                {{(assignmentData?.sow?.project?.remaining_budget || 0)
+                    | accuracy :  accuracyConfig.amount: { currencyCode: assignmentData?.finance?.currency }
+                }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4  budget-item">
+      <div class="panel panel-light p-16 h-100">
+        <h4 class="mb-0 font-weight-medium py-4">
+          {{ 'total_spend_awaiting_on_approval' | i18nextEager }}
+        </h4>
+
+        <div class="row card-content">
+          <div class="col-md-4">
+            <div class="d-flex flex-column">
+              <span class="budget-amount mb-8 text-black" tooltip="{{showToolTip(budget?.total_pending_approval)}}" placement="top">
+                {{
+                  (budget.total_pending_approval && budget.total_pending_approval !== 0 ? budget.total_pending_approval : '0.00')
+                    | accuracy :  accuracyConfig.amount: { currencyCode: assignmentData?.finance?.currency }
+                }}
+              </span>
+              <span class="text-black">{{ 'total_spend_awaiting_on_approval' | i18nextEager }}</span>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <svms-column-chart
+              *ngIf="!hideApprovalChart"
+              [width]="280"
+              [height]="250"
+              [margin]="{ top: 40, right: 50, bottom: 100, left: 100 }"
+              [hideLabels]="true"
+              [colorsScheme]="awaitingApprovalChartColorScheme"
+              [chart]="awaitingApprovalChartData"
+              chartId="awaiting-approval"
+              class="position-absolute approval-chart"
+            ></svms-column-chart>
+          </div>
+        </div>
+        <div class="p-12 panel-card rounded">
+          <div class="d-flex flex-column">
+            <div class="d-flex align-items-center justify-content-center-m">
+              <icon
+                name="circle"
+                size="12px"
+                [color]="findColor('awaiting', BudgetLabels.GeneralExpense)"
+                cuclass="d-flex"
+                class="d-flex mr-4"
+              ></icon>
+              <p class="small text-underline text-blue cursor-pointer" tooltip="{{showToolTip(budget?.expense_pending_approval)}}" placement="top" (click)="openExpenseApproval('submitted')">
+                {{ BudgetLabels.GeneralExpense | i18nextEager}} -
+
+                {{
+                  (budget?.expense_pending_approval && budget?.expense_pending_approval !== 0 ? budget?.expense_pending_approval : '0.00')
+                    | accuracy :  accuracyConfig.amount: { currencyCode: assignmentData?.finance?.currency }
+                }}
+              </p>
+            </div>
+            <div class="d-flex align-items-center justify-content-center-m">
+              <icon
+                name="circle"
+                size="12px"
+                [color]="findColor('awaiting', BudgetLabels.Timesheet)"
+                cuclass="d-flex"
+                class="d-flex mr-4"
+              ></icon>
+              <p class="small text-underline text-blue cursor-pointer" tooltip="{{showToolTip(budget?.timesheet_pending_approval.toString())}}" placement="top" (click)="openTimesheetApproval('all-pending')">
+                {{ BudgetLabels.Timesheet  | i18nextEager}} -
+                {{
+                  (budget?.timesheet_pending_approval && budget?.timesheet_pending_approval !== 0
+                    ? budget?.timesheet_pending_approval
+                    : '0.00'
+                  ) | accuracy :  accuracyConfig.amount: { currencyCode: assignmentData?.finance?.currency }
+                }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 budget-item">
+      <div class="panel panel-light p-16 h-100">
+        <h4 class="mb-0 font-weight-medium py-4">{{ 'total_spend_approved' | i18nextEager }}</h4>
+
+        <div class="row card-content">
+          <div class="col-md-4">
+            <div class="d-flex flex-column">
+              <span class="budget-amount mb-8 text-black" tooltip="{{showToolTip(budget?.total_spend)}}" placement="top">
+                {{
+                  (budget?.total_spend && budget?.total_spend !== 0 ? budget?.total_spend : '0.00')
+                    | accuracy :  accuracyConfig.amount: { currencyCode: assignmentData?.finance?.currency }
+                }}
+              </span>
+              <span class="text-black">{{ 'total_spend_approved' | i18nextEager }}</span>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <svms-column-chart
+              *ngIf="!hideApprovedChart"
+              [width]="280"
+              [height]="250"
+              [margin]="{ top: 40, right: 50, bottom: 100, left: 100 }"
+              [hideLabels]="true"
+              [colorsScheme]="awaitingApprovalChartColorScheme"
+              [chart]="approvedChartData"
+              chartId="spend-approved"
+              class="position-absolute approval-chart"
+            >
+            </svms-column-chart>
+          </div>
+        </div>
+        <div class="p-12 panel-card rounded">
+          <div class="d-flex flex-column">
+            <div class="d-flex align-items-center justify-content-center-m">
+              <icon
+                name="circle"
+                size="12px"
+                [color]="findColor('awaiting', BudgetLabels.GeneralExpense)"
+                cuclass="d-flex"
+                class="d-flex mr-4"
+              ></icon>
+              <p class="small text-underline text-blue cursor-pointer" tooltip="{{showToolTip(budget?.total_spend_expenses)}}" placement="top" (click)="openExpenseApproval('approved')">
+                {{ BudgetLabels.GeneralExpense   | i18nextEager}} -
+                {{
+                  (budget?.total_spend_expenses && budget?.total_spend_expenses !== 0 ? budget?.total_spend_expenses : '0.00')
+                    | accuracy :  accuracyConfig.amount: { currencyCode: assignmentData?.finance?.currency }
+                }}
+              </p>
+            </div>
+            <div class="d-flex align-items-center justify-content-center-m">
+              <icon
+                name="circle"
+                size="12px"
+                [color]="findColor('awaiting', BudgetLabels.Timesheet)"
+                cuclass="d-flex"
+                class="d-flex mr-4"
+              ></icon>
+              <p class="small text-underline text-blue cursor-pointer" tooltip="{{showToolTip(budget?.total_spend_timesheet)}}" placement="top" (click)="openTimesheetApproval('approved')">
+                {{ BudgetLabels.Timesheet   | i18nextEager}} -
+                {{
+                  (budget?.total_spend_timesheet && budget?.total_spend_timesheet !== 0 ? budget?.total_spend_timesheet : '0.00')
+                    | accuracy :  accuracyConfig.amount: { currencyCode: assignmentData?.finance?.currency }
+                }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h4 class="font-weight-medium mt-24">{{ '' | i18nextEager }}</h4>
+  <div class="additional-budget-table">
+    <table class="mt-24 position-relative">
+      <thead>
+        <tr>
+          <th>{{ 'req_id' | i18nextEager }}</th>
+          <th>{{ 'status' | i18nextEager }}</th>
+          <th>{{ 'requested_add/reduce_amount' | i18nextEager }}</th>
+          <th>{{ 'new_total_approved_budget' | i18nextEager }}</th>
+          <th>{{ 'reason_for_add/reduce_budget' | i18nextEager }}</th>
+          <th>{{ 'notes' | i18nextEager }}</th>
+          <th>{{ 'requested_by' | i18nextEager }}</th>
+          <th>{{ 'date_time_of_request' | i18nextEager }}</th>
+        </tr>
+      </thead>
+      <tbody *ngIf="hasPendingRequest; else noData">
+        <tr *ngFor="let assignment of additionalBudget$ | async">
+          <td [ngStyle]="{ width: '10%' }">{{ assignment.req_id }}</td>
+          <td [ngStyle]="{ width: '8%' }">
+            <span class="status-ui pending-approval">{{ assignment.status | titlecase | i18nextEager }}</span>
+          </td>
+          <td [ngStyle]="{ width: '11%' }" tooltip="{{showToolTip(assignment?.requested_additional_budget_amount)}}" placement="top">
+            {{ assignment.requested_additional_budget_amount | accuracy :  accuracyConfig.amount: { currencyCode: assignmentData?.finance?.currency } }}
+          </td>
+          <td [ngStyle]="{ width: '11%' }" tooltip="{{showToolTip(assignment?.total_budget_amount)}}" placement="top">
+            {{ assignment.total_budget_amount | accuracy :  accuracyConfig.amount: { currencyCode: assignmentData?.finance?.currency } }}
+          </td>
+          <td [ngStyle]="{ width: '18%' }">{{ assignment.reason_code?.name }}</td>
+          <td [ngStyle]="{ width: '17%' }">
+            <span *ngIf="!fullNotes; else showFull">
+              {{ (assignment.request_notes | slice: 0:50) || '--' }}
+              <ng-container *ngIf="assignment.request_notes.length > 50"
+                >.. <a (click)="fullNotes = true">{{ 'show_more' | i18nextEager }}</a></ng-container
+              >
+            </span>
+            <ng-template #showFull>
+              {{ (assignment.request_notes | slice: 0:1000000000) || '--' }}
+              <a *ngIf="assignment.request_notes.length > 50" (click)="fullNotes = false">{{ 'show_less' | i18nextEager }}</a>
+            </ng-template>
+          </td>
+          <td [ngStyle]="{ width: '17%' }">{{ assignment.created_by?.name }} &nbsp;<span *ngIf="assignment?.impersonated_by?.name">({{ 'impersonated_by' | i18nextEager }}: {{assignment?.impersonated_by?.name}} <span *ngIf="assignment?.impersonated_by?.role?.name"> - {{assignment?.impersonated_by?.role?.name}}</span> <span *ngIf="assignment?.impersonated_by?.role?.organization_category">({{assignment?.impersonated_by?.role?.organization_category}})</span>)</span></td>
+          <td [ngStyle]="{ width: '8%' }">{{ getDateAssignmentDate(assignment?.created_at)}}</td>
+        </tr>
+      </tbody>
+      <ng-template #noData>
+        <div class="d-flex justify-content-center align-items-center mt-8 position-absolute full-width">
+          {{ 'no_pending_statuses' | i18nextEager }}
+        </div>
+      </ng-template>
+    </table>
+  </div>
+</div>
+
+<app-expense-awaiting-approval
+  *ngIf="isOpenExpenseAwaiting"
+  (closeExpenseAwait)="toggleIsOpenExpenseAwait()"
+  [programId]="programId"
+  [assignmentId]="assignmentData?.assignment?.assignment_uuid || assignmentId"
+  [currency]="assignmentData?.finance?.currency"
+>
+</app-expense-awaiting-approval>
+<app-timesheet-awaiting-approval
+  *ngIf="isOpenTimesheetAwaiting"
+  (closeTimesheetAwait)="toggleIsOpenTimesheetAwait()"
+  [currency]="assignmentData?.finance?.currency"
+>
+</app-timesheet-awaiting-approval>
+<app-assignment-details-sidepanel
+  *ngIf="isOpenAddBudget"
+  (closeAddBudget)="closeAddSidebar()"
+  [budget]="budget"
+  [assignmentData]="assignmentData.assignment"
+  [currency]="assignmentData?.finance?.currency"
+  [programId]="programId"
+  [additionalBudget$]="additionalBudget$"
+  [hasPendingRequest]="assignmentData?.pending_request?.is_available"
+  [actionAllow]="assignmentData?.action_allow"
+  [sowData]="assignmentData?.sow"
+  [assignmentConfig]="_assignmentConfig"
+>
+</app-assignment-details-sidepanel>

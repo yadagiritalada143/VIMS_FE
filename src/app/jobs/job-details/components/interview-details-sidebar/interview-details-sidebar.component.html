@@ -1,0 +1,335 @@
+<div *ngIf="!detailsLoaded " class="p-32 pt-24 sidebar-view-wrapper interview-detail-view">
+    <div *ngIf='intDetails'>
+        <div class="sp-head-module-info">
+            <div class="row">
+                <div class="col-md-7">
+                    <h4>{{intDetails?.name}}</h4>
+                </div>
+                <div class="col-md-5">
+                    <label class="status-ui rejected float-right" *ngIf="intDetails?.status ==='REJECTED'">{{intDetails?.status?.toLowerCase()}}</label>
+                    <label class="status-ui withdrawn float-right" *ngIf="intDetails?.status ==='CANCELLED'">{{intDetails?.status?.toLowerCase()}}</label>
+                    <label class="status-ui interview-scheduled float-right" *ngIf="intDetails?.status ==='SCHEDULED'">{{intDetails?.status?.toLowerCase()}}</label>
+                    <label class="status-ui offer-accepted float-right" *ngIf="intDetails?.status ==='ACCEPTED'">{{intDetails?.status?.toLowerCase()}}</label>
+                </div>
+            </div>
+            <div class="sp-sub-head-info">
+                <label class="mdid float-left d-flex">
+                    <icon size="20px" name="label" color="#FFC409" type="material" class="mr-4" cuClass="d-flex"></icon>
+                    <span>{{intDetails?.unique_id}}</span>
+                </label>
+                <label class="publish-date-time float-left">
+                    <icon size="18px" name="update" color="#536476" type="material" cuClass="d-flex"></icon>
+                    <span>{{ 'created_on' | i18next }} :
+                      {{ intDetails?.created_on | localDateFormat }} {{ intDetails?.created_on | localDateFormat: 'hh:mm:ss a z' }}
+                    </span>
+                </label>
+
+            </div>
+        </div>
+
+
+        <div class="clearfix"></div>
+        <div class="clearfix"></div>
+            <div class="alert_message alert_error border-none mt-12" *ngIf="isAlertError">
+                <div class="d-flex align-items-center w-100">
+                  <div class="d-flex align-items-center justify-content-start">
+                    <icon name="error" size="24px" type="material" cuClass="validation-icon"></icon>
+                  </div>
+                <div class="pl-8">
+                    <div class="font-weight-bold mb-0 medium-font" *ngIf="this.candidateStatusReason">
+                    {{ 'rejection_reason' | i18next }}: {{this.candidateStatusReason}}
+                    </div>
+                    <div class="font-weight-bold mb-0 medium-font" *ngIf="this.candidateStatusNote">
+                        {{ 'notes' | i18next }}: {{this.candidateStatusNote}}
+                    </div>
+                </div>
+                </div>
+            </div>
+
+        <div class="d-flex  justify-content-between interview-info">
+            <div class="d-flex align-items-center grid-data-wrap">
+                <icon class="mr-8" size="18px" name="chair_alt" theme="outlined" color="#495057" type="material" cuClass="d-flex"></icon>
+                <div class="grid-data">
+                    <span class="small">{{ 'interview_type' | i18next }}</span>
+                    <div [ngClass]="{'person':intDetails?.interview_type === 'F2F','telephone':intDetails?.interview_type === 'PHONE','virtual':intDetails?.interview_type === 'VIRTUAL'}">
+                        <label class="label-rounded" *ngIf="intDetails?.interview_type === 'F2F'">
+                            <icon class="mr-8 d-flex" size="18px" theme="outlined" name="group" type="material" cuClass="icon-cu d-flex"></icon>
+                            {{ 'in_person' | i18next }}
+                        </label>
+
+                        <label class="label-rounded" *ngIf="intDetails?.interview_type === 'PHONE'">
+                            <icon class="mr-8 d-flex" size="18px" theme="outlined" name="phone_in_talk" type="material" cuClass="icon-cu d-flex"></icon>
+                            {{ 'phone' | i18next }}
+                        </label>
+
+                        <label class="label-rounded" *ngIf="intDetails?.interview_type === 'VIRTUAL'">
+                            <icon class="mr-8 d-flex" size="18px" theme="outlined" name="videocam" type="material" cuClass="icon-cu d-flex"></icon>
+                            {{ 'virtual' | i18next }}
+                        </label>
+                    </div>
+
+
+                </div>
+            </div>
+            <div class="d-flex align-items-center grid-data-wrap">
+
+                <icon *ngIf="intDetails?.interview_type === 'F2F'" size="18px" name="share_location" theme="outlined" color="#495057" type="material" cuClass="d-flex"></icon>
+
+                <icon *ngIf="intDetails?.interview_type === 'PHONE'" size="18px" name="dialpad" theme="outlined" color="#495057" type="material" cuClass="d-flex"></icon>
+
+                <icon *ngIf="intDetails?.interview_type === 'VIRTUAL'" size="18px" name="video_camera_front" theme="outlined" color="#495057" type="material" cuClass="d-flex"></icon>
+
+                <div class="grid-data">
+                    <span class="small">{{locationLabel | i18next}}</span>
+                    <label>{{intDetails?.interview_type === 'PHONE' ? phoneLocation : intDetails?.location}}</label>
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="d-flex  justify-content-between interview-info">
+            <!-- <div class="d-flex align-items-center grid-data-wrap">
+                <icon class="mr-8" size="18px" name="timelapse" theme="outlined" color="#495057" type="material" cuClass="d-flex"></icon>
+                <div class="grid-data">
+                    <span class="small">{{ 'interview_duration' | i18next }}</span>
+                    <label>{{intDetails?.duration}} {{ 'minutes' | i18next }}</label>
+                </div>
+            </div> -->
+            <div class="d-flex align-items-center grid-data-wrap">
+                <icon class="mr-8" size="18px" name="travel_explore" theme="outlined" color="#495057" type="material" cuClass="d-flex"></icon>
+                <div class="grid-data">
+                    <span class="small">{{ 'interview_timezone' | i18next }}</span>
+                    <label>{{intDetails?.time_zone}}</label>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- <div class="d-flex mt-24 justify-content-between interview-info">
+            <div class="d-flex align-items-center">
+
+                <div class="ml-8 pl-0">
+                    <p class="small">Interviewer</p>
+                    <ul class="attandees d-inline-block">
+                        <li *ngFor='let i of displayInterviewers'>
+                            <figure class="img-item">
+                                <img [src]="i?.avatar">
+                            </figure>
+                        </li>
+                        <li *ngIf="AddDisplayInterviewrs?.length > 0">
+                            <figure class="img-item">
+                                {{AddDisplayInterviewrs.length }}
+                            </figure>
+                        </li>
+                    </ul>
+                    <p class="d-inline-block other-attandees">{{ displayInterviewersNames }} {{ AddDisplayInterviewrs?.length > 0 ? ', ' + AddDisplayInterviewrs.length : ''}}</p>
+
+                </div>
+            </div>
+            <div class="d-flex align-items-center">
+                <div>
+                    <p class="small">Additional Attendees</p>
+                    <ul class="attandees d-inline-block">
+                        <li *ngFor='let i of displayAddAttendees'>
+                            <figure class="img-item">
+                                <img [src]="i?.avatar">
+                            </figure>
+                        </li>
+                        <li *ngIf="AddDisplayAddAttendees?.length > 0">
+                            <figure class="img-item">
+                                {{AddDisplayAddAttendees.length }}
+                            </figure>
+                        </li>
+                    </ul>
+                    <p class="d-inline-block other-attandees">{{ displayAddAttendeesNames }} {{ AddDisplayAddAttendees?.length > 0 ? ', ' + AddDisplayAddAttendees.length : ''}}</p>
+                </div>
+            </div>
+        </div>
+         -->
+
+        <div class="d-flex justify-content-between interview-info">
+            <div class="d-flex align-items-center grid-data-wrap">
+
+
+                <span class="initials initials__purple"> {{displayInterviewersNames | shortName: "last"}}</span>
+                <div class="grid-data">
+                    <span class="small">{{ 'interviewer' | i18next }}</span>
+                    <label>{{ displayInterviewersNames }}</label>
+                </div>
+            </div>
+            <div class="d-flex align-items-center grid-data-wrap">
+                <span class="visibility-hidden mr-16">
+                    <icon size="18px" name="travel_explore" theme="outlined" color="#495057" type="material" cuClass="d-flex">
+                    </icon>
+                  </span>
+                  <div class="grid-data">
+                    <span class="small">{{ 'additional_attendees' | i18next }}</span>
+                    <ul *ngIf="!showadditionalemail">
+                        <li *ngFor="let i of displayAddAttendees">
+                            <!-- <img *ngIf='i?.avatar' [src]="i?.avatar"> -->
+                            <figure *ngIf='i?.avatar' class="img-item">
+                                <img [src]="i?.avatar" />
+                            </figure>
+                            <span *ngIf='!i?.avatar' class="initials initials__purple">{{ i?.initials}}</span>
+                        </li>
+                        <li *ngIf="AddDisplayAddAttendees?.length > 0">
+                            <span class="initials count">{{ '+' +  AddDisplayAddAttendees.length }}</span>
+                        </li>
+                    </ul>
+                    <label class="fixed-width" *ngIf="!showadditionalemail">{{ displayAddAttendeesNames || "--" }} {{ AddDisplayAddAttendees?.length > 0 ? ', ' + '+' + AddDisplayAddAttendees.length : ''}}</label>
+                    <div class="additionalattend position-relative" *ngIf="showadditionalemail">
+                        <div class="item-first">
+                            <p>{{additionalAttendees[0] || "--"}}</p>
+                            <p *ngIf="additionalAttendees?.length > 1">
+                                <a (click)="showPopover()">
+                                    {{ '+' }}{{ additionalAttendees.length-1}}
+                                </a>
+                            </p>
+                        </div>
+                        <div class="pop-over" [ngClass]="{'active' : popoverActive}" (mouseleave)="hidePopOver()">
+                            <p>{{ 'additional_attendees' | i18next }}</p>
+                            <ul>
+                                <li *ngFor="let i of additionalAttendees">{{i || "--"}}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="notes-wrap mini mt-24 " *ngIf="intDetails?.instructions">
+            <div class="d-flex trigger align-items-center notes-header" (click)="showHideInstruction()">
+                <icon class="mr-8" size="18px" name="sticky_note_2" theme="outlined" color="#776DE0" type="material" cuClass="d-flex "></icon>
+                <label>{{ 'interview_instructions' | i18next }}</label>
+                <icon size="18px" [name]="showInstruction? 'keyboard_arrow_up' : 'keyboard_arrow_down'" theme="outlined" color="#666666" type="material" cuClass="d-flex float-right"></icon>
+            </div>
+            <div class="detail-instruction" *ngIf="showInstruction">
+                {{intDetails?.instructions}}
+            </div>
+        </div>
+
+        <div class="notes-wrap mini empty mt-24 " *ngIf="!intDetails?.instructions">
+            <div class="d-flex trigger align-items-center notes-header">
+                <icon class="mr-8" size="18px" name="sticky_note_2" theme="outlined" color="#776DE0" type="material" cuClass="d-flex "></icon>
+                <label>{{ 'no_instructions_added' | i18next }}</label>
+            </div>
+        </div>
+
+        <h4 class="d-flex my-24">
+            <icon class="mr-8" size="18px" name="date_range" theme="outlined" color="#343A40" type="material" cuClass="d-flex">
+            </icon>
+            <span>{{ 'scheduled_date' | i18next }} & {{ 'time' | i18next }}</span>
+        </h4>
+        <div class="row Scheduled-header mb-0 p-12">
+            <div class="col-md-3">
+                <p class="small first">{{ 'date' | i18next }}</p>
+            </div>
+            <div class="col-md-3">
+                <P class="small second">{{ 'time' | i18next }}</P>
+            </div>
+            <div class="col-md-3">
+                <P class="small second">{{ 'duration' | i18next }}</P>
+            </div>
+            <div class="col-md-3">
+                <P class="small third">{{ 'status' | i18next }}</P>
+            </div>
+        </div>
+        <div class="row-container">
+
+                <div *ngFor="let interview of intDetails?.schedules; let i = index">
+                    <div class="row p-12 Scheduled-body mb-8 d-flex align-items-center" *ngIf="interview.is_accepted" [ngClass]="{ active: interview.is_accepted }">
+                        <div class="col-md-3 ml-0 pl-0">
+                            <div class="d-flex align-items-center pr-12 pl-0">
+                                <span class="date-thumb p-4">{{ getDate(interview?.date) | date :'dd' }}</span>
+                                <p class="font-weight-medium date interview-date">{{ interview?.date | localDateFormat: '': '':'' : true}}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <p class="time d-flex align-item-center">{{ interview?.start_time }} - {{ interview?.end_time }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p class="time d-flex align-item-center">{{ interview?.duration }}{{ 'mins' | i18next }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <div [ngClass]="{'status-icon': !interview?.is_accepted }">
+                                <icon class="mr-8 float-left" size="23px" name="event_available" color="#2aca20" type="material" tooltip="Accepted" placement="right" delay="500"></icon>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div *ngFor="let interview of intDetails?.schedules; let i = index">
+                    <div class="row p-12 Scheduled-body mb-8 d-flex align-items-center" *ngIf="!interview.is_accepted" [ngClass]="{disabled: intDetails?.status === 'ACCEPTED'}">
+                        <div class="col-md-3 ml-0 pl-0">
+                            <div class="d-flex align-items-center pr-12 pl-0">
+                              <span class="date-thumb p-4">{{ getDate(interview?.date) | date :'dd' }}</span>
+                              <p class="font-weight-medium date interview-date">{{ interview?.date | localDateFormat: '': '':'' : true}}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <p class="time d-flex align-item-center">{{ interview?.start_time }} - {{ interview?.end_time }} </p>
+                        </div>
+                        <div class="col-md-3">
+                            <p class="time d-flex align-item-center">{{ interview?.duration }}{{ 'mins' | i18next }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <div *ngIf="intDetails?.status === 'SCHEDULED' || intDetails?.status === 'PENDING_ACCEPTANCE' || intDetails?.status === 'PENDING_INTERVIEW_REVIEW' ">
+                                <icon class="mr-8 float-left" size="23" name="hourglass_empty" theme="outlined" color="#f3b528" type="material" tooltip="{{ 'waiting_for_acceptance' | i18next }}" placement="right" delay="500"></icon>
+                            </div>
+                            <div *ngIf="intDetails?.status === 'ACCEPTED' || intDetails?.status === 'CANCELLED'">
+                                <icon class="mr-8 float-left" size="23" name="event_busy" theme="outlined" color="#7b7871" type="material"></icon>
+                            </div>
+                            <div *ngIf="intDetails?.status === 'REJECTED'">
+                                <icon name="not_interested" size="23" class="float-left mr-8" color="#FF0033"></icon>
+                            </div>
+
+                            <div *ngIf="intDetails?.status === 'COMPLETED'">
+                                <icon name="check_circle" size="23" class="float-left mr-8" color="#4EB734"></icon>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <!-- <div class="d-flex p-12 Scheduled-body mb-8 align-items-center">
+    <span class="date-thumb">21</span>
+    <p class="font-weight-medium date">21 April, 2020</p>
+    <p class="time">10:00 AM</p>
+    <div class="status-icon">
+      <icon size="17px" name="more_horiz" type="material" cuClass="d-flex"></icon>
+    </div>
+  </div>
+  <div class="d-flex p-12 Scheduled-body mb-8 align-items-center">
+    <span class="date-thumb">21</span>
+    <p class="font-weight-medium date">21 April, 2020</p>
+    <p class="time">10:00 AM</p>
+    <div class="status-icon">
+      <icon size="17px" name="more_horiz" type="material" cuClass="d-flex"></icon>
+    </div>
+  </div>
+  <div class="d-flex p-12 Scheduled-body mb-8 align-items-center">
+    <span class="date-thumb">21</span>
+    <p class="font-weight-medium date">21 April, 2020</p>
+    <p class="time">10:00 AM</p>
+    <div class="status-icon">
+      <icon size="17px" name="more_horiz" type="material" cuClass="d-flex"></icon>
+    </div>
+  </div> -->
+    </div>
+
+    <div *ngIf='!intDetails' class="d-flex justify-content-center align-items-center img_height loader-height">
+        <div class="text-center">
+            <img alt="no data" width="100" src="../../../../../assets/images/no-interviews.svg" class="img-fluid">
+            <h5 class="pt-16">{{ 'no_interviews_for_this_candidate' | i18next }}</h5>
+        </div>
+    </div>
+
+
+    <div *ngIf="detailsLoaded" class="schedule-wrapper" style="padding-left: 20px;">
+        <div class="dotloader"></div>
+    </div>

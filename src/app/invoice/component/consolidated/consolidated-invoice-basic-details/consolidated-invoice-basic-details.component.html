@@ -1,0 +1,631 @@
+<!-- <ng-container *ngTemplateOutlet="invoiceTemplate;context:ctx"></ng-container> -->
+<app-logs [log]="logs"></app-logs>
+<app-cancel-consolidated-invoice [cancelConsolidateOptions]="optPickListData" [invoiceDetails]="invoiceDetails?.data" (invoiceCancelled)="invoiceCancelled($event)"></app-cancel-consolidated-invoice>
+<app-transaction-complete [isTransactionCompleteNotesMandatory]="isTransactionCompleteNotesMandatory" [transactionCompleteOptions]="reasonCodesForTransactionComplete" [invoiceDetails]="invoiceDetails?.data" (transactionCompleted)="transactionComplete($event)" *ngIf="showTransactionCompleteSideBar"></app-transaction-complete>
+
+<ng-container>
+
+  <span class="back-btn d-flex align-items-center mb-24 cursor-pointer mb-m-0 back-mobile" style="width: 200px" (click)="back()">
+    <icon class="d-flex" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon>
+    <span>{{ redirectSow ? 'Back to SOW' : 'Back to Invoice List' |i18next }}</span>
+  </span>
+  <div *ngIf="invoiceDetails?.data?.invoice_status == 'cancelled' " class="alert_message alert_pending mt-m-0 mb-m-0 ml-m-0 mr-m-0">
+    <div class="d-flex align-items-center w-100">
+      <div class="d-flex align-items-center justify-content-start ">
+        <icon class="d-flex mr-8" size="24px" name="check_circle" type="material" cuClass="d-flex"></icon>
+      </div>
+      <div class="pl-8">
+        <div class="font-weight-bold mb-0 medium-font">{{ 'cancelled_by' | i18nextEager }} :
+          {{invoiceDetails?.data?.approval_cancel_manager?.name}}
+         {{getDateTime(invoiceDetails?.data?.approved_cancel_date, false) ? 'On' +getDateTime(invoiceDetails?.data?.approved_cancel_date, false) : '' |i18next}} <span *ngIf="impersonatedBy">({{ 'impersonated_by' | i18nextEager }} {{impersonatedBy?.name}} - {{impersonatedBy?.role?.name}}<span *ngIf="impersonatedBy?.role?.user_type">({{impersonatedBy?.role?.user_type}})</span>)</span>
+         </div>
+        <div class="mb-4"> <span class="font-weight-bold">{{ 'reason_for_cancel' | i18nextEager }} :</span>
+          {{invoiceDetails?.data?.approved_cancel_reason || ' - '}}
+        </div>
+        <div> <span class="font-weight-bold">{{ 'notes' | i18nextEager }} :</span>
+          {{ invoiceDetails?.data?.approved_cancel_notes || 'N/A' |i18next}}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-light border-m-0">
+    <div class="p-24 d-flex align-items-start justify-content-between c-invoice-header detail-page-header">
+      <div class="max-width-wrapper">
+        <h3>
+          {{ 'invoice' | i18nextEager }}
+          <span [ngClass]="{'approved':invoiceDetails?.data?.invoice_status ==='approved',
+          'in-progress':invoiceDetails?.data?.invoice_status ==='in progress' || invoiceDetails?.data?.invoice_status ==='in_progress',
+          'withdrawn':invoiceDetails?.data?.invoice_status ==='cancelled',
+          'draft':invoiceDetails?.data?.invoice_status ==='draft'}" class="status-ui ml-16 position-relative" *ngIf="invoiceDetails?.data?.invoice_status">
+            {{invoiceDetails?.data?.invoice_status | titlecase | i18nextEager}}
+          </span>
+          <div class="d-inline-block align-middle ml-16" *ngIf="!invoiceDetails?.data?.invoice_status">
+            <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+              width: '70px',
+              height: '24px',
+              'border-radius': '4px',
+              'background-color': '#f8f8f9',
+              'border-top': '0',
+              'margin-bottom': '0'
+            }"></ngx-skeleton-loader>
+          </div>
+        </h3>
+        <div class="d-flex align-items-center">
+          <p class="d-flex align-items-center page-item-id" *ngIf="invoiceDetails?.data?.invoice_number">
+            <icon class="meta-label d-flex mr-4" color="#FFC409" name="label" size="18px"></icon>
+            <!--  Remove this hard coded one -->
+            {{invoiceDetails?.data?.invoice_number}}
+          </p>
+          <div *ngIf="!invoiceDetails?.data?.invoice_number">
+            <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+              width: '121px',
+              height: '15px',
+              'border-radius': '4px',
+              'background-color': '#f8f8f9',
+              'border-top': '0',
+              'margin-bottom': '9px'
+            }"></ngx-skeleton-loader>
+
+          </div>
+          <p class="d-flex align-items-center hide-on-mobile" *ngIf="invoiceDetails?.data?.created_at">
+            <icon class="ml-24 d-flex mr-4" color="#646369" name="history" size="18px"></icon>
+            <span class="invoice-meta d-block max-width text-truncate cursor-default" (mouseover)="showDetailTooltip()" (mouseleave)="hideDetailTooltip()">
+              {{ 'consolidated_on' | i18nextEager }} : {{getDate(invoiceDetails?.data?.created_at, false)}}, {{ 'consolidated_by' | i18nextEager }} :
+            {{invoiceDetails?.data?.invoice_generation_type == "manual" ? invoiceDetails?.data?.updated_by?.name : "System (Process Automated)" |i18next}} <span *ngIf="invoiceDetails?.data?.updated_by?.impersonated_by">({{ 'impersonated_by' | i18nextEager }} {{invoiceDetails?.data?.updated_by?.impersonated_by?.name}} - {{invoiceDetails?.data?.updated_by?.impersonated_by?.role?.name}}({{invoiceDetails?.data?.updated_by?.impersonated_by?.role?.user_type}}))</span>
+            </span>
+          </p>
+          <div *ngIf="!invoiceDetails?.data?.created_at">
+            <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+              width: '150px',
+              height: '15px',
+              'border-radius': '4px',
+              'background-color': '#f8f8f9',
+              'border-top': '0',
+              'margin-bottom': '9px'
+            }"></ngx-skeleton-loader>
+          </div>
+        </div>
+      </div>
+      <div class='invoice-actions d-flex justify-content-end c-inv-button position-relative'>
+        <div *ngIf="!invoiceDetails?.data">
+          <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+            width: '150px',
+            height: '15px',
+            'border-radius': '4px',
+            'background-color': '#f8f8f9',
+            'border-top': '0',
+            'margin-bottom': '25px'
+          }"></ngx-skeleton-loader>
+        </div>
+        <div class="actions position-absolute" *ngIf="(invoiceDetails?.data?.invoice_status === 'draft' || invoiceDetails?.data?.invoice_status === 'approved') && showAction">
+          <button class="btn btn-primary" #invActionButton *ngIf="!invoiceDetails?.data?.transaction_complete">
+            <span class="hide-on-mobile">{{ 'actions' | i18nextEager }}</span>
+            <icon class="icon--on-right hide-on-mobile" size="20px" type="material" cuClass="icon-cu"
+              [name]="actionVisibility ? 'keyboard_arrow_up' : 'keyboard_arrow_down'">
+            </icon>
+            <icon class="hide-on-desktop" size="20px" name="more_horiz" type="material" cuClass="icon-cu">
+            </icon>
+          </button>
+          <ul class="action-list position-absolute bg-light rounded-sm"
+            [ngClass]="{ active: actionVisibility }" #invActionDropdown>
+            <li *ngIf="invoiceDetails?.data?.invoice_status === 'draft'">
+              <button (click)="consolidateConfirm()" type="button" [disabled] = 'consoilidationBeingConfirmed'
+              *authorize="'view_confirm_consolidation'">
+                {{ 'confirm_consolidation' | i18nextEager }}
+                <span *ngIf="consoilidationBeingConfirmed" class="loader position-absolute ml-12"> </span>
+              </button>
+            </li>
+            <li *ngIf="invoiceDetails?.data?.invoice_status === 'draft'">
+              <button class="cancel-ui" (click)="consolidateCancel()" type="button" [disabled] = 'cancellingConsolidation'
+              *authorize="'view_cancel_consolidation'">
+                {{ 'cancel_consolidation' | i18nextEager }}
+                <span *ngIf="cancellingConsolidation" class="loader position-absolute ml-12"> </span>
+              </button>
+            </li>
+            <li *ngIf="invoiceDetails?.data?.invoice_status === 'approved' && invoiceDetails?.data?.show_cancel_approved_consolidated_invoice_button">
+              <button class="cancel-ui" *authorize="'view_cancel_consolidation'" (click)="approvedConsolidateCancel()" type="button"
+              >
+                 {{ 'cancel_consolidation' | i18nextEager }}
+                 <!-- <span *ngIf="cancellingApprovedConsolidation" class="loader position-absolute ml-12"> </span> -->
+               </button>
+            </li>
+            <li *ngIf="invoiceDetails?.data?.cancel_flag">
+              <button *authorize="'view_cancel_consolidation'" class="cancel-ui" (click)="cancelConsolidateInvoice()" type="button">
+                {{ 'cancel_consolidation' | i18nextEager }}
+              </button>
+            </li>
+            <li *ngIf="invoiceDetails?.data?.retry_flag">
+              <button class="cancel-ui" (click)="regenerateConsolidateInvoice()" type="button">
+                {{ 'retry_consolidation' | i18nextEager }}
+              </button>
+            </li>
+            <li *ngIf="invoiceDetails?.data?.invoice_status === 'approved'">
+              <button type="button" (click)="onTransactionComplete()"
+              *ngIf="invoiceDetails?.data?.show_transaction_complete_button">
+                {{ 'transaction_complete' | i18nextEager }}
+              </button>
+            </li>
+            <li *ngIf="invoiceDetails?.data?.invoice_status === 'approved'">
+              <div *ngIf="!invoiceDetails?.data?.transaction_complete">
+                <ng-container *ngIf="isCreditDebitEnable">
+                  <button (click)="creditDebit()" type="button" *authorize="'create_credit_debit'">
+                    {{ 'credit' | i18nextEager }}/{{ 'debit' | i18nextEager }}
+                  </button>
+                </ng-container>
+              </div>
+            </li>
+            <li *ngIf="invoiceDetails?.data?.invoice_status === 'approved'">
+              <div *ngIf="!invoiceDetails?.data?.transaction_complete">
+                <ng-container *ngIf="isClientPaymentEnable">
+                  <button (click)="createPaymentAuthorization()" type="button" *authorize="'view_add_client_payment'"
+                   >
+                    {{ 'add' | i18nextEager }} {{ 'client_payments' | i18nextEager }}
+                  </button>
+                </ng-container>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer pt-24">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="d-flex align-items-center">
+            <div class="initials align-justify-center mr-8">
+              <icon name="tag" size="18px" color="#7767CB" class="d-flex" cuclass="d-flex"></icon>
+            </div>
+            <div class="d-flex flex-column">
+              <p class="small">{{ 'consolidated_invoice_id' | i18nextEager }}</p>
+              <p class="font-weight-medium text-black" *ngIf="invoiceDetails?.data?.invoice_number">{{invoiceDetails?.data?.invoice_number}}</p>
+              <p *ngIf="!invoiceDetails?.data?.invoice_number">
+                <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                  width: '130px',
+                  height: '15px',
+                  'border-radius': '4px',
+                  'background-color': '#dce2e7',
+                  'border-top': '0',
+                  'margin-bottom': '9px'
+                }"></ngx-skeleton-loader>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="d-flex align-items-center">
+            <div class="initials align-justify-center mr-8">
+              <icon name="assignment" size="18px" color="#7767CB" class="d-flex" cuclass="d-flex"></icon>
+            </div>
+            <div class="d-flex flex-column">
+              <p class="small">{{ 'batch_number' | i18nextEager }}</p>
+              <p class="font-weight-medium text-black" *ngIf="invoiceDetails?.data?.batch_number">{{invoiceDetails?.data?.batch_number}}</p>
+              <p *ngIf="!invoiceDetails?.data?.batch_number">
+                <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                  width: '130px',
+                  height: '15px',
+                  'border-radius': '4px',
+                  'background-color': '#dce2e7',
+                  'border-top': '0',
+                  'margin-bottom': '9px'
+                }"></ngx-skeleton-loader>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="d-flex align-items-center">
+            <div class="initials align-justify-center mr-8">
+              <icon name="event_available" size="18px" color="#7767CB" class="d-flex" cuclass="d-flex"></icon>
+            </div>
+            <div class="d-flex flex-column">
+              <p class="small">{{ 'invoice_duration' | i18nextEager }}</p>
+              <p class="font-weight-medium text-black" *ngIf="invoiceDetails?.data?.duration_start_date">{{(+invoiceDetails?.data?.duration_start_date) |
+                localDateFormat :'':'':'':true }} - {{(+invoiceDetails?.data?.duration_end_date) | localDateFormat :'':'':'':true}}
+              </p>
+              <p *ngIf="!invoiceDetails?.data?.duration_start_date">
+                <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                  width: '130px',
+                  height: '15px',
+                  'border-radius': '4px',
+                  'background-color': '#dce2e7',
+                  'border-top': '0',
+                  'margin-bottom': '9px'
+                }"></ngx-skeleton-loader>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- <div class="d-flex align-items-center">
+            <div class="initials align-justify-center mr-8">
+              <icon name="corporate_fare" size="18px" color="#7767CB" class="d-flex" cuclass="d-flex"></icon>
+            </div>
+            <div class="d-flex flex-column">
+              <p class="small">{{ 'company_code' | i18nextEager }}</p>
+              <p class="font-weight-medium text-black">0023</p>
+            </div>
+          </div> -->
+
+
+    </div>
+  </div>
+  <div class="panel panel-light mt-16 ">
+    <div class="row no-gutters">
+      <div class="p-24" [ngClass]="invoiceDetails?.data?.invoice_status === 'approved' ? 'col-md-9' : 'col-md-12'">
+       <div class="inv-overflow">
+        <div class="inv-calculation">
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex flex-column">
+              <icon name="access_time_filled" size="18px" color="#ACC74F" class="d-flex" cuclass="d-flex"></icon>
+              <p class="text-black" *ngIf="invoiceDetails?.data?.calculation?.timesheet">
+               <span tooltip="{{showTooltip(invoiceDetails?.data?.calculation?.timesheet)}}"  placement="bottom" delay="100">{{ invoiceDetails?.data?.calculation?.timesheet | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency} }}</span> </p>
+               <p *ngIf="!invoiceDetails?.data?.calculation?.timesheet">
+                <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                  width: '64px',
+                  height: '15px',
+                  'border-radius': '4px',
+                  'background-color': '#f8f8f9',
+                  'border-top': '0',
+                  'margin-top': '4px',
+                  'margin-bottom': '0px'
+                }"></ngx-skeleton-loader>
+              </p>
+              <p class="small">{{ 'timesheet' | i18nextEager }}</p>
+            </div>
+            <button type="button" class="btn btn-light rounded mr-12 btn-operators">
+              <icon name="add" size="12px" color="#ADB5BD" class="d-flex" cuclass="d-flex"></icon>
+            </button>
+            <div class="d-flex flex-column">
+              <icon name="account_balance_wallet" size="18px" color="#F54747" class="d-flex" cuclass="d-flex"></icon>
+              <p class="text-black" *ngIf="invoiceDetails?.data?.calculation?.expense">
+                <span tooltip="{{showTooltip(invoiceDetails?.data?.calculation?.expense)}}"  placement="bottom" delay="100">{{ invoiceDetails?.data?.calculation?.expense | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency} }}</span></p>
+                <p *ngIf="!invoiceDetails?.data?.calculation?.expense">
+                  <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                    width: '64px',
+                    height: '15px',
+                    'border-radius': '4px',
+                    'background-color': '#f8f8f9',
+                    'border-top': '0',
+                    'margin-top': '4px',
+                    'margin-bottom': '0px'
+                  }"></ngx-skeleton-loader>
+                </p>
+              <p class="small">{{ 'general_expense' | i18nextEager }}</p>
+            </div>
+            <button type="button" class="btn btn-light btn-operators rounded">
+              <icon name="add" size="12px" color="#ADB5BD" class="d-flex" cuclass="d-flex"></icon>
+            </button>
+            <div class="d-flex flex-column">
+              <icon name="local_mall" size="18px" color="#7F91F5" class="d-flex" cuclass="d-flex"></icon>
+              <p class="text-black" *ngIf="invoiceDetails?.data?.calculation?.misc_expense">
+                <span tooltip="{{showTooltip(invoiceDetails?.data?.calculation?.misc_expense)}}"  placement="bottom" delay="100">{{ invoiceDetails?.data?.calculation?.misc_expense | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency} }}</span></p>
+                <p *ngIf="!invoiceDetails?.data?.calculation?.misc_expense">
+                  <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                    width: '64px',
+                    height: '15px',
+                    'border-radius': '4px',
+                    'background-color': '#f8f8f9',
+                    'border-top': '0',
+                    'margin-top': '4px',
+                    'margin-bottom': '0px'
+                  }"></ngx-skeleton-loader>
+                </p>
+              <p class="small">{{ 'misc_expense' | i18nextEager }}</p>
+            </div>
+            <button type="button" class="btn btn-light btn-operators rounded">
+              <icon name="add" size="12px" color="#ADB5BD" class="d-flex" cuclass="d-flex"></icon>
+            </button>
+            <div class="d-flex flex-column">
+              <div class="progress-update">
+                <i class="material-icons-outlined">checklist_rtl</i>
+              </div>
+              <p class="text-black" *ngIf="invoiceDetails?.data?.calculation?.by_milestone">
+                <span tooltip="{{showTooltip(invoiceDetails?.data?.calculation?.by_milestone)}}"  placement="bottom" delay="100">{{ invoiceDetails?.data?.calculation?.by_milestone | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency} }}</span></p>
+                <p *ngIf="!invoiceDetails?.data?.calculation?.by_milestone">
+                  <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                    width: '64px',
+                    height: '15px',
+                    'border-radius': '4px',
+                    'background-color': '#f8f8f9',
+                    'border-top': '0',
+                    'margin-top': '4px',
+                    'margin-bottom': '0px'
+                  }"></ngx-skeleton-loader>
+                </p>
+              <p class="small">{{ 'progress_update' | i18nextEager }}</p>
+            </div>
+            <!-- <button type="button" class="btn btn-light btn-operators rounded mr-12">
+              <icon name="add" size="12px" color="#ADB5BD" class="d-flex" cuclass="d-flex"></icon>
+            </button> -->
+            <!-- <div class="d-flex flex-column">
+              <icon name="task" size="18px" color="#BF7FBA" class="d-flex" cuclass="d-flex"></icon>
+              <p class="text-black"> {{ '0.00' | customcurrency :
+                invoiceDetails?.data?.currency}} </p>
+              <p class="small">{{ 'sow' | i18nextEager }}</p>
+            </div> -->
+            <button type="button" class="btn btn-light btn-operators rounded">
+              =
+            </button>
+            <div class="d-flex flex-column ">
+              <icon name="payments" size="18px" color="#53A329" class="d-flex" cuclass="d-flex"></icon>
+              <p class="text-green" *ngIf="invoiceDetails?.data?.calculation?.total_amount">
+                <span tooltip="{{showTooltip(invoiceDetails?.data?.calculation?.total_amount)}}"  placement="bottom" delay="100">{{ invoiceDetails?.data?.calculation?.total_amount | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency} }}</span></p>
+                <p *ngIf="!invoiceDetails?.data?.calculation?.total_amount">
+                  <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                    width: '64px',
+                    height: '15px',
+                    'border-radius': '4px',
+                    'background-color': '#f8f8f9',
+                    'border-top': '0',
+                    'margin-top': '4px',
+                    'margin-bottom': '0px'
+                  }"></ngx-skeleton-loader>
+                </p>
+              <p class="small text-green">{{ 'total' | i18nextEager }}</p>
+            </div>
+            <button type="button" class="btn btn-light small" (click)="showTable = !showTable">
+              <icon name="keyboard_arrow_up" *ngIf="showTable" size="18px" color="#ADB5BD" class="d-flex"
+                cuclass="d-flex"></icon>
+              <icon name="keyboard_arrow_down" *ngIf="!showTable" size="18px" color="#ADB5BD" class="d-flex"
+                cuclass="d-flex"></icon>
+            </button>
+          </div>
+        </div>
+       </div>
+      </div>
+      <div class="col-md-3 p-24 border-left" *ngIf="invoiceDetails?.data?.invoice_status === 'approved'">
+        <svms-pie-mini-chart [isDoughnut]='true' [chartData]='chartData'></svms-pie-mini-chart>
+      </div>
+      <div class="col-12 p-12 border-top" *ngIf="showTable">
+        <div class="inv-overflow">
+          <table class="table-invoicing">
+            <thead>
+              <tr>
+                <td>
+                  {{ 'summary' | i18nextEager }}
+                </td>
+                <td>
+                  {{ 'timesheet' | i18nextEager }}
+                </td>
+                <td>
+                  {{ 'general_expense' | i18nextEager }}
+                </td>
+                <td>
+                  {{ 'misc_expense' | i18nextEager }}
+                </td>
+                <td>{{ 'progress_update' | i18nextEager }}</td>
+                <td>{{ 'vendor' | i18nextEager }}</td>
+                <td>{{ 'msp' | i18nextEager }}</td>
+                <td>{{ 'total' | i18nextEager }}</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <p *ngIf="!invoiceDetails?.data?.calculation?.amount_without_tax">
+                    <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                      width: '64px',
+                      height: '15px',
+                      'border-radius': '4px',
+                      'background-color': '#f8f8f9',
+                      'border-top': '0',
+                      'margin-top': '4px',
+                      'margin-bottom': '0px'
+                    }"></ngx-skeleton-loader>
+                  </p>
+                  <span *ngIf="invoiceDetails?.data?.calculation?.amount_without_tax" tooltip="{{showTooltip(invoiceDetails?.data?.calculation?.amount_without_tax)}}"  placement="bottom" delay="100">
+                  {{ invoiceDetails?.data?.calculation?.amount_without_tax | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency} }}
+                </span>
+                </td>
+                <td>
+                  <p *ngIf="!invoiceDetails?.data?.calculation?.timesheet">
+                    <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                      width: '64px',
+                      height: '15px',
+                      'border-radius': '4px',
+                      'background-color': '#f8f8f9',
+                      'border-top': '0',
+                      'margin-top': '4px',
+                      'margin-bottom': '0px'
+                    }"></ngx-skeleton-loader>
+                  </p>
+                  <span *ngIf="invoiceDetails?.data?.calculation?.timesheet" tooltip="{{showTooltip(invoiceDetails?.data?.calculation?.timesheet)}}"  placement="bottom" delay="100">
+                  {{ invoiceDetails?.data?.calculation?.timesheet | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency} }}
+                </span>
+                </td>
+                <td>
+                  <p *ngIf="!invoiceDetails?.data?.calculation?.expense">
+                    <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                      width: '64px',
+                      height: '15px',
+                      'border-radius': '4px',
+                      'background-color': '#f8f8f9',
+                      'border-top': '0',
+                      'margin-top': '4px',
+                      'margin-bottom': '0px'
+                    }"></ngx-skeleton-loader>
+                  </p>
+                  <span *ngIf="invoiceDetails?.data?.calculation?.expense" tooltip="{{showTooltip(invoiceDetails?.data?.calculation?.expense)}}"  placement="bottom" delay="100">
+                  {{ invoiceDetails?.data?.calculation?.expense | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency} }}
+                </span>
+                </td>
+                <td>
+                  <p *ngIf="!invoiceDetails?.data?.calculation?.misc_expense">
+                    <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                      width: '64px',
+                      height: '15px',
+                      'border-radius': '4px',
+                      'background-color': '#f8f8f9',
+                      'border-top': '0',
+                      'margin-top': '4px',
+                      'margin-bottom': '0px'
+                    }"></ngx-skeleton-loader>
+                  </p>
+                  <span *ngIf="invoiceDetails?.data?.calculation?.misc_expense" tooltip="{{showTooltip(invoiceDetails?.data?.calculation?.misc_expense)}}"  placement="bottom" delay="100">
+                  {{ invoiceDetails?.data?.calculation?.misc_expense | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency} }}
+                </span>
+                </td>
+                <td>
+                  <p *ngIf="!invoiceDetails?.data?.calculation?.by_milestone">
+                    <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                      width: '64px',
+                      height: '15px',
+                      'border-radius': '4px',
+                      'background-color': '#f8f8f9',
+                      'border-top': '0',
+                      'margin-top': '4px',
+                      'margin-bottom': '0px'
+                    }"></ngx-skeleton-loader>
+                  </p>
+                  <span *ngIf="invoiceDetails?.data?.calculation?.by_milestone" tooltip="{{showTooltip(invoiceDetails?.data?.calculation?.by_milestone)}}"  placement="bottom" delay="100">
+                  {{ invoiceDetails?.data?.calculation?.by_milestone | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency} }}
+                </span>
+                </td>
+                <!-- <td> {{ 0 | customcurrency :
+                  invoiceDetails?.data?.currency}}</td> -->
+                <td>
+                  <p *ngIf="!invoiceDetails?.data?.calculation?.vendor_total_amount">
+                    <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                      width: '64px',
+                      height: '15px',
+                      'border-radius': '4px',
+                      'background-color': '#f8f8f9',
+                      'border-top': '0',
+                      'margin-top': '4px',
+                      'margin-bottom': '0px'
+                    }"></ngx-skeleton-loader>
+                  </p>
+                  <span *ngIf="invoiceDetails?.data?.calculation?.vendor_total_amount" tooltip="{{showTooltip(invoiceDetails?.data?.calculation?.vendor_total_amount)}}"  placement="bottom" delay="100">
+                    {{ invoiceDetails?.data?.calculation?.vendor_total_amount | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency} }}
+                  </span>
+                  </td>
+                <td>
+                  <p *ngIf="!invoiceDetails?.data?.calculation?.msp_amount">
+                    <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                      width: '64px',
+                      height: '15px',
+                      'border-radius': '4px',
+                      'background-color': '#f8f8f9',
+                      'border-top': '0',
+                      'margin-top': '4px',
+                      'margin-bottom': '0px'
+                    }"></ngx-skeleton-loader>
+                  </p>
+                  <span *ngIf="invoiceDetails?.data?.calculation?.msp_amount" tooltip="{{showTooltip(invoiceDetails?.data?.calculation?.msp_amount)}}"  placement="bottom" delay="100">
+                    {{ invoiceDetails?.data?.calculation?.msp_amount | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency} }}
+                  </span>
+                </td>
+                <td>
+                  <p *ngIf="!invoiceDetails?.data?.calculation?.total_amount">
+                    <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                      width: '64px',
+                      height: '15px',
+                      'border-radius': '4px',
+                      'background-color': '#f8f8f9',
+                      'border-top': '0',
+                      'margin-top': '4px',
+                      'margin-bottom': '0px'
+                    }"></ngx-skeleton-loader>
+                  </p>
+                  <span *ngIf="invoiceDetails?.data?.calculation?.total_amount" tooltip="{{showTooltip(invoiceDetails?.data?.calculation?.total_amount)}}"  placement="bottom" delay="100">
+                     {{ invoiceDetails?.data?.calculation?.total_amount | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency} }}
+                    </span>
+                    </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-light mt-16 from-to-panel">
+    <div class="row no-gutters">
+      <div class="col-md-6 border-right d-flex align-items-center p-24 column-direction panel-center">
+        <img *ngIf="invoiceDetails?.data?.to?.logo" src="{{invoiceDetails?.data?.to?.logo}}" class="mr-12" width="150" />
+        <p *ngIf="!invoiceDetails?.data?.to?.logo" class="mr-12">
+          <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+            width: '150px',
+            height: '15px',
+            'border-radius': '4px',
+            'background-color': '#f8f8f9',
+            'border-top': '0',
+            'margin-bottom': '18px'
+          }"></ngx-skeleton-loader>
+        </p>
+        <div class="d-flex flex-column">
+          <p class="text-black font-weight-medium">{{ 'to' | i18nextEager }}</p>
+          <span class="text-break text-dark" *ngIf="invoiceDetails?.data?.to?.address">
+            {{invoiceDetails?.data?.to?.address}}
+          </span>
+          <p *ngIf="!invoiceDetails?.data?.to?.address">
+            <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+              width: '250px',
+              height: '15px',
+              'border-radius': '4px',
+              'background-color': '#f8f8f9',
+              'border-top': '0',
+              'margin-bottom': '18px'
+            }"></ngx-skeleton-loader>
+          </p>
+        </div>
+      </div>
+      <div class="col-md-6  d-flex align-items-center p-24 column-direction  panel-center">
+        <img *ngIf="invoiceDetails?.data?.from?.logo" src="{{invoiceDetails?.data?.from?.logo}}" class="mr-12" width="150" />
+        <p *ngIf="!invoiceDetails?.data?.from?.logo"  class="mr-12">
+          <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+            width: '150px',
+            height: '15px',
+            'border-radius': '4px',
+            'background-color': '#f8f8f9',
+            'border-top': '0',
+            'margin-bottom': '18px'
+          }"></ngx-skeleton-loader>
+        </p>
+        <div class="d-flex flex-column">
+          <p class="text-black font-weight-medium">{{ 'from' | i18nextEager }}</p>
+
+          <span class="text-break text-dark" *ngIf="invoiceDetails?.data?.from?.address">
+            {{invoiceDetails?.data?.from?.address}}
+          </span>
+          <p *ngIf="!invoiceDetails?.data?.from?.address">
+            <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+              width: '250px',
+              height: '15px',
+              'border-radius': '4px',
+              'background-color': '#f8f8f9',
+              'border-top': '0',
+              'margin-bottom': '18px'
+            }"></ngx-skeleton-loader>
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- <app-individual-invoice-list></app-individual-invoice-list> -->
+  </div>
+  <div class="meta-tooltip no-translate position-absolute" [ngClass]="{'active' : metaTooltip}">
+    <div class="p-12">
+      <p class="mb-8">
+        <strong>
+          {{ 'consolidated_on' | i18nextEager }}
+        </strong><br>
+          <span *ngIf="invoiceDetails?.data?.created_at" class="font-weight-medium">
+            {{getDate(invoiceDetails?.data?.created_at, false)}}
+        </span>
+      </p>
+      <p>
+        <strong>{{ 'consolidated_by' | i18nextEager }}:</strong> <br>
+        {{invoiceDetails?.data?.invoice_generation_type == "manual" ? invoiceDetails?.data?.updated_by?.name : "System (Process Automated)"}}
+      </p>
+      <p>
+        <span *ngIf="invoiceDetails?.data?.updated_by?.impersonated_by">
+        <strong>{{ 'impersonated_by' | i18nextEager }}:</strong> <br>
+        {{invoiceDetails?.data?.updated_by?.impersonated_by?.name}} - {{invoiceDetails?.data?.updated_by?.impersonated_by?.role?.name}}<span *ngIf="invoiceDetails?.data?.updated_by?.impersonated_by?.role?.user_type">({{invoiceDetails?.data?.updated_by?.impersonated_by?.role?.user_type}})</span>
+      </span>
+      </p>
+    </div>
+  </div>
+</ng-container>
+
+<app-withdraw-candidate (onActionSuccess)='onActionSuccess($event)'
+  (onWithdrawnCandidate)='onWithdrawnCandidate($event)'></app-withdraw-candidate>

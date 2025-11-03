@@ -1,0 +1,473 @@
+<div>
+  <div class="d-flex align-items-center  justify-content-between bg-light vms-header-panel" [ngClass]="isSelectedTab=='vendor bill' ? 'p-0':'p-24'">
+    <div class="d-flex vms-header-left">
+      <ul class="breadcrumb-list">
+        <li class="breadcrumb-listItem d-flex">
+          <a  class="title font-weight-medium" [class.title-color]="submenuName"
+            (click)="titleClicked(mainmenuName)"> {{mainmenuName | i18next}} </a>
+          <table-icon *ngIf="submenuName" class="sub-menu-arrow d-inline-block" size="20px" name="navigate_next"
+            type="material" cuClass="d-flex"></table-icon>
+          <a  *ngIf="submenuName" [tooltip]="submenuName | i18next" placement="bottom" class="page-title font-weight-medium">
+            {{submenuName| i18next}} </a>
+        </li>
+        <li class="breadcrumb-listItem expense-add-btn ml-8" [hidden]="!tableConfig?.isCreate" *authorize="tableConfig?.permission">
+          <button type="button" class="btn small btn-primary ml-8 rounded-circle add-btn" (click)="onCreateClick()"
+            tooltip="{{(isCreateButtonName? isCreateButtonName : 'Create '+tooltipName) | i18next}}" placement="right" delay="500">
+            <table-icon size="20px" name="add" type="material" cuClass="d-flex" class="d-flex">
+            </table-icon>
+            <!-- {{isCreateButtonName ? isCreateButtonName:createBtnName}} -->
+          </button>
+          <button type="button" class="btn small btn-primary rounded-circle d-none add-btn-mobile" (click)="onCreateClick()"
+            tooltip="{{(isCreateButtonName? isCreateButtonName : 'Create '+tooltipName) | i18next}}" placement="left" delay="500">
+            <table-icon size="20px" name="add" type="material" cuClass="d-flex" class="d-flex">
+            </table-icon>
+          </button>
+        </li>
+        <li class="breadcrumb-listItem" [hidden]="!tableConfig?.isDownload">
+          <button class="btn small btn-outine ml-12 pl-8 pr-8">
+            <table-icon size="20px" name="save_alt" type="material" cuClass="d-flex" class="d-flex"></table-icon>
+          </button>
+        </li>
+        <li class="breadcrumb-listItem mb-m-0" [hidden]="!tableConfig?.isViewBaseReport">
+          <button class="btn xx-small btn-outine ml-16 pl-8 pr-8 base-report-btn" (click)="baseReportClicked($event)">
+            <span class="hide-on-mobile">{{ 'view_base_report' | i18next }}</span>
+            <table-icon size="14px" name="call_made" type="material" cuClass="d-flex" class="d-flex"></table-icon>
+          </button>
+        </li>
+      </ul>
+    </div>
+    <div class="d-flex">
+      <ul class="listing-filter" [ngClass]="isSelectedTab=='vendor bill' ? 'vendor-bill--filter':''">
+        <li class="breadcrumb-listItem">
+          <div class="position-relative">
+            <button *ngIf="tableConfig?.showScoreCalculator" class="btn btn-success small" (click)="showScoreCalculator()">
+             <table-icon class="icon--on-left" color="#ffffff" name="view_carousel"></table-icon> {{'Score Calculation'|i18next}}</button>
+             <div class="header-dropdown calculator-popup bg-light border rounded-sm position-absolute" [hidden]="!scoreCalculator" (mouseleave)="hideCalculator()">
+              <div class="py-24 px-16 calculator-popup-head border-bottom">
+                <h5 class="mb-8 font-weight-bold">Weighted Calculation</h5>
+                <p class="small">The total must be 100</p>
+              </div>
+              <div class="calculator-popup-body">
+                <div *ngFor="let calfactor of tableConfig?.scoreFactors;let i = index" class="calculation-content d-flex justify-content-between border-bottom p-16">
+                  <div class="calculation-name">
+                    <p class="mb-8">{{calfactor.name | snakeToTitleCase | i18next}}</p>
+                    <div class="slider-wrapper">
+                      <input [(ngModel)]="+calfactor.value" [style]="{'backgroundSize':(!calfactor.value ? 0 : calfactor.value) +'%'}" [id]="calfactor.name" type="range" min="0" max="100" value="0" (change)="adjustFactors(i)"/>
+                    </div>
+                  </div>
+                  <div class="calculation-Weighted d-flex align-items-end">
+                    <p class="mb-8">Weighted %</p>
+                    <input onlyNumber min="0" max="100" [class]="getClassNameForScoreCal(calfactor.name)" [(ngModel)]="calfactor.value" (ngModelChange)="scoreFactorChange.next([calfactor.name,calfactor, i]);" />
+                  </div>
+                </div>
+                <div class="calculation-total d-flex justify-content-between p-16">
+                  <p class="font-weight-bold">{{'Total Score' | i18next}}</p>
+                  <p class="font-weight-bold pr-12">{{ total_sum + '%' }}</p>
+                </div>
+                <div class="pl-16 pb-16">
+                  <p *ngIf="total_sum > 100" class="font-weight-bold text-danger">{{'The total score should not exceed 100.'}}</p>
+                </div>
+              </div>
+              <div class="py-12 px-16 calculator-popup-footer d-flex justify-content-end align-items-center">
+                <button (click)="resetScoreCal()" class="btn btn-light mr-4">Reset</button>
+                <button [disabled]="total_sum!=100" (click)="calculateScoreCal()" class="btn btn-primary">Calculate</button>
+              </div>
+             </div>
+          </div>
+        </li>
+        <li class="breadcrumb-listItem hide-on-mobile" *ngIf="tableConfig?.showComparisonBtn">
+          <div class="position-relative d-flex align-items-center">
+            <button [disabled]="compareDisabledBtn"  (click)="compareCandidates()" class="btn btn-gray small mr-4">
+             <table-icon class="icon--on-left" color="#ffffff" name="view_carousel"></table-icon> {{'Compare Candidates'|i18next}}</button>
+             <icon cuClass="d-flex" name="help" size="16px" color="#A3B0C0" tooltip="Select at least two candidates from the listing page for comparison" placement="top"></icon>
+          </div>
+        </li>
+
+        <li class="breadcrumb-listItem">
+          <div *ngIf="tableConfig?.enableGenricListViewButton" class="position-relative checkout-new-btn">
+            <button class="btn btn-primary small" (click)="openGenericListPage($event)">
+              {{'check_out_new_view'|i18next}}</button>
+          </div>
+        </li>
+
+
+        <li class="breadcrumb-listItem sortby" [hidden]="!tableConfig?.isMonthYearFilter">
+              <div *ngIf="compliance?.is_allow && compliance?.options?.month">
+                <ng-select placeholder="{{ 'select_month' | i18next }}" [(ngModel)]="selectedMonth"  (change)="onMonthChange($event)">
+                  <ng-option *ngFor="let month of monthList" [value]="month.value">{{month.name|i18next}}</ng-option>
+                </ng-select>
+              </div>
+            </li>
+            <li class="breadcrumb-listItem sortby" [hidden]="!tableConfig?.isMonthYearFilter">
+              <div *ngIf="compliance?.is_allow && compliance?.options?.year">
+                <ng-select placeholder="{{ 'select_year' | i18next }}" [(ngModel)]="selectedYear" (change)="onYearChange($event)">
+                  <ng-option *ngFor="let year of yearList" [value]="year">{{year}}</ng-option>
+                </ng-select>
+              </div>
+            </li>
+
+        <li class="breadcrumb-listItem" [hidden]="!(tableConfig?.filterCandidateBy && tableConfig?.filterCandidateBy.length >= 1)">
+          <ng-select placeholder="" (change)="onFilterCandidate($event)" [(ngModel)]="selected" >
+            <ng-option [value]="columns?.value" *ngFor="let columns of  tableConfig?.filterCandidateBy">{{columns?.title | titlecase |i18next}}</ng-option>
+          </ng-select>
+        </li>
+        <li class="breadcrumb-listItem button-list-lg" *ngFor="let actionButton of tableConfig?.headerActionButtons">
+          <button *ngIf="totalItem > 0"  class="btn small btn-primary" [ngClass]="actionButton?.class"
+            [disabled]="!!actionButton?.disabled" placement="right" (click)="actionButtonClicked(actionButton)"
+            delay="500">
+            {{actionButton?.title | i18next}}
+          </button>
+        </li>
+        <li class="breadcrumb-listItem">
+          <a  class="btn small btn-outine green color-light"
+            [hidden]="!tableConfig?.isSelectSubmitButton" (click)="onSelectButtonClick($event)" placement="right"
+            delay="500">
+            <icon size="18px" name="check_box" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+            {{isSelectSubmitButtonName |i18next}}
+          </a>
+        </li>
+        <li class="breadcrumb-listItem position-relative" [hidden]="!tableConfig?.isDownloadButton"
+          (click)="openDropdown()" (clickOutside)="onClickedOutside($event)">
+          <a class="btn small btn-primary color-light" placement="right" delay="500">
+            {{ 'download' | i18next }}
+            <icon class="d-flex cursor-pointer icon--on-right" size="20px" name="arrow_drop_down" type="material"
+              cuClass="d-flex">
+            </icon>
+          </a>
+          <ul class="dropdown-menu-download" *ngIf="openDrop">
+            <li *ngIf="tableConfig?.downloadOptions?.excelOption" class="dropdown-item cursor-pointer" (click)="onDownloadClick('excel')">{{ 'excel' | i18next }}
+            </li>
+            <li *ngIf="tableConfig?.downloadOptions?.csvOption" class="dropdown-item cursor-pointer" (click)="onDownloadClick('csv')">{{ 'csv' | i18next }}
+            </li>
+            <li *ngIf="tableConfig?.downloadOptions?.pdfOption" class="dropdown-item cursor-pointer" (click)="onDownloadClick('pdf')">{{ 'pdf' | i18next }}
+            </li>
+          </ul>
+        </li>
+        <li class="breadcrumb-listItem position-relative" [hidden]="!tableConfig?.isPendingReportButton">
+          <a [href]="tableConfig?.routeLinkText" class="btn btn-primary color-light small">
+            <icon class="d-flex cursor-pointer icon--on-left" size="20px" name="pending_actions" type="material"
+              cuClass="d-flex"></icon> {{tableConfig?.routeLinkOption|i18next}}
+          </a>
+        </li>
+        <li class="search-field"
+          [hidden]="!tableConfig?.isSearch" [ngClass]="{'filter-enabled': tableConfig?.isFilter}">
+          <div class="position-relative search-head">
+            <input type="text" placeholder="{{searchPlaceHolder ||  'search_by_name_or_id' | i18next}}" [(ngModel)]="searchValue"
+              class="form-control" (keyup.enter)="onSearchClick($event)" (keyup)="onSearchClick($event)"
+              [ngClass]="{'no-radius': tableConfig?.isTheme}">
+            <table-icon size="17px" name="search" type="material" class="icon-search" cuClass="d-flex"
+              (click)="onSearchClick()">
+            </table-icon>
+          </div>
+          <div class="mobile-search-head" [ngClass]="{'seearch-opened' : isSearchOpen}">
+            <a  [ngClass]="{'hide' : isSearchOpen}" class="d-block btn small d-flex jiustify-align-center" #search>
+              <table-icon size="17px" name="search" type="material" cuClass="d-flex"></table-icon>
+            </a>
+            <div class="filter-search" [hidden]="!isSearchOpen" #searchInput>
+              <input type="text" placeholder="{{searchPlaceHolder ||  'Search By Name or ID' | i18next}}" [(ngModel)]="searchValue"
+                class="form-control search-input " (keyup.enter)="onSearchClick($event)" (keyup)="onSearchClick($event)"
+                [ngClass]="{'no-radius': tableConfig?.isTheme}">
+              <table-icon size="17px" name="search" type="material" class="search-trigger" cuClass="d-flex" (click)="onSearchClick()">
+              </table-icon>
+            </div>
+          </div>
+        </li>
+        <li class="position-relative hide-on-mobile" [hidden]="!tableConfig?.isSetting">
+          <a  class="btn small btn-outine" [tooltip]="'Table Settings' | i18next" placement="top" delay="200"
+            #setting>
+            <table-icon size="17px" name="settings" type="material" cuClass="d-flex"></table-icon>
+          </a>
+          <div class="header-dropdown bg-light border rounded-sm position-absolute" [hidden]="!showSettings"
+            #settingMenu>
+            <h5 class="px-16 py-12 font-weight-bold border-bottom">{{ 'customize_listing' | i18next }}</h5>
+            <div class="">
+              <h6 class="px-16 pb-4 pt-8 font-weight-bold">
+                {{ 'display_density' | i18next }}
+              </h6>
+              <ul class="density-tab px-16 pb-12 d-flex flex-row">
+                <li class="text-center py-8 mr-0" [ngClass]="{'active' : density === 'COMFORTABLE' }"
+                  (click)="onDensityClick('COMFORTABLE')">{{ 'comfortable' | i18next }}</li>
+                <li class="text-center py-8 mr-0" [ngClass]="{'active' : density === 'COMPACT' }"
+                  (click)="onDensityClick('COMPACT')">
+                  {{ 'compact' | i18next }}
+                </li>
+              </ul>
+              <h6 class="px-16 pb-4 pt-12 font-weight-bold">
+                {{ 'customize_columns' | i18next }}
+              </h6>
+              <div class="d-flex flex-column px-16 mb-8 reordring-column" dndDropzone dndEffectAllowed="copyMove"
+                (dndDrop)="onDrop($event)">
+                <div dndPlaceholderRef class="dndPlaceholder"></div>
+                <div class="toggle-inner d-flex align-items-center justify-content-between reordering-item"
+                  *ngFor="let col of tableConfig?.columnList, let i = index" [attr.data-index]="i" [dndDraggable]="col"
+                  (dndStart)="onDragStart(i)" [class.dnone]="(i===0)" [dndDisableIf]="!allowReordering" [dndDisableDragIf]="!allowReordering">
+                  <div class="toggle d-flex align-items-center"
+                    [ngClass]="filterList[col?.name] ? 'if-active' : 'if-inactive'">
+                    <table-icon size="40px" [name]="filterList[col?.name] ? 'toggle_on' : 'toggle_off'" type="material"
+                      cuClass="d-flex cursor-pointer" class="d-flex" (click)="onClickColumn(col?.name)">
+                    </table-icon>
+                    <span class="ml-4 toggle-name">{{(col?.title ? col?.title : col?.name) | i18next}}</span>
+                  </div>
+                  <span *ngIf="allowReordering" class="drag cursor-pointer">
+                    <table-icon size="20px" name="drag_indicator" type="material" cuClass="d-flex" class="d-flex">
+                    </table-icon>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="position-relative sortby d-none" *ngIf="!tableConfig?.isSort">
+          <!-- <a  class="small btn btn-outine p-0"> -->
+          <!-- <span class="mr-8">Sort by :</span> -->
+          <ng-select [clearable]="true" placeholder="{{ 'sort_by' | i18next }}" (change)="onClickSort($event)">
+            <!-- <ng-option [value]="'created'">{{ 'date_created' | i18next }}</ng-option>
+            <ng-option [value]="'updated'">{{ 'date_updated' | i18next }}</ng-option> -->
+            <ng-option [value]="columns?.key" *ngFor="let columns of sortOptions">{{columns?.title|i18next}}</ng-option>
+          </ng-select>
+          <!-- <span class="text-dark ml-4 mr-4"></span> -->
+          <!-- <table-icon size="17px" name="keyboard_arrow_down" type="material" class="text-dark" cuClass="d-flex">
+            </table-icon> -->
+          <!-- </a> -->
+        </li>
+        <li class="position-relative mr-m-0" [hidden]="!tableConfig?.isFilter">
+          <!--ui for no active filter-->
+          <a *ngIf="totalFilterApplied === 0" (click)="activateFilter()" class="small btn btn-outine" #filter [tooltip]="'filter' | i18next" placement="top"
+            delay="200">
+            <table-icon size="20px" name="filter_alt" class="" type="material" cuClass="d-flex"></table-icon>
+              <span class="hide-on-mobile">{{ 'filter' | i18next }}</span>
+            <span class="filter-active ml-12" *ngIf="tableConfig?.isTheme"></span>
+          </a>
+          <!--ui for active filter-->
+          <div *ngIf="totalFilterApplied > 0" class="active-filter btn small btn-primary">
+            <a  class="filter-trigger" (click)="activateFilter()" #filter>
+              <table-icon size="20px" name="filter_alt" type="material" cuClass="d-flex"></table-icon>
+            </a>
+            <span class="active-count font-weight-normal pl-4 pr-4" #filterCount>{{totalFilterApplied}}
+              {{ 'active_filters' | i18next }}</span>
+            <a  class="clear-filter" (click)="onAdFilterClear()"
+              [tooltip]="'Remove Active Filter(s)' | i18next" placement="top" delay="200">
+              <table-icon size="14px" name="close" type="material" cuClass="d-flex"></table-icon>
+            </a>
+          </div>
+          <program-filter *ngIf="tableConfig?.advanceFilter" [class.active]="showFilter"
+            [filter]="tableConfig?.advanceFilter" [isFilterCleard]="isFilterCleared" #filterMenu
+            (advanceSearchFilter)="onFilterDone($event)" (closeSearchFilter)="onCloseFilter($event)">
+          </program-filter>
+        </li>
+        <li class="position-relative btn-grid-view d-none">
+          <a  class="small btn btn-outine" [tooltip]="'Grid View' | i18next" placement="top" delay="200">
+            <table-icon size="24px" name="view_module" type="material" cuClass="d-flex"></table-icon>
+          </a>
+        </li>
+        <li class="position-relative btn-list-view d-none">
+          <a  class="small btn btn-outine active-grid" [tooltip]="'List View' | i18next" placement="top"
+            delay="200">
+            <table-icon size="24px" name="view_stream" type="material" cuClass="d-flex"></table-icon>
+          </a>
+        </li>
+        <li class="pagination mr-0 hide-on-mobile" [hidden]="!tableConfig?.isTopPagination">
+          <!-- Top Pagination -->
+          <ul class="d-flex">
+            <li *ngIf="currentPage != 1" class="position-relative btn-prev-page"
+              [ngClass]="{'remove-border-radius':currentPage != maxPages}">
+              <a href="#" class="small btn btn-outine pl-4 pr-4" (click)="onClick($event, '-1')" [tooltip]="'Previous Page' | i18next"
+                placement="top" delay="200">
+                <table-icon size="24px" name="arrow_left" type="material" cuClass="d-flex"></table-icon>
+              </a>
+            </li>
+            <li *ngIf="currentPage != maxPages" class="position-relative mr-0 btn-next-page"
+              [ngClass]="{'remove-border-radius':currentPage != firstPage}">
+              <a href="#" class="small btn btn-outine pl-4 pr-4" (click)="onClick($event, '+1')" [tooltip]="'Next Page' | i18next"
+                placement="top" delay="200">
+                <table-icon size="24px" name="arrow_right" type="material" cuClass="d-flex">
+                </table-icon>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="position-relative mr-0 view-type no-radius-right" [hidden]="!tableConfig?.isTheme">
+          <!--ui for list view-->
+          <a  class="small btn btn-light bg-light active">
+            <table-icon size="22px" name="reorder" type="material" cuClass="d-flex"></table-icon>
+          </a>
+        </li>
+        <li class="position-relative mr-0 view-type no-radius " [hidden]="!tableConfig?.isTheme">
+          <!--ui for kanban view-->
+          <a  class="small btn btn-light bg-light">
+            <table-icon theme="outlined" size="22px" name="view_stream" type="material" cuClass="d-flex"></table-icon>
+          </a>
+        </li>
+        <li class="position-relative mr-0 view-type no-radius-left " [hidden]="!tableConfig?.isTheme">
+          <!--ui for grid view-->
+          <a  (click)="showGridViewLayout($event)" class="small btn btn-light bg-light">
+            <table-icon size="22px" name="apps" type="material" cuClass="d-flex"></table-icon>
+          </a>
+        </li>
+        <li class="breadcrumb-listItem position-relative mr-m-0" *ngIf="customDownload?.length > 0" style="margin-right: 30px; margin-left: 8px;"
+          (click)="customDropdown = !customDropdown" (clickOutside)="customDropdown = false;">
+          <a class="btn small btn-primary color-light" placement="left" delay="500">
+            {{ 'download' | i18next }}
+            <icon class="d-flex cursor-pointer icon--on-right" size="20px" name="arrow_drop_down" type="material"
+              cuClass="d-flex">
+            </icon>
+          </a>
+          <ul class="dropdown-menu-download" *ngIf="customDropdown">
+            <li (click)="goToURL(download.path)" class="dropdown-item cursor-pointer"
+              *ngFor="let download of customDownload">{{download.file_name}}
+              ({{download.file_extention}})
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+
+  <ul class="theme-filter" *ngIf="tableConfig?.isTheme">
+    <!-- <li>
+      Active Filters <table-icon size="14px" name="cancel" type="material" cuClass="d-flex"></table-icon>
+    </li>
+    <li>
+      Preferred Pay Rate : <span>$30 - $140</span> <table-icon size="14px" name="cancel" type="material" cuClass="d-flex"></table-icon>
+    </li>
+    <li>
+      Estimated Hours : <span>30h - 90h</span> <table-icon size="14px" name="cancel" type="material" cuClass="d-flex"></table-icon>
+    </li>
+    <li>
+      Match Score : <span>50% +</span> <table-icon size="14px" name="cancel" type="material" cuClass="d-flex"></table-icon>
+    </li>
+    <li>
+      Estimated Payrate : <span>$3000+</span> <table-icon size="14px" name="cancel" type="material" cuClass="d-flex"></table-icon>
+    </li>
+    <li>
+      Available Date : <span>12/04/2020</span> <table-icon size="14px" name="cancel" type="material" cuClass="d-flex"></table-icon>
+    </li> -->
+  </ul>
+  <!-- <div *ngIf="tableConfig?.showTabs" class="tab-wraper d-flex align-items-center justify-content-between bg-light">
+    <ul class="assignment-tab">
+      <li class="position-relative px-24 mr-4" [ngClass]="{'active-tab': selectedTab == tab}"
+        *ngFor="let tab of tableConfig?.tabsList" (click)="tabClick(tab)">
+        {{tab}}
+      </li>
+    </ul>
+  </div> -->
+</div>
+<div>
+</div>
+
+<div class="mobile-header-buttons">
+  <div *ngFor="let actionButton of tableConfig?.headerActionButtons">
+    <button  class="btn small btn-primary" [ngClass]="actionButton?.class"
+      [disabled]="!!actionButton?.disabled" placement="right" (click)="actionButtonClicked(actionButton)"
+      delay="500">
+      {{actionButton?.title | i18next}}
+    </button>
+  </div>
+</div>
+<div class="record-option position-fixed px-m-0" *ngIf="tableConfig?.subHeaderActionButtons?.length">
+  <div class="d-flex align-items-center justify-content-between px-24 py-16 column-direction align-items-start-m" *ngIf="selectedRecordsCount">
+    <div>
+      <p class="font-weight-medium mr-32 mr-md-16">
+        {{selectedRecordsCount}} {{'records_selected(s)' | i18next}}.
+        <a class="ml-4" *ngIf="selectAllRecordsFromBar && showAllRecordsToggle"  (click)="onSelectAllRecords()"> {{'select_all' | i18next}} {{selectedAllRecordsCount}} {{'records'|i18next}}.</a>
+
+      </p>
+    </div>
+    <div class="d-flex align-items-center-m ml-30 ml-m-0 mt-m-8">
+      <ng-container *ngIf="!tableConfig.isActionDropdown">
+      <div *ngFor="let button of tableConfig?.subHeaderActionButtons" class="ml-8 ml-m-0">
+        <button class="btn btn-primary"  [disabled]="!selectedRecordsCount" (click)="actionButtonClicked(button)" delay="500">{{button.title|i18next}}</button>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="tableConfig.isActionDropdown">
+      <div *ngIf="tableConfig?.subHeaderActionButtons?.length" class="actions">
+        <button class="btn btn-primary" #action>
+          <span class="hide-on-mobile">{{ 'actions' | i18nextEager }}</span>
+          <icon class="icon--on-right hide-on-mobile" size="20px" type="material" cuClass="icon-cu"
+            [name]="actionVisibility ? 'keyboard_arrow_up' : 'keyboard_arrow_down'">
+          </icon>
+          <icon class="hide-on-desktop" size="20px" name="more_horiz" type="material" cuClass="icon-cu">
+          </icon>
+        </button>
+        <ul class="action-list position-absolute bg-light rounded-sm" [ngClass]="{ active: actionVisibility }" #actionList>
+          <li *ngFor="let button of tableConfig?.subHeaderActionButtons">
+            <button (click)="actionButtonClicked(button)" type="button">
+              {{button?.title}}
+            </button>
+          </li>
+        </ul>
+      </div>
+    </ng-container>
+    <p class="ml-8 bg-light rounded-sm">  <a class=""    (click)="onClearSelection()"><table-icon name="close" size="24px"></table-icon></a></p>
+  </div>
+</div>
+</div>
+<div class="d-flex align-items-center px-24 justify-content-between bg-light mt-16 tab-mobile-view" *ngIf="tableConfig?.showTabs && tableConfig?.tabsList && isSelectedTab!='vendor bill'" appResponsiveMenu dataLoaded="{{tableConfig?.tabsList.length}}">
+  <ul class="tabs primary not-loaded">
+    <li class="position-relative d-flex align-items-end active-tab pb-4"
+      *ngFor="let tab of tableConfig?.tabsList;let i=index" [ngClass]="{'active-tab': getActiveTab(tab) }"
+      (click)="tabClick(tab)">
+      <span class="mb-0 font-weight-medium">{{tab | i18next}}</span>
+      <span class="rounded-sm ml-12 count pl-4 pr-4" *ngFor="let c of count;let j = index" [hidden]="j != i">
+        {{c | i18next}}
+      </span>
+      <ngx-skeleton-loader animation="progress" appearance="line" [theme]="{
+                      width: '40px',
+                      height: '17px',
+                      'border-radius': '14px',
+                      'background-color': '#e9e6ef',
+                      'margin-bottom': '-3px',
+                      'margin-left': '4px'
+                    }" *ngIf="!count">
+      </ngx-skeleton-loader>
+    </li>
+    <!-- <li class="position-relative d-flex align-items-end pb-12">
+      <span class="mb-0">Open Jobs</span>
+      <span class="rounded-sm ml-8 count">16</span>
+    </li>
+    <li class="position-relative d-flex align-items-end pb-12">
+      <span class="mb-0">Filled Jobs</span>
+      <span class="rounded-sm ml-8 count">16</span>
+    </li>
+    <li class="position-relative d-flex align-items-end pb-12">
+      <span class="mb-0">Closed Jobs</span>
+      <span class="rounded-sm ml-8 count">16</span>
+    </li>
+      <li class="position-relative d-flex align-items-end pb-12">
+        <span class="mb-0">Pending Approval</span>
+        <span class="rounded-sm ml-8 count">16</span>
+      </li> -->
+      <li class="more">
+        <a >{{moreBtnText | i18next}}</a>
+        <div class="secondary">
+          <span class="d-none position-relative nav-close-btn text-right">
+            <a >
+              <icon name="close" size="18px"></icon>
+            </a>
+          </span>
+          <ul>
+            <li class="secondary-item position-relative  align-items-end active-tab pb-4"
+            *ngFor="let tab of tableConfig?.tabsList;let i=index" [ngClass]="{'active-tab': getActiveTab(tab) }"
+            (click)="subTabClick(tab)">
+            <div class="d-flex">
+              <span class="mb-0 font-weight-medium">{{tab | i18next}}</span>
+              <span class="rounded-sm ml-12 count pl-4 pr-4" *ngFor="let c of count;let j = index" [hidden]="j != i">
+                {{c | i18next}}
+              </span>
+              <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                        width: '26px',
+                        height: '17px',
+                        'border-radius': '14px',
+                        'background-color': '#e9e6ef',
+                        'margin-bottom': '-3px',
+                        'margin-left': '4px'
+                      }" *ngIf="!count">
+              </ngx-skeleton-loader>
+            </div>
+          </li>
+          </ul>
+        </div>
+    </li>
+  </ul>
+</div>

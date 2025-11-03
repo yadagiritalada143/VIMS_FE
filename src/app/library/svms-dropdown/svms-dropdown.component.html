@@ -1,0 +1,20 @@
+<div (clickOutside)="hideDropdownBox($event)" (touchend)="hideDropdownBox($event)" *ngIf="showActionLinks">
+  <nav class="action-dropdown-list" [ngClass]="{ active: rowDropdownTrigger, 'top-pos':position == 'top'}" #optionDropdownMenu>
+    <ul>
+      <ng-container *ngFor="let actionLink of actionLinks">
+        <li *ngIf="!actionLink?.hide" (click)="onActionClick(actionLink)" [ngClass]="{disabled: actionLink?.disable}">
+          <a >
+            {{ actionLink?.linkName | i18next }}
+          </a>
+        </li>
+      </ng-container>
+
+    </ul>
+  </nav>
+
+  <span class="action-list" [ngClass]="{ active: rowDropdownTrigger }" #optionButton (click)="toogleDropDown()">
+    <i class="material-icons">more_horiz</i>
+  </span>
+
+
+</div>

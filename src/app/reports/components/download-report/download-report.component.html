@@ -1,0 +1,96 @@
+<!--<div class="download-report-header">-->
+<!--  <p class="header-text"></p>-->
+<!--  <span class="exit-btn">-->
+<!--    <i class="material-icons cursor-pointer"-->
+<!--       (click)=hideModal()>-->
+<!--      {{ 'cancel' | i18next }}-->
+<!--    </i>-->
+<!--  </span>-->
+<!--</div>-->
+<div class="download-report">
+  <div class="download-report__header">
+    <div class="download-report__header__icon">
+      <span class="material-icons-outlined">{{ 'file_download' }}</span>
+    </div>
+    <div>
+      <div class="download-report__header__title">{{ 'download_data' | i18next }}</div>
+      <div class="download-report__header__description">{{ 'select_options_to_download_report' | i18next }}</div>
+    </div>
+    <span class="material-icons-outlined cursor-pointer download-report__header__close-icon"
+      (click)="hideModal()">close</span> <!-- No translation needed for this. It is icon name. -->
+  </div>
+  <app-logs [log]="logs"></app-logs>
+  <form class="download-report__container" [formGroup]="downloadReportForm">
+    <ng-container *ngIf="_reportConfigData?.show_filter_in_download">
+      <div class="form-group-row">
+        <div class="form-group date-picker position-relative">
+          <label> {{ 'start_date' | i18next }} <span class="require">*</span> </label>
+          <svms-datepicker [placeholder]="'DD/MM/YYYY'| i18nextEager" [inputdateFormat]="dateFormat" [options]="datepickerOptions.start_date" id="start_date" I18n formControlName="start_date" (onDateChange)="validateDateFilter('start_date')"></svms-datepicker>
+        </div>
+        <div class="form-group date-picker position-relative">
+          <label> {{ 'end_date' | i18next }} <span class="require">*</span> </label>
+          <svms-datepicker [placeholder]="'DD/MM/YYYY'| i18nextEager" [inputdateFormat]="dateFormat" [options]="datepickerOptions.end_date" id="end_date" I18n formControlName="end_date" (onDateChange)="validateDateFilter()"></svms-datepicker>
+        </div>
+      </div>
+      <div class="date-filter-note">
+        <div>Dates related to {{_reportConfigData?.filter_in_download?.label}}</div>
+        <div [ngClass]="{'error-message': hasDateFilterError}">{{ maxPeriodNote }}</div>
+      </div>
+    </ng-container>
+    <div class="download-report__container__data" *ngIf="!isexpenseReport">
+      <div class="form-group">
+        <label>{{ 'data' | i18next }}</label>
+        <div class="switch-field">
+          <input id="filtered-data" name="data" type="radio" [value]="'filtered'" formControlName="data" />
+          <label for="filtered-data">{{ 'filtered_report' | i18next }}</label>
+          <input id="all-data" name="data" type="radio" [value]="'all'" formControlName="data" />
+          <label for="all-data">{{ 'default_report' | i18next }}</label>
+        </div>
+        <p class="small text-primary d-flex align-items-center" *ngIf="formcontrol?.data?.value === 'all'">
+          <icon name="info" size="18px" theme="outlined" color="inherit" class="d-flex mr-4" cuclass="d-flex"> </icon>
+          <span>{{ 'default_report_will_contain_data_defined_by_the_platform' | i18next }}</span>
+        </p>
+      </div>
+    </div>
+    <div class="download-report__container__format">
+      <div class="form-group">
+        <label>{{ 'format' | i18next }}</label>
+        <div class="switch-field">
+          <ng-container *ngFor="let format of downloadReportFormats; let i = index">
+            <input *ngIf ="format?.display" [id]="format?.format" name="format" type="radio" [value]="format" formControlName="format" [checked]=" i == 0" />
+            <label [for]="format?.format" *ngIf="format?.display">
+              <img [src]="format?.icon" [alt]="format?.icon" class="mr-8" />
+              <span> {{ format.name | i18next }}</span>
+            </label>
+          </ng-container>
+        </div>
+      </div>
+      <div class="form-group">
+        <span class="pr-8">
+          <input type="checkbox" [checked]="sendToMail" (change)="sendToMail = !sendToMail;">
+          <span class="checkmark"></span>
+        </span>
+        <span>{{ 'send_to_my_mail_instead' | i18next }}</span>
+      </div>
+    </div>
+    <div class="download-report__container__action">
+      <button type="submit" class="btn download-report__container__action__download-btn" (click)="downloadReport()"
+        [disabled]="showProgress || downloadReportForm?.invalid">
+        <div class="download-report__container__action__download-btn__loader" *ngIf="showProgress">
+          <svg version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+            x="0px" y="0px" width="40px" height="40px" viewBox="0 0 50 50" style="enable-background: new 0 0 50 50"
+            xml:space="preserve">
+            <path fill="#000"
+              d="M43.935,25.145c0-10.318-8.364-18.683-18.683-18.683c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615c8.072,0,14.615,6.543,14.615,14.615H43.935z">
+              <animateTransform attributeType="xml" attributeName="transform" type="rotate" from="0 25 25"
+                to="360 25 25" dur="0.6s" repeatCount="indefinite" />
+            </path>
+          </svg>
+          <span>{{ sendToMail ? 'Preparing to send mail' : 'Preparing download' | i18next }}</span>
+        </div>
+        <span *ngIf="!showProgress">{{ sendToMail ? 'Submit to Send' : 'Download Report Data' | i18next }}</span>
+      </button>
+    </div>
+  </form>
+</div>
+<div class="dialog-backdrop position-fixed active"></div>

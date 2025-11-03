@@ -1,0 +1,309 @@
+<div class="comparison-ui">
+  <a class="back-btn" (click)="backToSubmitted(true)">
+    <icon name="chevron_left" class="d-inline-block" size="24px" cuClass="d-flex"></icon>
+    <span>{{'Back to Submitted Candidates'|i18next}}</span>
+  </a>
+  <div class="mt-24">
+    <div class="comparison-box">
+      <perfect-scrollbar [config]="scrollConfig">
+        <div class="comparison-items d-flex">
+          <div class="first item py-12 px-4 mr-8">
+            <button class="btn btn-primary">
+              <icon name="view_carousel" size="20px" cuClass="d-flex" class="button-icon mb-12 d-flex align-items-center justify-content-center"></icon>
+              <span>{{'Candidate Comparison'|i18next}}</span>
+            </button>
+            <div *ngIf="isScoringEnabled">
+              <div class="circular-progres px-8 py-12 d-flex align-items-center justify-content-start">
+                <p class="font-weight-medium">{{'Overall Score'|i18next}}</p>
+              </div>
+              <h6 class="title">{{'Category Based Score'|i18next}}</h6>
+              <div class="item-value border-bottom">
+                <p class="small font-weight-medium">{{'Skills'|i18next}}</p>
+              </div>
+              <div class="item-value border-bottom">
+                <p class="small font-weight-medium">{{'Labor Category'|i18next}}</p>
+              </div>
+              <div class="item-value border-bottom">
+                <p class="small font-weight-medium">{{'Job Titles'|i18next}}</p>
+              </div>
+              <div class="item-value border-bottom">
+                <p class="small font-weight-medium">{{'Education'|i18next}}</p>
+              </div>
+              <div class="item-value">
+                <p class="small font-weight-medium">{{'Certification'|i18next}}</p>
+              </div>
+            </div>
+            <h6 class="title">{{'Skills'|i18next}}</h6>
+            <div class="item-value">
+              <p class="small font-weight-medium">{{'Top Skills'|i18next}}</p>
+            </div>
+            <h6 class="title">{{'Labor Category'|i18next}}</h6>
+            <div class="item-value">
+              <p class="small font-weight-medium">{{'Labor Categories'|i18next}}</p>
+            </div>
+            <h6 class="title">{{'Job Titles'|i18next}}</h6>
+            <div class="item-value">
+              <p class="small font-weight-medium">{{'Recent Job Title'|i18next}}</p>
+            </div>
+            <h6 class="title">{{'Education'|i18next}}</h6>
+            <div class="item-value">
+              <p class="small font-weight-medium">{{'Education'|i18next}}</p>
+            </div>
+            <h6 class="title">{{'Certification'|i18next}}</h6>
+            <div class="item-value">
+              <p class="small font-weight-medium">{{'Certification'|i18next}}</p>
+            </div>
+          </div>
+          <div class="item py-12 px-4 mr-8 border" *ngFor="let item of candidateComparisonData;let i = index;">
+            <header class="item-header position-relative rounded-sm p-12">
+              <div class="d-flex align-items-start pb-4">
+                  <ng-container *ngIf="item?.image; else showInitials">
+                    <figure class="overflow-hidden">
+                      <img [src]="item?.image" alt="profile image" width="36" height="36">
+                    </figure>
+                  </ng-container>
+                  <ng-template #showInitials>
+                    <span class="initials initials__purple big_initial"> {{item?.candidate_info?.name_initials}}</span>
+                  </ng-template>
+                <div class="pl-16 candidate-name">
+                  <h6 class="font-weight-medium">{{item?.candidate_info?.first_name}} {{item?.candidate_info?.last_name}}</h6>
+                  <p class="small">{{item?.candidate_info?.vendor?.name}}</p>
+                  <p class="status-ui mt-8" [ngClass]="getStatusClass(item?.candidate_info?.status)">{{snakeCaseToTitle(item?.candidate_info?.status) |i18next}}</p>
+                </div>
+              </div>
+              <div class="d-flex flex-direction-column">
+               <div class="detail-item d-flex p-8">
+                  <icon name="email" size="20px" theme="outlined" cuClass="d-flex"></icon>
+                  <p class="small px-24 text-truncate" [title]="item?.candidate_info?.email">{{item?.candidate_info?.email}}</p>
+               </div>
+               <div class="detail-item d-flex p-8">
+                  <icon name="phone" size="20px" theme="outlined" cuClass="d-flex"></icon>
+                  <p class="small px-24">
+                    {{ (item?.candidate_info?.phone_isdcode && item?.candidate_info?.phone_isdcode[0] === '+') ? item?.candidate_info?.phone_isdcode : '+' + item?.candidate_info?.phone_isdcode }}
+                    {{ item?.candidate_info?.phone_number }}
+               </div>
+              </div>
+
+              <span  class="vert-icon cursor-pointer p-4 ml-8 float-right option-dd-button position-absolute">
+               <icon (click)="openDropdown(i)" name="more_vert" size="24px" cuClass="d-flex compare-dropdown-option"></icon>
+              </span>
+              <div *ngIf="dropdowntoggle == i" (clickOutside)="closeDropdown($event)"  [exclude]="'.compare-dropdown-option'" class="more-dropdown position-absolute rounded-sm">
+                <div id="dropdownUnorderList">
+                  <ng-container *ngIf="item?.candidate_info?.status.toLowerCase() === 'pending_shortlist'">
+                  <p *ngIf="(currentProgram?.config?.submission?.is_shortlisting_enabled && shortlistActor) || userType === 'SUPER_ORG' "> <!-- && this.submissionDetails?.offer_visibility-->
+                      <a (click)="shortList(item?.candidate_info)">{{'shortlist'|i18next}}</a>
+                  </p>
+                </ng-container>
+
+                  <ng-container *authorize="'schedule_interview'">
+                    <p *ngIf="!isInterviewHidden(item, userType)">
+                      <a (click)="scheduleInterview(item?.candidate_info)">{{ 'schedule_interview' | i18next }}</a>
+                    </p>
+                  </ng-container>
+                  <ng-container *authorize="'create_offer'">
+                    <p [hidden]="jobStatus == 'PENDING_APPROVAL_SOURCING' || jobStatus == 'PENDING_APPROVAL' ||
+                    jobStatus == 'FILLED'" *ngIf="(item?.candidate_info?.status?.toLowerCase() === 'submitted' || item?.candidate_info?.status?.toLowerCase() === 'pending_interview_acceptance') && item?.candidate_info?.offer_visibility">
+                      <a (click)="clickToCreateOffer(item?.candidate_info)"> {{ 'create_offer' | i18next }}
+                      </a>
+                    </p>
+                  </ng-container>
+                  <ng-container *authorize="'reject_candidate'">
+                    <ng-container>
+                      <p *ngIf="!isRejectCandidateHidden(item, userType)">
+                        <a class="text-danger" (click)="clickToRejectCandidate(item?.candidate_info)">
+                          {{ 'reject_candidate' | i18next }}
+                        </a>
+                      </p>
+                    </ng-container>
+                  </ng-container>
+                  <ng-container *ngIf="noActionMessages">
+                    <div class="no-action-message"  >
+                      <a >
+                        {{ 'no_actions_available' | i18next }}
+                      </a>
+                    </div>
+                  </ng-container>
+                </div>
+              </div>
+            </header>
+            <div *ngIf="isScoringEnabled">
+              <div class="circular-progres px-8 py-12 d-flex align-items-center justify-content-center">
+                <style type="text/css">
+                  @property --progress-value {
+                    syntax: '<integer>';
+                    inherits: false;
+                    initial-value: 0;
+                  }
+            
+                  @keyframes html-progress {
+                    to {
+                      --progress-value: var(--progress-val, 0);
+                    }
+                  }
+            
+                  .circular-progress-bar {
+                    background:
+                      radial-gradient(closest-side, white 79%, transparent 80% 100%),
+                      conic-gradient(#84919F calc(var(--progress-value) * 1%), #E9ECEF 0);
+                    animation: html-progress 2s 1 forwards;
+            
+                    &:before {
+                      counter-reset: percentage var(--progress-value);
+                      content: counter(percentage);
+                      animation: html-progress 2s 1 forwards;
+                      padding: 8px;
+                      font-weight: 600;
+                    }
+            
+                    &.low {
+                      background:
+                        radial-gradient(closest-side, white 79%, transparent 80% 100%),
+                        conic-gradient(#FF1A23 calc(var(--progress-value) * 1%), #E9ECEF 0);
+            
+                      &::before {
+                        color: #FF1A23;
+                      }
+                    }
+            
+                    &.average {
+                      background:
+                        radial-gradient(closest-side, white 79%, transparent 80% 100%),
+                        conic-gradient(#FFB100 calc(var(--progress-value) * 1%), #E9ECEF 0);
+            
+                      &::before {
+                        color: #FFB100;
+                      }
+                    }
+            
+                    &.excellent {
+                      background:
+                        radial-gradient(closest-side, white 79%, transparent 80% 100%),
+                        conic-gradient(#26DE4A calc(var(--progress-value) * 1%), #E9ECEF 0);
+            
+                      &::before {
+                        color: #26DE4A;
+                      }
+                    }
+                  }
+                </style>
+                <div class="circular-progress-wrapper d-flex align-items-center">
+                  <div [style.--progress-val]="item.score" [ngClass]="getProgressBarPercentage(item?.score)"
+                    class="circular-progress-bar circular-bar-comparison"> </div>
+                </div>
+              </div>
+              <h6 class="title">{{'Category Based Score'|i18next}}</h6>
+              <!--Skills-->
+              <div class="item-value border-bottom">
+                <div class="linear-progress-bar d-flex align-items-center justify-content-between">
+                  <div class="linear-rail linear-comparision mr-12">
+                    <span [ngStyle]="{ 'width': item?.individual_scores?.skills?.score + '%' }"
+                      [ngClass]="getProgressBarPercentage(item?.individual_scores?.skills?.score)"></span>
+                  </div>
+                  <p class="small">{{item?.individual_scores?.skills?.score || 0}}%</p>
+                </div>
+              </div>
+              <!--Labor Category-->
+              <div class="item-value border-bottom">
+                <div class="linear-progress-bar d-flex align-items-center justify-content-between">
+                  <div class="linear-rail linear-comparision mr-12">
+                    <span [ngStyle]="{ 'width': item?.individual_scores?.labor_category?.score + '%' }"
+                      [ngClass]="getProgressBarPercentage(item?.individual_scores?.labor_category?.score)"></span>
+                  </div>
+                  <p class="small">{{item?.individual_scores?.labor_category?.score || 0}}%</p>
+                </div>
+              </div>
+              <!--Job titles-->
+              <div class="item-value border-bottom">
+                <div class="linear-progress-bar d-flex align-items-center justify-content-between">
+                  <div class="linear-rail linear-comparision mr-12">
+                    <span [ngStyle]="{ 'width': item?.individual_scores?.job_title?.score + '%' }"
+                      [ngClass]="getProgressBarPercentage(item?.individual_scores?.job_title?.score)"></span>
+                  </div>
+                  <p class="small">{{item?.individual_scores?.job_title?.score || 0}}%</p>
+                </div>
+              </div>
+              <!--Education-->
+              <div class="item-value border-bottom">
+                <div class="linear-progress-bar d-flex align-items-center justify-content-between">
+                  <div class="linear-rail linear-comparision mr-12">
+                    <span [ngStyle]="{ 'width': item?.individual_scores?.education?.score + '%' }"
+                      [ngClass]="getProgressBarPercentage(item?.individual_scores?.education?.score)"></span>
+                  </div>
+                  <p class="small">{{item?.individual_scores?.education?.score || 0}}%</p>
+                </div>
+              </div>
+              <!--Certification-->
+              <div class="item-value">
+                <div class="linear-progress-bar d-flex align-items-center justify-content-between">
+                  <div class="linear-rail linear-comparision mr-12">
+                    <span [ngStyle]="{ 'width': item?.individual_scores?.certification?.score + '%' }"
+                      [ngClass]="getProgressBarPercentage(item?.individual_scores?.certification?.score)"></span>
+                  </div>
+                  <p class="small">{{item?.individual_scores?.certification?.score || 0}}%</p>
+                </div>
+              </div>
+            </div>
+            <!--infomration section-->
+            <h6 class="title">{{'Skills'|i18next}}</h6>
+            <div class="item-value text-center text-center">
+              <p class="small font-weight-medium text-truncate" [tooltip]="joinData(item?.individual_scores?.skills?.data)" placement="top" *ngIf="item?.individual_scores?.skills?.data?.length > 0; else emptySkils">
+                <ng-container *ngFor="let val of item?.individual_scores?.skills?.data; let last = last">
+                    {{ val }}{{ !last ? ',' : '' }}
+                </ng-container>
+              </p>
+              <ng-template #emptySkils>
+                <p class="small font-weight-medium">--</p>
+              </ng-template>
+            </div>
+            <h6 class="title">{{'Labor Category'|i18next}}</h6>
+            <div class="item-value text-center">
+              <p class="small font-weight-medium text-truncate" [tooltip]="joinData(item?.individual_scores?.labor_category?.data)" placement="top" *ngIf="item?.individual_scores?.labor_category?.data?.length > 0; else emptylaborCategory">
+                <ng-container *ngFor="let val of item?.individual_scores?.labor_category?.data; let last = last">
+                    {{ val }}{{ !last ? ',' : '' }}
+                </ng-container>
+              </p>
+              <ng-template #emptylaborCategory>
+                <p class="small font-weight-medium">--</p>
+              </ng-template>
+            </div>
+            <h6 class="title">{{'Job Titles'|i18next}}</h6>
+            <div class="item-value text-center">
+              <p class="small font-weight-medium text-truncate" [tooltip]="joinData(item?.individual_scores?.job_title?.data)" placement="top" *ngIf="item?.individual_scores?.job_title?.data?.length > 0; else emptyJobtitle">
+                <ng-container *ngFor="let val of item?.individual_scores?.job_title?.data; let last = last">
+                    {{ val }}{{ !last ? ',' : '' }}
+                </ng-container>
+              </p>
+              <ng-template #emptyJobtitle>
+                <p class="small font-weight-medium">--</p>
+              </ng-template>
+            </div>
+            <h6 class="title">{{'Education'|i18next}}</h6>
+            <div class="item-value text-center">
+              <p class="small font-weight-medium text-truncate" [tooltip]="joinData(item?.individual_scores?.education?.data)" placement="top" *ngIf="item?.individual_scores?.education?.data?.length > 0; else emptyEducation">
+                <ng-container *ngFor="let val of item?.individual_scores?.education?.data; let last = last">
+                    {{ val }}{{ !last ? ',' : '' }}
+                </ng-container>
+              </p>
+              <ng-template #emptyEducation>
+                <p class="small font-weight-medium">--</p>
+              </ng-template>
+
+            </div>
+            <h6 class="title">{{'Certification'|i18next}}</h6>
+            <div class="item-value text-center">
+              <p class="small font-weight-medium text-truncate" [tooltip]="joinData(item?.individual_scores?.certification?.data)" placement="top" *ngIf="item?.individual_scores?.certification?.data?.length > 0; else emptyCertification">
+                <ng-container *ngFor="let val of item?.individual_scores?.certification?.data; let last = last">
+                    {{ val }}{{ !last ? ',' : '' }}
+                </ng-container>
+              </p>
+              <ng-template #emptyCertification>
+                <p class="small font-weight-medium">--</p>
+              </ng-template>
+            </div>
+          </div>
+
+        </div>
+      </perfect-scrollbar>
+    </div>
+  </div>
+</div>

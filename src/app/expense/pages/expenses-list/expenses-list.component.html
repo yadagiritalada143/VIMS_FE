@@ -1,0 +1,19 @@
+<app-logs [log]="logs"></app-logs>
+<vms-table *ngIf="is_expense_enabled"  class="expense-table" [vmsTableConfig]="tableConfig" [vmsDataSource]="vmsData" [totalItem]="totalRecords"
+    [itemsPerPage]="limitRecords" (onCreate)="onCreateClick($event)" (onViewClick)="onClickView($event)"
+    (search)="onSearch($event)" (onDeleteClick)="onDeleteClick($event)" (changePage)="onPaginationClick($event)"
+    (onTabClick)="onTabClick($event)" [count]="expensesTabsCount" [currentTab]="currentTabName" [loading]="dataLoader"
+    (changeRecords)="onChangeRecords($event)" (onHeaderButtonClick)="onMassApproval($event)" (onSort)="onSortClick($event)" 
+    (onSelectAllClick)="onselectAllClick($event)" (onSelectClick)="selectClicked($event)" (onOpenPanel)="viewSidePanel($event)"
+    (onDownloadButtonClick)="onDownloadClick($event)" managerListTitle="Expense Managers"
+    [availableCountForSelect]="availableCountForSelect"
+    (selectedRecords)="selectedRecord($event)"
+    [selectedRecordslist]="selectedexpenseIds"
+    (onAllRecordsSelected)="onAllRecordsSelected($event)"
+    [manuallySelectedCount]="selectedExpenseCount"
+    (onActionButtonClick)="bulkApproval($event)"
+    [isMultipleSelectionDropdown] ="true"
+    >
+</vms-table>
+<app-expense-assignment></app-expense-assignment>
+<app-assignment-details-flyout></app-assignment-details-flyout>

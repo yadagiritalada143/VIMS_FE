@@ -1,0 +1,28 @@
+<svms-sidebar title="{{(currentDoc?.required_document?.name || 'Add Compliance Document') | i18next}}" size="small"
+  [dataVisibility]="visiblity" (onClose)="sideBaClose()">
+  <div>
+    <svms-sidebar-body>
+      <div class="compliance-sidebar p-24">
+        <div class="form-group">
+          <label>{{ 'document_title' | i18next }}</label>
+          <ng-select [typeahead]="input$" [clearable]="false" [(ngModel)]="selectedDocument" placeholder="{{ 'please_select' | i18next }}"
+            (change)="docSelected($event)">
+            <ng-option [value]="doc" *ngFor="let doc of complianceList">
+              {{doc?.name}}
+            </ng-option>
+          </ng-select>
+        </div>
+      </div>
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+      <ng-container *accessControl>
+        <div class="d-flex justify-content-end">
+          <button [disabled]="!selectedDocument" (click)="save()" type="button" class="btn btn-primary">
+            <span *ngIf="showLoader" class="ml-8"><button-loader></button-loader></span>
+            {{ 'add' | i18next }}
+          </button>
+        </div>
+      </ng-container>
+    </svms-sidebar-footer>
+  </div>
+</svms-sidebar>

@@ -1,0 +1,54 @@
+<form [formGroup]="shortlistingForm">
+  <div class="p-24">
+    <div class="d-flex align-items-center">
+      <h4 class="font-weight-medium mr-8 fs-15 mb-0 text-black">{{ 'shortlisting' | i18next }}</h4>
+      <i class="info-icon material-icons mr-16"
+        [tooltip]="'When enabled, the defined actors listed below will be responsible for providing feedback on submitted candidates as either &quot;Shortlisted&quot; or &quot;Rejected&quot;.' | i18next"
+        placement="right">help</i>
+      <toggle-button [checked]="isShortlisting" (changed)="changeValue($event)"></toggle-button>
+    </div>
+    <p class="text-gray mt-8 fs-13 mb-24">
+      {{ 'you_can_enable_shortlisting' | i18next }}, {{ 'allowing_the_users_to_review_submitted_candidates' | i18next }}
+      {{ 'and' | i18next }} {{ 'mark_them_as_shortlisted' | i18next }}
+    </p>
+    <!-- <p class="font-weight-medium text-black mt-24 pb-0">Submission Visibility</p>
+    <p class="text-gray fs-13 mb-12">You can set the visibility of candidates by Client users</p> -->
+    <div class="d-flex flex-column">
+      <div class="row mt-24" *ngIf="showRoleInfo">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>{{ 'actor' | i18next }} <span class="require">*</span></label>
+            <div class="actor">
+              <div class="role-checkbox" formArrayName="shortlist_details" *ngFor="let role of roles; let i = index">
+                <div [formGroupName]="i">
+                  <label class="checkbox-container actor">
+                    <span class="radio-container_description">{{role.name }}</span>
+                    <input type="checkbox" [value]="role.name" name="roleName" (change)="selectRole(i)"
+                      [checked]="role.isChecked">
+                    <span class="checkmark"></span>
+                  </label>
+                  <ng-select [multiple]="true" [hidden]="!role.isChecked" [items]="role.roles" bindLabel="name"
+                    bindValue="id" formControlName="short_role_id" placeholder="{{ 'select_the_role' | i18next }}"
+                    class="mt-8">
+                  </ng-select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <button class="btn btn-primary" type="button" [disabled]="isInvalidForm" (click)="roleSubmit()"
+              *accessControl>{{ 'submit' | i18next }}</button>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <h4 class="font-weight-medium mr-8 fs-15 mb-0 text-black">{{ 'hm_shortlist_review' | i18next }}</h4>
+        <i class="info-icon material-icons mr-16"
+          [tooltip]="'When enabled, the Hiring Manager will be able to view the shortlisted candidate (done in the above step) and then mark them either as &quot;Reviewed&quot; or &quot;Rejected&quot;.' | i18next"
+          placement="right">help</i>
+        <toggle-button [disabled]="!currentProgram?.config?.submission?.is_shortlisting_enabled" [checked]="currentProgram?.config?.submission?.hm_shortlist_review"
+          (changed)="hmShortlistReview($event)"></toggle-button>
+      </div>
+    </div>
+  </div>
+</form>

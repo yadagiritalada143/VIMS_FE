@@ -1,0 +1,630 @@
+  <div class="description-card p-24 mb-24">
+    <ng-template [ngIf]="jobDetails?.status?.toLowerCase() == JobStatus.PENDING_APPROVAL?.toLowerCase() || jobDetails?.status?.toLowerCase() == JobStatus.PENDING_APPROVAL_SOURCING?.toLowerCase()">
+      <div class="d-flex align-items-center justify-content-between mb-24 column-direction py-m-12 seperation-border-m mb-m-0"
+        *ngIf="jobStatus?.toLowerCase() == approvalStatus.pending">
+        <h4 class="d-flex align-items-center"
+          *ngIf="jobStatus.toLowerCase() == approvalStatus.pending && !hasOwnApprovalPending">
+        </h4>
+        <h4 class="d-flex align-items-center"
+          *ngIf="jobStatus.toLowerCase() == approvalStatus.pending && hasOwnApprovalPending">
+          <span class="text-red mr-8">
+            <icon size="24px" name="notifications_active" type="material" class="d-flex" cuClass="d-flex">
+            </icon>
+          </span>
+          <span>{{ 'your_approval_requested' | i18next }}</span>
+        </h4>
+        <div class="d-flex align-items-center column-direction"
+          *ngIf="hasApprovalOverridePermission && jobStatus?.toLowerCase() == approvalStatus.pending">
+          <ng-select placeholder="Select the approval" [(ngModel)]="adminApprovalMode">
+            <ng-option value="sequence">{{ 'current_sequence_approval' | i18next }}</ng-option>
+            <ng-option value="job">{{ 'entire_approval_workflow' | i18next }}</ng-option>
+          </ng-select>
+          <ng-container *accessControl>
+            <div class="d-flex mt-m-8">
+              <button [disabled]="!adminApprovalMode" type="button" class="btn btn-success mx-16 ml-m-0"
+              (click)="superAdminEdit=true;openApprovalPanel(approvalStatus.approved);">
+              <icon size="20px" name="check_circle_outline" type="material" class="icon--on-left" cuClass="icon-cu">
+              </icon>
+              {{ 'approve' | i18next }}
+            </button>
+            <button [disabled]="!adminApprovalMode" type="button" class="btn btn-danger"
+              (click)="superAdminEdit=true;openApprovalPanel(approvalStatus.rejected);">
+              <icon size="20px" name="do_not_disturb" type="material" class="icon--on-left" cuClass="icon-cu">
+              </icon>
+              {{ 'reject' | i18next }}
+            </button>
+            </div>
+        </ng-container>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- <h4 class="d-flex align-items-center pt-16 pb-12">
+      <span class="mr-8">
+        <icon size="24px" name="sort" type="material" class="d-flex" cuClass="d-flex">
+        </icon>
+      </span>
+      <span>{{ 'summary' | i18next }}</span>
+    </h4> -->
+    <div class="approval-detail-ui seperation-border-m">
+      <p> {{ 'approval_details' | i18next }} </p>
+      <div class="row pl-24 mt-16 pl-m-0">
+        <div class="col-md-3 d-flex flex-column mb-24" *ngFor="let values of summaryList.slice(0, summaryListLength)">
+          <p class="small text-muted">{{values?.title | i18next | titlecase}}</p>
+          <span class="white-space-pre-line">{{values?.new_value || '--'}}</span>
+          <p class="text-red small strike-through white-space-pre-line" *ngIf="values?.new_value !== values?.old_value">{{values?.old_value}}</p>
+        </div>
+      </div>
+  
+      <p *ngIf="summaryList.slice(summaryListLength,-1).length"> {{ 'master_data_details' | i18next }} </p>
+      <div class="row pl-24 mt-16 pl-m-0">
+        <div class="col-md-3 d-flex flex-column mb-24" *ngFor="let values of  summaryList.slice(summaryListLength)">
+          <p class="small text-muted">{{values?.title | titlecase}}</p>
+          <span class="white-space-pre-line">{{values?.new_value || '--'}}</span>
+          <p class="text-red small strike-through white-space-pre-line" *ngIf="values?.new_value !== values?.old_value">{{values?.old_value}}</p>
+        </div>
+      </div>
+    </div>
+
+    <h4 class="d-flex align-items-center pt-16 pb-12 approval-heading">
+      <span class="mr-8">
+        <icon size="24px" name="task_alt" type="material" class="d-flex" cuClass="d-flex">
+        </icon>
+      </span>
+      <span>{{ 'approval_workflow' | i18next }}</span>
+    </h4>
+    <!-- approval list start -->
+    <div class="ml-24 mb-24 panel panel-light p-16 pb-8 ml-m-0" *ngFor="let approval of approvalList">
+      <div>
+        <div>
+          <div>
+            <div class="d-flex">
+              <div class="d-inline-flex mr-auto">
+                <p class="small text-uppercase pb-12">{{reverseSnakeCase(approval?.role?.name)}}
+                  <ng-container
+                    *ngIf="(approval?.status?.toLowerCase() == approvalStatus.approved || approval?.status?.toLowerCase() == approvalStatus.rejected) && approval?.is_forced_approval">
+                    <span class="text-green">
+                      {{ 'admin_approved_the_following_level' | i18next }}
+                    </span>
+                    <span class="text-red"
+                      *ngIf="approval?.value?.action_by_admin && approval?.value?.status == approvalStatus.rejected">
+                      {{ 'admin_rejected_the_following_level' | i18next }}
+                    </span>
+                  </ng-container>
+                </p>
+              </div>
+            <ng-container *accessControl>
+              <div class="d-inline-flex mr-0" *authorize="'replace_approver'">
+                <app-approval-replace [role]="approval?.role?.name"
+                  *ngIf="approval?.status?.toLowerCase() === approvalStatus.pending"
+                  (replaceApprover)="replaceLevelApprover($event, approval.level)">
+                </app-approval-replace>
+              </div>
+            </ng-container>
+            </div>
+            <div class="d-flex flex-column ">
+              <div *ngFor="let profile of approval?.members">
+                <app-approval-member-profile [profile]="profile" [approval]="approval" [jobStatus]="jobStatus"
+                  (onReplaceApprover)="replaceApprover($event, approval.level)" [jobCurrentStatus]="jobDetails?.status"
+                  (onOpenApprovalPanel)="handleMemberProfileOpenApproverPanel($event)"
+                  [approvalChainId]="approval?.approval_chain_id"></app-approval-member-profile>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- approval list end -->
+    <!-- <div class="ml-24 panel panel-light p-24" *ngFor="let approval of approvalList?.levels | keyvalue">
+      <div *ngFor="let key of approval?.value | keyvalue">
+        <div *ngIf="key?.key === 'roles'">
+          <div *ngFor="let role of key?.value">
+            <p class="text-dark pb-24 capitilize">{{role?.role_name}}
+              <span class="text-green"
+                *ngIf="approval?.value?.action_by_admin && approval?.value?.status == approvalStatus.approved">
+                {{ 'admin_approved_the_following_level' | i18next }}
+              </span>
+              <span class="text-red" *ngIf="approval?.value?.action_by_admin && approval?.value?.status == approvalStatus.rejected">
+                {{ 'admin_rejected_the_following_level' | i18next }}
+              </span>
+            </p>
+
+            <div class="d-flex align-item-center justify-content-between"
+              *ngFor="let profile of role?.pending_approvals">
+              <div class="p-12 d-flex justify-content-center flex-column" [ngClass]="getStatusStyleClass(profile)">
+                <div class="d-flex align-items-center">
+                  <div class="initials initials-profile d-flex" *ngIf="profile?.approver?.avatar">
+                    <img *ngIf="profile?.approver?.avatar" src="{{profile?.approver?.avatar}}" />
+                  </div>
+
+                  <div class="initial blue mr-4" *ngIf="!profile?.approver?.avatar">
+                    {{profile?.approver?.full_name | shortName:'first'}}</div>
+                  <span class="text-dark">{{profile?.approver?.full_name | titlecase}}</span>
+                  <span class="ml-16">
+                    <icon size="15px" *ngIf="(profile?.status == approvalStatus.pending && jobDetails?.status !== approvalStatus.rejected) && !(approval?.value?.status == approvalStatus.approved)"
+                      name="hourglass_top" type="material" class="d-flex op-5" cuClass="d-flex">
+                    </icon>
+                  </span>
+                </div>
+                <div class="align-items-center justify-content-between mt-12 d-flex"
+                  *ngIf="profile?.status == approvalStatus.approved || approval?.value?.action_by_admin && approval?.value?.status == approvalStatus.approved">
+                  <div class="d-flex align-items-center">
+                    <span class="mr-4">
+                      <icon size="15px" name="today" type="material" class="d-flex" cuClass="d-flex">
+                      </icon>
+                    </span>
+
+                    <span><span class="text-green">{{ 'approved_on' | i18next }}</span> : {{ profile.modified_on | localDateFormat:'MMMM d, y'}} </span>
+                  </div>
+                  <span class="info" *ngIf="profile?.approval_notes" (clickOutside)="approval.showDetail = false">
+                    <icon size="15px" name="description" theme="outlined" type="material"
+                      class="d-flex myDIV cursor-pointer" cuClass="d-flex" (click)="approval.showDetail = true">
+                    </icon>
+                    <p class="info-msg" *ngIf="approval.showDetail">
+                      {{profile?.approval_notes}}
+                      <a class="text-primary"
+                        (click)="openApprovalPanel('accept'); approval.showDetail = false">
+                        {{ 'view_more' | i18next }} >
+                      </a>
+                    </p>
+                  </span>
+                </div>
+
+                <div class="align-items-center justify-content-between mt-12 d-flex"
+                  *ngIf="profile?.status == approvalStatus.rejected">
+                  <div class="d-flex align-items-center">
+                    <span class="mr-4">
+                      <icon size="15px" name="today" type="material" class="d-flex" cuClass="d-flex">
+                      </icon>
+                    </span>
+
+                    <span><span class="text-red">{{ 'rejected_on' | i18next }}</span> : {{ profile.modified_on | localDateFormat:'MMMM d, y'}} </span>
+                  </div>
+                  <span class="info" *ngIf="profile?.approval_notes" (clickOutside)="approval.showDetail = false">
+                    <icon size="15px" name="description" theme="outlined" type="material"
+                      class="d-flex myDIV cursor-pointer" cuClass="d-flex" (click)="approval.showDetail = true">
+                    </icon>
+                    <p class="info-msg" *ngIf="approval.showDetail">
+                      {{profile?.approval_notes}}
+                      <a class="text-primary"
+                        (click)="openApprovalPanel('accept'); approval.showDetail = false">
+                        {{ 'view_more' | i18next }} >
+                      </a>
+                    </p>
+                  </span>
+                </div>
+
+              </div>
+              <div class="d-flex" *ngIf="showApproveReject(profile?.id)">
+                <button type="button" class="btn btn-success small mr-12"
+                  (click)="openApprovalPanel('accept', profile?.id)">
+                  <icon size="14px" name="check_circle_outline" type="material" class="icon--on-left" cuClass="icon-cu">
+                  </icon>
+                  {{ 'approve' | i18next }}
+                </button>
+                <button type="button" class="btn btn-danger small" (click)="openApprovalPanel('reject', profile?.id)">
+                  <icon size="14px" name="do_not_disturb" type="material" class="icon--on-left" cuClass="icon-cu">
+                  </icon>
+                  {{ 'reject' | i18next }}
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <br>
+     <div class="ml-24 panel panel-light p-24 mt-24">
+      <p class="text-dark pb-24 d-flex align-items-center justify-content-between"><span>Hiring Manager(s)</span>
+        <span class="">
+          <icon size="15px" name="keyboard_arrow_down" type="material" class="d-flex" cuClass="d-flex">
+          </icon>
+        </span>
+      </p>
+      <div class="approved-panel p-12 d-flex justify-content-center flex-column">
+        <div class="d-flex align-item-center">
+          <div class="initials initials-profile">
+            <img src="../../../../../assets/images/user-profile.png" />
+          </div>
+          <span class="text-dark">Pavan Kumar</span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-8">
+          <div class="d-flex align-items-center">
+            <span class="mr-4">
+              <icon size="15px" name="today" type="material" class="d-flex" cuClass="d-flex">
+              </icon>
+            </span>
+            <span><span class="text-green">Approved On</span> : Oct 30, 2020</span>
+          </div>
+          <div>
+            <icon size="15px" name="description" theme="outlined" type="material" class="d-flex" cuClass="d-flex">
+            </icon>
+          </div>
+        </div>
+      </div>
+      <div class="no-approved-panel p-12 d-flex justify-content-center flex-column mt-16">
+        <div class="d-flex align-item-center justify-content-between">
+          <div class="d-flex align-item-center">
+            <div class="initials initials-profile">
+              <img src="../../../../../assets/images/user-profile.png" />
+            </div>
+            <span class="text-dark">Pavan Kumar</span>
+          </div>
+          <div class="info">
+            <icon size="15px" name="search" type="material" class="d-flex" cuClass="d-flex">
+            </icon>
+            <p class="info-msg">
+              On selecting this Job board will change their scheduled distribution to the current distribution tier
+              <a href="" class="text-primary">View More ></a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    <div class="panel panel-light ml-24 mt-24 ">
+
+      <div class="d-flex align-items-center justify-content-between p-24 border-bottom">
+        <p>Employee Chain</p>
+        <p class="approved text-green">Administrator approved this sequence</p>
+      </div>
+
+      <div class="row bg-primary no-gutters">
+        <div class="col-md-6 ">
+          <div class="employee-chain">
+            <div class="d-flex align-items-center justify-content-between px-24 py-16 border-bottom">
+              <div class="d-flex align-items-center">
+                <div class="initials initials-profile">
+                  <img src="../../../../../assets/images/user-profile.png">
+                </div>
+                <span class="mx-8">Blaise Pascal</span>
+                <span class="text-green">
+                  <icon size="18px" name="verified" type="material" class="d-flex" cuClass="d-flex">
+                  </icon>
+                </span>
+              </div>
+              <span>Employee - Level 1</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between px-24 py-16 border-bottom pending-level-1">
+              <div class="d-flex align-items-center">
+                <div class="initials initials-profile">
+                  <img src="../../../../../assets/images/user-profile.png">
+                </div>
+                <span class="mx-8">Blaise Pascal</span>
+                <span class="pending-icon">
+                  <icon size="12px" name="hourglass_bottom" type="material" class="d-flex" cuClass="d-flex">
+                  </icon>
+                </span>
+              </div>
+              <span>Employee - Level 1</span>
+            </div>
+            <div
+              class="d-flex align-items-center justify-content-between px-24 py-16 border-bottom pending-level-1 disabled">
+              <div class="d-flex align-items-center">
+                <div class="initials initials-profile">
+                  <img src="../../../../../assets/images/user-profile.png">
+                </div>
+                <span class="mx-8">Blaise Pascal</span>
+                <span class="pending-icon">
+                  <icon size="12px" name="hourglass_bottom" type="material" class="d-flex" cuClass="d-flex">
+                  </icon>
+                </span>
+              </div>
+              <span>Employee - Level 1</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between px-24 py-16 border-bottom disabled">
+              <div class="d-flex align-items-center">
+                <div class="initials initials-profile">
+                  <img src="../../../../../assets/images/user-profile.png">
+                </div>
+                <span class="mx-8">Blaise Pascal</span>
+                <span class="text-muted">
+                  <icon size="18px" name="fiber_manual_record" type="material" class="d-flex" cuClass="d-flex">
+                  </icon>
+                </span>
+              </div>
+              <span>Employee</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 p-24 d-none">
+          <div class="p-16 panel-approve disabled">
+            <div class="d-flex align-items-center">
+              <div class="initials initials-profile mr-12">
+                <img src="../../../../../assets/images/user-profile.png" />
+              </div>
+              <div class="d-flex flex-column">
+                <p class="mb-0">Marie Curie</p>
+                <p class="x-small mb-0">CFO</p>
+              </div>
+            </div>
+            <div class="d-flex">
+              <button type="button" class="btn btn-success small mr-12">
+                <icon size="14px" name="check_circle_outline" type="material" class="icon--on-left" cuClass="icon-cu">
+                </icon>
+                Approve
+              </button>
+              <button type="button" class="btn btn-danger small">
+                <icon size="14px" name="do_not_disturb" type="material" class="icon--on-left" cuClass="icon-cu">
+                </icon>
+                Reject
+              </button>
+            </div>
+          </div>
+
+          <div class="timeline mt-24 mb-16 mx-auto">
+            <ul>
+              <li class="approve">
+                <span>
+                  Employee Level 1
+                </span>
+              </li>
+              <li class="pending-level-1">
+                <span>
+                  Director Level 2
+                </span>
+              </li>
+              <li class="pending-level-2">
+                <span>
+                  CFO Level 3
+                </span>
+              </li>
+              <li class="pending">
+                <span>
+                  CEO Level 4
+                </span>
+              </li>
+            </ul>
+          </div>
+          <p lcass="text-dark">Approved By</p>
+
+          <div class="d-flex align-items-center flex-wrap mt-24">
+
+            <div class="approved-by p-12 d-flex justify-content-center flex-column mr-8">
+              <div class="d-flex align-item-center justify-content-between">
+                <div class="d-flex align-items-center">
+                  <div class="initials initials-profile">
+                    <img src="../../../../../assets/images/user-profile.png" />
+                  </div>
+                  <span class="text-dark">Pavan Kumar</span>
+                </div>
+                <span class="text-dark">
+                  <icon size="15px" name="description" theme="outlined" type="material" class="d-flex" cuClass="d-flex">
+                  </icon>
+                </span>
+              </div>
+              <div class="d-flex align-items-center justify-content-between mt-8">
+                <div class="d-flex align-items-center">
+                  <span class="mr-4">
+                    <icon size="15px" name="today" type="material" class="d-flex" cuClass="d-flex">
+                    </icon>
+                  </span>
+                  <span><span class="text-green">Approved On</span> : Oct 30, 2020</span>
+                </div>
+              </div>
+            </div>
+            <div class="approved-by p-12 d-flex justify-content-center flex-column mr-8">
+              <div class="d-flex align-item-center justify-content-between">
+                <div class="d-flex align-items-center">
+                  <div class="initials initials-profile">
+                    <img src="../../../../../assets/images/user-profile.png" />
+                  </div>
+                  <span class="text-dark">Pavan Kumar</span>
+                </div>
+                <span class="text-dark">
+                  <icon size="15px" name="description" theme="outlined" type="material" class="d-flex" cuClass="d-flex">
+                  </icon>
+                </span>
+              </div>
+              <div class="d-flex align-items-center justify-content-between mt-8">
+                <div class="d-flex align-items-center">
+                  <span class="mr-4">
+                    <icon size="15px" name="today" type="material" class="d-flex" cuClass="d-flex">
+                    </icon>
+                  </span>
+                  <span><span class="text-green">Approved On</span> : Oct 30, 2020</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 p-24 d-flex align-item-center justify-content-center">
+          <div class="no-history">
+            <span>
+              <icon size="30px" name="history_toggle_off" type="material" class="d-flex" cuClass="d-flex">
+              </icon>
+            </span>
+            <span class="mt-8">No Approval history</span>
+          </div>
+        </div>
+      </div>
+    </div>
+     <div class="panel panel-light ml-24 or-after">
+
+      <div class="d-flex align-items-center justify-content-between p-24 border-bottom">
+        <p>Employee Chain</p>
+        <p class="approved text-green">Administrator approved this sequence</p>
+      </div>
+
+      <div class="row bg-primary no-gutters">
+        <div class="col-md-6 ">
+          <div class="employee-chain">
+            <div class="d-flex align-items-center justify-content-between px-24 py-16 border-bottom">
+              <div class="d-flex align-items-center">
+                <div class="initials initials-profile">
+                  <img src="../../../../../assets/images/user-profile.png">
+                </div>
+                <span class="mx-8">Blaise Pascal</span>
+                <span class="text-green">
+                  <icon size="18px" name="verified" type="material" class="d-flex" cuClass="d-flex">
+                  </icon>
+                </span>
+              </div>
+              <span>Employee - Level 1</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between px-24 py-16 border-bottom pending-level-1">
+              <div class="d-flex align-items-center">
+                <div class="initials initials-profile">
+                  <img src="../../../../../assets/images/user-profile.png">
+                </div>
+                <span class="mx-8">Blaise Pascal</span>
+                <span class="pending-icon">
+                  <icon size="12px" name="hourglass_bottom" type="material" class="d-flex" cuClass="d-flex">
+                  </icon>
+                </span>
+              </div>
+              <span>Employee - Level 1</span>
+            </div>
+            <div
+              class="d-flex align-items-center justify-content-between px-24 py-16 border-bottom pending-level-1 disabled">
+              <div class="d-flex align-items-center">
+                <div class="initials initials-profile">
+                  <img src="../../../../../assets/images/user-profile.png">
+                </div>
+                <span class="mx-8">Blaise Pascal</span>
+                <span class="pending-icon">
+                  <icon size="12px" name="hourglass_bottom" type="material" class="d-flex" cuClass="d-flex">
+                  </icon>
+                </span>
+              </div>
+              <span>Employee - Level 1</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between px-24 py-16 border-bottom disabled">
+              <div class="d-flex align-items-center">
+                <div class="initials initials-profile">
+                  <img src="../../../../../assets/images/user-profile.png">
+                </div>
+                <span class="mx-8">Blaise Pascal</span>
+                <span class="text-muted">
+                  <icon size="18px" name="fiber_manual_record" type="material" class="d-flex" cuClass="d-flex">
+                  </icon>
+                </span>
+              </div>
+              <span>Employee</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 p-24 d-none">
+          <div class="p-16 panel-approve disabled">
+            <div class="d-flex align-items-center">
+              <div class="initials initials-profile mr-12">
+                <img src="../../../../../assets/images/user-profile.png" />
+              </div>
+              <div class="d-flex flex-column">
+                <p class="mb-0">Marie Curie</p>
+                <p class="x-small mb-0">CFO</p>
+              </div>
+            </div>
+            <div class="d-flex">
+              <button type="button" class="btn btn-success small mr-12">
+                <icon size="14px" name="check_circle_outline" type="material" class="icon--on-left" cuClass="icon-cu">
+                </icon>
+                Approve
+              </button>
+              <button type="button" class="btn btn-danger small">
+                <icon size="14px" name="do_not_disturb" type="material" class="icon--on-left" cuClass="icon-cu">
+                </icon>
+                Reject
+              </button>
+            </div>
+          </div>
+
+          <div class="timeline mt-24 mb-16 mx-auto">
+            <ul>
+              <li class="approve">
+                <span>
+                  Employee Level 1
+                </span>
+              </li>
+              <li class="pending-level-1">
+                <span>
+                  Director Level 2
+                </span>
+              </li>
+              <li class="pending-level-2">
+                <span>
+                  CFO Level 3
+                </span>
+              </li>
+              <li class="pending">
+                <span>
+                  CEO Level 4
+                </span>
+              </li>
+            </ul>
+          </div>
+          <p lcass="text-dark">Approved By</p>
+
+          <div class="d-flex align-items-center flex-wrap mt-24">
+
+            <div class="approved-by p-12 d-flex justify-content-center flex-column mr-8">
+              <div class="d-flex align-item-center justify-content-between">
+                <div class="d-flex align-items-center">
+                  <div class="initials initials-profile">
+                    <img src="../../../../../assets/images/user-profile.png" />
+                  </div>
+                  <span class="text-dark">Pavan Kumar</span>
+                </div>
+                <span class="text-dark">
+                  <icon size="15px" name="description" theme="outlined" type="material" class="d-flex" cuClass="d-flex">
+                  </icon>
+                </span>
+              </div>
+              <div class="d-flex align-items-center justify-content-between mt-8">
+                <div class="d-flex align-items-center">
+                  <span class="mr-4">
+                    <icon size="15px" name="today" type="material" class="d-flex" cuClass="d-flex">
+                    </icon>
+                  </span>
+                  <span><span class="text-green">Approved On</span> : Oct 30, 2020</span>
+                </div>
+              </div>
+            </div>
+            <div class="approved-by p-12 d-flex justify-content-center flex-column mr-8">
+              <div class="d-flex align-item-center justify-content-between">
+                <div class="d-flex align-items-center">
+                  <div class="initials initials-profile">
+                    <img src="../../../../../assets/images/user-profile.png" />
+                  </div>
+                  <span class="text-dark">Pavan Kumar</span>
+                </div>
+                <span class="text-dark">
+                  <icon size="15px" name="description" theme="outlined" type="material" class="d-flex" cuClass="d-flex">
+                  </icon>
+                </span>
+              </div>
+              <div class="d-flex align-items-center justify-content-between mt-8">
+                <div class="d-flex align-items-center">
+                  <span class="mr-4">
+                    <icon size="15px" name="today" type="material" class="d-flex" cuClass="d-flex">
+                    </icon>
+                  </span>
+                  <span><span class="text-green">Approved On</span> : Oct 30, 2020</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 p-24 d-flex align-item-center justify-content-center">
+          <div class="no-history">
+            <span>
+              <icon size="30px" name="history_toggle_off" type="material" class="d-flex" cuClass="d-flex">
+              </icon>
+            </span>
+            <span class="mt-8">No Approval history</span>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+  </div>
+
+  <app-approval-notes-history [visiblity]="approvalNote" [isView]="viewMode" [superAdminEdit]="superAdminEdit"
+    [approvalHistory]="approvalHistory" [approvalId]="approverId" [approvalFor]="approvalFor" [jobDetail]="jobDetails"
+    [approvalWorkflow]="approvalWorkflow" (onClose)="onSidePanelClose()" (onSubmit)="onSubmit($event)"
+    [approvalChainId] ="approvaChainId" [isProgramAdmin]="isProgramAdmin">
+  </app-approval-notes-history>

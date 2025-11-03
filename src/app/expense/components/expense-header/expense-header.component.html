@@ -1,0 +1,358 @@
+<app-status-message
+  [data]="statusMessageData"
+  [simpleMessage]=" (data?.is_budget_insufficient ||  noBudgetForOperation ? 'Assignment Budget is insufficient for Approval.' : '') | i18nextEager"
+  [type]="StatusMessageTypes.Expense"
+>
+</app-status-message>
+<app-logs [log]="logs"></app-logs>
+<header class="expense-header overflow-hidden mt-24 mt-m-0">
+  <div class="p-24 pb-m-0">
+    <div class="float-left float-none-m">
+      <div class="d-flex column-direction">
+        <h3 class="font-weight-medium mb-0">
+          {{ (expenseType?.value === ExpenseType.MiscExpense ? 'Misc. Expenses' : 'General Expenses') | i18nextEager }}
+        </h3>
+        <app-status [status]="data?.expense_status"></app-status>
+      </div>
+      <div class="d-flex align-item-center mt-12 column-direction">
+        <div class="d-flex">
+          <icon name="label" color="#FFC409" type="material" size="16px"></icon>
+          <p class="ml-8 small mr-24 expense-code">{{ data?.expense_code }}</p>
+        </div>
+       <div class="d-flex expense-status-m">
+        <icon name="update" type="material" size="16px"></icon>
+        <p class="ml-8 small">
+          {{ getStatusText(data?.expense_status) |i18next }} {{ 'by' | i18nextEager }} : {{ getWokerName(data?.expense_status) }},
+          {{ getStatusText(data?.expense_status) |i18next }} {{ 'on' | i18nextEager }} :
+          <ng-container *ngIf="data?.expense_status?.toLowerCase() === ExpenseStatusMessage.draft; else submittedDate">
+            {{ data.updated_date | localDateFormat }} {{ data.updated_date | localDateFormat: 'hh:mm:ss a z' | i18nextEager }}
+          </ng-container>
+          <ng-template #submittedDate>
+            {{ data?.submitted_date | localDateFormat }} {{ data?.submitted_date | localDateFormat: 'hh:mm:ss a z' | i18nextEager }}
+          </ng-template>
+          <ng-template [ngIf]="data?.impersonation?.create?.by?.name && data?.expense_status?.toLowerCase() == ExpenseStatusMessage?.draft?.toLowerCase()">({{'impersonated_by' | i18nextEager}} {{ data?.impersonation?.create?.by?.name + ' - ' + data?.impersonation?.create?.by?.organization_category + ' (' + data?.impersonation?.create?.by?.role + ')' }})</ng-template>
+          <ng-template [ngIf]="data?.impersonation?.submit?.by?.name && data?.expense_status?.toLowerCase() != ExpenseStatusMessage?.draft?.toLowerCase()">({{'impersonated_by' | i18nextEager}} {{ data?.impersonation?.submit?.by?.name + ' - ' + data?.impersonation?.submit?.by?.organization_category + ' (' + data?.impersonation?.submit?.by?.role + ')' }})</ng-template>
+          <ng-template [ngIf]="data?.impersonation?.update?.by?.name && data?.expense_status?.toLowerCase() == ExpenseStatusMessage?.draft?.toLowerCase()">({{'impersonated_by' | i18nextEager}} {{ data?.impersonation?.update?.by?.name + ' - ' + data?.impersonation?.update?.by?.organization_category + ' (' + data?.impersonation?.update?.by?.role + ')' }})</ng-template>
+        </p>
+       </div>
+      </div>
+    </div>
+    <div class="float-right float-none-m">
+      <div class="d-flex">
+        <div class="d-flex position-fixed-m mobile-buttons-approve-reject-wrapper expense-buttons-wrapper">
+        <ng-container *accessControl>
+        <button
+          *ngIf="data?.expense_status?.toLowerCase() === ExpenseStatusMessage.draft && canSubmit() && data?.actions_allow?.can_submit"
+          type="button"
+          class="btn btn-primary d-flex-1-m ml-16 m-m-4 flex-grow-m"
+          (click)="submitExpenseForApprovalById()"
+          [disabled]="isDisabledBtn || isLock"
+        >
+          <span class="hide-on-desktop mr-8">
+            <icon name="check_circle" size="18px" color="#ffffff"></icon>
+         </span>
+        <span>{{ 'submit' | i18nextEager }}
+          {{ (expenseType?.value === ExpenseType.MiscExpense ? 'Misc. Expense' : 'General Expense') | i18nextEager }}
+        </span>
+        </button>
+
+      </ng-container>
+        <ng-container *accessControl>
+          <button *ngIf="!isWorker &&
+                  data?.expense_status?.toLowerCase() === ExpenseStatusMessage.draft && data?.is_discard && data?.actions_allow?.can_discard"
+                  [disabled]="isDisabledBtn || isLock" class="btn btn-primary btn-orange ml-16 d-flex-1-m m-m-4 flex-grow-m"
+                  (click)="discardExpense()">
+            <span class="hide-on-desktop">
+              <icon name="edit" size="18px" color="#ffffff"></icon>
+            </span>
+            <span>{{ 'discard_expense' | i18nextEager }}</span>
+          </button>
+        </ng-container>
+
+      <!-- <div class="position-fixed-m mobile-buttons-approve-reject-wrapper d-flex"> -->
+        <ng-container *ngIf="data?.expense_status?.toLowerCase() === ExpenseStatusMessage?.pending ">
+          <ng-container *accessControl>
+            <div class="position-relative flex-grow-m">
+              <button
+              *ngIf="(data?.can_approve && ((hasApproveExpensePermission && isExpenseManager) || hasOverrideApprovalPermission) && data?.actions_allow?.can_approve) || data?.actions_allow?.can_perform_workflow"
+              [disabled]="isDisabledBtn || noBudgetForOperation || !isShowApprovalButton || isLock || data?.is_budget_insufficient"
+              class="btn btn-primary btn-green my-m-12"
+              (click)="openApprovalOption()"
+            >
+              <span>{{'Approve'|i18nextEager}}</span>
+              <icon *ngIf="data?.expense_type != expense_type.misc_expense && data?.actions_allow?.can_perform_workflow" size="20px" [name]="adminOption? 'keyboard_arrow_up' : 'keyboard_arrow_down'" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+            </button>
+
+              <div class="breadcrumb-dropdown approve-dropdown" *ngIf="data?.expense_type != expense_type.misc_expense && data?.actions_allow?.can_perform_workflow && adminOption" (mouseleave)="hideApprovalOption()">
+                <ul>
+                  <li>
+                    <a (click)="approveExpense('current')">
+                      {{'Current Level Approval'|i18nextEager }}
+                      <span class="d-block">{{'select_to_approve_the_current_approval_level'|i18nextEager }}</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a (click)="approveExpense('entire')">
+                      {{'Entire Approval Workflow'|i18nextEager }}
+                      <span class="d-block">{{'select_to_approve_the_entire_approval_workflow'|i18nextEager }}</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+        </ng-container>
+          <button
+            *ngIf="(((hasRejectExpensePermission && isExpenseManager) || hasOverrideApprovalPermission) && data?.actions_allow?.can_reject) || data?.actions_allow?.can_perform_workflow"
+            [disabled]="isDisabledBtn || isLock"
+            class="btn btn-primary btn-red ml-16 my-m-12 flex-grow-m"
+            (click)="rejectExpense()"
+          >
+            <icon size="20px" name="block" type="material" class="icon--on-left mr-m-0"> </icon>
+            <span>{{ 'reject' | i18nextEager }}</span>
+          </button>
+        </ng-container>
+      <!-- </div> -->
+
+        <!-- <div class="position-fixed-m mobile-buttons-approve-reject-wrapper d-flex"> -->
+        <ng-container *ngIf="data?.msp_review">
+          <ng-container *accessControl>
+          <div class="position-relative d-flex-m d-flex-1-m flex-grow-m">
+          <button *ngIf="(data?.can_approve && data?.actions_allow?.can_approve ) || data?.actions_allow?.can_perform_workflow" class="btn btn-primary btn-green d-flex-1-m" 
+          [disabled]="isLock" #expenseBreadcumDropdownTrigger (click)="openReleseOption()">
+            <icon size="20px" name="check_circle" type="material" class="icon--on-left mr-m-0"> </icon>
+            <span>{{ 'Release' | i18nextEager }}</span>
+            <icon *ngIf="data?.expense_type != expense_type.misc_expense && data?.actions_allow?.can_perform_workflow"  size="20px" [name]="approvalOption? 'keyboard_arrow_up' : 'keyboard_arrow_down'" type="material" class="icon--on-right hide-on-mobile" cuClass="icon-cu"></icon>
+            <icon *ngIf="data?.expense_type != expense_type.misc_expense && data?.actions_allow?.can_perform_workflow"  size="20px" [name]="approvalOption? 'keyboard_arrow_down' : 'keyboard_arrow_up'" type="material" class="icon--on-right hide-on-desktop" cuClass="icon-cu"></icon>
+          </button>
+          <div class="breadcrumb-dropdown breadcrumb-dropdown-mobile-only" *ngIf="data?.expense_type != expense_type.misc_expense && data?.actions_allow?.can_perform_workflow && approvalOption" (mouseleave)="hideApprovalOption()">
+            <ul>
+              <li>
+                <a (click)="releaseExpense('current')">
+                  {{'Current Level Approval'|i18nextEager }}
+                  <span class="d-block">{{'Need to add some supporting text for this'|i18nextEager }}</span>
+                </a>
+              </li>
+              <li>
+                <a (click)="releaseExpense('entire')">
+                  {{'Entire Approval Workflow'|i18nextEager }}
+                  <span class="d-block">{{'Need to add some supporting text for this'|i18nextEager }}</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        </ng-container>
+          <button
+            *ngIf="data?.actions_allow?.can_reject"
+            class="btn btn-primary btn-red ml-16 d-flex-1-m flex-grow-m"
+            (click)="rejectExpense()"
+            [disabled]="isLock"
+          >
+            <icon size="20px" name="block" type="material" class="icon--on-left mr-m-0"> </icon>
+            <span>{{ 'reject' | i18nextEager }}</span>
+          </button>
+        </ng-container>
+        <!-- </div> -->
+
+        <!-- <div class="position-fixed-m mobile-buttons-approve-reject-wrapper d-flex"> -->
+          <ng-container *authorize="'withdraw_' + (expenseType?.value ? expenseType?.value : 'expense' | i18nextEager)">
+            <button
+              *ngIf="data?.expense_status?.toLowerCase() === ExpenseStatusMessage.pending && !isExpenseManager && data?.actions_allow?.can_withdraw"
+              [disabled]="isDisabledBtn  || isLock"
+              class="btn btn-primary btn-orange ml-16 my-m-12 flex-grow-m"
+              (click)="withdrawExpense()"
+            >
+              {{ 'withdraw' | i18nextEager }}
+            </button>
+          </ng-container>
+        <!-- </div> -->
+        <!-- <div class="d-flex-m position-fixed-m mobile-buttons-approve-reject-wrapper"> -->
+        <ng-container *authorize="'modify_' + (expenseType?.value ? expenseType?.value : 'expense' | i18nextEager)">
+          <button
+            *ngIf="
+              !isWorker &&
+              (data?.expense_status?.toLowerCase() === ExpenseStatusMessage.approved ||
+                data?.expense_status?.toLowerCase() === ExpenseStatusMessage.modified) &&
+              data.is_archive != '1' && data?.actions_allow?.can_modify
+            "
+            [disabled]="isDisabledBtn || isLock"
+            class="btn btn-primary btn-orange d-flex-1-m flex-grow-m"
+            (click)="modifyExpense()"
+          >
+            <span class="hide-on-desktop mr-8">
+              <icon name="edit" size="18px" color="#ffffff"></icon>
+            </span>
+            <span>{{ 'modify' | i18nextEager }}</span>
+          </button>
+        </ng-container>
+      <!-- </div> -->
+      </div>
+        <ng-container *authorize="'delete_' + (expenseType?.value ? expenseType?.value : 'expense' | i18nextEager)">
+          <div *ngIf="data.delete_allowed && data?.actions_allow?.can_delete" class="exp-right-action position-relative position-absolute-m">
+            <button class="btn icon btn-outline-primary ml-8 exp-option-btn" #expenseOptionBtn>
+              <i class="material-icons fs-24">more_horiz</i>
+            </button>
+            <ul class="action-list position-absolute bg-light rounded-sm" [ngClass]="{ active: optionsVisibility }" #expenseOptionsList>
+              <li>
+                <a class="pt-8 pb-8 pl-24 pr-8" (click)="deleteExpense($event)">
+                  {{ 'delete_expense' | i18nextEager }}
+                </a>
+              </li>
+            </ul>
+          </div>
+        </ng-container>
+        <!--download expense report-->
+        <!-- <div
+          class="btn-group position-relative ml-8"
+          *ngIf="
+            data.expense_status.toLowerCase() === ExpenseStatusMessage.approved ||
+            data.expense_status.toLowerCase() === ExpenseStatusMessage.modified
+          "
+          (click)="openDownloadReportModal()"
+        >
+          <button type="button" class="btn btn-primary d-flex align-items-center">
+            <icon size="18px" name="file_download" type="material" theme="outlined" cuClass="d-flex mr-8 mr-m-0"></icon>
+            <span class="hide-on-mobile">{{ 'download_data' | i18nextEager }}</span>
+          </button>
+        </div> -->
+        <!--download expense report-->
+      </div>
+    </div>
+    <div class="clearfix"></div>
+  </div>
+
+  <div class="header-bottom overflow-hidden d-flex-m p-16">
+   
+        <div class="expense-grid-group-data d-inline-block my-4 d-flex-m align-items-center full-page-width">
+          <figure class="float-left mr-12 flex-row">
+            <!-- temporary commented while src link is broken -->
+            <!-- <img  *ngIf="data.created_by.avatar" [src]="data.created_by.avatar" alt="" /> -->
+            <!-- <div *ngIf="!data.created_by.avatar" class="text-capitalize "> {{data.created_by.initials}}</div> -->
+            <div class="text-capitalize">{{ data?.updated_by?.initials }}</div>
+            <div *ngIf="!data?.updated_by?.avatar && !data?.updated_by?.initials" class="text-capitalize">
+              {{ data?.updated_by?.name | shortName: 'last' | i18nextEager }}
+            </div>
+          </figure>
+          <div class="expense-info-text float-left mr-64 mr-m-0">
+            <p class="font-weight-medium">{{ data?.updated_by?.name }}</p>
+            <p class="small d-flex" *ngIf="data?.work_location?.name">
+              <icon name="location_on" type="material" theme="outlined" size="14px"></icon>
+              <span>{{ data?.work_location?.name }}</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="expense-grid-group-data d-inline-block my-4 d-flex-m align-items-center full-page-width">
+          <figure class="float-left text-center mr-12">
+            <icon class="d-inline-block" name="assignment" type="material" theme="outlined" size="18px"></icon>
+          </figure>
+          <div class="expense-info-text float-left mr-64 mr-m-0">
+            <p class="small">{{ 'assignment' | i18nextEager }}</p>
+            <p>
+              <a>{{ data?.assignment?.title }}({{ data?.assignment?.code }})</a>
+            </p>
+          </div>
+        </div>
+
+        <div *ngIf="data?.expense_manager" class="expense-grid-group-data d-inline-block my-4 d-flex-m align-items-center full-page-width">
+          <!-- <figure class="float-left mr-12 flex-row">
+            temporary commented while src link is broken
+            <img  *ngIf="data.expense_manager.avatar" [src]="data.expense_manager.avatar" alt="" />
+            <div *ngIf="!data.expense_manager.avatar" class="text-capitalize "> {{data.expense_manager.initials}}</div> 
+            <div class="text-capitalize">{{ data?.expense_manager[0]?.initials }}</div>
+            <div *ngIf="!data?.expense_manager[0]?.avatar && !data?.expense_manager[0]?.initials" class="text-capitalize">
+              {{ data?.expense_manager[0]?.name | shortName: 'last' | i18nextEager}}
+            </div>
+          </figure> -->
+          <div class="expense-info-text float-left mr-64 mr-m-0">
+            <p class="small">{{(expenseType?.value === ExpenseType?.Expense? 'Expense Manager': 'Assignment Manager')|i18nextEager}}</p>
+            <div class="position-relative">
+              <div class="text-truncate d-flex align-items-center justify-content-center manager-images-list">
+                <ng-container *ngFor="let manager of data?.expense_manager;let i =index">
+                  <div class="manager-avatar-list overflow-hidden d-flex align-items-center justify-content-center cursor-pointer" tooltip="{{manager?.name}}" placement="top" *ngIf="manager && i<6">
+                    {{manager?.avatar ? '' : manager?.initials}}
+                    <img class="manager-profile" *ngIf="manager?.avatar" width="20" height="20" src="{{manager?.avatar}}" alt="{{manager?.initials}}">
+                  </div>
+                  <div class="manager-avatar-list overflow-hidden d-flex align-items-center justify-content-center more-name cursor-pointer" placement="top" *ngIf="manager && i==6" #managerCount>
+                    +{{data?.expense_manager?.length - 6}}
+                </div>
+                </ng-container>
+              <p class="ml-24 font-weight-medium" tooltip="{{data?.expense_manager?.[0]?.name}}" placement="top" delay="500" *ngIf="data?.expense_manager?.length===1">
+                  {{(data?.expense_manager?.[0]?.name || "-")}}
+              </p>
+            </div>
+            </div>
+          </div>
+        </div>
+      
+        <div class="expense-grid-group-data d-inline-block my-4 d-flex-m align-items-center full-page-width"> 
+          <figure class="float-left mr-12 text-center">
+            <icon name="corporate_fare" type="material" theme="outlined" size="18px"></icon>
+          </figure>
+          <div class="expense-info-text float-left mr-64 mr-m-0">
+            <p class="small">{{ 'vendor' | i18nextEager }}</p>
+            <p class="font-weight-medium">{{ data?.vendor_organization?.name }}</p>
+          </div>
+        </div>
+      
+
+     
+        <div class="expense-grid-group-data d-inline-block my-4 d-flex-m align-items-center full-page-width">
+          <figure class="float-left mr-12 text-center">
+            <icon name="account_tree" type="material" theme="outlined" size="18px"></icon>
+          </figure>
+          <div class="expense-info-text float-left mr-64 mr-m-0">
+            <p class="small">{{ 'hierarchy' | i18nextEager }}</p>
+            <p class="font-weight-medium">{{ data?.hierarchy?.title }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="data?.sourcing_model" class="expense-grid-group-data d-inline-block my-4 d-flex-m align-items-center full-page-width">
+          <figure class="float-left mr-12 text-center">
+            <icon name="account_tree" type="material" theme="outlined" size="18px"></icon>
+          </figure>
+          <div class="expense-info-text float-left mr-64 mr-m-0">
+            <p class="small">{{ 'sourcing_model' | i18nextEager }}</p>
+            <p class="font-weight-medium text-capitalize">{{ data?.sourcing_model }}</p>
+          </div>
+        </div>
+      
+        <div class="expense-grid-group-data d-inline-block my-4 d-flex-m align-items-center full-page-width">
+          <figure class="float-left mr-12 flex-row">
+            <div class="text-capitalize">{{ data?.worker?.initials }}</div>
+            <div *ngIf="!data?.worker?.avatar && !data?.worker?.initials" class="text-capitalize">
+              {{ data?.worker?.name | shortName: 'last' | i18nextEager }}
+            </div>
+          </figure>
+          <div class="expense-info-text float-left mr-64 mr-m-0">
+            <p class="font-weight-medium">{{ data?.worker?.name }}</p>
+            <p class="small d-flex" *ngIf="data?.worker_id">
+              <span>{{data?.worker_id}}</span>
+            </p>
+          </div>
+        </div>
+  </div>
+</header>
+<div class="more-name-list"  [ngClass]="{'active' : showHideManagerList}" #managerNameDropdown>
+  <h6>{{'Expense Managers' | i18nextEager }}</h6>
+  <ul>
+    <ng-container *ngFor="let manager of data?.expense_manager; let i = index">
+      <li class="d-flex align-items-center" *ngIf="manager && i>=6">
+        <div class="name-avatar" [ngClass]="{'overflow-hidden':manager?.avatar}" placement="top">
+        <img class="manager-profile" *ngIf="manager?.avatar" src="{{manager?.avatar}}" alt="{{manager?.initials}}" width="15" height="15"  srcset="">
+          {{ manager?.avatar ? '' : manager?.initials }}
+        </div>
+        <div>{{ manager?.name }}</div>
+      </li>
+    </ng-container>
+  </ul>
+</div>
+<app-reject-expense [data]="data" *ngIf="isOpenReject" (closeRejectModal)="isOpenReject = false"></app-reject-expense>
+<app-withdraw-expense [data]="data" *ngIf="isOpenWithdraw" (closeWithdrawModal)="isOpenWithdraw = false"> </app-withdraw-expense>
+<app-modify-expense [data]="data" *ngIf="isOpenModify" (closeModifyModal)="isOpenModify = false"></app-modify-expense>
+<app-delete-expense
+  [data]="data"
+  *ngIf="isOpenDelete"
+  (closeModal)="isOpenDelete = false"
+  (updateExpenseDetails)="updateExpenseDetails()"
+></app-delete-expense>

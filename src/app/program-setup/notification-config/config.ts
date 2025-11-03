@@ -1,0 +1,2 @@
+export const prefix = `<body style='padding-left: 0; padding-right: 0; padding-bottom: 0; padding-top: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; background-color: #F8FAFF;'><table width='100%' cellpadding='0' cellspacing='0' style='width:100%;' align='center'><tr><td align='center'><table style='max-width: 650px; width: 100%;' cellpadding='0' cellspacing='0' align='center'><tr><td align='center' style='background-color: #ffffff;'>`
+export const suffix = `</td></tr></table></td></tr></table></body>`

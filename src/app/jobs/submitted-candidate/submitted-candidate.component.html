@@ -1,0 +1,95 @@
+<!-- <app-submitted-candidate-sidebar *ngIf="jobData && submissionData" [submissionData]="submissionData" [jobData]="jobData"></app-submitted-candidate-sidebar> -->
+
+<div class="detail-wrapper">
+  <section class="description-panel p-32 position-relative">
+    <div class="card bg-light">
+      <header class="job-header position-relative">
+        <div>
+          <h3><a [routerLink]="['/jobs/details/job-details/',currentJobid,'submitted-candidate']">{{ 'candidates' | i18next }}</a> /
+            <span class="title">{{submissionData?.first_name ? submissionData?.first_name : '-'}} {{submissionData?.last_name}}</span><span
+              class="tag ml-16 position-relative">{{(submissionData?.status == 'SUBMITTED' ? 'Submitted' : submissionData?.status) | titlecase | i18next}}</span>
+          </h3>
+          <p class="job-meta" *ngIf="!fixedHeader">
+            <icon class="job-id" name="label" size="18px"></icon> {{jobData?.id}}
+            <icon class="ml-32 updated" name="update" size="18px"></icon> {{ 'last_updated_on' | i18next }} :
+            {{submissionData?.submitted_on | localDateFormat:"MMMM, d y"}}
+          </p>
+        </div>
+        <div class="actions position-absolute">
+          <button class="btn btn-primary edit-btn" (click)="openOfferDetailPanel($event)">
+            <icon class="d-flex" size="20px" name="create" type="material" cuClass="icon-cu"></icon>
+            &nbsp;{{ 'edit' | i18next }}
+          </button>
+          <button class="btn btn-primary" #actionButton>
+            {{ 'actions' | i18next }} <icon class="icon--on-right" size="20px"
+              [name]="actionVisibility? 'keyboard_arrow_up' : 'keyboard_arrow_down'" type="material" cuClass="icon-cu">
+            </icon>
+          </button>
+          <ul class="action-list position-absolute bg-light rounded-sm pt-12 pb-12"
+            [ngClass]="{'active' : actionVisibility}" #actionDropdown>
+            <li *authorize="'update_offer'">
+              <a class="pt-8 pb-8 pl-24 pr-8">
+                <icon class="mr-16" size="20px" name="library_add_check" type="material" cuClass="icon-cu"></icon>
+                {{ 'accept_offer' | i18next }}
+              </a>
+            </li>
+            <ng-container *authorize="'counter_offer'">
+              <li *ngIf="offerId || userType === 'VENDOR'">
+              <a class="pt-8 pb-8 pl-24 pr-8" (click)="counterOffer($event)">
+                <icon class="mr-16" size="20px" name="local_offer" type="material" cuClass="icon-cu"></icon>
+                {{ 'counter_offer' | i18next | titlecase}}
+              </a>
+            </li>
+            </ng-container>
+            <li *authorize="'update_offer'">
+              <a class="pt-8 pb-8 pl-24 pr-8">
+                <icon class="mr-16" size="20px" name="thumb_down" type="material" cuClass="icon-cu"></icon>
+                {{ 'reject_offer' | i18next }}
+              </a>
+            </li>
+            <li>
+              <a class="pt-8 pb-8 pl-24 pr-8" (click)="rejectCandidate()">
+                <icon class="mr-16" size="20px" name="do_not_touch" type="material" cuClass="icon-cu"></icon>
+                {{ 'reject_candidate' | i18next }}
+              </a>
+            </li>
+            <li>
+              <a class="pt-8 pb-8 pl-24 pr-8">
+                <icon class="mr-16" size="20px" name="local_offer" type="material" cuClass="icon-cu"></icon>
+                {{ 'release_offer' | i18next }}
+              </a>
+            </li>
+            <li>
+              <a class="pt-8 pb-8 pl-24 pr-8" (click)="withdrawCandidate()">
+                <icon class="mr-16" size="20px" name="pan_tool" type="material" cuClass="icon-cu"></icon>
+                {{ 'withdraw_candidate' | i18next }}
+              </a>
+            </li>
+            <li>
+              <a class="pt-8 pb-8 pl-24 pr-8" (click)="scheduleInterview()">
+                <icon class="mr-16" size="20px" name="today" type="material" cuClass="icon-cu"></icon>
+                {{ 'schedule_interview' | i18next }}
+              </a>
+            </li>
+          </ul>
+        </div>
+      </header>
+      <nav class="detail-nav pl-16 pr-16">
+        <ul class="primary">
+          <li><a >{{ 'submission_details' | i18next }}</a></li>
+          <li><a [routerLink]="['/jobs/submission/',currentJobid,'candidate',candidateId,'interviews']"
+              [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">{{ 'interviews' | i18next }}</a></li>
+          <li><a [routerLink]="['/jobs/submission/',currentJobid,'candidate',candidateId,'offer']"
+              [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">{{ 'offer' | i18next }}</a></li>
+          <li><a >{{ 'assignments' | i18next }}</a></li>
+          <li hidden><a >{{ 'approval' | i18next }}</a></li>
+          <li hidden><a >{{ 'history' | i18next }}</a></li>
+        </ul>
+        <div class="clearfix"></div>
+      </nav>
+    </div>
+    <ng-content></ng-content>
+  </section>
+</div>
+<app-withdraw-candidate></app-withdraw-candidate>
+<app-offer-detail-panel></app-offer-detail-panel>

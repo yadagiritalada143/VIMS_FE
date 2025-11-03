@@ -1,0 +1,866 @@
+<div class="create-wrapper p-24 pt-32">
+  <div class="user-preference-wrap">
+    <app-user-preference-header [profileUser]="profileUser" [programMember]="programMember" (loadData)="init()">
+    </app-user-preference-header>
+       <div class="mt-16 d-flex ">
+        <aside class="notify-sidebar mr-16">
+          <h4 class="font-weight-medium p-24 mb-0">{{ 'available_modules' | i18nextEager }}</h4>
+          <ul>
+            <li [ngClass]="{'border-active': selectedCategories?.name == module?.name}" *ngFor="let module of moduleData; let i = index">
+              <a [ngClass]="{'active': selectedCategories?.name == module?.name}" href="javascript:void(0)"
+                class="d-flex position-relative  justify-content-between align-items-center"
+                (click)="selectedModule(module, i)">
+
+                <icon *ngIf="module?.name == 'Configuration & Settings'" class="mr-12" name="build_circle" theme="outlined" size="18px" type="material"></icon>
+                <icon *ngIf="module?.name == 'Job'" class="mr-12" name="work_outline" theme="outlined" size="18px" type="material"></icon>
+                <icon *ngIf="module?.name == 'Expense'" class="mr-12" name="watch_later"  theme="outlined" size="18px" type="material"></icon>
+                <icon *ngIf="module?.name == 'Time & Expense'" class="mr-12" name="watch_later"  theme="outlined" size="18px" type="material"></icon>
+                <icon *ngIf="module?.name == 'Invoice'" class="mr-12" name="receipt_long"  theme="outlined" size="18px" type="material"></icon>
+                <icon *ngIf="module?.name == 'Password Management'" class="mr-12" name="vpn_key"  theme="outlined" size="18px" type="material"></icon>
+                <icon *ngIf="module?.name == 'Profile Management'" class="mr-12" name="admin_panel_settings"  theme="outlined" size="18px" type="material"></icon>
+                <icon *ngIf="module?.name == 'Approval'" class="mr-12" name="assignment_turned_in"  theme="outlined" size="18px" type="material"></icon>
+                <icon *ngIf="module?.name == 'Generic'" class="mr-12" name="build_circle"  theme="outlined" size="18px" type="material"></icon>
+                <icon *ngIf="module?.name == 'Time Sheet'" class="mr-12" name="account_balance_wallet"  theme="outlined" size="18px" type="material"></icon>
+                <icon *ngIf="module?.name == 'Assignment'" class="mr-12" name="assignment"  theme="outlined" size="18px" type="material"></icon>
+                <icon *ngIf="module?.name == 'Assignment Amendment'" class="mr-12" name="assignment"  theme="outlined" size="18px" type="material"></icon>
+                <icon *ngIf="module?.name == 'Onboarding'" class="mr-12" name="assignment_late"  theme="outlined" size="18px" type="material"></icon>
+                <icon *ngIf="module?.name == 'Username Management'" class="mr-12" name="manage_accounts"  theme="outlined" size="18px" type="material"></icon>
+                <!-- <icon *ngIf="module?.name == 'Invoice'" class="mr-12" name="gpp_good"  theme="outlined" size="18px" type="material"></icon> -->
+                <span>{{module?.name}} </span>
+                <icon [ngClass]="{'on':(selectedCategories && index == i) && !toggleJobs.value}" class="off mr-12"
+                  name="notifications_off" size="18px" type="material"></icon>
+              </a>
+            </li>
+          </ul>
+        </aside>
+        <div class="notify-content px-32 py-24">
+          <div>
+            <div class="d-flex">
+              <div>
+                <h3 *ngIf="selectedCategories?.name" class="d-inline-block mr-12">{{selectedCategories?.name}}</h3>
+                <div *ngIf="selectedCategories?.name" class="toggle-box d-inline-block">
+                  <div class="toggle-panel-inner" [ngClass]="toggleJobs?.value ? 'if-active' : 'if-inactive'">
+                    <span class="toggle-switch" [ngClass]="toggleJobs?.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickToggleJob()"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="ml-auto mb-8">
+                <!-- <button (click)="onSubmit()" type="submit" i18n class="btn loginbtn userbtn btn-primary position-relative">
+                  {{ 'save' | i18nextEager }} <icon  *ngIf="!isSaveLoader" size="20px" name="check_circle" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+                  <span *ngIf="isSaveLoader" class="ml-8"><button-loader></button-loader></span></button>  -->
+              </div>
+            </div>
+            <p class="small">
+              {{ 'in_this_section_you_can_determine' | i18nextEager }} {{ 'which_notification_types_you_would_like_to_receive' | i18nextEager }}, {{ 'and_by_what_methods' | i18nextEager }}.
+              {{ 'to_turn_on_a_notification' | i18nextEager }},
+              {{ 'select_the_field_that_corresponds_to_the_action' | i18nextEager }} {{ 'and_notification_type_(the_indicator_will_turn_green)' | i18nextEager }}.
+              {{ 'to_opt-out_of_a_notification' | i18nextEager }},
+              {{ 'deselect_the_field_that_corresponds_to_the_action' | i18nextEager }}
+              {{ 'and_notification_type_(the_indicator_will_turn_grey)' | i18nextEager }}.
+            </p>
+            <div class="notification-type mt-32">
+              <ul *ngIf="infoList[0]?.name">
+                <li>
+                  <a href="javascript:void(0)" class="active">
+                    <icon class="d-inline-block mr-8" name="email" theme="outlined" size="18px" type="material"></icon>
+                    {{infoList[0]?.name}}
+                  </a>
+                </li>
+              </ul>
+              <div>
+                <table *ngIf="userType != 'CLIENT' && userType != 'HM'">
+                  <thead>
+                    <tr>
+                      <th>{{ 'actions' | i18nextEager }}</th>
+                      <th>{{ 'informational' | i18nextEager }}</th>
+                      <th>{{ 'action' | i18nextEager }}</th>
+                      <th>{{ 'reminder' | i18nextEager }}</th>
+                    </tr>
+                  </thead>
+                  <tbody *ngIf="actionList?.length > 0" [ngClass]="{'disabled':!toggleJobs.value}">
+                    <tr *ngFor="let actions of actionList;let i = index">
+                      <td>
+                        {{actions?.category?.name}}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox"   [(ngModel)]="actions.informational"
+                               [checked]="actions.informational" name="informational">
+                            <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox"   [(ngModel)]="actions.action"
+                              [checked]="actions.action" name="action">
+                            <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox"   [(ngModel)]="actions.reminder"
+                              [checked]="actions.reminder" name="reminder">
+                            <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table  *ngIf="userType == 'CLIENT' && this.selectedCategories?.name == 'Configuration & Settings'">
+                  <thead>
+                    <tr>
+                      <th>{{ 'actions' | i18nextEager }}</th>
+                      <th>{{ 'informational' | i18nextEager }}</th>
+                      <th>{{ 'action' | i18nextEager }}</th>
+                      <th>{{ 'reminder' | i18nextEager }}</th>
+                    </tr>
+                  </thead>
+                  <tbody >
+                    <tr >
+                      <td>
+                        {{ 'password_management' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <span _ngcontent-sgy-c370="" class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                              <span _ngcontent-sgy-c370="" class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <span _ngcontent-sgy-c370="" class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr >
+                      <td>
+                        {{ 'profile_management' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="false" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <span _ngcontent-sgy-c370="" class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table  *ngIf="userType == 'CLIENT' && this.selectedCategories?.name == 'Assignment'">
+                  <thead>
+                    <tr>
+                      <th>{{ 'actions' | i18nextEager }}</th>
+                      <th>{{ 'informational' | i18nextEager }}</th>
+                      <th>{{ 'action' | i18nextEager }}</th>
+                      <th>{{ 'reminder' | i18nextEager }}</th>
+                    </tr>
+                  </thead>
+                  <tbody >
+                    <tr >
+                      <td>
+                        {{ 'assignment' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table  *ngIf="userType == 'CLIENT' && this.selectedCategories?.name == 'Job'">
+                  <thead>
+                    <tr>
+                      <th>{{ 'actions' | i18nextEager }}</th>
+                      <th>{{ 'informational' | i18nextEager }}</th>
+                      <th>{{ 'action' | i18nextEager }}</th>
+                      <th>{{ 'reminder' | i18nextEager }}</th>
+                    </tr>
+                  </thead>
+                  <tbody >
+                    <tr >
+                      <td>
+                        {{ 'job' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <span _ngcontent-sgy-c370="" class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr >
+                      <td>
+                        {{ 'onboarding' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr >
+                      <td>
+                        {{ 'interview' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="false" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="false" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr >
+                      <td>
+                        {{ 'submission' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="false" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="false" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr >
+                      <td>
+                        {{ 'offer' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="false" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="false" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table  *ngIf="userType == 'CLIENT' && this.selectedCategories?.name == 'Time & Expense'">
+                  <thead>
+                    <tr>
+                      <th>{{ 'actions' | i18nextEager }}</th>
+                      <th>{{ 'informational' | i18nextEager }}</th>
+                      <th>{{ 'action' | i18nextEager }}</th>
+                      <th>{{ 'reminder' | i18nextEager }}</th>
+                    </tr>
+                  </thead>
+                  <tbody >
+                    <tr >
+                      <td>
+                        {{ 'expense' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <span _ngcontent-sgy-c370="" class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                              <span _ngcontent-sgy-c370="" class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <span _ngcontent-sgy-c370="" class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr >
+                      <td>
+                        {{ 'time_sheet' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <span _ngcontent-sgy-c370="" class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <span _ngcontent-sgy-c370="" class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <span _ngcontent-sgy-c370="" class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table  *ngIf="userType == 'CLIENT' && this.selectedCategories?.name == 'Invoice'">
+                  <thead>
+                    <tr>
+                      <th>{{ 'actions' | i18nextEager }}</th>
+                      <th>{{ 'informational' | i18nextEager }}</th>
+                      <th>{{ 'action' | i18nextEager }}</th>
+                      <th>{{ 'reminder' | i18nextEager }}</th>
+                    </tr>
+                  </thead>
+                  <tbody >
+                    <tr >
+                      <td>
+                        {{ 'invoice' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <table  *ngIf="userType == 'HM' && this.selectedCategories?.name == 'Configuration & Settings'">
+                  <thead>
+                    <tr>
+                      <th>{{ 'actions' | i18nextEager }}</th>
+                      <th>{{ 'informational' | i18nextEager }}</th>
+                      <th>{{ 'action' | i18nextEager }}</th>
+                      <th>{{ 'reminder' | i18nextEager }}</th>
+                    </tr>
+                  </thead>
+                  <tbody >
+                    <tr >
+                      <td>
+                        {{ 'password_management' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <span _ngcontent-sgy-c370="" class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                              <span _ngcontent-sgy-c370="" class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <span _ngcontent-sgy-c370="" class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr >
+                      <td>
+                        {{ 'profile_management' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="false" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <span _ngcontent-sgy-c370="" class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table  *ngIf="userType == 'HM' && this.selectedCategories?.name == 'Assignment'">
+                  <thead>
+                    <tr>
+                      <th>{{ 'actions' | i18nextEager }}</th>
+                      <th>{{ 'informational' | i18nextEager }}</th>
+                      <th>{{ 'action' | i18nextEager }}</th>
+                      <th>{{ 'reminder' | i18nextEager }}</th>
+                    </tr>
+                  </thead>
+                  <tbody >
+                    <tr >
+                      <td>
+                        {{ 'assignment' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table  *ngIf="userType == 'HM' && this.selectedCategories?.name == 'Job'">
+                  <thead>
+                    <tr>
+                      <th>{{ 'actions' | i18nextEager }}</th>
+                      <th>{{ 'informational' | i18nextEager }}</th>
+                      <th>{{ 'action' | i18nextEager }}</th>
+                      <th>{{ 'reminder' | i18nextEager }}</th>
+                    </tr>
+                  </thead>
+                  <tbody >
+                    <tr >
+                      <td>
+                        {{ 'job' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr >
+                      <td>
+                        {{ 'onboarding' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr >
+                      <td>
+                        {{ 'interview' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr >
+                      <td>
+                        {{ 'submission' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr >
+                      <td>
+                        {{ 'offer' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table  *ngIf="userType == 'HM' && this.selectedCategories?.name == 'Time & Expense'">
+                  <thead>
+                    <tr>
+                      <th>{{ 'actions' | i18nextEager }}</th>
+                      <th>{{ 'informational' | i18nextEager }}</th>
+                      <th>{{ 'action' | i18nextEager }}</th>
+                      <th>{{ 'reminder' | i18nextEager }}</th>
+                    </tr>
+                  </thead>
+                  <tbody >
+                    <tr >
+                      <td>
+                        {{ 'expense' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr >
+                      <td>
+                        {{ 'time_sheet' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="true" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table  *ngIf="userType == 'HM' && this.selectedCategories?.name == 'Invoice'">
+                  <thead>
+                    <tr>
+                      <th>{{ 'actions' | i18nextEager }}</th>
+                      <th>{{ 'informational' | i18nextEager }}</th>
+                      <th>{{ 'action' | i18nextEager }}</th>
+                      <th>{{ 'reminder' | i18nextEager }}</th>
+                    </tr>
+                  </thead>
+                  <tbody >
+                    <tr >
+                      <td>
+                        {{ 'invoice' | i18nextEager }}
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="false" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="false" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="checkbox-wrapper d-inline-block">
+                          <label class="checkbox-container">
+                            <input type="checkbox" [checked]="false" [disabled]="true" name="informational">
+                         <span class="checkmark"></span>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+   </div>
+</div>

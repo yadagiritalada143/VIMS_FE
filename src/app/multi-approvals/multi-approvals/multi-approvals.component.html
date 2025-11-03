@@ -1,0 +1,25 @@
+<h3 class="font-weight-medium">{{'current_workflows'|i18next }}</h3>
+<section *ngIf="!NoDataFound" class="workflow-page">
+    <!-- breadcrumb Start -->
+    <nav class="d-flex">
+        <div *ngIf="multiApprovals?.review" class="nav-item cursor-pointer position-relative done">
+            <span>{{'review'|i18next }}</span>
+        </div>
+        <div *ngIf="multiApprovals?.approvals" class="nav-item cursor-pointer position-relative rejected active">
+            <span>{{'approvals'|i18next }}</span>
+        </div>
+        <div *ngIf="multiApprovals?.acceptance" class="nav-item cursor-pointer position-relative lock">
+            <span>{{'acceptance'|i18next }}</span>
+        </div>
+    </nav>
+    <!-- breadcrumb End -->
+</section>
+
+<!-- no workflow section start here -->
+<section *ngIf="NoDataFound" class="no-workflow d-flex align-items-center justify-content-center">
+  <div class="text-center">
+    <img src="../../../assets/images/no-workflow.png" alt="No Workflow Defined" width="70" >
+    <h4 class="font-weight-medium mt-12">{{'no_current_workflows'|i18next }}</h4>
+    <p>No Workflow Defined</p>
+  </div>
+</section>

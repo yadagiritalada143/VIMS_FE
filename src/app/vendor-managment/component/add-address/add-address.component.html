@@ -1,0 +1,63 @@
+<svms-sidebar title="{{ 'add_address' | i18next }}" size="small" [dataVisibility]="visiblity" (onClose)="sideBaClose()">
+  <form  [formGroup]="addressForm">
+    <svms-sidebar-body>
+      <div class="p-24">
+        <div class="form-group">
+          <label>
+            {{ 'country' | i18next }} <span class="require">*</span>
+          </label>
+          <ng-select bindLabel="name" [clearable]="true" placeholder="{{ 'select_country' | i18next }}"
+            ngDefaultControl formControlName="country" (change)="setCountry();setaddres('primary')">
+            <ng-option *ngFor="let country of allCountryList" [value]="country.name">{{country.name|i18next}}</ng-option>
+          </ng-select>
+          <p *ngIf="
+            addressForm.get('country').touched &&
+                (addressForm.get('country').errors?.pattern || addressForm.get('country').invalid)
+              " class="validation-msg">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'country_can_not_be_blank' | i18next }}.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label>
+            {{ 'address' | i18next }} <span class="require">*</span>
+          </label>
+          <search-address (setAddress)="getAddress($event)" [adressType]="'geocode'" required [country]="countryShortName" id="date"
+          formControlName="address" #address></search-address>
+          <p *ngIf="
+            addressForm.get('address').touched &&
+                (addressForm.get('address').errors?.pattern || addressForm.get('address').invalid)
+              " class="validation-msg">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'address_can_not_be_blank' | i18next }}.
+          </p>
+        </div>
+        <div class="d-flex justify-content-end">
+          <div class="d-flex align-items-center">
+            <input formControlName="is_billing" (click)="checkBilling($event)" type="checkbox">
+            <p class="pl-12">{{ 'billing_address' | i18next }}</p>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end">
+          <div class="d-flex align-items-center">
+            <p *ngIf="isBillingExist" class="validation-msg">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'another_address_already_selected_as_billing_address' | i18next }}.
+            </p>
+          </div>
+        </div>
+      </div>
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+      <div class="d-flex align-items-center justify-content-between">
+        <button (click)="sideBaClose()" type="button" class="btn btn-outline-secondary">
+          {{ 'cancel' | i18next }}
+        </button>
+        <button [disabled]="addressForm.invalid || isBillingExist" type="button" class="btn btn-primary" (click)="addressSubmit(index)">
+          {{ 'save' | i18next }}
+        </button>
+      </div>
+    </svms-sidebar-footer>
+  </form>
+</svms-sidebar>

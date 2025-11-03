@@ -1,0 +1,333 @@
+@import '../../../../assets/sass/abstracts/variables';
+.level {
+  color: $text-secondary;
+}
+
+.level-listing {
+  list-style-type: none;
+  margin-left: -24px;
+  margin-right: -24px;
+  padding-left: $p16;
+  border-top: 1px solid $color-gray-20;
+  .disabled {
+    opacity: .5;
+    pointer-events: none;
+    cursor: not-allowed;
+  }
+
+  li {
+    .listing-item {
+      border-bottom: 1px solid $color-gray-20;
+      background-color: $color-gray-5;
+      padding-left: $p32;
+      overflow: hidden;
+      transition: $transition;
+      cursor: pointer;
+
+      .listing-info {
+        padding-top: $p16;
+        padding-bottom: $p16;
+        float: left;
+
+        .initials {
+          margin-top: 2px;
+          margin-right: $m8;
+        }
+
+        .level-title {
+          line-height: 24px;
+          text-decoration: underline;
+        }
+      }
+
+      .level-status {
+        float: right;
+        border-left: 1px solid $color-gray-20;
+        padding-top: $p16;
+        padding-bottom: $p16;
+        width: 195px;
+        text-align: center;
+
+        .checkbox-wrapper {
+          width: 22px;
+          height: 22px;
+          margin: auto;
+          margin-top: 2px;
+          margin-bottom: 3px;
+
+          .checkbox-container {
+
+            .checkmark {
+              border: none;
+              border-radius: $rounded-circle;
+              background-color: $color-gray-50;
+
+              &:after {
+                display: block;
+              }
+            }
+
+            input {
+              &:checked {
+
+                &~.checkmark {
+                  background-color: $color-green;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      &:hover {
+        background-color: $light;
+      }
+
+      &.active {
+
+        .sub-level-title {
+          color: $color-green;
+        }
+      }
+    }
+  }
+
+  ul {
+    list-style-type: none;
+
+    li {
+      .sub-level-title {
+        line-height: 24px;
+        display: block;
+        position: relative;
+        margin-left: $p32;
+        text-decoration: underline;
+
+        &:before {
+          position: absolute;
+          top: 6px;
+          left: -32px;
+          background: url(../../../../assets/images/arrow-sub-item.svg) no-repeat left top;
+          content: '.';
+          text-indent: -9999px;
+          overflow: hidden;
+          display: block;
+          visibility: visible;
+          width: 15px;
+          height: 13px;
+        }
+      }
+
+      ul {
+
+        li {
+
+          .listing-item {
+            padding-left: $p64;
+          }
+
+          ul {
+
+            li {
+
+              .listing-item {
+                padding-left: 96px;
+              }
+
+              ul {
+
+                li {
+
+                  .listing-item {
+                    padding-left: 128px;
+                  }
+
+                  ul {
+
+                    li {
+
+                      .listing-item {
+                        padding-left: 160px;
+                      }
+
+                      ul {
+
+                        li {
+
+                          .listing-item {
+                            padding-left: 192px;
+                          }
+
+                          ul {
+
+                            li {
+
+                              .listing-item {
+                                padding-left: 224px;
+                              }
+                            }
+
+                            ul {
+
+                              li {
+
+                                .listing-item {
+                                  padding-left: 256px;
+                                }
+
+                                ul {
+
+                                  li {
+
+                                    .listing-item {
+                                      padding-left: 288px;
+                                    }
+
+                                    ul {
+
+                                      li {
+
+                                        .listing-item {
+                                          padding-left: 320px;
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+::ng-deep {
+  .search-hierarchy {
+    .ng-select {
+      .ng-arrow-wrapper {
+        display: none;
+      }
+
+      .ng-select-container {
+        padding-left: 24px;
+      }
+      .ng-clear-wrapper{
+        text-align: center;
+        background-color: $color-gray-100;
+        color: #FFFFFF;
+        width: 18px;
+        height: 18px;
+        margin-right: 20px;
+        border-radius: $rounded-circle;
+
+        .ng-clear{
+          font-size: 16px;
+        }
+        
+        &:hover {
+          .ng-clear{
+            color: #ffffff;
+          } 
+        }
+      }
+    }
+
+    .ng-select.ng-select-single .ng-select-container .ng-value-container .ng-input {
+      left: 24px;
+    }
+
+    .ng-select.ng-select-opened .ng-select-container {
+      z-index: 3;
+    }
+  }
+}
+
+.search-hierarchy {
+  .search-icon {
+    top: 10px;
+    left: 12px;
+    z-index: 4;
+    color: $color-gray-100;
+  }
+}
+
+.hierarchy-title{
+  font-size: $font-primary;
+  line-height: normal;
+  color: $color-gray-100;
+}
+
+.hierarchy-wrapper{
+  max-height: 500px;
+  overflow: auto;
+  border: 1px solid $color-gray-20;
+  padding: $p16;
+  border-radius: $border-radius;
+  margin-top: $m16;
+
+  ul{
+    list-style-type: none;
+    padding-left: $p32;
+    padding-bottom: $p16;
+    
+    li{
+      position: relative;
+      padding-bottom: $p16;
+    }
+
+    .hierarchy-down-arrow{
+      position: absolute;
+      top: -4px;
+      left: -28px;
+      transform: rotate(-90deg);
+    }
+
+    .rotated{
+      transform: rotate(0deg);
+    }
+
+    .herarchy-name{
+      color: $color-gray-100;
+    }
+    
+    .disabled {
+      opacity: .5;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+  }
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #FFFFFF;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #E3E9F0;
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #bcd2ec;
+  }
+
+  .active{
+    display: block;
+  }
+
+  .inactive{
+    display: none;
+  }
+
+}
+

@@ -1,0 +1,29 @@
+<div class="p-24 vendor-payment p-m-0">
+  <a class="back-btn d-flex align-items-center mb-24 cursor-pointer back-mobile" style="width: 200px;" (click)='goBack()'>
+    <icon class="d-flex" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon>
+    <span>{{ 'back_to_invoice_details' | i18nextEager }}</span>
+  </a>
+
+  <div class="payment-wrapper" *ngIf="payNow">
+    <app-vendor-payment-authorization [vendors]='vendors' [invoiceList]='vendorInvoices'
+      (vendorChanged)='loadVendorInvoices($event)' (selectionChanged)='selectionChangedHandler()'
+      [paymentAllocationDetails]="paymentAllocationDetails" [consolidatedInvoiceDetails]="consolidatedInvoiceDetails">
+    </app-vendor-payment-authorization>
+      <app-vendor-payment-summary [logs]="logs" [selectedVendor]='selectedVendor' [paymentDetails]='paymentAllocationDetails'
+      [consolidatedInvoiceDetails]="consolidatedInvoiceDetails" [invoiceTotal]="invoiceTotal" [invGrandTotal]="invGrandTotal" [voucherId]="voucherId"
+      (onSave)='createVendorAllocation($event)'></app-vendor-payment-summary>
+    <div class="clearfix"></div>
+  </div>
+  <div class="payment-wrapper" *ngIf="!payNow">
+    <div class="content-area ui-content-wrapper no-content bg-light">
+      <!-- <div class="page-title px-24 pt-24">Programs</div> -->
+      <div class="first-program">
+        <img src="./assets/images/no-programs.png" alt="organization-board" width="250" class="img-fluid">
+          <h2>{{ 'you_don_t_have_authorization_for_this_roles' | i18nextEager }}</h2>
+          <button class="btn btn-primary" (click)="goBack()">{{ 'go_back' | i18nextEager }}</button>
+      </div>
+    </div>
+    
+  </div>
+
+</div>

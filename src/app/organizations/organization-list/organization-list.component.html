@@ -1,0 +1,29 @@
+<vms-table [vmsTableConfig]="tableConfig" [vmsDataSource]="vmsData" [loading]="dataLoading" [open]="isExpand" [totalItem]="totalRecords" [itemsPerPage]="itemsPerPage" (onViewClick)="onClikcView($event)" (onEditClick)="onEditClick($event)" (onExpandClick)="onExpandClick($event)"
+    (changePage)="onPaginationClick($event)" (onCreate)="onCreateClick($event)" [searchTerm]="seachTerms"
+    (changeRecords)="onClickRecords($event)" (search)="onSearchClick($event)" (onListFilter)="onListFielter($event)" (onSort)="onSortClick($event)">
+    <div class="expanded-col">
+        <img src="{{logo}}" alt="" class="img-fluid logo-pic mr-32" *ngIf="logo" />
+        <div *ngFor="let data of organizeMembers">
+            <div class="expanded-chips mr-12" *ngIf="data.name && data.type">
+                <div class="chip-content mr-24">
+                    <span class="name">
+            {{data.name}}
+          </span>
+                    <span class="designation mr-64">
+            {{data.type |localDateFormat}}
+          </span>
+                </div>
+                <div (click)="programClick(data)" class="d-flex" *ngIf="data.name">
+                    <span class="view">{{ 'view' | i18next }}</span>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="(organizeMembers | json) == '[]'">
+           {{ 'data_not_available' | i18next }}
+        </div>
+    </div>
+</vms-table>
+
+<app-no-organization *ngIf="vmsData?.total === 0" [orgTitle]="orgTitle" [orgIcon]="orgIcon" [orgType]="orgType">
+</app-no-organization>
+<app-organization-create [title]="orgTitle" [icon]="orgIcon" [type]="orgType"></app-organization-create>

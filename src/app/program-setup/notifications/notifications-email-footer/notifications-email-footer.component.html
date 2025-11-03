@@ -1,0 +1,357 @@
+<div class="notification-email-footer d-flex position-relative" [formGroup]="emailFooterForm">
+  <div class="col-6 email-footer__left">
+    <div class="email-footer__content">
+      <div class="email-footer__top">
+        <div class="flex flex-col">
+          <div class="flex block-item">
+            <span class="block-heading">{{ 'footer' | i18next }}</span>
+            <span class="toggle-switch" (click)="onClickToggle('enableFooter')"
+                  [ngClass]="footerOptions.enableFooter ? 'toggle-on' : 'toggle-off'"
+            ></span>
+          </div>
+        </div>
+        <div class="flex flex-col">
+          <span class="block-label">{{ 'language' | i18next }}</span>
+          <ng-select class="w-100" placeholder="{{ 'select_language' | i18next }}" formControlName="language"
+                     [items]="footerOptions.languages" bindValue="id" bindLabel="name">
+          </ng-select>
+        </div>
+        <div class="flex flex-col padt-20">
+          <span class="block-label">{{ 'footer_color_theme' | i18next }}</span>
+          <div class="flex">
+            <span class="type-switch" [ngClass]="footerOptions.themeType === 'light' ? 'active' : ''"
+                  (click)="footerOptions.themeType = 'light'">
+              {{ 'light' | i18next }}
+            </span>
+            <span class="type-switch" [ngClass]="footerOptions.themeType === 'dark' ? 'active' : ''"
+                  (click)="footerOptions.themeType = 'dark'">
+                          {{ 'dark' | i18next }}
+                        </span>
+          </div>
+        </div>
+        <div class="flex block-item dropdown-item">
+                    <span class="block-heading arrow-item"
+                          (click)="footerOptions.footerLogo.open = !footerOptions.footerLogo.open"
+                          [ngClass]="footerOptions.footerLogo.open ? 'arrow-item__down' : 'arrow-item__right'">
+                      {{ 'footer_logo' | i18next }}
+                    </span>
+          <span class="toggle-switch"
+                (click)="onClickToggle('footerLogo')"
+                [ngClass]="footerOptions.footerLogo.selected ? 'toggle-on' : 'toggle-off'"></span>
+        </div>
+        <div *ngIf="footerOptions.footerLogo.open" class="upload-img-container flex align-center">
+          <svms-upload-avatar (hideError)="getCropImage($event)"
+                              [image]="formValue?.logo?.value"></svms-upload-avatar>
+          <!--  -->
+          <div class="upload-panel-body">
+            <h5 *ngIf="!logoComponent?.logoUrl || !footerOptions.footerLogo.file">{{ 'upload_logo' | i18next }}</h5>
+            <div
+              *ngIf="(!logoComponent?.logoUrl || !footerOptions.footerLogo.file)"
+              class="error-text">{{ 'only_.png,_.jpg' | i18next }}
+              {{ 'formats_file_size' | i18next }} 3 {{ 'mb' | i18next }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="email-footer__bottom">
+        <div class="switch-item">
+                    <span class="block-heading arrow-item"
+                          (click)="footerOptions.caption.open = !footerOptions.caption.open"
+                          [ngClass]="footerOptions.caption.open ? 'arrow-item__down' : 'arrow-item__right'">
+                      {{ 'enable_caption' | i18next }}
+                    </span>
+          <span class="toggle-switch"
+                (click)="onClickToggle('caption')"
+                [ngClass]="footerOptions.caption.selected ? 'toggle-on' : 'toggle-off'"></span>
+        </div>
+        <div class="content-container" *ngIf="footerOptions.caption.open">
+          <div class="form-group">
+            <div class="footer-caption">
+              <label for="caption-input">{{ 'enable_caption_line_below_logo' | i18next }}</label>
+              <input type="text" class="form-control" placeholder="{{ 'enter_the_text' | i18next }}" id="caption-input"
+                     formControlName="caption" [readonly]="!footerOptions.caption.selected">
+            </div>
+            <small class="error-text"
+                   *ngIf="emailFooterForm.get('caption').invalid && emailFooterForm.get('caption').touched">{{ 'maximum_length_can_be_100_characters' | i18next }}</small>
+          </div>
+        </div>
+        <div class="switch-item">
+                    <span
+                      class="block-heading arrow-item"
+                      (click)="footerOptions.applicationLinks.open = !footerOptions.applicationLinks.open"
+                      [ngClass]="footerOptions.applicationLinks.open ? 'arrow-item__down' : 'arrow-item__right'">
+                      {{ 'application_download_links' | i18next }}
+                    </span>
+          <span class="toggle-switch"
+                (click)="onClickToggle('applicationLinks')"
+                [ngClass]="footerOptions.applicationLinks.selected ? 'toggle-on' : 'toggle-off'"></span>
+        </div>
+        <div class="content-container" *ngIf="footerOptions.applicationLinks.open">
+          <div class="form-group" formGroupName="applicationLinks">
+            <div class="application-download">
+              <div class="row d-flex mb-12" *ngFor="let link of footerOptions.applicationLinks.links">
+                <div class="choose-url">
+                  <span class="prepend">{{ link.prepend }}</span>
+                  <input type="text" class="form-control" placeholder="{{ 'web_address' | i18next }} ({{ 'url' | i18next }})"
+                         [readonly]="!footerOptions.applicationLinks.selected" [formControlName]="link.control"
+                         (blur)="isValidUrl(link.control, 'downloadLinks', $event)">
+                </div>
+                <small *ngIf="link.error" class="error-text mt-4">{{ 'please_enter_the_valid_url' | i18next }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="switch-item">
+                    <span class="block-heading arrow-item"
+                          (click)="footerOptions.mediaLinks.open = !footerOptions.mediaLinks.open"
+                          [ngClass]="footerOptions.mediaLinks.open ? 'arrow-item__down' : 'arrow-item__right'">
+                      {{ 'social_media_links' | i18next }}
+                    </span>
+          <span class="toggle-switch"
+                (click)="onClickToggle('mediaLinks')"
+                [ngClass]="footerOptions.mediaLinks.selected ? 'toggle-on' : 'toggle-off'"></span>
+        </div>
+        <div class="content-container" *ngIf="footerOptions.mediaLinks.open">
+          <div class="form-group" formGroupName="mediaLinks">
+            <div class="media-links">
+              <div class="row d-flex mb-12">
+                <div class="choose-url">
+                  <ng-select class="mediaLinkPrepend" bindLabel="prepend"
+                             [readonly]="!footerOptions.mediaLinks.selected"
+                             [clearable]="true"
+                             (change)="changeMediaLink($event, 'firstSelected')"
+                             (clear)="clearSelectedMedia('firstSelected')"
+                             placeholder="{{ 'choose_application' | i18next }}"
+                             formControlName="firstSelected">
+                    <ng-container *ngFor="let link of footerOptions.mediaLinks.links">
+                      <ng-option *ngIf="!link.selected" [value]="link"
+                                 [disabled]="link.selected">{{link.prepend}}</ng-option>
+                    </ng-container>
+                  </ng-select>
+                  <input type="text" class="form-control" placeholder="Web Address (URL)"
+                         [readonly]="!footerOptions.mediaLinks.selected || !formValue.mediaLinks.value.firstSelected"
+                         formControlName="first"
+                         (blur)="isValidUrl(formValue.mediaLinks.value.firstSelected.control, 'mediaLinks', $event)">
+                </div>
+                <small *ngIf="getLinkError('firstSelected')"
+                       class="error-text mt-4">{{ 'please_enter_the_valid_url' | i18next }}</small>
+              </div>
+              <div class="row d-flex mb-12">
+                <div class="choose-url">
+                  <ng-select class="mediaLinkPrepend" bindLabel="prepend"
+                             [readonly]="!footerOptions.mediaLinks.selected"
+                             [clearable]="true" (clear)="clearSelectedMedia('secondSelected')"
+                             (change)="changeMediaLink($event, 'secondSelected')" placeholder="{{ 'choose_application' | i18next }}"
+                             formControlName="secondSelected">
+                    <ng-container *ngFor="let link of footerOptions.mediaLinks.links">
+                      <ng-option *ngIf="!link.selected" [value]="link"
+                                 [disabled]="link.selected">{{link.prepend}}</ng-option>
+                    </ng-container>
+                  </ng-select>
+                  <input type="text" class="form-control" placeholder="{{ 'web_address_' | i18next }}({{ 'url' | i18next }})"
+                         [readonly]="!footerOptions.mediaLinks.selected || !formValue.mediaLinks.value.secondSelected"
+                         formControlName="second"
+                         (blur)="isValidUrl(formValue.mediaLinks.value.secondSelected.control, 'mediaLinks', $event)">
+                </div>
+                <small *ngIf="getLinkError('secondSelected')"
+                       class="error-text mt-4">{{ 'please_enter_the_valid_url' | i18next }}</small>
+              </div>
+              <div class="row d-flex mb-12">
+                <div class="choose-url">
+                  <ng-select class="mediaLinkPrepend" bindLabel="prepend"
+                             [readonly]="!footerOptions.mediaLinks.selected"
+                             [clearable]="true" (clear)="clearSelectedMedia('thirdSelected')"
+                             (change)="changeMediaLink($event, 'thirdSelected')" placeholder="{{ 'choose_application' | i18next }}"
+                             formControlName="thirdSelected">
+                    <ng-container *ngFor="let link of footerOptions.mediaLinks.links">
+                      <ng-option *ngIf="!link.selected" [value]="link"
+                                 [disabled]="link.selected">{{link.prepend}}</ng-option>
+                    </ng-container>
+                  </ng-select>
+                  <input type="text" class="form-control" placeholder="{{ 'web_address' | i18next }} ({{ 'url' | i18next }})"
+                         [readonly]="!footerOptions.mediaLinks.selected || !formValue.mediaLinks.value.thirdSelected"
+                         formControlName="third"
+                         (blur)="isValidUrl(formValue.mediaLinks.value.thirdSelected.control, 'mediaLinks', $event)">
+                </div>
+                <small *ngIf="getLinkError('thirdSelected')"
+                       class="error-text mt-4">{{ 'please_enter_the_valid_url' | i18next }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="switch-item">
+                    <span class="block-heading arrow-item"
+                          (click)="footerOptions.hyperLinks.open = !footerOptions.hyperLinks.open"
+                          [ngClass]="footerOptions.hyperLinks.open ? 'arrow-item__down' : 'arrow-item__right'">
+                      {{ 'hyper_links' | i18next }}
+                    </span>
+          <span class="toggle-switch"
+                (click)="onClickToggle('hyperLinks')"
+                [ngClass]="footerOptions.hyperLinks.selected ? 'toggle-on' : 'toggle-off'"></span>
+        </div>
+        <div class="content-container" *ngIf="footerOptions.hyperLinks.open">
+          <div class="form-group" formGroupName="hyperLinks">
+            <div class="media-links">
+              <div class="row d-flex mb-12" *ngFor="let link of footerOptions.hyperLinks.links; index as it;">
+                <div class="choose-url">
+                  <input class="prepend form-control" [value]='link.prepend' [formControlName]='link.btn_control'
+                   [placeholder]='"Hyperlink #"+(it+1)' [readonly]="!footerOptions.hyperLinks.selected"/>
+                  <input type="text" class="form-control" placeholder="{{ 'web_address' | i18next }} ({{ 'url' | i18next }})"
+                         [readonly]="!footerOptions.hyperLinks.selected" [formControlName]="link.control"
+                         (blur)="isValidUrl(link.control, 'hyperLinks', $event)">
+                </div>
+                <small *ngIf="link.error" class="error-text mt-4">{{ 'please_enter_the_valid_url' | i18next }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="switch-item">
+                    <span class="block-heading arrow-item"
+                          (click)="footerOptions.address.open = !footerOptions.address.open"
+                          [ngClass]="footerOptions.address.open ? 'arrow-item__down' : 'arrow-item__right'">
+                      {{ 'address' | i18next }}
+                    </span>
+          <span class="toggle-switch"
+                (click)="onClickToggle('address')"
+                [ngClass]="footerOptions.address.selected ? 'toggle-on' : 'toggle-off'"></span>
+        </div>
+        <div class="content-container" *ngIf="footerOptions.address.open">
+          <div class="form-group">
+            <input type="text" class="form-control" placeholder="{{ 'address' | i18next }}"
+                   [readonly]="!footerOptions.address.selected" formControlName="address">
+          </div>
+        </div>
+        <div class="switch-item">
+                    <span
+                      class="block-heading arrow-item"
+                      (click)="footerOptions.disclaimer.open = !footerOptions.disclaimer.open"
+                      [ngClass]="footerOptions.disclaimer.open ? 'arrow-item__down' : 'arrow-item__right'"
+                    >{{ 'disclaimer' | i18next }}</span>
+          <span class="toggle-switch"
+                (click)="onClickToggle('disclaimer')"
+                [ngClass]="footerOptions.disclaimer.selected ? 'toggle-on' : 'toggle-off'"></span>
+        </div>
+        <div class="content-container" *ngIf="footerOptions.disclaimer.open">
+          <div class="form-group">
+            <input type="text" class="form-control" placeholder="{{ 'disclaimer' | i18next }}"
+                   [readonly]="!footerOptions.disclaimer.selected" formControlName="disclaimer" maxlength="500">
+          </div>
+        </div>
+        <div class="switch-item">
+                    <span class="block-heading arrow-item"
+                          (click)="footerOptions.copyright.open = !footerOptions.copyright.open"
+                          [ngClass]="footerOptions.copyright.open ? 'arrow-item__down' : 'arrow-item__right'">
+                      {{ 'copyright' | i18next }}
+                    </span>
+        </div>
+        <div class="content-container" *ngIf="footerOptions.copyright.open">
+          <div class="form-group">
+            <input type="text" class="form-control" placeholder="{{ 'copyright' | i18next }}" formControlName="copyright">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-buttons-container">
+      <button (click)="onCancel()">{{ 'cancel' | i18next }}</button>
+      <button *accessControl (click)="saveFooterTemplate()">
+        <icon size="20px" name="check_circle" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+        &nbsp;&nbsp;{{ 'save' | i18next }}
+      </button>
+    </div>
+  </div>
+
+  <div class="panel panel-light preview">
+    <div style="height: 35%; width: 100%"></div>
+    <div id="footer_content" style="height: 65%;">
+      <div class="preview-content" [ngClass]="footerOptions.themeType">
+        <div>
+          <div *ngIf="!footerOptions.footerLogo.file && footerOptions.footerLogo.selected, else uploadLogo"
+               id="defaultLogo">
+            <div class="logo defaultLogo">
+              <div>
+                <img src="https://d1sbrrldholyx7.cloudfront.net/assets/email-templates/treva.png" alt="">
+              </div>
+            </div>
+          </div>
+          <ng-template #uploadLogo>
+            <div id="footerLogo" *ngIf="footerOptions.footerLogo.selected">
+              <div class="logo footerLogo">
+                <div>
+                  <img [src]="footerOptions.footerLogo.file" alt="" class="img-after-upload">
+                </div>
+                <div>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+          <div *ngIf="footerOptions.caption.selected" id="caption">
+            <p class="caption">{{ formValue.caption.value ? formValue.caption.value : '' }}</p>
+          </div>
+        </div>
+
+        <div class="links d-flex">
+          <div *ngIf="footerOptions.applicationLinks.selected" id="applicationLinks">
+            <div class="applicationLinks d-flex mr-12">
+              <a [href]="emailFooterForm.get('applicationLinks').get('app_store').value" target="_blank"><img
+                src="https://d1sbrrldholyx7.cloudfront.net/assets/email-templates/app_store.png" alt=""></a>
+              <a [href]="emailFooterForm.get('applicationLinks').get('play_store').value" target="_blank"><img
+                src="https://d1sbrrldholyx7.cloudfront.net/assets/email-templates/google_play.png" alt=""></a>
+            </div>
+          </div>
+
+          <div *ngIf="footerOptions.mediaLinks.selected" id="mediaLinks">
+            <div class="mediaLinks d-flex">
+              <a *ngIf="formValue.mediaLinks.value.firstSelected"
+                 [href]="formValue.mediaLinks.value.first" target="_blank"><img class='icon-logo'
+                [src]='formValue.mediaLinks.value.firstSelected.image' alt=''></a>
+              <a *ngIf="formValue.mediaLinks.value.secondSelected"
+                 [href]="formValue.mediaLinks.value.second" target="_blank"><img class='icon-logo'
+                [src]='formValue.mediaLinks.value.secondSelected.image' alt=''></a>
+              <a *ngIf="formValue.mediaLinks.value.thirdSelected"
+                 [href]="formValue.mediaLinks.value.third" target="_blank"><img class='icon-logo'
+                [src]='formValue.mediaLinks.value.thirdSelected.image' alt=''></a>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="footerOptions.hyperLinks.selected" id="hyperLinks" (click)="$event.preventDefault();false">
+          <div class="hyperLinks d-flex justify-content-center mt-16">
+            <a
+              [href]="emailFooterForm.get('hyperLinks').get('first_link').value"><span>{{ emailFooterForm.get('hyperLinks').get('first_btn_name').value | i18next}}</span></a>
+            <span>|</span>
+            <a
+              [href]="emailFooterForm.get('hyperLinks').get('second_link').value"><span>{{ emailFooterForm.get('hyperLinks').get('second_btn_name').value | i18next}}</span></a>
+            <span>|</span>
+            <a
+              [href]="emailFooterForm.get('hyperLinks').get('third_link').value"><span>{{ emailFooterForm.get('hyperLinks').get('third_btn_name').value | i18next}}</span></a>
+          </div>
+        </div>
+        <div *ngIf="footerOptions.address.selected" id="address">
+          <p class="address">{{formValue.address.value}}</p>
+        </div>
+
+        <div *ngIf="defaultFooter && !hasSelected">
+          <div class="w-100 justify-content-center caption"></div>
+        </div>
+
+        <hr class="line" *ngIf="hasSelected">
+
+        <div id="disclaimer" *ngIf="footerOptions.disclaimer.selected">
+          <div class="disclaimer">
+        <span>
+          {{formValue.disclaimer.value}}
+        </span>
+          </div>
+        </div>
+
+        <div id="copyright">
+          <div class="copyright mt-12 d-flex justify-content-center">
+        <span>
+          {{formValue.copyright.value}}
+        </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

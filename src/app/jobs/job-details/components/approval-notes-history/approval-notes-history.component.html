@@ -1,0 +1,72 @@
+<svms-sidebar [title]="sidebarTitle || (approvalFor== 'approved' ? 'Approval Notes' : 'Rejection Notes')" [dataVisibility]="visiblity" (onClose)="sidebarClose()">
+  <app-logs [log]="logs"></app-logs>
+  <div>
+    <svms-sidebar-body>
+      <div class="px-24 pt-16" *ngIf="jobDetail?.note_for_approver">
+        <h4>{{ 'approval_notes_history' | i18next }}</h4>
+      </div>
+      <div class="d-flex align-items-start border-bottom px-24 py-16" *ngIf="jobDetail?.note_for_approver">
+        <div class="initials initails-purple mr-16">
+          <icon size="24px" name="work" type="material" class="d-flex" cuClass="d-flex">
+          </icon>
+        </div>
+        <div class="d-flex flex-column w-93">
+          <p class="text-gray-90">{{ 'approval_notes_from_job' | i18next }}</p>
+          <p class="text-gray-70">{{jobDetail?.note_for_approver}}
+            <!-- <a href="" class="text-gray-90 ml-4">View More></a>-->
+        </div>
+      </div>
+      <div class="d-flex align-items-start border-bottom px-24 py-16" *ngFor="let history of approvalHistory">
+        <div class="initials initials-profile mr-16" *ngIf="history?.modified_by?.avatar">
+          <img [src]="history?.modified_by?.avatar" />
+        </div>
+        <div class="initials initials-blue mr-16" *ngIf="!history?.modified_by?.avatar">
+          {{
+          (history?.first_name + ' ' +history?.last_name) | shortName:'first'
+          }}
+        </div>
+        <div class="d-flex flex-column w-93">
+
+          <p class="text-dark">{{history?.full_name}}<i>{{history?.title ? ' (' + history?.title + ')' : ''}}</i> - {{history?.role_name | titlecase}}</p>
+
+          <p class="text-green" *ngIf="history.approval_status?.toLowerCase()==='approved'">
+            {{ 'approved_by' | i18next }} : {{history?.modified_by?.full_name}}<i>{{history?.modified_by?.title ? ' (' + history?.modified_by?.title + ')' : ''}}</i>
+          </p>
+          <p class="text-red" *ngIf="history.approval_status?.toLowerCase()==='rejected'">
+            {{ 'rejected_by' | i18next }} : {{history?.modified_by?.full_name}}<i>{{history?.modified_by?.title ? ' (' + history?.modified_by?.title + ')' : ''}}</i>
+          </p>
+
+          <p class="text-gray-70">{{ 'note_:' | i18next }} {{history?.approval_notes}}</p>
+          <p class="text-gray-70" *ngIf="history?.approval_reason">{{ 'reason_:' | i18next }} {{history?.approval_reason}}</p>
+          <p class="text-gray-70" *ngIf="history?.approval_on">{{ 'on_:' | i18next }} {{history?.approval_on | date :'MMMM d, y, h:mm a'}}</p>
+        </div>
+      </div>
+
+      <div class="px-24 py-16" *ngIf="!isView || superAdminEdit">
+        <div class="form-group" *ngIf="approvalFor === 'rejected'">
+          <label>{{ 'choose_reason_for_reject' | i18next }}  <span class="require">*</span></label>
+          <ng-select placeholder="{{ 'select_reason' | i18next }}" [(ngModel)]="approval_reason" [items]="rejectReasons" bindLabel="name" bindValue="name">
+          </ng-select>
+        </div>
+        <div class="form-group">
+          <label>{{approvalFor === 'approved' ? 'Enter your' : 'Reject'}} {{ 'notes' | i18next }}</label>
+          <textarea placeholder="{{ 'notes' | i18next }}" class="form-control" [(ngModel)]="approval_notes"></textarea>
+        </div>
+      </div>
+    </svms-sidebar-body>
+    <svms-sidebar-footer *accessControl>
+      <div class="d-flex justify-content-end" *ngIf="!isView || superAdminEdit">
+        <button type="button" class="btn btn-success mx-16" (click)="submit()" *ngIf="approvalFor== 'approved'">
+          <icon size="20px" name="check_circle_outline" type="material" class="icon--on-left" cuClass="icon-cu">
+          </icon>
+          {{ 'approve' | i18next }}
+        </button>
+        <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="!approval_reason" *ngIf="approvalFor== 'rejected'">
+          <icon size="20px" name="do_not_disturb" type="material" class="icon--on-left" cuClass="icon-cu">
+          </icon>
+          {{ 'reject' | i18next }}
+        </button>
+      </div>
+    </svms-sidebar-footer>
+  </div>
+</svms-sidebar>

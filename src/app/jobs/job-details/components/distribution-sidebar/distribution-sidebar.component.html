@@ -1,0 +1,268 @@
+<svms-sidebar size="large" class="extended-sidebar" [hideHeader]="true" title="Advanced Search"
+    [dataVisibility]="viewCandidateProfile" dataExtended="extended" (onClose)="sidebarClose()">
+    <svms-sidebar-extended>
+        <!-- Vendors Section: START-->
+        <div class="extend-bar">
+            <h4 class="p-12 filter-title d-flex align-items-center justify-content-between"
+                (click)="visiblePanel = visiblePanel === 'vendors' ? '' : 'vendors'; tabIndex=0">
+                <span class="cursor-pointer">{{ 'search_vendors' | i18next }} </span>
+                <span class="cursor-pointer">
+                    <icon size="18px" [name]="visiblePanel === 'vendors' ? 'keyboard_arrow_down' : 'keyboard_arrow_up'"
+                        type="material" class="d-flex" cuClass="icon-cu d-flex">
+                    </icon>
+                </span>
+            </h4>
+            <div class="p-12" *ngIf="visiblePanel == 'vendors'">
+                <div class="form-group">
+                    <label>{{ 'filter_vendors' | i18next }}</label>
+                    <div class="d-flex align-items-center position-relative search_div">
+                        <input placeholder="{{ 'filter_vendor_by_name' | i18next }}" type="search" [(ngModel)]="vendorSearchText"
+                            class="form-control filter-vendors" (keypress)="filterVendorOnEnter($event, 'vendor')">
+                        <span class="position-absolute search-icon">
+                            <icon size="18px" name="search" type="material" class="d-flex" cuClass="d-flex">
+                            </icon>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'labor_category' | i18next }}</label>
+                    <div class="d-flex align-items-center position-relative search_div">
+                        <ng-select #laborCategorySearch class="w-100" placeholder="{{ 'filter_labor_categories' | i18next }}"
+                            [searchable]="true" (change)="laborCategoryValueAdd($event)">
+                            <ng-option *ngFor="let indus of searchedLaborCategoriesList" [value]="indus">
+                                {{indus?.name}}
+                            </ng-option>
+                        </ng-select>
+                        <span class="position-absolute search-icon">
+                            <icon size="18px" name="search" type="material" class="d-flex cursor-pointer"
+                                cuClass="d-flex">
+                            </icon>
+                        </span>
+                    </div>
+                </div>
+                <div *ngIf="selectedLaborCategoriesList?.length" class="d-flex align-items-center flex-wrap mb-16">
+                    <div class="selected-vendor mr-8 mb-8 selected" *ngFor="let item of laborCategories;let index = index">
+                        {{item?.industry_type}}
+                        <span class="float-right">
+                            <icon (click)="removeFromLaborCategories(index)" size="15px" name="cancel" type="material"
+                                class="icon--on-right ml-8 cursor-pointer" cuClass="icon-cu">
+                            </icon>
+                        </span>
+                    </div>
+                    <div class="selected-vendor mr-8 mb-8"
+                        *ngFor="let item of selectedLaborCategoriesList;let index = index">
+                        {{item?.name}}
+                        <span class="float-right">
+                            <icon (click)="removeFromSelected(index)" size="15px" name="cancel" type="material"
+                                class="icon--on-right ml-8 cursor-pointer" cuClass="icon-cu">
+                            </icon>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'search_by_country/regions' | i18next }}</label>
+                    <div class="d-flex align-items-center position-relative search_div">
+                        <ng-select #regionSearch class="w-100" placeholder="{{ 'filter_country/regions' | i18next }}" ngDefaultControl
+                            (search)="this.regionSearchTypeahead.next($event)" [searchable]="true" (change)="regionAdd($event)"
+                            [loading]='regionLoading' loadingText='Loading...' (clear)="this.regionSearchTypeahead.next($event)">
+                            <ng-option *ngFor="let region of searchRegionsList" [value]="region">
+                                {{region?.name}}
+                            </ng-option>
+                        </ng-select>
+                        <span class="position-absolute search-icon">
+                            <icon size="18px" name="search" type="material" class="d-flex" cuClass="d-flex">
+                            </icon>
+                        </span>
+                    </div>
+                </div>
+                <div *ngIf="selectedRegionList?.length" class="d-flex align-items-center flex-wrap mb-16">
+                    <div class="selected-vendor mr-8 mb-8 selected" *ngFor="let item of regionList;let index = index">
+                        {{item?.industry_type}}
+                        <span class="float-right">
+                            <icon (click)="removeFromRegion(index)" size="15px" name="cancel" type="material"
+                                class="icon--on-right ml-8 cursor-pointer" cuClass="icon-cu">
+                            </icon>
+                        </span>
+                    </div>
+                    <div class="selected-vendor mr-8 mb-8" *ngFor="let item of selectedRegionList;let index = index">
+                        {{item?.name}}
+                        <span class="float-right">
+                            <icon (click)="removeFromRegionSelected(index)" size="15px" name="cancel" type="material"
+                                class="icon--on-right ml-8 cursor-pointer" cuClass="icon-cu">
+                            </icon>
+                        </span>
+                    </div>
+                </div>
+                <div class="my-16">
+                    <button class="btn btn-primary w-100" (click)="loadVendors()" [disabled]="loadingData || !disableVendorFilter">{{ 'filter' | i18next }}
+                        <span *ngIf="loadingData" class="ml-8">
+                            <button-loader></button-loader>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Vendors Section: END-->
+        <!-- Vendor Groups Section: START-->
+        <div class="extend-bar">
+            <h4 class="p-12 filter-title d-flex align-items-center justify-content-between cursor-pointer"
+                (click)="visiblePanel = visiblePanel === 'vendor-group' ? '' : 'vendor-group'; tabIndex=0">
+                <span>{{ 'search_vendor_groups' | i18next }}</span>
+                <icon size="18px" [name]="visiblePanel === 'vendor-group' ? 'keyboard_arrow_down' : 'keyboard_arrow_up'"
+                    type="material" class="d-flex" cuClass="icon-cu d-flex">
+                </icon>
+            </h4>
+            <div class="p-12" *ngIf="visiblePanel == 'vendor-group'">
+                <div class="form-group">
+                    <label>{{ 'filter_vendor_groups' | i18next }}</label>
+                    <div class="d-flex align-items-center position-relative search_div">
+                        <input placeholder="{{ 'select_vendor_groups' | i18next }}" type="search" [(ngModel)]="vendorGroupSearchText"
+                            class="form-control filter-vendors" (keypress)="filterVendorOnEnter($event, 'vendor-group')">
+                        <span class="position-absolute search-icon">
+                            <icon size="18px" name="search" type="material" class="d-flex" cuClass="d-flex">
+                            </icon>
+                        </span>
+                    </div>
+                </div>
+                <div class="my-16">
+                    <button class="btn btn-primary w-100" (click)="loadVendorsGroup()" [disabled]="loadingData || !disableVendorGroupFilter">{{ 'filter' | i18next }}
+                        <span *ngIf="loadingData" class="ml-8">
+                            <button-loader></button-loader>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Vendor Groups Section: END-->
+    </svms-sidebar-extended>
+    <svms-sidebar-body>
+        <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)">
+            <vms-tab label="Search Results">
+                <h4 *ngIf="visiblePanel != 'vendors' && visiblePanel != 'vendor-group'" class="mb-16">
+                    <i>{{ 'select_a_vendor_or_vendor_group' | i18next }}.</i>
+                </h4>
+                <h4 *ngIf="visiblePanel == 'vendors' || visiblePanel == 'vendor-group'" class="mb-16">{{ 'search_results' | i18next }}
+                </h4>
+                <div *ngIf="visiblePanel == 'vendors'">
+                    <div class="dotloader" *ngIf="loadingData"></div>
+                    <div *ngIf="!loadingData" class="d-flex align-items-center flex-wrap">
+                        <div [attr.for]="'check-'+ index" class="boxes slected-border mr-8"
+                            *ngFor="let vendor of vendorsList;let index = index">
+                            <p>
+                                <input [(ngModel)]="vendor.selected" [attr.id]="'check-'+ index"
+                                    [attr.name]="'check-'+ index" type="checkbox" checked>
+                            </p>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="initial red">{{ vendor?.vendor?.name | shortName:'first'}}</div>
+                            </div>
+                            <p class="text-center small my-12">{{vendor?.vendor?.name}}</p>
+                            <div class="rate mb-0 d-flex align-items-center justify-content-center">
+                                <input type="radio" id="star5" name="rate" value="5" />
+                                <label for="star5" title="text">5 {{ 'start' | i18next }}</label>
+                                <input type="radio" id="star4" name="rate" value="4" />
+                                <label for="star4" title="text">4 {{ 'start' | i18next }}</label>
+                                <input type="radio" id="star3" name="rate" value="3" />
+                                <label for="star3" title="text">3 {{ 'start' | i18next }}</label>
+                                <input type="radio" id="star2" name="rate" value="2" />
+                                <label for="star2" title="text">2 {{ 'start' | i18next }}</label>
+                                <input type="radio" id="star1" name="rate" value="1" />
+                                <label for="star1" title="text">1 {{ 'start' | i18next }}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="visiblePanel == 'vendor-group'">
+                    <div class="dotloader" *ngIf="loadingData"></div>
+                    <div *ngIf="!loadingData" class="d-flex align-items-center flex-wrap">
+                        <div [attr.for]="'check-'+ index" class="boxes slected-border mr-8"
+                            *ngFor="let vendorGroup of vendorsGroupList;let index = index">
+                            <p>
+                                <input [(ngModel)]="vendorGroup.selected" [attr.id]="'check-'+ index"
+                                    [attr.name]="'check-'+ index" type="checkbox" checked
+                                    (change)="selectVendorGroup(vendorGroup)">
+                            </p>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="initial " *ngFor="let item of vendorGroup?.vendors;let groupIndex = index"
+                                    [hidden]="groupIndex > 2" [ngClass]="getColorCode(groupIndex)">
+                                    {{item?.vendor?.name | shortName:'first'}}</div>
+                                <div class="initial more" *ngIf="vendorGroup?.vendors?.length > 3">
+                                    {{vendorGroup?.vendors?.length}}+</div>
+                            </div>
+                            <p class="text-center small my-12">{{vendorGroup?.name}}</p>
+                            <div class="rate mb-0 d-flex align-items-center justify-content-center">
+                                <input type="radio" id="star5" name="rate" value="5" />
+                                <label for="star5" title="text">5 {{ 'start' | i18next }}</label>
+                                <input type="radio" id="star4" name="rate" value="4" />
+                                <label for="star4" title="text">4 {{ 'start' | i18next }}</label>
+                                <input type="radio" id="star3" name="rate" value="3" />
+                                <label for="star3" title="text">3 {{ 'start' | i18next }}</label>
+                                <input type="radio" id="star2" name="rate" value="2" />
+                                <label for="star2" title="text">2 {{ 'start' | i18next }}</label>
+                                <input type="radio" id="star1" name="rate" value="1" />
+                                <label for="star1" title="text">1 {{ 'start' | i18next }}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </vms-tab>
+            <vms-tab label="Summary" [disabled]="!vendorsSelected && !vendorGroupsSelected">
+                <ng-container *ngIf="vendorsSelected">
+                    <h4 class="mb-16">{{ 'selected_vendors' | i18next }}</h4>
+                    <div class="d-flex align-items-center flex-wrap">
+                        <div [attr.for]="'check-'+ index" class="boxes slected-border mr-8 position-relative"
+                            *ngFor="let vendor of vendorsList;let index = index" [hidden]="!vendor.selected">
+                            <p>
+                                <input [(ngModel)]="vendor.selected" [attr.id]="'check-'+ index"
+                                    [attr.name]="'check-'+ index" type="checkbox" checked (change)="selectVendor()">
+                            </p>
+                            <p class="position-absolute group-name fs-12" title="Selected Vendor Group">
+                                {{vendor.groupName}}</p>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="initial red">{{ vendor?.vendor?.name | shortName:'first'}}</div>
+                            </div>
+                            <p class="text-center small my-12">{{vendor?.vendor?.name}}</p>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="vendorGroupsSelected">
+                    <h4 class="my-16">{{ 'selected_vendor_groups' | i18next }}</h4>
+                    <div class="d-flex align-items-center flex-wrap">
+                        <div [attr.for]="'check-'+ index" class="boxes slected-border mr-8"
+                            *ngFor="let vendorGroup of vendorsGroupList;let index = index"
+                            [hidden]="!vendorGroup.selected">
+                            <p>
+                                <input [(ngModel)]="vendorGroup.selected" [attr.id]="'check-'+ index"
+                                    [attr.name]="'check-'+ index" type="checkbox" checked
+                                    (change)="selectVendorGroup(vendorGroup)">
+                            </p>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="initial " *ngFor="let item of vendorGroup?.vendors;let groupIndex = index"
+                                    [hidden]="groupIndex > 2" [ngClass]="getColorCode(groupIndex)">
+                                    {{item?.vendor?.name | shortName:'first'}}</div>
+                                <div class="initial more" *ngIf="vendorGroup?.vendors?.length > 3">
+                                    {{vendorGroup?.vendors?.length}}+</div>
+                            </div>
+                            <p class="text-center small my-12">{{vendorGroup?.name}}</p>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="!vendorsSelected && !vendorGroupsSelected">
+                    <h4 class="mb-16">
+                        <i>{{'select_at_least_one,_a_vendor_or_vendor_group' | i18next}}.</i>
+                    </h4>
+                </ng-container>
+            </vms-tab>
+        </vms-tab-group>
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+        <button *ngIf="tabIndex === 0" type="submit" (click)="next()" class="btn btn-primary float-right" [disabled]="!vendorsSelected && !vendorGroupsSelected">
+            {{ 'next' | i18next }} <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu">
+            </icon>
+        </button>
+        <button *ngIf="tabIndex === 1" type="submit" (click)="addVendors()" class="btn btn-primary float-right"
+            [disabled]="!vendorsSelected && !vendorGroupsSelected">
+            {{ 'done' | i18next }} <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu">
+            </icon>
+        </button>
+    </svms-sidebar-footer>
+</svms-sidebar>

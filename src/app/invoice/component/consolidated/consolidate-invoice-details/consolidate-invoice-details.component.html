@@ -1,0 +1,146 @@
+<app-logs [log]="logs"></app-logs>
+<app-payment-authorization-sidebar></app-payment-authorization-sidebar>
+<app-invoice-view-sidepanel [invoiceDetails]="invoiceBasicDetails"></app-invoice-view-sidepanel>
+  <app-client-payment-rollback *ngIf='showClientPaymentRollBack' [reasonCodes]='reasonCodes' [current_pa_uuid]="current_pa_uuid"
+  (rollbacked)='rollbacked($event)' [consolidatedInvoice]="rollbackData" [basicDetails]="invoiceBasicDetails.data"></app-client-payment-rollback>
+  <app-vendor-payment-rollback *ngIf='showVendorPaymentRollBack'[vendorRollbackOptions]="reasonCodesForVendorRollback"  [current_pa_uuid]="current_pa_uuid"
+  [invoiceDetails]="invoiceBasicDetails?.data" (vendorPaymentRollback)="vendorPaymentRollbacked($event)" ></app-vendor-payment-rollback>
+<app-credit-debit [currency]="invoiceBasicDetails?.data?.currency"></app-credit-debit>
+<div class="detail-page-wrapper ">
+  <div class="description-panel p-32 position-relative">
+    <app-consolidate-invoice-basic-details [invoiceDetails]="invoiceBasicDetails" [impersonatedBy]="impersonatedBy" (onRetryConsolidationInvoice)="regenerateConsolidateInvoice()" (onCancelConsolidateInvoice)="cancelConsolidateInvoice()" (clearIntervalStatus)="clearInterval()" >
+    </app-consolidate-invoice-basic-details>
+
+      <div class="table-bg1 border-left border-bottom border-right invoice-detail-list" id="smarttable" [ngClass]="user_type==='vendor' ? 'vendor-user-invoice-list' :''">
+      <div class="table-bg-inner">
+        <div class="title">{{ 'individual_invoice_list' | i18nextEager }}</div>
+
+        <svms-tabs class="m-12" [tabs]="indInvoicetabs" [selectedTab]="tabName"
+          (tabSelected)="individualInvoiceTabChange($event)" [count]="count"></svms-tabs>
+
+        <div class="vendor-table" [ngClass]="{'tab-active': indInvoicetabs?.length > 0}">
+          <vms-table *ngIf="tabName?.toLowerCase()!=='vendor bill'"
+            [vmsTableConfig]="tableConfig" (onclickToisGenericWithdrawClick)="paymentRollback($event)" [totalItem]="total_records"
+            [vmsDataSource]="invoiceList" (onExpandClick)="onExpandClick($event)" (onOpenPanel)="viewSidePanel($event)"
+            [loading]="loading" [customDownload]="customDownload" (search)="onSearch($event)"
+            (changePage)="onPaginationClick($event)" (changeRecords)="changerecords($event)" [itemsPerPage]="limit"
+            (onListFilter)="onListFilter($event)" [currentTab]="tabName" [rotuterLinkOnClick]="rotuterLinkOnClick"
+            [rotuterLinkParseFn]="rotuterLinkParseFn" (onViewClick)="onClickView($event)" (downloadDoc)="downloadInvoice($event)"></vms-table>
+        </div>
+        <div class="px-24 vendor-tab" *ngIf="tabName?.toLowerCase()==='vendor bill'" [ngClass]="{'tab-active': indInvoicetabs?.length > 0}">
+          <div class="row no-gutters">
+            <div class="vendor-tab-left col-3">
+              <ul>
+                <li *ngFor="let vendor of vendorList; let i = index" [ngClass]="{'active': vendorIndex === i}">
+                  <a (click)="showVendorInfo(vendor?.key,1,i,limit)">
+                    {{vendor?.vendor_name}}
+                    <span>{{vendor?.vendor_code}}</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div class="col-9">
+              <div *ngFor="let vendordetail of vendorList; let i = index;">
+                <div *ngIf="vendorIndex === i">
+                  <div class="vendor-bill-header d-flex align-items-center justify-content-between border-bottom text-center">
+                    <div class="border-right p-12">
+                      <p class="font-weight-medium">
+                        {{(+vendordetail?.vendor_amount_without_tax)| accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceBasicDetails?.data?.currency } }}
+                      </p>
+                      <p class="small">{{ 'total_vendor_amount_w/o_tax' | i18nextEager }}</p>
+                    </div>
+                    <div class="p-12">
+                      <p class="font-weight-medium">
+                        {{((+vendordetail?.vendor_total_amount))| accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceBasicDetails?.data?.currency } }}
+                      </p>
+                      <p class="small">{{ 'total_vendor_amount_inc._tax' | i18nextEager }}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <vms-table [vmsTableConfig]="vendorTableConfig" [loading]="loading" (search)="onSearch($event)"
+                      [currentTab]="'vendor bill'" [customDownload]="customDownload" (onViewClick)="onClickView($event)" [vmsDataSource]="vendordetail?.invoiceLists"
+                      (changePage)="onPaginationClick($event)" [totalItem]="total_records" (changeRecords)="changerecords($event)" [itemsPerPage]="limit">
+                    </vms-table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="px-24" *ngIf="tabName?.toLowerCase()==='credit/debit'">
+          
+          <!-- <vms-table [vmsTableConfig]="crediDebitTableConfig" [vmsDataSource]="creditDebitData">
+          </vms-table> -->
+
+          <!-- <div class="row no-gutters" *ngFor="let obj of creditDebitData">
+            <div class="col-12 vendor-bill p-16 d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center">
+                <div class="initials-blue">
+                  <icon name="domain" size="24px" color="#A884ED" class="d-flex" cuclass="d-flex"></icon>
+                </div>
+                <p class="text-black ml-4">{{obj?.name}}</p>
+              </div>
+              <div class="d-flex flex-column align-items-center border-right px-24">
+                <p class="text-black"></p>
+                <p class="small text-lightgray">{{ 'total_vendor_amount' | i18nextEager }} W/O {{ 'tax' | i18nextEager }}</p>
+              </div>
+              <div class="d-flex flex-column align-items-center border-right px-24">
+                <p class="text-black">
+                </p>
+                <p class="small text-lightgray">{{ 'total_vendor_tax_amount' | i18nextEager }}</p>
+              </div>
+              <div class="d-flex flex-column align-items-center border-right px-24">
+                <p class="text-black">
+                </p>
+                <p class="small text-lightgray">{{ 'total_vendor_amount_inc._tax' | i18nextEager }}</p>
+              </div>
+              <div class="initials-blue">
+                <icon name="expand_more" size="24px" color="#4C7FF0" class="d-flex" cuclass="d-flex"
+                  (click)="toggle(obj);" *ngIf="!obj.isCollapsed"></icon>
+                <icon name="expand_less" size="24px" color="#4C7FF0" class="d-flex" cuclass="d-flex"
+                  (click)="toggle(obj);" *ngIf="obj.isCollapsed"></icon>
+              </div>
+            </div>
+            <div class="col-12" *ngIf="!obj.isCollapsed">
+              <vms-table [vmsTableConfig]="crediDebitTableConfig" [vmsDataSource]="obj?.creditDebitItems">
+              </vms-table>
+            </div>
+          </div> -->
+        </div>
+
+        <!-- <div class="vmt"
+      *ngIf="totals && tabName?.toLowerCase()==='client bill' && invoiceList && invoiceList.length > 0">
+      <table style="width: 50%; float: right;">
+        <tr>
+          <th></th>
+          <th style="text-align: left;">VENDOR</th>
+          <th style="text-align: left;">MSP</th>
+          <th style="text-align: left;">TOTAL</th>
+        </tr>
+        <tr>
+          <td>Amount</td>
+          <td>{{currencyPipe.transform(+totals?.vendor_amount_without_tax)}}</td>
+          <td>{{currencyPipe.transform(+totals?.total_msp_amount_without_tax)}}</td>
+          <td>{{currencyPipe.transform((+totals?.vendor_amount_without_tax) + (+totals?.total_msp_amount_without_tax))}}</td>
+        </tr>
+        <tr>
+          <td>Tax</td>
+          <td>{{currencyPipe.transform(+totals?.total_vendor_tax_amount)}}</td>
+          <td>{{currencyPipe.transform(+totals?.total_msp_tax_amount)}}</td>
+          <td>{{currencyPipe.transform((+totals?.total_vendor_tax_amount)+(+totals?.total_msp_tax_amount))}}</td>
+        </tr>
+        <tr>
+          <td> <b>Total Amount</b></td>
+          <td><b>{{currencyPipe.transform(+totals?.total_vendor_amount)}}</b></td>
+          <td><b>{{currencyPipe.transform(+totals?.total_msp_amount)}}</b></td>
+          <td><b>{{currencyPipe.transform((+totals?.total_vendor_amount)+(+totals?.total_msp_amount))}}</b></td>
+        </tr>
+      </table>
+    </div> -->
+
+
+      </div>
+    </div>
+  </div>
+</div>

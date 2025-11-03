@@ -1,0 +1,226 @@
+<div class="notification-reminder">
+    <app-logs [log]="logs"></app-logs>
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <i tooltip="Back" *ngIf="!viewMode" placement="bottom" class="material-icons back-arrow-icon cursor-pointer" (click)="backtoView()">arrow_back</i>
+            <div class="ml-16">
+                <h3 class="font-weight-semibold mb-0">{{ 'Notification Reminder Threshold' | i18next }}</h3>
+            </div>
+        </div>
+        <div *authorize="'notification_reminder_threshold_manage'">
+            <button type="button" class="c-btn c-btn-secondary-medium-left-icon" *ngIf="viewMode"
+                (click)="viewMode=false">
+                <i class="material-icons">drive_file_rename_outline</i> {{'edit' |i18next}}
+            </button>
+            <button type="button" class="c-btn c-btn-success-medium" *ngIf="!viewMode" [disabled]="getDisableSaveButon()" (click)="update()">
+                {{'save' |i18next}}
+            </button>
+        </div>
+    </header>
+    <section class="section-body-content">
+        <div class="config-item d-flex align-items-center justify-content-between sticky-header no-border">
+            <p class="font-weight-medium blue-color">{{'assignment' |i18next}}</p>
+        </div>
+        <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+            subtitle="{{ 'end_of_assignment' | i18next }}"
+            description="{{'when_enabled_you_can_define_the_threshold(s)_for_when_a_reminder_notification_is_to_be_sent_regarding_the_assignment_ending_prior_to_the_assignment_end_date._for_example,_if_configured_2_weeks,_a_notification_will_be_sent_2_weeks_prior_to_the_assignment_end_date.' |i18next}}"
+            toggleSwitch="true" (onValueChange)="updateToggleValue($event , 'assignment' , 'end_assignment')"
+            [toggleDisabled]="viewMode" [updatedToggleValue]="payload?.assignment?.end_assignment?.is_allow">
+        </app-config-common-listing>
+        <div *ngIf="payload?.assignment?.end_assignment?.is_allow">
+            <div *ngIf="viewMode">
+                <!-- <app-config-common-listing itemLevel="child" subtitle="{{ 'Define Threshold' | i18next }}"
+                    description="{{ 'Select the threshold for which the notifications should be sent to the user.' | i18next }}"
+                    bulletedList="true"></app-config-common-listing> -->
+
+                <div class="position-relative child-item">
+                    <div class="tab-inner-parent">
+                        <div
+                            class="tab-inner invoice-inner position-relative d-flex justify-content-between align-items-center">
+                            <div class="tab-left-content d-flex">
+                                <div class="c-text-content">
+                                    <div class="c-text-content-inner position-relative">
+                                        <h4>{{ 'Define Threshold' | i18next }} </h4>
+                                        <p>{{ 'Select the threshold for which the notifications should be sent to the user.' | i18next }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-right-content d-flex justify-content-end">
+                                <ul class="view-list view-list-radius">
+                                    <li
+                                        *ngFor="let assignmentEnd of payload?.assignment?.end_assignment?.options; let i = index">
+                                        {{ assignmentEnd.period }}
+                                        <ng-container *ngIf="assignmentEnd?.type == 'day'">
+                                            {{ assignmentEnd?.period > 1 ? 'Days' : 'Day' }}
+                                        </ng-container>
+                                        <ng-container *ngIf="assignmentEnd?.type == 'week'">
+                                            {{ assignmentEnd?.period > 1 ? 'Weeks' : 'Week' }}
+                                        </ng-container>
+                                        <ng-container *ngIf="assignmentEnd?.type == 'month'">
+                                            {{ assignmentEnd?.period > 1 ? 'Months' : 'Month' }}
+                                        </ng-container>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="!viewMode">
+                <div *ngIf="payload?.assignment?.end_assignment?.is_allow && !viewMode">
+                    <app-config-common-listing itemLevel="child" subtitle="Define Threshold" description="Select the threshold for which the notifications should be sent to the user."
+                      addRemoveFieldItem="true" required="true" [payloadType]="payloadType?.assignment_end_assignment" [defaultPayloadValue]="convertToLowerValue(payload?.assignment?.end_assignment?.options)" [secoundSelectedInputOption]="payloadType?.assignment_end_assignment_option?.secound_type_option"
+                      (onMultiSelectArrayChange)="updatePeriod($event , 'assignment','end_assignment')">
+                    </app-config-common-listing>
+                  </div>
+            </div>
+        </div>
+
+        <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+            subtitle="{{ 'assignment_budget' | i18next }}"
+            description="{{'when_enabled_you_can_define_the_threshold(s)_for_when_a_reminder_notification_is_to_be_sent_regarding_budget_consumption._for_example,_if_configured_at_70%,_a_notification_would_be_triggered_once_70%_of_the_consumed_budget_has_been_reached.' |i18next}}"
+            toggleSwitch="true" (onValueChange)="updateToggleValue($event , 'assignment' , 'budget_notification')"
+            [updatedToggleValue]="payload?.assignment?.budget_notification?.is_allow" [toggleDisabled]="viewMode">
+        </app-config-common-listing>
+        <div *ngIf="payload?.assignment?.budget_notification?.is_allow">
+            <div *ngIf="viewMode">
+                <div class="position-relative child-item">
+                    <div class="tab-inner-parent">
+                        <div
+                            class="tab-inner invoice-inner position-relative d-flex justify-content-between align-items-center">
+                            <div class="tab-left-content d-flex">
+                                <div class="c-text-content">
+                                    <div class="c-text-content-inner position-relative">
+                                        <h4>{{ 'Define Threshold' | i18next }} </h4>
+                                        <p>{{ 'Select the threshold for which the notifications should be sent to the user.' | i18next }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-right-content d-flex justify-content-end">
+                                <ul class="view-list view-list-radius">
+                                    <li
+                                        *ngFor="let assignmentBudget of payload?.assignment?.budget_notification?.options; let i = index">
+                                        {{ assignmentBudget?.consumed_budget }} {{ 'Percentage' }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="!viewMode">
+                <div *ngIf="payload?.assignment?.budget_notification?.is_allow && !viewMode">
+                    <app-config-common-listing itemLevel="child" subtitle="Define Threshold" description="Select the threshold for which the notifications should be sent to the user."
+                      addRemoveFieldItem="true" required="true" [payloadType]="payloadType?.budget_notification" [defaultPayloadValue]="convertToLowerValue(payload?.assignment?.budget_notification?.options)" [secoundSelectedInputOption]="payloadType?.budget_notification_options?.secound_type_option" [inputPropertyChange]="'consumed_budget'"
+                      [multiSelectArray]="payload?.timesheet?.missing?.options" (onMultiSelectArrayChange)="updatePeriod($event , 'assignment','budget_notification')">
+                    </app-config-common-listing>
+                  </div>
+            </div>
+        </div>
+        <div class="config-item d-flex align-items-center justify-content-between sticky-header">
+            <p class="font-weight-medium blue-color">{{'timesheet' |i18next}}</p>
+        </div>
+        <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+            subtitle="{{ 'missing_timesheet' | i18next }}"
+            description="{{'Define the threshold(s) for when a reminder notification is to be sent to remind workers/vendors that they have not submitted timesheets.  These reminders are based on the timesheet’s week ending date.' |i18next}}"
+            toggleSwitch="true" (onValueChange)="updateToggleValue($event , 'timesheet' , 'missing')"
+            [updatedToggleValue]="payload?.timesheet?.missing?.is_allow" [toggleDisabled]="viewMode">
+        </app-config-common-listing>
+        <div *ngIf="payload?.timesheet?.missing?.is_allow">
+            <div *ngIf="viewMode">
+                <div class="position-relative child-item">
+                    <div class="tab-inner-parent">
+                        <div
+                            class="tab-inner invoice-inner position-relative d-flex justify-content-between align-items-center">
+                            <div class="tab-left-content d-flex">
+                                <div class="c-text-content">
+                                    <div class="c-text-content-inner position-relative">
+                                        <h4>{{ 'Define Threshold' | i18next }} </h4>
+                                        <p>{{ 'Select the threshold for which the notifications should be sent to the user.' | i18next }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-right-content d-flex justify-content-end">
+                                <ul class="view-list view-list-radius">
+                                    <li
+                                        *ngFor="let timesheetMissing of payload?.timesheet?.missing?.options; let i = index">
+                                        {{ timesheetMissing.unit + ' ' + timesheetMissing?.period }} 
+                                        <ng-container *ngIf="timesheetMissing?.type == 'day'">
+                                            {{ timesheetMissing?.period > 1 ? 'Days' : 'Day' }}
+                                        </ng-container>
+                                        <ng-container *ngIf="timesheetMissing?.type == 'week'">
+                                            {{ timesheetMissing?.period > 1 ? 'Weeks' : 'Week' }}
+                                        </ng-container>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="payload?.timesheet?.missing?.is_allow && !viewMode">
+            <app-config-common-listing itemLevel="child" subtitle="Define Threshold" description="Select the threshold for which the notifications should be sent to the user."
+              addRemoveFieldItem="true" required="true" [selectedInputOption]="payloadType?.timesheet_missing_options?.first_type_option" [payloadType]="payloadType?.timesheet_missing" [defaultPayloadValue]="convertToLowerValue(payload?.timesheet?.missing?.options)" [secoundSelectedInputOption]="payloadType?.timesheet_missing_options?.secound_type_option"
+              (onMultiSelectArrayChange)="updatePeriod($event , 'timesheet','missing')">
+            </app-config-common-listing>
+          </div>
+        <app-config-common-listing mainIcon="data_saver_on" itemLevel="parent"
+            subtitle="{{ 'approve_timesheet' | i18next }}"
+            description="{{'when_enabled_you_can_define_the_threshold(s)_for_when_a_notification_will_be_sent_to_timesheet_approvers_after_the_timesheet_has_been_submitted_but__is_still_pending_approval._for_example,_if_configured_to_3_days_and_5_days,_a_reminder_notification_will_be_sent_to_the_timesheet_approver_3_and_5_days_after_the_timesheet_is_submitted_if_it_has_not_yet_been_approved.' |i18next}}"
+            toggleSwitch="true" (onValueChange)="updateToggleValue($event , 'timesheet' , 'approve')"
+            [updatedToggleValue]="payload?.timesheet?.approve?.is_allow" [toggleDisabled]="viewMode">
+        </app-config-common-listing>
+        <div *ngIf="payload?.timesheet?.approve?.is_allow">
+            <div *ngIf="viewMode">
+                <div class="position-relative child-item">
+                    <div class="tab-inner-parent">
+                        <div
+                            class="tab-inner invoice-inner position-relative d-flex justify-content-between align-items-center">
+                            <div class="tab-left-content d-flex">
+                                <div class="c-text-content">
+                                    <div class="c-text-content-inner position-relative">
+                                        <h4>Define Threshold </h4>
+                                        <p>Select the threshold for which the notifications
+                                            should be sent to the user.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-right-content d-flex justify-content-end">
+                                <ul class="view-list view-list-radius">
+                                    <li
+                                        *ngFor="let timesheetApprove of payload?.timesheet?.approve?.options; let i = index">
+                                        <ng-container *ngIf="!(timesheetApprove?.unit == 'submitted_at' || timesheetApprove?.unit == 'end_date' )">
+                                            {{ timesheetApprove?.unit | titlecase }}
+                                        </ng-container>
+                                        <ng-container *ngIf="timesheetApprove?.unit == 'end_date'">
+                                            {{ 'End Date' }}
+                                        </ng-container>
+                                        <ng-container *ngIf="timesheetApprove?.unit == 'submitted_at'">
+                                            {{ 'Submit Date' }}
+                                        </ng-container>
+                                        {{ timesheetApprove?.period }} 
+                                        <ng-container *ngIf="timesheetApprove?.type == 'day'">
+                                            {{ timesheetApprove?.period > 1 ? 'Days' : 'Day' }}
+                                        </ng-container>
+                                        <ng-container *ngIf="timesheetApprove?.type == 'week'">
+                                            {{ timesheetApprove?.period > 1 ? 'Weeks' : 'Week' }}
+                                        </ng-container>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="!viewMode">
+                <div *ngIf="payload?.timesheet?.approve?.is_allow && !viewMode">
+                    <app-config-common-listing itemLevel="child" subtitle="Define Threshold" description="Select the threshold for which the notifications should be sent to the user."
+                      addRemoveFieldItem="true" required="true" [selectedInputOption]="payloadType?.timesheet_approve_options?.first_type_option" [payloadType]="payloadType?.timesheet_approve" [defaultPayloadValue]="convertToLowerValue(payload?.timesheet?.approve?.options)" [secoundSelectedInputOption]="payloadType?.timesheet_approve_options?.secound_type_option"
+                      (onMultiSelectArrayChange)="updatePeriod($event , 'timesheet','approve')">
+                    </app-config-common-listing>
+                  </div>
+            </div>
+        </div>
+    </section>
+</div>

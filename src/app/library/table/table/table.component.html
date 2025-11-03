@@ -1,0 +1,194 @@
+<div class="table-bg" [ngClass]="{ compact: compactView }" id="smarttable">
+  <div class="table-bg-inner">
+    <vms-header *ngIf="!vmsTableConfig?.hideHeader" mainmenuName="{{vmsTableConfig?.title | i18next}}"
+      submenuName="{{vmsTableConfig?.subTitle | i18next}}" [isCreateButtonName]="vmsTableConfig?.isCreateButtonName"
+      [tableConfig]="vmsTableConfig" [currentPage]="currentPage" [maxPages]="maxPages"
+      (changePages)="onPaginationClick($event)" (onCreate)="onCreateClick($event)" (onSetting)="onSettingClick($event)"
+      (onSearch)="onSearchClick($event)" (onBackClick)="onBackClicked($event)" (onReorder)="onReorderClick()" (onFilter)="onClickHeaderFilter($event)"
+      (onFilter)="onClickHeaderFilter($event)" (onListFilter)="listFilter($event)"
+      [ngClass]="{'theme': vmsTableConfig?.isTheme}" (onTabClick)="onTabClicked($event)" [showOrg]="showOrg">
+    </vms-header>
+
+    <br />
+    <ng-content select='[upper]'></ng-content>
+    <br />
+
+    <div class="content-area ui-content-wrapper bg-light" *ngIf="columnList"
+      [ngClass]="{'theme': vmsTableConfig?.isTheme}">
+      <div class="content-area-inner">
+        <div class="fixed-header" [ngClass]="{'active': fixedHeader}" *ngIf="!vmsTableConfig?.isTheme">
+          <table class="table table-listing">
+            <thead>
+              <tr>
+                <th [hidden]="!vmsTableConfig?.isTheme" width="5%" class="pl-24">
+                  <div class="checkbox-wrapper">
+                    <label class="checkbox-container">
+                      <input type="checkbox" name="selectall">
+                      <span class="checkmark"></span>
+                    </label>
+                  </div>
+                </th>
+                <th [hidden]="!vmsTableConfig?.isExpand" width="5%" class="pl-24">
+                  <button class="btn x-small btn-light rounded-sm expaneded-btn">
+                    <table-icon size="12px" name="add" type="material" cuClass="icon"></table-icon>
+                  </button>
+                </th>
+                <th class="position-relative header-column"
+                  *ngFor="let header of vmsTableConfig?.columnList; let i =index"
+                  [ngClass]="{'pl-24':!vmsTableConfig?.isExpand && i == 0}"
+                  [width]="columnList[header?.name+'_width'] + '%'" [hidden]="!columnList[header?.name]">
+                  <span class="mr-4"> {{(header?.title ? header?.title : header?.name) | i18next}}</span>
+                  <table-icon [hidden]="!header?.isIcon" size="24px"
+                    [color]="sortedColumn === header?.name ? 'blue' : ''"
+                    [name]="((sortedColumn === header?.name) && isSortAsc) ? 'expand_less' : 'expand_more'"
+                    type="material" [cuClass]="header?.iconClass ? header?.iconClass : 'icon'"
+                    (onClick)="onSortClick(header?.name)">
+                  </table-icon>
+                </th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+        <div class="listing-wrap">
+          <div class="table-outer">
+            <table class="table table-listing">
+              <thead>
+                <tr>
+                  <th [hidden]="!vmsTableConfig?.isTheme" width="5%" class="pl-24">
+                    <div class="checkbox-wrapper">
+                      <label class="checkbox-container">
+                        <input type="checkbox" name="selectall">
+                        <div class="checkmark" (click)="selectAllClick($event)"></div>
+                      </label>
+                    </div>
+                  </th>
+                  <th [hidden]="!vmsTableConfig?.isExpand" width="5%" class="pl-24">
+                    <button class="btn x-small btn-light rounded-sm expaneded-btn"  [hidden]="vmsTableConfig?.hideHeaderExpand">
+                      <table-icon size="12px" name="add" type="material" cuClass="icon"></table-icon>
+                    </button>
+                  </th>
+                  <th class="position-relative header-column"
+                    *ngFor="let header of vmsTableConfig?.columnList; let i =index"
+                    [ngClass]="{'pl-24':!vmsTableConfig?.isExpand && i == 0}"
+                    [width]="columnList[header?.name+'_width'] + '%'" [hidden]="!columnList[header?.name]">
+                    <span class="mr-4">{{(header?.title ? header?.title : header?.name) | i18next}}</span>
+                    <table-icon [hidden]="!header?.isIcon" size="24px"
+                      [color]="sortedColumn === header?.name ? 'blue' : ''"
+                      [name]="((sortedColumn === header?.name) && isSortAsc) ? 'expand_less' : 'expand_more'"
+                      type="material" [cuClass]="header?.iconClass ? header?.iconClass : 'icon'"
+                      (onClick)="onSortClick(header?.name)">
+                    </table-icon>
+                  </th>
+                </tr>
+              </thead>
+              <tbody *ngIf="!loading">
+                <tr *ngFor="let vmsData of vmsDataSource, let i=index" (mouseleave)="hideOptionDropdown()">
+                  <td
+                    [attr.colspan]="vmsTableConfig?.isTheme || vmsTableConfig?.isExpand ? vmsTableConfig?.columnList?.length + 1 : vmsTableConfig?.columnList?.length">
+                    <table>
+                      <tr
+                        [ngClass]="{'ifExpand' : (expandRow === i) && open,'disable':isDisabled && indexValues === i}">
+                        <td [hidden]="!vmsTableConfig?.isTheme" width="5%" class="pl-24">
+                          <div class="checkbox-wrapper">
+                            <label class="checkbox-container">
+                              <input type="checkbox" name="select-item" [(ngModel)]="vmsData.isChecked">
+                              <div class="checkmark" (click)="onCheckClick(vmsData, i)"></div>
+                            </label>
+                          </div>
+                        </td>
+                        <td class="pl-24" width="5%" [hidden]="!vmsTableConfig?.isExpand"
+                          (click)="onclickexpand(i, vmsTableConfig?.isIdDifferent ? vmsData[vmsTableConfig?.differentId] : vmsData?.id)">
+                          <button class="btn x-small btn-light rounded-sm expaneded-btn">
+                            <table-icon size="12px" [name]="(((expandRow === i) && open) ? 'remove' : 'add')"
+                              type="material" cuClass="d-flex"></table-icon>
+                          </button>
+                        </td>
+                        <vms-row *ngFor="let column of vmsTableConfig?.columnList;let i = index"
+                          [width]="columnList[column?.name+'_width'] + '%'"
+                          [isVmsTableExpand]="vmsTableConfig?.isExpand"
+                          [index]="i"
+                          [doNotRehire]="vmsData?.is_do_not_rehire"
+                          [worker_or_not]="vmsData?.role?.organization_category"
+                          (removeDoNotRehire)="removeDoNotRehire($event, vmsData)"
+                          [vmsRowDataSource]="getColumnData( column?.isRange ? column?.rangeNameList :column?.name, vmsData)"
+                          [isImage]="column?.isImage" [isNumberBadge]="column?.isNumberBadge"
+                          [isContact]="column?.isContact" (viewClicked)="onViewClickd($event, vmsData)"
+                          (cloneClicked)="onCloneClickd(vmsData)" (deleteClicked)="deleteClick(i,vmsData)"
+                          (viewProfileClicked)="clickToViewProfile(i,vmsData)"
+                          (editClicked)="editClicked($event, vmsData)"
+                          (onCreateJobClick)="onCreateJobClicked($event, vmsData)"
+                          (disableClicked)="onDisableClick(i, vmsData)" style="display: contents;"
+                          [hidden]="!columnList[column?.name]" [isVieworEdit]="column?.isVieworEdit"
+                          [isCreateJob]="column?.isCreateJob" [isDetails]="column?.isDetails"
+                          [isWithdrawal]="column?.isWithdrawal" [isRateCard]="column?.isRateCard" [isCustomField]="column?.isCustomField"
+                          [isViewProfile]="column?.isViewProfile" [isInterview]="column?.isInterview"
+                          [isViewEnabled]="column?.isViewEnabled" [isVieworClone]="column?.isVieworClone"
+                          [isDisableorDelete]="column?.isDisableorDelete" [isProfileMatch]="column?.isProfileMatch"
+                          [isCandidateStatus]="column?.isCandidateStatus" [isDeleteInVisible]="column?.isDeleteInVisible" [isDelete]="column?.isDelete"
+                          [isIconSrc]="column?.isIconSrc" [isDescription]="column?.isDescription"
+                          [isNoOption]="column?.isNoOption" [isAction]="column?.isAction"
+                          [isStatusColor]="column?.isStatusColor" [isIconList]="column?.isIconList"
+                          [isShowCheckBox]="column?.isShowCheckBox" [isMultiUser]="column?.isMultiUser"
+                          [isOptOut]="column?.isOptOut" [options]="column?.options"
+                          (optOutClicked)="onOptOutClicked($event, vmsData)"
+                          [isSubmitCandidate]="column?.isSubmitCandidate"
+                          (submitCandidateClicked)="onSubmittedCandidateClicked($event, vmsData)"
+                          (click)="columnClick(column, vmsData)"
+                          (numberBadgeClicked)="onNumberBadgeClicked(column, vmsData)"
+                          (onNameClicked)="onRowNameClick(column, vmsData)"
+                          (withdrawProfileClicked)="clickToWithdrawProfile(i,vmsData)"
+                          (viewDetailClicked)="clickToDetails(i,vmsData)"
+                          (rescheduleInterviewClicked)="clickToRescheduleInterview(i,vmsData)"
+                          (cancelInterviewClicked)="clickToCancelInterview(i,vmsData)"
+                          (viewSubmittedCandidate)="clickToViewSubmittedCandidate(i,vmsData)"
+                          (onOptionClicked)="optionClicked($event, vmsData)"
+                          [isCheckBoxReadonly]="column?.isCheckBoxReadonly"
+                          [notification_type]='column?.isNotificationType'>
+                        </vms-row>
+                      </tr>
+                      <tr class="expanded-row" *ngIf="(expandRow === i) && open">
+                        <td
+                          [attr.colspan]="vmsTableConfig?.isExpand ? vmsTableConfig.columnList.length + 1 : vmsTableConfig.columnList.length"
+                          style="padding-left:70px;">
+                          <ng-content></ng-content>
+                        </td>
+                      </tr>
+
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+              <tbody *ngIf="loading">
+                <tr>
+                  <td class="data-loader">
+                    <ngx-skeleton-loader count="10" animation="progress" appearance="line"
+                      [theme]="{'width': '100%', height: '50px','margin-bottom': '-2px', 'border-radius':'0px'}">
+                    </ngx-skeleton-loader>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="no-matches-found text-center m-4 pt-16"
+            *ngIf="vmsDataSource && vmsDataSource?.length === 0 && !loading">
+            <div class="content-area ui-content-wrapper no-content">
+              <div class="no-data">
+                <img src="./assets/images/no-data-lst.svg" alt="no offers" width="100" class="img-fluid" />
+                <h4 class="pt-16">{{ 'no_records_found' | i18next }}</h4>
+              </div>
+            </div>
+          </div>
+          <vms-paginator *ngIf="!loading && !vmsTableConfig?.hideBottomPagination && vmsDataSource?.length > 0" [currentPage]="currentPage"
+            [maxPages]="maxPages" [itemsPerPage]="itemsPerPage" [showRecordSelect]="vmsTableConfig?.showRecordSelect"
+            (changePage)="onPaginationClick($event)" (changeRecords)="onClickRecords($event)">
+          </vms-paginator>
+          <div *ngIf="!vmsTableConfig?.hideResultCount" class="total-result">
+            <div class="total-result-box">
+              {{vmsDataSource?.length}} {{ 'results' | i18next }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

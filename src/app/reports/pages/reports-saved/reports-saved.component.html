@@ -1,0 +1,38 @@
+<div class="px-24 reports-saved-bg pl-m-0 pr-m-0">
+  <div class="header-top py-24 d-flex aign-items-center justify-content-between">
+    <a routerLink="/reports" class="d-flex align-items-center text-primary header-top__back">
+      <icon size="24px" name="keyboard_arrow_left" type="material" cuClass="d-flex"></icon>
+      <span>{{ 'back_to_reports' | i18next }}</span>
+    </a>
+    <!-- <div class="d-flex align-items-center header-top__info">
+      <icon size="20px" name="help" type="material" cuClass="d-flex"></icon>
+      <span>{{ 'how_to_save_a_report' | i18next }} ?</span>
+    </div> -->
+  </div>
+<app-logs [log]="logs"></app-logs>
+  <div class="saved-report-table">
+    <vms-table *ngIf="!reportKey" [vmsTableConfig]="tableConfig" [vmsDataSource]="reportsData"
+      [totalItem]="totalRecords" [itemsPerPage]="limitRecords" [loading]="isDataLoading"
+      (onViewClick)="onClickView($event)" (onListFilter)="onListFilter($event)"  (changePage)="onPaginationClick($event)"
+      (changeRecords)="onClickRecords($event)" (onSort)="onSortClick($event)" (search)="onSearch($event)"
+      (onOptionClicked)="onOptionClicked($event)">
+    </vms-table>
+    <vms-table *ngIf="reportKey" [vmsTableConfig]="subTableConfig" [vmsDataSource]="reportsData"
+      [totalItem]="totalRecords" [itemsPerPage]="limitRecords" (onListFilter)="onListFilter($event)" [loading]="isDataLoading"
+      (onViewClick)="onClickView($event)" (changePage)="onPaginationClick($event)"
+      (changeRecords)="onClickRecords($event)" (onSort)="onSortClick($event)" (search)="onSearch($event)"
+      (onTitleClicked)="onTitleClick($event)" (onOptionClicked)="onOptionClicked($event)" (onBaseReportClicked)="onBaseReportClicked($event)">
+    </vms-table>
+  </div>
+
+  <app-filter-fields-sidepanel *ngIf="isFilterViewVisibile" [reportKey]="selectedReportId" [saveReport]="true" [viewMode]="filterViewMode"
+    (onUpdate)="updateReportFilter($event)" (onClose)="closeFilterAndFields()">
+  </app-filter-fields-sidepanel>
+
+  <svms-sidebar-ng [title]="'Schedule Report - ' + scheduleReportName" [dataVisibility]="dataVisibilitySchedule"
+    (onClose)="closeSchedule()">
+    <svms-schedule-panel [setReport]="schedulePanelData" (closeView)="finishEditing($event)" [viewOnly]="false"
+      [edit]="false" [reportName]='scheduleReportId'></svms-schedule-panel>
+  </svms-sidebar-ng>
+  <app-reports-invite-dialog *ngIf="showReportsShare" [reportId]="savedReportId" [reportName]="savedReportName" (closeInviteDialog)="closeInviteDialog($event)"></app-reports-invite-dialog>
+</div>

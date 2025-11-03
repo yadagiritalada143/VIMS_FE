@@ -1,0 +1,209 @@
+<svms-sidebar title="{{ 'edit_profile' | i18nextEager }}" [clickOutside]="clickOutside" [dataVisibility]="editProfile"
+  (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <form [formGroup]="profileForm" class="p-24" >
+      <h4 class="font-weight-medium mb-16">{{ 'profile_information' | i18nextEager }}</h4>
+      <div>
+        <div class="form-group-row">
+          <div class="form-group">
+            <label>{{ 'first_name' | i18nextEager }} <span class="require">*</span></label>
+            <input formControlName="first_name" type="text" readonly class="form-control" placeholder="{{ 'enter_first_name' | i18nextEager }}">
+          </div>
+          <div class="form-group">
+            <label>{{ 'middle_name' | i18nextEager }} </label>
+            <input formControlName="middle_name" type="text" readonly class="form-control" placeholder="{{ 'enter_middle_name' | i18nextEager }}">
+          </div>
+          <div class="form-group">
+            <label>{{ 'last_name' | i18nextEager }} <span class="require">*</span></label>
+            <input formControlName="last_name" type="text" readonly class="form-control" placeholder="{{ 'enter_last_name' | i18nextEager }}">
+          </div>
+        </div>
+
+        <div class="form-group-row" *ngIf="!getPrefixSuffixFlag()">
+          <div class="form-group">
+            <label>{{ 'prefix' | i18nextEager }}</label>
+            <ng-select  [readonly]="isEdit" formControlName="name_prefix"   [clearable]="true" placeholder="{{ 'choose' | i18nextEager }}">
+              <ng-option [value]="'Mr'">{{ 'mr' | i18nextEager }}</ng-option>
+              <ng-option [value]="'Mrs'">{{ 'mrs' | i18nextEager }}</ng-option>
+              <ng-option [value]="'Miss'">{{ 'miss' | i18nextEager }}</ng-option>
+              <ng-option [value]="'Dr'">{{ 'dr' | i18nextEager }}</ng-option>
+              <ng-option [value]="'Prof'">{{ 'prof' | i18nextEager }}</ng-option>
+              <ng-option [value]="'MX.'">{{ 'mx' | i18nextEager }}.</ng-option>
+              <ng-option [value]="'IND'">{{ 'ind' | i18nextEager }}.</ng-option>
+              <ng-option [value]="'Misc'">{{ 'misc' | i18nextEager }}</ng-option>
+            </ng-select>
+          </div>
+          <div class="form-group">
+            <label>{{ 'suffix' | i18nextEager }}</label>
+            <ng-select  [readonly]="isEdit" formControlName="name_suffix" [clearable]="true" placeholder="{{ 'choose' | i18nextEager }}">
+              <ng-option [value]="'Jr'">{{ 'jr' | i18nextEager }}</ng-option>
+              <ng-option [value]="'Sr'">{{ 'sr' | i18nextEager }}</ng-option>
+              <ng-option [value]="'III'">{{ 'iii' | i18nextEager }}</ng-option>
+              <ng-option [value]="'IV'">{{ 'iv' | i18nextEager }}</ng-option>
+              <ng-option [value]="'V'">{{ 'v' | i18nextEager }}</ng-option>
+            </ng-select>
+          </div>
+          <div class="form-group"></div>
+        </div>
+        <div class="form-group">
+          <label>{{ 'title' | i18nextEager }}</label>
+          <input formControlName="title" type="text" readonly class="form-control">
+        </div>
+      </div>
+      <!-- <vms-tab label="Contact Information"> -->
+      <h4 class="font-weight-medium mb-16">{{ 'contact_information' | i18nextEager }}</h4>
+      <div>
+        <div class="form-group">
+          <label>{{ 'email_address' | i18nextEager }} <span class="require">*</span> </label>
+          <input formControlName="email" type="email"  readonly class="form-control" placeholder="{{ 'enter_email_address' | i18nextEager }}">
+        </div>
+        <!-- <app-address-contact-details  [showSecondaryAddress]="true"   [showSecondaryContact]="true"></app-address-contact-details> -->
+
+        <div class="form-group">
+          <label>{{ 'time_zone' | i18nextEager }}</label>
+          <ng-select bindLabel="name" [clearable]="false" formControlName="preferred_time_zone" [multiple]="false"
+          [items]="timezoneData" placeholder="{{ 'search_time_zone' | i18nextEager }}" [searchable]="true" bindValue="id">
+        </ng-select>
+           <!-- <ng-select  formControlName="timezone" bindLabel="name" [clearable]="false">
+          <ng-option [value]="'UTC'">{{ 'utc' | i18nextEager }}</ng-option>
+          </ng-select> -->
+        </div>
+        <!-- [readonly]="isEdit" -->
+
+
+        <!-- Time Zone-->
+        <div class="form-group-row">
+
+
+
+          <div class="form-group">
+            <label> {{ 'language' | i18nextEager }} </label>
+            <ng-select bindLabel="name" [clearable]="false" formControlName="preferred_language" [multiple]="false"
+            [items]="languageData"  placeholder="{{ 'search_language' | i18nextEager }}" [searchable]="true" bindValue="name">
+          </ng-select>
+             <!-- <ng-select  formControlName="language" bindLabel="name" [clearable]="false">
+             <ng-option [value]="'English(US)'">{{ 'english(us)' | i18nextEager }}</ng-option>
+            </ng-select> -->
+          </div>
+
+          <div class="form-group" style="display: none;">
+            <label>{{ 'select_date_format' | i18nextEager }} </label>
+            <div>
+              <ng-select placeholder="{{ 'select' | i18nextEager }}" [searchable]="false" I18n ngDefaultControl formControlName="dateFormat">
+                <ng-option *ngFor="let format of dateFormats" [value]="format">{{format}}</ng-option>
+              </ng-select>
+          </div>
+        </div>
+        </div>
+
+        <div class="form-group">
+          <label> {{ 'country' | i18nextEager }}<span class="require">*</span> </label>
+          <ng-select formControlName="country" (change)="setCountry()" bindLabel="name" [clearable]="false"
+            placeholder="{{ 'select_country' | i18nextEager }}" (change)="phoneLengthValidation()">
+            <ng-option *ngFor="let country of allCountryList" [value]="country.id">{{country.name | i18nextEager}}</ng-option>
+          </ng-select>
+          <span *ngIf="form.country.touched && form.country.errors?.required"
+              class="error-text">{{ 'this_field_is_required' | i18nextEager }}</span>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'address' | i18nextEager }}</label>
+          <search-address [adressType]="'geocode'" (setAddress)="getAddress($event)" [country]="countryShortName"
+            id="addressField" formControlName="address" #candidateAddress>
+          </search-address>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'phone' | i18nextEager }}</label>
+          <div class="d-flex align-items-center country-searchable">
+            <ng-select class="phone-format" formControlName="phoneFormat" [searchable]="true" [clearable]="false" (change)="phoneLengthValidation()">
+              <ng-option *ngFor="let country of allCountryList" [value]="country?.iso_code_2">
+                <div class="d-flex w-90" [attr.title]="country?.name">
+                  <img src="../../../assets/images/flag/{{country.iso_code_2.toLowerCase()}}.png" width="20px" class="mr-4" />
+                  <span>{{'+'+country?.isd_code}}</span>
+                </div>
+              </ng-option>
+            </ng-select>
+
+            <input type="number" (keypress)="keyPressNumbers($event)" class="form-control" placeholder="{{ 'enter_phone_number' | i18nextEager }}"
+            formControlName="phone_number" [pattern]="mobNumberPattern"
+            [ngClass]="{'error':profileForm.controls['phone_number'].invalid && (profileForm.controls['phone_number'].dirty || profileForm.controls['phone_number'].touched || isSubmitted)}">
+          </div>
+          <p *ngIf="profileForm.controls['phone_number'].invalid && (profileForm.controls['phone_number'].dirty || profileForm.controls['phone_number'].touched || isSubmitted)"
+          class="validation-msg">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'phone_number_is_not_valid' | i18nextEager }}.
+        </p>
+        </div>
+      </div>
+      <!-- social media start here -->
+      <div hidden>
+        <div class="social-media mt-24">
+          <div class="add-new position-relative">
+            <a href="javascript:void(0)" class="btn small btn-outine" (click)="addSocialLink()">
+              <icon size="20px" name="add" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+              {{ 'add_new' | i18nextEager }}
+            </a>
+          </div>
+          <h4 class="d-flex mb-32 pb-8">
+            <icon class="d-flex mr-8" size="24px" name="connect_without_contact" type="material" cuClass="d-flex">
+            </icon>
+            {{ 'social_media_profile(s)' | i18nextEager }}
+          </h4>
+          <div class="form-group-row" *ngFor="let social of socialProfileArr, let i = index">
+            <div class="form-group mr-0 social-application">
+              <label>{{ 'application' | i18nextEager }}</label>
+              <ng-select [searchable]="false" [clearable]="false" placeholder="{{ 'choose_application' | i18nextEager }}"
+                class="no-right-border" [ngModelOptions]="{standalone: true}" [(ngModel)]="social.type"
+                (change)="selectSocialApp(social)">
+                <ng-option [value]="'git'">
+                  <img src="/assets/images/github.svg" class="mr-12">
+                  <span>{{ 'github' | i18nextEager }}</span>
+                </ng-option>
+                <ng-option [value]="'linkedin'">
+                  <img src="/assets/images/linkedin.svg" class="mr-12">
+                  <span>{{ 'linked_in' | i18nextEager }}</span>
+                </ng-option>
+                <ng-option [value]="'twitter'">
+                  <img src="/assets/images/twitter.svg" class="mr-12 pr-4">
+                  <span>{{ 'twitter' | i18nextEager }}</span>
+                </ng-option>
+                <ng-option [value]="'facebook'">
+                  <img src="/assets/images/facebook.svg" class="mr-12 pr-4">
+                  <span>{{ 'facebook' | i18nextEager }}</span>
+                </ng-option>
+                <ng-option [value]="'Be'">
+                  <img src="/assets/images/be.svg" class="mr-12">
+                  <span>{{ 'be' | i18nextEager }}</span>
+                </ng-option>
+                <ng-option [value]="'dribbble'">
+                  <img src="/assets/images/dribble.svg" class="mr-12">
+                  <span>{{ 'dribbble' | i18nextEager }}</span>
+                </ng-option>
+              </ng-select>
+            </div>
+            <div class="form-group">
+              <label>{{ 'enter_profile_link' | i18nextEager }}</label>
+              <input type="text" class="form-control no-left-border" placeholder="{{ 'enter_your_profile_url' | i18nextEager }}"
+                [ngModelOptions]="{standalone: true}" [(ngModel)]="social.link" (keyup)="checkSocialApp(social)">
+            </div>
+            <div class="form-group add-remove">
+              <label>&nbsp;</label>
+              <a (click)="deleteSocialLink(i)" class="add-link">
+                <icon class="remove-icon" size="24px" name="remove_circle" type="material" cuClass="d-flex">
+                </icon>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- social media end here -->
+    </form  >
+  </svms-sidebar-body>
+  <svms-sidebar-footer>
+    <button (click)="submit()" [disabled]="profileForm.invalid && this.form.country.value === ''" type="button" class="btn btn-primary float-right">
+      <icon size="20px" name="how_to_reg" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+      {{ 'update_profile' | i18nextEager }}
+    </button>
+  </svms-sidebar-footer>
+</svms-sidebar>

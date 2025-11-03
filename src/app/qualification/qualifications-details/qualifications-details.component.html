@@ -1,0 +1,64 @@
+<svms-sidebar [title]="title | i18next" icon="" [dataVisibility]="isCreateQualificationItem" (onClose)="sidebarClose($event)">
+    <svms-sidebar-body>
+      <form [formGroup]="addNewQualificationForm">
+        <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)">
+          <vms-tab label="Basic Info">
+            <!-- Create new tab content start here -->
+            <div class="create-new-tab">
+              <div class="form-group-row mb-16">
+                <div class="form-group">
+                  <label>{{ 'title' | i18next }}<span class="require">*</span> </label>
+                  <input type="text" class="form-control" placeholder="{{ 'cpr_cert_2' | i18next }}"
+                    formControlName="name" [readOnly]="isViewMode">
+                  <p class="validation-msg"
+                    *ngIf="addNewQualificationForm.controls['name'].touched && addNewQualificationForm.controls['name'].invalid && addNewQualificationForm.controls['name'].errors?.required">
+                    <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                    {{ 'qualification_name_is_required' | i18next }}
+                  </p>
+                  <p class="validation-msg" *ngIf="addNewQualificationForm.controls.name.errors?.minlength">
+                    {{ 'name_must_be_at_long' | i18next }}
+                  </p>
+                  <p class="validation-msg" *ngIf="addNewQualificationForm.controls.name.errors?.maxlength">
+                    {{ 'name_cannot_long' | i18next }}.
+                  </p>
+                </div>
+                <div class="toggle-panel mt-24" [ngClass]="{'disable':isViewMode}">
+                  <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+                    <span class="status-text">{{toggle?.title | i18next}}</span>
+                    <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickToggle()"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group-row mb-16">
+                <div class="form-group">
+                  <label>{{ 'code' | i18next }}<span class="require">*</span>  </label>
+                  <input type="text" class="form-control" [readOnly]="isViewMode" placeholder="{{ 'enter_code_here' | i18next }}"
+                     formControlName="code">
+                  <p class="validation-msg"
+                    *ngIf="addNewQualificationForm.controls['code'].touched && addNewQualificationForm.controls['code'].invalid && addNewQualificationForm.controls['code'].errors?.required">
+                    <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                   {{ 'code_is_required' | i18next }}
+                  </p>
+                  <p class="validation-msg" *ngIf="addNewQualificationForm.controls.code.errors?.minlength">
+                    {{ 'code_must_be_at_least' | i18next }} 5 {{ 'characters_long.' | i18next }}
+                  </p>
+                  <p class="validation-msg" *ngIf="addNewQualificationForm.controls.code.errors?.maxlength">
+                    {{ 'code_cannot_long' | i18next }}.
+                  </p>
+                </div>
+              </div>
+              <div class="form-group mb-32">
+                <label>{{ 'description' | i18next }} </label>
+                <textarea type="textarea" [readOnly]="isViewMode" rows="7" cols="12" maxlength="1000" class="form-control"
+                  formControlName="description"
+                  placeholder="{{ 'brief_description' | i18next }}"></textarea>
+              </div>
+            </div>
+            <!-- Create new tab content end here -->
+          </vms-tab>
+        </vms-tab-group>
+      </form>
+    </svms-sidebar-body>
+    <svms-sidebar-footer></svms-sidebar-footer>
+  </svms-sidebar>

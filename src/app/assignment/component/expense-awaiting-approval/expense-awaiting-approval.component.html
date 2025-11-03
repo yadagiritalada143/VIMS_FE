@@ -1,0 +1,52 @@
+<svms-sidebar title="{{title|i18next}}"
+              [dataVisibility]="expenseAwaiting"
+              (onClose)="sidebarClose($event)"
+              class="expense-sidebar">
+  <svms-sidebar-body>
+    <div class="mt-24 mr-24 d-flex justify-content-end">
+      <ng-select [ngModelOptions]="{ standalone: true }"
+                 [ngModel]="typeFilter"
+                 [clearable]="true"
+                 placeholder="{{ 'filter_by_expense_type' | i18nextEager }}"
+                 class="type-select mr-24"
+                 (change)="selectFilter($event)"
+                 (clear)="clearFilter()">
+        <ng-option *ngFor="let type of expenseTypes" [value]="type">
+          {{ type }}
+        </ng-option>
+      </ng-select>
+      <button class="small btn btn-outine btn-filter" [disabled]="!typeFilter" (click)="activateFilter()" #filter>
+        <icon class="mr-12" size="20px" name="filter_list" type="material" cuClass="d-flex"></icon>
+        <span class="filter-active"></span> {{ 'filter' | i18nextEager }}
+      </button>
+    </div>
+    <table class="mt-24">
+      <thead>
+        <tr>
+          <th class="pl-24">{{ 'expense_id' | i18nextEager }}</th>
+          <th>{{ 'start_date' | i18nextEager }}</th>
+          <th>{{ 'end_date' | i18nextEager }}</th>
+          <th>{{ 'expense_type' | i18nextEager }}</th>
+          <th>{{ 'total_billable_amount' | i18nextEager }}</th>
+        </tr>
+      </thead>
+      <tbody *ngIf="filteredExpensesData?.length; else noData">
+        <tr *ngFor="let item of filteredExpensesData">
+          <td (click)="viewExpense(item.expense_id)" class="pl-24 cursor-pointer text-primary" >{{ item.expense_code }}</td>
+          <td>{{ item.expense_start_date  | localDateFormat : '': '':'' : true }}</td>
+          <td>{{ item.expense_end_date  | localDateFormat : '': '':'' : true }}</td>
+          <td>{{ item.expense_type }}</td>
+          <td tooltip="{{showToolTip(item?.total_amount)}}" placement="top">{{ item.total_amount | accuracy :  accuracyConfig.amount: { currencyCode: currency } }}</td>
+        </tr>
+      </tbody>
+      <ng-template #noData>
+        <div class="d-flex justify-content-center align-items-center position-absolute full-height">
+          <div class="text-center">
+            <img src="../../../../assets/images/wallet-rafiki.svg" alt="" />
+            <p class="mt-8 font-weight-medium">{{ 'no_expense_records' | i18nextEager }}</p>
+          </div>
+        </div>
+      </ng-template>
+    </table>
+  </svms-sidebar-body>
+</svms-sidebar>

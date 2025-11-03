@@ -1,0 +1,102 @@
+<div class="generic-list-page doc-list">
+  <app-svms-table
+    [tableOptions]="tableOptions"
+    [coloumnDefintions]="svmstableColomnDefn"
+    [dataSource]="svmsData">
+  </app-svms-table>
+
+  <ng-template #emptyDataTemplate>
+    <app-no-listing-page
+      headingmsg="No Folder Found"
+      #emptyDataTemplate>
+    </app-no-listing-page>
+  </ng-template>
+</div>
+
+<app-svms-modal size="medium" *ngIf="!renameFolder" title="{{ updatePermission ? 'permissions' : 'create' | i18nextEager }}" [visibility]="libraryModal" (onClose)="onCloseModal()">
+  <app-svms-modal-body>
+    <div>
+      <div class="form-group" *ngIf="!updatePermission">
+        <label>{{ 'new_folder_name' | i18nextEager }} <span class="require">*</span></label>
+        <input type="text" id="name" name="name" #name="ngModel" [(ngModel)]="folderObj.name" class="form-control" placeholder="{{ 'new_folder_name' | i18nextEager }}">
+      </div>
+      <h4 class="font-weight-medium">{{ 'Permissions' | i18nextEager }}</h4>
+      <p class="small">{{ 'at_least_one_organization_category_needs_to_be_selected_before_folder_creation._granting_permission_on_this_screen_will_enable_users_tagged_to_that_role_to_access_and_download_the_files_under_this_folder._selection_of_user_role_is_mandatory_for_client_and_msp_categories._vendor_and_worker_categories_do_not_require_user_role_selection_for_granting_access.' | i18nextEager }}</p>
+      <div class="conditional-box border p-16 mt-16 border-radius">
+        <div class="d-flex justify-content-between align-items-center">
+          <p class="font-weight-medium">{{ 'MSP' | i18nextEager }}</p>
+          <toggle-button [checked]="msp" (changed)="showHideRole('msp')"></toggle-button>
+        </div>
+        <div class="form-group mt-8 mb-0 pb-0" *ngIf="msp && mspList?.length > 0">
+          <label>{{ 'select_user_roles' | i18nextEager }} <span class="require">*</span></label>
+          <ng-select multiple="true" placeholder="{{ 'select_values' | i18nextEager }}" [(ngModel)]="folderObj.msp">
+            <ng-option *ngFor="let mspData of mspList" [value]="mspData.id">{{mspData.name}}</ng-option>
+          </ng-select>
+        </div>
+      </div>
+      <div class="conditional-box border p-16 mt-16 border-radius">
+        <div class="d-flex justify-content-between align-items-center">
+          <p class="font-weight-medium">{{ 'client' | i18nextEager }}</p>
+          <toggle-button [checked]="client" (changed)="showHideRole('client')"></toggle-button>
+        </div>
+        <div class="form-group mt-8 mb-0 pb-0" *ngIf="client && clientList?.length > 0">
+          <label>{{ 'select_user_roles' | i18nextEager }} <span class="require">*</span></label>
+          <ng-select multiple="true" placeholder="{{ 'select_values' | i18nextEager }}" [(ngModel)]="folderObj.client">
+            <ng-option *ngFor="let clientData of clientList" [value]="clientData?.id">{{clientData?.name}}</ng-option>
+          </ng-select>
+        </div>
+      </div>
+      <div class="conditional-box border p-16 mt-16 border-radius">
+        <div class="d-flex justify-content-between align-items-center">
+          <p class="font-weight-medium">{{ 'vendor' | i18nextEager }}</p>
+          <toggle-button [checked]="vendor" (changed)="showHideRole('vendor')"></toggle-button>
+        </div>
+        <!-- <div class="form-group mt-8 mb-0 pb-0" *ngIf="vendor && vendorList?.length > 0">
+          <label>{{ 'Select User Roles' | i18nextEager }} <span class="require">*</span></label>
+          <ng-select multiple="true" placeholder="{{ 'Select Values' | i18nextEager }}" [(ngModel)]="folderObj.vendor">
+            <ng-option *ngFor="let vendorData of vendorList" [value]="vendorData?.id">{{vendorData?.name}}</ng-option>
+          </ng-select>
+        </div> -->
+      </div>
+      <div class="conditional-box border p-16 mt-16 border-radius">
+        <div class="d-flex justify-content-between align-items-center">
+          <p class="font-weight-medium">{{ 'worker' | i18nextEager }}</p>
+          <toggle-button [checked]="worker" (changed)="showHideRole('worker')"></toggle-button>
+        </div>
+        <!-- <div class="form-group mt-8 mb-0 pb-0" *ngIf="worker && workerList?.length > 0">
+          <label>{{ 'Select User Roles' | i18nextEager }} <span class="require">*</span></label>
+          <ng-select multiple="true" placeholder="{{ 'Select Values' | i18nextEager }}" [(ngModel)]="folderObj.worker">
+            <ng-option *ngFor="let workerData of workerList" [value]="workerData?.id">{{workerData?.name}}</ng-option>
+          </ng-select>
+        </div> -->
+      </div>
+    </div>
+  </app-svms-modal-body>
+  <app-svms-modal-footer>
+    <div class="d-flex justify-content-end" *ngIf="!updatePermission">
+        <button class="btn btn-primary" type="button" [disabled]="!folderObj.name || (msp && !folderObj?.msp?.length) || (client && !folderObj?.client?.length) || (!msp && !client && !vendor && !worker)"
+          *accessControl (click)="createFolder()">{{ 'create' | i18nextEager }}</button>
+    </div>
+    <div class="d-flex justify-content-end" *ngIf="updatePermission">
+      <button class="btn btn-primary" type="button" [disabled]="(msp && !folderObj?.msp?.length) || (client && !folderObj?.client?.length) || (!msp && !client && !vendor && !worker)"
+        *accessControl (click)="createFolder()">{{ 'save' | i18nextEager }}</button>
+    </div>
+</app-svms-modal-footer>
+</app-svms-modal>
+
+<app-svms-modal size="medium" title="{{ 'rename_folder' | i18nextEager }}" [visibility]="libraryModal" (onClose)="onCloseModal()" *ngIf="renameFolder">
+  <app-svms-modal-body>
+    <div>
+      <div class="form-group">
+        <label>{{ 'folder_name' | i18nextEager }} <span class="require">*</span></label>
+        <input type="text" id="name" name="name" #name="ngModel" [(ngModel)]="folderObj.name" class="form-control" placeholder="{{ 'new_folder_name' | i18nextEager }}">
+      </div>
+    </div>
+  </app-svms-modal-body>
+  <app-svms-modal-footer>
+    <div class="d-flex justify-content-end">
+        <button class="btn btn-primary" type="button" [disabled]="!folderObj.name"
+          *accessControl (click)="clickRenameFolder()">{{ 'save' | i18nextEager }}</button>
+    </div>
+</app-svms-modal-footer>
+</app-svms-modal>

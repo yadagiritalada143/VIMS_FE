@@ -1,0 +1,55 @@
+<vms-table *ngIf="tableLoaded" [vmsTableConfig]="tableConfig" [vmsDataSource]="assignmentList" [loading]="dataLoading"
+  [open]="isExpand" [totalItem]="totalRecords" [itemsPerPage]="itemPerPage" (onExpandClick)="onExpandClick($event)"
+  (changePage)="onPaginationClick($event)" (onViewClick)="onClickView($event)" (onCreate)="onCreateClick($event)"
+  (onSort)="onSortClick($event)" (search)="onSearch($event)" (onListFilter)="onListFilter($event)"
+  (onTabClick)="onTabClick($event)">
+  <div class="expanded-col" *ngFor="let data of assignmentList" [hidden]="expandId != data?.assignment_uuid">
+    <div class="expanded-chips selected-expanded">
+      <div class="profiles-img">
+        <span class="initials">{{data?.assignment_title?.name?.substring(0,2)}}</span>
+      </div>
+      <div class="chip-content">
+        <span class="name">
+          {{data?.vendor?.name | i18nextEager}}
+        </span>
+        <span class="designation">
+          {{data?.work_location | i18nextEager}}
+        </span>
+      </div>
+    </div>
+    <div class="expanded-chips">
+      <div>
+        <span class="more">
+          <icon size="17px" name="event_available" type="material" cuClass="icon d-flex pr-16"></icon>
+        </span>
+      </div>
+      <div class="chip-content">
+        <span class="name">
+          {{data?.start_date | localDateFormat}} - {{data?.end_date | localDateFormat}}
+        </span>
+        <span class="designation">
+          {{ 'duration' | i18nextEager }}
+        </span>
+      </div>
+    </div>
+    <div class="expanded-chips">
+      <div>
+        <span class="more">
+          <icon size="17px" name="payments" type="material" cuClass="icon d-flex pr-16"></icon>
+        </span>
+      </div>
+      <div class="chip-content">
+        <span class="name">
+          {{data?.finance?.expense_budget | accuracy : accuracyConfig.amount : { currencyCode: data?.finance?.currency} }}
+        </span>
+        <span class="designation">
+          {{ 'total' | i18nextEager }}
+        </span>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="(assignmentList | json) == '[]'">
+    {{ 'data_not_available' | i18nextEager }}
+  </div>
+</vms-table>
+

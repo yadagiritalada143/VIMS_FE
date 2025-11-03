@@ -1,0 +1,38 @@
+<ng-template #activeBadge let-row let-value="value">
+    <span class="initial-bg">{{value | i18next}} </span>
+  </ng-template>
+
+  <ng-template #showCurrency let-row let-value="value">
+    {{value | i18next}}
+  </ng-template>
+
+  <app-svms-table [tableOptions]="tableOptions" [coloumnDefintions]="svmstableColomnDefn" [dataSource]="svmsData?.results"></app-svms-table>
+  <app-create-rate-card
+    *ngIf="(createCardVisibility === 'visible')"
+    [title]="sidebartitle"
+    [currencies]="currencies"
+    [createCardVisibility]="createCardVisibility"
+    (onClose)="onCloseCreateCard()"
+    (onSaveRateCard)="onSaveRateCard($event)"
+  >
+  </app-create-rate-card>
+
+  <app-edit-rate-card
+    *ngIf="(editCardVisibility === 'visible')"
+    [card]="selectedCard"
+    [title]="sidebartitle"
+    [editCardVisibility]="editCardVisibility"
+    (onClose)="onCloseEditCard()"
+    (onUpdateRateCard)="onUpdateRateCard($event)"
+  >
+  </app-edit-rate-card>
+
+  <app-view-rate-card
+    *ngIf="(viewCardVisibility === 'visible')"
+    [card]="selectedCard"
+    [title]="sidebartitle"
+    [viewCardVisibility]="viewCardVisibility"
+    (onClose)="onCloseViewCard()"
+  >
+  </app-view-rate-card>
+

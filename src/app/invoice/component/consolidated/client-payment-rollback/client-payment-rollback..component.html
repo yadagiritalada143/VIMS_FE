@@ -1,0 +1,187 @@
+<svms-sidebar-ng [title]="'Rollback Payment Allocation' | i18nextEager" [dataVisibility]="'visible'" (onClose)='sidebarClose()'>
+  <app-logs [log]="logs"></app-logs>
+  <div class="sidebar-wrapper">
+
+
+    <div *ngIf ='consolidatedInvoice'>
+      <!-- {{ consolidatedInvoice | json}} -->
+      <div class="px-24 pb-16">
+        <div class="row  mt-12">
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+              <div class="mr-8">
+                <icon name="tag" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+              </div>
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'consolidated_invoice_number' | i18nextEager }}</p>
+                <p>{{ consolidatedInvoice?.consolidate_invoice?.invoice_number || '--'}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+              <div class="mr-8">
+                <icon name="receipt" theme="outlined" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+              </div>
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'batch_invoice_number' | i18nextEager }}</p>
+                <p>{{ consolidatedInvoice?.consolidate_invoice?.batch_number || '--'}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+              <div class="mr-8">
+                <icon name="event_available" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+              </div>
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'invoice_duration' | i18nextEager }}</p>
+                <p class="white-space-pre">{{ (basicDetails?.invoice_start_date) | localDateFormat :'':'':'':true }} - {{ (basicDetails?.invoice_end_date) | localDateFormat :'':'':'':true}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+              <div class="mr-8">
+                <icon name="payment" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+              </div>
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'invoice_amount' | i18nextEager }}</p>
+
+                <!-- As per Story ::source - "Total Amount Due" from the Consolidated Invoice
+                Need to figure out
+                ASK API : about this property.
+                /invoice/programs/<PROGRAM_ID>/consolidate-invoice/<INVOICE_ID>/tab/client -- "data" -- "client" -- "total_remaining_amount"
+                -->
+                <p>{{ basicDetails?.calculation?.amount_with_tax || consolidatedInvoice?.invoice_amount || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode:  consolidatedInvoice?.currency } }} </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+              <div class="mr-8">
+                <icon name="account_balance" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+              </div>
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'currency' | i18nextEager }}</p>
+                <p>{{ consolidatedInvoice?.currency ? consolidatedInvoice?.currency : currentProgram.defaultCurrency || '--' | uppercase  }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+              <div class="mr-8">
+                <icon name="paid" size="18px" theme="outlined" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+              </div>
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'balance_amount' | i18nextEager }}</p>
+                <!-- Story has a prop called Remaining Amount, is this the same? and calucate it -- Invoice Amount - PA Amount ?? -->
+                <p>{{ (consolidatedInvoice?.remaining_amount?.amount || '0') | accuracy :accuracyEnum.AMOUNT : { currencyCode: consolidatedInvoice?.currency} }}</p>
+              </div>
+            </div>
+          </div>
+
+
+
+
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'payment_authorization_number' | i18nextEager }}</p>
+                <!-- Story has a prop called Remaining Amount, is this the same? and calucate it -- Invoice Amount - PA Amount ?? -->
+                <p>{{ consolidatedInvoice?.payment_id || '--' | uppercase  }}</p>
+              </div>
+            </div>
+          </div>
+
+
+
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'payment_details' | i18nextEager }}</p>
+                <!-- Story has a prop called Remaining Amount, is this the same? and calucate it -- Invoice Amount - PA Amount ?? -->
+                <span><p>{{consolidatedInvoice.check_type}} / </p></span><span><p>{{ ' '+ consolidatedInvoice.check_number }}</p></span>
+              </div>
+            </div>
+          </div>
+
+
+
+
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'received_date' | i18nextEager }}</p>
+                <!-- Story has a prop called Remaining Amount, is this the same? and calucate it -- Invoice Amount - PA Amount ?? -->
+                <p>{{ consolidatedInvoice.received_date | localDateFormat :'':'':'':true }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'entered_date' | i18nextEager }}</p>
+                <!-- Story has a prop called Remaining Amount, is this the same? and calucate it -- Invoice Amount - PA Amount ?? -->
+                <p>{{ consolidatedInvoice.entered_date | localDateFormat :'':'':'':true }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'pa_amount' | i18nextEager }}</p>
+                <!-- Story has a prop called Remaining Amount, is this the same? and calucate it -- Invoice Amount - PA Amount ?? -->
+                <p>{{ (consolidatedInvoice?.pa_amount?.amount || '0') | accuracy :accuracyEnum.AMOUNT : { currencyCode: consolidatedInvoice?.currency} }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'notes' | i18nextEager }}</p>
+                <!-- Story has a prop called Remaining Amount, is this the same? and calucate it -- Invoice Amount - PA Amount ?? -->
+                <p>{{consolidatedInvoice.notes }}</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <div class="pl-24 pr-24 pt-32 pb-32">
+      <div class="form-group">
+        <label> {{ 'rollback_reason' | i18nextEager }} <span class="require">*</span></label>
+        <ng-select [clearable]="false" placeholder="{{ 'select_reason' | i18nextEager }}" [searchable]="false"
+          [(ngModel)]="reason">
+          <ng-option *ngFor="let reason of reasonCodes" [value]="reason?.name ? reason?.name :reason?.label">{{
+            reason?.name ? reason?.name : reason?.label }}</ng-option>
+        </ng-select>
+      </div>
+      <div class="form-group">
+        <label>{{ 'notes' | i18nextEager }} <span class="require">*</span></label>
+        <textarea class="form-control" placeholder="{{ 'enter_additional_notes' | i18nextEager }}" rows="7" cols="12"
+          maxlength="3000" [(ngModel)]="notes"></textarea>
+      </div>
+    </div>
+
+  </div>
+  <svms-sidebar-footer-ng >
+    <button type="button" class="btn btn-outline-danger float-right" (click)='sidebarClose()'>{{ 'cancel' | i18nextEager }}</button>
+    <button type="button" class="btn btn-primary float-right mr-16" (click) = 'sidebarClose(false)' [disabled] = '!reason || !notes || loading'>
+      {{ 'rollback' | i18nextEager }}
+      <span *ngIf="loading" class="loader ml-12"> </span>
+    </button>
+
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

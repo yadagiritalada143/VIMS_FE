@@ -1,0 +1,16 @@
+<app-account-setup-intro [isValid]="tokenValidate" *ngIf="navigation === '/auth/invite'" (onNext)="setPasswordIntro()">
+</app-account-setup-intro>
+<app-set-password *ngIf="navigation === '/auth/setup-password'" (onNext)="setPasswordObj($event)">
+</app-set-password>
+<app-basic-details *ngIf="navigation === '/auth/basic-details'" (onNext)="setUserBasicDetails($event)"
+    ></app-basic-details>
+<app-secret-questions *ngIf="navigation === '/auth/security-questions'" (onNext)="setQuestionObj($event)"
+(onBack)="onNavigationClick(2)" (onSkip)="onNavigationClick(4)" >
+</app-secret-questions>
+<app-customize-avatar *ngIf="navigation === '/auth/avatar'"
+    (onNext)="setAvatarColor($event)" 
+    (onBack)="onNavigationClick(2)"
+    (onSkip)="onNavigationClick(5)">
+</app-customize-avatar>
+<app-color-theme [disableSubmit]="submitted" *ngIf="navigation === '/auth/theme-color'" (onNext)="onThemeSave($event)" (onBack)="onNavigationClick(4)">
+</app-color-theme>

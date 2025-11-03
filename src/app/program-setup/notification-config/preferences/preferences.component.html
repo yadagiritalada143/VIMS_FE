@@ -1,0 +1,61 @@
+<div class="notification-page-wrapper">
+<div class="card"  *ngIf="!templateDesignerConfig">
+  <div class="d-flex align-iten-center justify-content-start p_10">
+    <h5>{{'notification_preferences' | i18next}} </h5>
+  </div>
+  <div class="position-relative search_input">
+    <i class="material-icons icon">search</i>
+    <input #searchData class="form-control " placeholder="Search" type="text"
+      (keyup)="setSearchParam(searchData?.value)">
+  </div>
+
+  <div class="border-top border-bottom" *ngFor="let notificationconfig of filteredNotificationconfig; let i = index">
+    <h5 class="p_20">{{notificationconfig.module | i18next}}</h5>
+    <div class="d-flex pb_10" *ngFor="let event of notificationconfig.events; let j = index" >
+      <div class="cur list_left" (click)="navigateToLink(event?.navigateTo)">
+        <p class="list_title d-flex justify-content-start align-item-center"> {{event.name | i18next}}
+        </p>
+        <p>{{event.description | i18next}}</p>
+      </div>
+      <div class="cur list_right" [routerLink]="event.navigateTo">
+        <div class="list_header">
+          <span class="material-icons" >
+            {{ 'chevron_right' | i18next }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="border-top border-bottom">
+    <h5 class="p_20">{{ 'header_&_footer' | i18next }}</h5>
+    <div class="d-flex pb_10" (click)="editHeaderFooter('Header')">
+      <div class="cur list_left">
+        <p class="list_title d-flex justify-content-start align-item-center">{{ 'configure_header' | i18next }}
+        </p>
+        <p>{{ 'here_you_can_configure_email_template_header' | i18next }}</p>
+      </div>
+      <div class="cur list_right">
+        <div class="list_header">
+          <span class="material-icons">
+            {{ 'chevron_right' | i18next }}
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex pb_10" (click)="editHeaderFooter('Footer')">
+      <div class="cur list_left">
+        <p class="list_title d-flex justify-content-start align-item-center">{{ 'configure_footer' | i18next }}
+        </p>
+        <p>{{ 'here_you_can_configure_email_template_footer' | i18next }}</p>
+      </div>
+      <div class="cur list_right">
+        <div class="list_header">
+          <span class="material-icons">
+            {{ 'chevron_right' | i18next }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<app-template-designer  *ngIf="templateDesignerConfig" [templateDesignerConfig]="templateDesignerConfig" (desingerClosed)="templateDesignerClosed($event)"></app-template-designer>

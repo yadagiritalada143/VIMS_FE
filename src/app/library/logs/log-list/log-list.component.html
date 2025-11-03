@@ -1,0 +1,28 @@
+<div class="alert_message position-relative" [hidden]="!log?.isShown" [ngClass]="getLogsClass()">
+  <a class="close-btn" [hidden]="log?.hideClose"(click)="closeAlertMessage()">
+    <icon name="close" size="14px" color="#ADB5BD"></icon>
+  </a>
+    <div class="d-flex align-items-center justify-content-between column-direction">
+      <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center justify-content-start">
+          <icon name="{{log?.type?.toLowerCase()}}" class="d-flex" size="24px"></icon>
+        </div>
+        <div class="pl-16">
+          <h4 *ngIf="!log?.heading && (!log?.messages || log?.messages?.length == 0)">{{ 'something_went_wrong._please_try_again' | i18next }}</h4>
+          <h4 class="font-weight-medium mb-0">{{ log?.heading|i18next }}</h4>
+          <div *ngFor="let message of log?.messages">
+              <p class="small">{{message|i18next}}</p>
+          </div>
+          <!-- <div class="mb-4" *ngFor="let message of logs?.messages"> <span class="font-weight-bold">{{'Reason for Reject'}} :</span>
+            {{message}}</div> -->
+          <!-- <div> <span class="font-weight-bold">Notes :</span>
+            {{' timeSheet?.data?.actions_by?.rejected_by?.action_note' || 'N/A'}}</div>
+        </div> -->
+      </div>
+      </div>
+      <div class="ml-24 mt-m-8 ml-m-0" *ngIf="log?.showReportButton">
+        <button class="btn" (click)="reportError()">{{ 'report_this_problem' | i18next }}</button>
+      </div>
+      <ng-content></ng-content>
+  </div>
+</div>

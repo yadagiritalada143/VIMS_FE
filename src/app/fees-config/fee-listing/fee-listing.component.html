@@ -1,0 +1,513 @@
+<div class="header-container">
+  <div>{{ 'fee_configuration' | i18nextEager }}</div>
+</div>
+
+<form>
+  <div class="fee-listing-content">
+    <div class="labels">
+      <button
+        [ngStyle]="{'font-weight': contents.All ? 'bold' : 'normal', 'border-color': contents.All ? 'lightgray lightgray white lightgray' : 'transparent', 'background': contents.All ? '#FFFFFF' : 'transparent'}"
+        mat-raised-button #all class="label-click-all" (click)="contentClick('All')">
+        {{ 'all' | i18nextEager }}
+      </button>
+      <button
+        [ngStyle]="{'font-weight': contents.Contingent ? 'bold' : 'normal', 'border-color': contents.Contingent ? 'lightgray lightgray white lightgray' : 'transparent', 'background': contents.Contingent ? '#FFFFFF' : 'transparent'}"
+        class="label-click-all" (click)="contentClick('Contingent')">
+        {{ 'contingent' | i18nextEager }}
+      </button>
+      <button
+        [ngStyle]="{'font-weight': contents.SOW ? 'bold' : 'normal', 'border-color': contents.SOW ? 'lightgray lightgray white lightgray' : 'transparent', 'background': contents.SOW ? '#FFFFFF' : 'transparent'}"
+        class="label-click-all" (click)="contentClick('SOW')">
+        {{ 'sow' | i18nextEager }}
+      </button>
+      <button
+        [ngStyle]="{'font-weight': contents.Direct_Sourcing ? 'bold' : 'normal', 'border-color': contents.Direct_Sourcing ? 'lightgray lightgray white lightgray' : 'transparent', 'background': contents.Direct_Sourcing ? '#FFFFFF' : 'transparent'}"
+        class="label-click-all" (click)="contentClick('Direct_Sourcing')">
+        {{ 'direct_sourcing' | i18nextEager }}
+      </button>
+      <button
+        [ngStyle]="{'font-weight': contents.History ? 'bold' : 'normal', 'border-color': contents.History ? 'lightgray lightgray white lightgray' : 'transparent', 'background': contents.History ? '#FFFFFF' : 'transparent'}"
+        class="label-click-all" (click)="contentClick('History')">
+        {{ 'history' | i18nextEager }}
+      </button>
+
+      <div class="add-button-container">
+        <button (click)="addNavigate()">{{ '+__}}{{_fee_configuration' | i18nextEager }}</button>
+      </div>
+      <div>
+        <a *ngIf="totalFilterApplied === 0" (click)="onshowFilterFlyout('visible')" class="small btn btn-outine filter-button" #filter tooltip="Filter" placement="top"
+            delay="200">
+            <i class="material-icons">filter_list</i>
+            <span>{{ 'filter' | i18nextEager }}</span>
+        </a>
+        <div *ngIf="totalFilterApplied > 0" class="active-filter btn small btn-outline filter-button">
+          <a href="javascript:void(0)" class="filter-trigger" (click)="onshowFilterFlyout('visible')" #filter>
+            <i class="material-icons">filter_list</i>
+          </a>
+          <span class="active-count font-weight-normal pl-4 pr-4" #filterCount>{{totalFilterApplied}}
+            {{ 'active_filters' | i18nextEager }}</span>
+          <a href="javascript:void(0)" class="clear-filter" (click)="onFilterClear()"
+            tooltip="Remove Active Filter(s)" placement="top" delay="200">
+            <i class="material-icons">close</i>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="listing-content">
+      <div *ngIf="contents.All" class="all-listing-container">
+        <div *ngIf="fees.length !== 0; else emptyAll;">
+          <div *ngFor="let fee of fees" class="form-group-row">
+            <div class="form-group d-inline">
+
+              <div class='header-highlight'>
+
+              <table>
+                <tr>
+                  <th>{{ 'hierarchy' | i18nextEager }}</th>
+                  <th>{{ 'source_model' | i18nextEager }}</th>
+                  <th>{{ 'labor_category' | i18nextEager }}</th>
+                  <th>{{ 'vendor' | i18nextEager }}</th>
+                </tr>
+                <tr>
+                  <td>{{getHierarchy(fee)}}</td>
+                  <td>{{fee?.sourcing_models?.join(", ")}}</td>
+                  <td>{{getLaborCategory(fee)}}</td>
+                  <!-- <td><div *ngFor="let labor_category of fee?.labor_categories.slice(0,3)">{{labor_category?.name}},</div> <span *ngIf="fee?.labor_categories.length > 3">+{{fee?.labor_categories.length - 3}}</span></td> -->
+                  <td>{{getVendor(fee)}}</td>
+                </tr>
+              </table>
+
+              <div class="settings-container">
+                <div class="toggle-panel" *accessControl>
+                  <div class="toggle-panel-inner">
+                    <span class="toggle-switch" [ngClass]="fee.is_enabled ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickToggle(fee)">
+                    </span>
+                  </div>
+                </div>
+
+                <div (mouseleave)="onMouseLeave(fee.id)">
+                  <button type="button" class="btn btn-outline-primary small" (mouseenter)="onMouseEnter(fee.id)">
+                    <icon class="dots" name="more_horiz" size="24px" cuClass="d-flex align-items-center"></icon>
+                  </button>
+                  <nav class='dropdown-box-wrapper' [ngClass]="{'active': hoverMap.get(fee?.id)?true:false}" >
+                    <ul>
+                      <li (click)='onEdit(fee)'>
+                        <!-- DEBUG test for component -->
+                        <a href="javascript:void(0)">
+                          <icon name="edit" class='table-icon' size="24px"></icon>
+                          {{ 'edit' | i18nextEager }}
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+
+                <span (click)="toggleFeeDetails(fee)" id="expand"
+                  class="material-icons-outlined">
+                    {{ !fee['expand'] ? "expand_more" : "expand_less" }}
+                </span>
+              </div>
+
+              </div>
+
+              <table *ngIf="fee['expand']">
+                <tr>
+                  <th>{{ 'module' | i18nextEager }}</th>
+                  <th>{{ 'msp_partner_fee' | i18nextEager }}</th>
+                  <th>{{ 'vms_fee' | i18nextEager }}</th>
+                  <th>{{ 'msp_penalty' | i18nextEager }}</th>
+                </tr>
+                <tr>
+                  <td>{{ 'timesheet' | i18nextEager }}</td>
+                  <td>{{getValue(fee, 'MSP_PARTNER', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "TIMESHEETS")}} {{getValue(fee, 'MSP_PARTNER', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "TIMESHEETS", true)}}{{getValue(fee, 'MSP_PARTNER', "TIMESHEETS", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PARTNER')}}</td>
+                  <td>{{getValue(fee, 'VMS', "TIMESHEETS", true) == "-" ? "" : getValue(fee,'VMS', "TIMESHEETS")}} {{getValue(fee, 'VMS', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'VMS', "TIMESHEETS", true)}}{{getValue(fee, 'VMS', "TIMESHEETS", true) == "-" ? "-" : getPercentOrFixed(fee,'VMS')}}</td>
+                  <td>{{getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PENALTY', "TIMESHEETS")}} {{getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true)}}{{getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PENALTY')}}</td>
+                </tr>
+                <tr>
+                  <td>{{ 'expense' | i18nextEager }}</td>
+                  <td>{{getValue(fee, 'MSP_PARTNER', "EXPENSES", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "EXPENSES")}} {{getValue(fee, 'MSP_PARTNER', "EXPENSES", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "EXPENSES", true)}}{{getValue(fee, 'MSP_PARTNER', "EXPENSES", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PARTNER')}}</td>
+                  <td>{{getValue(fee, 'VMS', "EXPENSES", true) == "-" ? "" : getValue(fee, 'VMS', "EXPENSES")}} {{getValue(fee, 'VMS', "EXPENSES", true) == "-" ? "" : getValue(fee, 'VMS', "EXPENSES", true)}}{{getValue(fee, 'VMS', "EXPENSES", true) == "-" ? "-" : getPercentOrFixed(fee,'VMS')}}</td>
+                  <td>-</td>
+                </tr>
+                <tr>
+                  <td>{{ 'misc._expense' | i18nextEager }}</td>
+                  <td>{{getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES")}} {{getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES", true)}}{{getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PARTNER')}}</td>
+                  <td>{{getValue(fee, 'VMS', "MISC_EXPENSES", true) == "-" ? "" : getValue(fee, 'VMS', "MISC_EXPENSES")}} {{getValue(fee, 'VMS', "MISC_EXPENSES", true) == "-" ? "" : getValue(fee, 'VMS', "MISC_EXPENSES", true)}}{{getValue(fee, 'VMS', "MISC_EXPENSES", true) == "-" ? "-" : getPercentOrFixed(fee,'VMS')}}</td>
+                  <td>-</td>
+                </tr>
+                <tr *ngIf="fee?.sourcing_models?.toString(',').includes('SOW')">
+                  <td>{{ 'sow_project' | i18nextEager }}</td>
+                  <td>{{getValue(fee, 'MSP_PARTNER', "SOW_PROJECT", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "SOW_PROJECT")}} {{getValue(fee, 'MSP_PARTNER', "SOW_PROJECT", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "SOW_PROJECT", true)}}{{getValue(fee, 'MSP_PARTNER', "SOW_PROJECT", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PARTNER')}}</td>
+                  <td>{{getValue(fee, 'VMS', "SOW_PROJECT", true) == "-" ? "" : getValue(fee, 'VMS', "SOW_PROJECT")}} {{getValue(fee, 'VMS', "SOW_PROJECT", true) == "-" ? "" : getValue(fee, 'VMS', "SOW_PROJECT", true)}}{{getValue(fee, 'VMS', "SOW_PROJECT", true) == "-" ? "-" : getPercentOrFixed(fee,'VMS')}}</td>
+                  <td>-</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+        <ng-template #emptyAll>
+          <h3 class="middle">{{ 'no_record_found' | i18nextEager }}</h3>
+        </ng-template>
+      </div>
+
+      <!-- CONTINGENT Start -->
+      <div *ngIf="contents.Contingent" class="all-listing-container">
+          <div *ngIf="contingentFees.length !== 0; else emptyContingent;">
+          <div *ngFor="let fee of contingentFees" class="form-group-row">
+            <div class="form-group d-inline">
+
+              <div class='header-highlight'>
+
+              <table>
+                <tr>
+                  <th>{{ 'hierarchy' | i18nextEager }}</th>
+                  <th>{{ 'source_model' | i18nextEager }}</th>
+                  <th>{{ 'labor_category' | i18nextEager }}</th>
+                  <th>{{ 'vendor' | i18nextEager }}</th>
+                </tr>
+                <tr>
+                  <td>{{getHierarchy(fee)}}</td>
+                  <td>{{fee?.sourcing_models?.join(", ")}}</td>
+                  <td>{{getLaborCategory(fee)}}</td>
+                  <!-- <td><div *ngFor="let labor_category of fee?.labor_categories.slice(0,3)">{{labor_category?.name}},</div> <span *ngIf="fee?.labor_categories.length > 3">+{{fee?.labor_categories.length - 3}}</span></td> -->
+                  <td>{{getVendor(fee)}}</td>
+                </tr>
+              </table>
+
+              <div class="settings-container">
+                <div class="toggle-panel" *accessControl>
+                  <div class="toggle-panel-inner">
+                    <span class="toggle-switch" [ngClass]="fee.is_enabled ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickToggle(fee)">
+                    </span>
+                  </div>
+                </div>
+
+                <div (mouseleave)="onMouseLeave(fee.id)">
+                  <button type="button" class="btn btn-outline-primary small" (mouseenter)="onMouseEnter(fee.id)">
+                    <icon class="dots" name="more_horiz" size="24px" cuClass="d-flex align-items-center"></icon>
+                  </button>
+                  <nav class='dropdown-box-wrapper' [ngClass]="{'active': hoverMap.get(fee?.id)?true:false}" >
+                    <ul>
+                      <li (click)='onEdit(fee)'>
+                        <!-- DEBUG test for component -->
+                        <a href="javascript:void(0)">
+                          <icon name="edit" class='table-icon' size="24px"></icon>
+                          {{ 'edit' | i18nextEager }}
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+
+                <span (click)="toggleFeeDetails(fee)" id="expand"
+                  class="material-icons-outlined">
+                    {{ !fee['expand'] ? "expand_more" : "expand_less" }}
+                </span>
+              </div>
+
+              </div>
+
+              <table *ngIf="fee['expand']">
+                <tr>
+                  <th>{{ 'module' | i18nextEager }}</th>
+                  <th>{{ 'msp_partner_fee' | i18nextEager }}</th>
+                  <th>{{ 'vms_fee' | i18nextEager }}</th>
+                  <th>{{ 'msp_penalty' | i18nextEager }}</th>
+                </tr>
+                <tr>
+                  <td>{{ 'timesheet' | i18nextEager }}</td>
+                  <td>{{getValue(fee, 'MSP_PARTNER', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "TIMESHEETS")}} {{getValue(fee, 'MSP_PARTNER', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "TIMESHEETS", true)}}{{getValue(fee, 'MSP_PARTNER', "TIMESHEETS", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PARTNER')}}</td>
+                  <td>{{getValue(fee, 'VMS', "TIMESHEETS", true) == "-" ? "" : getValue(fee,'VMS', "TIMESHEETS")}} {{getValue(fee, 'VMS', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'VMS', "TIMESHEETS", true)}}{{getValue(fee, 'VMS', "TIMESHEETS", true) == "-" ? "-" : getPercentOrFixed(fee,'VMS')}}</td>
+                  <td>{{getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PENALTY', "TIMESHEETS")}} {{getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true)}}{{getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PENALTY')}}</td>
+                </tr>
+                <tr>
+                  <td>{{ 'expense' | i18nextEager }}</td>
+                  <td>{{getValue(fee, 'MSP_PARTNER', "EXPENSES", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "EXPENSES")}} {{getValue(fee, 'MSP_PARTNER', "EXPENSES", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "EXPENSES", true)}}{{getValue(fee, 'MSP_PARTNER', "EXPENSES", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PARTNER')}}</td>
+                  <td>{{getValue(fee, 'VMS', "EXPENSES", true) == "-" ? "" : getValue(fee, 'VMS', "EXPENSES")}} {{getValue(fee, 'VMS', "EXPENSES", true) == "-" ? "" : getValue(fee, 'VMS', "EXPENSES", true)}}{{getValue(fee, 'VMS', "EXPENSES", true) == "-" ? "-" : getPercentOrFixed(fee,'VMS')}}</td>
+                  <td>-</td>
+                </tr>
+                <tr>
+                  <td>{{ 'misc._expense' | i18nextEager }}</td>
+                  <td>{{getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES")}} {{getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES", true)}}{{getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PARTNER')}}</td>
+                  <td>{{getValue(fee, 'VMS', "MISC_EXPENSES", true) == "-" ? "" : getValue(fee, 'VMS', "MISC_EXPENSES")}} {{getValue(fee, 'VMS', "MISC_EXPENSES", true) == "-" ? "" : getValue(fee, 'VMS', "MISC_EXPENSES", true)}}{{getValue(fee, 'VMS', "MISC_EXPENSES", true) == "-" ? "-" : getPercentOrFixed(fee,'VMS')}}</td>
+                  <td>-</td>
+                </tr>
+                <tr *ngIf="fee?.sourcing_models?.toString(',').includes('SOW')">
+                  <td>{{ 'sow_project' | i18nextEager }}</td>
+                  <td>{{getValue(fee, 'MSP_PARTNER', "SOW_PROJECT", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "SOW_PROJECT")}} {{getValue(fee, 'MSP_PARTNER', "SOW_PROJECT", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "SOW_PROJECT", true)}}{{getValue(fee, 'MSP_PARTNER', "SOW_PROJECT", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PARTNER')}}</td>
+                  <td>{{getValue(fee, 'VMS', "SOW_PROJECT", true) == "-" ? "" : getValue(fee, 'VMS', "SOW_PROJECT")}} {{getValue(fee, 'VMS', "SOW_PROJECT", true) == "-" ? "" : getValue(fee, 'VMS', "SOW_PROJECT", true)}}{{getValue(fee, 'VMS', "SOW_PROJECT", true) == "-" ? "-" : getPercentOrFixed(fee,'VMS')}}</td>
+                  <td>-</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+        <ng-template #emptyContingent>
+          <h3 class="middle">{{ 'no_record_found' | i18nextEager }}</h3>
+        </ng-template>
+      </div>
+      <!-- CONTINGENT ENd -->
+
+      <!-- SOW Start -->
+      <div *ngIf="contents.SOW" class="all-listing-container">
+        <div *ngIf="sowFees.length !== 0; else emptySOW;">
+          <div *ngFor="let fee of sowFees" class="form-group-row">
+            <div class="form-group d-inline">
+
+              <div class='header-highlight'>
+
+              <table>
+                <tr>
+                  <th>{{ 'hierarchy' | i18nextEager }}</th>
+                  <th>{{ 'source_model' | i18nextEager }}</th>
+                  <th>{{ 'labor_category' | i18nextEager }}</th>
+                  <th>{{ 'vendor' | i18nextEager }}</th>
+                </tr>
+                <tr>
+                  <td>{{getHierarchy(fee)}}</td>
+                  <td>{{fee?.sourcing_models?.join(", ")}}</td>
+                  <td>{{getLaborCategory(fee)}}</td>
+                  <!-- <td><div *ngFor="let labor_category of fee?.labor_categories.slice(0,3)">{{labor_category?.name}},</div> <span *ngIf="fee?.labor_categories.length > 3">+{{fee?.labor_categories.length - 3}}</span></td> -->
+                  <td>{{getVendor(fee)}}</td>
+                </tr>
+              </table>
+
+              <div class="settings-container">
+                <div class="toggle-panel" *accessControl>
+                  <div class="toggle-panel-inner">
+                    <span class="toggle-switch" [ngClass]="fee.is_enabled ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickToggle(fee)">
+                    </span>
+                  </div>
+                </div>
+
+                <div (mouseleave)="onMouseLeave(fee.id)">
+                  <button type="button" class="btn btn-outline-primary small" (mouseenter)="onMouseEnter(fee.id)">
+                    <icon class="dots" name="more_horiz" size="24px" cuClass="d-flex align-items-center"></icon>
+                  </button>
+                  <nav class='dropdown-box-wrapper' [ngClass]="{'active': hoverMap.get(fee?.id)?true:false}" >
+                    <ul>
+                      <li (click)='onEdit(fee)'>
+                        <!-- DEBUG test for component -->
+                        <a href="javascript:void(0)">
+                          <icon name="edit" class='table-icon' size="24px"></icon>
+                          {{ 'edit' | i18nextEager }}
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+
+                <span (click)="toggleFeeDetails(fee)" id="expand"
+                  class="material-icons-outlined">
+                    {{ !fee['expand'] ? "expand_more" : "expand_less" }}
+                </span>
+              </div>
+
+              </div>
+
+              <table *ngIf="fee['expand']">
+                <tr>
+                  <th>{{ 'module' | i18nextEager }}</th>
+                  <th>{{ 'msp_partner_fee' | i18nextEager }}</th>
+                  <th>{{ 'vms_fee' | i18nextEager }}</th>
+                  <th>{{ 'msp_penalty' | i18nextEager }}</th>
+                </tr>
+                <tr>
+                  <td>{{ 'timesheet' | i18nextEager }}</td>
+                  <td>{{getValue(fee, 'MSP_PARTNER', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "TIMESHEETS")}} {{getValue(fee, 'MSP_PARTNER', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "TIMESHEETS", true)}}{{getValue(fee, 'MSP_PARTNER', "TIMESHEETS", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PARTNER')}}</td>
+                  <td>{{getValue(fee, 'VMS', "TIMESHEETS", true) == "-" ? "" : getValue(fee,'VMS', "TIMESHEETS")}} {{getValue(fee, 'VMS', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'VMS', "TIMESHEETS", true)}}{{getValue(fee, 'VMS', "TIMESHEETS", true) == "-" ? "-" : getPercentOrFixed(fee,'VMS')}}</td>
+                  <td>{{getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PENALTY', "TIMESHEETS")}} {{getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true)}}{{getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PENALTY')}}</td>
+                </tr>
+                <tr>
+                  <td>{{ 'expense' | i18nextEager }}</td>
+                  <td>{{getValue(fee, 'MSP_PARTNER', "EXPENSES", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "EXPENSES")}} {{getValue(fee, 'MSP_PARTNER', "EXPENSES", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "EXPENSES", true)}}{{getValue(fee, 'MSP_PARTNER', "EXPENSES", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PARTNER')}}</td>
+                  <td>{{getValue(fee, 'VMS', "EXPENSES", true) == "-" ? "" : getValue(fee, 'VMS', "EXPENSES")}} {{getValue(fee, 'VMS', "EXPENSES", true) == "-" ? "" : getValue(fee, 'VMS', "EXPENSES", true)}}{{getValue(fee, 'VMS', "EXPENSES", true) == "-" ? "-" : getPercentOrFixed(fee,'VMS')}}</td>
+                  <td>-</td>
+                </tr>
+                <tr>
+                  <td>{{ 'misc._expense' | i18nextEager }}</td>
+                  <td>{{getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES")}} {{getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES", true)}}{{getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PARTNER')}}</td>
+                  <td>{{getValue(fee, 'VMS', "MISC_EXPENSES", true) == "-" ? "" : getValue(fee, 'VMS', "MISC_EXPENSES")}} {{getValue(fee, 'VMS', "MISC_EXPENSES", true) == "-" ? "" : getValue(fee, 'VMS', "MISC_EXPENSES", true)}}{{getValue(fee, 'VMS', "MISC_EXPENSES", true) == "-" ? "-" : getPercentOrFixed(fee,'VMS')}}</td>
+                  <td>-</td>
+                </tr>
+                <tr *ngIf="fee?.sourcing_models?.toString(',').includes('SOW')">
+                  <td>{{ 'sow_project' | i18nextEager }}</td>
+                  <td>{{getValue(fee, 'MSP_PARTNER', "SOW_PROJECT", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "SOW_PROJECT")}} {{getValue(fee, 'MSP_PARTNER', "SOW_PROJECT", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "SOW_PROJECT", true)}}{{getValue(fee, 'MSP_PARTNER', "SOW_PROJECT", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PARTNER')}}</td>
+                  <td>{{getValue(fee, 'VMS', "SOW_PROJECT", true) == "-" ? "" : getValue(fee, 'VMS', "SOW_PROJECT")}} {{getValue(fee, 'VMS', "SOW_PROJECT", true) == "-" ? "" : getValue(fee, 'VMS', "SOW_PROJECT", true)}}{{getValue(fee, 'VMS', "SOW_PROJECT", true) == "-" ? "-" : getPercentOrFixed(fee,'VMS')}}</td>
+                  <td>-</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+        <ng-template #emptySOW>
+          <h3 class="middle">{{ 'no_record_found' | i18nextEager }}</h3>
+        </ng-template>
+      </div>
+      <!-- SOW End -->
+
+      <!-- DIRECT_SOURCING Start -->
+      <div *ngIf="contents.Direct_Sourcing" class="all-listing-container">
+        <div *ngIf="directSourcingFees.length !== 0; else emptyDirectSourcing;">
+          <div *ngFor="let fee of directSourcingFees" class="form-group-row">
+            <div class="form-group d-inline">
+
+              <div class='header-highlight'>
+
+              <table>
+                <tr>
+                  <th>{{ 'hierarchy' | i18nextEager }}</th>
+                  <th>{{ 'source_model' | i18nextEager }}</th>
+                  <th>{{ 'labor_category' | i18nextEager }}</th>
+                  <th>{{ 'vendor' | i18nextEager }}</th>
+                </tr>
+                <tr>
+                  <td>{{getHierarchy(fee)}}</td>
+                  <td>{{fee?.sourcing_models?.join(", ")}}</td>
+                  <td>{{getLaborCategory(fee)}}</td>
+                  <!-- <td><div *ngFor="let labor_category of fee?.labor_categories.slice(0,3)">{{labor_category?.name}},</div> <span *ngIf="fee?.labor_categories.length > 3">+{{fee?.labor_categories.length - 3}}</span></td> -->
+                  <td>{{getVendor(fee)}}</td>
+                </tr>
+              </table>
+
+              <div class="settings-container">
+                <div class="toggle-panel" *accessControl>
+                  <div class="toggle-panel-inner">
+                    <span class="toggle-switch" [ngClass]="fee.is_enabled ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickToggle(fee)">
+                    </span>
+                  </div>
+                </div>
+
+                <div (mouseleave)="onMouseLeave(fee.id)">
+                  <button type="button" class="btn btn-outline-primary small" (mouseenter)="onMouseEnter(fee.id)">
+                    <icon class="dots" name="more_horiz" size="24px" cuClass="d-flex align-items-center"></icon>
+                  </button>
+                  <nav class='dropdown-box-wrapper' [ngClass]="{'active': hoverMap.get(fee?.id)?true:false}" >
+                    <ul>
+                      <li (click)='onEdit(fee)'>
+                        <!-- DEBUG test for component -->
+                        <a href="javascript:void(0)">
+                          <icon name="edit" class='table-icon' size="24px"></icon>
+                          {{ 'edit' | i18nextEager }}
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+
+                <span (click)="toggleFeeDetails(fee)" id="expand"
+                  class="material-icons-outlined">
+                    {{ !fee['expand'] ? "expand_more" : "expand_less" }}
+                </span>
+              </div>
+
+              </div>
+
+              <table *ngIf="fee['expand']">
+                <tr>
+                  <th>{{ 'module' | i18nextEager }}</th>
+                  <th>{{ 'msp_partner_fee' | i18nextEager }}</th>
+                  <th>{{ 'vms_fee' | i18nextEager }}</th>
+                  <th>{{ 'msp_penalty' | i18nextEager }}</th>
+                </tr>
+                <tr>
+                  <td>{{ 'timesheet' | i18nextEager }}</td>
+                  <td>{{getValue(fee, 'MSP_PARTNER', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "TIMESHEETS")}} {{getValue(fee, 'MSP_PARTNER', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "TIMESHEETS", true)}}{{getValue(fee, 'MSP_PARTNER', "TIMESHEETS", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PARTNER')}}</td>
+                  <td>{{getValue(fee, 'VMS', "TIMESHEETS", true) == "-" ? "" : getValue(fee,'VMS', "TIMESHEETS")}} {{getValue(fee, 'VMS', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'VMS', "TIMESHEETS", true)}}{{getValue(fee, 'VMS', "TIMESHEETS", true) == "-" ? "-" : getPercentOrFixed(fee,'VMS')}}</td>
+                  <td>{{getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PENALTY', "TIMESHEETS")}} {{getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true) == "-" ? "" : getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true)}}{{getValue(fee, 'MSP_PENALTY', "TIMESHEETS", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PENALTY')}}</td>
+                </tr>
+                <tr>
+                  <td>{{ 'expense' | i18nextEager }}</td>
+                  <td>{{getValue(fee, 'MSP_PARTNER', "EXPENSES", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "EXPENSES")}} {{getValue(fee, 'MSP_PARTNER', "EXPENSES", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "EXPENSES", true)}}{{getValue(fee, 'MSP_PARTNER', "EXPENSES", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PARTNER')}}</td>
+                  <td>{{getValue(fee, 'VMS', "EXPENSES", true) == "-" ? "" : getValue(fee, 'VMS', "EXPENSES")}} {{getValue(fee, 'VMS', "EXPENSES", true) == "-" ? "" : getValue(fee, 'VMS', "EXPENSES", true)}}{{getValue(fee, 'VMS', "EXPENSES", true) == "-" ? "-" : getPercentOrFixed(fee,'VMS')}}</td>
+                  <td>-</td>
+                </tr>
+                <tr>
+                  <td>{{ 'misc._expense' | i18nextEager }}</td>
+                  <td>{{getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES")}} {{getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES", true)}}{{getValue(fee, 'MSP_PARTNER', "MISC_EXPENSES", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PARTNER')}}</td>
+                  <td>{{getValue(fee, 'VMS', "MISC_EXPENSES", true) == "-" ? "" : getValue(fee, 'VMS', "MISC_EXPENSES")}} {{getValue(fee, 'VMS', "MISC_EXPENSES", true) == "-" ? "" : getValue(fee, 'VMS', "MISC_EXPENSES", true)}}{{getValue(fee, 'VMS', "MISC_EXPENSES", true) == "-" ? "-" : getPercentOrFixed(fee,'VMS')}}</td>
+                  <td>-</td>
+                </tr>
+                <tr *ngIf="fee?.sourcing_models?.toString(',').includes('SOW')">
+                  <td>{{ 'sow_project' | i18nextEager }}</td>
+                  <td>{{getValue(fee, 'MSP_PARTNER', "SOW_PROJECT", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "SOW_PROJECT")}} {{getValue(fee, 'MSP_PARTNER', "SOW_PROJECT", true) == "-" ? "" : getValue(fee, 'MSP_PARTNER', "SOW_PROJECT", true)}}{{getValue(fee, 'MSP_PARTNER', "SOW_PROJECT", true) == "-" ? "-" : getPercentOrFixed(fee,'MSP_PARTNER')}}</td>
+                  <td>{{getValue(fee, 'VMS', "SOW_PROJECT", true) == "-" ? "" : getValue(fee, 'VMS', "SOW_PROJECT")}} {{getValue(fee, 'VMS', "SOW_PROJECT", true) == "-" ? "" : getValue(fee, 'VMS', "SOW_PROJECT", true)}}{{getValue(fee, 'VMS', "SOW_PROJECT", true) == "-" ? "-" : getPercentOrFixed(fee,'VMS')}}</td>
+                  <td>-</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+        <ng-template #emptyDirectSourcing>
+          <h3 class="middle">{{ 'no_record_found' | i18nextEager }}</h3>
+        </ng-template>
+      </div>
+      <!-- DIRECT_SOURCING End -->
+
+      <!-- HISTORY Start-->
+
+      <div *ngIf="contents.History" class="history-content">
+        <div class="form-group-row">
+          <div class="form-group">
+            <div class="history">
+              <div class="date-time">
+                <p>{{ 'date' | i18nextEager }}</p>
+                <p>{{ 'time' | i18nextEager }}</p>
+                <p>{{ 'revision' | i18nextEager }}: 2</p>
+              </div>
+              <div class="circles">
+                <icon class="mr-16 circle2" size="15px" name="panorama_fish_eye" type="material" cuClass="icon-cu">
+                </icon>
+                <hr class="circle-hr">
+                <icon class="mr-16 circle1" size="15px" name="panorama_fish_eye" type="material" cuClass="icon-cu">
+                </icon>
+              </div>
+              <div class="status-info">
+                <h4>{{ 'fees_activated_-_fee_-_b' | i18nextEager }}</h4>
+                <p>{{ 'status_:_in-active' | i18nextEager }}</p>
+                <p>{{ 'updated_by:_tejal' | i18nextEager }}</p>
+                <div class="view-info">
+                  <button>
+                    <icon class="mr-16 icon" size="15px" name="visibility" type="material" cuClass="icon-cu"></icon>
+                    {{ 'view' | i18nextEager }}
+                  </button>
+                </div>
+              </div>
+
+            </div>
+            <div style="margin-top: 10px;" class="history">
+              <div class="date-time">
+                <p>{{ 'date' | i18nextEager }}</p>
+                <p>{{ 'time' | i18nextEager }}</p>
+                <p>{{ 'revision' | i18nextEager }}: 2</p>
+              </div>
+              <div class="status-info">
+                <h4>{{ 'fees_activated_-_fee_-_b' | i18nextEager }}</h4>
+                <p>{{ 'status_:_in-active' | i18nextEager }}</p>
+                <p>{{ 'updated_by:_tejal' | i18nextEager }}</p>
+                <div class="view-info">
+                  <button>
+                    <icon class="mr-16 icon" size="15px" name="visibility" type="material" cuClass="icon-cu"></icon>
+                    {{ 'view' | i18nextEager }}
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY END -->
+    </div>
+  </div>
+</form>
+
+
+<app-filter-fee-config [feeFilter]="showFilterFlyout" (onshowFilterFlyout)="onshowFilterFlyout($event)" (filtersApplied)="filtersApplied($event)"></app-filter-fee-config>

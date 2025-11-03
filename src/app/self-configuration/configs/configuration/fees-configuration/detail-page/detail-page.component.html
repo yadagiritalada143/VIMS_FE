@@ -1,0 +1,92 @@
+<div class="view-detail-page">
+  <header class="section-header p-24 d-flex align-items-center justify-content-between">
+      <div class="d-flex">
+          <i (click)="backClicked()" class="material-icons back-arrow-icon cursor-pointer" tooltip="{{'Back' | i18next}}" placement="bottom">arrow_back</i>
+          <div class="ml-16">
+              <h3 class="font-weight-semibold mb-0">{{FeesDetail?.msp_fee?.title | i18next}}</h3>
+              <p class="small">{{commonView.getTimeStamp(created_on, modified_on) | i18next}}</p>
+          </div>
+      </div>
+
+      <div *accessControl>
+          <button *authorize="'fee_configuration_manage'" (click)="onEdit()" class="c-btn c-btn-secondary-medium-left-icon"><i class="material-icons">drive_file_rename_outline</i> {{'edit'|i18next}}</button>
+      </div>
+  </header>
+  <section class="section-body-content">
+      <div class="px-32 py-16">
+          <h4 class="font-weight-medium mb-16">{{ 'basic_details' | i18next }}</h4>
+
+          <app-common-view-rule-flow [details]="details" *ngIf="details.length > 0"></app-common-view-rule-flow>
+
+          <h4 class="font-weight-medium pt-16">{{ 'fee_summary' | i18next }}</h4>
+          <div class="detail-page-table">
+              <table>
+                  <thead>
+                      <tr>
+                          <th>{{ 'module' | i18next }}
+                              <div class="sorting d-none">
+                                  <span class="asc">
+                                      <i class="material-icons">arrow_drop_up</i>
+                                  </span>
+                                  <span class="dec">
+                                      <i class="material-icons">arrow_drop_down</i>
+                                  </span>
+                              </div>
+                          </th>
+                          <th>{{ 'msp_partner_fee' | i18next }}
+                              <div class="sorting d-none">
+                                  <span class="asc">
+                                      <i class="material-icons">arrow_drop_up</i>
+                                  </span>
+                                  <span class="dec">
+                                      <i class="material-icons">arrow_drop_down</i>
+                                  </span>
+                              </div>
+                          </th>
+                          <th>{{ 'vms_fee' | i18next }}
+                              <div class="sorting d-none">
+                                  <span class="asc">
+                                      <i class="material-icons">arrow_drop_up</i>
+                                  </span>
+                                  <span class="dec">
+                                      <i class="material-icons">arrow_drop_down</i>
+                                  </span>
+                              </div>
+                          </th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <tr>
+                          <td>
+                              {{'timesheet' | i18next}}
+                          </td>
+                          <td>{{toggles.msp_partner.msp_partner_timesheet_fees == "" ? "" : toggles.msp_partner.mspFees[0].isSelected && toggles.msp_partner.value ? toggles.msp_partner.funded_by?.toUpperCase() === 'VENDOR' ? "Vendor" : "Client" : ""}} {{(toggles.msp_partner.mspFees[0].isSelected && toggles.msp_partner.value ? toggles.msp_partner.msp_partner_timesheet_fees == "" ? "-" : toggles.msp_partner.msp_partner_timesheet_fees : "-") | precision:2 }} {{toggles.msp_partner.msp_partner_timesheet_fees == "" ? "" : toggles.msp_partner.mspFees[0].isSelected && toggles.msp_partner.value ? toggles?.msp_partner?.feesType?.toUpperCase() == "FIXED" ? "(fixed)" : "%" : ""}} </td>
+                          <td>{{toggles.vms.vms_timesheet_fees == "" ? "" : toggles.vms.vmsFees[0].isSelected && toggles.vms.value ? toggles.vms.funded_by?.toUpperCase() === 'VENDOR' ? "Vendor" : "Client" : ""}} {{(toggles.vms.vmsFees[0].isSelected && toggles.vms.value ? toggles.vms.vms_timesheet_fees == "" ? "-" : toggles.vms.vms_timesheet_fees : "-") | precision:2 }} {{toggles.vms.vms_timesheet_fees == "" ? "" : toggles.vms.vmsFees[0].isSelected && toggles.vms.value ? toggles?.vms?.feesType?.toUpperCase() == "FIXED" ? " (fixed)" : "%" : ""}} </td>
+                      </tr>
+                      <tr>
+                          <td>
+                              {{'expense' | i18next}}
+                          </td>
+                          <td>{{toggles.msp_partner.msp_partner_expense_fees == "" ? "" : toggles.msp_partner.mspFees[1].isSelected && toggles.msp_partner.value ? toggles.msp_partner.funded_by?.toUpperCase() === 'VENDOR' ? "Vendor" : "Client" : ""}} {{(toggles.msp_partner.mspFees[1].isSelected && toggles.msp_partner.value ? toggles.msp_partner.msp_partner_expense_fees == "" ? "-" : toggles.msp_partner.msp_partner_expense_fees : "-") | precision:2 }} {{toggles.msp_partner.msp_partner_expense_fees == "" ? "" : toggles.msp_partner.mspFees[1].isSelected && toggles.msp_partner.value ? toggles?.msp_partner?.feesType?.toUpperCase() == "FIXED" ? "  (fixed)" : "%": ""}} </td>
+                          <td>{{toggles.vms.vms_expense_fees == "" ? "" : toggles.vms.vmsFees[1].isSelected && toggles.vms.value ? toggles.vms.funded_by?.toUpperCase() === 'VENDOR' ? "Vendor" : "Client" : ""}} {{(toggles.vms.vmsFees[1].isSelected && toggles.vms.value ? toggles.vms.vms_expense_fees == "" ? "-" : toggles.vms.vms_expense_fees : "-") | precision:2 }} {{toggles.vms.vms_expense_fees == "" ? "" : toggles.vms.vmsFees[1].isSelected && toggles.vms.value ? toggles?.vms?.feesType?.toUpperCase() == "FIXED" ? "  (fixed)" : "%" : ""}}</td>
+                      </tr>
+                      <tr>
+                          <td>
+                              {{'Misc. Expense' | i18next}}
+                          </td>
+                          <td>{{toggles.msp_partner.msp_partner_miscExpense_fees == "" ? "" : toggles.msp_partner.mspFees[2].isSelected && toggles.msp_partner.value ? toggles.msp_partner.funded_by?.toUpperCase() === 'VENDOR' ? "Vendor" : "Client" : ""}} {{(toggles.msp_partner.mspFees[2].isSelected && toggles.msp_partner.value ? toggles.msp_partner.msp_partner_miscExpense_fees == "" ? "-" : toggles.msp_partner.msp_partner_miscExpense_fees : "-") | precision:2 }}{{toggles.msp_partner.msp_partner_miscExpense_fees == "" ? "" : toggles.msp_partner.mspFees[2].isSelected && toggles.msp_partner.value ? toggles?.msp_partner?.feesType?.toUpperCase() == "FIXED" ? "  (fixed)" : "%": ""}} </td>
+                          <td>{{toggles.vms.vms_miscExpense_fees == "" ? "" : toggles.vms.vmsFees[2].isSelected && toggles.vms.value ? toggles.vms.funded_by?.toUpperCase() === 'VENDOR' ? "Vendor" : "Client" : ""}} {{(toggles.vms.vmsFees[2].isSelected && toggles.vms.value ? toggles.vms.vms_miscExpense_fees == "" ? "-" : toggles.vms.vms_miscExpense_fees : "-") | precision:2 }}{{toggles.vms.vms_miscExpense_fees == "" ? "" : toggles.vms.vmsFees[2].isSelected && toggles.vms.value ? toggles?.vms?.feesType?.toUpperCase() == "FIXED" ? "  (fixed)" : "%" : ""}} </td>
+                      </tr>
+                      <tr>
+                          <td>
+                              {{'sow_project' | i18next}}
+                          </td>
+                          <td>{{toggles.msp_partner.msp_partner_sow_project_fees == "" ? "" : toggles.msp_partner.mspFees[3].isSelected && toggles.msp_partner.value ? toggles.msp_partner.funded_by?.toUpperCase() === 'VENDOR' ? "Vendor" : "Client" : ""}} {{(toggles.msp_partner.mspFees[3].isSelected && toggles.msp_partner.value ? toggles.msp_partner.msp_partner_sow_project_fees == "" ? "-" : toggles.msp_partner.msp_partner_sow_project_fees : "-") | precision:2 }}{{toggles.msp_partner.msp_partner_sow_project_fees == "" ? "" : toggles.msp_partner.mspFees[3].isSelected && toggles.msp_partner.value ? toggles?.msp_partner?.feesType?.toUpperCase() == "FIXED" ? "  (fixed)" : "%": ""}} </td>
+                          <td>{{toggles.vms.vms_sow_project_fees == "" ? "" : toggles.vms.vmsFees[3].isSelected && toggles.vms.value ? toggles.vms.funded_by?.toUpperCase() === 'VENDOR' ? "Vendor" : "Client" : ""}} {{(toggles.vms.vmsFees[3].isSelected && toggles.vms.value ? toggles.vms.vms_sow_project_fees == "" ? "-" : toggles.vms.vms_sow_project_fees : "-") | precision:2 }}{{toggles.vms.vms_sow_project_fees == "" ? "" : toggles.vms.vmsFees[3].isSelected && toggles.vms.value ? toggles?.vms?.feesType?.toUpperCase() == "FIXED" ? "  (fixed)" : "%" : ""}} </td>
+                      </tr>
+                  </tbody>
+              </table>
+           </div>
+      </div>
+  </section>
+</div>

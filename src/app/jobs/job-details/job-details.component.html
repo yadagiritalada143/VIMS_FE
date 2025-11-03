@@ -1,0 +1,661 @@
+<!-- <app-job-detail-sidebar *ngIf="jobData" [jobData]="jobData"></app-job-detail-sidebar> -->
+<div class="detail-page-wrapper">
+  <section class="description-panel p-32 position-relative">
+    <a class="back-btn back-mobile" (click)="backToJob()">
+      <icon class="d-inline-block" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon>
+      <span>{{ 'back_to_jobs' | i18next }}</span>
+    </a>
+    <app-status-message *ngIf="isAlertBoxShown" [data]="statusMessageData" [type]="StatusMessageTypes.Job"></app-status-message>
+    <div class="mt-24" *ngIf="logs">
+      <app-logs [log]="logs"></app-logs>
+    </div>
+    <div *ngIf="support_text?.module_level" class="mt-24 mt-m-0">
+      <app-supporting-text [support_data]="support_text?.module_level"></app-supporting-text>
+    </div>
+    <div class="card bg-light mt-24 mt-m-0">
+      <header class="detail-page-header position-relative">
+        <div>
+          <div *ngIf="dataLoader">
+            <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                width: '30%',
+                height: '16px',
+                'border-radius': '15px',
+                'margin-bottom': '5px',
+                'background-color': '#FCF8FF',
+                'border-top': '0'
+              }">
+            </ngx-skeleton-loader>
+          </div>
+          <h3 *ngIf="jobData?.title?.title || jobData?.template_name">
+            {{ jobData?.template_name || jobData?.title.title }}
+            <span class="status-ui ml-16 hide-on-mobile {{getActiveClass(jobData?.status)}}" *ngIf="jobStatus && jobStatus != null">
+              {{getJobDisplayStatus(jobData?.status) | i18next}}
+            </span>
+          </h3>
+          <div *ngIf="dataLoader">
+            <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                width: '60%',
+                height: '16px',
+                'border-radius': '15px',
+                'margin-bottom': '0',
+                'background-color': '#FCF8FF',
+                'border-top': '0'
+              }">
+            </ngx-skeleton-loader>
+          </div>
+          <p class="detail-meta hide-on-mobile" [ngClass]="{'max-width text-truncate cursor-default' : ((jobApprovalStatus | lowercase) == 'pending' && (jobData?.status != 'CLOSED' && jobData?.status != 'HOLD' && (jobData?.status | lowercase) == jobsStatus.PENDING_REVIEW  && (jobData?.status | lowercase) !== jobsStatus.DRAFT) && hasOwnApprovalPending && activeTab !== 'approval')}" (mouseover)="showDetailTooltip()" (mouseleave)="hideDetailTooltip()" *ngIf="jobData?.id">
+            <icon class="meta-label" name="label" size="18px"></icon>
+            {{ jobData?.job_id }}
+            <icon class="ml-32 updated" name="update" size="18px"></icon>
+            {{ 'last_updated' | i18next }}
+            <span *ngIf="jobData?.modified_by?.first_name || jobData?.modified_by?.last_name">{{ 'by' | i18next }}:</span>
+            <span *ngIf="jobData?.modified_by?.first_name || jobData?.modified_by?.last_name" class="font-weight-medium">
+              {{ jobData?.modified_by?.name_prefix }} {{ jobData?.modified_by?.first_name }} {{ jobData?.modified_by?.last_name }}
+            </span>
+           <span *ngIf="jobData?.modified_by_impersonation?.impersonated_by?.id"> &nbsp;({{ 'impersonated_by' | i18nextEager }}: {{jobData?.modified_by_impersonation?.impersonated_by?.first_name + (jobData?.modified_by_impersonation?.impersonated_by?.middle_name ?  ' ' + jobData?.modified_by_impersonation?.impersonated_by?.middle_name : '')  + (jobData?.modified_by_impersonation?.impersonated_by?.last_name ?  ' ' + jobData?.modified_by_impersonation?.impersonated_by?.last_name : '')}} )</span>
+            {{ 'on' | i18next }} {{ jobData?.modified_on | localDateFormat }}
+            <span>{{ jobData?.modified_on | localDateFormat : 'hh:mm:ss a z' }}</span>
+          </p>
+          <div class="hide-on-desktop">
+            <div class="d-flex align-item-center d-block-m">
+              <span class="status-ui mr-16 mb-m-8 {{getActiveClass(jobData?.status)}}" *ngIf="jobStatus && jobStatus != null">
+                {{getJobDisplayStatus(jobData?.status) | i18next}}
+              </span>
+              <div class="job-id d-flex">
+                <icon class="meta-label mr-4" color="#ffc409" name="label" size="18px"></icon>
+                  {{ jobData?.job_id }}
+              </div>
+              <div class="job-id d-flex mt-8">
+                <icon class="meta-label mr-4" color="#d6dae3" name="update" size="18px"></icon>
+                <div class="text-truncate">
+                  {{ 'last_updated' | i18next }}
+                  <span
+                    *ngIf="jobData?.modified_by?.first_name || jobData?.modified_by?.last_name">{{ 'by' | i18next }}:</span>
+                  <span *ngIf="jobData?.modified_by?.first_name || jobData?.modified_by?.last_name"
+                    class="font-weight-medium">
+                    {{ jobData?.modified_by?.name_prefix }} {{ jobData?.modified_by?.first_name }}
+                    {{ jobData?.modified_by?.last_name }}
+                  </span>
+                  <span *ngIf="jobData?.modified_by_impersonation?.impersonated_by?.id">&nbsp;({{ 'impersonated_by' | i18nextEager }}: {{jobData?.modified_by_impersonation?.impersonated_by?.first_name + (jobData?.modified_by_impersonation?.impersonated_by?.middle_name ?  ' ' + jobData?.modified_by_impersonation?.impersonated_by?.middle_name : '')  + (jobData?.modified_by_impersonation?.impersonated_by?.last_name ?  ' ' + jobData?.modified_by_impersonation?.impersonated_by?.last_name : '')}} )</span>
+                  {{ 'on' | i18next }} {{ jobData?.modified_on | localDateFormat }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="actions position-absolute">
+          <div class="d-flex align-item-center">
+            <ng-container *authorize="'approve_job'">
+              <div class="approval-nofification d-flex align-items-center mr-16 cursor-pointer"
+              *ngIf="!newWorkFlow && (jobApprovalStatus | lowercase) == 'pending' && (jobData?.status != 'CLOSED' && jobData?.status != 'HOLD' && (jobData?.status | lowercase) !== jobsStatus.PENDING_REVIEW  && (jobData?.status | lowercase) !== jobsStatus.DRAFT) && hasOwnApprovalPending && activeTab !== 'approval'"
+                (click)="goToApproval()">
+                <div class="d-flex align-items-center">
+                  <span class="mr-8 mr-m-0">
+                    <icon name="notifications_active" class="d-flex justify-content-center align-items-center" size="16px"
+                      theme="outlined" type="material"></icon>
+                  </span>
+                  <p class="hide-on-mobile">
+                    <!-- removed this cound based on AMFMI-1647-->
+                    <!-- <span *ngIf="approvalCount > 0">{{approvalCount}}</span> -->
+                    {{'pending_approval_request' | i18next}}
+                  </p>
+                </div>
+              </div>
+            </ng-container>
+            <ng-template [ngIf]="!newWorkFlow && isJobReview && (jobData?.status | lowercase) === jobsStatus.PENDING_REVIEW && hasOwnApprovalPending">
+              <button *authorize="'review_job'" class="btn btn-review mr-16"
+                (click)="jobOptionListClicked('editAndReview')">{{ 'review' | i18next }}</button>
+            </ng-template>
+            <ng-container>
+              <ng-template [ngIf]="newWorkFlow && isJobReview && (jobData?.status | lowercase) === jobsStatus.PENDING_REVIEW && approvalChainId">
+                <button *authorize="'review_job'" class="btn btn-review mr-16"
+                  (click)="EditClicked(true, jobData)">{{'review'|i18next}}</button>
+              </ng-template>
+              <ng-template [ngIf]="newWorkFlow && ((jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL || (jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL_SOURCING) && (approvalChainId || (hasApprovalOverridePermission && approvalInstance))">
+                <div class="position-relative mr-16">
+                  <button class="btn btn-success hide-on-mobile" #jobBreadcumDropdownTrigger>{{'approve'|i18next}}
+                  <icon *ngIf="hasApprovalOverridePermission" size="20px" [name]="approvalOption? 'keyboard_arrow_up' : 'keyboard_arrow_down'" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+                </button>
+                  <div class="breadcrumb-dropdown hide-on-mobile" *ngIf="approvalOption">
+                    <ul>
+                      <li>
+                        <a (click)="openApprovalPanel('approved', true, 'sequence')" >
+                          {{'current_level_approval'|i18next }}
+                          <span class="d-block">{{'select_to_approve_the_current_approval_level'|i18next }}</span>
+                        </a>
+                      </li>
+                      <li>
+                        <a (click)="openApprovalPanel('approved', true, 'job')" >
+                          {{'entire_approval_workflow'|i18next }}
+                          <span class="d-block">{{'select_to_approve_the_entire_approval_workflow'|i18next }}</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </ng-template>
+              <ng-template [ngIf]="newWorkFlow && (((jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL || (jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL_SOURCING) || ((jobData?.status | lowercase) === jobsStatus.PENDING_REVIEW && isJobReview)) && (approvalChainId || ((hasApprovalOverridePermission && approvalInstance) && ((jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL || (jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL_SOURCING)))">
+                <button class="btn btn-reject mr-16 hide-on-mobile"
+                  (click)="openApprovalPanel('rejected')">{{'reject'|i18next}}</button>
+              </ng-template>
+            </ng-container>
+
+
+            <!-- only for mobile use -->
+            <ng-container>
+              <div class="mobile-buttons-approve-reject-wrapper position-fixed d-flex align-items-center justify-content-between">
+                <ng-template [ngIf]="newWorkFlow && ((jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL || (jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL_SOURCING) && (approvalChainId || hasApprovalOverridePermission)">
+                  <div class="position-relative d-flex-1-m mx-16 hide-on-desktop">
+                    <button class="btn btn-success" #jobBreadcumDropdownTriggerMobileOnly>{{'approve'|i18next}}
+                    <icon *ngIf="hasApprovalOverridePermission" size="20px" [name]="approvalOption? 'keyboard_arrow_down' : 'keyboard_arrow_up'" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+                  </button>
+                    <div class="breadcrumb-dropdown breadcrumb-dropdown-mobile-only hide-on-desktop" *ngIf="approvalOption">
+                      <ul>
+                        <li>
+                          <a (click)="openApprovalPanel('approved', true, 'sequence')" >
+                            {{'current_level_approval'|i18next }}
+                            <span class="d-block">{{'select_to_approve_the_current_approval_level'|i18next }}</span>
+                          </a>
+                        </li>
+                        <li>
+                          <a (click)="openApprovalPanel('approved', true, 'job')" >
+                            {{'entire_approval_workflow'|i18next }}
+                            <span class="d-block">{{'select_to_approve_the_entire_approval_workflow'|i18next }}</span>
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </ng-template>
+                <ng-template [ngIf]="newWorkFlow && (((jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL || (jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL_SOURCING) || ((jobData?.status | lowercase) === jobsStatus.PENDING_REVIEW && isJobReview)) && (approvalChainId || (hasApprovalOverridePermission && (jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL))">
+                  <button class="btn btn-reject d-flex-1-m mx-16 hide-on-desktop"
+                    (click)="openApprovalPanel('rejected')">{{'reject'|i18next}}</button>
+                </ng-template>
+              </div>
+            </ng-container>
+
+
+
+
+            <button class="btn btn-primary" [disabled]="disableAction" #actionButton *ngIf="userBelongToJobModule">
+              <span class="hide-on-mobile">{{ 'actions' | i18next }}</span>
+              <icon class="icon--on-right hide-on-mobile" size="20px" type="material" cuClass="icon-cu"
+                [name]="actionVisibility ? 'keyboard_arrow_up' : 'keyboard_arrow_down'">
+              </icon>
+              <icon class="hide-on-desktop" size="20px" name="more_horiz" type="material" cuClass="icon-cu">
+              </icon>
+            </button>
+          </div>
+          <ul class="action-list position-absolute bg-light rounded-sm"
+            [ngClass]="{ active: actionVisibility }" #actionDropdown>
+            <ng-template [ngIf]="jobData?.is_distributed && !isOptInOptOutPending">
+              <li [hidden]="!isOptOut" *authorize="'opt_job'">
+                <a  class="pt-8 pb-8 pl-12 pr-8" (click)="optOut($event)">
+                  {{(isOptOutText === "opt_in" ? "Opt-Out" : "Opt-In") | i18next}}
+                </a>
+              </li>
+            </ng-template>
+            <ng-template [ngIf]="jobData?.is_distributed && isOptInOptOutPending">
+              <li [hidden]="!isOptOut" *authorize="'opt_job'">
+                <a  class="pt-8 pb-8 pl-12 pr-8" (click)="optOut($event,'opt_in')">
+                  {{ 'opt-in' | i18next }}
+                </a>
+              </li>
+              <li [hidden]="!isOptOut" *authorize="'opt_job'">
+                <a  class="pt-8 pb-8 pl-12 pr-8" (click)="optOut($event,'opt_out')">
+                  {{ 'opt-out' | i18next }}
+                </a>
+              </li>
+            </ng-template>
+            <li *authorize="'submit_candidate'">
+              <a *ngIf=" ((userType | uppercase) == loggedUserType.SUPER_ORG || (userType | uppercase) == loggedUserType.VENDOR)
+                 && (jobStatus == jobsStatus?.PENDING_APPROVAL_SOURCING  || jobStatus == jobsStatus?.SOURCING) && isOptOutText === 'opt_in' && activeTab !== 'available'"
+                 (click)="submitCandidate()">
+                {{ 'submit_candidate' | i18next }}
+              </a>
+            </li>
+            <!-- <li *authorize="'submit_candidate'">
+                            <a  *ngIf="(jobStatus == jobsStatus?.PENDING_APPROVAL_SOURCING  || jobStatus == jobsStatus?.SOURCING)&& isOptOutText === 'opt_in' && activeTab !== 'available'"
+                              class="pt-8 pb-8 pl-24 pr-8" (click)="submitCandidate()">
+                                {{ 'submit_candidate' | i18next }}
+                            </a>
+                        </li>
+                        <li *authorize="'submit_candidate'">
+                            <a class="pt-8 pb-8 pl-24 pr-8" (click)="addSubmission()"
+                             *ngIf="( isOptOut && jobData?.is_distributed) && (jobStatus ==  jobsStatus?.PENDING_APPROVAL_SOURCING || jobStatus == jobsStatus?.SOURCING)">
+                                {{ 'add' | i18next }} &amp; {{ 'submit_candidate' | i18next }}
+                            </a>
+                        </li>
+                        <li *authorize="'create_job'">
+                            <a *ngIf="(jobStatus !==  jobsStatus?.HOLD  && jobStatus  !== jobsStatus?.REJECTED  && jobStatus !== jobsStatus?.CLOSED )"
+                                class="pt-8 pb-8 pl-24 pr-8" (click)="updateJobStatus('hold')"> {{ 'hold_job' | i18next }}</a>
+                        </li>
+                        <li *authorize="'create_job'">
+                            <a *ngIf="(jobStatus !== jobsStatus?.HOLD && jobStatus !== jobsStatus?.HALTED &&  jobStatus !== jobsStatus?.REJECTED  && jobStatus !== jobsStatus?.CLOSED ) && (jobStatus === jobsStatus?.PENDING_APPROVAL || jobStatus ===  jobsStatus?.PENDING_APPROVAL_SOURCING  || jobStatus === jobsStatus?.SOURCING ) "
+                                class="pt-8 pb-8 pl-24 pr-8"(click)="updateJobStatus('halted')"> {{ 'halt_job' | i18next }} </a>
+                                </li>
+                        <li  *authorize="'create_job'">
+                            <a *ngIf="(jobStatus ==  jobsStatus?.HOLD || jobStatus=== jobsStatus?.HALTED )"
+                                class="pt-8 pb-8 pl-24 pr-8" (click)="updateJobStatus('release')">
+                                {{ 'release_job' | i18next }}
+                            </a>
+                        </li> -->
+            <ng-container>
+              <ng-template
+                [ngIf]="(jobData?.status | lowercase) === jobsStatus.OPEN">
+                <li *authorize="'distribute_job'">
+                  <a  (click)="jobOptionListClicked('distribute')">
+                    {{ 'distribute' | i18next }}
+                  </a>
+                </li>
+              </ng-template>
+              <!-- <ng-template
+                [ngIf]="isLoggedInUserApprover && hasOwnApprovalPending && ((jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL || (jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL_SOURCING)">
+                <li *authorize="'approve_job'">
+                  <a  (click)="jobOptionListClicked('approve')" >
+                    {{ 'approve' | i18next }}
+                  </a>
+                </li>
+              </ng-template>
+              <ng-template
+                [ngIf]="isLoggedInUserApprover && hasOwnApprovalPending && ((userType | uppercase) == loggedUserType.SUPER_ORG || (userType | uppercase) == loggedUserType.CLIENT || (userType | uppercase) == loggedUserType.MSP) &&  ((jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL || (jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL_SOURCING)">
+                <li *authorize="'reject_job'">
+                  <a  (click)="jobOptionListClicked('reject')" >
+                    {{ 'reject' | i18next }}
+                  </a>
+                </li>
+              </ng-template> -->
+              <ng-template
+                [ngIf]="(jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL || (jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL_SOURCING || (jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL_HOLD || (jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL_HALTED || (jobData?.status | lowercase) === jobsStatus.OPEN || (jobData?.status | lowercase) === jobsStatus.SOURCING || (jobData?.status | lowercase) === jobsStatus.HALTED">
+                <ng-container *accessControl>
+                <li *authorize="'hold_job'">
+                  <a  (click)="jobOptionListClicked('hold')">
+                    {{ 'hold' | i18next }}
+                  </a>
+                </li>
+              </ng-container>
+              </ng-template>
+              <ng-template
+                [ngIf]="(jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL_SOURCING || (jobData?.status | lowercase) === jobsStatus.SOURCING">
+                <li *authorize="'distribute_job'">
+                  <a  (click)="jobOptionListClicked('reDistribute')">
+                    {{ 're_distribute' | i18next }}
+                  </a>
+                </li>
+              </ng-template>
+              <ng-template
+                [ngIf]="(jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL_SOURCING  || (jobData?.status | lowercase) === jobsStatus.OPEN || (jobData?.status | lowercase) === jobsStatus.SOURCING">
+                <ng-container *accessControl>
+                <li *authorize="'halt_job'">
+                  <a  (click)="jobOptionListClicked('halt-submission')">
+                    {{ 'halt_submissions' | i18next }}
+                  </a>
+                </li>
+                </ng-container>
+              </ng-template>
+              <ng-template
+                [ngIf]="(jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL_HOLD || (jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL_HALTED || (jobData?.status | lowercase) === jobsStatus.HALTED || (jobData?.status | lowercase) === jobsStatus.HOLD">
+                <li *authorize="'release_job'">
+                  <a  (click)="jobOptionListClicked('release')">
+                    {{ 'release' | i18next }}
+                  </a>
+                </li>
+              </ng-template>
+              <ng-template
+                [ngIf]="!((jobData?.status | lowercase) === jobsStatus.DRAFT || (jobData?.status | lowercase) === jobsStatus.FILLED || (jobData?.status | lowercase) === jobsStatus.CLOSED)">
+                <li *authorize="'close_job'">
+                  <a  (click)="jobOptionListClicked('close')">
+                    {{ 'close' | i18next }}
+                  </a>
+                </li>
+              </ng-template>
+              <ng-template
+                [ngIf]="(jobData?.status | lowercase) === jobsStatus.REJECTED ||  (jobData?.status | lowercase) === jobsStatus.DRAFT">
+                <li *authorize="'update_job'">
+                  <a  (click)="EditClicked(true, jobData)">
+                    {{ 'edit' | i18next }}
+                  </a>
+                </li>
+              </ng-template>
+              <ng-template [ngIf]="(jobData?.status | lowercase) === jobsStatus.DRAFT">
+                <ng-container *accessControl>
+                <li *authorize="'close_job'">
+                  <a  (click)="draftOptionClicked('remove')" [class]="jobData?.is_deletable ? '' : 'disabled'">
+                    {{ 'remove' | i18next }}
+                  </a>
+                </li>
+              </ng-container>
+              </ng-template>
+              <!-- <ng-template [ngIf]="(jobData?.status | lowercase) === jobsStatus.DRAFT">
+                <ng-container *accessControl>
+                  <li *authorize="'close_job'">
+                    <a  (click)="draftOptionClicked('close')">
+                      {{'Close'|i18next}}
+                    </a>
+                  </li>
+                </ng-container>
+              </ng-template> -->
+              <!-- <ng-template [ngIf]="(jobData?.status | lowercase) === jobsStatus.PENDING_REVIEW && hasOwnApprovalPending">
+                <li *authorize="'review_job'">
+                  <a  (click)="EditClicked(true, jobData)">
+                    {{'edit_&_review'|i18next}}
+                  </a>
+                </li>
+              </ng-template> -->
+              <ng-template
+                [ngIf]="(jobData?.status | lowercase) === jobsStatus.OPEN || (jobData?.status | lowercase) === jobsStatus.SOURCING">
+                <li *authorize="'edit_approved_job'">
+                  <a  (click)="EditClicked(true, jobData, true)">
+                    {{ 'edit' | i18next }}
+                  </a>
+                </li>
+              </ng-template>
+              <li *authorize="'submit_candidate'">
+                <a *ngIf="((userType | uppercase) == loggedUserType.VENDOR || (userType | uppercase) == loggedUserType.SUPER_ORG || (userType | uppercase) == loggedUserType.MSP)
+                                && ((jobData?.status | lowercase) == jobsStatus.SOURCING || (jobData?.status | lowercase) == jobsStatus.HALTED || (jobData?.status | lowercase) == jobsStatus.HOLD || (jobData?.status | lowercase) == jobsStatus?.FILLED || (jobData?.status | lowercase) == jobsStatus?.PENDING_APPROVAL_SOURCING)
+                                && (isOptOutText === 'opt_in')" >
+                  <span *ngIf="(jobData?.status | lowercase) == jobsStatus.SOURCING || (jobData?.status | lowercase) == jobsStatus?.PENDING_APPROVAL_SOURCING"
+                    (click)="optionClicked(jobData)">{{ 'add' | i18next }} &amp; {{ 'submit_candidate' | i18next }} </span>
+                  <span
+                    *ngIf="(jobData?.status | lowercase) == jobsStatus.HALTED || (jobData?.status | lowercase) == jobsStatus.HOLD || (jobData?.status | lowercase) == jobsStatus.FILLED || (jobData?.status | lowercase) == jobsStatus.CLOSED"
+                    tooltip="Submission activity is unavailable while Job is {{getJobDisplayStatus(jobData?.status)}}"
+                    placement="bottom" delay="500"
+                    [ngClass]="{'disabled': (jobData?.status | lowercase) == jobsStatus.HALTED || (jobData?.status | lowercase) == jobsStatus.HOLD || (jobData?.status | lowercase) == jobsStatus.FILLED || (jobData?.status | lowercase) == jobsStatus.CLOSED}">
+                    {{ 'add' | i18next }} &amp; {{ 'submit_candidate' | i18next }} </span>
+                </a>
+              </li>
+              <li *authorize="'create_job'">
+                <a  (click)="CloneJobClicked(true, jobData)" [ngClass]="{'disabled': jobData?.disableClone}">
+                  {{ 'clone_job' | i18next }}
+                </a>
+              </li>
+            </ng-container>
+          </ul>
+        </div>
+      </header>
+      <nav class="detail-nav position-relative pl-24 pr-24 tab-mobile-view" appResponsiveMenu dataLoaded="10">
+       <ul class="tabs primary not-loaded">
+          <li>
+            <a [routerLink]="['/jobs/details/job-details', param]" [routerLinkActive]="['active']" [ngClass]="{'active': activeTab === 'detail'}"
+              [routerLinkActiveOptions]="{ exact: true }" (click)="changeActiveTab('detail')">
+              <icon class="mr-8" size="20px" name="info" theme="outlined" cuClass="icon-cu"></icon>
+              {{ 'job_details' | i18next }}
+            </a>
+          </li>
+          <li *ngIf="checkAvailableCandidateRole && jobStatus !== jobsStatus?.CLOSED">
+            <a [queryParams]="{templateId:templateId,jobStatus:jobStatus}"
+              [ngClass]="{'active': activeTab === 'available'}"
+              [routerLink]="['/jobs/details/job-details', param, 'available']" [routerLinkActive]="['active']"
+              [routerLinkActiveOptions]="{ exact: true }" class="d-flex align-item-center justify-content-center" (click)="changeActiveTab('available')">
+              <icon class="mr-8" size="20px" name="people_outline" theme="outlined" cuClass="icon-cu">
+              </icon>
+              {{ 'available_candidates' | i18next }}
+              <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                                width: '26px',
+                                height: '17px',
+                                'border-radius': '14px',
+                                'background-color': '#e9e6ef',
+                                'margin-bottom': '-3px',
+                                'margin-left': '4px'
+                              }" *ngIf="!availableCanCount && dataLoader">
+              </ngx-skeleton-loader>
+              <span class="badge counter" *ngIf="!dataLoader">{{availableCanCount ? availableCanCount : 0}}</span>
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="['/jobs/details/job-details',param,'submitted-candidate']" [routerLinkActive]="['active']" [ngClass]="{'active': activeTab === 'submitted-candidate'}"
+              [queryParams]="{templateId:templateId}" [routerLinkActiveOptions]="{ exact: true }"
+              class="d-flex align-item-center justify-content-center">
+              <icon class="mr-8" size="20px" name="how_to_reg" theme="outlined" cuClass="icon-cu"></icon>
+              {{ 'submitted_candidates' | i18next }}
+              <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                                width: '26px',
+                                height: '17px',
+                                'border-radius': '14px',
+                                'background-color': '#e9e6ef',
+                                'margin-bottom': '-3px',
+                                'margin-left': '4px'
+                              }" *ngIf="!submittedCanCount && dataLoader">
+              </ngx-skeleton-loader>
+              <span class="badge counter" *ngIf="!dataLoader">{{submittedCanCount ? submittedCanCount: 0}}</span>
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="['/jobs/details/job-details', param, 'interviews']" [routerLinkActive]="['active']" [ngClass]="{'active': activeTab === 'interviews'}"
+              [routerLinkActiveOptions]="{ exact: true }" class="d-flex align-item-center justify-content-center" (click)="changeActiveTab('interviews')">
+              <icon class="mr-8" size="20px" name="group_work" theme="outlined" cuClass="icon-cu"></icon>
+              {{ 'interviews' | i18next }}
+              <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                                width: '26px',
+                                height: '17px',
+                                'border-radius': '14px',
+                                'background-color': '#e9e6ef',
+                                'margin-bottom': '-3px',
+                                'margin-left': '4px'
+                              }" *ngIf="!interviewCount && dataLoader">
+              </ngx-skeleton-loader>
+              <span class="badge counter" *ngIf="!dataLoader">{{interviewCount}}</span>
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="['/jobs/details/job-details', param, 'offers']" [routerLinkActive]="['active']" [ngClass]="{'active': activeTab === 'offers'}"
+              class="d-flex align-item-center justify-content-center" (click)="changeActiveTab('offers')">
+              <icon class="mr-8" size="20px" name="drafts" theme="outlined" cuClass="icon-cu"></icon>
+              {{ 'offers' | i18next }}
+              <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                                width: '26px',
+                                height: '17px',
+                                'border-radius': '14px',
+                                'background-color': '#e9e6ef',
+                                'margin-bottom': '-3px',
+                                'margin-left': '4px'
+                              }" *ngIf="!offerCount && dataLoader">
+              </ngx-skeleton-loader>
+              <span class="badge counter" *ngIf="!dataLoader">{{offerCount}}</span>
+            </a>
+          </li>
+          <!-- <li><a [routerLink]="['/jobs/details/job-details',param,'offers']" [routerLinkActive]="['active']"
+              [routerLinkActiveOptions]="{ exact: true }">Offers</a></li> -->
+          <li>
+            <a [routerLink]="['/jobs/details/job-details', param, 'assignment']" [routerLinkActive]="['active']" [ngClass]="{'active': activeTab === 'assignment'}"
+              class="d-flex align-item-center justify-content-center" (click)="changeActiveTab('assignment')">
+              <icon class="mr-8" size="20px" name="assignment" theme="outlined" cuClass="icon-cu"></icon>
+              {{ 'assignment' | i18next }}
+              <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                                width: '26px',
+                                height: '17px',
+                                'border-radius': '14px',
+                                'background-color': '#e9e6ef',
+                                'margin-bottom': '-3px',
+                                'margin-left': '4px'
+                              }" *ngIf="!assignmentCount && dataLoader">
+              </ngx-skeleton-loader>
+              <span class="badge counter" *ngIf="!dataLoader">{{assignmentCount ? assignmentCount : 0}}</span>
+            </a>
+          </li>
+          <ng-container *ngIf="(jobData?.status | lowercase)!= jobsStatus.PENDING_APPROVAL">
+            <li *authorize="'distribute_job'" [hidden]="(jobData?.status | lowercase) === jobsStatus.PENDING_APPROVAL || (jobData?.status | lowercase) === jobsStatus.PENDING_REVIEW || (jobData?.status | lowercase) === jobsStatus.DRAFT || (jobData?.status | lowercase) === jobsStatus.HOLD">
+              <a [routerLink]="[ '/jobs/details/job-details', param, 'distribution']" [routerLinkActive]="['active']" [ngClass]="{'active': activeTab === 'distribution'}"
+                [routerLinkActiveOptions]="{ exact: true }" (click)="changeActiveTab('distribution')">
+                <icon class="mr-8" size="20px" name="stream" theme="outlined" cuClass="icon-cu"></icon>
+                {{ 'distribution' | i18next }}
+              </a>
+            </li>
+          </ng-container>
+        <ng-container *authorize="'approve_job'">
+          <li *ngIf="newWorkFlow && jobData" [hidden]="(jobData?.status | lowercase) === jobsStatus.DRAFT">
+            <a (click)="routeTOWorkFlow()" [routerLinkActive]="['active']"  [ngClass]="{'active': activeTab === 'workflow'}"
+              [routerLinkActiveOptions]="{ exact: true }" (click)="changeActiveTab('workflow')">
+              <icon class="mr-8" size="20px" name="task_alt" theme="outlined" cuClass="icon-cu"></icon>
+              {{'Workflow'|i18next}}
+            </a>
+          </li>
+        </ng-container>
+          <ng-container *ngIf="!newWorkFlow">
+            <li *authorize="'approve_job'"
+              [hidden]="(jobData?.status | lowercase) === jobsStatus.PENDING_REVIEW || (jobData?.status | lowercase) === jobsStatus.DRAFT">
+              <a [routerLink]="['/jobs/details/job-details',param,'approval']" [routerLinkActive]="['active']"
+                [ngClass]="{'active': activeTab === 'approval'}" [routerLinkActiveOptions]="{ exact: true }" (click)="changeActiveTab('approval')">
+                <icon class="mr-8" size="20px" name="task_alt" theme="outlined" cuClass="icon-cu"></icon>
+                {{'approval'|i18next}}
+              </a>
+            </li>
+          </ng-container>
+          <li [ngClass]="{ 'd-none': userType === 'VENDOR' }">
+            <a [routerLink]="['/jobs/details/job-details', param, 'history']" [routerLinkActive]="['active']"
+              [routerLinkActiveOptions]="{ exact: true }" [ngClass]="{'active': activeTab === 'history'}" (click)="changeActiveTab('history')">
+              <icon class="mr-8" size="20px" name="history" theme="outlined" cuClass="icon-cu"></icon>
+              {{ 'history' | i18next }}
+            </a>
+          </li>
+          <!-- <li>
+            <a [routerLink]="['/jobs/details/job-details', param, 'onboarding']" [routerLinkActive]="['active']"
+              [routerLinkActiveOptions]="{ exact: true }">
+              <icon class="mr-8" size="20px" name="check_circle_outline" theme="outlined" cuClass="icon-cu"></icon>
+              Onboarding
+            </a>
+          </li> -->
+          <li class="more">
+            <a >{{ 'more' | i18next }}</a>
+            <div class="secondary">
+              <span class="d-none position-relative nav-close-btn text-right">
+                <a >
+                  <icon name="close" size="18px"></icon>
+                </a>
+              </span>
+              <ul>
+                <li class="secondary-item">
+                  <a [routerLink]="['/jobs/details/job-details', param]" [routerLinkActive]="['active']" [ngClass]="{'active': activeTab === 'detail'}"
+                    [routerLinkActiveOptions]="{ exact: true }" (click)="changeActiveTab('detail')">
+                    <icon class="mr-8" size="20px" name="info" theme="outlined" cuClass="icon-cu"></icon>
+                    {{ 'job_details' | i18next }}
+                  </a>
+                </li>
+                <li class="secondary-item" *ngIf="checkAvailableCandidateRole && jobStatus !== jobsStatus?.CLOSED">
+                  <a [queryParams]="{templateId:templateId,jobStatus:jobStatus}"
+                    [ngClass]="{'active': activeTab === 'available'}"
+                    [routerLink]="['/jobs/details/job-details', param, 'available']" [routerLinkActive]="['active']"
+                    [routerLinkActiveOptions]="{ exact: true }" class="d-flex align-item-center justify-content-start"
+                    (click)="changeActiveTab('available')"
+                    >
+                    <icon class="mr-8" size="20px" name="people_outline" theme="outlined" cuClass="icon-cu">
+                    </icon>
+                    {{ 'available_candidates' | i18next }}
+                  </a>
+                </li>
+                <li class="secondary-item">
+                  <a [routerLink]="['/jobs/details/job-details',param,'submitted-candidate']" [routerLinkActive]="['active']" [ngClass]="{'active': activeTab === 'submitted-candidate'}"
+                    [queryParams]="{templateId:templateId}" [routerLinkActiveOptions]="{ exact: true }"
+                    class="d-flex align-item-center justify-content-start" (click)="changeActiveTab('submitted-candidate')">
+                    <icon class="mr-8" size="20px" name="how_to_reg" theme="outlined" cuClass="icon-cu"></icon>
+                    {{ 'submitted_candidates' | i18next }}
+                  </a>
+                </li>
+                <li class="secondary-item">
+                  <a [routerLink]="['/jobs/details/job-details', param, 'interviews']" [routerLinkActive]="['active']" [ngClass]="{'active': activeTab === 'interviews'}"
+                    [routerLinkActiveOptions]="{ exact: true }" class="d-flex align-item-center justify-content-start"  (click)="changeActiveTab('interviews')">
+                    <icon class="mr-8" size="20px" name="group_work" theme="outlined" cuClass="icon-cu"></icon>
+                    {{ 'interviews' | i18next }}
+                  </a>
+                </li>
+                <li class="secondary-item">
+                  <a [routerLink]="['/jobs/details/job-details', param, 'offers']" [routerLinkActive]="['active']" [ngClass]="{'active': activeTab === 'offers'}"
+                    class="d-flex align-item-center justify-content-start" (click)="changeActiveTab('offers')">
+                    <icon class="mr-8" size="20px" name="drafts" theme="outlined" cuClass="icon-cu"></icon>
+                    {{ 'offers' | i18next }}
+                  </a>
+                </li>
+                <!-- <li><a [routerLink]="['/jobs/details/job-details',param,'offers']" [routerLinkActive]="['active']"
+                    [routerLinkActiveOptions]="{ exact: true }">Offers</a></li> -->
+                <li class="secondary-item">
+                  <a [routerLink]="['/jobs/details/job-details', param, 'assignment']" [routerLinkActive]="['active']" [ngClass]="{'active': activeTab === 'assignment'}"
+                    class="d-flex align-item-center justify-content-start" (click)="changeActiveTab('assignment')">
+                    <icon class="mr-8" size="20px" name="assignment" theme="outlined" cuClass="icon-cu"></icon>
+                    {{ 'assignment' | i18next }}
+                  </a>
+                </li>
+                <ng-container *ngIf="(jobData?.status | lowercase)!= jobsStatus.PENDING_APPROVAL">
+                  <li class="secondary-item" *authorize="'distribute_job'" [hidden]="(jobData?.status | lowercase) === jobsStatus.PENDING_REVIEW || (jobData?.status | lowercase) === jobsStatus.DRAFT || (jobData?.status | lowercase) === jobsStatus.HOLD">
+                    <a [routerLink]="[ '/jobs/details/job-details', param, 'distribution']" [routerLinkActive]="['active']" [ngClass]="{'active': activeTab === 'distribution'}"
+                      [routerLinkActiveOptions]="{ exact: true }" (click)="changeActiveTab('distribution')">
+                      <icon class="mr-8" size="20px" name="stream" theme="outlined" cuClass="icon-cu"></icon>
+                      {{ 'distribution' | i18next }}
+                    </a>
+                  </li>
+                </ng-container>
+                <ng-container *authorize="'approve_job'">
+                <li *ngIf="newWorkFlow && jobData" class="secondary-item" [hidden]="(jobData?.status | lowercase) === jobsStatus.DRAFT">
+                  <a (click)="routeTOWorkFlow();changeActiveTab('workflow')" [routerLinkActive]="['active']"  [ngClass]="{'active': activeTab === 'workflow'}"
+                    [routerLinkActiveOptions]="{ exact: true }">
+                    <icon class="mr-8" size="20px" name="task_alt" theme="outlined" cuClass="icon-cu"></icon>
+                    {{'Workflow'|i18next}}
+                  </a>
+                </li>
+                </ng-container>
+                <ng-container *ngIf="!newWorkFlow">
+                  <li class="secondary-item" *authorize="'approve_job'"
+                    [hidden]="(jobData?.status | lowercase) === jobsStatus.PENDING_REVIEW || (jobData?.status | lowercase) === jobsStatus.DRAFT">
+                    <a [routerLink]="['/jobs/details/job-details',param,'approval']" [routerLinkActive]="['active']"
+                      [ngClass]="{'active': activeTab === 'approval'}" [routerLinkActiveOptions]="{ exact: true }" (click)="changeActiveTab('approval')">
+                      <icon class="mr-8" size="20px" name="task_alt" theme="outlined" cuClass="icon-cu"></icon>
+                      {{'approval'|i18next}}
+                    </a>
+                  </li>
+                </ng-container>
+                <li class="secondary-item" [ngClass]="{ 'd-none': userType === 'VENDOR' }">
+                  <a [routerLink]="['/jobs/details/job-details', param, 'history']" [routerLinkActive]="['active']"
+                    [routerLinkActiveOptions]="{ exact: true }" (click)="changeActiveTab('history')" [ngClass]="{'active': activeTab === 'history'}">
+                    <icon class="mr-8" size="20px" name="history" theme="outlined" cuClass="icon-cu"></icon>
+                    {{ 'history' | i18next }}
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+        <div class="clearfix"></div>
+      </nav>
+      <!-- <button (click)="openCreateOfferSidebar()">Job create offer</button> -->
+      <!-- <ng-content></ng-content> -->
+      <router-outlet></router-outlet>
+    </div>
+
+    <!-- <job-details *ngIf="jobDetails"></job-details>
+        <app-available-candidates *ngIf="availableCandidate"></app-available-candidates>
+        <app-submitted-candidates *ngIf="submittedCandidate"></app-submitted-candidates>
+        <app-interviews *ngIf="interviews"></app-interviews>
+        <app-offers *ngIf="offers"></app-offers>
+        <app-assignment *ngIf="assignment"></app-assignment>
+        <app-approvel *ngIf="approval"></app-approvel>
+        <app-history *ngIf="history"></app-history> -->
+  </section>
+</div>
+
+<div class="meta-tooltip position-absolute" *ngIf="jobData?.id && (jobApprovalStatus | lowercase) == 'pending' && (jobData?.status != 'CLOSED' && jobData?.status != 'HOLD' && (jobData?.status | lowercase) == jobsStatus.PENDING_REVIEW  && (jobData?.status | lowercase) !== jobsStatus.DRAFT) && hasOwnApprovalPending && activeTab !== 'approval'" [ngClass]="{'active' : metaTooltip}">
+  <div class="p-12">
+    <p class="mb-8">
+      <strong>
+        {{ 'last_updated' | i18next }}
+        <span *ngIf="jobData?.modified_by?.first_name || jobData?.modified_by?.last_name">{{ 'by' | i18next }}:</span>
+      </strong><br>
+        <span *ngIf="jobData?.modified_by?.first_name || jobData?.modified_by?.last_name" class="font-weight-medium">
+        {{ jobData?.modified_by?.name_prefix }} {{ jobData?.modified_by?.first_name }} {{ jobData?.modified_by?.last_name }}
+      </span>
+      <span *ngIf="jobData?.modified_by_impersonation?.impersonated_by?.id">&nbsp;({{ 'impersonated_by' | i18nextEager }}: {{jobData?.modified_by_impersonation?.impersonated_by?.first_name + (jobData?.modified_by_impersonation?.impersonated_by?.middle_name ?  ' ' + jobData?.modified_by_impersonation?.impersonated_by?.middle_name : '')  + (jobData?.modified_by_impersonation?.impersonated_by?.last_name ?  ' ' + jobData?.modified_by_impersonation?.impersonated_by?.last_name : '')}} )</span>
+    </p>
+    <p>
+      <strong>{{ 'last_updated' | i18next }} {{ 'on' | i18next }}:</strong> <br> {{ jobData?.modified_on | localDateFormat }}
+      {{ jobData?.modified_on | localDateFormat : 'hh:mm:ss a z' }}
+    </p>
+  </div>
+</div>
+
+<app-job-details-sidebar-view></app-job-details-sidebar-view>
+<app-opt-out-reason (optOutJob)="onClickoptOutJob($event)" [_closeSidebar]="closeSidebar"></app-opt-out-reason>
+<app-reject-and-close-reason (closeAction)="closeAction($event)"
+  (onRejectAndCloseJob)="onClickrejectAndCloseJob($event)" [action]="action" [jobData]="jobData"></app-reject-and-close-reason>
+  <app-approval-notes-history [visiblity]="approvalNote" [approvalFor]="approvalFor" [jobDetail]="jobDetails" [approvalChainId]="approvalChainId"
+  [approvalWorkflow]="approvalWorkflow" (onClose)="onSidePanelClose()" (onSubmit)="onSubmitApproveReject($event)"  [isProgramAdmin]="isProgramAdmin"
+  [superAdminEdit]="superAdminEdit"
+  >
+</app-approval-notes-history>

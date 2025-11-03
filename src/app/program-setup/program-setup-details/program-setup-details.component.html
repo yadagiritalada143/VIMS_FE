@@ -1,0 +1,186 @@
+<div class="page-title p-24" I18n>
+  {{ 'program_details' | i18next }}
+</div>
+
+<div class="row no-gutters program-details-mobile">
+  <div class="col-5 pl-24">
+
+    <div class="panel panel-light mb-24 mb-m-0" *ngIf="showCustomPanel && dataLoad">
+      <div class="panel-head py-16 border-bottom d-flex align-items-center justify-content-between">
+        <h5 I18n>
+          {{programName}}
+        </h5>
+        <button class="btn btn-outline-secondary small" *accessControl (click)="onEditBtnClick()">{{ 'edit' | i18next }}</button>
+      </div>
+      <div class="panel-content">
+        <div class="d-flex align-items-center mt-16">
+          <label class="w-50">{{ 'status' | i18next }}</label>
+          <div class="status-dropdown">
+            <div class="status d-flex align-justify-center rounded-sm cursor-pointer px-8"  [ngClass]="{'status-active':is_enabled,'status-inactive':!is_enabled}">
+              <icon size="8px" name="stop_circle" type="material" cuClass="circle d-flex mr-4">
+              </icon> <span *ngIf="is_enabled">{{ 'active' | i18next }}</span>
+              <span *ngIf="!is_enabled">{{ 'inactive' | i18next }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center mt-16">
+          <label class="w-50" I18n>{{ 'program_name' | i18next }}</label>
+          <span class="w-50" I18n>{{programName}}</span>
+        </div>
+        <div class="d-flex align-items-center mt-16">
+          <label class="w-50" I18n>{{ 'program_code' | i18next }}</label>
+          <span class="w-50">{{uniqueId}}</span>
+        </div>
+        <div class="d-flex align-items-center mt-16">
+          <label class="w-50">{{ 'program_type' | i18next }}</label>
+          <span class="w-50">{{service_type}}</span>
+        </div>
+        <div class="d-flex align-items-center mt-16" *ngIf="msp">
+          <label class="w-50" >{{ 'msp' | i18next }}</label>
+          <span class="w-50" >{{msp?.name | i18next}}</span>
+        </div>
+        <div class="d-flex align-items-center mt-16">
+          <label class="w-50" I18n>{{ 'effective_date' | i18next }}</label>
+          <span class="w-50" I18n>{{start_date}}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-light mb-24 mb-m-0" *ngIf="!showCustomPanel">
+      <div class="panel-head py-16 border-bottom d-flex align-items-center justify-content-between">
+        <h5 I18n>
+          {{programName}}
+        </h5>
+        <div class="d-flex align-items-center">
+          <button class="btn btn-outline-secondary small mr-12" (click)="onCancelBtnClick()" I18n>{{ 'cancel' | i18next }}</button>
+          <button class="btn btn-primary small" (click)="onSaveBtnClick()" I18n [disabled]="duplicateProgram || editProgramForm.controls['name'].invalid || (editProgramForm.get('programType').value == 'MSP-MANAGED' && editProgramForm.get('msp').value == null)" >{{ 'save' | i18next }} </button>
+        </div>
+
+      </div>
+      <div class="panel-content">
+        <form [formGroup]="editProgramForm">
+        <div class="d-flex align-items-center mt-16">
+          <label class="w-50">{{ 'status' | i18next }} </label>
+          <div class="status-dropdown position-relative" (click)="onClickDropdwon()">
+            <div class="status d-flex align-justify-center rounded-sm cursor-pointer px-8" [ngClass]="{'status-active':programStatus,'status-inactive':!programStatus}">
+              <icon size="8px" class="d-flex" name="stop_circle" type="material" cuClass="circle d-flex mr-4 ">
+              </icon>
+              <span I18n *ngIf="programStatus">{{ 'active' | i18next }}</span>
+              <span I18n *ngIf="!programStatus">{{ 'inactive' | i18next }}</span>
+              <icon size="16px" class="d-flex" name="expand_more" type="material" cuClass="circle d-flex ml-12">
+              </icon>
+            </div>
+            <div class="dropdown" *ngIf="showDropdwon">
+
+              <ul class="pl-0 ml-0">
+                <li class="pb-16 cursor-pointer" I18n (click)="selectstatus(true)">
+                  {{ 'active' | i18next }}
+                </li>
+                <li class="cursor-pointer" I18n (click)="selectstatus(false)">{{ 'inactive' | i18next }}</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+        <div class="d-flex align-items-center mt-16">
+          <label class="w-50" I18n>{{ 'program_name' | i18next }}</label>
+          <div class="w-50">
+            <input type="text" class="form-control" value="" formControlName="name" required [ngClass]="{'error':
+            editProgramForm.controls['name'].invalid && (editProgramForm.controls['name'].dirty || editProgramForm.controls['name'].touched)
+              }" minlength="3">
+          <p class="validation-msg"
+            *ngIf="editProgramForm.controls.name.touched && editProgramForm.controls['name'].invalid && editProgramForm.controls['name'].errors?.required">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'program_name_is_required' | i18next }}
+          </p>
+          <p class="validation-msg" *ngIf="editProgramForm.controls.name.errors?.minlength">
+            {{ 'name_must_be_at_least_3_characters_long' | i18next }}.
+          </p>
+          <p class="validation-msg" *ngIf="duplicateProgram">{{duplicateProgram}}</p>
+          <p class="validation-msg" *ngIf="editProgramForm.controls.name.errors?.pattern">{{ 'special_charactes_not_allowed' | i18next }}<p>
+          </div>
+        </div>
+        <div class="d-flex align-items-center mt-16">
+          <label class="w-50" I18n>{{ 'program_code' | i18next }}</label>
+          <div class="w-50">
+            <input type="text" class="form-control" value="" formControlName= "programID"  readonly>
+          </div>
+
+        </div>
+        <div class="d-flex align-items-center mt-16">
+          <label class="w-50" I18n>{{ 'program_type' | i18next }} </label>
+          <div class="w-50">
+            <ng-select bindLabel="name" placeholder="{{ 'choose_program_type' | i18next }}" formControlName="programType" I18n required (change)="changeService_Type()">
+              <ng-option [value]="'SELF-SERVICED'">{{ 'self-serviced' | i18next }}</ng-option>
+              <ng-option [value]="'MSP-MANAGED'">{{ 'msp' | i18next }}-{{ 'managed' | i18next }}</ng-option>
+            </ng-select>
+            <p class="validation-msg"
+                *ngIf="editProgramForm.controls.programType.touched && editProgramForm.controls['programType'].errors">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'program_type_is_required' | i18next }}
+              </p>
+          </div>
+
+        </div>
+
+        <div class="d-flex align-items-center mt-16" *ngIf="editProgramForm.get('programType').value && editProgramForm.get('programType').value == 'MSP-MANAGED'">
+          <label class="w-50" I18n>{{ 'msp' | i18next }}</label>
+          <div class="w-50">
+            <ng-select placeholder="{{ 'msp' | i18next }}" formControlName="msp" I18n required
+              (search)="mspsearchManager.next({ term: ($event?.term ?? ''), page: 1 })"
+              (scrollToEnd)="loadMoreMSP()" (open)="mspsearchManager.next({ term: '', page: 1 })"
+              [loading]='mspLoading' loadingText='{{"Loading"|i18next}}....' [searchable]="true">
+                <ng-option [value]="msp?.id" *ngFor="let msp of mspList">{{msp?.name|i18next}}</ng-option>
+            </ng-select>
+          </div>
+        </div>
+        <div class="d-flex align-items-center mt-16">
+          <label class="w-50" I18n>{{ 'effective_date' | i18next }}</label>
+          <div class="w-50">
+            <svms-datepicker
+              [inputdateFormat]="defaultDateFormat"
+              id="date1" I18n
+              formControlName="date"
+              [options]="start_date_options"
+              #dateFiled>
+            </svms-datepicker>
+          </div>
+        </div>
+      </form>
+      </div>
+    </div>
+    <div class="panel panel-light p-16 mb-m-0">
+      <div class="d-flex align-items-center">
+        <div class="w-50 pb-12 pr-12 pl-0 d-flex align-items-start justify-content-start" *ngIf="client_logo">
+          <!-- <img [src]="../../../assets/images/Group_2.svg" width="50" alt="" /> -->
+          <span class="p-8 border rounded-sm">{{ client_logo | shortName: 'first'}}</span>
+        </div>
+        <div class="d-flex flex-column w-50 ml-4">
+          <h4 I18n>{{clientName}}</h4>
+          <div class="icons" *ngIf="false">
+            <a href="">
+              <icon size="18px" name="language" type="material"></icon>
+            </a>
+            <a [href]="email" class="ml-8">
+              <icon size="18px" name="mail" type="material"></icon>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="mt-24">
+        <div class="d-flex align-items-center mt-8">
+          <label class="w-50" I18n>{{'Org.Type'|i18next}}</label>
+          <span class="w-50" I18n>{{category}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-7 px-24 ">
+    <div class="panel panel-light mb-24 pt-0 p-16 tabs h-100 detail-tab mb-m-0">
+      <vms-tab-group>
+        <vms-tab label="{{'modules' | i18next}}" iconLeft="category">
+          <app-modules [readOnly]='editData' [moduleData]="moduleGroup"
+            (moduleDataChange)="onClickModule($event)"></app-modules>
+        </vms-tab>
+      </vms-tab-group>
+    </div>
+  </div>
+</div>

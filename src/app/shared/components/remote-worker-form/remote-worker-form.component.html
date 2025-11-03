@@ -1,0 +1,43 @@
+<form [formGroup]="remoteWorkerForm">
+<div class="border p-12 rounded-sm mb-24">
+  <h4 class="font-weight-medium mb-24">Remote Worker Location</h4>
+  <div class="form-group-row">
+    <div class="form-group mb-0 pb-0">
+      <label>{{'country'|i18next}} <span class="require">*</span></label>
+      <ng-select formControlName="country" [clearable]="true" placeholder="{{'select_country'|i18next}}" [readonly]="isReadOnly"
+      (change)="changeCountry($event)" [ngClass]="submitEvent && !(remoteWorkerForm?.get('country').value) || !(remoteWorkerForm?.get('country').value) && remoteWorkerForm.controls.country.touched ? 'invalid': '' " (clear)="onClear('country')" loadingText="{{'Loading....' |i18next}}" notFoundText="{{'no_data_found' |i18next}}">
+        <ng-option *ngFor="let country of allCountryList" [value]="country">
+          {{country.name | i18next}}
+        </ng-option>
+      </ng-select>
+      <span class="validation-msg" *ngIf="submitEvent && !(remoteWorkerForm?.get('country').value) || !(remoteWorkerForm?.get('country').value) && remoteWorkerForm.controls.country.touched">
+    {{'country_is_required'|i18next}}
+  </span>
+    </div>
+
+    <div class="form-group mb-0 pb-0">
+      <label>{{'state'|i18next}} </label>
+      <ng-select formControlName="state"  [clearable]="true" placeholder="{{'select_state'|i18next}}" (change)="changeState($event)" [readonly]="isReadOnly"
+      (clear)="onClear('state')" loadingText="{{'loading....' |i18next}}" notFoundText="{{'no_data_found' |i18next}}">
+        <ng-option *ngFor="let state of stateList" [value]="state">{{state.name | i18next}}</ng-option>
+      </ng-select>
+    </div>
+
+    <div class="form-group mb-0 pb-0">
+      <label>{{'county'|i18next}}</label>
+      <ng-select formControlName="county"  [clearable]="true" placeholder="{{'select_county'|i18next}}" (change)="changeCounty($event)" [readonly]="isReadOnly"
+       loadingText="{{'Loading....' |i18next}}" notFoundText="{{'no_data_found' |i18next}}">
+        <ng-option *ngFor="let county of countyList" [value]="county">{{county.name | i18next}}</ng-option>
+      </ng-select>
+    </div>
+
+    <div class="form-group mb-0 pb-0">
+      <label>{{'city'|i18next}}</label>
+      <ng-select formControlName="city"  [clearable]="true" placeholder="{{'select_city'|i18next}}" (change)="changeCity($event)" [readonly]="isReadOnly"
+       loadingText="{{'Loading....' |i18next}}" notFoundText="{{'no_data_found' |i18next}}">>
+        <ng-option *ngFor="let city of cityList" [value]="city">{{city.name | i18next}}</ng-option>
+      </ng-select>
+    </div>
+  </div>
+</div>
+</form>

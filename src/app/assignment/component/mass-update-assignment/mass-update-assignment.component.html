@@ -1,0 +1,55 @@
+<svms-sidebar-ng title="{{ 'mass_update_assignment' | i18nextEager }}" [dataVisibility]="massUpdateAssignment" (onClose)="sidebarClose()">
+  <div class="sidebar-wrapper" [formGroup]="updateForm">
+    <div class="px-24 mt-12">
+      <div class="form-group">
+        <label>{{ 'select_update_module' | i18nextEager }}</label>
+        <ng-select  formControlName="module" placeholder="{{ 'select_module' | i18nextEager }}">
+        </ng-select>
+      </div>
+      <div class="form-group-row">
+          <div class="form-group">
+            <label>{{ 'select_field' | i18nextEager }}</label>
+            <ng-select formControlName="field_name" [clearable]="false" placeholder="{{ 'select_field' | i18nextEager }}">
+            </ng-select>
+          </div>
+          <div class="form-group">
+            <label>{{ 'update_to' | i18nextEager }}</label>
+            <ng-select formControlName="field_value" [clearable]="false" placeholder="{{ 'select_assignment' | i18nextEager }}">
+              <ng-option value="Assignment 1">
+                {{ 'assignment' | i18nextEager }} 1
+              </ng-option>
+            </ng-select>
+          </div>
+      </div>
+      <div class="form-group-row">
+        <div class="form-group">
+          <label>{{ 'effective_date' | i18nextEager }}</label>
+          <svms-datepicker formControlName="effective_date"  [inputdateFormat]="'MM/DD/YY'" id="issuedate"
+          I18n>
+        </svms-datepicker>
+        </div>
+        <div class="form-group">
+          <label>{{ 'reason_for_update' | i18nextEager }}</label>
+          <ng-select formControlName="reason" [clearable]="false" placeholder="{{ 'select_assignment' | i18nextEager }}">
+            <ng-option value="Assignment 1">
+              {{ 'assignment' | i18nextEager }} 1
+            </ng-option>
+          </ng-select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label>{{ 'notes' | i18nextEager }}</label>
+        <textarea formControlName="request_notes" placeholder="{{ 'enter_additional_notes' | i18nextEager }}" rows="4" class="form-control"></textarea>
+      </div>
+    </div>
+  </div>
+  <svms-sidebar-footer-ng>
+    <button type="submit" class="btn btn-outine small float-right">
+      {{ 'view' | i18nextEager }}
+    </button>
+    <button type="submit" class="btn btn-primary small float-right mr-8" (click)="reviewSummary($event)">
+      {{ 'continue' | i18nextEager }}
+    </button>
+
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

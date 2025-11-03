@@ -1,0 +1,4 @@
+export const app4Icon = {
+    data: `<svg data-name="4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34"><path data-name="Rectangle 1" fill="none" d="M0 0h34v34H0z"/><g data-name="Group 3223" stroke="#2b2d42" stroke-width="1.3"><g data-name="Rectangle 3" transform="translate(6.001 8.906)" fill="#fff"><rect width="22" height="19.094" rx="2" stroke="none"/><rect x=".65" y=".65" width="20.7" height="17.794" rx="1.35" fill="none"/></g><g data-name="Rectangle 5" fill="none"><path d="M8.001 8.906h18a2 2 0 012 2v4.564h-22v-4.564a2 2 0 012-2z" stroke="none"/><path d="M8.001 9.556h18a1.35 1.35 0 011.35 1.35v3.264a.65.65 0 01-.65.65h-19.4a.65.65 0 01-.65-.65v-3.264a1.35 1.35 0 011.35-1.35z"/></g><path data-name="Line 4" fill="none" d="M11.196 6v5.894"/><path data-name="Line 5" fill="none" d="M22.75 6v5.894"/></g></svg>`,
+    name: '4'
+};

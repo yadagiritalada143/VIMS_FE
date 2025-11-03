@@ -1,0 +1,95 @@
+  <div class="interview-list">
+    <div class="description-card p-24 detail-page-responsive-list pl-m-0 pr-m-0">
+      <div class="recent-items position-relative mb-32 pb-8" *ngIf="todaysInterviewsList?.length > 0">
+        <div class="d-flex align-items-center justify-content-between mobile-spacing">
+          <h4>{{ 'todays_interviews' | i18next }} ({{toDaysDate}})</h4>
+          <div class="item-paginator">
+            <button class="btn small btn-light rounded float-right">
+              <icon size="20px" name="keyboard_arrow_right" type="material" class="d-flex" cuClass="d-flex"></icon>
+            </button>
+            <button class="btn small btn-light rounded float-right mr-4">
+              <icon size="20px" name="keyboard_arrow_left" type="material" class="d-flex" cuClass="d-flex"></icon>
+            </button>
+          </div>
+        </div>
+        <!--Todays Interview -->
+        <div class="d-flex align-items-center mt-16  flex-wrap">
+          <div class="panel panel-light interview-card mr-8 mt-12" *ngFor="let candidate of todaysInterviewsList">
+            <div class="d-flex p-16">
+              <div class="profile">
+                {{candidate?.current_name | shortName: 'last'}}
+              </div>
+              <div class="profile-content ml-12">
+                <div class="d-flex align-items-start justify-content-between">
+                  <div class="d-flex flex-column">
+                    <p class="text-black">{{candidate?.current_name}}
+                    </p>
+                    <p class="small">{{candidate?.name}}</p>
+                  </div>
+                  <div class="meet-status" [ngClass]="{'in-person':candidate?.interview_type=='F2F' || candidate?.interview_type=='VIRTUAL','over-phone':candidate?.interview_type=='PHONE'}">
+                    <icon class="d-flex mr-4" *ngIf="candidate?.interview_type=='VIRTUAL'" size="16px" name="link" type="material" cuClass="d-flex"></icon>
+                    <icon class="d-flex mr-4" *ngIf="candidate?.interview_type=='PHONE'" size="16px" name="phone_in_talk" type="material" cuClass="d-flex"></icon>
+                    <icon class="d-flex mr-4" *ngIf="candidate?.interview_type=='F2F'" size="16px" name="people_alt" type="material" cuClass="d-flex"></icon>
+                    {{candidate?.interview_type}}
+                  </div>
+                </div>
+                <div class="d-flex align-items-center justify-content-between mt-16 time">
+                  <p class="small ">{{ 'time' | i18next }} : <span>{{candidate?.startTime}}</span></p>
+                  <p class="small">{{ 'duration' | i18next }} : <span>{{candidate?.duration}} {{ 'min' | i18next }}</span></p>
+                </div>
+              </div>
+            </div>
+            <div class="panel-footer p-16 d-flex align-items-center justify-content-between">
+              <div class="meeting-status" [ngClass]="{'in-progress':candidate?.currentStatus=='In Progress','wait':candidate?.currentStatus=='wait','completed':candidate?.currentStatus=='Completed'}">
+                <icon *ngIf="candidate?.currentStatus=='In Progress'" class="d-flex mr-4" size="13px" name="timelapse" type="material" cuClass="d-flex"></icon>
+                <icon *ngIf="candidate?.currentStatus=='wait'" class="d-flex mr-4" size="13px" name="access_time" type="material" cuClass="d-flex"></icon>
+                <icon *ngIf="candidate?.currentStatus=='Completed'" class="d-flex mr-4" size="13px" name="check_circle" type="material" cuClass="d-flex"></icon>
+                <app-interview-timer *ngIf="candidate?.currentStatus=='wait'" [counter]="candidate?.timeDifference"></app-interview-timer>
+                <span *ngIf="candidate?.currentStatus=='In Progress'">{{candidate?.timeDifference}}</span>
+                <span *ngIf="candidate?.currentStatus=='Completed'">{{candidate?.timeDifference}}</span>
+              </div>
+              <p class="d-flex align-items-center">
+                <!-- <icon class="d-flex mr-4" size="13px" name="access_time" type="material" cuClass="d-flex"></icon> -->
+                <!-- {{candidate?.dasyDifference}} -->
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+
+        <div class="clearfix"></div>
+      </div>
+        <div *ngIf="interviews?.length == 0" class="no-interview-alert mb-32 d-flex align-items-center px-16" >
+          <icon class="d-flex mr-8" size="16px" name="event_busy" type="material" cuClass="d-flex"></icon>
+          <p>{{ 'no_interviews_scheduled_for_this_job' | i18next }}</p>
+        </div>
+
+      <vms-table *ngIf="tableLoaded" [vmsTableConfig]="tableConfig" [vmsDataSource]="vmsData?.interview"
+        [loading]="dataLoading" [open]="isExpand" [totalItem]="totalRecords" [itemsPerPage]="itemsPerPage"
+        [rotuterLinkOnClick] = 'true' (onSort)="onSortClick($event)"
+        [rotuterLinkParams] = 'rotuterLinkParams'
+        [rotuterLinkParseFn] = 'rotuterLinkParseFn'
+        (onEditClick)="onEditClick($event)" (search)="onSearch($event)"
+        (onListFilter)="onListFilter($event)" (onSelectAllClick)="selectAllClicked($event)"
+        (onSelectClick)="selectClicked($event)" (onCancelInterviewClick)="cancelInterview($event)" (onRejectCandidateClick)="rejectInterview($event)"
+        (onRescheduleInterviewClick)="rescheduleInterview($event)"  (onCreateOfferClick)="clickToCreateOffer($event)"
+        (onClickToReviewInterview)="clickToReviewInterview($event)"
+        (onScheduleInterviewClick)="scheduleInterview($event)"
+        (onClickToEditInterviewReview)="clickToEditInterview($event)"
+        (onClickToCancelInterviewReview)="cancelInterview($event)"
+        (onCompleteInterviewClick) = "completeInterviewClick($event)"
+        (onRejectCandidateClick)="clickToRejectCandidate($event)" (onWithdrawProfileClick)="withdrawalClicked($event)"
+        (previewClicked)="previewClicked($event)">
+      </vms-table>
+
+      <!-- <app-grid-view *ngIf="!viewGrid" [gridData]="gridVewJson" [gridContentType]="gridContentType"></app-grid-view> -->
+      <app-interview-details></app-interview-details>
+      <app-withdraw-candidate></app-withdraw-candidate>
+      <app-schedule-interview></app-schedule-interview>
+      <app-job-details-sidebar-create></app-job-details-sidebar-create>
+    </div>
+  </div>
+
+<app-mark-as-comp-side-panel [visiblity]="showSidePanel" [isView]="sidePanelViewMode" (onClose)="onSidePanelClose()" (onSubmit)="onSubmit($event)">
+</app-mark-as-comp-side-panel>

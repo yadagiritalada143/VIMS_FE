@@ -1,0 +1,57 @@
+<app-svms-table
+    [dataSource]="vmsData"
+    [tableOptions]="tableOptions"
+    [coloumnDefintions]="tableColumnConfig"
+>
+</app-svms-table>
+
+<ng-template #program let-rowData let-value="value">
+    <p class="text-truncate blue-text cursor-pointer" (click)="navigateToProgramDetails(rowData)"> {{ value }} </p>
+    <small> {{ '#' + rowData?.unique_id }} </small>
+</ng-template>
+
+<ng-template #status let-value="value">
+    <span class="status-ui active" *ngIf="value">
+        {{ 'active' | i18next }}
+      </span>
+    <span class="status-ui inactive" *ngIf="!value">
+        {{ 'inactive' | i18next }}
+    </span>
+</ng-template>
+
+<ng-template #organization let-value="value">
+    <p class="text-truncate blue-text"> {{ value }} </p>
+</ng-template>
+
+<ng-template #options let-rowData>
+    <!-- <ng-container *ngIf="!rowData?.is_enabled">
+        <div class="d-flex cursor-pointer" (click)="navigateToProgramDetails(rowData)">
+            <icon class="prb-4 position-relative" size="16px" color="#007311" name="open_in_new"
+                type="material" cuClass="module-icon">
+            </icon>
+            <p class="green-text ml-4">
+                {{ 'let_s_start_the_program_configuration' | i18next }}
+            </p>
+        </div>
+    </ng-container> -->
+    <ng-container *ngIf="true">
+        <div class="row">
+            <div class="col-sm-8 d-flex cursor-pointer" (click)="launchProgram(rowData, 'dashboard')">
+                <icon class="prb-4 position-relative" size="16px" color="#0044C5" name="open_in_new"
+                    type="material" cuClass="module-icon">
+                </icon>
+                <p class="blue-text ml-4">
+                    {{ 'navigate_to_dashboard' | i18next }}
+                </p>
+            </div>
+            <div class="col-sm-4 d-flex cursor-pointer" (click)="launchProgram(rowData, 'self-configuration')">
+                <icon class="prb-4  position-relative" size="16px" color="#0044C5" name="settings"
+                    type="material" cuClass="module-icon">
+                </icon>
+                <p class="blue-text ml-4">
+                    {{ 'settings' | i18next }}
+                </p>
+            </div>
+        </div>
+    </ng-container>
+</ng-template>

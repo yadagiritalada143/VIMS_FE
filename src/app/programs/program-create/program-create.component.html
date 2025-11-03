@@ -1,0 +1,201 @@
+<div class="create-program p-24">
+    <a href="" class="back-button icon-only" (click)="onBackToLIsting($event)">
+        <icon size="24px" name="keyboard_backspace" type="material" cuClass="d-flex"></icon>
+    </a>
+    <div class="create-program-inner">
+        <div class="page-title my-24">
+            {{ 'create_new_program' | i18next }}
+        </div>
+        <div class="create">
+            <form *ngIf="createProgramForm" [formGroup]="createProgramForm" (keydown.enter)="$event.preventDefault()">
+                <div class="panel panel-light mb-24">
+                    <div class="panel-head">
+                        <h5 I18n>
+                            <icon size="19px" name="info" theme="outlined" type="material" class="d-flex mr-4" cuClass="d-flex">
+                            </icon>
+                            {{ 'program_details' | i18next }}
+                        </h5>
+                    </div>
+                    <div class="panel-content">
+                        <label I18n>{{ 'client' | i18next }} <span class="require">*</span></label>
+                        <div class="d-flex column-direction">
+                            <div class="pl-0 create-client">
+                                <div class="form-group">
+                                    <ng-select bindLabel="name" placeholder="{{ 'choose_client' | i18next }}"
+                                        (search)="this.clientsearchManager.next($event)" [loading]='clientLoading' loadingText='Loading....'
+                                        [searchable]="true" ngDefaultControl formControlName="client" (change)="changeClient()" required
+                                        (clear)="clientData()">
+                                        <ng-option value="{{arr?.name}}" *ngFor="let arr of clientList">
+                                            <span class="initials initials__img">
+                                                <img *ngIf="arr?.logo" src="{{arr?.logo}}" alt="" class="img-fluid" />
+                                                <span *ngIf="!arr?.logo" class="material-icons option-icon">
+                                                    business
+                                                </span>
+                                            </span>
+                                            <span>{{arr?.name | i18next}}</span>
+                                        </ng-option>
+                                    </ng-select>
+                                    <p *ngIf="createProgramForm?.controls.client.touched && createProgramForm?.controls['client'].errors"
+                                        class="validation-msg">
+                                        <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                                        {{ 'client_is_required' | i18next }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="ml-12 client-create-btn">
+                                <button type="button" class="btn btn-primary" (click)="createOrg()">
+                                    <icon name="add" type="material" class="d-flex" cuClass="d-flex"></icon>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="org-summary" *ngIf="clientInfo">
+                            <div class="logo">
+                                <img *ngIf="clientInfo?.logo" src="{{clientInfo?.logo}}" class="img-fluid" width="100" />
+                                <span *ngIf="!clientInfo?.logo" class="material-icons select-option-icon">
+                                    business
+                                </span>
+                            </div>
+                            <div class="client">
+                                <label>{{ 'org._type' | i18next }}</label>
+                                <div>{{clientInfo?.category ?? 'NA' | i18next }}</div>
+                            </div>
+                            <div class="icons" *ngIf="false">
+                                <a href="">
+                                    <icon size="18px" name="language" type="material"></icon>
+                                </a>
+                                <a href="">
+                                    <icon size="18px" name="mail" type="material"></icon>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label I18n>{{ 'program_type' | i18next }}<span class="require">*</span></label>
+                            <ng-select bindLabel="name" placeholder="{{ 'choose_program_type' | i18next }}" ngDefaultControl formControlName="programType" I18n required (change)="changeMSP()">
+                                <ng-option [value]="'SELF-SERVICED'">{{ 'self-serviced' | i18next }}</ng-option>
+                                <ng-option [value]="'MSP-MANAGED'">{{ 'msp-managed' | i18next }}</ng-option>
+                            </ng-select>
+                            <p class="validation-msg" *ngIf="createProgramForm?.controls.programType.touched && createProgramForm?.controls['programType'].errors">
+                                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{'program_type_is_required' | i18next}}
+                            </p>
+                        </div>
+                        <div class="form-group" *ngIf="createProgramForm?.get('programType').value && createProgramForm?.get('programType').value == 'MSP-MANAGED'">
+                            <label I18n>{{'msp' | i18next}}<span class="require">*</span></label>
+                            <ng-select bindLabel="name" placeholder="{{'choose_msp' | i18next}}" formControlName="msp" [typeahead]="mspInput$" I18n>
+                                <ng-option [value]="arr?.id" *ngFor="let arr of mspList">{{arr?.name | i18next}}</ng-option>
+                            </ng-select>
+                            <p class="validation-msg" *ngIf="createProgramForm?.controls.msp.touched && createProgramForm?.controls['msp'].errors">
+                                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{'msp_is_required' | i18next}}
+                            </p>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>{{'program_name' | i18next}}<span class="require">*</span></label>
+                                    <input type="text" class="form-control" placeholder="{{'enter_your_program_name' | i18next}}" formControlName="name" required [ngClass]="{'error':
+                    createProgramForm?.controls['name'].invalid && (createProgramForm?.controls['name'].dirty || createProgramForm?.controls['name'].touched)
+                      }" minlength="5">
+                                    <p class="validation-msg" *ngIf="createProgramForm?.controls.name.touched && createProgramForm?.controls['name'].invalid && createProgramForm?.controls['name'].errors?.required">
+                                        <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{'program_name_is_required' | i18next}}
+                                    </p>
+                                    <p class="validation-msg" *ngIf="createProgramForm?.controls.name.errors?.pattern">{{'special_charactes_not_allowed' | i18next}}</p>
+                                    <p class="validation-msg" *ngIf="createProgramForm?.controls.name.errors?.minlength">
+                                        {{'name_must_be_at_least' | i18next}} 5 {{'characters_long.' | i18next}}
+                                    </p>
+                                    <p class="validation-msg" *ngIf="duplicateProgram">{{duplicateProgram | i18next}}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>{{ 'program_code' | i18next }}<span class="require">*</span></label>
+                                    <div class="program-id">
+                                        <input (keyup)="validatProgramID($event)" [ngClass]="{'error':createProgramForm?.controls['programID'].invalid && (createProgramForm?.controls['programID'].dirty || createProgramForm?.controls['programID'].touched)}" type="text" class="form-control" placeholder="{{'maximum_5_characters_are_only_allowed' | i18next}}" formControlName="programID"  minlength="1" maxlength="5" pattern="^[A-Za-z0-9]+$" required />
+                                    </div>
+                                    <p class="validation-msg" *ngIf="createProgramForm?.controls['programID'].touched && createProgramForm?.controls['programID'].invalid">{{'enter_only_alpha-numeric_value' | i18next}}</p>
+                                    <p class="validation-msg" *ngIf="createProgramForm?.controls['programID'].touched && createProgramForm?.controls['programID'].valid && !validProgramId">{{'given_program_id_is_already_in_use_for_other_program' | i18next}}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>{{ 'effective_date' | i18next }}<span class="require">*</span></label>
+                                    <!-- <svms-datepicker [inputdateFormat]="" ngDefaultControl formControlName="date" id="date1" I18n #dateFiled>
+                  </svms-datepicker> -->
+                                    <!-- This is program creation so there whould be no any default date format -->
+                                    <svms-datepicker [inputdateFormat]="defaultDateFormat" formControlName="date" id="date1" I18n #dateFiled>
+                                    </svms-datepicker>
+                                    <p class="validation-msg" *ngIf="createProgramForm?.controls['date'].touched && createProgramForm?.controls['date'].errors?.required">{{'please_add_effective_date' | i18next}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-light mb-24">
+                    <div class="panel-head">
+                        <h5>
+                            <icon size="19px" name="people_alt" theme="outlined" type="material" class="d-flex mr-4" cuClass="d-flex">
+                            </icon>
+                            {{ 'program_members' | i18next }}
+                        </h5>
+                    </div>
+                    <div class="panel-content">
+                        <app-program-manage [formType]="'CreateProgram'" (showCreateUser)="addUserToProgram($event)" [edit]="'true'"></app-program-manage>
+                    </div>
+                </div>
+
+                <ng-container *ngIf="showModules">
+                    <div class="panel panel-light mb-24">
+                        <div class="panel-head">
+                            <h5>
+                                <icon size="19px" name="category" theme="outlined" type="material" class="d-flex mr-4" cuClass="d-flex">
+                                </icon>
+                                {{ 'modules' | i18next }}
+                            </h5>
+                        </div>
+                        <div class="panel-content module-panel">
+                            <app-modules [moduleData]="moduleGroup" (moduleDataChange)="onClickModule($event)"></app-modules>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <div class="d-flex justify-content-end align-items-center mt-24 pb-32">
+                    <button class="btn btn-primary" (click)="onFormSubmit()" [disabled]="createProgramForm?.invalid">
+            {{'continue' | i18next}}
+            <icon *ngIf="!isSaveLoader" size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+            <span *ngIf="isSaveLoader" class="ml-8"><button-loader></button-loader></span>
+            </button>
+                    <!-- Success modal html goes here-->
+                    <div class="success-modal position-fixed bg-light rounded-sm pt-64" [ngClass]="{'active' : showSuccessModal}">
+                        <a href="javascript:void(0)" class="close-success-modal" (click)="closeSuccessModal()">
+                            <icon size="18px" name="close" type="material" cuClass="success-close"></icon>
+                        </a>
+                        <div class="success-modal-body text-center pb-64">
+                            <icon size="69px" name="check_circle" type="material" class="success-icon" cuClass="success-close"></icon>
+                            <h3 class="mt-8">
+                                {{ 'your_program_has_been_successfully_created' | i18next }}
+                            </h3>
+                        </div>
+                        <div class="modal-footer p-24">
+                            <figure class="user-avatar float-left rounded-sm text-center overflow-hidden mr-12">
+                                <span *ngIf="programName">{{programName | shortName :'last' | i18next}} </span>
+                            </figure>
+                            <div class="user-info float-left">
+                                <p>{{programName | i18next}}</p>
+                                <div class="user-status rounded-sm mt-4 inactive pl-8 pr-8 d-inline-block">
+                                    <span class="rounded-circle d-inline-block mr-8"></span> {{ 'inactive' | i18next }}
+                                </div>
+                            </div>
+                            <button class="btn float-right btn-secondary btn-submit-mobile" (click)="gotToconfiguration()">{{ 'configure_the_program' | i18next }} <icon
+                    size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+                </button>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                    <div class="modal-backdrop position-fixed" [ngClass]="{'active' : showSuccessModal}"></div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+<app-organization-create [title]="'Create New Client'" [icon]="'domain'" [type]="'TYPE_CLIENT'">
+</app-organization-create>
+<app-create-new-user [showUserCreate]="showUserCreate"></app-create-new-user>

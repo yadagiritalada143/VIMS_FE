@@ -1,0 +1,2085 @@
+{
+  "data": {
+    "version": 3,
+    "form_config": {
+      "title": "Create Quick Assignment",
+      "config": {
+        "nav_tabs": [
+          {
+            "label": "Basic Info",
+            "field_groups": [
+              {
+                "icon": "people_alt",
+                "label": "Candidate Information",
+                "fields": [
+                  {
+                    "id": "candidate_uuid",
+                    "slug": "candidate_uuid",
+                    "type": "CANDIDATE_DROPDOWN",
+                    "label": "Select Candidate",
+                    "source": "SYSTEM",
+                    "btn_name": "Create Candidate",
+                    "bind_label": "first_name",
+                    "bind_value": "id",
+                    "datasource": {
+                      "url": "/configurator/candidates?k=",
+                      "type": "url",
+                      "getBy": [
+                        "candidates"
+                      ],
+                      "options": []
+                    },
+                    "is_required": true,
+                    "placeholder": "Search for Candidate",
+                    "is_create_btn": true
+                  }
+                ],
+                "tag_line": "For creating an assignment you need to provide the candidate information, you can select an existing Candidate or Add new Candidate",
+                "is_toggle": {
+                  "slug": "candidate_information",
+                  "value": false,
+                  "is_needed": false
+                },
+                "is_visible": true
+              },
+              {
+                "icon": "domain",
+                "label": "Vendor Information",
+                "fields": [
+                  {
+                    "id": "vendor_id",
+                    "slug": "vendor_id",
+                    "type": "VENDOR_DROPDOWN",
+                    "label": "Select Vendor",
+                    "source": "SYSTEM",
+                    "bind_label": "name",
+                    "bind_value": "uuid",
+                    "datasource": {
+                      "url": "/configurator/organizations?category=VENDOR&name=",
+                      "type": "url",
+                      "getBy": [
+                        "organizations"
+                      ],
+                      "options": []
+                    },
+                    "is_required": true,
+                    "placeholder": "Search for Vendor"
+                  }
+                ],
+                "is_toggle": {
+                  "slug": "vendor_information",
+                  "value": false,
+                  "is_needed": false
+                },
+                "is_visible": true
+              },
+              {
+                "icon": "engineering",
+                "label": "Worker Information",
+                "fields": [
+                  {
+                    "fields": [
+                      {
+                        "id": "source_type",
+                        "slug": "source_type",
+                        "type": "DROPDOWN",
+                        "label": "Worker SourceType",
+                        "source": "SYSTEM",
+                        "bind_label": "label",
+                        "bind_value": "slug",
+                        "datasource": {
+                          "type": "picklist",
+                          "options": [
+                            {
+                              "id": "dd84f65a-6a28-42f3-85cd-9991a01049f0",
+                              "slug": "new_worker",
+                              "label": "New Worker"
+                            },
+                            {
+                              "id": "ee21ce38-2c1a-4056-9254-837fd1ba99cc",
+                              "slug": "migrated_worker_data",
+                              "label": "Migrated Worker Data"
+                            }
+                          ]
+                        },
+                        "is_required": true,
+                        "placeholder": "Select Worker SourceType"
+                      },
+                      {
+                        "id": "source_id",
+                        "slug": "source_id",
+                        "type": "TEXT",
+                        "label": "Source ID",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "source_type",
+                              "value": [
+                                "",
+                                "new_worker"
+                              ],
+                              "condition": "hidden"
+                            },
+                            {
+                              "slug": "source_type",
+                              "value": true,
+                              "condition": "required"
+                            }
+                          ]
+                        },
+                        "is_readonly": false,
+                        "is_required": false,
+                        "placeholder": "External System ID"
+                      },
+                      {
+                        "id": "original_start_date",
+                        "slug": "original_start_date",
+                        "type": "DATE",
+                        "label": "Original Start Date",
+                        "source": "SYSTEM",
+                        "is_required": true,
+                        "placeholder": ""
+                      }
+                    ],
+                    "group_type": "ARRAY"
+                  },
+                  {
+                    "fields": [
+                      {
+                        "id": "sso_id",
+                        "slug": "sso_id",
+                        "type": "TEXT",
+                        "label": "SSO ID",
+                        "source": "SYSTEM",
+                        "is_readonly": false,
+                        "is_required": false,
+                        "placeholder": "SSO ID HERE"
+                      },
+                      {
+                        "id": "official_email",
+                        "slug": "official_email",
+                        "type": "EMAIL",
+                        "label": "Official Email Address",
+                        "source": "SYSTEM",
+                        "is_required": true,
+                        "placeholder": "Official Email Here"
+                      }
+                    ],
+                    "group_type": "ARRAY"
+                  }
+                ],
+                "is_toggle": {
+                  "slug": "worker_information",
+                  "value": false,
+                  "is_needed": false
+                },
+                "is_visible": true
+              }
+            ]
+          },
+          {
+            "label": "Assignment Info",
+            "field_groups": [
+              {
+                "icon": "event_available",
+                "label": "Assignment Association",
+                "fields": [
+                  {
+                    "fields": [
+                      {
+                        "id": "hierarchy_id",
+                        "slug": "hierarchy_id",
+                        "type": "HIERARCHY",
+                        "label": "Hierarchy",
+                        "source": "SYSTEM",
+                        "is_required": true,
+                        "placeholder": "Choose Hierarchy"
+                      },
+                      {
+                        "id": "sourcing_model",
+                        "slug": "sourcing_model",
+                        "type": "DROPDOWN",
+                        "label": "Assignment Sourcing Model",
+                        "source": "SYSTEM",
+                        "bind_label": "label",
+                        "bind_value": "label",
+                        "datasource": {
+                          "url": "/configurator/programs/${programId}/picklists/de4d7ce2-1355-4828-9025-a4357872b6fd/items",
+                          "type": "url",
+                          "getBy": [
+                            "picklist_items"
+                          ]
+                        },
+                        "is_required": true,
+                        "placeholder": "Select"
+                      },
+                      {
+                        "id": "job_id",
+                        "slug": "job_id",
+                        "type": "DROPDOWN",
+                        "label": "Existing Job/SOW Project",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "hierarchy_id",
+                              "condition": "reset"
+                            }
+                          ]
+                        },
+                        "bind_label": "title.title",
+                        "bind_value": "uid",
+                        "datasource": {
+                          "url": "/job-manager/${programId}/job?page=1&limit=10&title=",
+                          "type": "url",
+                          "getBy": [
+                            "data"
+                          ],
+                          "options": []
+                        },
+                        "is_required": true,
+                        "placeholder": "Select"
+                      }
+                    ],
+                    "group_type": "ARRAY"
+                  }
+                ],
+                "is_toggle": {
+                  "slug": "assignment_association",
+                  "value": false,
+                  "is_needed": false
+                },
+                "is_visible": true
+              },
+              {
+                "icon": "work",
+                "label": "Assignment Information",
+                "fields": [
+                  {
+                    "id": "assignment_title_uuid",
+                    "slug": "assignment_title_uuid",
+                    "type": "DROPDOWN",
+                    "label": "Assignment Title (Job Template)",
+                    "source": "SYSTEM",
+                    "meta_data": {
+                      "rules": [
+                        {
+                          "slug": "hierarchy_id",
+                          "condition": "reset"
+                        }
+                      ]
+                    },
+                    "bind_label": "title.title",
+                    "bind_value": "uid",
+                    "datasource": {
+                      "url": "/job-manager/${programId}/job_template?page=1&limit=10&title=",
+                      "type": "url",
+                      "getBy": [
+                        "data"
+                      ],
+                      "options": []
+                    },
+                    "is_required": true,
+                    "placeholder": "Search for Assignment Title"
+                  },
+                  {
+                    "fields": [
+                      {
+                        "id": "experience_level",
+                        "slug": "experience_level",
+                        "type": "DROPDOWN",
+                        "label": "Experience/Job Level",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "hierarchy_id",
+                              "condition": "reset"
+                            },
+                            {
+                              "slug": "assignment_title_uuid",
+                              "condition": "set_value",
+                              "value_get_by": [
+                                "level"
+                              ],
+                              "label_get_by": [
+                                "level"
+                              ],
+                              "slug_value": "uid"
+                            }
+                          ],
+                          "style": {
+                            "background": "#fff"
+                          },
+                          "pattern": false,
+                          "max_length": 100,
+                          "min_length": 5
+                        },
+                        "bind_label": "name",
+                        "bind_value": "id",
+                        "datasource": {
+                          "url": "",
+                          "type": "url",
+                          "getBy": [],
+                          "options": []
+                        },
+                        "is_required": false,
+                        "placeholder": "Select"
+                      },
+                      {
+                        "id": "work_location",
+                        "slug": "work_location",
+                        "type": "DROPDOWN",
+                        "label": "Work Location",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "hierarchy_id",
+                              "condition": "reset"
+                            },
+                            {
+                              "slug": "assignment_title_uuid",
+                              "condition": "set_value",
+                              "value_get_by": [
+                                "location_id",
+                                "id"
+                              ],
+                              "label_get_by": [
+                                "location_id",
+                                "name"
+                              ],
+                              "slug_value": "uid"
+                            }
+                          ]
+                        },
+                        "bind_label": "name",
+                        "bind_value": "id",
+                        "datasource": {
+                          "url": "/configurator/programs/${programId}/work-locations?k=",
+                          "type": "url",
+                          "getBy": [
+                            "work_locations"
+                          ],
+                          "options": []
+                        },
+                        "is_required": true,
+                        "placeholder": "Enter Work location"
+                      },
+                      {
+                        "id": "assignment_manager",
+                        "slug": "assignment_manager",
+                        "type": "DROPDOWN",
+                        "label": "Assignment Manager",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "hierarchy_id",
+                              "condition": "reset"
+                            }
+                          ]
+                        },
+                        "bind_label": "first_name",
+                        "bind_value": "id",
+                        "datasource": {
+                          "url": "/configurator/programs/${programId}/members?org_category=CLIENT&k=",
+                          "type": "url",
+                          "getBy": [
+                            "members"
+                          ],
+                          "params": [
+                            {
+                              "name": "job_id",
+                              "required": true
+                            }
+                          ],
+                          "options": []
+                        },
+                        "is_required": true,
+                        "placeholder": "Select Assignment Manager"
+                      }
+                    ],
+                    "group_type": "ARRAY"
+                  },
+                  {
+                    "fields": [
+                      {
+                        "id": "start_date",
+                        "slug": "start_date",
+                        "type": "DATE",
+                        "label": "Assignment Start Date",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "assignment_title_uuid",
+                              "condition": "set_value",
+                              "value_get_by": [
+                                "start_date"
+                              ],
+                              "slug_value": "uid"
+                            }
+                          ]
+                        },
+                        "is_required": true,
+                        "placeholder": "Choose Date"
+                      },
+                      {
+                        "id": "end_date",
+                        "slug": "end_date",
+                        "type": "DATE",
+                        "label": "Assignment End Date",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "start_date",
+                              "message": "Assignment End Date should greater then Assignment Start Date",
+                              "condition": "ltr_equal"
+                            },
+                            {
+                              "slug": "assignment_title_uuid",
+                              "condition": "set_value",
+                              "value_get_by": [
+                                "end_date"
+                              ],
+                              "slug_value": "uid"
+                            }
+                          ]
+                        },
+                        "is_required": true,
+                        "placeholder": "Choose Date"
+                      },
+                      {
+                        "id": "worker_start_date",
+                        "slug": "worker_start_date",
+                        "type": "DATE",
+                        "label": "Worker Original Start Date",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "start_date",
+                              "message": "Worker Original Start Date should equal or previous then Assignment Start Date",
+                              "condition": "gtr"
+                            },
+                            {
+                              "slug": "end_date",
+                              "message": "Worker Original Start Date should less then Assignment End Date",
+                              "condition": "gtr"
+                            },
+                            {
+                              "slug": "original_start_date",
+                              "condition": "equal_data"
+                            }
+                          ]
+                        },
+                        "is_required": true,
+                        "placeholder": "Choose Date"
+                      }
+                    ],
+                    "group_type": "ARRAY"
+                  },
+                  {
+                    "fields": [
+                      {
+                        "id": "shift_timing",
+                        "slug": "shift_timing",
+                        "type": "DROPDOWN",
+                        "label": "Shift Timings",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "style": {
+                            "background": "#fff"
+                          },
+                          "pattern": false,
+                          "max_length": 100,
+                          "min_length": 5
+                        },
+                        "bind_label": "label",
+                        "bind_value": "label",
+                        "datasource": {
+                          "url": "/configurator/programs/${programId}/picklists/14941b25-bac6-43a9-a59d-3b310c550a7e/items",
+                          "type": "url",
+                          "getBy": [
+                            "picklist_items"
+                          ],
+                          "options": []
+                        },
+                        "is_required": true,
+                        "placeholder": "Select"
+                      }
+                    ],
+                    "group_type": "ARRAY"
+                  }
+                ],
+                "is_toggle": {
+                  "slug": "assignment_information",
+                  "value": false,
+                  "is_needed": false
+                },
+                "is_visible": true
+              },
+              {
+                "id": "foundation_details",
+                "icon": "category",
+                "label": "Foundation Details & Custom Fields",
+                "fields": [
+                  {
+                    "fields": [
+                      {
+                        "id": "project_based",
+                        "slug": "project_based",
+                        "type": "DROPDOWN",
+                        "label": "Project Based",
+                        "source": "CUSTOM",
+                        "meta_data": {
+                          "rules": []
+                        },
+                        "bind_label": "label",
+                        "bind_value": "label",
+                        "datasource": {
+                          "url": "/configurator/programs/${programId}/picklists/5f870b61-fe0d-41d6-a506-4dc4c5cc393f/items",
+                          "type": "url",
+                          "getBy": [
+                            "picklist_items"
+                          ],
+                          "options": []
+                        },
+                        "is_readonly": false,
+                        "is_required": true,
+                        "placeholder": "Select"
+                      },
+                      {
+                        "id": "project_po",
+                        "slug": "project_po",
+                        "type": "TEXT",
+                        "label": "Project PO",
+                        "source": "CUSTOM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "project_based",
+                              "value": [
+                                "",
+                                "Support based"
+                              ],
+                              "condition": "hidden"
+                            },
+                            {
+                              "slug": "project_based",
+                              "value": true,
+                              "condition": "required"
+                            }
+                          ],
+                          "max_length": 30
+                        },
+                        "is_readonly": false,
+                        "is_required": false,
+                        "placeholder": "Project PO"
+                      },
+                      {
+                        "id": "project_wbs_code",
+                        "slug": "project_wbs_code",
+                        "type": "TEXT",
+                        "label": "Project WBS Code",
+                        "source": "CUSTOM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "project_based",
+                              "value": [
+                                "",
+                                "Support based"
+                              ],
+                              "condition": "hidden"
+                            },
+                            {
+                              "slug": "project_based",
+                              "value": true,
+                              "condition": "required"
+                            }
+                          ],
+                          "max_length": 30
+                        },
+                        "is_readonly": false,
+                        "is_required": false,
+                        "placeholder": "Project WBS Code"
+                      },
+                      {
+                        "id": "project_wbs_name",
+                        "slug": "project_wbs_name",
+                        "type": "TEXT",
+                        "label": "Project WBS Name",
+                        "source": "CUSTOM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "project_based",
+                              "value": [
+                                "",
+                                "Support based"
+                              ],
+                              "condition": "hidden"
+                            },
+                            {
+                              "slug": "project_based",
+                              "value": true,
+                              "condition": "required"
+                            }
+                          ],
+                          "max_length": 30
+                        },
+                        "is_readonly": false,
+                        "is_required": false,
+                        "placeholder": "Project WBS Name"
+                      },
+                      {
+                        "id": "support_po",
+                        "slug": "support_po",
+                        "type": "TEXT",
+                        "label": "Support PO",
+                        "source": "CUSTOM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "project_based",
+                              "value": [
+                                "",
+                                "Project based"
+                              ],
+                              "condition": "hidden"
+                            },
+                            {
+                              "slug": "project_based",
+                              "value": true,
+                              "condition": "required"
+                            }
+                          ],
+                          "max_length": 30
+                        },
+                        "is_readonly": false,
+                        "is_required": true,
+                        "placeholder": "Support PO"
+                      },
+                      {
+                        "id": "support_cc_code",
+                        "slug": "support_cc_code",
+                        "type": "TEXT",
+                        "label": "Support cc code",
+                        "source": "CUSTOM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "project_based",
+                              "value": [
+                                "",
+                                "Project based"
+                              ],
+                              "condition": "hidden"
+                            },
+                            {
+                              "slug": "project_based",
+                              "value": true,
+                              "condition": "required"
+                            }
+                          ],
+                          "max_length": 30
+                        },
+                        "is_readonly": false,
+                        "is_required": false,
+                        "placeholder": "Support cc code"
+                      },
+                      {
+                        "id": "support_cc_name",
+                        "slug": "support_cc_name",
+                        "type": "TEXT",
+                        "label": "Support cc name",
+                        "source": "CUSTOM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "project_based",
+                              "value": [
+                                "",
+                                "Project based"
+                              ],
+                              "condition": "hidden"
+                            },
+                            {
+                              "slug": "project_based",
+                              "value": true,
+                              "condition": "required"
+                            }
+                          ],
+                          "max_length": 30
+                        },
+                        "is_readonly": false,
+                        "is_required": false,
+                        "placeholder": "Support cc name"
+                      }
+                    ],
+                    "group_type": "ARRAY"
+                  },
+                  {
+                    "fields": [
+                      {
+                        "id": "work_location_type",
+                        "slug": "work_location_type",
+                        "type": "DROPDOWN",
+                        "label": "Wipro project location",
+                        "source": "CUSTOM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "hierarchy_id",
+                              "condition": "reset"
+                            }
+                          ]
+                        },
+                        "bind_label": "label",
+                        "bind_value": "label",
+                        "datasource": {
+                          "url": "/configurator/programs/${programId}/picklists/d9727183-598b-4c53-b3c1-605c97ba8d66/items",
+                          "type": "url",
+                          "getBy": [
+                            "picklist_items"
+                          ],
+                          "options": []
+                        },
+                        "is_readonly": false,
+                        "is_required": true,
+                        "placeholder": "Select Wipro project location"
+                      },
+                      {
+                        "id": "skill_based",
+                        "slug": "skill_based",
+                        "type": "DROPDOWN",
+                        "label": "Skill based",
+                        "source": "CUSTOM",
+                        "meta_data": {
+                          "rules": []
+                        },
+                        "bind_label": "label",
+                        "bind_value": "label",
+                        "datasource": {
+                          "url": "/configurator/programs/${programId}/picklists/8ee79a26-7d49-427b-a4a4-4a6c7fa05f52/items",
+                          "type": "url",
+                          "getBy": [
+                            "picklist_items"
+                          ],
+                          "options": []
+                        },
+                        "is_readonly": false,
+                        "is_required": true,
+                        "placeholder": "Select Skill based"
+                      },
+                      {
+                        "id": "skill_type",
+                        "slug": "skill_type",
+                        "type": "DROPDOWN",
+                        "label": "Skill Type",
+                        "source": "CUSTOM",
+                        "meta_data": {
+                          "rules": []
+                        },
+                        "bind_label": "label",
+                        "bind_value": "label",
+                        "datasource": {
+                          "url": "/configurator/programs/${programId}/picklists/7bbf89f6-10d6-4e28-9c85-e46366e271c2/items",
+                          "type": "url",
+                          "getBy": [
+                            "picklist_items"
+                          ],
+                          "options": []
+                        },
+                        "is_readonly": false,
+                        "is_required": true,
+                        "placeholder": "Select"
+                      }
+                    ],
+                    "group_type": "ARRAY"
+                  }
+                ],
+                "is_toggle": {
+                  "slug": "foundation_details",
+                  "value": false,
+                  "is_needed": false
+                },
+                "is_visible": true
+              }
+            ]
+          },
+          {
+            "label": "Financial Info",
+            "field_groups": [
+              {
+                "icon": "pending_actions",
+                "label": "Timesheet",
+                "fields": [
+                  {
+                    "fields": [
+                      {
+                        "id": "timesheet_manager",
+                        "slug": "timesheet_manager",
+                        "type": "DROPDOWN",
+                        "label": "Timesheet Manager",
+                        "source": "SYSTEM",
+                        "bind_label": "first_name",
+                        "bind_value": "id",
+                        "datasource": {
+                          "url": "/configurator/programs/${programId}/members?org_category=CLIENT",
+                          "type": "url",
+                          "getBy": [
+                            "members"
+                          ],
+                          "params": [
+                            {
+                              "name": "job_id",
+                              "required": true
+                            }
+                          ],
+                          "options": []
+                        },
+                        "is_required": true,
+                        "placeholder": "Select"
+                      },
+                      {
+                        "id": "timesheet_type",
+                        "slug": "timesheet_type",
+                        "type": "DROPDOWN",
+                        "label": "Timesheet Type",
+                        "source": "SYSTEM",
+                        "bind_label": "label",
+                        "bind_value": "label",
+                        "datasource": {
+                          "url": "/configurator/programs/${programId}/picklists/937a1e00-2e44-442f-a460-ef01999fac9a/items",
+                          "type": "url",
+                          "getBy": [
+                            "picklist_items"
+                          ]
+                        },
+                        "is_required": true,
+                        "placeholder": "Select Timesheet Type"
+                      }
+                    ],
+                    "group_type": "ARRAY"
+                  },
+                  {
+                    "fields": [
+                      {
+                        "id": "st_hours",
+                        "slug": "st_hours",
+                        "type": "DROPDOWN",
+                        "label": "No of ST Hours/Day",
+                        "source": "SYSTEM",
+                        "bind_label": "label",
+                        "bind_value": "label",
+                        "datasource": {
+                          "url": "/configurator/programs/${programId}/picklists/a124169a-1d2b-4891-9e31-6dbb9b1dedf4/items",
+                          "type": "url",
+                          "getBy": [
+                            "picklist_items"
+                          ]
+                        },
+                        "is_required": true,
+                        "placeholder": "Select"
+                      },
+                      {
+                        "id": "days_per_week",
+                        "slug": "days_per_week",
+                        "type": "DROPDOWN",
+                        "label": "No of Days/Week",
+                        "source": "SYSTEM",
+                        "bind_label": "label",
+                        "bind_value": "label",
+                        "datasource": {
+                          "url": "/configurator/programs/${programId}/picklists/5569fc9e-8ea7-40cf-b7a7-e0a3554c6d57/items",
+                          "type": "url",
+                          "getBy": [
+                            "picklist_items"
+                          ]
+                        },
+                        "is_required": true,
+                        "placeholder": "Select"
+                      }
+                    ],
+                    "group_type": "ARRAY"
+                  }
+                ],
+                "is_toggle": {
+                  "slug": "is_timesheet_enabled",
+                  "value": true,
+                  "is_needed": true
+                },
+                "is_visible": true
+              },
+              {
+                "icon": "event_note",
+                "label": "Billable",
+                "fields": [
+                  {
+                    "fields": [
+                      {
+                        "id": "rate_model",
+                        "slug": "rate_model",
+                        "type": "DROPDOWN",
+                        "label": "Rate model",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "is_timesheet_enabled",
+                              "value": true,
+                              "message": "Timesheet should be enable to set Rate model.",
+                              "condition": "match"
+                            }
+                          ]
+                        },
+                        "bind_label": "label",
+                        "bind_value": "slug",
+                        "datasource": {
+                          "options": [
+                            {
+                              "id": "ee21ce38-2c1a-4056-9254-837fd1ba99c3",
+                              "slug": "markup",
+                              "label": "Markup"
+                            }
+                          ]
+                        },
+                        "is_required": true,
+                        "placeholder": "Select"
+                      },
+                      {
+                        "id": "rate_type",
+                        "slug": "rate_type",
+                        "type": "DROPDOWN",
+                        "label": "Rate Type",
+                        "source": "SYSTEM",
+                        "bind_label": "label",
+                        "bind_value": "slug",
+                        "datasource": {
+                          "options": [
+                            {
+                              "id": "dd84f65a-6a28-42f3-85cd-9991a01049g2",
+                              "slug": "per_month",
+                              "label": "Per Month"
+                            }
+                          ]
+                        },
+                        "is_required": true,
+                        "placeholder": "Select"
+                      },
+                      {
+                        "id": "currency",
+                        "slug": "currency",
+                        "type": "DROPDOWN",
+                        "label": "Currency",
+                        "source": "SYSTEM",
+                        "bind_label": "label",
+                        "bind_value": "slug",
+                        "datasource": {
+                          "type": "picklist",
+                          "options": [
+                            {
+                              "id": "ee21ce38-2c1a-4056-9254-837fd1ba99b2",
+                              "slug": "inr",
+                              "label": "INR (₹)"
+                            }
+                          ]
+                        },
+                        "is_required": false,
+                        "placeholder": "Select"
+                      }
+                    ],
+                    "group_type": "ARRAY"
+                  },
+                  {
+                    "fields": [
+                      {
+                        "id": "adjusted_markup",
+                        "slug": "adjusted_markup",
+                        "type": "NUMBER",
+                        "label": "Adjusted Markup (%)",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "rate_model",
+                              "value": [
+                                "",
+                                "billrate",
+                                "payrate"
+                              ],
+                              "condition": "hidden"
+                            }
+                          ]
+                        },
+                        "has_default": true,
+                        "is_readonly": false,
+                        "is_required": true,
+                        "placeholder": "Adjusted markup",
+                        "default_value": 0
+                      },
+                      {
+                        "id": "vendor_markup",
+                        "slug": "vendor_markup",
+                        "type": "NUMBER",
+                        "label": "Vendor Markup (%)",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "slug": "rate_model",
+                              "value": [
+                                "",
+                                "billrate",
+                                "payrate"
+                              ],
+                              "condition": "hidden"
+                            }
+                          ]
+                        },
+                        "datasource": {
+                          "url": "/configurator/programs/${programId}/config?entity_code=vendor_markup",
+                          "type": "url",
+                          "getBy": [
+                            "config",
+                            "markup"
+                          ],
+                          "on_land": true
+                        },
+                        "is_readonly": true,
+                        "is_required": true,
+                        "placeholder": "Vendor markup"
+                      }
+                    ],
+                    "group_type": "ARRAY"
+                  }
+                ],
+                "is_toggle": {
+                  "slug": "is_billable",
+                  "value": true,
+                  "is_needed": true
+                },
+                "is_visible": true
+              },
+              {
+                "id": "fees",
+                "icon": "payment",
+                "label": "Fee(s)",
+                "fields": [
+                  {
+                    "row": [
+                      {
+                        "slug": "vms_fee_enabled",
+                        "label": "VMS Fee",
+                        "value": true,
+                        "is_show_hide": true
+                      }
+                    ],
+                    "fields": [
+                      [
+                        {
+                          "id": "vms_fee_types",
+                          "slug": "vms_fee_types",
+                          "type": "DROPDOWN",
+                          "label": "Types",
+                          "source": "SYSTEM",
+                          "meta_data": {
+                            "rules": []
+                          },
+                          "bind_label": "label",
+                          "bind_value": "slug",
+                          "datasource": {
+                            "type": "picklist",
+                            "options": [
+                              {
+                                "id": "dd84f65a-6a28-42f3-85cd-9991y01049a1",
+                                "slug": "percentage",
+                                "label": "Percentage"
+                              },
+                              {
+                                "id": "ee21ce38-2c1a-4056-9254-837fd1bv99b2",
+                                "slug": "fixed_amount",
+                                "label": "Fixed Amount"
+                              }
+                            ]
+                          },
+                          "has_default": true,
+                          "is_required": true,
+                          "placeholder": "Percentage (%)",
+                          "default_value": "percentage"
+                        },
+                        {
+                          "id": "vms_fee_value",
+                          "slug": "vms_fee_value",
+                          "type": "NUMBER",
+                          "label": "Fee",
+                          "source": "SYSTEM",
+                          "meta_data": {
+                            "rules": []
+                          },
+                          "has_default": true,
+                          "is_readonly": false,
+                          "is_required": true,
+                          "placeholder": "Fee in percent",
+                          "default_value": 0.23
+                        },
+                        {
+                          "id": "vms_applicable_on",
+                          "slug": "vms_applicable_on",
+                          "type": "DROPDOWN",
+                          "label": "Applicable On",
+                          "source": "SYSTEM",
+                          "meta_data": {
+                            "rules": []
+                          },
+                          "bind_label": "label",
+                          "bind_value": "slug",
+                          "datasource": {
+                            "type": "picklist",
+                            "options": [
+                              {
+                                "id": "dd84f65a-6a28-42f3-85cd-9991y01049a1",
+                                "slug": "client_bill_rate",
+                                "label": "Client Bill Rate"
+                              }
+                            ]
+                          },
+                          "has_default": true,
+                          "is_required": true,
+                          "placeholder": "Client Bill Rate",
+                          "default_value": "client_bill_rate"
+                        }
+                      ]
+                    ],
+                    "group_type": "TABLE"
+                  }
+                ],
+                "is_toggle": {
+                  "slug": "is_billable",
+                  "value": true,
+                  "is_needed": false
+                },
+                "is_visible": false
+              },
+              {
+                "id": "billing_details",
+                "icon": "receipt_long",
+                "label": "Billing Details",
+                "fields": [
+                  {
+                    "row": [
+                      {
+                        "slug": "is_straight_time_rate",
+                        "label": "Straight Time Rate",
+                        "is_show_hide": false
+                      }
+                    ],
+                    "fields": [
+                      [
+                        {
+                          "id": "regular_billrate",
+                          "slug": "regular_billrate",
+                          "type": "CURRENCY",
+                          "label": "Client Bill Rate",
+                          "source": "SYSTEM",
+                          "meta_data": {
+                            "rules": [
+                              {
+                                "slug": "regular_payrate",
+                                "message": "Regular Client Bill Rate should greater then Regular Pay Rate",
+                                "condition": "ltr"
+                              },
+                              {
+                                "slug": "rate_model",
+                                "condition": "reset"
+                              },
+                              {
+                                "slug": "rate_model",
+                                "value": "payrate",
+                                "condition": "readonly"
+                              },
+                              {
+                                "name": "regular_billrate",
+                                "slug": "rate_model",
+                                "value": [
+                                  "billrate",
+                                  "markup"
+                                ],
+                                "condition": "required"
+                              },
+                              {
+                                "name": "regular_payrate",
+                                "slug": "rate_model",
+                                "value": [
+                                  "billrate",
+                                  "payrate"
+                                ],
+                                "condition": "required"
+                              },
+                              {
+                                "name": "currency",
+                                "condition": "currency"
+                              }
+                            ]
+                          },
+                          "datasource": {
+                            "url": "/rate-estimate/programs/${programId}/rate-model",
+                            "type": "url",
+                            "getBy": [
+                              "data",
+                              "rate",
+                              "regular",
+                              "billrate"
+                            ],
+                            "params": [
+                              {
+                                "name": "rate_model",
+                                "slug": "rate_model",
+                                "required": true
+                              },
+                              {
+                                "name": "adjusted_markup",
+                                "slug": "adjusted_markup",
+                                "required": true
+                              },
+                              {
+                                "name": "vendor_markup",
+                                "slug": "vendor_markup",
+                                "required": true
+                              },
+                              {
+                                "name": "max_bill_rate",
+                                "value": 50000,
+                                "required": true
+                              },
+                              {
+                                "name": "min_bill_rate",
+                                "value": 0,
+                                "required": true
+                              },
+                              {
+                                "name": "msp_fee_value",
+                                "value": 0,
+                                "required": true
+                              },
+                              {
+                                "name": "client_bill_rate",
+                                "slug": "regular_billrate",
+                                "required": false
+                              },
+                              {
+                                "name": "candidate_pay_rate",
+                                "slug": "regular_payrate",
+                                "required": false
+                              },
+                              {
+                                "name": "over_time",
+                                "value": true,
+                                "required": true
+                              },
+                              {
+                                "name": "double_time",
+                                "value": true,
+                                "required": true
+                              }
+                            ]
+                          },
+                          "is_readonly": false,
+                          "is_required": true,
+                          "placeholder": "100.0"
+                        },
+                        {
+                          "id": "regular_vendor_rate",
+                          "slug": "regular_vendor_rate",
+                          "type": "CURRENCY",
+                          "label": "Vendor Bill Rate",
+                          "source": "SYSTEM",
+                          "meta_data": {
+                            "rules": [
+                              {
+                                "slug": "rate_model",
+                                "condition": "reset"
+                              },
+                              {
+                                "name": "regular_billrate",
+                                "slug": "rate_model",
+                                "value": [
+                                  "billrate",
+                                  "markup"
+                                ],
+                                "condition": "required"
+                              },
+                              {
+                                "name": "regular_payrate",
+                                "slug": "rate_model",
+                                "value": [
+                                  "billrate",
+                                  "payrate"
+                                ],
+                                "condition": "required"
+                              },
+                              {
+                                "name": "currency",
+                                "condition": "currency"
+                              }
+                            ]
+                          },
+                          "datasource": {
+                            "url": "/rate-estimate/programs/${programId}/rate-model",
+                            "type": "url",
+                            "getBy": [
+                              "data",
+                              "rate",
+                              "regular",
+                              "vendor_rate"
+                            ],
+                            "params": [
+                              {
+                                "name": "rate_model",
+                                "slug": "rate_model",
+                                "required": true
+                              },
+                              {
+                                "name": "adjusted_markup",
+                                "slug": "adjusted_markup",
+                                "required": true
+                              },
+                              {
+                                "name": "vendor_markup",
+                                "slug": "vendor_markup",
+                                "required": true
+                              },
+                              {
+                                "name": "max_bill_rate",
+                                "value": 50000,
+                                "required": true
+                              },
+                              {
+                                "name": "min_bill_rate",
+                                "value": 0,
+                                "required": true
+                              },
+                              {
+                                "name": "client_bill_rate",
+                                "slug": "regular_billrate",
+                                "required": false
+                              },
+                              {
+                                "name": "candidate_pay_rate",
+                                "slug": "regular_payrate",
+                                "required": false
+                              },
+                              {
+                                "name": "msp_fee_value",
+                                "value": 0,
+                                "required": true
+                              },
+                              {
+                                "name": "over_time",
+                                "value": true,
+                                "required": true
+                              },
+                              {
+                                "name": "double_time",
+                                "value": true,
+                                "required": true
+                              }
+                            ]
+                          },
+                          "is_readonly": true,
+                          "is_required": true,
+                          "placeholder": "97.0"
+                        },
+                        {
+                          "id": "regular_payrate",
+                          "slug": "regular_payrate",
+                          "type": "CURRENCY",
+                          "label": "Pay Rate",
+                          "source": "SYSTEM",
+                          "meta_data": {
+                            "rules": [
+                              {
+                                "slug": "regular_billrate",
+                                "message": "Regular Client Bill Rate should greater then Regular Pay Rate",
+                                "condition": "gtr"
+                              },
+                              {
+                                "slug": "rate_model",
+                                "condition": "reset"
+                              },
+                              {
+                                "slug": "rate_model",
+                                "value": "markup",
+                                "condition": "readonly"
+                              },
+                              {
+                                "name": "regular_billrate",
+                                "slug": "rate_model",
+                                "value": [
+                                  "billrate",
+                                  "markup"
+                                ],
+                                "condition": "required"
+                              },
+                              {
+                                "name": "regular_payrate",
+                                "slug": "rate_model",
+                                "value": [
+                                  "billrate",
+                                  "payrate"
+                                ],
+                                "condition": "required"
+                              },
+                              {
+                                "name": "currency",
+                                "condition": "currency"
+                              }
+                            ]
+                          },
+                          "datasource": {
+                            "url": "/rate-estimate/programs/${programId}/rate-model",
+                            "type": "url",
+                            "getBy": [
+                              "data",
+                              "rate",
+                              "regular",
+                              "payrate"
+                            ],
+                            "params": [
+                              {
+                                "name": "rate_model",
+                                "slug": "rate_model",
+                                "required": true
+                              },
+                              {
+                                "name": "adjusted_markup",
+                                "slug": "adjusted_markup",
+                                "required": true
+                              },
+                              {
+                                "name": "vendor_markup",
+                                "slug": "vendor_markup",
+                                "required": true
+                              },
+                              {
+                                "name": "max_bill_rate",
+                                "value": 50000,
+                                "required": true
+                              },
+                              {
+                                "name": "min_bill_rate",
+                                "value": 0,
+                                "required": true
+                              },
+                              {
+                                "name": "client_bill_rate",
+                                "slug": "regular_billrate",
+                                "required": false
+                              },
+                              {
+                                "name": "candidate_pay_rate",
+                                "slug": "regular_payrate",
+                                "required": false
+                              },
+                              {
+                                "name": "msp_fee_value",
+                                "value": 0,
+                                "required": true
+                              },
+                              {
+                                "name": "over_time",
+                                "value": true,
+                                "required": true
+                              },
+                              {
+                                "name": "double_time",
+                                "value": true,
+                                "required": true
+                              }
+                            ]
+                          },
+                          "is_readonly": false,
+                          "is_required": true,
+                          "placeholder": "50"
+                        }
+                      ]
+                    ],
+                    "group_type": "TABLE"
+                  }
+                ],
+                "is_toggle": {
+                  "slug": "is_billable",
+                  "value": true,
+                  "is_needed": false
+                },
+                "is_visible": true
+              },
+              {
+                "id": "taxes",
+                "icon": "account_balance",
+                "label": "Taxes",
+                "fields": [
+                  {
+                    "row": [
+                      {
+                        "slug": "gst_enabled",
+                        "label": "GST",
+                        "value": true,
+                        "is_show_hide": true
+                      }
+                    ],
+                    "fields": [
+                      [
+                        {
+                          "id": "types",
+                          "slug": "gst_types",
+                          "type": "DROPDOWN",
+                          "label": "Types",
+                          "source": "SYSTEM",
+                          "bind_label": "label",
+                          "bind_value": "slug",
+                          "datasource": {
+                            "type": "picklist",
+                            "options": [
+                              {
+                                "id": "dd84f65a-6a28-42f3-85cd-9991y01049a1",
+                                "slug": "percentage",
+                                "label": "Percentage"
+                              },
+                              {
+                                "id": "ee21ce38-2c1a-4056-9254-837fd1bv99b2",
+                                "slug": "fixed_amount",
+                                "label": "Fixed Amount"
+                              }
+                            ]
+                          },
+                          "has_default": true,
+                          "is_required": true,
+                          "placeholder": "Fixed Amount",
+                          "default_value": "percentage"
+                        },
+                        {
+                          "id": "gst_value",
+                          "slug": "gst_value",
+                          "type": "NUMBER",
+                          "label": "Fee",
+                          "source": "SYSTEM",
+                          "has_default": true,
+                          "is_readonly": false,
+                          "is_required": true,
+                          "placeholder": "100.00",
+                          "default_value": 18
+                        },
+                        {
+                          "id": "applicable_on",
+                          "slug": "gst_applicable_on",
+                          "type": "DROPDOWN",
+                          "label": "Applicable On",
+                          "source": "SYSTEM",
+                          "bind_label": "label",
+                          "bind_value": "slug",
+                          "datasource": {
+                            "type": "piclist",
+                            "options": [
+                              {
+                                "id": "dd84f65a-6a28-42f3-85cd-9991y01049a1",
+                                "slug": "client_bill_rate",
+                                "label": "Client Bill Rate"
+                              }
+                            ]
+                          },
+                          "is_required": true,
+                          "placeholder": "Client Bill Rate"
+                        }
+                      ]
+                    ],
+                    "group_type": "TABLE"
+                  }
+                ],
+                "is_toggle": {
+                  "slug": "is_billable",
+                  "value": true,
+                  "is_needed": false
+                },
+                "is_visible": true
+              },
+              {
+                "icon": "event_note",
+                "label": "Budget Estimate",
+                "fields": [
+                  {
+                    "fields": [
+                      {
+                        "id": "total_working_days",
+                        "slug": "total_working_days",
+                        "type": "NUMBER",
+                        "label": "Total Working Days",
+                        "source": "SYSTEM",
+                        "datasource": {
+                          "url": "/rate-estimate/programs/${programId}/working-hours-estimate",
+                          "type": "url",
+                          "getBy": [
+                            "data",
+                            "working_days"
+                          ],
+                          "params": [
+                            {
+                              "name": "start_date",
+                              "slug": "start_date",
+                              "required": true
+                            },
+                            {
+                              "name": "end_date",
+                              "slug": "end_date",
+                              "required": true
+                            },
+                            {
+                              "name": "hours_per_day",
+                              "slug": "st_hours",
+                              "required": true
+                            },
+                            {
+                              "name": "week_working_days",
+                              "slug": "days_per_week",
+                              "required": true
+                            }
+                          ]
+                        },
+                        "is_readonly": true,
+                        "is_required": false,
+                        "placeholder": "0"
+                      },
+                      {
+                        "id": "timesheet_budget",
+                        "slug": "timesheet_budget",
+                        "type": "CURRENCY",
+                        "label": "Timesheet Budget Amount",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "name": "currency",
+                              "condition": "currency"
+                            }
+                          ]
+                        },
+                        "datasource": {
+                          "url": "/rate-estimate/programs/${programId}/resource-budget",
+                          "type": "url",
+                          "getBy": [
+                            "data",
+                            "initial_budget"
+                          ],
+                          "params": [
+                            {
+                              "name": "rate",
+                              "slug": "regular_billrate",
+                              "required": true
+                            },
+                            {
+                              "name": "rate_type",
+                              "slug": "rate_type",
+                              "required": true
+                            },
+                            {
+                              "name": "num_resources",
+                              "value": 1,
+                              "required": true
+                            },
+                            {
+                              "name": "total_hours",
+                              "slug": "total_working_days",
+                              "required": true
+                            },
+                            {
+                              "name": "start_date",
+                              "slug": "start_date",
+                              "required": true
+                            },
+                            {
+                              "name": "end_date",
+                              "slug": "end_date",
+                              "required": true
+                            },
+                            {
+                              "name": "hours_per_day",
+                              "slug": "st_hours",
+                              "required": true
+                            },
+                            {
+                              "name": "week_working_days",
+                              "slug": "days_per_week",
+                              "required": true
+                            },
+                            {
+                              "name": "adjustment_type",
+                              "slug": "gst_types",
+                              "required": true
+                            },
+                            {
+                              "name": "adjustment_value",
+                              "slug": "gst_value",
+                              "required": true
+                            }
+                          ]
+                        },
+                        "is_readonly": true,
+                        "is_required": false,
+                        "placeholder": "0"
+                      },
+                      {
+                        "id": "overtime_budget",
+                        "slug": "overtime_budget",
+                        "type": "CURRENCY",
+                        "label": "Overtime Budget Amount",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "name": "currency",
+                              "condition": "currency"
+                            }
+                          ]
+                        },
+                        "has_default": true,
+                        "is_readonly": false,
+                        "is_required": false,
+                        "placeholder": "0",
+                        "default_value": null
+                      },
+                      {
+                        "id": "expense_budget",
+                        "slug": "expense_budget",
+                        "type": "CURRENCY",
+                        "label": "Expense Budget Amount",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "name": "currency",
+                              "condition": "currency"
+                            }
+                          ]
+                        },
+                        "has_default": true,
+                        "is_readonly": false,
+                        "is_required": false,
+                        "placeholder": "0",
+                        "default_value": null
+                      }
+                    ],
+                    "group_type": "ARRAY"
+                  },
+                  {
+                    "fields": [
+                      {
+                        "id": "gross_allocated_budget",
+                        "slug": "gross_allocated_budget",
+                        "type": "CURRENCY",
+                        "label": "Total Estimated Budget w/o Tax",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "name": "currency",
+                              "condition": "currency"
+                            }
+                          ]
+                        },
+                        "datasource": {
+                          "url": "/rate-estimate/programs/${programId}/resource-budget",
+                          "type": "url",
+                          "getBy": [
+                            "data",
+                            "gross_budget"
+                          ],
+                          "params": [
+                            {
+                              "name": "rate",
+                              "slug": "regular_billrate",
+                              "required": true
+                            },
+                            {
+                              "name": "rate_type",
+                              "slug": "rate_type",
+                              "required": true
+                            },
+                            {
+                              "name": "num_resources",
+                              "value": 1,
+                              "required": true
+                            },
+                            {
+                              "name": "total_hours",
+                              "slug": "total_working_days",
+                              "required": true
+                            },
+                            {
+                              "name": "start_date",
+                              "slug": "start_date",
+                              "required": true
+                            },
+                            {
+                              "name": "end_date",
+                              "slug": "end_date",
+                              "required": true
+                            },
+                            {
+                              "name": "hours_per_day",
+                              "slug": "st_hours",
+                              "required": true
+                            },
+                            {
+                              "name": "week_working_days",
+                              "slug": "days_per_week",
+                              "required": true
+                            },
+                            {
+                              "name": "adjustment_type",
+                              "slug": "gst_types",
+                              "required": true
+                            },
+                            {
+                              "name": "adjustment_value",
+                              "slug": "gst_value",
+                              "required": true
+                            },
+                            {
+                              "name": "additional_amount",
+                              "slug": "overtime_budget",
+                              "type": "array",
+                              "required": false
+                            },
+                            {
+                              "name": "additional_amount",
+                              "slug": "expense_budget",
+                              "type": "array",
+                              "required": false
+                            }
+                          ]
+                        },
+                        "is_readonly": true,
+                        "is_required": false,
+                        "placeholder": "0"
+                      },
+                      {
+                        "id": "estimated_tax",
+                        "slug": "estimated_tax",
+                        "type": "CURRENCY",
+                        "label": "Estimated Tax",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "name": "currency",
+                              "condition": "currency"
+                            }
+                          ]
+                        },
+                        "datasource": {
+                          "url": "/rate-estimate/programs/${programId}/resource-budget",
+                          "argu": [
+                            {
+                              "name": "gross_allocated_budget",
+                              "slug": "gross_allocated_budget",
+                              "required": true
+                            },
+                            {
+                              "name": "net_allocated_budget",
+                              "slug": "net_allocated_budget",
+                              "required": false
+                            }
+                          ],
+                          "type": "url_function",
+                          "getBy": [
+                            "data"
+                          ],
+                          "params": [
+                            {
+                              "name": "rate",
+                              "slug": "regular_billrate",
+                              "required": true
+                            },
+                            {
+                              "name": "rate_type",
+                              "slug": "rate_type",
+                              "required": true
+                            },
+                            {
+                              "name": "num_resources",
+                              "value": 1,
+                              "required": true
+                            },
+                            {
+                              "name": "total_hours",
+                              "slug": "total_working_days",
+                              "required": true
+                            },
+                            {
+                              "name": "start_date",
+                              "slug": "start_date",
+                              "required": true
+                            },
+                            {
+                              "name": "end_date",
+                              "slug": "end_date",
+                              "required": true
+                            },
+                            {
+                              "name": "hours_per_day",
+                              "slug": "st_hours",
+                              "required": true
+                            },
+                            {
+                              "name": "week_working_days",
+                              "slug": "days_per_week",
+                              "required": true
+                            },
+                            {
+                              "name": "adjustment_type",
+                              "slug": "gst_types",
+                              "required": true
+                            },
+                            {
+                              "name": "adjustment_value",
+                              "slug": "gst_value",
+                              "required": true
+                            },
+                            {
+                              "name": "additional_amount",
+                              "slug": "overtime_budget",
+                              "type": "array",
+                              "required": false
+                            },
+                            {
+                              "name": "additional_amount",
+                              "slug": "expense_budget",
+                              "type": "array",
+                              "required": false
+                            }
+                          ],
+                          "function": "function differ(e){return null==e.net_budget?0:e.net_budget-e.gross_budget}",
+                          "function_name": "differ"
+                        },
+                        "is_readonly": true,
+                        "is_required": false,
+                        "placeholder": "0"
+                      },
+                      {
+                        "id": "net_allocated_budget",
+                        "slug": "net_allocated_budget",
+                        "type": "CURRENCY",
+                        "label": "Total Estimated Budget",
+                        "source": "SYSTEM",
+                        "meta_data": {
+                          "rules": [
+                            {
+                              "name": "currency",
+                              "condition": "currency"
+                            }
+                          ]
+                        },
+                        "datasource": {
+                          "url": "/rate-estimate/programs/${programId}/resource-budget",
+                          "type": "url",
+                          "getBy": [
+                            "data",
+                            "net_budget"
+                          ],
+                          "params": [
+                            {
+                              "name": "rate",
+                              "slug": "regular_billrate",
+                              "required": true
+                            },
+                            {
+                              "name": "rate_type",
+                              "slug": "rate_type",
+                              "required": true
+                            },
+                            {
+                              "name": "num_resources",
+                              "value": 1,
+                              "required": true
+                            },
+                            {
+                              "name": "total_hours",
+                              "slug": "total_working_days",
+                              "required": true
+                            },
+                            {
+                              "name": "start_date",
+                              "slug": "start_date",
+                              "required": true
+                            },
+                            {
+                              "name": "end_date",
+                              "slug": "end_date",
+                              "required": true
+                            },
+                            {
+                              "name": "hours_per_day",
+                              "slug": "st_hours",
+                              "required": true
+                            },
+                            {
+                              "name": "week_working_days",
+                              "slug": "days_per_week",
+                              "required": true
+                            },
+                            {
+                              "name": "adjustment_type",
+                              "slug": "gst_types",
+                              "required": true
+                            },
+                            {
+                              "name": "adjustment_value",
+                              "slug": "gst_value",
+                              "required": true
+                            },
+                            {
+                              "name": "additional_amount",
+                              "slug": "overtime_budget",
+                              "type": "array",
+                              "required": false
+                            },
+                            {
+                              "name": "additional_amount",
+                              "slug": "expense_budget",
+                              "type": "array",
+                              "required": false
+                            }
+                          ]
+                        },
+                        "is_readonly": true,
+                        "is_required": false,
+                        "placeholder": "0"
+                      }
+                    ],
+                    "group_type": "FOOTER_ARRAY"
+                  }
+                ],
+                "is_toggle": {
+                  "slug": "is_billable",
+                  "value": true,
+                  "is_needed": false
+                },
+                "is_visible": true
+              }
+            ]
+          }
+        ]
+      },
+      "metadata": {
+        "is_review": false,
+        "backButton": true,
+        "is_approval_workflow": false
+      }
+    }
+  }
+}

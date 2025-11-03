@@ -1,0 +1,90 @@
+<div class="submitted-candidate-page-wrapper">
+  <ng-container>
+    <div class="submitted-candidate-listing">
+      <div class="description-card p-24 detail-page-responsive-list pl-m-0 pr-m-0">
+        <div class="dotloader" *ngIf="dataLoader"></div>
+        <div [hidden]="!(viewGrid && !dataLoader)" class="overflow-box">
+          <div *ngIf="!isVendor && countDuplicate!=0" class="potential-duplicate d-flex justify-content-end align-items-center"><i class="material-icons mr-8">report</i><a class=" d-flex justify-content-end align-items-center"(click)="potentialDuplicate($event)">{{'potential_duplicate_submittal(s)' | i18next}} <span class="count ml-8">{{countDuplicate}}</span></a></div>
+          <vms-table
+            *ngIf="tableLoaded && !showCompareScreen"
+            [vmsTableConfig]="tableConfig"
+            [vmsDataSource]="vmsData?.candidate"
+            [loading]="dataLoading"
+            [open]="isExpand"
+            [totalItem]="totalRecords"
+            [itemsPerPage]="itemsPerPage"
+            [rotuterLinkOnClick] = 'true'
+            [rotuterLinkParams] = 'rotuterLinkParams'
+            [rotuterLinkParseFn] = 'rotuterLinkParseFn'
+            (onExpandClick)="onExpandClick($event)"
+            (onEditClick)="onEditClick($event)"
+            (changePage)="onPaginationClick($event)"
+            [currentPage]="pageNumber"
+            (onCreate)="onCreateClick($event)"
+            (onDisableClicked)="disableClicked($event)"
+            (onDeleteClick)="onDeleteClick($event)"
+            (numberBadgeClicked)="columnClicked($event)"
+            (cloneClicked)="cloneClicked($event)"
+            (search)="onSearch($event)"
+            (onListFilter)="onListFilter($event)"
+            (onWithdrawProfileClick)="withdrawalClicked($event)"
+            (onSelectAllClick)="selectAllClicked($event)"
+            (onSelectClick)="selectClicked($event)"
+            (clickOnNext)="onClickNext($event)"
+            (onViewSubmittedCandidateClick)="clickViewSubmittedCandidate($event)"
+            (onUpdateRecord)="onUpdateRecordClick($event)"
+            (onScheduleInterviewClick)="clickToScheduleInterview($event)"
+            (onRehireCheckClick)="clickTorRehireCheck($event)"
+            (onCreateOfferClick)="clickToCreateOffer($event)"
+            (onRejectCandidateClick)="clickToRejectCandidate($event)"
+            (shortlistReviewClick)="clickToShortListReviewReject($event)"
+            (onshortListReviewClick)="clickToShortListReview($event)"
+            (previewClicked)="previewClicked($event)"
+            (changeRecords)="onClickRecords($event)"
+            (onSort)="onSortClick($event)"
+            (onCancelOfferClick)="clickToCancelOfferReview($event)"
+            (onOfferReviewClick)="clickToOfferReview($event)"
+            (onEditOfferClick)="clickToEditOfferReview($event)"
+            (viewCandidateScore)="candidateScoreFlyout($event)"
+            (viewCompareScreen)="navigateToCompareScreen($event)"
+            (emitCandidateScore)="submitCandidateScore($event)"
+            (onClickShortlistCandidate)="onClickShortListCandidate($event)"
+            [compareDisabled]="compareDisabled"
+            [currentOptStatus]="currentOptStatus"
+            (openMTPLinkingModal)="openLinkingModal($event)"
+          >
+          </vms-table>
+        </div>
+
+        <app-grid-view
+          *ngIf="!viewGrid"
+          [gridData]="gridVewJson"
+          [gridContentType]="gridContentType"
+        ></app-grid-view>
+        <app-candidate-comparison [jobStatus]="jobStatus" *ngIf="showCompareScreen" [compareCandidatesInfo]="candidatesInfo" (ShortlistCandidate)="onClickShortListCandidate($event)" (rejectCandidate)="onRejectCandidate($event)" (backToSubmittedCandidates)="onClickBacktoSubmittedCandidates($event)"></app-candidate-comparison>
+      </div>
+    </div>
+    <app-withdraw-candidate
+      (onWithdrawnCandidate)="onClickWithdrawnCandidate($event)"
+    ></app-withdraw-candidate>
+    <app-view-submitted-candidate></app-view-submitted-candidate>
+    <app-schedule-interview></app-schedule-interview>
+    <app-job-details-sidebar-create></app-job-details-sidebar-create>
+  </ng-container>
+
+  <div  *ngIf="!showCompareScreen" class="detail-page-wrapper withdrawal-table">
+    <div class="description-panel position-relative withdwrwal-box">
+      <div class="card bg-light">
+        <div class="submitted-candidate-listing">
+          <div class="description-card p-24 detail-page-responsive-list pl-m-0 pr-m-0">
+            <app-withdraw-status-candidates (countData)="setCount($event)"></app-withdraw-status-candidates>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<app-candidate-score *ngIf="showCandidateScore" (closeSidebar)="closeSidebar()"></app-candidate-score>
+<app-pontential-duplicate-candidate [jobIdd]="jobId" [isMasked]="isMasked" [isShowVendorColumn]="isShowVendorColumn"></app-pontential-duplicate-candidate>
+<app-master-talent-profile-details [profileId]="profileId" (modelclose)="closemtpModal()" *ngIf="mtpDetails"></app-master-talent-profile-details>
+

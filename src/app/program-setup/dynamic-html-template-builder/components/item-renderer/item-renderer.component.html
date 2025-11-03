@@ -1,0 +1,20 @@
+<div style="position: relative;" *ngIf="item" (click)="itemClicked(item)">
+  <div #Text *ngIf='item?.type === "Text"' [innerHTML]="item.text" [style.color]='item.customProperties.color'
+    [style.font-family]='item.customProperties.fontFamily'></div>
+  <img #Image *ngIf='item?.type === "Image"' [src]="item.customProperties.imageLink"
+    [alt]="item.customProperties.altText" />
+  <button #Button *ngIf='item?.type === "Button"' [style.color]='item.customProperties.color'
+    [style.background-color]='item.customProperties.backgroundColor' [innerHTML]="item.customProperties.label"></button>
+  <a #Link *ngIf='item?.type === "Link" && item?.customProperties.link === ""'
+    [innerHTML]="item.customProperties.label"></a>
+  <a #Link *ngIf='item?.type === "Link" && item?.customProperties.link !== ""' [innerHTML]="item.customProperties.label"
+    [href]="item.customProperties.link" [target]="target"></a>
+  <h1 #Header *ngIf='item?.type === "Header"' [innerHTML]="item.customProperties.text"></h1>
+  <h2 #SubHeader *ngIf='item?.type === "Sub Header"' [innerHTML]="item.customProperties.text"></h2>
+  <div style="height: 100%; min-height: 20px; width: 100%; border: 1px dotted gold;" #customHtml
+    *ngIf='item?.type === "Custom Html"'>
+    <app-custom-html [innerHtml]='item.customProperties.innerHtml'></app-custom-html>
+  </div>
+  <icon class="delete-item" title="Delete item" size="16px" theme="outlined" name="close" type="material"
+    cuClass="d-flex" (onClick)="onDeleteItem(itemIndex)"></icon>
+</div>

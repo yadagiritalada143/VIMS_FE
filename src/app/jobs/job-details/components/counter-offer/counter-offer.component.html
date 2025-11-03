@@ -1,0 +1,761 @@
+<form
+  [formGroup]="counterOfferForm"
+  (ngSubmit)="checkOverlap()"
+  class="px-24 pb-64 pt-24"
+>
+  <h4 class="pb-4">{{ 'counter_offer' | i18next }}</h4>
+  <app-logs [log]="logs"></app-logs>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="form-group custom-datepicker">
+        <label>{{ 'start_date' | i18next }}<span class="require">*</span></label>
+        <svms-datepicker
+          [inputdateFormat]="prefferedfDateFormate"
+          ngDefaultControl
+          id="start_date_offer"
+          formControlName="startDate"
+          [options]="optionsStartDate"
+          I18n
+          #start_date_offer
+          (click)="end_date_offer.closeDatePicker()"
+          flip="false"
+        >
+        </svms-datepicker>
+        <span
+          class="validation-msg"
+          *ngIf="
+            (createOfferFormControls.startDate.touched || submitted) &&
+            createOfferFormControls.startDate.errors?.required
+          "
+        >
+          {{ 'start_date_is_required' | i18next }}
+        </span>
+        <span class="validation-msg" *ngIf="checkDateMax()">
+          {{ 'please_select_start_date_less_than_end_date' | i18next }}
+        </span>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="form-group">
+        <label>{{ 'end_date' | i18next }}<span class="require">*</span></label>
+        <svms-datepicker
+          [inputdateFormat]="prefferedfDateFormate"
+          ngDefaultControl
+          id="end_date_offer"
+          [options]="optionsEndDate"
+          flip="false"
+          formControlName="endDate"
+          I18n
+          #end_date_offer
+          (click)="start_date_offer.closeDatePicker()"
+          [ngClass]="{'disableDiv': isOfferEndDateDisabled }"
+          [allowDuration]="true" [durationStartDate]="counterOfferForm?.get('startDate')?.value"
+        >
+        </svms-datepicker>
+        <span
+          class="validation-msg"
+          *ngIf="
+            (createOfferFormControls.endDate.touched || submitted) &&
+            createOfferFormControls.endDate.errors?.required
+          "
+        >
+          {{ 'end_date_is_required' | i18next }}
+        </span>
+      </div>
+    </div>
+    <div class="col-md-6" *ngIf="!isVendorNeutral">
+      <div class="form-group">
+        <label>{{ 'job_manager' | i18next }}<span class="require">*</span></label>
+        <ng-select
+          [items]="jobMangerDropDownOpt"
+          placeholder="{{ 'choose_job_manager' | i18next }}"
+          [typeahead]="jobManagerTypeAhead$"
+          [clearOnBackspace]="true"
+          [searchable]="true"
+          [clearable]="true"
+          bindLabel="fullname_derived"
+          bindValue="id"
+          ngDefaultControl
+          formControlName="jobManager"
+          [(ngModel)]="jobmanagerSelected"
+          [loading]="loadingJobmanager"
+          loadingText="Loading..."
+         (click)="end_date_offer.closeDatePicker();start_date_offer.closeDatePicker()"
+          [readonly] = "vendorUserReadonly"
+        >
+        </ng-select>
+        <span
+          class="validation-msg"
+          *ngIf="
+            (createOfferFormControls.jobManager.touched || submitted) &&
+            createOfferFormControls.jobManager.errors?.required
+          "
+        >
+          {{ 'job_manager_is_required' | i18next }}
+        </span>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="form-group">
+
+        <label>{{ 'work_location' | i18next }}<span class="require">*</span></label>
+        <ng-select
+          [items]="workLocations"
+          placeholder="{{ 'choose_work_location' | i18next }}"
+          [typeahead]="workLocationTypeAhead$"
+          [clearOnBackspace]="true"
+          [searchable]="true"
+          [clearable]="true"
+          bindLabel="fullname_derived"
+          bindValue="id"
+          ngDefaultControl
+          formControlName="locations"
+          [(ngModel)]="workLocationSelected"
+          [loading]="loadingWorkLocation"
+          loadingText="Loading..."
+         (click)="end_date_offer.closeDatePicker();start_date_offer.closeDatePicker()"
+          [readonly] = "vendorUserReadonly"
+        >
+        </ng-select>
+        <span
+          class="validation-msg"
+          *ngIf="
+            (createOfferFormControls.jobManager.touched || submitted) &&
+            createOfferFormControls.jobManager.errors?.required
+          "
+        >
+          {{ 'job_manager_is_required' | i18next }}
+        </span>
+      </div>
+    </div>
+    <div class="col-md-6" *ngIf="showRemoteWorker">
+      <div class="form-group">
+        <label class="d-flex align-items-center">
+          <span class="mr-8">{{'remote_worker'|i18next}}</span> <span class="require">*</span>
+          <icon cuClass="d-flex" name="help" size="16px" color="#A3B0C0" tooltip="If the candidate/worker is considered “Remote”, select Yes.
+          “Remote Worker Location” details will then drive additional
+          functionality in the application, like Timesheet Type, based
+          on this program’s specific configuration." placement="top"></icon>
+        </label>
+        <ul class="overtime-control">
+          <li>
+            <div class="radio-wrapper">
+              <input type="radio" name="remoteWorker" value="false" [checked]="!remote_worker"
+                (change)="changeRemoteWorker(false)" [disabled]="true">
+              <label>{{'no'|i18next}}</label>
+            </div>
+          </li>
+          <li>
+            <div class="radio-wrapper">
+              <input type="radio" name="remoteWorker" value="true" [checked]="remote_worker"
+                (change)="changeRemoteWorker(true)" [disabled]="true">
+              <label>{{'yes'|i18next}}</label>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-6" *ngIf="offerDetailStageData">
+      <div class="form-group">
+        <label>{{ 'ot_exempt' | i18next }}</label>
+        <ul class="overtime-control">
+          <li>
+            <div class="radio-wrapper">
+              <input type="radio" name="overtime" value="false" [checked]="!is_ot_exempt"
+                (change)="changeOtExempt(false)">
+              <label>{{ 'no' | i18next }}</label>
+            </div>
+          </li>
+          <li>
+            <div class="radio-wrapper">
+              <input type="radio" name="overtime" value="true" [checked]="is_ot_exempt"
+                (change)="changeOtExempt(true)">
+              <label>{{ 'yes' | i18next }}</label>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <app-remote-worker-form *ngIf="showRemoteWorker && remote_worker"
+  (formSubmitted)="onRemoteFormSubmitted($event)" (apiErrors)="remoteAPIErrors($event)" [patchData]="candidateRemoteWorkerDetails"
+  [remoteWorkSelected]="remote_worker" [isReadOnly]="true"></app-remote-worker-form>
+  <div class="row">
+    <div class="col-md-6" *ngIf="!isVendorNeutral">
+      <div class="form-group">
+        <label>{{ 'timesheet_manager' | i18next }}<span class="require">*</span></label>
+        <ng-select
+          [items]="timeSheetManagerDropDownOpt"
+          placeholder="{{ 'choose_timesheet_manager' | i18next }}"
+          [typeahead]="timesheetManagerTypeAhead$"
+          [clearOnBackspace]="true"
+          [searchable]="true"
+          [clearable]="true"
+          bindLabel="fullname_derived"
+          bindValue="id"
+          ngDefaultControl
+          formControlName="timesheetManager"
+          [multiple]="multipleApprovers ? true : false"
+          [(ngModel)]="timesheetManagerSelected"
+          [loading]="loadingTimeSheetManager"
+          loadingText="Loading..."
+          (click)="end_date_offer.closeDatePicker();start_date_offer.closeDatePicker()"
+          [readonly] = "vendorUserReadonly"
+        >
+        </ng-select>
+        <span
+          class="validation-msg"
+          *ngIf="
+            (createOfferFormControls.timesheetManager.touched || submitted) &&
+            createOfferFormControls.timesheetManager.errors?.required
+          "
+        >
+          {{ 'timesheet_manager_is_required' | i18next }}
+        </span>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="form-group">
+        <label>{{ 'timesheet_type' | i18next }}<span class="require">*</span></label>
+        <ng-select
+          [items]="timesheetTypeList"
+          placeholder="{{ 'choose_timesheet_type' | i18next }}"
+          [clearOnBackspace]="true"
+          [searchable]="true"
+          [clearable]="true"
+          bindLabel="label"
+          bindValue="id"
+          ngDefaultControl
+          formControlName="timesheetType"
+          [(ngModel)]="timesheetTypeSelected"
+          [loading]="loadingtimesheetType"
+          loadingText="Loading..."
+          (click)="end_date_offer.closeDatePicker();start_date_offer.closeDatePicker()"
+          [readonly] = "vendorUserReadonly"
+        >
+        </ng-select>
+        <span
+          class="validation-msg"
+          *ngIf="
+            (createOfferFormControls.timesheetType.touched || submitted) &&
+            createOfferFormControls.timesheetType.errors?.required
+          "
+        >
+          {{ 'timesheet_type_is_required' | i18next }}
+        </span>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="form-group custom-datepicker">
+        <label>{{ 'worker_original/tenure_start_date' | i18next }}<span class="require">*</span></label>
+        <svms-datepicker [inputdateFormat]="prefferedfDateFormate" I18n [options]="optionsTenureDate" disabled="true" [ngClass]="{'disabledinput' : true}" formControlName="tenure_start">
+        </svms-datepicker>
+        <span class="validation-msg" *ngIf="(createOfferFormControls.tenure_start.touched || submitted) &&
+                  createOfferFormControls.tenure_start.errors?.required">
+          {{ 'tenure_date_is_required' | i18next }}
+        </span>
+      </div>
+      <div *ngIf="tenureSpan && tenureSpanUnit && counterOfferForm.get('tenure_start').value && tenureMessage" class="pb-16 warning">
+        {{tenureMessage | i18next}}
+      </div>
+    </div>
+    <div class="col-md-6" *ngIf="jobDetailsData?.is_expense_allowed_display">
+      <div class="form-group">
+        <label>{{'expense_allowed'|i18next}}</label>
+        <ng-select [readonly]= "true" formControlName="allow_expense" placeholder="{{'select'|i18next}}">
+          <ng-option *ngFor="let selectItem of items" [value]="selectItem?.value">{{ selectItem?.value }}</ng-option>
+        </ng-select>
+      </div>
+      <div *ngIf="tenureSpan && tenureSpanUnit && counterOfferForm.get('tenure_start').value && tenureMessage" class="pb-16 warning">
+        {{tenureMessage | i18next}}
+      </div>
+    </div>
+    <div class="col-md-6" *ngIf="jobDetailsData?.is_expense_allowed_display && offerDetailStageData?.is_expense_allowed">
+      <div class="form-group" *ngIf="!isVendorNeutral">
+        <label>{{ 'expense_manager' | i18next }}<span class="require">*</span></label>
+        <ng-select
+          [items]="expenseManagerDropDownOpt"
+          placeholder="{{ 'choose_expense_manager' | i18next }}"
+          [typeahead]="expenseManagerTypeAhead$"
+          [clearOnBackspace]="true"
+          [searchable]="true"
+          [clearable]="true"
+          bindLabel="fullname_derived"
+          bindValue="id"
+          ngDefaultControl
+          formControlName="expenseManager"
+          [multiple]="multipleApprovers ? true : false"
+          [(ngModel)]="expenseManagerSelected"
+          [loading]="loadingExpenseManager"
+          loadingText="Loading..."
+          [readonly] = "vendorUserReadonly"
+        >
+        </ng-select>
+        <span
+          class="validation-msg"
+          *ngIf="
+            (createOfferFormControls.expenseManager.touched || submitted) &&
+            createOfferFormControls.expenseManager.errors?.required">
+          {{ 'expense_manager_is_required' | i18next }}
+        </span>
+      </div>
+    </div>
+    <div class="col-md-6 mb-12" *ngIf="(programRateModel == 'MARKUP') || (programRateModel == 'PAY_RATE')">
+      <ng-container *ngIf="markupConfigObj">
+        <label>{{'Candidate Source Type'}}<span class="require">*</span></label>
+        <ng-select formControlName="candidate_sourcing_type" [clearable]="false"
+          placeholder="{{ 'select_sourcing_type' | i18next }}" [clearOnBackspace]="false"
+          [readonly]="isSourced || isPayroll" (change)="patchMarkup()">
+          <ng-option value="Sourced" [disabled]="!isSourcedValid">{{ 'sourced' | i18next }}</ng-option>
+          <ng-option value="Payrolled" [disabled]="!isPayRolledValid">{{ 'payrolled' | i18next }}</ng-option>
+        </ng-select>
+      </ng-container>
+    </div>
+  </div>
+
+<ng-container *ngIf="jobDetailsData">
+  <div class="w-100 mt-12 mb-12 d-flex justify-content-between align-items-start">
+    <h4 class="pb-16">{{'rate'|i18next}} & {{'other_informations'|i18next}}</h4>
+    <ng-container *ngIf="markupByRateTypeEnabled || costComponentEnabled">
+      <a class="text-link small mx-16 my-auto" (click)="showRateDetails()">
+        {{((rateDetailsEditableMarkup || rateDetailsEditableFactors || costComponentEnabled) ? 'manage_rate_details' : 'view_rate_details') | i18next}}
+      </a>
+    </ng-container>
+  </div>
+    <div class="row">
+      <div class="col-md-3">
+        <div class="form-group">
+          <label>{{'unit_of_measure'|i18next}}<span class="require">*</span></label>
+          <input
+            formControlName="rateType"
+            type="text"
+            class="form-control"
+            placeholder="{{'unit_of_measure'|i18next}}"
+            readonly
+          />
+        </div>
+      </div>
+      <div class="col-md-3" *ngIf="!hideRateAuthority">
+        <div class="form-group">
+          <label>Min. {{ (programRateModel === 'PAY_RATE' ? 'Pay Rate' : (user_type.toLowerCase() === 'vendor' && !clientBillRateEnabled) ? 'Vendor Bill Rate' : 'Bill Rate') | i18next}}<span class="require">*</span></label>
+          <div class="input-with-fixed-value position-relative">
+            <span>{{'' | accuracy : '' : { currencyCode: jobCurrency, display: 'symbol' } }}</span>
+            <input
+              [attr.disabled]="true"
+              type="number"
+              formControlName="minBillRate"
+              class="form-control"
+              placeholder=""
+            />
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3" *ngIf="!hideRateAuthority">
+        <div class="form-group">
+          <label>{{'max'|i18next}}. {{ (programRateModel === 'PAY_RATE' ? 'Pay Rate' : (user_type.toLowerCase() === 'vendor' && !clientBillRateEnabled) ? 'Vendor Bill Rate' : 'Bill Rate') | i18next}}<span class="require">*</span></label>
+          <div class="input-with-fixed-value position-relative">
+            <span>{{'' | accuracy : '' : { currencyCode: jobCurrency, display: 'symbol' } }}</span>
+            <input
+              [attr.disabled]="true"
+              type="number"
+              class="form-control"
+              formControlName="maxBillRate"
+              placeholder=""
+            />
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3" [hidden]="markupByRateTypeEnabled" *ngIf="(programRateModel == 'MARKUP') || (programRateModel == 'PAY_RATE')">
+        <!--  -->
+        <div class="form-group" *ngIf="markupConfigObj">
+          <div class="d-flex align-items-center justify-content-between mb-8">
+            <label class="mb-0"> {{'mark'|i18next}}-{{'up'|i18next}} <span class="require">*</span> </label>
+          </div>
+          <div class="input-with-fixed-value position-relative">
+            <span>%</span>
+            <input type="text" inputAccuracy="markup_percentage" formControlName="rateMarkUpValue" class="form-control" placeholder=""
+              />
+          </div>
+          <span class="validation-msg" *ngIf="
+          (createOfferFormControls.rateMarkUpValue.touched ||
+            submitted ||
+            createOfferFormControls.rateMarkUpValue.untouched) &&
+          (createOfferFormControls.rateMarkUpValue.errors?.required ||
+            createOfferFormControls.rateMarkUpValue.errors?.max ||
+            createOfferFormControls.rateMarkUpValue.errors?.min)
+
+        ">
+            {{
+            createOfferFormControls.rateMarkUpValue.errors?.max ||
+            createOfferFormControls.rateMarkUpValue.errors?.min
+            }}
+          </span>
+
+        </div>
+      </div>
+    </div>
+</ng-container>
+  <div class="row" *ngIf="jobDetailsData && offerDetails">
+    <div class="col-md-3 d-flex align-items-center justify-content-start">
+      <p class="text-dark">{{ stRateFactor?.name | i18next }}</p>
+    </div>
+    <div class="col-md-9">
+      <div class="row">
+        <div [class]="gridClass" *ngIf="showPayRate">
+          <div class="form-group">
+            <label>{{ 'pay_rate' | i18next }}
+              <span *ngIf="!isBillDriven" class="require">*</span> </label>
+            <div class="input-with-fixed-value position-relative">
+              <span>{{'' | accuracy : '' : { currencyCode: jobCurrency, display: 'symbol' } }}</span>
+              <input
+                type="text" inputAccuracy="rate"
+                formControlName="candidatePayRate"
+                class="form-control"
+                placeholder="{{ 'candidate_pay_rate' | i18next }}"
+
+              />
+            </div>
+            <span class="validation-msg" *ngIf="
+                          (createOfferFormControls.candidatePayRate.touched ||
+                            submitted ||
+                            createOfferFormControls.candidatePayRate.untouched) &&
+                          (createOfferFormControls.candidatePayRate.errors?.required ||
+                            createOfferFormControls.candidatePayRate.errors?.max ||
+                            createOfferFormControls.candidatePayRate.errors?.min)
+                        ">
+              {{
+              createOfferFormControls.candidatePayRate.errors?.max ||
+              createOfferFormControls.candidatePayRate.errors?.min
+              }}
+            </span>
+            <span class="validation-msg" *ngIf="
+            (programRateModel !== 'BILL_RATE' &&  programRateModel !== 'MARKUP'  &&  !isBillRateValid(counterOfferForm.get('candidatePayRate')) && !counterOfferForm.get('candidatePayRate').value && !( createOfferFormControls.candidatePayRate.errors?.max ||
+              createOfferFormControls.candidatePayRate.errors?.min))
+            "><icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'please_fill_candidate_pay_rate' | i18next }}.</span>
+          </div>
+        </div>
+
+        <div [class]="gridClass" *ngIf="checkConfig()">
+          <div class="form-group">
+            <label>{{ programRateModel === 'MARKUP' && (user_type.toLowerCase() === 'vendor' || user_type.toLowerCase() === 'super_org') ? 'Vendor Bill Rate' : 'Client Bill Rate' |i18next}}<span class="require">*</span></label>
+            <div class="input-with-fixed-value position-relative">
+              <span>{{'' | accuracy : '' : { currencyCode: jobCurrency, display: 'symbol' } }}</span>
+              <input
+                type="text" inputAccuracy="rate"
+                formControlName="billRatevalue"
+                class="form-control"
+                placeholder=""
+
+              />
+            </div>
+            <span
+              class="text-danger"
+              *ngIf="
+                (createOfferFormControls.billRatevalue?.touched ||
+                  submitted ||
+                  createOfferFormControls.billRatevalue?.untouched) &&
+                (createOfferFormControls.billRatevalue?.errors?.required ||
+                  createOfferFormControls.billRatevalue?.errors?.max ||
+                  createOfferFormControls.billRatevalue?.errors?.min)
+              "
+            >
+              {{
+                createOfferFormControls.billRatevalue.errors?.max ||
+                  createOfferFormControls.billRatevalue.errors?.min
+              }}
+            </span>
+            <span class="validation-msg" *ngIf="
+            (programRateModel !== 'PAY_RATE'  &&  !isBillRateValid(counterOfferForm.get('billRatevalue')) && clientBillRateEnabled && !counterOfferForm.get('billRatevalue').value && !( createOfferFormControls.billRatevalue.errors?.max ||
+              createOfferFormControls.billRatevalue.errors?.min))
+            "><icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{'please_fill_client_bill_rate'|i18next}}.</span>
+          </div>
+        </div>
+
+        <div [class]="gridClass">
+          <div class="form-group">
+            <label>{{ 'vendor_bill_rate' | i18next }}<span class="require">*</span></label>
+            <div class="input-with-fixed-value position-relative">
+              <span>{{'' | accuracy : '' : { currencyCode: jobCurrency, display: 'symbol' } }}</span>
+              <input
+                type="text" inputAccuracy="rate"
+                formControlName="vendorBillRateValue"
+                class="form-control"
+                placeholder=""
+
+              />
+            </div>
+            <span
+              class="validation-msg"
+              *ngIf="
+                (createOfferFormControls.vendorBillRateValue?.touched ||
+                  submitted ||
+                  createOfferFormControls.vendorBillRateValue?.untouched) &&
+                (createOfferFormControls.vendorBillRateValue?.errors?.required ||
+                  createOfferFormControls.vendorBillRateValue?.errors?.max ||
+                  createOfferFormControls.vendorBillRateValue?.errors?.min)"
+            >
+              {{
+                createOfferFormControls.vendorBillRateValue.errors?.max ||
+                  createOfferFormControls.vendorBillRateValue.errors?.min
+              }}
+            </span>
+            <span class="validation-msg" *ngIf="
+            (programRateModel !== 'PAY_RATE'  &&  !isBillRateValid(counterOfferForm.get('vendorBillRateValue')) && !clientBillRateEnabled && !counterOfferForm.get('vendorBillRateValue').value && !( createOfferFormControls.vendorBillRateValue.errors?.max ||
+              createOfferFormControls.vendorBillRateValue.errors?.min))
+            "><icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'please_fill_vendor_bill_rate' | i18next }}.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <ng-container formArrayName="rates" *ngIf="jobDetailsData && offerDetails">
+    <ng-container *ngFor="let rate of ratesArray?.controls; let i = index">
+
+      <ng-container *ngIf="!offerDetailStageData?.is_hybrid">
+        <div class="row" [formGroupName]="i" *ngIf="rate?.get('billable')?.value">
+          <div class="col-md-3 d-flex align-items-center justify-content-start">
+            <p class="text-dark">{{rate?.get('name')?.value || rate?.get('rate_factor')?.value}}</p>
+          </div>
+          <div class="col-md-9">
+            <div class="row">
+              <div [class]="gridClass" *ngIf="programRateModel !== 'BILL_RATE'">
+                <div class="form-group">
+                  <div class="d-flex align-items-center justify-content-between mb-8">
+                    <label class="mb-0"> {{rate?.get('rate_factor')?.value | uppercase}} {{ 'pay_rate' | i18next }} <span class="require">*</span> </label>
+                    <div class="d-flex">
+                      <ng-container *ngIf="programRateModel != 'MARKUP' || user_type.toLowerCase() != 'vendor' || user_type.toLowerCase() !== 'super_org'">
+                        <span class="pr-24 factor-style" [attr.title]="clientOverTimePayRateFactor"  [tooltip]="getFormulatoDisplay(rate?.get('rate_factor')?.value,'pay_rate')" placement="right">{{rate?.get('rate_factor')?.value}} Factor</span>
+                      </ng-container>
+
+                    </div>
+                  </div>
+                  <div [ngClass]="{disabledWrapper : checkedotPayRate}" class="input-with-fixed-value position-relative">
+                    <span>{{'' | accuracy : '' : { currencyCode: jobCurrency, display: 'symbol' } }}</span>
+                    <input type="number" inputAccuracy="rate"  formControlName="pay_rate" class="form-control" placeholder=""  />
+                  </div>
+                  <p *ngIf="(rate?.invalid && rate?.errors?.gtr)" class="text-red fs-12">
+                    {{rate?.errors?.gtr}}
+                  </p>
+                </div>
+              </div>
+              <div [class]="gridClass" *ngIf="checkConfig()">
+                <div class="form-group">
+                  <div class="d-flex align-items-center justify-content-between mb-8">
+                    <label class="mb-0"> {{rate?.get('rate_factor')?.value | uppercase}} {{(programRateModel === 'MARKUP' && (user_type.toLowerCase() === 'vendor' || user_type.toLowerCase() === 'super_org')) ? 'Vendor' : ''}} Bill Rate <span class="require">*</span></label>
+                    <div class="d-flex">
+                      <ng-container *ngIf="programRateModel != 'MARKUP' && (user_type.toLowerCase() != 'vendor' || user_type.toLowerCase() !== 'super_org')">
+                        <span class="pr-24 factor-style" [hidden]="markupByRateTypeEnabled && (programRateModel === 'PAY_RATE' || programRateModel === 'MARKUP')" [attr.title]="clientOverTimeBillRateFactor"  [tooltip]="getFormulatoDisplay(rate?.get('rate_factor')?.value,'bill_rate')" placement="right">
+                        {{rate?.get('rate_factor')?.value}} Factor</span>
+                      </ng-container>
+
+                    </div>
+                  </div>
+                  <div [ngClass]="{disabledWrapper : checkedotBillRate}" class="input-with-fixed-value position-relative">
+                    <span>{{'' | accuracy : '' : { currencyCode: jobCurrency, display: 'symbol' } }}</span>
+                    <input type="text" allowUptoNDigitDecimalNumber formControlName="bill_rate" class="form-control" placeholder=""
+                      />
+                  </div>
+                </div>
+              </div>
+              <div [class]="gridClass">
+                <div class="form-group">
+                  <div class="d-flex align-items-center justify-content-between mb-8">
+                    <label class="mb-0"> {{rate?.get('rate_factor')?.value | uppercase}} {{'vendor_bill_rate' | i18next}} <span class="require">*</span></label>
+                  </div>
+                  <div [ngClass]="{disabledWrapper : checkedotBillRate}" class="input-with-fixed-value position-relative">
+                    <span>{{'' | accuracy : '' : { currencyCode: jobCurrency, display: 'symbol' } }}</span>
+                    <input type="text" allowUptoNDigitDecimalNumber formControlName="vendor_bill_rate" class="form-control" placeholder=""
+                      />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="offerDetailStageData?.is_hybrid">
+        <div class="row" [formGroupName]="i"  *ngIf="rate?.get('applicable')?.value">
+          <div class="col-md-3 d-flex align-items-center justify-content-start">
+            <p class="text-dark">{{rate?.get('name')?.value || rate?.get('rate_factor')?.value}}</p>
+          </div>
+          <div class="col-md-9">
+            <div class="row" [class]="(!rate?.get('billable')?.value) ? 'mb-24 mt-24' : '' ">
+              <ng-container *ngIf="rate?.get('billable')?.value === true">
+                <div [class]="gridClass" *ngIf="programRateModel !== 'BILL_RATE'">
+                  <div class="form-group">
+                    <div class="d-flex align-items-center justify-content-between mb-8">
+                      <label class="mb-0"> {{rate?.get('rate_factor')?.value | uppercase}} {{ 'pay_rate' | i18next }} <span class="require">*</span> </label>
+                      <div class="d-flex">
+                        <ng-container *ngIf="programRateModel != 'MARKUP' || user_type.toLowerCase() != 'vendor' || user_type.toLowerCase() !== 'super_org'">
+                          <span class="pr-24 factor-style" [attr.title]="clientOverTimePayRateFactor"  [tooltip]="getFormulatoDisplay(rate?.get('rate_factor')?.value,'pay_rate')" placement="right">{{rate?.get('rate_factor')?.value}} Factor</span>
+                        </ng-container>
+
+                      </div>
+                    </div>
+                    <div [ngClass]="{disabledWrapper : checkedotPayRate}" class="input-with-fixed-value position-relative">
+                      <span>{{'' | accuracy : '' : { currencyCode: jobCurrency, display: 'symbol' } }}</span>
+                      <input type="number" inputAccuracy="rate"  formControlName="pay_rate" class="form-control" placeholder=""  />
+                    </div>
+                    <p *ngIf="(rate?.invalid && rate?.errors?.gtr)" class="text-red fs-12">
+                      {{rate?.errors?.gtr}}
+                    </p>
+                  </div>
+                </div>
+                <div [class]="gridClass" *ngIf="checkConfig()">
+                  <div class="form-group">
+                    <div class="d-flex align-items-center justify-content-between mb-8">
+                      <label class="mb-0"> {{rate?.get('rate_factor')?.value | uppercase}} {{(programRateModel === 'MARKUP' && (user_type.toLowerCase() === 'vendor' || user_type.toLowerCase() === 'super_org')) ? 'Vendor' : ''}} Bill Rate <span class="require">*</span></label>
+                      <div class="d-flex">
+                        <ng-container *ngIf="programRateModel != 'MARKUP' && (user_type.toLowerCase() != 'vendor' || user_type.toLowerCase() !== 'super_org')">
+                          <span class="pr-24 factor-style" [attr.title]="clientOverTimeBillRateFactor"  [tooltip]="getFormulatoDisplay(rate?.get('rate_factor')?.value,'bill_rate')" placement="right">
+                          {{rate?.get('rate_factor')?.value}} Factor</span>
+                        </ng-container>
+
+                      </div>
+                    </div>
+                    <div [ngClass]="{disabledWrapper : checkedotBillRate}" class="input-with-fixed-value position-relative">
+                      <span>{{'' | accuracy : '' : { currencyCode: jobCurrency, display: 'symbol' } }}</span>
+                      <input type="text" allowUptoNDigitDecimalNumber formControlName="bill_rate" class="form-control" placeholder=""
+                        />
+                    </div>
+                  </div>
+                </div>
+                <div [class]="gridClass">
+                  <div class="form-group">
+                    <div class="d-flex align-items-center justify-content-between mb-8">
+                      <label class="mb-0"> {{rate?.get('rate_factor')?.value | uppercase}} {{'vendor_bill_rate' | i18next}} <span class="require">*</span></label>
+                    </div>
+                    <div [ngClass]="{disabledWrapper : checkedotBillRate}" class="input-with-fixed-value position-relative">
+                      <span>{{'' | accuracy : '' : { currencyCode: jobCurrency, display: 'symbol' } }}</span>
+                      <input type="text" allowUptoNDigitDecimalNumber formControlName="vendor_bill_rate" class="form-control" placeholder=""
+                        />
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf="rate?.get('billable')?.value === false">
+                <div class="col-md-12 justify-content-between">
+                  <p>{{ 'Non-Billable' | i18next }}</p>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+
+    </ng-container>
+  </ng-container>
+
+<ng-container *ngIf="taxData || adjustmentData">
+  <app-adjustment-and-tax-forms [isShowTax]="isShowTax" [currency]="jobCurrency"
+  [jobDetails]="jobDetailsData" [candidateDetails]="candidateDetails"
+    [remoteDetails]="remoteLocation" [isRemoteWorker]="remote_worker"
+  [adjustmentValue]="adjustmentData || offerDetails?.offer?.adjustment_fee" [taxesData]="offerDetails?.offer?.taxes" (taxFormValueChange)="handleTaxFormValueChange($event)"></app-adjustment-and-tax-forms>
+</ng-container>
+
+<ng-container *ngIf="jobDetailsData && offerDetails">
+  <h4 class="pt-12 pb-12 font-weight-medium">{{'budget_summary' | i18next}}</h4>
+  <div class="budget-section d-flex mb-16">
+    <div class="budget-item mr-16 p-12">
+      <icon name="hourglass_empty" size="20" class="green mr-12"></icon>
+      <p>
+        <span class="font-weight-bold-500">
+          {{formatted_working_days}}
+        </span>
+        <span>{{ 'duration' | i18next }}</span>
+      </p>
+    </div>
+    <div class="budget-item p-12">
+      <icon name="payments" size="20" class="yellow mr-12"></icon>
+      <p>
+        <span class="font-weight-bold-500 d-flex">
+          {{
+              totalBudget | accuracy : 'amount' : {currencyCode: jobCurrency}
+          }}
+        </span><span>{{'total_estimated'|i18next}} {{'budget' | i18next}}</span>
+      </p>
+    </div>
+  </div>
+</ng-container>
+
+  <div [class.d-none]="vendorUserReadonly">
+
+  </div>
+  <div *ngIf="offerDetails?.offer?.account_code_data?.account_code">
+    <div *authorize="'show_account_code'">
+      <h4 class="mt-32 pb-12 font-weight-medium">{{ 'account_code_' | i18next }}
+      </h4>
+      <div class="row mb-12">
+          <div class="col-md-6 font-weight-normal" >
+              <p  style="font-size: 14px;font-weight: 500;">{{offerDetails?.offer?.account_code_data?.account_code}}</p>
+
+          </div>
+          <div class="col-md-2">
+              <button type="button" class="btn btn-light w-30" (click)="showAccountCodeDetails='visible'">
+                  <icon class="d-flex" size="18px" name="remove_red_eye" type="material" theme="outlined"
+                      cuClass="d-flex">
+                  </icon>
+              </button>
+          </div>
+      </div>
+      <app-account-code-generate [module]="'job'" [accountCodeFields]="offerDetails?.offer?.account_code_data"
+          (onClose)="onCloseSideBar($event)" [visiblity]="showAccountCodeDetails"
+          [entityId]="offerDetails?.offer?.id" [readOnly]="true">
+      </app-account-code-generate>
+    </div>
+
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="form-group">
+        <label>{{ 'notes' | i18next }}</label>
+        <textarea
+          row="3"
+          class="form-control"
+          placeholder="{{ 'enter_your_notes' | i18next }}"
+          formControlName="notes"
+        ></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="d-flex float-right" *accessControl>
+    <button type="submit" class="btn btn-outine" (click)="cancel()">
+      {{ 'cancel' | i18next }}
+    </button>
+    <button *ngIf="(userType === 'VENDOR' && isCounterOffer) || (userType === 'SUPER_ORG' && isCounterOffer)"
+      type="submit"
+      [disabled]="counterOfferForm.invalid || isLoader || disabledCounter || billrateValidation || !this.countryValidated || this.isTaxValid"
+      class="btn btn-primary ml-16"
+    >
+      {{ 'counter_offer' | i18next }}
+      <span *ngIf="isLoader" class="loader ml-12"> </span>
+    </button>
+  </div>
+</form>
+
+<app-rate-details
+    [rateDetailsVisible]="rateDetailsVisible" (onUpdateClose)="hideRateDetails($event)"
+    (updateRateDetailsVisibility)="updateRateDetailsVisibility($event)"
+    [standardRates]="standardRateDetails" [ratesArray]="ratesArrayValues || []"
+    [factors]="payloadRateFactors" [selectedCurrency]="currency"
+    [validationData]="requiredValidationData"
+    [editableFactors]="rateDetailsEditableFactors" [editableMarkup]="rateDetailsEditableMarkup"
+    [rateModelPayload]="rateDetailsPayload" [isSourcing]="true"
+    [markupByRateTypeEnabled]="markupByRateTypeEnabled" [costComponentEnabled]="costComponentEnabled"
+    [editableCostComponent]="rateDetailsEditableCostComponent"
+    [editableVendorRate]="!this.createOfferFormControls?.vendorBillRateValue?.disabled"
+    [editablePayrate]="!this.createOfferFormControls?.candidatePayRate?.disabled"
+    [editableBillrate]="!this.createOfferFormControls?.billRatevalue?.disabled"
+    [payrateVisible]="showPayRate" [billrateVisible]="checkConfig()"
+>
+</app-rate-details>
+<app-assignment-overlap-warning [showWarning]="showOverlapWarning" [assignmentData]="overlapAssignmentData" 
+(onWarningClose)="showOverlapWarning=false" >
+</app-assignment-overlap-warning>

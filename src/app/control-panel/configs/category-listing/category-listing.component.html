@@ -1,0 +1,48 @@
+<app-svms-table
+    [dataSource]="vmsData"
+    [tableOptions]="tableOptions"
+    [coloumnDefintions]="tableColumnConfig"
+>
+</app-svms-table>
+
+<ng-template #status let-value="value">
+    <span class="status-ui active" *ngIf="value">
+        {{ 'active' | i18next }}
+      </span>
+    <span class="status-ui inactive" *ngIf="!value">
+        {{ 'inactive' | i18next }}
+    </span>
+</ng-template>
+
+<ng-template #contacts let-value="value">
+    <ng-container *ngIf="!value?.length">
+        {{ '--' }}
+    </ng-container>
+    <ng-container *ngIf="value?.length == 1">
+        <span class="initials initials__purple">{{value[0].first_name | shortName:'first'}}</span>
+    </ng-container>
+    <ng-container *ngIf="value?.length == 2">
+        <p *ngIf="value" class="contact-avatar-list">
+            <span class="initials initials__green">{{value[0].first_name | shortName:'first'}}</span>
+            <span class="initials initials__gray">{{value[1].first_name | shortName:'first'}}</span>
+        </p>
+    </ng-container>
+    <ng-container *ngIf="value?.length > 2">
+        <ul class="manager-avatar-list">
+            <ng-container *ngFor="let item of value; let x = index">
+                <li *ngIf="x < 2">
+                    {{item.first_name | shortName:'first'}}
+                </li>
+            </ng-container>
+            <li class="more-link">
+                {{ '+' + (value?.length - 2) }}
+            </li>
+        </ul>
+    </ng-container>
+</ng-template>
+
+<app-organization-create
+    [title]="categoryTitle"
+    [icon]="categoryIcon"
+    [type]="categoryType"
+></app-organization-create>

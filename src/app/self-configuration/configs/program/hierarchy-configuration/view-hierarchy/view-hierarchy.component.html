@@ -1,0 +1,176 @@
+<div class="view-detail-page">
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <i (click)="backClicked()" class="material-icons back-arrow-icon back-arrow-icon cursor-pointer" tooltip="{{'Back' }}" placement="bottom">arrow_back</i>
+            <div class="ml-16">
+                <h3 class="font-weight-semibold mb-0">{{hierarchyData?.name }}</h3>
+                <p> {{ commonViewService.getTimeStamp(hierarchyData?.created_on, hierarchyData?.modified_on) }} </p>
+            </div>
+        </div>
+
+        <div *accessControl>
+            <button *authorize="'hierarchy_manage'" (click)="onEdit()" class="c-btn c-btn-secondary-medium-left-icon">
+                <i class="material-icons">drive_file_rename_outline</i>
+                {{ 'edit' | i18next }}
+            </button>
+        </div>
+    </header>
+    <section class="section-body-content">
+        <div class="px-32 py-16">
+            <div *ngIf="hierarchyData?.hierarchy_level != 1" class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'parent_hierarchy' | i18next }}</div>
+                <div class="item-value font-weight-medium">{{ hierarchyData?.parent_name }}</div>
+            </div>
+            <div class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'status' | i18next }}</div>
+                <div class="item-value"><span class="c-status-ui"
+                        [ngClass]="{'active': hierarchyData?.is_enabled, 'inactive': !hierarchyData?.is_enabled}">{{(hierarchyData?.is_enabled
+                        ? 'Active': 'Inactive') | i18nextEager }}</span></div>
+            </div>
+
+            <div class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'code' | i18next }}</div>
+                <div class="item-value font-weight-medium">
+                    {{ hierarchyData?.code || '--' | i18nextEager }} 
+                </div>
+            </div>
+
+            <h4 class="font-weight-medium mb-16">{{ 'localization' | i18next }}</h4>
+            <div *ngIf="!hide()" class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'default_language' | i18next }}</div>
+                <div class="item-value font-weight-medium">{{ getLanguageEnglish(hierarchyData?.preferred_language) }}</div>
+            </div>
+            <div *ngIf="!hide()" class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'default_currency' | i18next }}</div>
+                <div class="item-value font-weight-medium">{{
+                    hierarchyData?.preferred_currency+'('+getSymbol(hierarchyData?.preferred_currency)+')' }}
+                </div>
+            </div>
+            <div class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'default_date_format' | i18next }}</div>
+                <div class="item-value font-weight-medium">{{ hierarchyData?.preferred_date_format }}</div>
+            </div>
+
+            <h4 class="font-weight-medium mb-16">{{ 'preferences' | i18next }}</h4>
+            <div *ngIf="!hide()" class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'workflow' | i18next }}</div>
+                <div class="item-value font-weight-medium">{{ 'standard' | i18next }}</div>
+            </div>
+            <div *ngIf="!hide()" class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'enforce_rate_card' | i18next }}</div>
+                <div class="item-value font-weight-medium">{{ hierarchyData?.is_rate_card_enforced ? 'enabled' :
+                    'disabled' | i18nextEager }}</div>
+            </div>
+            <div class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'rate_model' | i18next }}</div>
+                <div class="item-value font-weight-medium">{{ getRateModelValue(hierarchyData?.rate_model) }}
+                </div>
+            </div>
+            <div *ngIf="!hide()" class="detail-item d-flex  mb-16">
+                <div class="item-label">{{ 'timesheet_type' | i18next }}</div>
+                <div class="item-value">
+                    <ul>
+                        <li *ngFor="let timesheet of hierarchyData?.pick_list_items">{{ timesheet?.label }}</li>
+                    </ul>
+                </div>
+            </div>
+            <div *ngIf="!hide()">
+                <h4 class="font-weight-medium mb-16">{{ 'master_data' | i18next }}</h4>
+                <div *ngFor="let foundationalDataType of hierarchyData?.foundational_data_types">
+                    <div class="detail-item d-flex  mb-16">
+                        <div class="item-label">{{ foundationalDataType?.name }}</div>
+                        <div class="item-value">
+                            <ul>
+                                <li *ngFor="let foundationalData of foundationalDataType?.foundational_data">{{foundationalData?.name}}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="!hide()">
+                <h4 class="font-weight-medium mb-16">{{ 'primary_address' | i18next }}</h4>
+                <div class="detail-item d-flex align-items-center mb-16">
+                    <div class="item-label">{{ 'country' | i18next }}</div>
+                    <div class="item-value font-weight-medium">{{hierarchyData?.addresses[0]?.country }}</div>
+                </div>
+                <div class="detail-item d-flex align-items-center mb-16">
+                    <div class="item-label">{{ 'address' | i18next }}</div>
+                    <div class="item-value font-weight-medium">{{ hierarchyData?.addresses[0]?.address_line1 }}
+                    </div>
+                </div>
+                <div *ngIf="hierarchyData?.addresses?.length > 1">
+                    <div *ngIf="hierarchyData?.addresses[1]?.country != '' && hierarchyData?.addresses[1]?.country">
+                        <h4 class="font-weight-medium mb-16">{{ 'secondary_address' | i18next }}</h4>
+                        <div class="detail-item d-flex align-items-center mb-16">
+                            <div class="item-label">{{ 'country' | i18next }}</div>
+                            <div class="item-value font-weight-medium">{{hierarchyData?.addresses[1]?.country }}
+                            </div>
+                        </div>
+
+                        <div class="detail-item d-flex align-items-center mb-16">
+                            <div class="item-label">{{ 'address' | i18next }}</div>
+                            <div class="item-value font-weight-medium">{{hierarchyData?.addresses[1]?.address_line1 }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h4 class="font-weight-medium mb-16">{{ 'primary_contact' | i18next }}</h4>
+                <div class="detail-item d-flex align-items-center mb-16">
+                    <div class="item-label">{{ 'contact_person_name' | i18next }}</div>
+                    <div class="item-value font-weight-medium">{{hierarchyData?.contact_info[0]?.contact_name }}
+                    </div>
+                </div>
+
+                <div class="detail-item d-flex align-items-center mb-16">
+                    <div class="item-label">{{ 'designation' | i18next }}</div>
+                    <div class="item-value font-weight-medium">{{hierarchyData?.contact_info[0]?.title }}</div>
+                </div>
+
+                <div class="detail-item d-flex align-items-center mb-16">
+                    <div class="item-label">{{ 'phone' | i18next }}</div>
+                    <div class="item-value font-weight-medium">
+                        {{'+'+hierarchyData?.contact_info[0]?.isd_code+'-'+hierarchyData?.contact_info[0]?.contact_phone |
+                        i18nextEager}}</div>
+                </div>
+
+                <div class="detail-item d-flex align-items-center mb-16">
+                    <div class="item-label">{{ 'email' | i18next }}</div>
+                    <div class="item-value font-weight-medium">{{hierarchyData?.contact_info[0]?.contact_email }}
+                    </div>
+                </div>
+
+                <div *ngIf="hierarchyData?.contact_info?.length > 1">
+                    <div
+                        *ngIf="hierarchyData?.contact_info[1]?.contact_phone != '' && hierarchyData?.contact_info[1]?.contact_phone">
+                        <h4 class="font-weight-medium mb-16">{{ 'secondary_contact' | i18next }}</h4>
+                        <div class="detail-item d-flex align-items-center mb-16">
+                            <div class="item-label">{{ 'contact_person_name' | i18next }}</div>
+                            <div class="item-value font-weight-medium">{{hierarchyData?.contact_info[1]?.contact_name }}</div>
+                        </div>
+
+                        <div class="detail-item d-flex align-items-center mb-16">
+                            <div class="item-label">{{ 'designation' | i18next }}</div>
+                            <div class="item-value font-weight-medium">{{hierarchyData?.contact_info[1]?.title }}
+                            </div>
+                        </div>
+
+                        <div class="detail-item d-flex align-items-center mb-16">
+                            <div class="item-label">{{ 'phone' | i18next }}</div>
+                            <div class="item-value font-weight-medium">
+                                {{'+'+hierarchyData?.contact_info[1]?.isd_code+'-'+hierarchyData?.contact_info[1]?.contact_phone}}</div>
+                        </div>
+
+                        <div class="detail-item d-flex align-items-center mb-16">
+                            <div class="item-label">{{ 'email' | i18next }}</div>
+                            <div class="item-value font-weight-medium">{{hierarchyData?.contact_info[1]?.contact_email |
+                              i18nextEager}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <app-common-view-rule-flow class="pt-24" [details]="customFields">
+            </app-common-view-rule-flow>
+        </div>
+    </section>
+</div>

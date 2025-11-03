@@ -1,0 +1,31 @@
+<app-svms-modal size="medium" title="{{'work_flow_details' | i18next}}" [visibility]="columnOrderModal" (onClose)="sidebarClose()">
+  <app-svms-modal-body>
+    <div class="p-24">
+      <div class="flow-items d-flex mb-16">
+          <p>{{ 'id' | i18next }}</p>
+          <p class="font-weight-medium">{{flowData?.code}}</p>
+      </div>
+      <div class="info-box">
+          <p class="info-header">
+              {{ 'condition' | i18next }}
+          </p>
+          <div class="p-12">
+             <div [innerHtml]="flowData?.default_conditions">
+             </div>
+          </div>
+      </div>
+      <h4 class="font-weight-medium mb-16 mt-24">{{ 'levels' | i18next }}</h4>
+      <div class="info-box" *ngFor="let level of flowData?.each_level; let i = index;">
+          <p class="info-header">
+              {{ 'level_' | i18next }}{{i+1}}
+          </p>
+          <div class="p-12">
+             <div [innerHTML]="level?.conditions">
+             </div>
+             <p class="font-weight-medium mt-12 mb-8 text-uppercase">{{ 'recipients' | i18next }}</p>
+             <div [innerHTML]="level?.recipients"></div>
+          </div>
+      </div>
+    </div>
+  </app-svms-modal-body>
+</app-svms-modal>

@@ -1,0 +1,23 @@
+<div class="d-flex pagination-border justify-content-between py-16 pl-16">
+  <div class="d-flex align-items-center">
+    <p class="mr-4">{{ 'show_records' | i18next }}</p>
+    <ng-select [clearable]="false" appendTo="body" [(ngModel)]="selectedRecords.selected" (change)="selectRecord($event)" class="small"
+      class="record-dropdown">
+      <ng-option selected value="5">5</ng-option>
+      <ng-option value="10">10</ng-option>
+      <ng-option value="15">15</ng-option>
+      <ng-option value="20">20</ng-option>
+      <ng-option value="25">25</ng-option>
+    </ng-select>
+  </div>
+
+  <div class="pagination font-weight-normal mx-24" [attr.actpage]="currentPage">
+    <a [class.disabled]="!isLeftNavigate()" (click)="onClick($event, '-1')">
+      <icon name="keyboard_arrow_left" size="17px" type="material" class="d-flex" cuClass="d-flex"></icon>
+    </a>
+
+    <a [class.disabled]="!isRightNavigate()" (click)="onClick($event, '+1')">
+      <icon name="keyboard_arrow_right" size="17px" type="material" class="d-flex" cuClass="d-flex"></icon>
+    </a>
+  </div>
+</div>

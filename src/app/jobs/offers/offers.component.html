@@ -1,0 +1,52 @@
+  <div class="offer-listing-item-root">
+
+    <div class="description-card">
+      <div class="dotloader" *ngIf="dataLoader"></div>
+      <div *ngIf="viewGrid" class="overflow-box">
+        <vms-table
+          *ngIf="tableLoaded"
+          [vmsTableConfig]="tableConfig"
+          [vmsDataSource]="vmsData?.offer"
+          [loading]="dataLoading"
+          [open]="isExpand"
+          [currentTab]="selectedTab"
+          [totalItem]="totalRecords"
+          [itemsPerPage]="limit"
+          [offerNewWorkflow]="offerNewWorkflow"
+          (onExpandClick)="onExpandClick($event)"
+          (onEditClick)="onEditClick($event)"
+          (changePage)="onPaginationClick($event)"
+          (onCreate)="onCreateClick($event)"
+          (onDisableClicked)="disableClicked($event)"
+          (onDeleteClick)="onDeleteClick($event)"
+          (numberBadgeClicked)="columnClicked($event)"
+          (search)="onSearch($event)"
+          (onListFilter)="onListFilter($event)"
+          (counterOffer)="openCounterOfferSidebar($event)"
+          (acceptOffer)="checkOverlap($event)"
+          [count]="countData"
+          (rejectOffer)="openRejectOfferSidebar($event)"
+          (onTabClick)="onTabClick($event)"
+          (onWithdrawProfileClick)="withdrawalClicked($event)"
+          (onRejectCandidateClick)="clickToRejectCandidate($event)"
+          (previewClicked)="previewClicked($event)"
+          [rotuterLinkOnClick] = 'true'
+          [rotuterLinkParseFn] = 'rotuterLinkParseFn'
+          [currentPage]="pageNumber"
+          (changeRecords)="onClickRecords($event)"
+          (onboardingCandidate)="onOnboardingCandidate($event)"
+          (onSort)="onSortClick($event)"
+          (onOfferReviewClick)="clickToOfferReview($event)"
+          (onEditOfferClick)="clickToEditOfferReview($event)"
+          (onCancelOfferClick)="clickToCancelOfferReview($event)"
+        >
+        </vms-table>
+      </div>
+    </div>
+</div>
+
+<app-job-details-sidebar-view></app-job-details-sidebar-view>
+<app-withdraw-candidate (onWithdrawnCandidate)="onWithdrawnCandidate($event)"></app-withdraw-candidate>
+<app-assignment-overlap-warning [showWarning]="showOverlapWarning" [assignmentData]="overlapAssignmentData" 
+(onWarningClose)="showOverlapWarning=false" >
+</app-assignment-overlap-warning>

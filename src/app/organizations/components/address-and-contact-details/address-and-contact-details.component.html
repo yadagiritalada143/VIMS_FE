@@ -1,0 +1,236 @@
+<form [formGroup]="addressForm">
+  <div class="float-left subtitle-2 mb-16 font-weight-bold">{{ 'primary_address' | i18next }}</div>
+  <div class="btn small btn-light float-right" (click)="showPrimarySecondaryAddress()"
+    [ngClass]="{'disable':isViewClicked}"> {{secondaryAddress | i18next}}</div>
+  <div class="clearfix"></div>
+  <div class="primary-address">
+    <div class="form-group">
+      <label> {{ 'country' | i18next }} </label>
+      <ng-select bindLabel="name" [clearable]="true" placeholder="{{ 'select_country' | i18next }}" [readonly]="isViewClicked"
+        ngDefaultControl formControlName="country" (change)="setCountry('primary')">
+        <ng-option *ngFor="let country of countryList" [value]="country.name">{{country.name|i18next}}</ng-option>
+      </ng-select>
+    </div>
+    <div class="form-group"
+      [ngClass]="{'disable':isViewClicked}">
+      <label>{{ 'address' | i18next }}</label>
+      <search-address (setAddress)="getAddress($event)" [adressType]="'geocode'" (customAddress)="getCustomAddress($event)" [country]="countryShortName"
+        formControlName="address" [readonlyMode]="isViewClicked" #address1></search-address>
+    </div>
+  </div>
+  <div class="Secondary-address" [hidden]="!secondaryaddressOpen ">
+    <div class="float-left subtitle-2 mb-16 font-weight-bold">{{ 'secondary_address' | i18next }} </div>
+    <div class="clearfix"></div>
+    <div class="form-group">
+      <label> {{ 'country' | i18next }} </label>
+      <ng-select bindLabel="name" [clearable]="false" placeholder="{{ 'select_country' | i18next }}" ngDefaultControl
+        formControlName="secondarycountry" (change)="setCountry('secondary')" [readonly]="isViewClicked">
+        <ng-option *ngFor="let country of countryList" [value]="country.name">{{country.name|i18next}}</ng-option>
+      </ng-select>
+    </div>
+    <div class="form-group"
+      [ngClass]="{'disable':isViewClicked}">
+      <label>{{ 'address' | i18next }}</label>
+      <search-address (setAddress)="getSecondaryAddress($event)" [adressType]="'geocode'" (customAddress)="getCustomSecondaryAddress($event)"
+        [country]="secondaryCountryShortName" formControlName="secondary_address" [readonlyMode]="isViewClicked"
+        #address2></search-address>
+    </div>
+  </div>
+  <span *ngIf="orgType?.toLowerCase() != 'type_msp' && orgType?.toLowerCase() != 'type_client'">
+  <div class="float-left subtitle-2 mb-16 font-weight-bold">{{subtitle | i18next}}</div>
+  <div class="btn small btn-light float-right" (click)="showPrimarySecondaryContact()"
+    [ngClass]="{'disable':isViewClicked}">{{secondaryContact | i18next}}</div>
+  <div class="clearfix"></div>
+  <div class="primary-contact">
+    <div class="form-group-row">
+      <div class="form-group">
+        <label>{{ 'first_name' | i18next }}<span class="require">*</span></label>
+        <input type="text" class="form-control" placeholder="{{ 'first_name' | i18next }}" formControlName="first_name"
+          minlength="2" required [readonly]="isViewClicked"
+          [ngClass]="{'error':
+          addressForm.controls['first_name']?.invalid && (addressForm.controls['first_name']?.dirty || addressForm.controls['first_name']?.touched)}">
+        <p class="validation-msg" *ngIf="addressForm?.get('first_name')?.errors?.minlength">
+          {{ 'first_name_must_be_greater_than' | i18next }} 2 {{ 'characters' | i18next }}.
+        </p>
+        <p *ngIf="
+            addressForm?.get('first_name')?.touched &&
+                    (addressForm?.get('first_name')?.errors?.pattern || addressForm?.get('first_name')?.errors?.required || addressForm?.get('first_name')?.invalid)
+                  " class="validation-msg">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'please_enter_only_characters' | i18next }}
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label>{{ 'last_name' | i18next }}<span class="require">*</span></label>
+        <input type="text" class="form-control" placeholder="{{ 'last_name' | i18next }}" formControlName="last_name"
+          minlength="2" required [readonly]="isViewClicked" [ngClass]="{'error':
+          addressForm.controls['last_name'].invalid && (addressForm.controls['last_name'].dirty || addressForm.controls['last_name'].touched)
+            }">
+        <p class="validation-msg" *ngIf="addressForm?.get('last_name')?.errors?.minlength">
+          {{ 'last_name_must_be_greater_than' | i18next }} 2 {{ 'characters' | i18next }}.
+        </p>
+        <p *ngIf="
+            addressForm?.get('last_name')?.touched &&
+                    (addressForm?.get('last_name')?.errors?.pattern || addressForm?.get('last_name')?.errors?.required || addressForm?.get('last_name')?.invalid)
+                  " class="validation-msg">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+         {{ 'please_enter_only_characters' | i18next }}
+        </p>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{ 'designation' | i18next }}</label>
+      <input type="text" class="form-control" placeholder="{{ 'enter_designation' | i18next }}"
+        formControlName="designation" [readonly]="isViewClicked" [ngClass]="{'error':
+        addressForm.controls['designation'].invalid && (addressForm.controls['designation'].dirty || addressForm.controls['designation'].touched)
+          }">
+      <p *ngIf="
+            addressForm?.get('designation')?.touched &&
+                    (addressForm?.get('designation')?.errors?.pattern || addressForm?.get('designation')?.errors?.required || addressForm?.get('designation')?.invalid)
+                  " class="validation-msg">
+        <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+       {{ 'please_enter_only_characters' | i18next }}
+      </p>
+    </div>
+    <div class="form-group-row">
+      <div class="form-group">
+        <label>{{ 'phone' | i18next }} <span class="require">*</span></label>
+        <div class="d-flex align-items-center country-searchable">
+          <ng-select [searchable]="true" [clearable]="false" [class.hide-arrow]="isViewClicked"  [(ngModel)]="addressForm.value.phoneFormatCountry" ngDefaultControl
+            formControlName="phoneFormatCountry" [readonly]="isViewClicked" (ngModelChange)="phoneLengthValidation()">
+            <ng-option *ngFor="let country of countryList" [value]="country.iso_code_2">
+              <img src="../../../assets/images/flag/{{country.iso_code_2.toLowerCase()}}.png" width="20px" class="mr-4" />
+              <span>+{{country.isd_code}}</span>
+            </ng-option>
+          </ng-select>
+
+          <input type="number" class="form-control" placeholder="{{ 'contact_person_phone_number' | i18next }}"
+            formControlName="phone" [readonly]="isViewClicked" [pattern]="mobNumberPattern" [ngClass]="{'error':
+        addressForm.controls['phone'].invalid && (addressForm.controls['phone'].dirty || addressForm.controls['phone'].touched)
+          }">
+        </div>
+        <p *ngIf="
+        addressForm?.get('phone')?.touched &&
+                (addressForm?.get('phone')?.errors?.pattern || addressForm?.get('phone')?.errors?.required || addressForm?.get('phone')?.invalid)
+              " class="validation-msg">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'phone_number_is_not_valid' | i18next }}.
+        </p>
+      </div>
+      <div class="form-group">
+        <label>{{ 'email' | i18next }}<span class="require">*</span></label>
+        <input type="email" [pattern]="emailvalidation" required class="form-control" onkeypress="return (event.charCode != 45) "
+          placeholder="{{ 'contact_person_email_address' | i18next }}" formControlName="email" [readonly]="isViewClicked"
+          [ngClass]="{'error':
+      addressForm.controls['email'].invalid && (addressForm.controls['email'].dirty || addressForm.controls['email'].touched)
+        }">
+
+        <p *ngIf="
+        addressForm?.get('email')?.touched &&
+                (addressForm?.get('email')?.errors?.pattern || addressForm?.get('email')?.errors?.required || addressForm?.get('email')?.invalid)
+              " class="validation-msg">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'email_is_not_valid' | i18next }}.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="secondary-contact" *ngIf="secondaryContactOpen">
+    <div class="float-left subtitle-2 mb-16 font-weight-bold">{{ 'secondary_contact' | i18next }} </div>
+    <div class="clearfix"></div>
+    <div class="form-group-row">
+      <div class="form-group">
+        <label>{{ 'first_name' | i18next }}<span class="require">*</span></label>
+        <input type="text" class="form-control" placeholder="{{ 'first_name' | i18next }}"
+          formControlName="secondary_first_name" minlength="2" required [readonly]="isViewClicked"
+          [ngClass]="{'error':
+          addressForm.controls['secondary_first_name'].invalid && (addressForm.controls['secondary_first_name'].dirty || addressForm.controls['secondary_first_name'].touched)}">
+        <p class="validation-msg" *ngIf="addressForm?.get('secondary_first_name')?.errors?.minlength">
+          {{ 'first_name_must_be_greater_than' | i18next }} 2 {{ 'characters' | i18next }}.
+        </p>
+        <p *ngIf="
+          addressForm?.get('secondary_first_name')?.touched &&
+                  (addressForm?.get('secondary_first_name')?.errors?.pattern || addressForm?.get('secondary_first_name')?.errors?.required || addressForm?.get('secondary_first_name')?.invalid)
+                " class="validation-msg">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'please_enter_only_characters' | i18next }}
+        </p>
+      </div>
+      <div class="form-group">
+        <label>{{ 'last_name' | i18next }} <span class="require">*</span></label>
+        <input type="text" class="form-control" placeholder="{{ 'last_name' | i18next }}"
+          formControlName="secondary_last_name" minlength="2" required [readonly]="isViewClicked"
+          [ngClass]="{'error':
+          addressForm.controls['secondary_last_name'].invalid && (addressForm.controls['secondary_last_name'].dirty || addressForm.controls['secondary_last_name'].touched)}">
+        <p class="validation-msg" *ngIf="addressForm?.get('secondary_last_name')?.errors?.minlength">
+          {{ 'last_name_must_be_greater_than' | i18next }} 2 {{ 'characters' | i18next }}.
+        </p>
+        <p *ngIf="
+          addressForm?.get('secondary_last_name')?.touched &&
+                  (addressForm?.get('secondary_last_name')?.errors?.pattern || addressForm?.get('secondary_last_name')?.errors?.required || addressForm?.get('secondary_last_name')?.invalid)
+                " class="validation-msg">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'please_enter_only_characters' | i18next }}
+        </p>
+      </div>
+
+    </div>
+    <div class="form-group">
+      <label>{{ 'designation' | i18next }}</label>
+      <input type="text" class="form-control " placeholder="{{ 'enter_designation' | i18next }}"
+        formControlName="secondary_designation" [readonly]="isViewClicked"
+        [ngClass]="{'error':
+        addressForm.controls['secondary_designation'].invalid && (addressForm.controls['secondary_designation'].dirty || addressForm.controls['secondary_designation'].touched)}">
+      <p *ngIf="
+          addressForm?.get('secondary_designation')?.touched &&
+                  (addressForm?.get('secondary_designation')?.errors?.pattern || addressForm?.get('secondary_designation')?.errors?.required || addressForm?.get('secondary_designation')?.invalid)
+                " class="validation-msg">
+        <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+        {{ 'please_enter_only_characters' | i18next }}
+      </p>
+    </div>
+    <div class="form-group-row">
+      <div class="form-group">
+        <label>{{ 'phone' | i18next }} <span class="require">*</span></label>
+        <div class="d-flex align-items-center country-searchable">
+          <ng-select [searchable]="true" [class.hide-arrow]="isViewClicked" [clearable]="false" [(ngModel)]="addressForm.value.secondary_phoneFormatCountry" ngDefaultControl
+            formControlName="secondary_phoneFormatCountry" [readonly]="isViewClicked" (ngModelChange)="phoneLengthValidation()">
+            <ng-option *ngFor="let country of countryList" [value]="country.iso_code_2">
+              <img src="../../../assets/images/flag/{{country.iso_code_2.toLowerCase()}}.png" width="20px" class="mr-4" />
+              <span>+{{country.isd_code}}</span>
+            </ng-option>
+          </ng-select>
+
+          <input type="number" class="form-control" placeholder="{{ 'contact_person_phone_number' | i18next }}"
+            formControlName="secondary_phone" [pattern]="mobNumberPattern" [ngClass]="{'error':
+        addressForm.controls['secondary_phone'].invalid && (addressForm.controls['secondary_phone'].dirty || addressForm.controls['secondary_phone'].touched)
+          }" [readonly]="isViewClicked">
+        </div>
+        <p *ngIf="
+        addressForm?.get('secondary_phone')?.touched &&
+                (addressForm?.get('secondary_phone')?.errors?.pattern || addressForm?.get('secondary_phone')?.errors?.required || addressForm?.get('secondary_phone')?.invalid)
+              " class="validation-msg">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'phone_number_is_not_valid' | i18next }}.
+        </p>
+      </div>
+      <div class="form-group">
+        <label>{{ 'email' | i18next }}<span class="require">*</span></label>
+        <input type="email" class="form-control" placeholder="{{ 'contact_person_email_address' | i18next }}"
+          formControlName="secondary_email" required [pattern]="emailvalidation" onkeypress="return (event.charCode != 45) "
+          [ngClass]="{'error':
+      addressForm.controls['secondary_email'].invalid && (addressForm.controls['secondary_email'].dirty || addressForm.controls['secondary_email'].touched)}"
+          [readonly]="isViewClicked">
+
+        <p *ngIf="addressForm?.get('secondary_email')?.touched && (addressForm?.get('secondary_email')?.errors?.pattern || addressForm?.get('secondary_email')?.errors?.required || addressForm?.get('secondary_email')?.invalid)"
+          class="validation-msg">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'email_is_not_valid' | i18next }}.
+        </p>
+      </div>
+    </div>
+  </div>
+  </span>
+  
+</form>

@@ -1,0 +1,46 @@
+<form [formGroup]="formGroup">
+    <app-program-config-control
+        subtitle="resume_mandatory_at_candidate_creation"
+        description="when_enabled_the_system_will_make_it_mandatory_for_a_resume_to_be_uploaded_during_candidate_creation_if_its_preferred_to_require_a_resume_at_the_time_of_submission_this_setting_should_be_disabled_and_the_setting_on_job_templates_called_resume_mandatory_should_be_enabled_instead"
+        [type]="ControlType.TOGGLE" 
+        formControlName='is_resume_mandatory'>
+    </app-program-config-control>
+    <app-program-config-control 
+        subtitle="country_mandatory"
+        description='enabling_this_setting_will_require_that_the_country_field_in_basic_details_is_selected_during_candidate_creation_this_will_ensure_that_suggested_addresses_for_the_candidate_align_with_the_country_selected'
+        [type]="ControlType.TOGGLE" 
+        formControlName='is_country_mandatory'
+        [disabled]="countryDisabled">
+    </app-program-config-control>
+    <!-- <app-program-config-control 
+        subtitle="State/National ID Mandatory"
+        description="'Enabling this setting will require that the last 3 digits of the State/National ID be entered during candidate creation."
+        [type]="ControlType.TOGGLE" 
+        formControlName='is_state_national_id_mandatory'>
+    </app-program-config-control> -->
+    <app-program-config-control 
+        subtitle="hide_candidate_image"
+        description="when_this_flag_is_enabled_any_candidate_image_which_has_been_uploaded_by_the_supplier_will_not_be_visible_to_client_users_ie_users_who_are_assigned_to_the_client_organization"
+        [type]="ControlType.TOGGLE" 
+        formControlName='is_candidate_image_hidden'>
+    </app-program-config-control>
+    <app-program-config-control 
+        subtitle="unique_id"
+        description="identifies_the_format_for_the_unique_id_field_which_is_used_across_the_application_as_a_unique_identifier_for_candidates"
+        [type]="ControlType.DROPDOWN" 
+        [dropdownItems]="candidateIDFormatOptions"
+        formControlName='candidate_unique_id_format'>
+    </app-program-config-control>
+    <app-program-config-control 
+        subtitle="address_mandatory_at_candidate_creation"
+        description='when_enabled_the_system_will_make_it_mandatory_to_enter_the_candidate_complete_address_in_the_form_of_address_primary_city_state_and_zip_code_at_the_time_of_candidate_creation'
+        [type]="ControlType.TOGGLE" 
+        formControlName='is_candidate_address'>
+    </app-program-config-control>
+    <app-program-config-control 
+        subtitle="education_mandatory"
+        description='enabling_this_setting_will_make_education_a_mandatory_field_during_candidate_creation'
+        [type]="ControlType.TOGGLE" 
+        formControlName='is_candidate_education_required'>
+    </app-program-config-control>
+</form>

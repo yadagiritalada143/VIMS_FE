@@ -1,0 +1,341 @@
+<form [formGroup]="renderForm">
+
+
+  <div *ngIf="field?.type === 'DROPDOWN'">
+    <div>
+      <ng-select [ngClass]="{'error': (is_continue && renderForm.get(field?.slug).invalid)}"
+        [items]="field?.datasource?.type === 'url' ? dropDownList : field?.datasource?.options" [loading]="isLoading"
+        [bindLabel]="field?.bind_label" [bindValue]="field?.bind_value" placeholder="{{field?.placeholder|i18next}}"
+        [formControlName]="field?.slug" [clearable]="true" (search)="getDropDownData($event)">
+      </ng-select>
+      <p class="text-red" *ngIf="(is_continue && renderForm.get(field?.slug).invalid)">
+        {{errorMassage[field?.slug]|i18next}}
+      </p>
+    </div>
+  </div>
+
+  <div *ngIf="field?.type === 'MULTIDROPDOWN'">
+    <ng-select [ngClass]="(is_continue && renderForm.get(field?.slug).invalid) ? 'error' : ''"
+      [items]="field?.datasource?.type === 'url' ? dropDownList : field?.datasource?.options" [loading]="isLoading"
+      [bindLabel]="field?.bind_label" [bindValue]="field?.bind_value" [clearable]="true" [multiple]="true"
+      placeholder="{{field?.placeholder|i18next}}" [hideSelected]="true" [formControlName]="field?.slug"
+      (search)="getDropDownData($event)">
+    </ng-select>
+    <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red">
+      {{errorMassage[field?.slug]}}
+    </p>
+  </div>
+
+  <div *ngIf="field?.type === 'PERSON_DROPDOWN'">
+    <ng-select [ngClass]="(is_continue && renderForm.get(field?.slug).invalid) ? 'error' : ''"
+      placeholder="{{field?.placeholder|i18next}}" [formControlName]="field?.slug" [clearable]="true"
+      (search)="getDropDownData($event)" [loading]="isLoading">
+      <ng-option *ngFor="let item of (field?.datasource?.type === 'url' ? dropDownList : field?.datasource?.options)"
+        [value]="item[field?.bind_value]">
+        {{item[field?.bind_label] | shortName}} {{item[field?.bind_label]|i18next}}
+      </ng-option>
+    </ng-select>
+    <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red">
+      {{errorMassage[field?.slug]|i18next}}
+    </p>
+  </div>
+
+  <div *ngIf="field?.type === 'HUMAN_DROPDOWN'">
+    <ng-select [ngClass]="(is_continue && renderForm.get(field?.slug)?.invalid) ? 'error' : ''"
+      placeholder="{{field?.placeholder}}" [formControlName]="field?.slug" [clearable]="true"
+      (search)="getDropDownData($event)"  (clear)="getDropDownData({term  :''});resetSelectedValue()" [loading]="isLoading">
+      <ng-option *ngFor="let item of (field?.datasource?.type === 'url' ? dropDownList : field?.datasource?.options)"
+        [value]="item[field?.bind_value]">
+        {{item[field?.bind_label]|titlecase}} {{item?.middle_name|titlecase}}
+        {{item?.last_name|titlecase}}</ng-option>
+    </ng-select>
+    <p *ngIf="(is_continue && renderForm.get(field?.slug)?.invalid)" class="text-red">
+      {{errorMassage[field?.slug]|i18next}}
+    </p>
+  </div>
+
+  <div *ngIf="field?.type === 'JOB_DROPDOWN'" class="form-group">
+    <ng-select [ngClass]="(is_continue && renderForm.get(field?.slug).invalid) ? 'error' : ''"
+      placeholder="{{field?.placeholder|i18next}}" [formControlName]="field?.slug" [clearable]="true"
+      (search)="getDropDownData($event)" [loading]="isLoading">
+      <ng-option *ngFor="let item of (field?.datasource?.type === 'url' ? dropDownList : field?.datasource?.options)"
+        [value]="item[field?.bind_value]">
+        {{item['ref_title'] ? item['ref_title']['title'] : item['ref_title.title']}} ({{item?.job_id}})</ng-option>
+    </ng-select>
+    <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red">
+      {{errorMassage[field?.slug]|i18next}}
+    </p>
+  </div>
+
+
+  <div *ngIf="field?.type === 'CANDIDATE_DROPDOWN'">
+    <div class="row no-gutters mb-24">
+      <div class="col-md-9">
+        <div class="mr-8 position-relative search-candidate">
+          <ng-select [ngClass]="(is_continue && renderForm.get(field?.slug).invalid) ? 'ng-invalid error' : ''"
+            placeholder="{{field?.placeholder|i18next}}" [ngModelOptions]="{standalone: true}" [clearable]="true"
+            [(ngModel)]="selectedCandidate" (search)="getDropDownData($event)" (change)="onSelect($event, true)"
+            [loading]="isLoading" (clear)="onCandidate()">
+            <ng-option
+              *ngFor="let item of (field?.datasource?.type === 'url' ? dropDownList : field?.datasource?.options)"
+              [value]="item[field?.bind_value]">
+              <span class="subtitle-2 font-weight-medium">
+                {{item[field?.bind_label]|titlecase}} {{item?.middle_name|titlecase}}
+                {{item?.last_name|titlecase}} {{item?.email ? '('+ item?.email +')' : ''}}</span>
+            </ng-option>
+          </ng-select>
+          <div class="position-absolute search-cand">
+            <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+          </div>
+          <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red">
+            {{errorMassage[field?.slug]|i18next}}
+          </p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <button type="button" class="btn btn-outine btn-primary-color float-right w-100"
+          (click)="onBtnClickEvent(field?.slug)">
+          <icon name="add" type="material" class="d-flex" cuClass="d-flex"></icon> {{field?.btn_name|i18next}}
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <div *ngIf="field?.type === 'VENDOR_DROPDOWN'">
+    <div class="form-group">
+      <ng-select [ngClass]="(is_continue && renderForm.get(field?.slug).invalid) ? 'error' : ''"
+        [items]="field?.datasource?.type === 'url' ? dropDownList : field?.datasource?.options" [loading]="isLoading"
+        [bindLabel]="field?.bind_label" [bindValue]="field?.bind_value" placeholder="{{field?.placeholder|i18next}}"
+        [formControlName]="field?.slug" [clearable]="false" (search)="getDropDownData($event)"
+        (change)="onSelectVendor($event)">
+      </ng-select>
+      <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red">
+        {{errorMassage[field?.slug]|i18next}}
+      </p>
+    </div>
+  </div>
+
+
+
+  <div *ngIf="field?.type === 'PERSON_MULTIDROPDOWN'" [formControlName]="field?.slug">
+    <ng-select [ngClass]="(is_continue && renderForm.get(field?.slug).invalid) ? 'error' : ''" [clearable]="false"
+      [multiple]="true" placeholder="{{field?.placeholder}}" [hideSelected]="true" (search)="getDropDownData($event)"
+      [loading]="isLoading">
+      <ng-option *ngFor="let item of (field?.datasource?.type === 'url' ? dropDownList : field?.datasource?.options)"
+        [value]="item[field?.bind_value]">
+        {{item[field?.bind_label] | shortName}} {{item[field?.bind_label]|i18next}}
+      </ng-option>
+      <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red">
+        {{errorMassage[field?.slug]|i18next}}
+      </p>
+    </ng-select>
+  </div>
+
+  <div *ngIf="field?.type === 'NUMBER'" class="form-group">
+    <input [ngClass]="(is_continue && renderForm.get(field?.slug).invalid) ? 'error' : ''" type="number" onlyNumber
+      class="form-control" placeholder="{{field?.placeholder|i18next}}" [formControlName]="field?.slug">
+    <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red">
+      {{errorMassage[field?.slug]|i18next}}
+    </p>
+  </div>
+
+  <div *ngIf="field?.type === 'CURRENCY'">
+    <div class="input-with-fixed-value position-relative">
+      <span>{{currencySym}}</span>
+      <input [ngClass]="(is_continue && renderForm.get(field?.slug).invalid) ? 'error' : ''" type="number" onlyNumber
+        class="form-control" placeholder="{{field?.placeholder|i18next}}" [formControlName]="field?.slug">
+      <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red position-absolute">
+        {{errorMassage[field?.slug]|i18next}}
+      </p>
+    </div>
+  </div>
+
+  <div *ngIf="field?.type === 'EXTENDED_NUMBER'">
+    <div class="no-gutters row">
+      <div class="col-8">
+        <label class="spc"> {{(field?.label ? field?.label : field?.slug)|i18next}}
+          <span *ngIf="field?.is_required" class="require">*</span>
+        </label>
+      </div>
+      <div class="col-4">
+        <input [ngClass]="(is_continue && renderForm.get(field?.slug).invalid) ? 'error' : ''" type="number"
+          class="form-control  highlight-form text-right" [formControlName]="field?.slug"
+          placeholder="{{field?.placeholder|i18next}}">
+        <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red">
+          {{errorMassage[field?.slug]|i18next}}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="field?.type === 'DATE'">
+
+    <svms-datepicker ngDefaultControl [id]="field?.slug" I18n [value]="dateValue" [formControlName]="field?.slug"
+      [inputdateFormat]="field?.date_format || 'yy-mm-dd'"
+      [ngClass]="{'error': (is_continue && renderForm.get(field?.slug).invalid), 'disableDiv': dateFieldDisable[field?.slug]}">
+    </svms-datepicker>
+    <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red">
+      {{errorMassage[field?.slug]|i18next}}
+    </p>
+
+  </div>
+
+  <div *ngIf="field?.type === 'TEXT'">
+    <input [ngClass]="(is_continue && renderForm.get(field?.slug).invalid) ? 'error' : ''" type="text"
+      [maxlength]="field?.meta_data?.max_length" class="form-control" placeholder="{{field?.placeholder|i18next}}"
+      [formControlName]="field?.slug">
+    <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red">
+      {{errorMassage[field?.slug]|i18next}}
+    </p>
+  </div>
+
+  <div *ngIf="field?.type === 'EXTENDED_TEXT'">
+    <div class="no-gutters row">
+      <div class="col-8">
+        <label class="spc"> {{(field?.label ? field?.label : field?.slug)|i18next}}
+          <span *ngIf="field?.is_required" class="require">*</span>
+        </label>
+      </div>
+      <div class="col-4">
+        <input [ngClass]="(is_continue && renderForm.get(field?.slug).invalid) ? 'error' : ''" type="number"
+          class="form-control  highlight-form text-right" [value]="renderForm.get(field?.slug).value | number:'1.0'"
+          [formControlName]="field?.slug" placeholder="{{field?.placeholder|i18next}}">
+        <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red">
+          {{errorMassage[field?.slug]|i18next}}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="field?.type === 'EMAIL'">
+    <input [ngClass]="(is_continue && renderForm.get(field?.slug).invalid) ? 'error' : ''" type="email"
+      class="form-control" placeholder="{{field?.placeholder|i18next}}" [formControlName]="field?.slug">
+    <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red">
+      {{errorMassage[field?.slug]|i18next}}
+    </p>
+  </div>
+
+  <div *ngIf="field?.type === 'TOGGLE'">
+    <div class="radio-group">
+      <div *ngFor="let radioitem of items" class="radio-container">
+        <input type="radio" [name]="field?.slug" [value]="radioitem.value" [formControlName]="field?.slug">
+        <span class="checkmark">{{radioitem.label|i18next}}</span>
+        <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red">
+          {{errorMassage[field?.slug]|i18next}}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="field?.type === 'HIERARCHY'">
+    <div class="form-group position-relative ">
+      <input [ngClass]="(is_continue && renderForm.get(field?.slug).invalid) ? 'error' : ''" type="text"
+        class="form-control" placeholder="{{field?.placeholder|i18next}}" [ngModel]="selectedHierarchyName"
+        [ngModelOptions]="{standalone: true}" (click)="onClickhierarchy()" readonly>
+      <span class="cursor-pointer hierarchy" (click)="onClickhierarchy()">
+        <icon size="19px" name="account_tree" type="material" class="d-flex" cuClass="d-flex"></icon>
+      </span>
+      <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red">
+        {{errorMassage[field?.slug]|i18next}}
+      </p>
+    </div>
+  </div>
+
+  <div *ngIf="field?.type === 'SEARCH'">
+    <div class="position-relative ">
+      <input [ngClass]="(is_continue && renderForm.get(field?.slug).invalid) ? 'error' : ''" type="text"
+        class="form-control" placeholder="{{field?.placeholder|i18next}}" [formControlName]="field?.slug">
+      <span class="cursor-pointer search">
+        <icon size="20px" name="search" type="material" class="d-flex" cuClass="d-flex"></icon>
+      </span>
+      <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red">
+        {{errorMassage[field?.slug]|i18next}}
+      </p>
+    </div>
+  </div>
+</form>
+
+<!-- candidate dropdown result -->
+<div *ngIf="(field?.type === 'CANDIDATE_DROPDOWN') && is_selected" class="candidate-panel w-100 my-16">
+  <div class="d-flex">
+    <div class="client">
+      <div class="logo d-flex align-items-center mr-32">
+        <div *ngIf="selectedDta?.first_name !== ''"
+          class="initials initials-profile initial-large initials__green d-flex align-justify-center mr-8 text-uppercase">
+          {{selectedDta?.first_name +' '+ selectedDta?.last_name | shortName}}</div>
+        <div class="d-flex flex-column text-capitalize">
+          <span class="subtitle-2 font-weight-medium">{{selectedDta?.name_prefix}}
+            {{selectedDta?.first_name | titlecase}}
+            {{selectedDta?.middle_name | titlecase}} {{selectedDta?.last_name | titlecase}}
+            {{selectedDta?.name_suffix}}</span>
+          <span class="small">{{selectedDta?.addresses ? (country[selectedDta?.addresses[0]?.country] | uppercase) :
+            ''}}</span>
+
+        </div>
+      </div>
+    </div>
+    <div class="client">
+      <div class="d-flex  align-items-center">
+        <div class="text-left mt-8 d-flex align-items-center mr-16"><span class="initials initials__lightBlue mr-8">
+            <icon class="d-flex blue" size="11px" name="mail" theme="outlined" type="material" cuClass="d-flex">
+            </icon>
+          </span><a href="javascript:void(0)" class="d-flex">{{selectedDta?.email}}</a>
+          <icon class="d-flex ml-4" size="12px" name="verified" type="material" cuClass="d-flex"></icon>
+        </div>
+      </div>
+    </div>
+    <div class="client">
+      <div class="d-flex  align-items-center">
+        <div class="text-left mt-8 d-flex align-items-center mr-16"><span class="initials initials__lightBlue mr-8">
+            <icon class="d-flex blue" size="11px" name="phone" theme="outlined" type="material" cuClass="d-flex">
+            </icon>
+          </span><a href="javascript:void(0)" class="d-flex">{{selectedDta?.phone_number ? (selectedDta?.phone_isdcode
+            +' '+ selectedDta?.phone_number) : 'N/A'|i18next }}</a>
+          <icon *ngIf="selectedDta?.phone_number" class="d-flex ml-4" size="12px" name="verified" type="material"
+            cuClass="d-flex"></icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<!-- Vendor dropdown result -->
+<div *ngIf="(field?.type === 'VENDOR_DROPDOWN') && is_selected" class="result-panel mb-16">
+  <div class="client-logo responsive-logo" *ngIf="selectedDta?.vendor?.logo_url === null">
+    <img src="assets/images/no-vendor-logo.svg" class="img-fluid" width="100" />
+  </div>
+  <div class="client-logo responsive-logo" *ngIf="selectedDta?.vendor?.logo_url !== null">
+    <img [src]="selectedDta?.vendor?.logo_url" alt="" class="img-fluid" />
+  </div>
+  <div class="industry">
+    <p class="font-weight-medium">
+      {{selectedDta?.vendor?.industries[0]?.name}}</p>
+    <span class="txt-11">{{ 'industry' | i18next }}</span>
+  </div>
+
+
+  <div class="client">
+    <!-- <div class="logo d-flex align-items-center">Api need to be discussed for details api -->
+    <!-- <div *ngIf="selectedDta?.contacts[0]?.contact_name !== ''" -->
+    <!-- <div
+      class="initials initials-profile initials__green d-flex align-justify-center mr-8 text-uppercase">
+      {{selectedDta?.contacts[0]?.contact_name | shortName}}</div>
+    <div class="d-flex flex-column text-capitalize">
+      <span class="subtitle-2 font-weight-medium">{{selectedDta?.contacts[0]?.contact_name | titlecase}}</span>
+      <span class="small">CONTACT PERSON</span>
+
+    </div>
+  </div> -->
+  </div>
+  <!-- <div class="icons">
+  <a href="">
+    <icon size="18px" name="language" type="material"></icon>
+  </a>
+  <a href="">
+    <icon size="18px" name="mail" type="material"></icon>
+  </a>
+</div> -->
+</div>

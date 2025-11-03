@@ -1,0 +1,95 @@
+<div class="filter-panel position-fixed bg-light">
+  <a  class="filter-close" (click)="closeFilter()">
+    <icon name="close" size="24px"></icon>
+  </a>
+  <h4 class="pt-16 pl-24 pr-24 font-weight-normal">
+    <table-icon size="19px" name="filter_alt" type="material" cuClass="d-flex" class="float-left mr-4"></table-icon>
+    {{ 'filters' | i18next }}
+  </h4>
+  <form [formGroup]="advanceFilterForm" (submit)="onSearch()">
+    <div class="filter-content p-24 pt-8">
+
+      <div class="form-group mb-8 pb-0 position-relative" *ngFor="let item of filter">
+        <div class="mb-8">
+          <label>{{item?.title | i18next}}</label>
+          <!-- <span class="total-count position-absolute" *ngIf="advanceFilterForm.get(item.name) > 0">{{client.length}}</span> -->
+          <input *ngIf="item.filterType === 'TEXT'" type="text" [name]="item.name" [formControlName]="item.name"
+            class="form-control mb-8" autocomplete="off"
+            placeholder="{{(item?.placeholder ? item?.placeholder : item?.title) | i18next}}">
+        </div>
+        <!-- For Multi Select DropDown -->
+        <div class="mb-8">
+          <ng-select *ngIf="item.filterType === 'MULTISELECT'" [clearable]="false" [multiple]="true"
+            placeholder="{{(item?.placeholder ? item?.placeholder : item?.title) | i18next}}" [formControlName]="item?.name"
+            [hideSelected]="true" ngDefaultControl>
+            <ng-option [value]="data?.value" *ngFor="let data of item?.multiSelectData">{{data?.name}}</ng-option>
+          </ng-select>
+        </div>
+
+        <!-- For Number Field -->
+        <input type='number' *ngIf="item.filterType === 'NUMBER'" type="text" [name]="item.name" [formControlName]="item.name"
+            class="form-control mb-8" autocomplete="off" (keydown)='numberOnlyValidator($event)'
+            placeholder="{{(item?.placeholder ? item?.placeholder : item?.title) | i18next}}">
+
+        <!-- For Select DropDown -->
+        <div class="mb-8">
+          <ng-select *ngIf="item.filterType === 'SELECT'" [clearable]="false" [items]="item?.multiSelectData"
+            bindLabel="name" [loading]="item?.fieldLoading" bindValue="value" placeholder="{{(item?.placeholder ? item?.placeholder : item?.title)|i18next}}"
+            [formControlName]="item?.name" (search)='searchTrigger($event, item?.searchEvent, item?.name)'
+            (add)='searchTrigger($event, item?.searchEvent, item?.name)'>
+          </ng-select>
+        </div>
+
+        <!-- For MultiChip DropDown -->
+        <div class="mb-8">
+          <ng-select *ngIf="item.filterType === 'MULTICHIP'" [clearable]="true" [multiple]="true" (search)='searchTrigger($event, item?.searchEvent, item?.name)'
+          (add)='searchTrigger($event, item?.searchEvent, item?.name)' (focus)='searchTrigger($event, item?.searchEvent, item?.name)'
+          placeholder="{{(item?.placeholder ? item?.placeholder : item?.title) | i18next}}" [loading]='(item.fieldLoading)?true: false'
+          [formControlName]="item?.name" [hideSelected]="true" ngDefaultControl>
+            <ng-option [value]="data?.value" *ngFor="let data of item?.multiSelectData">{{data?.name}}</ng-option>
+          </ng-select>
+        </div>
+
+        <!-- For Select dropdown -->
+        <div class='mb-8 d-flex w-100' *ngIf="item.filterType === 'CHECKBOX'">
+          <input [id]='"checkbox-"+item?.name' [name]='item?.name' type="checkbox" [formControlName]="item?.name">
+          <label [for]='item?.name' class='checkbox-label'> {{ 'do_not_rehire' | i18next }}</label>
+        </div>
+
+        <!-- For DateRange Picker-->
+        <div class="mb-8">
+          <div *ngIf="item.filterType === 'DATERANGE'" class="form-group position-relative">
+            <svms-datepicker [inputdateFormat]="" [formControlName]="item?.name" [options]="createdDate"
+              placeholder="{{ 'choose_date_range' | i18next }}" id="startDate" I18n #refdate1>
+            </svms-datepicker>
+          </div>
+        </div>
+
+        <!-- For multiple checkbox -->
+        <div class='mb-8' *ngIf='item.filterType === "MULTICHECKBOX"'>
+          <br/>
+          <ng-container *ngFor='let option of item?.multiSelectData'>
+            <div class='d-flex mb-8'>
+              <input type='checkbox' [value]="option.value" [id]='"filter-"+option.value'/>
+              <label class='ml-8' [for]='"filter-"+option.value'> {{ option.name|i18next }} </label>
+            </div>
+          </ng-container>
+        </div>
+
+
+      </div>
+    </div>
+
+    <div class="filter-footer pt-16 pb-16 pl-24 pr-24">
+      <button class="btn btn-outine float-left" type="reset" (click)="ClearFilter()">
+        <table-icon size="20px" name="highlight_off" type="material" cuClass="d-flex" class="icon--on-left d-flex">
+        </table-icon> {{ 'clear_all_filter' | i18next }}
+      </button>
+      <button class="btn btn-primary float-right" type="submit">
+        <table-icon size="20px" name="check_circle" type="material" cuClass="d-flex" class="icon--on-left d-flex">
+        </table-icon> {{ 'apply' | i18next }}
+      </button>
+    </div>
+  </form>
+</div>
+<div class="filter-backdrop"></div>

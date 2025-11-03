@@ -1,0 +1,16 @@
+<div>
+  <div *ngIf="isValid == 'valid'">
+    <!-- <app-vendor-account-setup (onNext)="setPassword()"></app-vendor-account-setup> -->
+    <app-user-profile-setup [userBasicInformation]="userBasicInformation" (onNext)="setPassword($event)"></app-user-profile-setup>
+  </div>
+  <div class="vendor-setup-invalid d-flex align-items-center justify-content-center" *ngIf="isValid == 'invalid'">
+    <div class="text-center">
+      <img src="./assets/images/link-expired.svg" alt="Invalid token" width="303" class="img-fluid">
+      <h2 class="mt-64 font-weight-semibold">{{'This invitation is already expired'| i18nextEager}}.</h2>
+      <p class="font-weight-medium">
+        {{ 'Please contact your Administrator to recieve a new invitation.' | i18nextEager }}
+      </p>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,78 @@
+<div class="view-detail-page">
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <div class="d-flex">
+            <i (click)="backClicked()" class="material-icons back-arrow-icon cursor-pointer" tooltip="Back" placement="bottom">arrow_back</i>
+            <div class="ml-16">
+                <h3 class="font-weight-semibold mb-0">{{vendorGroupDetails?.name | i18next}}</h3>
+                <p class="small" *ngIf="vendorGroupDetails?.created_on?.less_than_24">{{'Created ' +
+                    (vendorGroupDetails?.created_on?.hours > 0 ? vendorGroupDetails?.created_on?.hours + ' hours ago' :
+                    vendorGroupDetails?.created_on?.minutes +' minutes ago') | i18next }}</p>
+                <p class="small" *ngIf="!vendorGroupDetails?.created_on?.less_than_24">{{'Created on ' +
+                    vendorGroupDetails?.created_on?.date | i18next }}</p>
+            </div>
+        </div>
+
+        <div *accessControl>
+            <button (click)="onEdit()" class="c-btn c-btn-secondary-medium-left-icon"><i class="material-icons">drive_file_rename_outline</i> {{'edit'|i18next}}</button>
+        </div>
+    </header>
+    <section class="section-body-content">
+        <div class="px-32 py-16">
+            <app-common-view-rule-flow [details]="viewConfig">
+            </app-common-view-rule-flow>
+            <div class="create-view-table-main">
+                <div class="top-head p-16 d-flex justify-content-between align-items-center">
+                    <div class="top-left-head">
+                        <p class="font-weight-medium">Vendors</p>
+                        <span>Here you can choose the existing vendors</span>
+                    </div>
+                </div>
+                
+                <table class="create-view-table">
+                    <thead>
+                        <tr>
+                            <!-- <th>
+                                <span> ID
+                                    <div class="sorting">
+                                        <span class="asc">
+                                            <i class="material-icons">arrow_drop_up</i>
+                                        </span>
+                                        <span class="dec">
+                                            <i class="material-icons">arrow_drop_down</i>
+                                        </span>
+                                    </div>
+                                </span>
+                               
+                            </th> -->
+                            <th><span>Vendor Name
+                                <!-- <div class="sorting">
+                                    <span class="asc">
+                                        <i class="material-icons">arrow_drop_up</i>
+                                    </span>
+                                    <span class="dec">
+                                        <i class="material-icons">arrow_drop_down</i>
+                                    </span>
+                                </div> -->
+                            </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let vendor of vendorGroupDetails?.vendors">
+                            <td>{{vendor?.name}}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center py-32" [ngClass]="{'d-none': vendorGroupDetails?.vendors?.length > 0}" colspan="3">
+                            <img src="/assets/images/no-records.svg" alt="">
+                            <h4 class="font-weight-medium mt-24">
+                              {{ 'no_vendors_selected' | i18next }}
+                            </h4>
+                          </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </section>
+</div>

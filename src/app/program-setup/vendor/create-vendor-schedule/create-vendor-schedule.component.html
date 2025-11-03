@@ -1,0 +1,186 @@
+<svms-sidebar title="{{title | i18next}}" [dataVisibility]="isCreateVendorSchedule" (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+
+    <form [formGroup]="distributionScheduleForm">
+      <div class="addnew-distribution-schedule">
+
+        <label i18n>
+          {{'vendor_distribution_schedule_name' | i18next}}
+          <span class="require">*</span>
+        </label>
+
+        <div class="d-flex">
+          <div class="pl-0 w-100">
+            <div class="form-group">
+              <input type="text" class="form-control" maxlength="100" minlength="3"
+                placeholder="{{'enter_name' | i18next}}" [readOnly]="isViewMode" formControlName="name" />
+              <ng-container *ngIf="distributionScheduleForm.controls.name.touched">
+                <p class="validation-msg" *ngIf="distributionScheduleForm.controls['name'].errors?.required">
+                  <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                  {{'vendor_distribution_schedule_name_is_required'|i18next}}
+                </p>
+                <p class="validation-msg" *ngIf="distributionScheduleForm.controls.name.errors?.minlength">
+                  <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                  {{'name_must_be_at_least_3_characters_long'|i18next}}
+                </p>
+              </ng-container>
+            </div>
+          </div>
+          <div class="ml-8">
+            <div class="toggle-panel" [ngClass]="{'disableDiv': isViewMode}">
+              <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+                <span class="status-text">{{toggle?.title | i18next}}</span>
+                <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="toggleStatus(!toggle?.value)"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group-row">
+          <div class="form-group">
+            <label>{{'description' | i18next}}</label>
+            <textarea placeholder="{{'enter_description..' | i18next}}." maxlength="2000" class="form-control" rows="4"
+              formControlName="description" [readOnly]="isViewMode">
+            </textarea>
+          </div>
+        </div>
+
+        <div [ngClass]="isViewMode?'disableDiv':''" class="form-group">
+          <label i18n>
+            {{'immediately_release_job_to' | i18next}}
+            <span class="require">*</span>
+          </label>
+          <ng-select formControlName="immediate" 
+            [readonly]="isViewMode"
+            [clearable]="!vendorOrGroupLoading" 
+            [searchable]="true" 
+            [multiple]="true"
+            (search)="searchVendorOrGroup($event)" 
+            (open)="searchVendorOrGroup({ term: '' })"
+            (clear)="distributionScheduleForm?.get('immediate')?.setValue([])"
+            placeholder="{{'choose_vendor_or_vendor_group' | i18next}}" 
+            [loading]="vendorOrGroupLoading">
+            <ng-container *ngFor="let entry of (vendorOrGroupList | keysort:'name')">
+              <ng-option [disabled]="isSelected(entry?.id)" [value]="entry?.id">
+                {{ entry?.name | i18next }}
+              </ng-option>
+            </ng-container>
+          </ng-select>
+          <ng-container *ngIf="distributionScheduleForm.controls.immediate.touched">
+            <p class="validation-msg" *ngIf="distributionScheduleForm.controls.immediate.errors?.required">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{'immediate_schedule_for_vendor_distribution_is_required'|i18next}}
+            </p>
+          </ng-container>
+        </div>
+
+        <h4 class="subtile-2">
+          {{'schedule' | i18next}}
+          <span class="require">*</span>
+        </h4>
+
+        <div class="panel panel-light mb-24" 
+          *ngFor="let schedule of distributionScheduleForm.get('schedules')?.controls; index as it">
+
+          <div class="m-16">
+            <div class="form-group-row">
+
+              <div class="form-group w-30">
+                <label i18n>{{'duration' | i18next}}</label>
+                <input [readonly]="isViewMode" type="number" class="form-control" placeholder="{{'3' | i18next}}"
+                  [formControl]="schedule?.get('schedule_value')" inputAccuracy="hour" [allowUptoNDigitDecimalNumber]="2"/>
+              </div>
+
+              <div class="form-group">
+                <label i18n>{{'unit_of_measurement' | i18next}}</label>
+                <ng-select [searchable]="false" [readonly]="isViewMode" 
+                  placeholder="{{'select'|i18next}}"
+                  [formControl]="schedule?.get('schedule_unit')"
+                >
+                  <ng-option value="{{duration?.value}}" 
+                    *ngFor="let duration of duration"> 
+                      {{duration?.name | i18next}}
+                  </ng-option>
+                </ng-select>
+              </div>
+
+              <div class="form-group" [ngClass]="{'disableDiv': isViewMode}">
+                <label i18n>{{'after_initial_release,_release_to' | i18next}}</label>
+
+                <ng-select [formControl]="schedule.get('value')"
+                  [readonly]="isViewMode" 
+                  [clearable]="false"
+                  [searchable]="true" 
+                  [multiple]="true" 
+                  (search)="searchVendorOrGroup($event)" 
+                  (open)="searchVendorOrGroup({ term: '' })"
+                  placeholder="{{'choose_vendor_or_vendor_group'|i18next}}"
+                  [loading]="vendorOrGroupLoading">
+                  <ng-container *ngFor="let entry of (vendorOrGroupList | keysort:'name')">
+                    <ng-option [disabled]="isSelected(entry?.id)" [value]="entry?.id">
+                      {{ entry?.name | i18next }}
+                    </ng-option>
+                  </ng-container>
+                </ng-select>
+              </div>
+
+              <div *ngIf="!isViewMode && (distributionScheduleForm.get('schedules')?.controls?.length > 1)" class="d-flex justify-content-center align-items-center">
+                <icon size="24px" name="delete" theme="outlined" type="material"
+                  class="d-flex mr-4 cursor-pointer" cuClass="d-flex" (click)="removeVendorSchedule(it)"
+                ></icon>
+              </div>
+            </div>
+
+            <ng-container *ngIf="schedule?.get('schedule_unit').touched">
+              <p class="validation-msg" *ngIf="schedule?.get('schedule_unit').errors?.required">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                {{'schedule_unit_is_required'|i18next}}
+              </p>
+            </ng-container>
+
+            <ng-container *ngIf="schedule?.get('schedule_value')?.touched">
+              <p class="validation-msg" *ngIf="schedule?.get('schedule_value').errors?.min">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                {{'duration_must_be_greater_than_zero' | i18next}}
+              </p>
+              <p class="validation-msg" *ngIf="schedule?.get('schedule_value').errors?.required">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                {{'schedule_duration_required' | i18next}}
+              </p>
+            </ng-container>
+
+            <ng-container *ngIf="schedule?.get('value').touched">
+              <p class="validation-msg" *ngIf="!schedule?.get('value').value?.length">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                {{'please_select_atleast_one_vendor_or_vendor_group'|i18next}}
+              </p>
+            </ng-container>
+
+          </div>
+        </div>
+
+        <div class="panel panel-info mb-24" [hidden]="isViewMode">
+          <div class="text-center">
+            <button class="btn add-button m-32" (click)="addScheduleRow()">
+              <icon size="24px" name="add" type="material" cuClass="d-flex"></icon>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </form>
+  </svms-sidebar-body>
+  <svms-sidebar-footer>
+    <button type="submit" [hidden]="isViewMode || editMode" [disabled]="distributionScheduleForm.invalid"
+      class="btn btn-primary float-right" (click)="isEditMode?editVendorDistribution():createVendorDistribution()" *accessControl>
+      <icon size="20px" name="check_circle" type="material" class="d-flex mr-8" cuClass="icon-cu">
+      </icon> {{ 'save' | i18next }}
+    </button>
+    <button type="submit" *accessControl [hidden]="isViewMode || !editMode"
+    class="btn btn-primary float-right" (click)="setEditMode()">
+    <icon size="20px" name="check_circle" type="material" class="d-flex mr-8" cuClass="icon-cu">
+    </icon> {{'Update'|i18next}}
+  </button>
+  </svms-sidebar-footer>
+</svms-sidebar>

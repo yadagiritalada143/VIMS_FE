@@ -1,0 +1,36 @@
+<div class="position-relative d-flex align-items-center number-filter mt-8">
+    <input type="search" class="number-filter-input c-form-control small" [placeholder]="placeholder | i18next" [(ngModel)]="inputVal" onlyNumber
+        [readOnly]="readonlyField || readonly" [disabled]="disabled"/>
+    <div (click)="readonlyToggle()" class="control-icon d-flex align-items-center"  [ngClass]="{'disableDiv': disabled || readonly}" *ngIf="numberType == 'number'">
+        <icon name="tune" cuClass="d-flex" size="20px" type="material" class="cursor-pointer"></icon>
+    </div>
+    <div *ngIf="readonlyField" class="position-absolute min-max-modal p-12">
+        <div class="c-form-group-row">
+            <div class="c-form-group mb-12">
+                <label class="font-weight-normal">{{ 'minimum_value' | i18next }}</label>
+                <input type="text" class="c-form-control small" [placeholder]="placeholder | i18next" [(ngModel)]="minVal"
+                    onlyNumber />
+            </div>
+        </div>
+        <div class="c-form-group-row">
+            <div class="c-form-group mb-12">
+                <label class="font-weight-normal">{{ 'maximum_value' | i18next }}</label>
+                <input type="text" class="c-form-control small" [placeholder]="placeholder | i18next" [(ngModel)]="maxVal"
+                    onlyNumber />
+            </div>
+        </div>
+        <!-- <div *ngIf="+minVal > +maxVal" class="validation-msg">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'minimum_value should be less than Maximum_value' | i18next}}
+        </div> -->
+        <div class="d-flex justify-content-between align-items-center">
+            <span class="date-selected"></span>
+            <button type="button" class="c-btn c-btn-outline-medium small mr-16" (click)="readonlyToggle(); resetInput();">
+                {{ 'cancel' | i18next }}
+            </button>
+            <button type="button" class="c-btn c-btn-primary-medium small" [disabled]="disableApply" (click)="applyMinMax()">
+                 {{ 'apply' | i18next }}
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,33 @@
+<svms-sidebar-ng [title]="'Cancel Confirmed Consolidated Invoice' | i18nextEager " [dataVisibility]="isCancelInvoice"
+    (onClose)='sidebarClose()'>
+     <app-logs [log]="logs"></app-logs>
+    <div class="sidebar-wrapper">
+        <div>
+            <div class="pl-24 pr-24 pt-32 pb-32">
+                <div class="form-group">
+                    <label> {{ 'cancelling_reason' | i18nextEager }} <span class="require">*</span></label>
+                    <ng-select [clearable]="false" placeholder="{{ 'select_reason' | i18nextEager }}" [searchable]="false"
+                        [(ngModel)]="reason">
+                        <ng-option *ngFor="let reason of cancelConsolidateOptions" [value]="reason?.name">{{
+                            reason?.name }}</ng-option>
+                    </ng-select>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'notes' | i18nextEager }} </label>
+                    <textarea class="form-control" placeholder="{{ 'enter_additional_notes' | i18nextEager }}" rows="7"
+                        cols="12" maxlength="3000" [(ngModel)]="notes"></textarea>
+                </div>
+            </div>
+
+        </div>
+        <svms-sidebar-footer-ng>
+            <button type="button" class="btn btn-outline-danger float-right" (click)="sidebarClose()">{{ 'cancel' | i18nextEager }}</button>
+            <button type="button" class="btn btn-primary float-right mr-16"
+                (click)='cancelApprovedConsolidation();sidebarClose()' [disabled]='!reason || !hasAccess'>
+               {{ 'cancel_invoice' | i18nextEager }}
+                <span *ngIf="loading" class="loader ml-12"> </span>
+            </button>
+
+        </svms-sidebar-footer-ng>
+    </div>
+</svms-sidebar-ng>

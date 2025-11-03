@@ -1,0 +1,35 @@
+
+<ng-template #ruleStatus let-row let-value="value">
+  <span class="c-status-ui active" *ngIf="value == 'Active'">
+    {{ 'active' | i18next }}
+  </span>
+  <span class="c-status-ui inactive" *ngIf="value == 'Inactive'">
+    {{ 'inactive' | i18next }}
+  </span>
+  <span class="c-status-ui inactive" *ngIf="value == 'Expired'">
+    {{ 'expired' | i18next }}
+  </span>
+</ng-template>
+
+<app-svms-table
+  [tableOptions]="tableOptions"
+  [coloumnDefintions]="svmstableColomnDefn"
+  [dataSource]="svmsData">
+</app-svms-table>
+
+<ng-template #emptyDataTemplate>
+  <app-no-listing-page
+    clickHere="click here"
+    btnClickUrl="FOUNDATION_DATA_TYPE_CREATE"
+    btnmsg="Create Your First Rule"
+    pmsg="If you would like to add Rule,"
+    headingmsg="No Rule found for the selected program."
+    (onCreateClick)="onCreateClick(true)"
+    #emptyDataTemplate
+  >
+  </app-no-listing-page>
+</ng-template>
+
+
+
+

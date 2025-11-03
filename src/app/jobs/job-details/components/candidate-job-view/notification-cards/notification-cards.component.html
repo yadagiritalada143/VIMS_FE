@@ -1,0 +1,1335 @@
+<app-logs [log]="logs"></app-logs>
+<ng-container *ngIf="!hasAssignments">
+  <div class="panel mb-16" *ngIf="!offer?.offer?.assignment_id && offer?.offer?.status.toLowerCase() === 'accepted' && offer?.offer?.assignment_failed_msg">
+    <div class="p-32 text-center" *ngIf="!loading">
+        <icon name="error" size="50px" color="#FE5858" class="mb-16"></icon>
+        <p class="font-weight-medium mb-4">{{ 'assignment_creation_pending' | i18next }}</p>
+        <p class="small mb-24">
+          {{ !offer?.offer?.assignment_failed_msg ? "Assignment creation is incomplete due to some technical issues." : offer?.offer?.assignment_failed_msg}}
+        </p>
+
+          <button class="btn btn-try small mx-auto" (click)="initAssignment()" *authorize="'create_offer'">{{ 'try_again' | i18next }}</button>
+    </div>
+    <div *ngIf="loading" class="d-flex justify-content-center align-items-center p-16">
+      <div class="dotloader"></div>
+    </div>
+  </div>
+  <div class="panel mb-16" *ngIf="!offerRes?.assignment_id && offerRes?.status.toLowerCase() === 'accepted' && !offerRes?.assignment_failed_msg">
+    <div class="p-32 text-center" *ngIf="!loading">
+        <icon name="error" size="50px" color="#FE5858" class="mb-16"></icon>
+        <p class="font-weight-medium mb-4">{{ 'assignment_creation_pending' | i18next }}</p>
+        <p class="small mb-24">
+  {{ !offer?.offer?.assignment_failed_msg ? "Assignment creation is incomplete due to some technical issues." : offer?.offer?.assignment_failed_msg}}
+ </p>
+          <button class="btn btn-try small mx-auto" (click)="initAssignment()" *authorize="'create_offer'">Try Again</button>
+    </div>
+    <div *ngIf="loading" class="d-flex justify-content-center align-items-center p-16">
+      <div class="dotloader"></div>
+    </div>
+  </div>
+</ng-container>
+
+
+<div class="notification-panel-hiring">
+  <!-- candidate submitted Candidate submitted client -->
+  <div class="panel mb-16" *ngIf="
+      !isUserRole('VENDOR') &&
+      submitedCandidateDetails &&
+      submitedCandidateDetails?.status === 'SUBMITTED' &&
+      !hasInternviews && !hasOffers
+    ">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="green">{{ 'candidate_submitted' | i18next }}</p>
+        <p class="small">
+          On
+
+          {{ submitedCandidateDetails?.submitted_on | localDateFormat }} {{ submitedCandidateDetails?.submitted_on | localDateFormat: 'hh:mm:ss a z' }}
+          <!-- <span class="dark-text">By {{ submitedCandidateDetails?.vendor?.name || "--" }}</span> -->
+          <span class="dark-text" *ngIf="showCreatedBy" >By {{submitedCandidateDetails.created_by?.first_name + " " + submitedCandidateDetails.created_by?.last_name}}</span>
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                                  a 15.9155 15.9155 0 0 1 0 31.831
+                                  a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValue" d="M18 2.0845
+                                  a 15.9155 15.9155 0 0 1 0 31.831
+                                  a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">0%</p>
+      <div class="clearfix"></div>
+    </div>
+    <div class="panels-footer d-flex justify-content-between align-items-center px-16 py-8">
+      <a class="view-link" (click)="goToAction('submission')">
+        {{ 'view_submission' | i18next }}
+      </a>
+      <div class="d-flex">
+        <button class="btn btn-primary small mr-12" *ngIf="visibleCreateButton && submitedCandidateDetails?.offer_visibility" (click)="goToAction('schedule-interview')">
+          {{ 'schedule_interview' | i18next }}
+        </button>
+        <div class="position-relative" (clickOutside)="showOption = false">
+          <button class="btn btn-outine small outline-btn position-relative" (click)="showOption = !showOption">
+            <icon name="more_horiz" size="24px" type="material" color="inherit"></icon>
+          </button>
+          <ul class="action-list position-absolute bg-light rounded-sm pt-12 pb-12 active border"
+            *ngIf="showOption == true">
+            <ng-container *ngIf="jobStatus!= 'PENDING_APPROVAL_SOURCING' && jobStatus!= 'FILLED' && jobStatus!= 'PENDING_APPROVAL' && submitedCandidateDetails?.offer_visibility">
+              <li (click)="showOption = false" *authorize="'create_offer'" >
+                <a class="pl-16 py-8 pr-8" (click)="goToAction('create-offer')">
+                 {{ 'create_offer' | i18next }}
+                </a>
+              </li>
+            </ng-container>
+            <li (click)="showOption = false" *ngIf="submitedCandidateDetails?.offer_visibility">
+              <a class="pl-16 py-8 pr-8" (click)="goToAction('reject-candidate')">
+                {{ 'reject_candidate' | i18next }}
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- candidate submitted -->
+
+  <!--  for vendor Candidate submitted vendor-->
+
+  <div class="panel mb-16 candidate-submitted-vendor" *ngIf="
+      isUserRole('VENDOR') &&
+      submitedCandidateDetails &&
+      submitedCandidateDetails?.status === 'SUBMITTED' &&
+      !hasInternviews  && !hasOffers
+    ">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="green">{{ 'candidate_submitted' | i18next }}</p>
+        <p class="small">
+          On
+          <!-- {{ submitedCandidateDetails?.submitted_on | date: "mediumDate" }} -->
+          {{ submitedCandidateDetails?.submitted_on | localDateFormat }} {{ submitedCandidateDetails?.submitted_on | localDateFormat: 'hh:mm:ss a z' }}
+          <span class="dark-text" *ngIf="showCreatedBy" >By {{submitedCandidateDetails.created_by?.first_name + " " + submitedCandidateDetails.created_by?.last_name}}</span>
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                      a 15.9155 15.9155 0 0 1 0 31.831
+                      a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValue" d="M18 2.0845
+                      a 15.9155 15.9155 0 0 1 0 31.831
+                      a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">0%</p>
+      <div class="clearfix"></div>
+    </div>
+    <div class="panels-footer d-flex justify-content-between align-items-center px-16 py-8">
+      <a class="view-link" (click)="goToAction('submission')">
+        {{ 'view_submission' | i18next }}
+      </a>
+      <button class="btn btn-withdrawn small" (click)="goToAction('withdraw-candidate')">
+        {{ 'withdraw_candidate' | i18next }}
+      </button>
+    </div>
+  </div>
+  <!-- view-submission -->
+
+  <!-- candidate withdrawan-->
+
+  <div class="panel panel-yellow p-24 mb-16 candidate-withdrawn" *ngIf="
+      submitedCandidateDetails && submitedCandidateDetails?.status === 'WITHDRAWN'
+    ">
+    <div class="d-flex mb-16">
+      <figure class="rounded-circle mr-16">
+        <icon name="person_off" size="24px"></icon>
+      </figure>
+      <div>
+        <p class="font-weight-medium title-yellow">{{ 'candidate_withdrawn' | i18next }}</p>
+        <p class="small">
+          On
+          {{ submitedCandidateDetails?.status_modified_on | localDateFormat }} {{ submitedCandidateDetails?.status_modified_on | localDateFormat: 'hh:mm:ss a z' }}
+        </p>
+      </div>
+    </div>
+    <p class="small brown-text">{{ 'reason' | i18next }}</p>
+    <p class="small mb-16">
+      {{ submitedCandidateDetails?.status_reason || "--" }}
+    </p>
+    <p class="small brown-text">{{ 'notes' | i18next }}</p>
+    <p class="small">{{ submitedCandidateDetails?.status_note || "--" }}</p>
+  </div>
+  <!-- candidate withdrawan-->
+
+  <!-- submission-rejected -->
+  <div class="panel panel-pink p-24 mb-16 candidate-rejected" *ngIf="
+      submitedCandidateDetails && submitedCandidateDetails?.status === 'REJECTED'
+    ">
+    <div class="d-flex mb-16">
+      <figure class="rounded-circle mr-16">
+        <icon name="not_interested" size="24px"></icon>
+      </figure>
+      <div>
+        <p class="font-weight-medium title-pink">{{ 'submission_rejected' | i18next }}</p>
+        <p class="small">
+          On
+          {{ submitedCandidateDetails?.status_modified_on | localDateFormat }} {{ submitedCandidateDetails?.status_modified_on | localDateFormat: 'hh:mm:ss a z' }}
+        </p>
+      </div>
+    </div>
+    <p class="small brown-text">{{ 'reason' | i18next }}</p>
+    <p class="small mb-16">
+      {{ submitedCandidateDetails?.status_reason || "--" }}
+    </p>
+    <p class="small brown-text">{{ 'notes' | i18next }}</p>
+    <p class="small">{{ submitedCandidateDetails?.status_note || "--" }}</p>
+  </div>
+  <!-- submission-rejected -->
+
+  <!-- Shortlist Review Rejected -->
+    <div class="panel panel-pink p-24 mb-16 candidate-rejected" *ngIf="
+      submitedCandidateDetails && submitedCandidateDetails?.status === 'SHORTLIST_REVIEW_REJECTED'
+    ">
+    <div class="d-flex mb-16">
+      <figure class="rounded-circle mr-16">
+        <icon name="not_interested" size="24px"></icon>
+      </figure>
+      <div>
+        <p class="font-weight-medium title-pink">{{ 'shortlist_review_rejected' | i18next }}</p>
+        <p class="small">
+          On
+          {{ submitedCandidateDetails?.status_modified_on | localDateFormat }} {{ submitedCandidateDetails?.status_modified_on | localDateFormat: 'hh:mm:ss a z' }}
+        </p>
+      </div>
+    </div>
+    <!-- <ng-container>
+      <p class="small brown-text">{{ 'reason' | i18next }}</p>
+      <p class="small mb-16">
+        {{ submitedCandidateDetails?.status_reason || "--" }}
+      </p>
+    </ng-container> -->
+
+    <p class="small brown-text">{{ 'notes' | i18next }}</p>
+    <p class="small">{{ submitedCandidateDetails?.status_note || "--" }}</p>
+  </div>
+  <!-- Shortlist Review Rejected -->
+
+  <!-- Reject interview -->
+
+  <div class="panel mb-16" *ngIf="hasInternviews && rejectedAllInterview  && !hasOffers">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="title-pink d-flex align-items-center">
+          <icon name="not_interested" size="16px" class="d-flex mr-4" color="#FF0033"></icon>
+          {{ 'interview_rejected' | i18next }}
+        </p>
+        <p class="small">
+          On
+          {{ CurrentInterview?.status_modified_on | localDateFormat }} {{ CurrentInterview?.status_modified_on | localDateFormat: 'hh:mm:ss a z' }}
+          <span class="dark-text">By {{ CurrentInterview?.status_updated_by?.first_name || '--'}} {{CurrentInterview?.status_updated_by?.middle_name}} {{CurrentInterview?.status_updated_by?.last_name}}</span>
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValue" d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">20%</p>
+      <div class="clearfix"></div>
+
+      <div class="mt-16">
+        <p class="small brown-text">{{ 'reason' | i18next }}</p>
+        <p class="small mb-16">{{ CurrentInterview?.status_reason || "--" }}</p>
+        <p class="small brown-text">{{ 'notes' | i18next }}</p>
+        <p class="small">{{ CurrentInterview?.status_note || "--" }}</p>
+      </div>
+    </div>
+    <div class="panels-footer d-flex justify-content-between align-items-center px-16 py-8" *ngIf="hasAdminAccess">
+      <a class="view-link" (click)="goToAction('submission')"> {{ 'view_submission' | i18next }} </a>
+      <div class="d-flex" *ngIf="submitedCandidateDetails?.status != 'REJECTED'">
+        <button class="btn btn-primary small mr-12" (click)="goToAction('re-schedule-interview')">
+          {{ 'reschedule_interview' | i18next }}
+        </button>
+        <div class="position-relative" (clickOutside)="showOption = false">
+          <button class="btn btn-outine small outline-btn position-relative" (click)="showOption = !showOption">
+            <icon name="more_horiz" size="24px" type="material" color="inherit"></icon>
+          </button>
+            <ul class="action-list position-absolute bg-light rounded-sm pt-12 pb-12 active border"
+              *ngIf="showOption == true">
+              <ng-container *ngIf="jobStatus !== 'PENDING_APPROVAL_SOURCING' && jobStatus!= 'FILLED' && jobStatus !== 'PENDING_APPROVAL' && submitedCandidateDetails?.offer_visibility">
+              <li (click)="showOption = false" *authorize="'create_offer'">
+                <a class="pl-16 py-8 pr-8" (click)="goToAction('create-offer')">
+                  {{ 'create_offer' | i18next }}
+                </a>
+              </li>
+              </ng-container>
+              <li (click)="showOption = false">
+                <a class="pl-16 py-8 pr-8" (click)="goToAction('reject-candidate')" *ngIf="submitedCandidateDetails?.offer_visibility">
+                  {{ 'reject_candidate' | i18next }}
+                </a>
+              </li>
+            </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Reject interview -->
+
+  <!-- CANCELLED interview -->
+
+  <div class="panel mb-16" *ngIf="hasInternviews && hasInterviewCancelled  && !hasOffers">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="title-pink d-flex align-items-center">
+          <icon name="not_interested" size="16px" class="d-flex mr-4" color="#FF0033"></icon>
+          {{ 'interview_cancelled' | i18next }}
+        </p>
+        <p class="small">
+          On
+          {{ CurrentInterview?.status_modified_on | localDateFormat }} {{ CurrentInterview?.status_modified_on | localDateFormat: 'hh:mm:ss a z' }}
+          <span class="dark-text" *ngIf="hasAdminAccess">By {{ CurrentInterview?.status_updated_by?.first_name || '--'}} {{CurrentInterview?.status_updated_by?.middle_name}} {{CurrentInterview?.status_updated_by?.last_name}}</span>
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                      a 15.9155 15.9155 0 0 1 0 31.831
+                      a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValue" d="M18 2.0845
+                      a 15.9155 15.9155 0 0 1 0 31.831
+                      a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">0%</p>
+      <div class="clearfix"></div>
+
+      <div class="mt-16">
+        <p class="small brown-text">{{ 'reason' | i18next }}</p>
+        <p class="small mb-16">{{ CurrentInterview?.status_reason || "--" }}</p>
+        <p class="small brown-text">{{ 'notes' | i18next }}</p>
+        <p class="small">{{ CurrentInterview?.status_note || "--" }}</p>
+      </div>
+    </div>
+
+    <div *ngIf="hasAdminAccess" class="panels-footer d-flex justify-content-between align-items-center px-16 py-8">
+      <a class="view-link" (click)="goToAction('submission')"> {{ 'view_submission' | i18next }} </a>
+      <div class="d-flex" (clickOutside)="showOption = false">
+        <!-- <button class="btn btn-primary small mr-12" (click)="goToAction('re-schedule-interview'); showOption = false">
+          {{ 'reschedule_interview' | i18next }}
+        </button> -->
+        <div class="position-relative" *ngIf="(submitedCandidateDetails && submitedCandidateDetails?.status !== 'REJECTED') &&
+        submitedCandidateDetails?.status !== 'WITHDRAWN' ">
+          <button class="btn btn-outine small outline-btn" (click)="showOption = !showOption">
+            <icon name="more_horiz" size="24px" type="material" color="inherit"></icon>
+          </button>
+          <ul class="action-list position-absolute bg-light rounded-sm pt-12 pb-12 active border"
+            *ngIf="showOption == true">
+            <ng-container *ngIf="jobStatus !== 'PENDING_APPROVAL_SOURCING' && jobStatus!= 'FILLED' && jobStatus !== 'PENDING_APPROVAL' && !submitedCandidateDetails.offer_id && submitedCandidateDetails?.offer_visibility">
+            <li (click)="showOption = false"  *authorize="'create_offer'">
+              <a class="pl-16 py-8 pr-8" (click)="goToAction('create-offer')" >
+                {{ 'create_offer' | i18next }}
+              </a>
+            </li>
+            </ng-container>
+            <li (click)="showOption = false">
+              <a class="pl-16 py-8 pr-8" (click)="goToAction('reject-candidate')" *ngIf="submitedCandidateDetails?.offer_visibility">
+                {{ 'reject_candidate' | i18next }}
+              </a>
+            </li>
+            <!-- <li (click)="showOption = false">
+              <a class="pl-16 py-8 pr-8" (click)="goToAction('re-schedule-interview')">
+                {{ 'reschedule_interview' | i18next }}
+              </a>
+            </li> -->
+          </ul>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- CANCELLED interview -->
+
+  <!-- Interview Scheduled -->
+
+  <div class="panel mb-16" *ngIf="hasInternviews && waitingForInterviewAcceptance  && hasAdminAccess && !hasOffers">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="green">{{ 'pending_acceptance' | i18next }}</p>
+        <p class="small">
+          {{ 'on' | i18next }}
+          {{ CurrentInterview?.created_on | localDateFormat }} {{ CurrentInterview?.created_on | localDateFormat: 'hh:mm:ss a z' }}
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValueInt" d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">20%</p>
+      <div class="clearfix"></div>
+    </div>
+    <div class="panels-footer yellow-footer d-flex justify-content-between align-items-center px-16 py-8">
+      <p class="waiting-msg small">{{ 'waiting_for_interview_request_acceptance' | i18next }} </p>
+      <div class="position-relative" (clickOutside)="showOption = false" *ngIf="submitedCandidateDetails && submitedCandidateDetails?.status !== 'REJECTED'">
+        <button class="btn btn-outine small outline-btn" (click)="showOption = !showOption">
+          <icon name="more_horiz" size="24px" type="material"></icon>
+        </button>
+        <ul class="action-list position-absolute bg-light rounded-sm pt-12 pb-12 active border" *ngIf="showOption && submitedCandidateDetails?.status !== 'WITHDRAWN'">
+          <!-- <li (click)="showOption = false">
+            <a class="pl-16 py-8 pr-8" (click)="goToAction('cancel-interview')">
+              {{ 'cancel_interview' | i18next }}
+            </a>
+          </li> -->
+          <ng-container *ngIf="jobStatus !== 'PENDING_APPROVAL_SOURCING' && jobStatus!= 'FILLED' && jobStatus !== 'PENDING_APPROVAL' && !submitedCandidateDetails.offer_id && submitedCandidateDetails?.offer_visibility">
+          <li (click)="showOption = false" *authorize="'create_offer'">
+            <a class="pl-16 py-8 pr-8" (click)="goToAction('create-offer')">
+              {{ 'create_offer' | i18next }}
+            </a>
+          </li>
+          </ng-container>
+          <li (click)="showOption = false">
+            <a class="pl-16 py-8 pr-8" (click)="goToAction('reject-candidate')" *ngIf="submitedCandidateDetails?.offer_visibility">
+              {{ 'reject_candidate' | i18next }}
+            </a>
+          </li>
+          <!-- <li (click)="showOption = false">
+            <a class="pl-16 py-8 pr-8" (click)="goToAction('re-schedule-interview')">
+              {{ 'reschedule_interview' | i18next }}
+            </a>
+          </li> -->
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!-- Interview Scheduled -->
+
+  <!-- notification -->
+
+  <div class="panel mb-16 pt-16"
+    *ngIf="hasInternviews && waitingForInterviewAcceptance  && hasVendorOrWorkerAccess && !hasOffers">
+    <div class="action-pending">
+      <p class="action-text pl-16">{{ 'notifications' | i18next }}</p>
+    </div>
+    <div class="d-flex align-items-center justify-content-between px-16 mt-12 pb-16">
+      <div class="d-flex flex-column">
+        <p class="green d-flex align-items-center">{{ 'pending_acceptance' | i18next }}</p>
+        <p class="small" *ngIf="!isVendorUser">
+          <span class="dark-text">By {{ CurrentInterview?.created_by?.first_name || "--" }}</span>
+          {{ 'on' | i18next }}
+          {{ CurrentInterview?.created_on | localDateFormat }} {{ CurrentInterview?.created_on | localDateFormat: 'hh:mm:ss a z' }}
+        </p>
+      </div>
+      <img src="../../../../../../assets/images/notification.svg" />
+    </div>
+    <div class="panels-footer px-16 py-8 d-flex align-items-center justify-content-between">
+      <a href="javascript:void()"class="small mr-12 text-primary" (click)="goToAction('view-interview')">{{ 'view_interview_details' | i18next }}</a>
+
+      <button class="btn btn-primary small" (click)="goToAction('propose-new-time')">{{ 'propose_new_time' | i18next }}</button>
+      <div class="position-relative" (clickOutside)="showOption = false" [hidden]="submitedCandidateDetails?.status === 'WITHDRAWN'">
+        <button class="btn btn-outine small outline-btn" (click)="showOption = !showOption">
+          <icon name="more_horiz" size="24px" type="material"></icon>
+        </button>
+        <ul class="action-list position-absolute bg-light rounded-sm pt-12 pb-12 active border" *ngIf="showOption">
+          <li (click)="showOption = false">
+            <a class="pl-16 py-8 pr-8" (click)="goToAction('withdraw-candidate')" *ngIf="submitedCandidateDetails?.offer_visibility">
+              {{ 'withdraw_candidate' | i18next }}
+            </a>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+  <!-- notification -->
+
+  <!-- Interview accepted timer-->
+  <div class="panel mb-16" *ngIf="CurrentInterview?.status === 'ACCEPTED' && ReachedInterviewStartTime && !hasOffers">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="d-flex align-items-center green">
+          <icon name="event_available" size="18px" color="#4EB734" class="mr-4" theme="outlined"></icon>
+          <span>{{ 'interview_accepted' | i18next }}</span>
+        </p>
+        <p class="small">
+          On
+          {{ CurrentInterview?.status_modified_on | localDateFormat }} {{ CurrentInterview?.status_modified_on | localDateFormat: 'hh:mm:ss a z' }}
+        </p>
+        <p class="small mt-16">{{ 'interview_date_&_time' | i18next }}</p>
+        <p class="font-weight-medium text-black">
+          {{ AcceptedSchdule?.date | localDateFormat : null : null : null : true }} {{ AcceptedSchdule?.start_time }} - {{ AcceptedSchdule?.end_time }}
+        </p>
+        <app-count-down-timer [actualDateTIme]='InterviewStartTIme'></app-count-down-timer>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValueInt" d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">20%</p>
+      <div class="clearfix"></div>
+    </div>
+    <div class="panels-footer d-flex justify-content-between align-items-center px-16 py-8" *ngIf="hasAdminAccess">
+      <span class="view-link">{{ 'actions' | i18next }}</span>
+      <div class="position-relative" (clickOutside)="showOption = false">
+        <button class="btn btn-outine small outline-btn" (click)="showOption = !showOption">
+          <icon name="more_horiz" size="24px" type="material"></icon>
+        </button>
+        <ul class="action-list position-absolute bg-light rounded-sm pt-12 pb-12 active border" *ngIf="showOption">
+          <!-- <li (click)="showOption = false">
+            <a class="pl-16 py-8 pr-8" (click)="goToAction('cancel-interview')">
+              {{ 'cancel_interview' | i18next }}
+            </a>
+          </li> -->
+          <ng-container *ngIf="jobStatus !== 'PENDING_APPROVAL_SOURCING' && jobStatus!= 'FILLED' && jobStatus !== 'PENDING_APPROVAL' && submitedCandidateDetails?.offer_visibility">
+          <li (click)="showOption = false"  *authorize="'create_offer'">
+            <a class="pl-16 py-8 pr-8" (click)="goToAction('create-offer')">
+              {{ 'create_offer' | i18next }}
+            </a>
+          </li>
+          </ng-container>
+          <li (click)="showOption = false" [hidden]="CurrentInterview?.candidate_submission_status?.toLowerCase() === 'rejected' || !submitedCandidateDetails?.offer_visibility">
+            <a class="pl-16 py-8 pr-8" (click)="goToAction('reject-candidate')">
+              {{ 'reject_candidate' | i18next }}
+            </a>
+          </li>
+          <!-- <li (click)="showOption = false">
+            <a class="pl-16 py-8 pr-8" (click)="goToAction('re-schedule-interview')">
+              {{ 'reschedule_interview' | i18next }}
+            </a>
+          </li> -->
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!-- Interview accepted -->
+
+  <!-- Interview accepted completed-->
+  <div class="panel mb-16"  *ngIf="CurrentInterview?.status === 'ACCEPTED' && !ReachedInterviewStartTime && !hasOffers">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="d-flex align-items-center green">
+          <icon name="event_available" size="18px" color="#4EB734" class="mr-4" theme="outlined"></icon>
+          <span>{{ 'interview_accepted' | i18next }}</span>
+        </p>
+        <p class="small">
+          {{ 'on' | i18next }}
+          {{ CurrentInterview?.status_modified_on | localDateFormat }} {{ CurrentInterview?.status_modified_on | localDateFormat: 'hh:mm:ss a z' }}
+        </p>
+        <p class="small mt-16">{{ 'interview_date_&_time' | i18next }}</p>
+        <p class="font-weight-medium text-black">
+          {{ AcceptedSchdule?.date | localDateFormat : null : null : null : true }} {{ AcceptedSchdule?.start_time }} - {{ AcceptedSchdule?.end_time }}
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValueInt" d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">20%</p>
+      <div class="clearfix"></div>
+    </div>
+    <div class="panels-footer d-flex justify-content-between align-items-center px-16 py-8" *ngIf="hasAdminAccess ">
+      <a class="view-link" (click)="goToAction('view-interview')">{{ 'interview_details' | i18next }}</a>
+      <div class="d-flex" (clickOutside)="showOption = false">
+        <button [hidden]="CurrentInterview?.candidate_submission_status?.toLowerCase() === 'rejected'" class="btn btn-primary small mr-12" (click)="goToAction('mark-interview-complete')">Mark as
+          {{ 'complete' | i18next }}</button>
+        <div [hidden]="CurrentInterview?.candidate_submission_status?.toLowerCase() === 'rejected'"
+        class="position-relative" (clickOutside)="showOption = false">
+          <button class="btn btn-outine small outline-btn position-relative" (click)="showOption = !showOption">
+            <icon name="more_horiz" size="24px" type="material" color="inherit"></icon>
+          </button>
+          <ul class="action-list position-absolute bg-light rounded-sm pt-12 pb-12 active border"
+            *ngIf="showOption == true">
+            <!-- <li (click)="showOption = false">
+              <a class="pl-16 py-8 pr-8" (click)="goToAction('cancel-interview')">
+                {{ 'cancel_interview' | i18next }}
+              </a>
+            </li> -->
+            <ng-container *ngIf="jobStatus !== 'PENDING_APPROVAL_SOURCING' && jobStatus!= 'FILLED' && jobStatus !== 'PENDING_APPROVAL' && submitedCandidateDetails?.offer_visibility">
+            <li (click)="showOption = false" *authorize="'create_offer'">
+              <a class="pl-16 py-8 pr-8" (click)="goToAction('create-offer')">
+                {{ 'create_offer' | i18next }}
+              </a>
+            </li>
+            </ng-container>
+            <li (click)="showOption = false">
+              <a class="pl-16 py-8 pr-8" (click)="goToAction('reject-candidate')" *ngIf="submitedCandidateDetails?.offer_visibility">
+                {{ 'reject_candidate' | i18next }}
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Interview accepted -->
+
+  <!-- offer cancelled -->
+  <div class="panel mb-16" *ngIf="hasOffers && hasOfferCancelled">
+    <div class="p-16">
+      <p class="font-weight-medium">Hiring Process</p>
+      <div class="float-left">
+        <p class="title-pink d-flex align-items-center title-yellow">
+          <icon name="person_off" size="20px" class="d-flex mr-4" color="#d09905"></icon>
+          {{ 'offer_review_cancelled' | i18next }}
+        </p>
+        <p class="small">
+          {{ 'on' | i18next }}
+          {{ offerDetails[0]?.modified_on | localDateFormat }} {{ offerDetails[0]?.modified_on | localDateFormat: 'hh:mm:ss a z' }}
+          <span class="dark-text" *ngIf="!isUserRole('CLIENT')">By
+            {{
+            offerDetails[0]?.modified_by?.full_name || "--"
+            }}</span>
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValue" d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">0%</p>
+      <div class="clearfix"></div>
+
+      <div class="mt-8">
+        <p class="small brown-text">{{ 'notes' | i18next }}</p>
+        <p class="small">{{ offerDetails[0]?.status_note }}</p>
+      </div>
+    </div>
+
+    <div class="panels-footer d-flex justify-content-between align-items-center px-16 py-8">
+      <a class="view-link" (click)="goToAction('submission')">
+        {{ 'view_submission' | i18next }}
+      </a>
+    </div>
+  </div>
+  <!-- offer cancelled -->
+
+  <!-- Counter Offer Review Cancelled -->
+  <div class="panel mb-16" *ngIf="hasOffers && hasCounterOfferCancelled">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="title-pink d-flex align-items-center title-yellow counter-text">
+          <icon name="person_off" size="20px" class="d-flex mr-4" color="#d09905"></icon>
+          {{ 'counter_offer_review_cancelled' | i18next }}
+        </p>
+        <p class="small">
+          {{ 'on' | i18next }}
+          {{ offerDetails[0]?.modified_on | localDateFormat }} {{ offerDetails[0]?.modified_on | localDateFormat: 'hh:mm:ss a z' }}
+          <span class="dark-text" *ngIf="!isUserRole('CLIENT')">By
+            {{
+            offerDetails[0]?.modified_by?.full_name || "--"
+            }}</span>
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValue" d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">0%</p>
+      <div class="clearfix"></div>
+
+      <div class="mt-8">
+        <p class="small brown-text">{{ 'notes' | i18next }}</p>
+        <p class="small">{{ offerDetails[0]?.status_note }}</p>
+      </div>
+    </div>
+
+    <div class="panels-footer d-flex justify-content-between align-items-center px-16 py-8">
+      <a class="view-link" (click)="goToAction('submission')">
+        {{ 'view_submission' | i18next }}
+      </a>
+    </div>
+  </div>
+  <!-- Counter Offer Review Cancelled -->
+
+  <!-- offer created -->
+  <div class="panel mb-16" *ngIf="hasOffers && hasOfferReleasedAndCreated">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="d-flex align-items-center green">
+          <icon name="drafts" size="18px" color="#4EB734" class="mr-4" theme="outlined"></icon>
+          <span>{{ 'offer_created' | i18next }}</span>
+        </p>
+        <p class="small">
+          {{ 'on' | i18next }}
+          {{ offerDetails[0]?.stages[0]?.created_on | localDateFormat }} {{ offerDetails[0]?.stages[0]?.created_on | localDateFormat: 'hh:mm:ss a z' }}
+          <br />
+          <span [hidden]="currentProgram?.config?.is_vendor_neutral && userType.toLowerCase() ==='vendor' && offerDetails[0]?.stages[0]?.created_by?.org_type.toLowerCase() ==='client'">
+          {{'by' | i18next}} {{ currentProgram?.config?.is_vendor_neutral && userType.toLowerCase() ==='client' && offerDetails[0]?.stages[0]?.created_by?.org_type.toLowerCase() ==='vendor' ? 'Vendor': offerDetails[0]?.stages[0]?.created_by?.full_name }}
+          </span>
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValueOffer" d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">40%</p>
+      <div class="clearfix"></div>
+    </div>
+    <div class="panels-footer yellow-footer d-flex justify-content-between align-items-center px-16 py-8"
+      *ngIf="!( userType == (offerDetails?.stages?.length > 0 && offerDetails?.stages[0]?.created_by?.org_type) ||
+        offerDetails?.status == 'REJECTED' ||
+        offerDetails?.status == 'ACCEPTED' ||
+        offerDetails?.status !== 'OFFER_RELEASED')">
+
+      <p class="waiting-msg small">{{ 'waiting_for_offer_acceptance' | i18next }}</p>
+      <ng-container *authorize="'update_offer'">
+        <button class="btn btn-primary small mr-12" (click)="clickToAcceptOffer()">{{ 'accept_offer' | i18next }}</button>
+      </ng-container>
+      <ng-container *ngIf="submitedCandidateDetails?.status != 'REJECTED' ">
+        <div class="d-flex position-relative" *authorize="'withdraw_offer'" (clickOutside)="showOption = false">
+          <button class="btn btn-outine small outline-btn" (click)="showOption = !showOption" #optionButton>
+            <icon name="more_horiz" size="24px" type="material"></icon>
+          </button>
+          <ul *ngIf='showOption' class="action-list position-absolute bg-light rounded-sm pt-12 pb-12 active border">
+            <li (click)="showOption = false" *ngIf='CanWithdrawOffer'>
+              <a class="pl-16 py-8 pr-8" (click)="goToAction('withdraw-offer')" *ngIf="submitedCandidateDetails?.offer_visibility">
+                {{ 'withdraw_offer' | i18next }}
+              </a>
+            </li>
+          </ul>
+        </div>
+    </ng-container>
+    </div>
+    <ng-container *ngIf="submitedCandidateDetails?.status != 'REJECTED' ">
+    <div class="panels-footer d-flex justify-content-end  px-16 py-8"
+      *ngIf="!( userType == (offerDetails?.stages?.length > 0 && offerDetails?.stages[0]?.created_by?.org_type) ||
+        offerDetails?.status == 'PENDING_SHORTLIST' || offerDetails?.status == 'PENDING_SHORTLIST_REVIEW' || offerDetails?.status == 'SHORTLIST_REVIEW_REJECTED' ||
+        offerDetails?.status == 'OFFER_RELEASED')">
+      <div class="d-flex position-relative" *authorize="'withdraw_offer'" (clickOutside)="showOption = false">
+        <button class="btn btn-outine small outline-btn" (click)="showOption = !showOption" #optionButton>
+          <icon name="more_horiz" size="24px" type="material"></icon>
+        </button>
+        <ul *ngIf='showOption' class="action-list position-absolute bg-light rounded-sm pt-12 pb-12 active border">
+          <li (click)="showOption = false" *ngIf='CanWithdrawOffer'>
+            <a class="pl-16 py-8 pr-8" (click)="goToAction('withdraw-offer')" *ngIf="submitedCandidateDetails?.offer_visibility">
+              {{ 'withdraw_offer' | i18next }}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </ng-container>
+  </div>
+  <!-- offer created -->
+
+  <!-- counter offer created -->
+  <div class="panel mb-16" *ngIf="hasOffers && hasOfferReleasedAndCountered">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="d-flex align-items-center green">
+          <icon name="drafts" size="18px" color="#4EB734" class="mr-4" theme="outlined"></icon>
+          <span>Counter {{ 'offer_created' | i18next }}</span>
+        </p>
+        <p class="small">
+          {{ 'on' | i18next }}
+          {{ offerDetails[0]?.modified_on | localDateFormat }} {{ offerDetails[0]?.modified_on | localDateFormat: 'hh:mm:ss a z' }} <br />By
+          {{ currentProgram?.config?.is_vendor_neutral && userType.toLowerCase() ==='client' && offerDetails[0]?.stages[0]?.created_by?.org_type?.toLowerCase() === 'vendor' ? 'Vendor' : offerDetails[0]?.stages[0]?.created_by?.full_name }}
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValueOffer" d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">40%</p>
+      <div class="clearfix"></div>
+    </div>
+    <div class="panels-footer d-flex justify-content-between align-items-center px-16 py-8"
+    *ngIf="!(userType == offerDetails[0]?.stages[0]?.created_by?.org_type ||
+          offerDetails?.status == 'REJECTED' ||
+          offerDetails?.status == 'ACCEPTED' ||
+          offerDetails?.status !== 'OFFER_RELEASED')
+        ">
+      <a class="view-link">{{ 'waiting_for_offer_acceptance' | i18next }}</a>
+      <ng-container *authorize="'update_offer'">
+        <button  class="btn btn-primary small mr-12" (click)="clickToAcceptOffer()">{{ 'accept_offer' | i18next }}</button>
+      </ng-container>
+      <ng-container *ngIf="submitedCandidateDetails?.status != 'REJECTED' ">
+      <div class="d-flex position-relative" *ngIf="!( userType == offerDetails[0]?.stages[0]?.created_by?.org_type ||
+        offerDetails?.status == 'REJECTED' ||
+        offerDetails?.status == 'ACCEPTED')" (clickOutside)="showOption = false">
+        <ng-container *authorize="'withdraw_offer'">
+          <button class="btn btn-outine small outline-btn" (click)="showOption = !showOption" #optionButtonCounteroffer>
+            <icon name="more_horiz" size="24px" type="material"></icon>
+          </button>
+          <ul *ngIf='showOption' class="action-list position-absolute bg-light rounded-sm pt-12 pb-12 active border">
+            <li (click)="showOption = false" *ngIf='CanWithdrawOffer && submitedCandidateDetails?.offer_visibility'>
+              <a class="pl-16 py-8 pr-8" (click)="goToAction('withdraw-offer')">
+                {{ 'withdraw_offer' | i18next }}
+              </a>
+            </li>
+          </ul>
+        </ng-container>
+      </div>
+    </ng-container>
+    </div>
+    <ng-container *ngIf="submitedCandidateDetails?.status != 'REJECTED' ">
+    <div class="panels-footer d-flex justify-content-end  px-16 py-8"
+      *ngIf="!( userType == (offerDetails?.stages?.length > 0 && offerDetails?.stages[0]?.created_by?.org_type) ||
+        offerDetails?.status == 'PENDING_SHORTLIST' || offerDetails?.status == 'PENDING_SHORTLIST_REVIEW' || offerDetails?.status == 'SHORTLIST_REVIEW_REJECTED' ||
+        offerDetails?.status == 'OFFER_RELEASED')">
+      <div class="d-flex position-relative" *authorize="'withdraw_offer'" (clickOutside)="showOption = false">
+        <button class="btn btn-outine small outline-btn" (click)="showOption = !showOption" #optionButton>
+          <icon name="more_horiz" size="24px" type="material"></icon>
+        </button>
+        <ul *ngIf='showOption' class="action-list position-absolute bg-light rounded-sm pt-12 pb-12 active border">
+          <li (click)="showOption = false" *ngIf='CanWithdrawOffer && submitedCandidateDetails?.offer_visibility'>
+            <a class="pl-16 py-8 pr-8" (click)="goToAction('withdraw-offer')">
+              {{ 'withdraw_offer' | i18next }}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    </ng-container>
+  </div>
+  <!-- counter offer created -->
+
+  <!-- offer rejected -->
+  <div class="panel mb-16" *ngIf="hasOffers && hasOfferReleasedAndRejected">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="title-pink d-flex align-items-center">
+          <icon name="not_interested" size="16px" class="d-flex mr-4" color="#FF0033"></icon>
+          {{ 'offer_rejected' | i18next }}
+        </p>
+        <p class="small">
+          {{ 'on' | i18next }}
+          {{ offerDetails[0]?.modified_on | localDateFormat }} {{ offerDetails[0]?.modified_on | localDateFormat: 'hh:mm:ss a z' }}
+          <span class="dark-text" *ngIf="!isUserRole('CLIENT')">{{ 'by' | i18next }}
+            {{
+            offerDetails[0]?.modified_by?.full_name || "--"
+            }}</span>
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValue" d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">0%</p>
+      <div class="clearfix"></div>
+
+      <div class="mt-16">
+        <p class="small brown-text">{{ 'reason' | i18next }}</p>
+        <p class="small mb-16">{{ offerDetails[0]?.status_reason }}</p>
+        <p class="small brown-text">{{ 'notes' | i18next }}</p>
+        <p class="small">{{ offerDetails[0]?.status_note }}</p>
+      </div>
+    </div>
+
+    <div class="panels-footer d-flex justify-content-between align-items-center px-16 py-8">
+      <a class="view-link" (click)="goToAction('submission')">
+        {{ 'view_submission' | i18next }}
+      </a>
+      <!-- <div class="d-flex">
+        <button class="btn btn-primary small mr-12"
+          [disabled]="userType == offerDetails[0]?.stages[0]?.created_by?.org_type"
+          (click)="clickToCounterOffer()">Counter Offer</button>
+      </div> -->
+    </div>
+  </div>
+  <!-- offer rejected -->
+
+  <!-- offer withdrawn -->
+  <!-- <div class="panel mb-16" *ngIf="hasOffers && hasOfferReleasedAndWithdrawn">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="title-pink d-flex align-items-center title-yellow">
+          <icon name="person_off" size="20px" class="d-flex mr-4" color="#d09905"></icon>
+          {{ 'offer_withdrawn' | i18next }}
+        </p>
+        <p class="small">
+          On {{ offerDetails[0]?.modified_on | localDateTimeFormat}}
+          <span class="dark-text" *ngIf="!isUserRole('CLIENT')">By
+            {{
+            offerDetails[0]?.modified_by?.full_name || "--"
+            }}</span>
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValue" d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">0%</p>
+      <div class="clearfix"></div>
+
+      <div class="mt-16">
+        <p class="small brown-text">{{ 'reason' | i18next }}</p>
+        <p class="small mb-16">{{ offerDetails[0]?.status_reason }}</p>
+        <p class="small brown-text">{{ 'notes' | i18next }}</p>
+        <p class="small">{{ offerDetails[0]?.status_note }}</p>
+      </div>
+    </div>
+
+    <div class="panels-footer d-flex justify-content-between align-items-center px-16 py-8">
+      <a class="view-link" (click)="goToAction('submission')">
+        {{ 'view_submission' | i18next }}
+      </a>
+
+    </div>
+  </div> -->
+  <!-- offer withdrawn -->
+
+  <!-- offer withdrawn -->
+  <div class="panel mb-16" *ngIf="hasOffers && hasOfferReleasedAndWithdrawn">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="title-pink d-flex align-items-center title-yellow">
+          <icon name="person_off" size="20px" class="d-flex mr-4" color="#d09905"></icon>
+          {{ 'offer_withdrawn' | i18next }}
+        </p>
+        <p class="small">
+          {{ 'on' | i18next }}
+          {{ offerDetails[0]?.modified_on | localDateFormat }} {{ offerDetails[0]?.modified_on | localDateFormat: 'hh:mm:ss a z' }}
+          <span class="dark-text" *ngIf="!isUserRole('CLIENT')">{{ 'by' | i18next }}
+            {{
+            offerDetails[0]?.modified_by?.full_name || "--"
+            }}</span>
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValue" d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">0%</p>
+      <div class="clearfix"></div>
+
+      <div class="mt-16">
+        <p class="small brown-text">{{ 'reason' | i18next }}</p>
+        <p class="small mb-16">{{ offerDetails[0]?.status_reason }}</p>
+        <p class="small brown-text">{{ 'notes' | i18next }}</p>
+        <p class="small">{{ offerDetails[0]?.status_note }}</p>
+      </div>
+    </div>
+
+    <div class="panels-footer d-flex justify-content-between align-items-center px-16 py-8">
+      <a class="view-link" (click)="goToAction('submission')">
+        {{ 'view_submission' | i18next }}
+      </a>
+      <!-- <div class="d-flex">
+        <button class="btn btn-primary small mr-12"
+          [disabled]="userType == offerDetails[0]?.stages[0]?.created_by?.org_type"
+          (click)="clickToCounterOffer()">Counter Offer</button>
+      </div> -->
+    </div>
+  </div>
+  <!-- offer withdrawn -->
+
+  <!-- offer accepted -->
+  <div class="panel mb-16" *ngIf="hasOffers && hasOfferReleasedAndAccepted && !hasAssignments">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="green d-flex align-items-center">
+          <icon name="mail_outline" size="16px" class="d-flex mr-4" color="#4EB734"></icon>
+         {{ 'offer_accepted' | i18next }}
+        </p>
+        <p class="small">
+          {{ 'on' | i18next }}
+          {{ offerDetails[0]?.modified_on | localDateFormat }} {{ offerDetails[0]?.modified_on | localDateFormat: 'hh:mm:ss a z' }}
+          <span class="dark-text" *ngIf="!isUserRole('CLIENT')">
+            {{
+              offer?.offer?.modified_by?.full_name ? ('By '+ offer?.offer?.modified_by?.full_name) : ""
+            }}</span>
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgAcceptOffer" d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">60%</p>
+      <div class="clearfix"></div>
+
+      <!-- <div class="mt-16 d-flex align-items-start">
+        <div class="mr-8">
+          <icon name="assignment" size="28px" class="d-flex" color="#e0edff"></icon>
+        </div>
+        <div class="d-flex flex-column">
+          <p class="small pb-0">{{ 'assignment_title' | i18next }}</p>
+          <p class="text-dark mb-0">{{ offerDetails[0]?.candidate?.title }}</p>
+          <div class="d-flex align-items-center">
+            <span class="status-ui inactive"> In-active </span>
+            <p class="small d-flex align-items-center ml-12">
+              <icon name="label" size="18px" class="d-flex mr-4" color="#FFC409"></icon>
+              {{ offerDetails[0]?.offer_id }}
+            </p>
+          </div>
+        </div>
+      </div> -->
+    </div>
+
+    <div class="panels-footer d-flex justify-content-between align-items-center px-16 py-8">
+      <a class="view-link" (click)="goToAction('submission')">
+        {{ 'view_submission' | i18next }}
+      </a>
+      <ng-container *authorize="'withdraw_offer'">
+      <div class="d-flex" *ngIf="submitedCandidateDetails?.status != 'REJECTED' " (clickOutside)="showOption = false">
+        <!-- <button class="btn btn-primary small mr-12" *ngIf="offerDetails[0]?.assignment_workflow=='ONBOARDING_COMPLETION' || offerDetails[0]?.assignment_workflow=='ONBOARDING_CREDENTIAL_VERIFICATION_COMPLETION' ">Begin Onboarding</button> -->
+        <!-- <button class="btn btn-primary small mr-12" *ngIf="offerDetails[0]?.assignment_workflow=='CREDENTIAL_VERIFICATION_COMPLETION' || offerDetails[0]?.assignment_workflow=='ONBOARDING_CREDENTIAL_VERIFICATION_COMPLETION'" >Begin Credentialing</button>  -->
+        <button class="btn btn-outine small outline-btn" (click)="showOption = !showOption"  #optionButton>
+          <icon name="more_horiz" size="24px" type="material" color="inherit"></icon>
+        </button>
+        <ul *ngIf = 'showOption' class="action-list position-absolute bg-light rounded-sm pt-12 pb-12 active border" style="top: 98%;">
+          <li (click)="showOption = false" *ngIf='CanWithdrawOffer && submitedCandidateDetails?.offer_visibility'>
+            <a class="pl-16 py-8 pr-8" (click)="goToAction('withdraw-offer')">
+              {{ 'withdraw_offer' | i18next }}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </ng-container>
+    </div>
+  </div>
+  <!-- offer accepted -->
+
+  <!--  offer accepted and assignmet created -->
+  <div class="panel mb-16" *ngIf="hasOffers && hasOfferReleasedAndAccepted && hasAssignments ">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left left-width">
+        <p class="d-flex align-items-center green">
+         {{ 'offer_accepted' | i18next }} &amp; {{ 'assignment_created' | i18next }}
+        </p>
+        <p *ngIf="assignments?.data?.assignments?.created_at" class="small">On
+          {{ assignments?.data?.assignments?.created_at | localDateFormat }} {{ assignments?.data?.assignments?.created_at | localDateFormat: 'hh:mm:ss a z' }}
+        </p>
+      </div>
+      <div class="float-right">
+        <img src="../../../../../../assets/images/hired.svg" alt="" />
+      </div>
+      <div class="clearfix"></div>
+        <div class="d-flex mt-24">
+          <icon name="assignment" size="30px" theme="outlined" color="#d4d9ff" class="mr-24"></icon>
+          <div>
+            <p class="small">{{ 'assignment_title' | i18next }}</p>
+            <h4 class="font-weight-medium">{{assignments?.data?.assignments?.assignment?.assignment_title?.name}}</h4>
+            <div class="d-flex align-items-center">
+              <icon name="label" size="15px" color="#FFC409" class="mr-4"></icon>
+              <p class="small">{{assignments?.data?.assignments?.assignment?.code}}
+              <span class="status-ui ml-16 position-relative hide-on-mobile"
+                [ngClass]="{'open': (assignments?.data?.assignments?.assignment?.status | lowercase) === 'open','pending': (assignments?.data?.assignments?.assignment?.status | lowercase) === 'pending', 'closed': ((assignments?.data?.assignments?.assignment?.status | lowercase) === 'assignment closed' || (assignments?.data?.assignments?.assignment?.status | lowercase) === 'closed') }">
+                {{assignments?.data?.assignments?.assignment?.status | titlecase}}
+              </span>
+            </p>
+            </div>
+          </div>
+        </div>
+    </div>
+      <button class="btn btn-primary large full-width-btn mt-16" *ngIf="this.submitedCandidateDetails?.assignment_id || offer?.offer?.assignment_id || triggerAssignmentId || offerRes?.assignment_id"
+      (click)="clickToViewAssignment(this.submitedCandidateDetails?.assignment_id || offer?.offer?.assignment_id || triggerAssignmentId || offerRes?.assignment_id)">
+      {{ 'view_assignment' | i18next }}
+    </button>
+  </div>
+  <!--  offer accepted and assignmet created -->
+
+  <!-- create offer -->
+
+  <div class="panel mb-16" *ngIf="InterviewCompleted  && !hasOffers && !isInterviewCompleted">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="green d-flex align-items-center">
+          <icon name="check_circle" size="16px" class="d-flex mr-4" color="#4EB734"></icon>
+          {{ 'interview_completed' | i18next }}
+        </p>
+        <p class="small">
+          {{ 'on' | i18next }}
+          {{ CurrentInterview?.status_modified_on | localDateFormat }} {{ CurrentInterview?.status_modified_on | localDateFormat: 'hh:mm:ss a z' }}
+          <!-- <span class="dark-text">By {{ CurrentInterview?.status_updated_by || "--" }}</span> -->
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                      a 15.9155 15.9155 0 0 1 0 31.831
+                      a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValue" d="M18 2.0845
+                      a 15.9155 15.9155 0 0 1 0 31.831
+                      a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">20%</p>
+      <div class="clearfix"></div>
+    </div>
+    <div *ngIf="hasAdminAccess" class="panels-footer d-flex justify-content-between align-items-center px-16 py-8">
+      <a class="view-link" (click)="goToAction('view-interview')"> {{ 'interview_details' | i18next }} </a>
+      <div class="d-flex">
+        <ng-container *ngIf="jobStatus!= 'PENDING_APPROVAL_SOURCING' && jobStatus!= 'FILLED' && jobStatus!= 'PENDING_APPROVAL'">
+          <ng-container *authorize="'create_offer'">
+            <button [hidden]="CurrentInterview?.candidate_submission_status?.toLowerCase() === 'rejected'" *ngIf="!submitedCandidateDetails.offer_id && submitedCandidateDetails?.offer_visibility" class="btn btn-primary small mr-12" (click)="goToAction('create-offer')">{{ 'create_offer' | i18next }}</button>
+          </ng-container>
+        </ng-container>
+        <div  [hidden]="CurrentInterview?.candidate_submission_status?.toLowerCase() === 'rejected'"
+        class="position-relative" (clickOutside)="showOption = false">
+          <button class="btn btn-outine small outline-btn position-relative" (click)="showOption = !showOption">
+            <icon name="more_horiz" size="24px" type="material" color="inherit"></icon>
+          </button>
+          <ul class="action-list position-absolute bg-light rounded-sm pt-12 pb-12 active border"
+            *ngIf="showOption == true">
+            <li (click)="showOption = false">
+              <a class="pl-16 py-8 pr-8" (click)="goToAction('reject-candidate')" *ngIf="submitedCandidateDetails?.offer_visibility">
+                {{ 'reject_candidate' | i18next }}
+              </a>
+            </li>
+            <!-- <li (click)="showOption = false">
+              <a class="pl-16 py-8 pr-8" (click)="goToAction('schedule-interview')" *ngIf="submitedCandidateDetails?.offer_visibility">
+                {{ 'schedule_interview' | i18next }}
+              </a>
+            </li> -->
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="!(hasAdminAccess)" class="panels-footer px-16 py-8">
+      <button class="btn btn-primary small w-100" (click)="goToAction('view-interview')">
+        {{ 'view_interview_details' | i18next }}
+      </button>
+    </div>
+  </div>
+
+  <div class="panel mb-16" *ngIf="submitedCandidateDetails && submitedCandidateDetails?.status === 'REHIRE_REJECTED'">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="title-pink d-flex align-items-center">
+          <icon name="not_interested" size="16px" class="d-flex mr-4" color="#FF0033"></icon>
+          {{ 'rehire_rejected' | i18next }}
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValue" d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">0%</p>
+      <div class="clearfix"></div>
+
+      <div class="mt-16">
+        <p class="small brown-text">{{ 'reason' | i18next }}</p>
+        <p class="small mb-16">{{ submitedCandidateDetails?.status_reason }}</p>
+        <p class="small brown-text">{{ 'notes' | i18next }}</p>
+        <p class="small">{{ submitedCandidateDetails?.status_note || '--' }}</p>
+      </div>
+    </div>
+  </div>
+  <!-- create offer -->
+ 
+  <!-- START New interview time proposed vendor view -->
+  <div class="panel mb-16" *ngIf="hasInternviews && newTimeProposed  && hasVendorOrWorkerAccess && !hasOffers">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="green">{{ 'new_interview_time_proposed' | i18next }}</p>
+        <p class="small">
+          {{ 'on' | i18next }}
+          {{ CurrentInterview?.status_modified_on | localDateFormat }} {{ CurrentInterview?.status_modified_on | localDateFormat: 'hh:mm:ss a z' }}
+        </p>
+      </div>
+      <div class="match-svg">
+        <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+          <path class="circle-bg" d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="circle" [style.strokeDasharray]="svgValueInt" d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+      </div>
+      <p class="match-value">20%</p>
+      <div class="clearfix"></div>
+    </div>
+    <div class="panels-footer yellow-footer d-flex justify-content-between align-items-center px-16 py-8">
+      <p class="waiting-msg small">{{ 'waiting_for_interview_request_confirmation_by_hiring_manager' | i18next }}</p>
+      <div class="position-relative" (clickOutside)="showOption = false" [hidden]="submitedCandidateDetails?.status === 'WITHDRAWN'">
+        <button class="btn btn-outine small outline-btn" (click)="showOption = !showOption">
+          <icon name="more_horiz" size="24px" type="material"></icon>
+        </button>
+        <ul class="action-list position-absolute bg-light rounded-sm pt-12 pb-12 active border" *ngIf="showOption">
+          <li (click)="showOption = false">
+            <a class="pl-16 py-8 pr-8" (click)="goToAction('withdraw-candidate')" *ngIf="submitedCandidateDetails?.offer_visibility">
+              {{ 'withdraw_candidate' | i18next }}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!-- END New interview time proposed vendor view -->
+  <!-- START New interview time proposed HM/MSP view -->
+  <div class="panel mb-16 pt-16"
+    *ngIf="hasInternviews && newTimeProposed && hasAdminAccess && !hasOffers">
+    <div class="action-pending">
+      <p class="action-text pl-16">{{ 'notifications' | i18next }}</p>
+    </div>
+    <div class="d-flex align-items-center justify-content-between px-16 mt-12 pb-16">
+      <div class="d-flex flex-column">
+        <p class="green d-flex align-items-center">{{ 'new_interview_timeslot_proposed' | i18next }}</p>
+        <p class="small">
+          <span class="dark-text">{{'by' | i18next}} {{ CurrentInterview?.status_updated_by?.first_name || "--" }}</span>
+          {{ 'on' | i18next }}
+          {{ CurrentInterview?.status_modified_on | localDateFormat }} {{ CurrentInterview?.status_modified_on | localDateFormat: 'hh:mm:ss a z' }}
+        </p>
+      </div>
+      <img src="../../../../../../assets/images/notification.svg" />
+    </div>
+    <div class="panels-footer px-16 py-8 d-flex align-items-center justify-content-between">
+      <a href="javascript:void()"class="small mr-12 text-primary" (click)="goToAction('view-interview')">{{ 'view_interview_details' | i18next }}</a>
+
+      <button class="btn btn-primary small" (click)="goToAction('propose-new-time')">{{ 'propose_new_time' | i18next }}</button>
+    </div>
+  </div>
+  <!-- END New interview time proposed HM/MSP view -->
+
+  <!-- hiring process interview details -->
+  <!-- <div class="panel mb-16">
+    <div class="p-16">
+      <p class="font-weight-medium">{{ 'hiring_process' | i18next }}</p>
+      <div class="float-left">
+        <p class="green d-flex align-items-center">Interview Completed</p>
+        <p class="small">
+          On Dec 12, 2020, 12:30 PM
+          <span class="dark-text">By Vendor Name</span>
+        </p>
+      </div>
+      <div class="clearfix"></div>
+    </div>
+    <div class="panels-footer px-16 py-8">
+      <button class="btn btn-primary small w-100">
+        {{ 'view_interview_details' | i18next }}
+      </button>
+    </div>
+  </div> -->
+  <!-- hiring process interview details -->
+
+  <!-- View Assignment -->
+
+  <!-- View Assignment -->
+</div>
+<nav [hidden]="!showDropdownOffer" class="dropdown-box-wrapper" id="rowDropdownWorkflow1"
+  (mouseleave)="hideDropdownBox()">
+  <ul>
+    <li *authorize="'counter_offer'" [hidden]="
+        userType == offerDetails[0]?.stages[0]?.created_by?.org_type ||
+        offerDetails?.status == 'REJECTED' ||
+        offerDetails?.status == 'ACCEPTED' || userType === 'VENDOR'
+      ">
+      <a (click)="clickToCounterOffer()">
+        {{ 'counter_offer' | i18next }}
+      </a>
+    </li>
+      <li *authorize="'update_offer'" [hidden]="userType == offerDetails[0]?.stages[0]?.created_by?.org_type ||
+          offerDetails?.status == 'REJECTED' ||
+          offerDetails?.status == 'ACCEPTED'
+        ">
+        <a (click)="clickToAcceptOffer()">
+          {{ 'accept_offer' | i18next }}
+        </a>
+      </li>
+
+    <li *authorize="'update_offer'" [hidden]="userType == offerDetails[0]?.stages[0]?.created_by?.org_type  ||
+        offerDetails?.status == 'REJECTED' ||
+        offerDetails?.status == 'ACCEPTED'
+      ">
+      <a (click)="clickToRejectOffer()">
+       {{ 'reject_offer' | i18next }}
+      </a>
+    </li>
+  </ul>
+</nav>
+<!-- <app-withdraw-candidate></app-withdraw-candidate> -->
+<!-- <app-approval-notes-history [visiblity]="approvalNote" [isView]="sidePanelViewMode" [superAdminEdit]="superAdminEdit"
+  [approvalHistory]="approvalHistory" [approvalId]="approverId" [approvalFor]="approvalFor"
+  [approvalWorkflow]="approvalWorkflow" (onClose)="onSidePanelClose()" (onSubmit)="onSubmit($event)">
+</app-approval-notes-history> -->
+
+<app-mark-as-comp-side-panel [visiblity]="showSidePanel" [isView]="sidePanelViewMode" (onClose)="onSidePanelClose()" (onSubmit)="onSubmit($event)">
+</app-mark-as-comp-side-panel>
+
+

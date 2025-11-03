@@ -1,0 +1,14 @@
+<ul class="hierarchy-child-renderer-wrapper">
+    <li class="pt-16 pl-16">
+        <icon id="hierarchy-child-icon" size="28px" name="arrow_drop_down" type="material" cuclass="icon-cu"
+          class="hierarchy-child-down-arrow cursor-pointer" (click)="childHierarchyrendered()"
+          *ngIf="childRenderData?.hierarchies?.length"
+          [ngClass]="{'child-rotated': hierarchyChildToggle}"></icon>
+        <p [ngClass]="{disabled: (isReadMode || childRenderData?.isDisabled) ? true : null}" [attr.disabled]="(isReadMode || childRenderData?.isDisabled) ? true : null" class="herarchy-name cursor-pointer" (click)="onSelectLevel($event)">{{childRenderData?.name}}</p>
+        <hierarchy-child-renderer *ngFor="let childLevel of childRenderData?.hierarchies" [childRenderData]="childLevel"
+            [isUserOnly]="isUserOnly" [isReadMode]="isReadMode" [parentCheckboxState]="checkboxState"
+            (selectHierarchyLevel)="selectParent($event)" [selectedTreeArr]="selectedTreeArr"
+            [ngClass]=" hierarchyChildToggle ? 'active' : 'inactive' ">
+        </hierarchy-child-renderer>
+    </li>
+</ul>

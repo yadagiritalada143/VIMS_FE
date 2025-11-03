@@ -1,0 +1,495 @@
+<div class="timesheet-page tito-timesheet-new">
+    <div class="detail-page-wrapper">
+        <section class="description-panel p-32 position-relative">
+            <a class="back-btn back-mobile" (click)="navigateBackTo()">
+                <icon class="d-inline-block" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon>
+                <span><span *ngIf="!redirectSow">{{ 'back_to ' | i18next }}</span>{{redirectSow ? ('back_to_sow' | i18next) : (redirectTimesheetFlyout ? redirectTimesheetFlyout : 'Timesheets')|i18next }}</span>
+            </a>
+            <app-timesheet-actions-alerts [timeSheet]="timeSheet" [isAssignmentClosed]="isAssignmentClosed"
+                [isTimesheetEnabled]="isTimesheetEnabled"></app-timesheet-actions-alerts>
+                <app-timesheet-supporting-text [timesheetStatus]="timeSheet?.data?.status"></app-timesheet-supporting-text>
+
+            <div class="create-wrapper mt-24">
+                <div class="card bg-light mb-24 mb-m-0">
+                    <app-timesheet-breadcrumb (onSave)="saveTITOTimeSheet($event);" [disableButton]="disableButton"
+                        [timeSheet]="timeSheet" [disableButton]="disableButton"
+                        [is_need_create]="timeSheet?.data?.is_need_create" [isAssignmentClosed]="isAssignmentClosed"
+                        [isTimesheetEnabled]="isTimesheetEnabled">
+                    </app-timesheet-breadcrumb>
+                    <app-timesheet-header [sourcing_model]="sourcing_model" [currentTimesheetData]="currentTimesheetData">
+                    </app-timesheet-header>
+                </div>
+                <app-master-data *ngIf="timesheetTab == 'timesheet'" [currentTimesheetData] = "currentTimesheetData" ></app-master-data>
+
+                <div class="card bg-light mb-24 mb-m-0">
+                       <app-timesheet-tab [isShowMultiApproval]="isShowMultiApproval" (activeTab)="showTimesheetTab($event)"></app-timesheet-tab>
+                       <div [hidden]="timesheetTab !== 'workflows'" class="p-16">
+                        <app-multi-workflow [moduleName]="'timesheets'" [moduleStatus]="currentTimesheetData?.status"
+                        [multiApprovals]="multiApprovals" [moduleId]="currentTimesheetData?.timesheet_uuid"></app-multi-workflow>
+                      </div>
+
+                    <div *ngIf="timesheetTab == 'timesheet'"  class="d-flex align-items-center justify-content-between p-16">
+                        <div class="d-flex align-items-center">
+                            <div class="date-range d-flex align-items-center px-8 rounded-sm mr-32">
+                                <icon name="date_range" cuClass="d-flex" class="mr-8" size="18px" color="#1C60D0">
+                                </icon>
+                                <p>
+                                    {{ getDateFromString(currentTimesheetData?.start_date) | date:'ccc'  | i18next }},
+                                    {{ getDateFromString(currentTimesheetData?.start_date) | localDateFormat :"": "":
+                                    "": true | i18next }} -
+                                    {{ getDateFromString(currentTimesheetData?.end_date) | date:'ccc'  | i18next }},
+                                    {{ getDateFromString(currentTimesheetData?.end_date) | localDateFormat:"": "": "":
+                                    true | i18next }}
+                                </p>
+                            </div>
+                            <div class="d-flex" *ngIf="!config?.overnight">
+                                <p class="bullet-point small mr-24 working-hour">{{ 'working_hours' | i18next }} </p>
+                                <p class="bullet-point small mr-24 break">{{ 'break' | i18next }} </p>
+                                <p class="bullet-point small rest">{{ 'rest' | i18next }} </p>
+                            </div>
+                        </div>
+                        <div class="d-flex position-relative action-buttons" (clickOutside)="dropdownToggle = false;">
+                            <ng-template [ngIf]="isVisibleOptions()">
+                                <button class="btn btn-outine small copy-btn" *ngIf="showCopyButton"
+                                    (click)="showCopywidget = true;">
+                                    <icon class="icon--on-left" name="content_copy" size="12px"></icon> {{'Copy
+                                    Previous'|i18next }}
+                                </button>
+
+                                <button *authorize="'create_timesheet'" class="btn btn-outine small more-btn-icon ml-12"
+                                    (click)="dropdownToggle = true">
+                                    <icon cuClass="d-flex" name="more_horiz" size="24px"></icon>
+                                </button>
+                            </ng-template>
+                            <div *authorize="'create_timesheet'" class="clear-data-dropdown"
+                                (mouseleave)="dropdownToggle= false;" [ngClass]="{'active' : dropdownToggle}">
+                                <ng-template
+                                    [ngIf]="!currentTimesheetData?.status || currentTimesheetData?.status == timesheetStatuses?.DRAFT">
+                                    <button class="clear-btn" (click)="clearTimesheetLogs()"
+                                        [disabled]="disableClearAllButton">
+                                        <icon class="mr-8" name="remove_circle_outline" theme="outlined" size="22px"
+                                            type="material"></icon>
+                                        {{ 'clear_all' | i18next }}
+                                    </button>
+                                </ng-template>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div *ngIf="timesheetTab == 'timesheet'"  class="timesheet-table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{ 'day_&_date' | i18next }}
+                                    </th>
+                                    <th *ngIf="!config?.overnight" [attr.colspan]="config?.overnight ? '' : '2'">
+                                        {{ 'attendance_visual' | i18next }}
+                                    </th>
+                                    <th class="time-in">
+                                        <div class="d-flex align-items-center">
+                                            <icon cuClass="d-flex" name="south_west" size="14px" color="#01CA17"></icon>
+                                            <span class="ml-4">{{ 'time_in' | i18next }}</span>
+                                        </div>
+                                    </th>
+                                    <th class="arrow-header" *ngIf="config?.overnight">
+
+                                    </th>
+                                    <th class="time-out">
+                                        <div class="d-flex align-items-center">
+                                            <icon cuClass="d-flex" name="north_east" size="14px" color="#FF0000"></icon>
+                                            <span class="ml-4">{{ 'timeout' | i18next }}</span>
+                                        </div>
+                                    </th>
+                                    <th *ngIf="!config?.overnight">
+                                        <div class="d-flex align-items-center">
+                                            <span>{{ 'penalty_break_&_rest' | i18next }}</span>
+                                        </div>
+                                    </th>
+                                    <th *ngIf="config?.overnight">
+                                        <div class="d-flex align-items-center">
+                                            <span>{{ 'break' | i18next }}</span>
+                                        </div>
+                                    </th>
+                                    <th *ngIf="config?.overnight">
+                                        <div class="d-flex align-items-center">
+                                            <span>{{ 'rest' | i18next }}</span>
+                                        </div>
+                                    </th>
+
+                                    <th *ngIf="config?.overnight">
+                                        {{ 'total_hours' | i18next }}
+                                    </th>
+                                    <th>
+                                        {{ 'billable_hours' | i18next }}
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody *ngFor="let col of formData?.data; let i = index;" [hidden]="!col?.isDayAvailable">
+                                <tr class="defalut-view" (click)="showHideEntry(i, col)"
+                                    [ngClass]="{'holiday' : (col.status == 'holiday'),  'off' : (col.status == 'off')}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <p class="font-weight-medium">
+                                                {{ col?.date | date:'cccc'  | i18next }}
+                                                <icon *ngIf="col.isWeekend" name="weekend" title="Weekend"
+                                                    class="holiday-icon align-sub" type="material" color="#01B116"
+                                                    size="18px"></icon>
+                                                <icon *ngIf="col.holiday" name="celebration" title="Holiday"
+                                                    class="holiday-icon align-sub" type="material" color="#ED6161"
+                                                    size="18px"></icon>
+                                            </p>
+                                            <icon class="ml-8" size="16px" name="celebration" color="#FF0000"
+                                                cuClass="d-flex" *ngIf="col.status == 'holiday'"></icon>
+                                            <icon class="ml-8" size="16px" name="weekend" color="#01B116"
+                                                cuClass="d-flex" *ngIf="col.status == 'off'"></icon>
+                                        </div>
+                                        <p> {{ col?.date | localDateFormat :"": "": "": true | i18next }} </p>
+                                    </td>
+                                    <td *ngIf="!config?.overnight && (col?.check_in && col?.check_out)"
+                                        [attr.colspan]="config?.overnight ? '' : '2'">
+                                        <div class="attendance-chart d-flex align-items-center justify-content-between"
+                                            *ngIf="col?.check_in && col?.check_out; ">
+                                            <!-- else noTimeLog -->
+                                            <div class="indicator"
+                                                [ngStyle]="{'width':percentage(col?.difference?.hours, 24) + '%', 'left': 70 - percentage(col?.difference?.hours, 24) + '%'}">
+                                                <div class="attendance-tooltip">
+                                                    <h6>{{ 'time_in_&_out' | i18next }}</h6>
+                                                    <p>{{col?.check_in | i18next }} - {{col?.check_out | i18next }}</p>
+                                                    <h6 *ngIf="col?.breaks?.meal?.breaks?.length"> {{'MEAL
+                                                        BREAK'|i18next }}</h6>
+                                                    <div *ngFor="let mb of col?.breaks?.meal?.breaks; let i = index">
+                                                        <p class="small" *ngIf="mb?.break_out && mb?.break_in">
+                                                            {{mb?.break_out | i18next }} - {{mb?.break_in | i18next }}</p>
+                                                        <p class="small" *ngIf="mb?.compliant"> {{mb?.compliant | i18next }} </p>
+                                                    </div>
+
+                                                    <h6 *ngIf="col?.breaks?.rest?.breaks?.length"> {{'REST
+                                                        BREAK'|i18next }}</h6>
+                                                    <div *ngFor="let rb of col?.breaks?.rest?.breaks; let i = index">
+                                                        <p class="small" *ngIf="rb?.break_out && rb?.break_in">
+                                                            {{rb?.break_out | i18next }} - {{rb?.break_in | i18next }}</p>
+                                                        <p class="small" *ngIf="rb?.compliant"> {{rb?.compliant | i18next }} </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div [ngStyle]="{'width':breakPercentage(col?.breaks?.meal?.breaks) + '%', 'left': 72 - percentage(col?.difference?.hours, 24) + '%'}"
+                                                *ngIf="col?.breaks?.meal?.breaks?.length" class="indicator break">
+                                            </div>
+                                            <div [ngStyle]="{'width':breakPercentage(col?.breaks?.rest?.breaks) + '%', 'left': 95- percentage(col?.difference?.hours, 24) + '%'}"
+                                                *ngIf="col?.breaks?.rest?.breaks?.length" class="indicator rest"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                            <div class="hour"></div>
+                                        </div>
+                                    </td>
+
+
+
+                                    <td  class="time-in" *ngIf="col?.check_in">
+                                        {{col?.check_in | i18next }}
+                                        <p *ngIf="config?.overnight">{{ col?.check_in_date | localDateFormat :"": "":
+                                            "": true | i18next }} </p>
+                                    </td>
+                                    <td class="arrow-header" *ngIf="config?.overnight && (col?.check_in && col?.check_out)">
+                                        <icon size="14px" name="arrow_right_alt" color="#84919F"></icon>
+                                    </td>
+                                    <td class="time-out" *ngIf="col?.check_out">
+                                        {{col?.check_out | i18next }}
+                                        <p *ngIf="config?.overnight">{{ col?.check_out_date | localDateFormat :"": "":
+                                            "": true | i18next }} </p>
+                                    </td>
+
+                                    <td [attr.colspan]="config?.overnight ? '3' : '4'"
+                                        *ngIf="(!col?.check_in && !col?.check_out)">
+                                        <p class="" *ngIf="(!col?.check_in && !col?.check_out) && col?.isWeekend">
+                                            Full day weekly off
+                                        </p>
+                                        <p *ngIf="(!col?.check_in && !col?.check_out) && !col?.isWeekend && !col?.holiday"
+                                            class="">
+                                            No time logged in
+                                        </p>
+                                        <p class="notimeentry" *ngIf="col?.holiday">
+                                            {{ "Holiday : " + col?.holiday?.name | i18next }}
+                                        </p>
+                                    </td>
+
+                                    <td *ngIf="!config?.overnight">
+                                        <div class="d-flex">
+                                            <p class="bullet-point small mr-24 break" *ngIf="col?.check_in && col?.check_out">
+                                                {{panaltyBreakCount(col?.breaks?.meal?.breaks) }}
+                                            </p>
+                                            <p class="bullet-point small rest" *ngIf="col?.check_in && col?.check_out">
+                                                {{panaltyBreakCount(col?.breaks?.rest?.breaks) }}
+                                            </p>
+                                        </div>
+                                    </td>
+                                    <td *ngIf="config?.overnight">
+                                        <div class="d-flex">
+                                            <p class="small mr-24 break" *ngIf="col?.check_in && col?.check_out">
+                                                {{col?.breaks?.meal?.breaks?.length | i18next }}
+                                            </p>
+                                        </div>
+                                    </td>
+
+                                    <td *ngIf="config?.overnight">
+                                        <div class="d-flex" *ngIf="col?.check_in && col?.check_out">
+                                            <p class="small rest">{{col?.breaks?.rest?.breaks?.length | i18next }}</p>
+                                        </div>
+                                    </td>
+
+
+                                    <td *ngIf="config?.overnight">
+                                        <span *ngIf="col?.check_in && col?.check_out">{{col?.difference?.hours | i18next }}h </span>
+                                        <span *ngIf="col?.check_in && col?.check_out">{{col?.difference?.minutes | i18next }} m</span>
+                                    </td>
+
+                                    <td><span *ngIf="col?.check_in && col?.check_out">{{col?.difference?.hours | i18next }}h </span>
+                                        <span *ngIf="col?.check_in && col?.check_out">{{col?.difference?.minutes | i18next }} m</span>
+
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center justify-content-end" *ngIf="col?.active">
+                                            <ng-container
+                                                *ngIf="isAuthorizedToCreate && !isAssignmentClosed && isTimesheetEnabled">
+                                                <button class="btn btn-outine small mr-12"
+                                                    *ngIf="col?.check_in && col?.check_out; else addTime"
+                                                    (click)="addNewTime(col)">
+                                                    <icon name="drive_file_rename_outline" class="icon--on-left"
+                                                        size="12px"></icon> {{ 'edit_time' | i18next }}
+                                                </button>
+                                                <ng-template #addTime>
+                                                    <button class="btn btn-light small mr-12" (click)="addNewTime(col)">
+                                                        <icon name="more_time" class="icon--on-left" size="12px"></icon>
+                                                        {{ 'add_time' | i18next }}
+                                                    </button>
+                                                </ng-template>
+                                            </ng-container>
+                                            <icon
+                                                [ngClass]="{'disabled' : (col.status == 'holiday' || col.status == 'off' || (!col?.check_in && !col?.check_out)) }"
+                                                name="{{activeItem == i? 'expand_less' : 'expand_more' }}"
+                                                cuClass="d-flex" class="cursor-pointer" size="20px" color="#0F2E4E">
+                                            </icon>
+
+                                        </div>
+
+                                    </td>
+                                </tr>
+                                <tr *ngIf="activeItem == i">
+                                    <td class="detail-information-box p-0" colspan="9">
+                                        <div class="shadow position-relative">
+                                            <div class="detail-view-day position-relative pl-32 pr-16 pt-16 pb-16">
+                                                <div *ngIf="!col?.check_in && !col?.check_out">
+                                                    No time logged in
+                                                </div>
+                                                <div
+                                                    *ngIf="(col?.breaks?.meal?.breaks?.length ? (col?.breaks?.meal?.breaks?.length === 0) : 1  && col?.breaks?.rest?.breaks?.length ? (col?.breaks?.rest?.breaks?.length === 0) : 1) && (col?.check_in && col?.check_out)">
+                                                    No Breaks Added Yet
+                                                </div>
+
+                                                <div class="d-flex"
+                                                    *ngIf="col?.breaks?.meal?.breaks?.length || col?.breaks?.rest?.breaks?.length">
+                                                    <div class="box position-relative"
+                                                        *ngFor="let mb of col?.breaks?.meal?.breaks; let i = index">
+                                                        <div *ngIf="col?.breaks?.meal?.breaks">
+                                                            <p class="small">Break {{i+1 }} <span
+                                                                    *ngIf="breakDifference(mb)">({{breakDifference(mb) | i18next }})</span>
+                                                            </p>
+                                                            <p class="small" *ngIf="mb?.break_out && mb?.break_in">
+                                                                {{mb?.break_out | i18next }} - {{mb?.break_in | i18next }}</p>
+                                                            <p class="small" *ngIf="mb?.compliant"> {{mb?.compliant | i18next }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="box blue position-relative"
+                                                        *ngFor="let rb of col?.breaks?.rest?.breaks; let i = index">
+                                                        <div>
+                                                            <p class="small">Rest {{i+1 }} <span
+                                                                    *ngIf="breakDifference(rb)">({{breakDifference(rb) | i18next }})</span>
+                                                            </p>
+                                                            <p class="small" *ngIf="rb?.break_out && rb?.break_in">
+                                                                {{rb?.break_out | i18next }} - {{rb?.break_in | i18next }}</p>
+                                                            <p class="small" *ngIf="rb?.compliant"> {{rb?.compliant | i18next }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <p class="small mt-16 d-flex" *ngIf="col?.notes">
+                                                    <icon class="mr-8" name="notes" color="#0F2E4E" size="16px"></icon>
+                                                    {{col?.notes | i18next }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot
+                                *ngIf="currentTimesheetData?.status && currentTimesheetData?.status !== timesheetStatuses?.MISSING">
+                                <tr class="total-col">
+                                    <td [attr.colspan]="config?.overnight ? '6' : '5'">
+                                        <p class="font-weight-medium">{{ 'total' | i18next }}</p>
+                                    </td>
+                                    <td>
+                                        <div class="font-weight-medium" *ngIf="config?.overnight">
+                                            <div class="col-item both-border"
+                                                [ngClass]="{'read-only' : (!isAuthorizedToCreate || isAssignmentClosed || !isTimesheetEnabled)}">
+                                                {{(formData?.total ? formData?.total : defaultValue) | accuracy :
+                                                accuracyConfig?.HOUR | i18next }}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="font-weight-medium">
+                                            <div class="col-item both-border"
+                                                [ngClass]="{'read-only' : (!isAuthorizedToCreate || isAssignmentClosed || !isTimesheetEnabled)}">
+                                                {{(formData?.total ? formData?.total : defaultValue) | accuracy :
+                                                accuracyConfig?.HOUR | i18next }}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-end">
+                                            <a class="view-more d-inline-block"
+                                                (click)="showHideFUllData()">{{ 'view_more' | i18next }} <icon
+                                                    class="ml-4" name="{{showFullData? 'expand_less' : 'expand_more' }}"
+                                                    size="16px"></icon></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div   class="total-breakup-table" *ngIf="showFullData && timesheetTab == 'timesheet'">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>
+                                        &nbsp;
+                                    </th>
+                                    <th *ngFor="let col of formData?.data; let i = index;">
+                                        {{ col?.date | date:'ccc' | i18next }}
+                                    </th>
+                                    <th>
+                                        TOTAL
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="parent-row cursor-pointer"
+                                    *ngFor="let hour_data of timeSheet?.data?.hour_data?.type | keyvalue: unsorted">
+                                    <td>
+                                        <div class="col-item" tooltip="{{ hour_data?.value  | i18next }}" placement="right"
+                                            delay="500">
+                                            {{ hour_data?.value | i18next }}
+                                        </div>
+                                    </td>
+
+                                    <td *ngFor="let col of formData?.data; let i = index;">
+                                        <div class="col-item">
+                                            {{ col?.billing_data && col?.billing_data[hour_data.key] ?
+                                            (col?.billing_data[hour_data.key]
+                                            | accuracy : accuracyConfig?.HOUR) : defaultValue | i18next }}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="col-item-wrapper activewrap">
+                                            <div class="col-item">
+                                                {{ (formData.billing_data_total &&
+                                                formData.billing_data_total[hour_data?.key]
+                                                )?(formData.billing_data_total[hour_data?.key] | accuracy :
+                                                accuracyConfig?.HOUR) : defaultValue  | i18next }}
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- notes -->
+            <div *ngIf="timesheetTab == 'timesheet'"  class="description-panel position-relative">
+                <div class="card bg-light mb-24 mb-m-0">
+                    <div class="footer-note mt-16 p-16" *ngIf="config?.notes?.option?.timesheet_level?.is_allow">
+                        <p class="mb-4 font-weight-bold"> {{ 'timesheet_notes' | i18next }}</p>
+                        <textarea [attr.disabled]="(isAuthorizedToCreate && !isAssignmentClosed && isTimesheetEnabled)? null : true"
+                            class="form-control" placeholder="{{ 'add_note' | i18next }}" rows="5"
+                            [(ngModel)]="formData.timesheet_level_notes"></textarea>
+                        <div>
+                            <div class="add-time-footer p-24 d-flex justify-content-end">
+                                <button *ngIf="isAuthorizedToCreate && !isAssignmentClosed && isTimesheetEnabled"
+                                    class="btn btn-primary mt-4 float-right" (click)="saveTITOTimeSheet({ submit: 0 });">
+                                    {{ 'save_notes' | i18next }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- end -->
+
+            <div *ngIf="timesheetTab == 'timesheet'"  class="description-panel position-relative">
+                <div class="card bg-light mb-24 mb-m-0">
+                    <ng-template
+                        [ngIf]="currentTimesheetData?.status && currentTimesheetData?.status !== timesheetStatuses?.DRAFT && currentTimesheetData?.status !== timesheetStatuses?.MISSING && isShowTimesheetBilling()">
+                        <app-timesheet-billing-details-new *ngIf="timeSheet?.data?.billable_info_by_api" [timesheetId]="currentTimesheetData?.timesheet_uuid"></app-timesheet-billing-details-new>
+                        <app-timesheet-billing-details [billingData]="billing_data"></app-timesheet-billing-details>
+                    </ng-template>
+                </div>
+            </div>
+
+            <app-timesheet-revision-history *ngIf="currentTimesheetData?.timesheet_uuid && timesheetTab == 'timesheet'"
+                [timesheetId]="this.currentTimesheetData?.timesheet_uuid"
+                (reloadPage)="initializeTimesheet()"></app-timesheet-revision-history>
+
+
+                <!-- Custom Fields -->
+                <div *ngIf="timesheetTab == 'timesheet'"  class="card bg-light mb-24 mb-m-0 py-16" [ngClass]="{'px-24 my-24': customFields?.length > 0}">
+                    <app-dynamic-custom-fields *ngIf="assignmentDetails?.assignment?.hierarchy?.id"  [dateFormat]="dateFormatEnum.FORMATYMD" (isCustomFieldsFormValid)="setCustomFieldsFormValid($event)"
+                        (customFieldUpdated)="customFieldUpdated($event);" [custom_fields]="selectedCustomData"
+                        [moduleName]="'TIMESHEETS'" [uploadS3RefName]="'timesheets'" [columnInRow]="3" [hierarchyIds]="assignmentDetails?.assignment?.hierarchy?.id">
+                    </app-dynamic-custom-fields>
+                </div>
+                <!-- end -->
+
+        </section>
+    </div>
+    <app-add-time (updateTimesheetLogs)="updateLogs($event)"></app-add-time>
+
+
+    <app-copy-timesheet-widget [showCopywidget]="showCopywidget" [config]="config"
+        (copiedTimesheet)="copyTimesheetInSelectedWeek($event)"></app-copy-timesheet-widget>
+    <ng-template [ngIf]="timeSheet?.data?.actions_allow?.can_reject || hasOverrideApprovalPermission">
+        <app-timesheet-reject></app-timesheet-reject>
+    </ng-template>
+    <ng-template
+        [ngIf]="timeSheet?.data?.actions_allow?.can_modify || timeSheet?.data?.actions_allow?.can_delete || timeSheet?.data?.actions_allow?.can_withdraw">
+        <app-timesheet-action-flyout></app-timesheet-action-flyout>
+    </ng-template>
+
+</div>

@@ -1,0 +1,57 @@
+<div>
+  <div class="d-flex align-items-center pb-24 justify-content-between bg-light vms-header-panel">
+    <div class="d-flex">
+      <ul class="breadcrumb-list">
+        <li class="breadcrumb-listItem">
+          <a class="title font-weight-medium"> {{ mainmenuName | i18next }} </a>
+        </li>
+        <li class="breadcrumb-listItem ml-8" [hidden]="!tableConfig?.isCreate" *authorize="tableConfig?.permission">
+          <button
+            type="button"
+            class="btn small btn-primary ml-8 rounded-circle add-btn"
+            (click)="onCreateClick()"
+            tooltip="{{ (isCreateButtonName ? isCreateButtonName : 'Create ' + tooltipName)|i18next }}"
+            placement="right"
+            delay="500"
+          >
+            <app-table-icon size="20px" name="add" type="material" cuClass="d-flex" class="d-flex"> </app-table-icon>
+          </button>
+        </li>
+      </ul>
+    </div>
+    <div class="d-flex">
+      <ul class="listing-filter">
+        <li class="position-relative" [ngClass]="{ 'search-when-expand': isSearchOpen }" [hidden]="!tableConfig?.isSearch">
+          <div class="position-relative search-head">
+            <input
+              type="text"
+              placeholder="{{ 'timesheet_list' | i18next }}"
+              [(ngModel)]="searchValue"
+              class="form-control"
+              (keyup.enter)="onSearchClick($event)"
+              (keyup)="onSearchClick($event)"
+            />
+            <app-table-icon size="17px" name="search" type="material" class="icon-search" cuClass="d-flex" (click)="onSearchClick()">
+            </app-table-icon>
+          </div>
+        </li>
+        <li class="position-relative sortby">
+          <ng-select [clearable]="true" placeholder="{{ 'sort_by' | i18next }}" (change)="onClickSort($event)">
+            <ng-option [value]="'created'">{{ 'date_created' | i18next }}</ng-option>
+            <ng-option [value]="'updated'">{{ 'date_updated' | i18next }}</ng-option>
+          </ng-select>
+        </li>
+        <li class="position-relative d-none">
+          <a href="javascript:void(0)" class="small btn btn-outine">
+            <app-table-icon size="24px" name="view_module" type="material" cuClass="d-flex"></app-table-icon>
+          </a>
+        </li>
+        <li class="position-relative d-none">
+          <a href="javascript:void(0)" class="small btn btn-outine active-grid">
+            <app-table-icon size="24px" name="view_stream" type="material" cuClass="d-flex"></app-table-icon>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

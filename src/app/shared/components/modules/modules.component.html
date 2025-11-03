@@ -1,0 +1,14 @@
+<div class="checkbox-panel p-m-0">
+  <ng-container *ngFor="let toggle of moduleData; let i = index">
+    <div *ngIf="!toggle?.hide" class="toggle-panel">
+      <div class="toggle-panel-inner" [ngClass]="!readOnly || toggle?.disabled ? 'if-inactive' : 'if-active'">
+        <span class="d-flex align-items-center">
+          <icon size="19px" [name]="toggle?.icon" type="material" cuClass="mr-4" class="d-flex"></icon>
+          <span> {{toggle?.name | i18next}}</span>
+        </span>
+        <span class="toggle-switch" [ngClass]="toggle?.is_enabled ? 'toggle-on' : 'toggle-off'"
+          (click)="!toggle.disabled?onClickToggle(i):''"></span>
+      </div>
+    </div>
+  </ng-container>
+</div>

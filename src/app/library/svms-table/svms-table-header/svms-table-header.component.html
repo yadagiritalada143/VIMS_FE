@@ -1,0 +1,105 @@
+<header class="c-listing-header d-flex align-items-center justify-content-between p-24">
+  <div class="d-flex">
+    <a class="mr-8" href="javascript:void(0)" *ngIf="headerConfig?.showBackArrow">
+      <i class="material-icons flow-back" (click)="backtoPreviousPage()">arrow_back</i>
+    </a>
+    <div [ngClass]="{'ml-16' : headerConfig?.showInformativeBubble}">
+      <h3 class="mb-0 font-weight-semibold">{{ headerConfig?.title | i18next}}
+        <span class="ml-8 mb-0 font-weight-normal informative-bubble" *ngIf="headerConfig?.showInformativeBubble && informativeBubbleText">{{informativeBubbleText |i18next}}</span>
+      </h3>
+      <p class="small gray-7">
+        <span *ngIf="!showLoader">{{ totalRecords }} {{ 'records' | i18next }}</span>
+        <ngx-skeleton-loader animation="progress" appearance="line" [theme]="{'height': '10px', 'margin-bottom': '0' }" *ngIf="showLoader"> </ngx-skeleton-loader>
+      </p>
+    </div>
+    <div class="d-flex align-items-center ml-24 mb-16" *ngIf="!showLoader && headerConfig?.subTitle">
+      <icon type="symbols" cuClass="d-flex" name="folder_supervised" size="20px" color="#5f6d89" class="mr-4"></icon>
+      <p class="small">{{ headerConfig?.subTitle }}</p>
+    </div>
+  </div>
+  <div class="d-flex align-items-center">
+
+    <button class="c-btn c-btn-primary-medium-left-icon" *ngIf="headerConfig?.switchBackURL" (click)="switchToOldUI(headerConfig?.switchBackURL)">
+       {{ 'switch_to_old_view' | i18next }}
+    </button>
+
+    <button class="c-btn c-btn-primary-medium-left-icon" *ngIf="headerConfig?.showAddBtn" (click)="onAdd($event)">
+      <i class="material-icons">add</i> {{(headerConfig?.createButtonTitle ?? 'create_new' )| i18next}}
+    </button>
+
+    <button class="c-btn c-btn-outline-medium-right-icon ml-8 clear-all-filter" (click)="clearAllFilters()" *ngIf="filterApplied">
+      <span class="hide-on-mobile">{{ 'clear_all_filters' | i18next }}</span> <i class="material-icons hide-on-mobile">cancel</i> <i class="material-icons hide-on-desktop ml-m-0">clear_all</i>
+    </button>
+
+    <button
+      class="c-btn c-btn-3-dot-actions ml-8"
+      #actionTrigger
+      id="action"
+      data-toggle="dropdown"
+      *ngIf="getShowActionLinks"
+      [ngClass]="{'hide-on-mobile' : hideActionButton}"
+    >
+      <i class="material-icons">more_horiz</i>
+    </button>
+    <button
+    class="c-btn c-btn-3-dot-actions ml-8 c-filter-button hide-on-desktop"
+    [ngClass]="{'show-filter' : hideActionButton}"
+    (click)="hideFilterButton()"
+  >
+    <i class="material-icons">clear</i>
+  </button>
+  </div>
+</header>
+<div class="c-search-panel" [ngClass]="{'filter-active' : filterApplied}" *ngIf="headerConfig?.searchAllowed">
+    <div class="position-relative"
+      [ngbTooltip]="'Clear advance filter to search the value'"
+      [disableTooltip]="!filterApplied" placement="top">
+      <input type="search" [placeholder]="'Search..' | i18next"
+        [ngClass]="filterApplied?'border-right':''"
+        (keyup)="onSearch($event)" [ngModel]="searchText"
+        [readonly]="filterApplied" [disabled]="filterApplied"
+        (ngModelChange)="onChange($event)" />
+        <i class="material-icons">search</i>
+    </div>
+</div>
+<section class="c-action-dropdown position-fixed" *ngIf="actionDropdownBox" id="c-action-dropdown" #actionDropdown>
+  <ul>
+    <li *ngIf="headerConfig.advanceFilter" >
+      <a href="javascript:void(0)" (click)="onAdvanceFilterClick()">
+        {{ 'advance_filter' | i18next }}
+      </a>
+    </li>
+    <li *ngIf="headerConfig.columnSetting" (click)="onColumnSettingClick()">
+      <a href="javascript:void(0)"> {{ 'customize_columns' | i18next }} </a>
+    </li>
+    <li *ngIf="headerConfig.importData" (click)="onImportDateClick()">
+      <a href="javascript:void(0)" > {{ 'import_data' | i18next }} </a>
+    </li>
+    <li *ngIf="headerConfig.exportData" (click)="onExportDataClick()">
+      <a href="javascript:void(0)" >{{ 'export_data' | i18next }}  </a>
+    </li>
+    <li *ngIf="headerConfig.reorder" (click)="onReorderClick()">
+      <a href="javascript:void(0)"> {{ 'reorder_data' | i18next }} </a>
+    </li>
+    <li *ngIf="columnFilterEnabled" class="hide-on-desktop" (click)="showFilterOnMobile()">
+      <a href="javascript:void(0)"> {{ 'filter' | i18next }} </a>
+    </li>
+  </ul>
+</section>
+
+
+<app-svms-table-filter
+  [(visibility)]="filterVisible"
+  [filterConfig]="headerConfig?.advanceFilterConfig ?? []"
+  (filterParams)="applyFilters($event)"
+>
+</app-svms-table-filter>
+
+<app-svms-column-setting
+    [(visibility)]="showColoumnSetting"
+    [coloumnSettingConfig]="headerConfig?.columnSettingConfig"
+    [selectedColumns]="colDefinition"
+    (onApplySetting)="onApplyColumnSetting($event)"
+    (onClose)="onClose($event)">
+
+</app-svms-column-setting>

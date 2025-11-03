@@ -1,0 +1,11 @@
+<ng-container [formGroup]="form">
+    <div class="flex-2 expense-form-label">{{ label | i18next}}</div>
+    <div class="d-flex flex-1 justify-content-center">
+        <input id="hourlyMinBill" type="number" class="form-control dayNumberInput" formControlName="count" [readonly]="disabled">
+        <ng-select class="timeUnitsSelect ml-16" [searchable]="false" [clearable]="false" placeholder="{{ 'days' | i18next }}" formControlName="units"
+            [readonly]="disabled || readonlySelect">
+            <ng-option *ngFor="let period of periodOptions" [value]="period">{{ period | i18next }}</ng-option>
+        </ng-select>
+    </div>
+    <div class="d-flex justify-content-end flex-2 expense-form-label">{{ labelFrom | i18next }}</div>
+</ng-container>

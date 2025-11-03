@@ -1,0 +1,148 @@
+<div class="detail-page-wrapper">
+  <section class="description-panel p-32 position-relative">
+    <a class="back-btn back-mobile" (click)="navigateBackTo()">
+      <icon class="d-inline-block" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon>
+      <span><span *ngIf="!redirectSow">{{ 'back_to ' | i18next }}</span>{{redirectSow ? ('back_to_sow' | i18next) : (redirectTimesheetFlyout ? redirectTimesheetFlyout : 'Timesheets') |i18next }}</span>
+    </a>
+    <app-timesheet-actions-alerts *ngIf="!hideTimesheetAlert" [timeSheet]="timeSheet" [isAssignmentClosed]="isAssignmentClosed" [isTimesheetEnabled]="isTimesheetEnabled">
+    </app-timesheet-actions-alerts>
+    <app-timesheet-supporting-text [timesheetStatus]="timeSheet?.data?.status"></app-timesheet-supporting-text>
+    <div class="create-wrapper mt-24">
+      <div class="card bg-light mb-24">
+        <app-timesheet-breadcrumb (onSave)="submitHourlyTimeSheet($event);" [timeSheet]="timeSheet"
+          [disableButton]="disableButton" [is_need_create]="timeSheet?.data?.is_need_create"
+          [isAssignmentClosed]="isAssignmentClosed" [isTimesheetEnabled]="isTimesheetEnabled">
+        </app-timesheet-breadcrumb>
+        <app-timesheet-header [currentTimesheetData]="currentTimesheetData">
+        </app-timesheet-header>
+        <!-- <app-monthly-timesheet-breadcrumb [isSubmitSheet]="isAllSubmitted" [calendar]="calendar"
+          (onSubmit)="onSubmit($event)" [infoDetails]="timesheetInfoDetails" [working_days]="getWorkingDays()">
+        </app-monthly-timesheet-breadcrumb>
+        <app-monthly-timesheet-header [timesheetStatus]="timesheetStatus" [selectedWorkLocation]="selectedWorkLocation"
+          [locationData]="locationData" (earnLeaveCount)="getEarnLeaveCount($event)"
+          (openAssignmentPanel)="openAssignmentDetailPanel($event)" (locationType)="getLocationType($event)"
+          (onChange)="showHoliday($event)">
+        </app-monthly-timesheet-header> -->
+      </div>
+      <div class="card bg-light">
+        <div class="calendar-controls py-12 px-24">
+          <h3 class="float-left mb-0 mr-12">{{ getDateFromString(currentTimesheetData?.start_date) | localDateFormat: 'MMM yyyy':"":"":true | i18next }}</h3>
+          <ul class="view-mode float-left">
+            <li class="d-inline-block mr-8" [ngClass]="{'active': gridView}">
+              <icon name="date_range" theme="outlined" size="16px"></icon>
+            </li>
+            <!-- (click)="showView('list')" -->
+            <!-- <li class="d-inline-block mr-8" [ngClass]="{'active': listView}">
+              <icon name="view_day" theme="outlined" size="16px"></icon>
+            </li> -->
+          </ul>
+          <div class="clearfix"></div>
+        </div>
+        <div class="controls-bottom px-24 pt-8 pb-8">
+          <!-- <ul class="leave-summary float-left">
+            <li>Total</li>
+            <li class="ml-16 pl-16">ST : <span>48 H</span></li>
+            <li class="ml-6 pl-16">OT : <span>48 H</span>
+            </li>
+          </ul> -->
+          <ng-template [ngIf]="isAuthorizedToCreate && isTimesheetEnabled && !this.isAssignmentClosed">
+            <app-monthly-hour-based-copy-timesheet (onCopy)="copyTimesheetData($event)" [disableButton]="disableButton" (onClose)="cancelApplication($event)"></app-monthly-hour-based-copy-timesheet>
+          </ng-template>
+          <div class="clearfix"></div>
+        </div>
+        <div class="view-container grid-mode" *ngIf="gridView">
+          <div class="calendar-days d-flex">
+            <div class="week-day position-relative d-flex justify-content-center"
+              *ngFor="let day of days; let i = index">
+
+                <span class="mr-4">{{day?.name | i18next }}</span>
+                <icon *ngIf="day?.isWeekend" name="weekend" title="Weekend" class="holiday-icon"  type="material" color="#ED6161" size="18px"></icon>
+
+             </div>
+
+            <div class="week-day cursor-pointer" title="Total Working Hours">{{ 'total' | i18next }}</div>
+          </div>
+          <div class="dotloader" *ngIf="dataLoader"></div>
+          <div [hidden]="dataLoader" class="days d-flex" *ngFor="let row of calendar | chunk: 7; let i = index"
+            [ngClass]="{'show-bottom' : (i == (calendar?.length/7 -2))}">
+            <div class="date position-relative" *ngFor="let c of row; let j = index"
+              [ngClass]="{'weekend':  c?.disableDate}"  (click)="openApplicationModal(!c?.disableDate, c?.date?.getTime(),j, c?.date, c?.timesheet)">
+              <span class="leave-icon float-left"
+                *ngIf="!c?.timesheet?.notes && c?.timesheet?.breaks && c?.timesheet?.breaks.length === 0">
+              </span>
+
+              <span class="day-value float-right">{{c?.date?.getDate() | i18next }}</span>
+              <div class="holiday" *ngIf="isshowHoliday">
+                <span>
+                  <icon *ngIf="c?.holiday?.name" class="d-inline-block mr-4" name="wb_sunny" color="#E07A7A"
+                    size="16px">
+                  </icon> {{c?.holiday?.name | i18next }}
+                </span>
+              </div>
+              <div class="calendar-day-header" [ngClass]="{'weekend':  c.disableDate}"
+               >
+                <!-- {{c.date | localDateFormat:'EEEE' | i18next }} -->
+                <span class="full-icon float-left">
+                  <icon *ngIf="c?.timesheet?.notes" class="d-inline-block mr-8" name="sticky_note_2" theme="outlined"
+                    color="#CED4DA" size="16px"></icon>
+                  <icon *ngIf="c?.timesheet?.breaks && c?.timesheet?.breaks.length>0" class="d-inline-block mr-8"
+                    name="local_cafe" theme="outlined" color="#CED4DA" size="16px"></icon>
+                  <icon *ngIf="c?.timesheet?.document?.filename" class="d-inline-block" name="attach_file"
+                    theme="outlined" color="#CED4DA" size="16px"></icon>
+                  <icon *ngIf="c?.timesheet?.overnight" class="d-inline-block" name="nightlight" color="#CED4DA"
+                    size="16px"></icon>
+                </span>
+                <div class="clearfix"></div>
+                <a *ngIf="!c.disableDate && !editViewCheck(c?.timesheet)" class="hover-menu">
+                  <p class="mb-16">{{c?.date?.getDate() | i18next }}</p>
+                  <icon
+                    *ngIf="!editViewCheck(c?.timesheet) && isAuthorizedToCreate && isTimesheetEnabled && !isAssignmentClosed"
+                    name="more_time" color="#FF8600" size="24"></icon>
+                  <span>{{ calculateHours(c?.timesheet) | i18next }}</span>
+                </a>
+                <div class="hour-per-day" *ngIf="c?.timesheet?.projects?.length > 0 && c?.timesheet?.total >= 0"
+                [ngStyle]="{'background-color':c?.timesheet?.total == 0 ? '#ffa50029' : '' }">{{c?.timesheet?.total | i18next }} H</div>
+              </div>
+              <!-- model start -->
+              <div *ngIf="leaveApplicationModal === c?.date?.getTime() && selectedWeekIndex === j">
+                <app-monthly-hour-based-timesheet-date-panel [selectedDate]="c.date" [configuration]="config"
+                  [timesheetStatus]="timesheetStatus" [calendar]="calendar" [projectDropdown]="dropDownItems"
+                  [currentIndex]="getCurrentIndex(i, j)" [selectedWeekIndex]="selectedWeekIndex" [isAssignmentClosed]="isAssignmentClosed"
+                  [assignmentDetails]='assignmentWorker' [selectedTimeSheetData]="c" (save)="createHourlyPayload($event)"
+                  [infoDetails]="timesheetInfoDetails" (onClose)="cancelApplication($event)" [disableButton]="disableButton"  [timeSheet]="timeSheet" [isTimesheetEnabled]="isTimesheetEnabled">
+                </app-monthly-hour-based-timesheet-date-panel>
+              </div>
+              <!-- end -->
+            </div>
+            <div class="date b_date" *ngFor="let b of billingData;let j = index;first as isFirst; last as isLast"
+              [hidden]="i!=j">
+              <div class="week-total-hours">
+                <label>Week {{j+1 }}</label>
+                <span>{{b?.billing_hours || 0 }} H </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template [ngIf]="currentTimesheetData?.status && currentTimesheetData?.status !== timesheetStatuses?.DRAFT && currentTimesheetData?.status !== timesheetStatuses?.MISSING && isShowTimesheetBilling()">
+      <app-timesheet-billing-details-new *ngIf="timeSheet?.data?.billable_info_by_api" [timesheetId]="currentTimesheetData?.timesheet_uuid"></app-timesheet-billing-details-new>
+    </ng-template>
+    
+      <!-- Custom Fields -->
+        <div class="card bg-light mb-24 mb-m-0 py-16" [ngClass]="{'px-24 my-24': customFields?.length > 0}">
+          <app-dynamic-custom-fields *ngIf="assignmentDetails?.assignment?.hierarchy?.id" [dateFormat]="dateFormatEnum.FORMATYMD" [isDisabled]="(!isAuthorizedToCreate || isAssignmentClosed || !isTimesheetEnabled)"
+            (isCustomFieldsFormValid)="setCustomFieldsFormValid($event)" (customFieldUpdated)="customFieldUpdated($event)"
+            [custom_fields]="selectedCustomData" [moduleName]="'TIMESHEETS'" [uploadS3RefName]="'timesheets'" [columnInRow]="3" [hierarchyIds]="assignmentDetails?.assignment?.hierarchy?.id">
+          </app-dynamic-custom-fields>
+        </div>
+      <!-- end -->
+  </section>
+</div>
+<ng-template [ngIf]="timeSheet?.data?.actions_allow?.can_reject || hasOverrideApprovalPermission">
+  <app-timesheet-reject></app-timesheet-reject>
+</ng-template>
+<ng-template [ngIf]="timeSheet?.data?.actions_allow?.can_modify || timeSheet?.data?.actions_allow?.can_delete || timeSheet?.data?.actions_allow?.can_withdraw">
+  <app-timesheet-action-flyout></app-timesheet-action-flyout>
+</ng-template>

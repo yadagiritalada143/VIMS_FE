@@ -1,0 +1,172 @@
+<div class="config-form-wrapper">
+  <app-logs [log]="logs"></app-logs>
+  <div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-primary mt-8 mb-16 mr-32 font-weight-normal font-14 px-24"
+            (click)="setEditMode()">
+      {{ 'edit' | i18next }}
+    </button>
+  </div>
+  <form [formGroup]="configurationForm" class="card bg-light py-32" *ngIf="!isLoading">
+    <div class="mb-16 px-32">
+      <div class="d-flex mb-32">
+        <icon name="description" type="material" size="24px" class="mr-12"></icon>
+        <h4 class="font-weight-medium">{{ 'expense' | i18next }}</h4>
+      </div>
+      <div class="d-flex mb-24 expense-toggles" formGroupName="config">
+        <app-expense-toggle [value]="configurationForm.get('config.is_expense').value" nestedControlName="is_expense"
+                            label="Expense" class="toggle-panel mr-24" [ngClass]="{ disable: viewStatus === configurationMode.View }"
+                            (toggleChange)="updateToggleValue($event)">
+        </app-expense-toggle>
+        <app-expense-toggle [value]="configurationForm.get('config.is_taxable').value" nestedControlName="is_taxable"
+                            label="Expense Tax" class="toggle-panel" [ngClass]="{ disable: viewStatus === configurationMode.View }"
+                            (toggleChange)="updateToggleValue($event)">
+        </app-expense-toggle>
+      </div>
+      <div class="form">
+        <div class="form-group-row">
+          <div class="form-group">
+            <label for="expense_type" class="expense-form-label">
+              {{ 'expense_configuration_name' | i18next }} <span class="require">*</span>
+            </label>
+            <input type="text" placeholder="{{ 'name' | i18next }}" class="form-control" formControlName="config_name"
+                   [readonly]="viewStatus === configurationMode.View ">
+          </div>
+        </div>
+        <div class="form-group-row">
+          <div class="form-group position-relative">
+            <label for="expense_type" class="expense-form-label">
+              {{ 'hierarchy' | i18next }} <span class="require">*</span>
+            </label>
+            <input formControlName="hierarchy_uuid" [readonly]="true" placeholder="{{ 'select_hierarchy' | i18next }}"
+                   class="form-control" (click)="onClickHirerachy()" />
+            <span class="cursor-pointer hierarchy" (click)="onClickHirerachy()">
+              <icon size="19px" name="account_tree" type="material" class="d-flex" cuClass="d-flex"></icon>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mb-16 px-32">
+      <div class="d-flex mb-32">
+        <icon name="description" type="material" size="24px" class="mr-12"></icon>
+        <h4 class="font-weight-medium">{{ 'project' | i18next }}</h4>
+      </div>
+      <div class="d-flex mb-24 expense-toggles" formGroupName="custom_fields">
+        <app-expense-toggle [value]="configurationForm.get('custom_fields.is_enabled')?.value" nestedControlName="is_enabled"
+                            label="Project" class="toggle-panel mr-24" (toggleChange)="updateProjectToggleValue($event)">
+        </app-expense-toggle>
+        <!-- [ngClass]="{ disable: viewStatus === configurationMode.View }" -->
+      </div>
+      <div class="form">
+        <div class="form-group-row">
+          <div class="form-group">
+            <label for="expense_type" class="expense-form-label">{{ 'select_project' | i18next }}</label>
+            <ng-select [readonly]="!configurationForm.get('custom_fields.is_enabled')?.value" [clearable]="true" placeholder="{{ 'select_project' | i18next }}"
+                       (change)="onProjectTypeSelection($event)" formControlName="project_name"
+                       [searchable]="false" multiple="true">
+              <ng-option *ngFor="let option of options.timesheetProjectTypes" [value]="option.value">{{option.name}}</ng-option>
+            </ng-select>
+          </div>
+        </div>
+        <div class="form-group-row">
+          <div class="form-group position-relative">
+            <label for="expense_type" class="expense-form-label">{{ 'select_options' | i18next }}</label>
+            <ng-select [readonly]="!configurationForm.get('custom_fields.is_enabled')?.value" [clearable]="true" placeholder="{{ 'add_new' | i18next }}" multiple="true" [searchable]="true"
+                       [(ngModel)]="projectOptions" (change)="onOptionSelection($event)"
+                       formControlName="option_name">
+              <ng-option *ngFor="let option of secondProjectsDropdown" [value]="option.id">{{option.name}}</ng-option>
+            </ng-select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mb-24 px-32">
+      <div class="d-flex mb-32">
+        <icon name="description" type="material" size="24px" class="mr-12"></icon>
+        <h4 class="font-weight-medium">{{ 'expense_date' | i18next }}</h4>
+      </div>
+      <div class="form-group-row">
+        <div class="form-group date-picker position-relative">
+          <label>{{ 'expense_start_date' | i18next }} <span class="require">*</span> </label>
+          <div class="datepicker--imgdate position-relative">
+            <img src="../../../../assets/images/calendar_today.svg" class="datepicker--imagesize position-absolute"
+                 id="datepicker">
+            <input type="input" id="expense_start_date" formControlName="expense_start_date"
+                   placeholder="{{ 'choose_date' | i18next }}" class="datepicker-- form-control pl-32 text-truncate" I18n
+                   autocomplete="false" readonly>
+          </div>
+        </div>
+      </div>
+    </div>
+     <!-- // days impl  -->
+     <div class="mb-24 px-32">
+      <div class="form-group-row">
+        <div  class="form-group date-picker position-relative">
+          <label>{{ 'expense_weekending_day' | i18next }} <span class="require">*</span> </label>
+          <ng-select [readonly]="viewStatus === configurationMode.View" [clearable]="false" placeholder="{{ 'select' | i18next }}"  [searchable]="false"
+                        (change)="onSelectionDays($event)"
+                       formControlName="week_end_day">
+              <ng-option *ngFor="let day of weekEndDays" [value]="day?.value">{{day?.name}}</ng-option>
+            </ng-select>
+        </div>
+      </div>
+    </div>
+    <!-- // days impl end-->
+    <div class="mb-16">
+      <app-period-select class="d-flex justify-content-between align-items-center py-12 px-32"
+                         label="Allow General Expense Incurred Submission" labelFrom="Ahead of current date"
+                         [form]="incurredSubmissionFrom" [disabled]="viewStatus === configurationMode.View ">
+      </app-period-select>
+      <!--            <app-period-select class="d-flex justify-content-between align-items-center py-12 px-32"-->
+      <!--                label="Allow Misc Expense Incurred Submission" labelFrom="ahead of assignment end date"-->
+      <!--                [form]="incurredMiscSubmissionFrom" [disabled]="viewStatus === configurationMode.View ">-->
+      <!--            </app-period-select>-->
+      <app-period-select class="d-flex justify-content-between align-items-center py-12 px-32 assignment-end-fields"
+                         label="Remove Worker Access to Enter General Expense" labelFrom="after assignment end date"
+                         [form]="removeWorkerAccessFrom" [disabled]="viewStatus === configurationMode.View">
+      </app-period-select>
+      <app-period-select class="d-flex justify-content-between align-items-center py-12 px-32 assignment-end-fields"
+                         label="Remove Vendor Access to Enter General Expense" labelFrom="after assignment end date"
+                         [form]="removeVendorAccessFrom" [disabled]="viewStatus === configurationMode.View">
+      </app-period-select>
+      <!--            <app-period-select-->
+      <!--                class="d-flex justify-content-between align-items-center py-12 px-32 assignment-end-fields"-->
+      <!--                label="Remove Worker Access to Enter Misc Expense" labelFrom="From Assignment End"-->
+      <!--                [form]="removeWorkerMiscFrom" [disabled]="viewStatus === configurationMode.View"-->
+      <!--                [readonlySelect]="true">-->
+      <!--            </app-period-select>-->
+      <app-period-select class="d-flex justify-content-between align-items-center py-12 px-32 assignment-end-fields"
+                         label="Remove Vendor Access to Enter Misc Expense" labelFrom="after assignment end date"
+                         [form]="removeVendorMiscFrom" [disabled]="viewStatus === configurationMode.View">
+      </app-period-select>
+      <app-period-select class="d-flex justify-content-between align-items-center py-12 px-32 assignment-end-fields"
+                         label="Remove MSP Access to Enter General Expense" labelFrom="after assignment end date"
+                         [form]="removeMspAccessFrom" [disabled]="viewStatus === configurationMode.View">
+      </app-period-select>
+      <app-period-select class="d-flex justify-content-between align-items-center py-12 px-32 assignment-end-fields"
+                         label="Remove MSP Access to Enter Misc Expense" labelFrom="after assignment end date"
+                         [form]="removeMspAccessMiscFrom" [disabled]="viewStatus === configurationMode.View">
+      </app-period-select>
+    </div>
+    <p *ngIf="validationError.length > 0" class="validation-msg pl-32">
+      <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+      {{ validationError }}
+    </p>
+    <div class="d-flex justify-content-between mt-64 px-32">
+      <button class="btn btn-outine" (click)="addExpenseType()" [disabled]="!configId">
+        {{ 'add_expense_type' | i18next }}
+      </button>
+      <button class="btn btn-primary ml-16" (click)="onSubmit()" [disabled]="!configurationForm.valid" *accessControl>
+        {{ 'save' | i18next }}
+      </button>
+    </div>
+  </form>
+</div>
+
+<app-add-expense-type *ngIf="isOpenAddExpenseType" (closeAddExpenseTypeModal)="toggleOpenAddExpenseType()" [configId]="configId">
+</app-add-expense-type>
+
+<app-select-hierarchy *ngIf="isOpenSelectHierarchy" (closeSelectHierarchy)="toggleOpenSelectHierarchy()"
+    (selectHierarchyIds)="selectHierarchyIds($event)" [hierarhies]="hierarchyData"
+    [userAssociatedHierarchyID]="userAssociatedHierarchyID" [selectedHierarchy]="selectedHierarchyIds">
+</app-select-hierarchy>

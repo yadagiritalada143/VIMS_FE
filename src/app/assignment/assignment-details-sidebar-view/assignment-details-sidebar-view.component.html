@@ -1,0 +1,23 @@
+<svms-sidebar-ng [dataVisibility]="isSidebarVisible" dataProfilePanel="profilepanel" (onClose)="sidebarClose()"
+  [showHeader]="true" [showFooter]="true" [clickOutside]="clickOutside">
+  <!-- <app-logs [log]="logs"></app-logs> -->
+  <svms-sidebar-nav profileVisibility="visible" [selectedIndex]="selectedIndex" [avatar]="candidateData?.avatar"
+    [userName]="userName" [userPosition]="assignmentData?.assignment_title?.name"
+    [socialProfiles]="candidateData?.social_profiles" [jobData]="assignmentData"
+    [showOnlyCandidateProfile]="showOnlyCandidateProfile" [showSkelton]="showSkelton"
+    (onSelectedIndexChange)="handleTabChangeEvent($event)" (onSelectedsubIndexChange)="handleSubTabChange($event)">
+
+    <svms-sidebar-body-ng label="{{ 'candidate_profile' | i18nextEager }}">
+      <app-candidate-profile [isEditDetails]= "isEditDetails" [isClear] = "isClear" (WorkerDetail)="cancelWorkerDetail($event)" [vendorDetail] = "vendorDetails"></app-candidate-profile>
+    </svms-sidebar-body-ng>
+    <svms-sidebar-body-ng label="{{ 'assignment_details' | i18nextEager }}">
+      <app-assignment-details></app-assignment-details>
+    </svms-sidebar-body-ng>
+
+  </svms-sidebar-nav>
+  <svms-sidebar-footer-ng *ngIf="!isEditDetails && !hide_section?.edit_worker">
+    <button type="submit" class="btn btn-primary float-right" (click)="editWorkerDetails()" > 
+     {{'edit_worker_details' | i18nextEager}}
+    </button>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

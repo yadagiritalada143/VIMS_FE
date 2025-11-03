@@ -1,0 +1,143 @@
+<header class="expense-header overflow-hidden mt-24 mt-m-0" *ngIf="data">
+  <div class="p-24">
+    <div class="float-left">
+      <div class="d-flex">
+        <h3 class="font-weight-medium mb-0">
+          {{ (expenseType.value === ExpenseType.MiscExpense ? 'Misc. Expenses' : 'General Expenses') | i18nextEager }}
+        </h3>
+      </div>
+    </div>
+    <div class="float-right expense-btn-fixed-m">
+      <div class="d-flex">
+        <button class="btn btn-primary" [disabled]="true">{{ 'submit_for_approval' | i18nextEager }}</button>
+      </div>
+    </div>
+    <div class="clearfix"></div>
+  </div>
+
+  <div class="header-bottom overflow-hidden d-flex-m p-16">
+    <div *ngIf="data?.worker?.user" class="expense-grid-group-data d-inline-block d-flex-m my-4 ">
+      <figure class="float-left mr-12 flex-row">
+        <img *ngIf="data.worker.user.avatar" [src]="data.worker.user.avatar" alt="" />
+        <div *ngIf="!data.worker.user.avatar" class="text-capitalize">{{ data.worker.user.initials }}</div>
+        <div *ngIf="!data.worker.user.avatar && !data.worker.user.initials" class="text-capitalize">
+          {{ data.worker.user.name | shortName: 'last' | i18nextEager }}
+        </div>
+      </figure>
+      <div class="expense-info-text float-left mr-64">
+        <p class="font-weight-medium">{{ data.worker.user.name }}</p>
+        <p class="small d-flex" *ngIf="data.assignment.work_location?.name">
+          <icon name="location_on" type="material" theme="outlined" size="14px"></icon>
+          <span>{{ data.assignment.work_location.name }}</span>
+        </p>
+      </div>
+    </div>
+    <div *ngIf="!data?.worker?.user && data?.worker?.candidate" class="expense-grid-group-data d-inline-block d-flex-m my-4">
+      <figure class="float-left mr-12 flex-row">
+        <img *ngIf="data?.worker?.candidate?.avatar" [src]="data?.worker?.candidate?.avatar" alt="" />
+        <div *ngIf="!data?.worker?.candidate?.avatar" class="text-capitalize">{{ data?.worker?.candidate?.initials }}</div>
+        <div *ngIf="!data?.worker?.candidate?.avatar && !data?.worker?.candidate?.initials" class="text-capitalize">
+          {{ data?.worker?.candidate?.name | shortName: 'last' }}
+        </div>
+      </figure>
+      <div class="expense-info-text float-left mr-64">
+        <p class="font-weight-medium">{{ data?.worker?.candidate?.name }}</p>
+        <p class="small d-flex" *ngIf="data?.assignment?.work_location?.name">
+          <icon name="location_on" type="material" theme="outlined" size="14px"></icon>
+          <span>{{ data?.assignment?.work_location?.name }}</span>
+        </p>
+      </div>
+    </div>
+    <div class="expense-grid-group-data d-inline-block d-flex-m my-4">
+      <figure class="float-left text-center mr-12">
+        <icon class="d-inline-block" name="assignment" type="material" theme="outlined" size="18px"></icon>
+      </figure>
+      <div class="expense-info-text float-left mr-64">
+        <p class="small">{{ 'assignment' | i18nextEager }}</p>
+        <p>
+          <a>{{ data.assignment.assignment_title.name }} ({{ data.assignment.code }})</a>
+        </p>
+      </div>
+    </div>
+    <div *ngIf="(expenseType?.value === ExpenseType.Expense);else showAssignmentManager" class="expense-grid-group-data d-inline-block my-4">
+      <!-- <figure class="float-left mr-12 flex-row">
+        <img *ngIf="data.finance.expense_manager?.avatar" [src]="data.finance.expense_manager?.avatar" alt="" />
+        <div *ngIf="!data.finance.expense_manager?.avatar" class="text-capitalize">
+          {{ data.finance.expense_manager?.initials }}
+        </div>
+        <div *ngIf="!data.finance.expense_manager?.avatar && !data.finance.expense_manager?.initials" class="text-capitalize">
+          {{ data.finance.expense_manager?.name | shortName: 'last' | i18nextEager }}
+        </div>
+      </figure> -->
+      <div class="expense-info-text float-left mr-64" >
+        <p class="small">{{'Expense Manager'|i18nextEager}}</p>
+        <!-- <p class="font-weight-medium">{{ data?.finance?.expense_manager?.name }}</p> -->
+        <div class="position-relative">
+          <div class="text-truncate d-flex align-items-center justify-content-center manager-images-list">
+            <ng-container *ngFor="let manager of data?.finance?.expense_manager;let i =index">
+              <div class="manager-avatar-list overflow-hidden d-flex align-items-center justify-content-center cursor-pointer" tooltip="{{manager?.name}}" placement="top" *ngIf="manager && i<6">
+                {{manager?.avatar ? '' : manager?.initials}}
+                <img class="manager-profile" *ngIf="manager?.avatar" width="20" height="20" src="{{manager?.avatar}}" alt="{{manager?.initials}}">
+              </div>
+              <div class="manager-avatar-list overflow-hidden d-flex align-items-center justify-content-center more-name cursor-pointer" placement="top" *ngIf="manager && i==6" #managerCount>
+                +{{data?.finance?.expense_manager?.length - 6}}
+              </div>
+            </ng-container>
+            <p class="ml-24 font-weight-medium" tooltip="{{data?.finance?.expense_manager?.[0]?.name}}" placement="top" delay="500" *ngIf="data?.finance?.expense_manager?.length===1">
+                {{(data?.finance?.expense_manager?.[0]?.name || "-")}}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template #showAssignmentManager>
+    <div *ngIf="data?.assignment?.assignment_manager" class="expense-grid-group-data d-inline-block d-flex-m my-4">
+      <figure class="float-left mr-12 flex-row">
+        <img *ngIf="data?.assignment?.assignment_manager?.avatar" [src]="data?.assignment?.assignment_manager?.avatar" alt="" />
+        <div *ngIf="!data?.assignment?.assignment_manager?.avatar" class="text-capitalize">
+          {{ data?.assignment?.assignment_manager?.initials }}
+        </div>
+        <div *ngIf="!data?.assignment?.assignment_manager?.avatar && !data?.assignment?.assignment_manager?.initials" class="text-capitalize">
+          {{ data?.assignment?.assignment_manager?.name | shortName: 'last' }}
+        </div>
+      </figure>
+        <div class="expense-info-text float-left mr-64" >
+          <p class="small">{{ 'assignment_manager' | i18nextEager }}</p>
+          <p class="font-weight-medium">{{ data?.assignment?.assignment_manager?.name }}</p>
+        </div>
+    </div>
+  </ng-template>
+    <div class="expense-grid-group-data d-inline-block d-flex-m my-4">
+      <figure class="float-left mr-12 text-center">
+        <icon name="corporate_fare" type="material" theme="outlined" size="18px"></icon>
+      </figure>
+      <div class="expense-info-text float-left mr-64">
+        <p class="small">{{ 'vendor' | i18nextEager }}</p>
+        <p class="font-weight-medium">{{ data.assignment.vendor_organization.name }}</p>
+      </div>
+    </div>
+    <div class="expense-grid-group-data d-inline-block d-flex-m my-4">
+      <figure class="float-left mr-12 text-center">
+        <icon name="account_tree" type="material" theme="outlined" size="18px"></icon>
+      </figure>
+      <div class="expense-info-text float-left mr-64">
+        <p class="small">{{ 'hierarchy' | i18nextEager }}</p>
+        <p class="font-weight-medium">{{ data.assignment.hierarchy?.name }}</p>
+      </div>
+    </div>
+  </div>
+</header>
+<div class="more-name-list" [ngClass]="{'active' : showHideManagerList}" #managerNameDropdown>
+  <h6>{{'Expense Managers' | i18nextEager }}</h6>
+  <ul>
+    <ng-container *ngFor="let manager of data?.finance?.expense_manager; let i = index">
+      <li class="d-flex align-items-center" *ngIf="manager && i>=6">
+        <div class="name-avatar" [ngClass]="{'overflow-hidden':manager?.avatar}" placement="top">
+        <img class="manager-profile" *ngIf="manager?.avatar" src="{{manager?.avatar}}" alt="{{manager?.initials}}" width="15" height="15"  srcset="">
+          {{ manager?.avatar ? '' : manager?.initials }}
+        </div>
+        <div>{{ manager?.name }}</div>
+      </li>
+    </ng-container>
+  </ul>
+</div>

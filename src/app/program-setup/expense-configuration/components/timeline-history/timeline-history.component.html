@@ -1,0 +1,37 @@
+<ng-container>
+  <div class="timeline" *ngIf="!loading">
+    <div class="entry" *ngFor="let item of data?.data?.activities">
+      <div class="title">
+        <h3>{{ item.activity_time | localDateFormat }}</h3>
+        <p>{{ item.activity_time | localDateFormat: "hh:mm:ss a z" }}</p>
+        <p>{{ 'revision' | i18next }} : {{item.revision - 1}}</p>
+      </div>
+      <div class="body">
+        <p>{{item.history_message}}</p>
+        <ul>
+          <li>{{ 'updated_by' | i18next }} : <span>{{item.activity_by.first_name}} {{item.activity_by.last_name}}</span></li>
+        </ul>
+        <button (click)="openExpenseHistoryDetail(item.log_id)">
+          <icon size="14px" name="visibility" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </icon>
+          <span>{{ 'view' | i18next }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="data-loader" *ngIf="loading">
+    <ngx-skeleton-loader count="10" animation="progress" appearance="line"
+                         [theme]="{'width': '100%', height: '50px','margin-bottom': '-2px', 'border-radius':'0px'}">
+    </ngx-skeleton-loader>
+  </div>
+
+  <app-timeline-paginator *ngIf="data && data?.data?.last_page > 1" [itemsPerPage]="itemsPerPage" [currentPage]="currentPage" (changeRecords)="onClickRecords($event)"
+                          [maxPages]="maxPages" (changePage)="onPaginationClick($event)">
+  </app-timeline-paginator>
+  <div class="clearfix"></div>
+</ng-container>
+<app-expense-history-details *ngIf="isOpenExpenseHistoryDetails"
+  (closeExpenseHistoryDetailModal)="toggleOpenExpenseHistoryDetails()">
+</app-expense-history-details>

@@ -1,0 +1,234 @@
+<svms-sidebar-ng [title]="'Create New Payment' | i18nextEager " [dataVisibility]="isVisible" (onClose)='clearForm()'>
+  <app-logs [log]="logs"></app-logs>
+  <div class=" ">
+    <div class="px-32 pb-16">
+      <div class="row  mt-12">
+        <label>{{'search_invoice_number' | i18nextEager}}<span class="require">*</span></label>
+        <div class="col-md-12 d-flex column-direction">
+          <div class="col-md-5 p-0">
+            <div class="form-group">
+              <ng-select [items]="" class="search-invoice" [clearOnBackspace]="true"
+                [searchable]="false" [clearable]="true" bindLabel="label" bindValue="id" (change)="onChange()" [(ngModel)]="selectedType">
+                <ng-option  value='Consolidated Invoice Number'>{{ 'consolidated_invoice_number' | i18nextEager }}</ng-option>
+                <ng-option value='Batch Number'>{{ 'batch_number' | i18nextEager }}</ng-option>
+                <ng-option value='Duration'>{{ 'duration' | i18nextEager }}</ng-option>
+              </ng-select>
+              <div class="position-absolute search-dropdown-top search-cand">
+                <span class="material-icons filter-list">filter_list</span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="selectedType=='Duration'" class="col-md-7 p-0">
+            <div class="form-group" >
+             <svms-datepicker [inputdateFormat]="dateFormat"  (onendDateChange)="onendDateChange($event)" (onDateChange)="onDateChange($event)"  [(ngModel)]="duration" [options]="options"
+              [placeholder]="'Select Duration'|i18next"  I18n>
+            </svms-datepicker>
+            <ng-select *ngIf="onClose" class="consolidated-invoice-filter" placeholder="{{ 'enter_consolidated_invoice_id' | i18nextEager }}"  (search)="onSearch('invoice_id', $event)"
+            (change)="onInvoiceDetail($event)" [items]="InvoicesWithDuration" bindLabel="invoice_number"
+            bindValue="invoice_number" loadingText="{{ 'loading....' | i18nextEager }}" notFoundText="{{ 'no_data_found' | i18nextEager }}">
+          </ng-select>
+
+            </div>
+          </div>
+          <div *ngIf="selectedType=='Consolidated Invoice Number'"  class="col-md-7 p-0">
+            <div class="form-group">
+              <div class="mr-8 position-relative  search-invoice-wrapper">
+                <div class="mr-8 position-relative search-invoice-wrapper">
+                  <ng-select placeholder="{{ 'enter_consolidated_invoice_id' | i18nextEager }}"  (search)="onSearch('invoice_id', $event)"
+                    (change)="onInvoiceDetail($event)" [items]="invoices" bindLabel="invoice_number"
+                    bindValue="invoice_number" loadingText="{{ 'loading....' | i18nextEager }}" notFoundText="{{ 'no_data_found' | i18nextEager }}">
+                  </ng-select>
+                  <div class="position-absolute search-dropdown-top search-invoice">
+                    <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <div *ngIf="selectedType=='Batch Number'" class="col-md-7 p-0">
+            <div class="form-group">
+              <div class="mr-8 position-relative  search-invoice-wrapper">
+                <div class="mr-8 position-relative search-invoice-wrapper">
+                  <ng-select placeholder="{{ 'enter_batch_number' | i18nextEager }} " (search)="onSearch('invoice_id', $event)"
+                    (change)="onInvoiceDetail($event)" [items]="invoices" bindLabel="batch_number"
+                    bindValue="batch_number" loadingText="{{ 'loading....' | i18nextEager }}" notFoundText="{{ 'no_data_found' | i18nextEager }}">
+                  </ng-select>
+                  <div class="position-absolute search-dropdown-top search-invoice">
+                    <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="isLoaded && isChange" class="sidebar-wrapper">
+    <form [formGroup]='form'>
+      <div class="px-24 pb-16">
+        <div class="row  mt-12">
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+              <div class="mr-8">
+                <icon name="tag" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+              </div>
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'consolidated_invoice_number' | i18nextEager }}</p>
+                <p>{{ consolidatedInvoice?.invoice_number || '--'}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+              <div class="mr-8">
+                <icon name="receipt" theme="outlined" size="18px" color="#536476" class="d-flex" cuclass="d-flex">
+                </icon>
+              </div>
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'batch_invoice_number' | i18nextEager }}</p>
+                <p>{{ consolidatedInvoice?.batch_number || '--'}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+              <div class="mr-8">
+                <icon name="event_available" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+              </div>
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'invoice_duration' | i18nextEager }}</p>
+                <p class="white-space-pre">{{ getDate(consolidatedInvoice?.invoice_start_date, true)}} - {{
+                  getDate(consolidatedInvoice?.invoice_end_date, true)}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+              <div class="mr-8">
+                <icon name="payment" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+              </div>
+              <div class="d-flex flex-column">
+                <p class="small">
+
+                  {{ 'invoice_amount' | i18nextEager }}</p>
+
+
+                <p>
+                  <span tooltip="{{showTooltip(consolidatedInvoice?.calculation?.amount_with_tax)}}"  placement="bottom" delay="100">
+                    {{ consolidatedInvoice?.calculation?.amount_with_tax || '--' |  accuracy : accuracyEnum.AMOUNT : { currencyCode: consolidatedInvoice?.currency } }}
+                  </span></p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+              <div class="mr-8">
+                <icon name="account_balance" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+              </div>
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'currency' | i18nextEager }}</p>
+                <p>{{ consolidatedInvoice?.currency || '--' | uppercase }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+              <div class="mr-8">
+                <icon name="paid" size="18px" theme="outlined" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+              </div>
+              <div class="d-flex flex-column">
+                <p class="small">{{ 'balance_amount' | i18nextEager }}</p>
+                <p>{{ (balanceAmount || '0') | accuracy :accuracyEnum.AMOUNT : { currencyCode: consolidatedInvoice?.currency } }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-24">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>{{ 'payment_authorization_number' | i18nextEager }}<span class="require">*</span></label>
+              <input formControlName='payment' type="text" class="form-control"
+                placeholder="{{ 'payment_authorization_number' | i18nextEager }}" />
+
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>{{ 'payment_details' | i18nextEager }}<span class="require">*</span></label>
+              <div class="d-flex align-items-center">
+                <ng-select class="w-120" formControlName='check_type' placeholder="{{ 'please_select' | i18nextEager }}">
+                  <ng-option value='ACH'>{{ 'ach' | i18nextEager }}</ng-option>
+                  <ng-option value='Check'>{{ 'check' | i18nextEager }}</ng-option>
+                  <ng-option value='Wire'>{{ 'wire' | i18nextEager }}</ng-option>
+                  <ng-option value='Others'>{{ 'others' | i18nextEager }}</ng-option>
+
+                </ng-select>
+                <input formControlName='check_number' type="text" class="form-control"
+                  placeholder="{{ 'payment_details' | i18nextEager }}" />
+              </div>
+
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>{{ 'received_date' | i18nextEager }}<span class="require">*</span></label>
+              <svms-datepicker [inputdateFormat]="dateFormat" ngDefaultControl formControlName='received_date' [options]="effectiveDate">
+              </svms-datepicker>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>{{ 'entered_date' | i18nextEager }}<span class="require">*</span></label>
+              <svms-datepicker [inputdateFormat]="dateFormat" ngDefaultControl formControlName='entered_date' class="disableDiv">
+              </svms-datepicker>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="form-group">
+              <label>{{ 'payment_authorization_amount' | i18nextEager }}<span class="require">*</span></label>
+              <div class="d-flex align-items-center">
+                <input type="number" inputAccuracy="{{accuracyEnum?.AMOUNT}}" class="form-control w-50" formControlName='pa_amount'
+                  placeholder="{{ 'enter_authorization_amount' | i18nextEager }}" (blur)="onBlurAmount()"/>
+                <div class="checkbox-wrapper d-inline-block">
+                  <label class="checkbox-container">
+                    <input type="checkbox" formControlName='full'>
+                    <span class="checkmark"></span>
+                    <span class="label pt-4">{{ 'full_payment' | i18nextEager }}</span>
+                  </label>
+                </div>
+                <div class="checkbox-wrapper d-inline-block">
+                  <label class="checkbox-container">
+                    <input type="checkbox" formControlName='partial'>
+                    <span class="checkmark"></span>
+                    <span class="label pt-4">{{ 'partial_payment' | i18nextEager }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="form-group">
+              <label>{{ 'notes' | i18nextEager }}</label>
+              <textarea class="form-control" formControlName='notes'
+                placeholder="{{ 'enter_additional_notes' | i18nextEager }}"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <svms-sidebar-footer-ng *ngIf='form'>
+    <ng-container *accessControl>
+    <button  type="button" class="btn btn-primary float-right" [disabled]='!form.valid || saveInProgress'
+      (click)='saveAuthorization()'>
+      {{ 'save' | i18nextEager }}
+      <span *ngIf="saveInProgress" class="loader ml-12"> </span>
+    </button>
+  </ng-container>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

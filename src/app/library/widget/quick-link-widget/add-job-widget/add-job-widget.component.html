@@ -1,0 +1,20 @@
+<div *ngIf="!deleted" class="quick-link-widget" [ngClass]="{'edit-widget': editMode}" [routerLink]="editMode ? '' : widget?.link">
+    <h5 *ngIf="editMode" class="edit-mode-label font-weight-normal">{{ widget.label | i18next}}</h5>
+    <div class="widget-content-info flex-column align-items-center h-100 justify-content-center">
+        <app-widget-icon [iconConfig]="{ icon: widget.icon, iconColor: widget.iconColor }"></app-widget-icon>
+        <h4 class="font-size-14 m-0 mt-12 font-weight-normal text-center">{{ widget?.label | i18next}}</h4>
+    </div>
+    <div class="tools-widget">
+        <div class="tool-icons">
+            <span class="material-icons icon-build" (click)="openEditWidgetModal()">build_circle</span>
+            <span class="material-icons icon-delete" (click)="deleteWidget()">delete</span>
+        </div>
+    </div>
+    <span class="icon-move"></span>
+</div>
+<div *ngIf="deleted" class="delete-widget">
+    <span class="badge-undo" (click)="undoWidget()">
+        <span class="material-icons icon-undo">undo</span>
+        <span class="text-undo">{{ 'undo' | i18next }}</span>
+    </span>
+</div>

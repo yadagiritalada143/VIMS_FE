@@ -1,0 +1,243 @@
+<svms-sidebar title="{{ 'assignment_details' | i18next }}" [dataVisibility]="assignmentDetails" (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+
+    <header class="detail-page-header position-relative border-bottom" *ngIf="assignmentData">
+      <div class="header-title-panel">
+        <div class="d-flex align-items-start mb-8">
+          <h3 class="mb-0">{{assignmentData?.assignment?.assignment_title?.name | i18next }} </h3>
+          <span class="status-ui ml-16 open">{{assignmentData?.assignment?.status | i18next }}</span>
+        </div>
+        
+
+        <p class="detail-meta">
+          <!-- <icon class="tag" name="label" size="18px"></icon> {{assignmentData?.assignment?.code | i18next }} -->
+          <icon class="updated" name="update" size="18px"></icon> {{'last_updated_on' | i18next }} :
+          {{assignmentData?.updated_at | localDateFormat : '' :'' : '' : true }}
+        </p>
+      </div>
+
+      <div class="actions position-absolute" *authorize="'menu_assignments'">
+        <button class="btn btn-primary rounded-corner small"
+          (click)="goToAssignmentPage(assignmentData?.assignment?.assignment_uuid)">
+          <icon class="d-flex mr-8" size="17px" name="launch" type="material" theme="outlined" cuClass="d-flex">
+          </icon> {{ 'view_full_assignment_details' | i18next }}
+        </button>
+      </div>
+    </header>
+
+    <div class="p-24" *ngIf="assignmentData">
+      <!--assignment details-->
+      <div class="mb-16">
+        <div class="d-flex align-items-center justify-content-between my-16">
+          <h4 class="d-flex align-items-center font-weight-medium info">
+            <div class="initials initials-light">
+              <icon class="d-flex" size="17px" name="description" type="material" theme="outlined" cuClass="d-flex">
+              </icon>
+            </div>
+            <span class="ml-12">{{ 'assignment_details' | i18next }}</span>
+          </h4>
+
+        </div>
+
+        <div class="no-gutters row mb-16">
+          <div class="col">
+            <label i18n>{{ 'hierarchy' | i18next }}</label>
+            <span i18n>{{assignmentData?.assignment?.hierarchy?.name | i18next }}</span>
+          </div>
+
+          <div class="col">
+            <label i18n>{{ 'assignment_manager' | i18next }}</label>
+            <p class="d-flex align-items-center">
+            <figure class="user-avatar small rounded-circle overflow-hidden float-left">
+              <span
+                class="initials initials__purple text-uppercase">{{assignmentData?.assignment?.assignment_manager?.initials | i18next }}</span>
+            </figure>
+            <a class="font-weight-medium">
+              {{assignmentData?.assignment?.assignment_manager?.name | i18next }}</a>
+            </p>
+          </div>
+        </div>
+
+        <div class="no-gutters row  mb-16">
+          <div class="col">
+            <label i18n>{{ 'assignment_duration' | i18next }}</label>
+            <span i18n>{{assignmentData?.assignment?.start_date | localDateFormat:"":"":"":true | i18next }} -
+              {{assignmentData?.assignment?.end_date | localDateFormat:"":"":"":true | i18next }}</span>
+          </div>
+          <div class="col">
+            <label i18n>{{ 'assignment_title' | i18next }}</label>
+            <span class="text-primary font-weight-medium"
+              i18n>{{assignmentData?.assignment?.assignment_title?.name | i18next }}
+            </span>
+          </div>
+        </div>
+
+        <div class="no-gutters row  mb-16">
+          <div class="col">
+            <label i18n>{{ 'original_start_date' | i18next }}</label>
+            <span i18n>{{assignmentData?.worker?.original_start_date | localDateFormat:"":"":"":true | i18next }}</span>
+          </div>
+          <div class="col" *ngIf="assignmentCode">
+            <label i18n>{{ 'unique_id_(system_generated)' | i18next }}</label>
+            <span i18n>{{assignmentCode | i18next }}</span>
+          </div>
+        </div>
+        <div class="no-gutters row mb-16">
+          <div class="col">
+            <div class="value-group">
+              <label i18n class="value-head">{{'timesheet' | i18next}}</label>
+              <span i18n class="value-content enabled d-flex align-items-center"
+                [ngStyle]="assignmentData?.finance?.is_timesheet_enabled ? {'color': '#4BA324'} : {'color': '#D64646'}">
+                <icon class="mr-8" size="14px" color="{{assignmentData?.finance?.is_timesheet_enabled ? '#4BA324' : '#D64646'}}"
+                  name="{{assignmentData?.finance?.is_timesheet_enabled ? 'check_circle' : 'unpublished'}}" cuClass="d-flex">
+                </icon>
+                {{ (assignmentData?.finance?.is_timesheet_enabled ? 'Enabled' : 'Disabled') | i18next}}
+              </span>
+            </div>
+          </div>
+          <div class="col">
+            <div class="value-group">
+              <label i18n class="value-head">{{'billable_model' | i18next}}</label>
+              <span i18n class="value-content enabled d-flex align-items-center"
+                [ngStyle]="assignmentData?.finance?.is_billable ? {'color': '#4BA324'} : {'color': '#D64646'}">
+                <icon class="mr-8" size="14px" color="{{assignmentData?.finance?.is_billable ? '#4BA324' : '#D64646'}}"
+                  name="{{assignmentData?.finance?.is_billable ? 'check_circle' : 'unpublished'}}" cuClass="d-flex"></icon>
+                {{ (assignmentData?.finance?.is_billable ? 'Enabled' : 'Disabled') | i18next}}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="no-gutters row mb-16" *ngIf="assignmentData?.finance?.is_expense_allowed">
+          <div class="col">
+            <div class="value-group">
+              <label i18n class="value-head">{{'general_expense' | i18next}}</label>
+              <span i18n class="value-content enabled d-flex align-items-center"
+                [ngStyle]="assignmentData?.finance?.is_expense_enabled ? {'color': '#4BA324'} : {'color': '#D64646'}">
+                <icon class="mr-8" size="14px" color="{{assignmentData?.finance?.is_expense_enabled ? '#4BA324' : '#D64646'}}"
+                  name="{{assignmentData?.finance?.is_expense_enabled ? 'check_circle' : 'unpublished'}}" cuClass="d-flex">
+                </icon>
+                {{ (assignmentData?.finance?.is_expense_enabled ? 'Enabled' : 'Disabled') | i18next}}
+              </span>
+            </div>
+          </div>
+        </div>
+        </div>
+      <!--assignment details-->
+
+      <!--Financial Details-->
+      <div class="mb-16 pt-24">
+        <div class="d-flex align-items-center justify-content-between my-16">
+          <h4 class="d-flex align-items-center font-weight-medium info">
+            <div class="initials initials-green">
+              <icon class="d-flex" size="17px" name="payments" type="material" theme="outlined" cuClass="d-flex">
+              </icon>
+            </div>
+            <span class="ml-12">{{ 'financial_details' | i18next }}</span>
+
+          </h4>
+        </div>
+
+
+
+        <div class="no-gutters row mb-16 ">
+          <div class="col">
+            <label i18n>{{'timesheet_manager'|i18next }}</label>
+            <!-- <p class="d-flex align-items-center">
+            <figure *ngIf="assignmentData?.finance?.timesheet_manager?.initials" class="user-avatar small rounded-circle overflow-hidden float-left">
+              <span class="initials initials__purple text-uppercase">{{assignmentData?.finance?.timesheet_manager?.initials | i18next }}</span>
+            </figure>
+            <a href="javascript:void(0)" class="font-weight-medium">
+              {{assignmentData?.finance?.timesheet_manager?.name || "-" | i18next }} </a>
+            </p> -->
+            <figure *ngIf="assignmentData?.finance?.timesheet_manager?.length > 1" class="text-truncate d-flex align-items-center justify-content-center manager-images-list">
+              {{assignmentData?.assignmentData?.finance?.timesheet_manager}}
+
+              <ng-container *ngFor="let manager of assignmentData?.finance?.timesheet_manager;let j =index">
+                <div class="manager-avatar-list overflow-hidden d-flex align-items-center justify-content-center cursor-pointer initials__purple" tooltip="{{manager?.name}}" placement="top" *ngIf=" manager && j<6">
+                  {{manager?.initials}}
+                </div>
+                <div class="manager-avatar-list overflow-hidden d-flex align-items-center justify-content-center more-name cursor-pointer" placement="top" *ngIf="j==6" (click)="showManagerListTimesheet()">
+                  +{{assignmentData?.finance?.timesheet_manager?.length - 6}}
+              </div>
+              </ng-container>
+              <label  class="ml-24 mt-0" tooltip="{{assignmentData?.finance?.timesheet_manager?.[0]?.name}}" placement="top" delay="500" *ngIf="assignmentData?.finance?.timesheet_manager?.length===1">
+                  {{(assignmentData?.finance?.timesheet_manager?.[0]?.name || "-")}}
+                </label>
+            </figure>
+            <!-- timesheet manager single ui start here -->
+            <p *ngIf="assignmentData?.finance?.timesheet_manager?.length == 1">
+              <span class="initials initials__purple initials-small">{{assignmentData?.finance?.timesheet_manager[0]?.initials}}</span>
+              <a class="font-weight-medium">{{assignmentData?.finance?.timesheet_manager?.[0]?.name  || ("-")}}</a>
+            </p>
+            <!-- timesheet manager single ui end here -->
+          <div class="more-name-list relative-item" (mouseleave)="hideMoreNameListTimesheet()" [ngClass]="{'active' : showHideManagerListTimesheet}">
+              <h6>{{'timesheet_manager' | i18next }}</h6>
+              <ul>
+                <ng-container *ngFor="let manager of assignmentData?.finance?.timesheet_manager; let i = index">
+                  <li class="d-flex align-items-center" *ngIf="manager && i>=6">
+                    <div class="name-avatar" [ngClass]="{'overflow-hidden':manager?.avatar}" placement="top">
+                      {{manager?.initials }}
+                    </div>
+                    <div>{{ manager?.name }}</div>
+                  </li>
+                </ng-container>
+              </ul>
+            </div> 
+          </div>
+          <div class="col">
+            <label i18n>{{ 'timesheet_type' | i18next }}</label>
+            <span i18n>{{assignmentData?.finance?.timesheet_type?.name | i18next | uppercase }}</span>
+          </div>
+          <!-- <div class="col">
+            <label i18n>{{ 'expense_manager' | i18next }}</label>
+            <p><span class="initials initials__purple">
+                JM</span><a href="javascript:void(0)" class="font-weight-medium"> {{ 'jason_main' | i18next }} </a></p>
+          </div> -->
+        </div>
+        <!-- <div class="no-gutters row mb-16 ">
+
+
+          <div class="col">
+            <label i18n>OT Exempt</label>
+            <span i18n>{{assignmentData?.finance?.ot_exempt_position == false ? 'No' : 'Yes' | i18next }}</span>
+          </div>
+        </div> -->
+        <div class="no-gutters row mb-16 ">
+
+          <div class="col">
+            <label i18n>{{ 'rate_model' | i18next }}</label>
+            <span i18n>{{assignmentData?.finance?.rate_model | titlecase | i18next }}</span>
+          </div>
+          <div class="col">
+            <label i18n class="value-head">{{ 'unit_of_measure' | i18nextEager }}</label>
+            <span i18n class="value-content"> {{unitOfMeasureObj[assignmentData?.finance?.rate_type?.toLowerCase()] | uppercase}}</span>
+            <!-- <label i18n>{{ 'rate_type' | i18next }}</label>
+            <span i18n>{{assignmentData?.finance?.rate_type | i18next }}</span> -->
+          </div>
+        </div>
+
+        <div class="no-gutters row mb-16 ">
+
+          <div class="col">
+            <label i18n>{{ 'work_location' | i18next }}</label>
+            <span i18n>{{assignmentData?.assignment?.work_location?.name | i18next }}</span>
+          </div>
+          <div class="col">
+            <label i18n>{{ 'billable' | i18next }}</label>
+            <span i18n>{{assignmentData?.finance?.is_billable == 1 ? 'Yes' : 'No'  | i18next }}</span>
+          </div>
+        </div>
+
+        <div class="no-gutters row mb-16 ">
+          <div class="col">
+            <label i18n>{{ 'currency' | i18next }}</label>
+            <span i18n>{{assignmentData?.finance?.currency | uppercase | i18next }}</span>
+          </div>
+        </div>
+      </div>
+      <!--Financial Details-->
+    </div>
+
+  </svms-sidebar-body>
+
+</svms-sidebar>

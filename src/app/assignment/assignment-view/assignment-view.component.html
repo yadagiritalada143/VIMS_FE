@@ -1,0 +1,331 @@
+<div class="detail-page-wrapper">
+  <section class="description-panel p-32 position-relative" *ngIf="!isUpdateAssignment">
+    <a class="back-btn back-mobile" (click)="navigateBack()">
+      <icon class="d-inline-block" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon>
+      <!-- <span>{{redirectSow ? 'Back to SOW' : 'Back to Assignments' | i18nextEager}}</span> -->
+      <span>{{(redirectSow ? 'back_to_sow' : 'back_to_assignments') | i18nextEager}}</span>
+      <!-- <span>{{redirectToSow  ? 'Back to SOW' : 'Back to Assignments' | i18nextEager}}</span> -->
+    </a>
+    <div class="my-24 mt-m-0 mb-m-0"
+    *ngIf="(assignmentListData?.assignment?.reasons?.length > 0 && (assignmentListData.assignment.reasons[0]?.type === 'Closed' || assignmentListData.assignment.reasons[0]?.type === 'Rejected'))">
+    <ng-container *ngIf="assignmentListData.assignment.reasons[0]?.type as reasonType">
+      <div class="alert_message" [ngClass]="{'alert_pending' : reasonType === 'Closed', 'alert_error': reasonType === 'Rejected'}">
+        <div class="d-flex align-items-center w-100">
+          <div class="d-flex align-items-center justify-content-start ">
+            <icon class="d-flex mr-8" size="24px" [name]="reasonType === 'Closed' ? 'no_accounts' : 'not_interested'" type="material" cuClass="d-flex"></icon>
+          </div>
+          <div class="pl-8">
+            <div class="font-weight-bold mb-0 medium-font">
+              {{(reasonType === 'Closed' ? 'Reason to close assignment' : 'Reason to reject assignment' )|i18next}}: {{(assignmentListData?.assignment?.reasons[0]?.reason || 'N/A')|i18next}}
+              <div class="mb-4" *ngIf="assignmentListData?.assignment?.reasons[0]?.notes"> <span
+                  class="font-weight-bold">{{ 'notes' | i18nextEager }} :</span>
+                {{assignmentListData?.assignment?.reasons[0]?.notes}}</div>
+                <div class="mb-4" *ngIf="assignmentListData?.assignment?.is_display_rehire_flag && assignmentListData?.assignment?.do_not_re_hire?.do_not_re_hire_reason"> <span
+                  class="font-weight-bold">{{ 'do_not_re-hire_reason' | i18nextEager }}:</span>
+                {{assignmentListData?.assignment?.do_not_re_hire?.do_not_re_hire_reason?.name}}</div>
+                <div class="mb-4" *ngIf="assignmentListData?.assignment?.do_not_re_hire?.do_not_re_hire_reason_notes">
+                  <span class="font-weight-bold">{{ 'notes' | i18nextEager }} : </span> {{assignmentListData?.assignment?.do_not_re_hire?.do_not_re_hire_reason_notes}}
+                </div>
+              <div class="mb-4"> <span class="font-weight-bold">{{ 'effective_date' | i18nextEager }} :</span>
+                <!-- getFormattedDate -->
+                {{(assignmentListData?.assignment?.reasons[0]?.effective_date) | localDateFormat: '': '':'' : true  }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+    </div>
+    <ng-container *ngIf="isLock">
+      <div class="alert_message alert_pending my-24">
+        <div class="d-flex align-items-center w-100">
+          <div class="d-flex align-items-center justify-content-start ">
+            <icon class="d-flex mr-8" size="24px" [name]="'no_accounts'" type="material" cuClass="d-flex"></icon>
+          </div>
+          <div class="pl-8">
+            <div class="font-weight-bold mb-0 medium-font">
+              {{ (lockMessage)|i18next }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+    <app-logs [log]="logs"></app-logs>
+    <div class="card bg-light mt-24 mt-m-0">
+      <header class="detail-page-header position-relative">
+        <div>
+          <h3>
+            {{assignmentListData?.assignment?.assignment_title?.name}}
+            <span class="status-ui ml-16 position-relative hide-on-mobile"
+              [ngClass]="{'open': (assignmentListData?.assignment?.status | lowercase) === 'open','in-progress':assignmentListData?.assignment?.status?.toLowerCase() === 'in-progress','pending': (assignmentListData?.assignment?.status | lowercase) === 'pending', 'closed': ((assignmentListData?.assignment?.status | lowercase) === 'assignment closed' || (assignmentListData?.assignment?.status | lowercase) === 'closed') , 'rejected' : (assignmentListData?.assignment?.status | lowercase) === 'rejected' }">
+              {{(assignmentListData?.assignment?.sub_status?.toLowerCase() === 'pending-closed' ? 'Pending Close Assignment' :assignmentListData?.assignment?.sub_status?.toLowerCase() === 'cancel-closed' ? 'Cancelled' : (assignmentListData?.assignment?.status?.toLowerCase() === 'in-progress' ? 'In-Progress' :assignmentListData?.assignment?.status)) | titlecase | i18nextEager}}
+            </span>
+          </h3>
+          <p class="detail-meta hide-on-mobile" [ngClass]="{'max-width text-truncate cursor-default' : assignmentListData?.assignment?.impersonated_by}" (mouseover)="showDetailTooltip()" (mouseleave)="hideDetailTooltip()">
+            <icon class="meta-label" name="label" size="18px"></icon>
+            {{assignmentListData?.assignment?.code}}
+            <icon class="ml-32 updated" name="update" size="18px"></icon>
+            {{ 'last_updated_by' | i18nextEager }} : <span class="font-weight-medium">{{assignmentListData?.last_updated_by?.name}}</span> &nbsp;<span *ngIf="assignmentListData?.assignment?.impersonated_by?.name">({{ 'impersonated_by' | i18nextEager }}: {{assignmentListData?.assignment?.impersonated_by?.name}} <span *ngIf="assignmentListData?.assignment?.impersonated_by?.role?.name"> - {{assignmentListData?.assignment?.impersonated_by?.role?.name}}</span> <span *ngIf="assignmentListData?.assignment?.impersonated_by?.role?.organization_category">({{assignmentListData?.assignment?.impersonated_by?.role?.organization_category}})</span>)</span> {{ 'on' | i18nextEager }} {{ assignmentListData?.last_updated_at  | localDateFormat }} {{ assignmentListData?.last_updated_at  | localDateFormat:'hh:mm:ss a z' }}
+          </p>
+          <div class="hide-on-desktop">
+            <div class="d-flex align-item-center d-block-m">
+              <span class="status-ui mr-16 position-relative mb-m-8"
+              [ngClass]="{'open': (assignmentListData?.assignment?.status | lowercase) === 'open','pending': (assignmentListData?.assignment?.status | lowercase) === 'pending', 'closed': ((assignmentListData?.assignment?.status | lowercase) === 'assignment closed' || (assignmentListData?.assignment?.status | lowercase) === 'closed') }">{{assignmentListData?.assignment?.status
+              | titlecase | i18nextEager}}
+            </span>
+              <div class="job-id d-flex">
+                <icon class="meta-label" color="#ffc409" name="label" size="18px"></icon>
+                {{assignmentListData?.assignment?.code}}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="actions position-absolute d-flex">
+          <button *ngIf="hasPendingRequest && assignmentListData?.pending_request?.request_sub_type && assignmentListData?.assignment?.sub_status.toLowerCase() !== 'pending-closed' && assignmentListData?.assignment?.sub_status.toLowerCase() !== 'cancel-closed'" class="btn pending-button" (click)="openBudgetPending()">
+            <icon size="20px" name="notifications_active" type="material" class="icon--on-left mr-m-0"> </icon>
+            <span class="hide-on-mobile">{{ 'pending' | i18nextEager }} {{(checkStatus(assignmentListData?.pending_request?.request_sub_type)) |i18next }} {{ 'request' | i18nextEager }}</span>
+          </button>
+          <ng-container *ngIf="hasAssignmentActionAccess()">
+            <button class="btn btn-primary ml-16" #action [disabled]="!isActionAllow || assignmentListData?.action_allow?.is_action_dropdown_disabled || isLock">
+              <span class="hide-on-mobile">{{ 'actions' | i18nextEager }}</span>
+              <icon  class="icon--on-right hide-on-mobile" size="20px" [name]="
+                  actionVisibility || !isActionAllow || isLock  || assignmentListData?.action_allow?.is_action_dropdown_disabled ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
+                " type="material" cuClass="icon-cu">
+              </icon>
+              <icon class="hide-on-desktop" size="20px" name="more_horiz" type="material" cuClass="icon-cu">
+              </icon>
+            </button>
+            <ul *ngIf="isActionAllow" class="action-list position-absolute bg-light rounded-sm pt-12 pb-12"
+              [ngClass]="{'active' : actionVisibility}" #actionList>
+              <ng-container *ngIf="assignmentListData?.action_allow?.can_update">
+                <li *authorize="'update_assignment'">
+                  <a class="pt-8 pb-8 pl-24 pr-8" (click)="updateFormShow()">
+                    <icon class="mr-16" size="20px" name="rate_review" type="material" cuClass="icon-cu"></icon>
+                    {{ 'update_assignment' | i18nextEager }}
+                  </a>
+                </li>
+              </ng-container>
+              <ng-container *ngIf="assignmentListData?.action_allow?.can_temporary_access">
+                <li>
+                  <a class="pt-8 pb-8 pl-24 pr-8" (click)="temporaryAcccess()">
+                    <icon class="mr-16" size="20px" name="schedule" type="material" cuClass="icon-cu"></icon>
+                    {{ 'temporary_access' | i18nextEager }}
+                  </a>
+                </li>
+              </ng-container>
+
+              <!-- We dont need this functionality anymore
+                <ng-template [ngIf]="status?.toLowerCase() === 'pending'">
+                <li *authorize="'approve_assignment'">
+                  <a href="javascript:void(0)" class="pt-8 pb-8 pl-24 pr-8" (click)="approveAssignment()">
+                    <icon class="mr-16" size="20px" name="person_add" type="material" cuClass="icon-cu"></icon>
+                    {{ 'approve_assignment' | i18nextEager }}
+                  </a>
+                </li>
+              </ng-template> -->
+
+              <ng-template [ngIf]="assignmentListData?.action_allow?.can_close">
+                <li *authorize="'close_assignment'">
+                  <a class="pt-8 pb-8 pl-24 pr-8" (click)="openTermination('close')">
+                    <icon class="mr-16" color="red" size="20px" name="indeterminate_check_box" type="material"
+                      cuClass="icon-cu"></icon>
+                    {{ 'close_assignment' | i18nextEager }}
+                  </a>
+                </li>
+              </ng-template>
+              <ng-template [ngIf]="assignmentListData?.action_allow?.can_cancel">
+                <li *authorize="'close_assignment'">
+                  <a class="pt-8 pb-8 pl-24 pr-8" (click)="openTermination('cancel')">
+                    <icon class="mr-16" color="red" size="20px" name="indeterminate_check_box" type="material"
+                      cuClass="icon-cu"></icon>
+                    {{ 'cancelled_assignment' | i18nextEager }}
+                  </a>
+                </li>
+              </ng-template>
+
+              <ng-template
+                [ngIf]="assignmentListData?.action_allow?.can_evaluate">
+                <li class="border-top" *authorize="'evaluate_assignment'">
+                  <a class="pt-8 pb-8 pl-24 pr-8 text-blue" (click)="openEvalution()">
+                    <icon class="mr-16" size="20px" name="stars" type="material" cuClass="icon-cu"></icon>
+                    {{ 'evaluate' | i18nextEager }}
+                  </a>
+                </li>
+              </ng-template>
+              <ng-template [ngIf]="assignmentListData?.assignment?.status?.toLowerCase() !== 'pending'">
+                <li *authorize="'account_code_setup_action'">
+                  <a class="pt-8 pb-8 pl-24 pr-8" (click)="navigateToAccountCodeSetup()">
+                    <icon class="mr-16" size="20px" name="schedule" type="material" cuClass="icon-cu"></icon>
+                    {{ 'account_code' | i18nextEager }}
+                  </a>
+                </li>
+              </ng-template>
+              <li *ngIf="assignmentListData?.action_allow?.can_add_projects">
+                <a class="pt-8 pb-8 pl-24 pr-8" (click)="navigateToActivityBasedPricing()">
+                  <icon class="mr-16" size="20px" name="price_change" theme="outlined" type="material" cuClass="icon-cu"></icon>
+                  {{(assignmentConfig?.project_based?.is_create ? 'Add' : '')|i18next}}
+                  {{ 'activity_and_pricing' | i18nextEager }}
+                </a>
+              </li>
+              <ng-container *ngIf="assignmentListData?.action_allow?.can_extend">
+                <li>
+                  <a class="pt-8 pb-8 pl-24 pr-8" (click)="openExtension()">
+                    <icon class="mr-16" size="20px" name="upgrade" type="material" cuClass="icon-cu"></icon>
+                    {{ 'quick_extension' | i18nextEager }}
+                  </a>
+                </li>
+              </ng-container>
+              <ng-container *ngIf="assignmentListData?.action_allow?.can_update_rates">
+                <li>
+                  <a class="pt-8 pb-8 pl-24 pr-8" (click)="openRateChange()">
+                    <icon class="mr-16" size="20px" name="price_change" type="material" cuClass="icon-cu"></icon>
+                    {{ 'quick_rate_change' | i18nextEager }}
+                  </a>
+                </li>
+              </ng-container>
+                <ng-container *ngIf="assignmentListData?.action_allow?.can_tax_update || assignmentListData?.action_allow?.can_tax_update_pending">
+                  <li>
+                    <a class="pt-8 pb-8 pl-24 pr-8" (click)="openTaxUpdate()">
+                      <icon class="mr-16" size="20px" name="credit_score" type="material" cuClass="icon-cu"></icon>
+                      {{ 'tax_update' | i18nextEager }}
+                    </a>
+                  </li>
+                </ng-container>
+            </ul>
+          </ng-container>
+        </div>
+      </header>
+      <nav class="detail-nav pl-24 pr-24 tab-mobile-view" appResponsiveMenu dataLoaded="5">
+        <ul class="tabs primary  not-loaded">
+          <li (click)="setActiveTab('assignment')" class="cursor-pointer">
+            <a [ngClass]="{'active': activeTab==='assignment'}">
+              <icon class="mr-8" size="20px" name="info" theme="outlined" cuClass="icon-cu"></icon>
+              {{ 'assignment_details' | i18nextEager }}
+            </a>
+          </li>
+
+          <li (click)="setActiveTab('budget')" class="cursor-pointer">
+            <a [ngClass]="{'active': activeTab==='budget'}">
+              <icon class="mr-8" size="20px" name="payments" theme="outlined" cuClass="icon-cu"></icon> {{ 'budget' | i18nextEager }}
+            </a>
+          </li>
+          <li (click)="setActiveTab('onboarding')" class="cursor-pointer" *ngIf="showOnboarding && !disableOnboarding">
+            <a [ngClass]="{'active': activeTab==='onboarding'}">
+              <icon class="mr-8" size="20px" name="check_circle" theme="outlined" cuClass="icon-cu"></icon>
+              {{ 'onboarding' | i18nextEager }}
+            </a>
+          </li>
+          <li (click)="setActiveTab('history')" class="cursor-pointer">
+            <a [ngClass]="{'active': activeTab==='history'}">
+              <icon class="mr-8" size="20px" name="group_work" theme="outlined" cuClass="icon-cu"></icon>
+              {{ 'history' | i18nextEager }}
+            </a>
+          </li>
+          <li (click)="setActiveTab('approval')" class="cursor-pointer" *ngIf="hasPendingRequest && showApprovalTab && pendingItem">
+            <a [ngClass]="{'active': activeTab==='approval'}">
+              <icon class="mr-8" size="20px" name="task_alt" theme="outlined" cuClass="icon-cu"></icon>
+              {{ 'approval' | i18nextEager }}
+            </a>
+          </li>
+          <li class="more">
+            <a>{{ 'more' | i18nextEager }}</a>
+            <div class="secondary">
+              <span class="d-none position-relative nav-close-btn text-right">
+                <a>
+                  <icon name="close" size="18px"></icon>
+                </a>
+              </span>
+              <ul>
+                <li (click)="setActiveTab('assignment')" class="secondary-item cursor-pointer">
+                  <a [ngClass]="{'active': activeTab==='assignment'}">
+                    <icon class="mr-8" size="20px" name="info" theme="outlined" cuClass="icon-cu"></icon>
+                    {{ 'assignment_details' | i18nextEager }}
+                  </a>
+                </li>
+
+                <li (click)="activeTab='budget'" class="secondary-item cursor-pointer">
+                  <a [ngClass]="{'active': activeTab==='budget'}">
+                    <icon class="mr-8" size="20px" name="payments" theme="outlined" cuClass="icon-cu"></icon> {{ 'budget' | i18nextEager }}
+                  </a>
+                </li>
+                <li (click)="setActiveTab('onboarding')" class="secondary-item cursor-pointer" *ngIf="showOnboarding && !disableOnboarding">
+                  <a [ngClass]="{'active': activeTab==='onboarding'}">
+                    <icon class="mr-8" size="20px" name="check_circle" theme="outlined" cuClass="icon-cu"></icon>
+                    {{ 'onboarding' | i18nextEager }}
+                  </a>
+                </li>
+                <li (click)="setActiveTab('history')" class="secondary-item cursor-pointer">
+                  <a [ngClass]="{'active': activeTab==='history'}">
+                    <icon class="mr-8" size="20px" name="group_work" theme="outlined" cuClass="icon-cu"></icon>
+                    {{ 'history' | i18nextEager }}
+                  </a>
+                </li>
+                <li (click)="setActiveTab('approval')" class="secondary-item cursor-pointer" *ngIf="hasPendingRequest && showApprovalTab && pendingItem">
+                  <a [ngClass]="{'active': activeTab==='approval'}">
+                    <icon class="mr-8" size="20px" name="task_alt" theme="outlined" cuClass="icon-cu"></icon>
+                    {{ 'approval' | i18nextEager }}
+                  </a>
+                </li>
+              </ul>
+            </div>
+            </li>
+        </ul>
+        <div class="clearfix"></div>
+      </nav>
+      <div class="card no-mobile-margin first bg-light mb-24 p-32" *ngIf="showData ? (assignmentListData | json) != ({} | json) : true; else noRecordFound">
+        <app-assignment-details-view [assignmentConfig]="assignmentConfig" [assignmentData]="assignmentListData" [budget]="budget" [config]="form_config" [error]="error"
+          [evaluationVisualData]="evaluationVisualData" *ngIf="activeTab==='assignment'"
+          (isBudgetNeedLoad)="getBudjetDetails()" (onSubmit)="onDateSubmit($event)" (closeEvent)="getDetails($event)">
+        </app-assignment-details-view>
+        <app-budget *ngIf="activeTab==='budget'" [assignmentConfig]="assignmentConfig" [assignmentData]="assignmentListData" [openBudgetPanel]="openBudgetPanel"
+          [hasPendingRequest]="hasPendingRequest" (updateAssignment)="getAssignmentList()" (updateLockStatus)="getAssignmentLockStatus($event)" [isLock]="isLock">
+        </app-budget>
+        <app-onboarding *ngIf="activeTab==='onboarding'" [checkListID]="checkListID" [assignmentID]="assignmentid"
+          [assignmentStatus]="assignmentStatus" [workerID]="workerId" [jobTemplateID]="jobTemplateId" [vendorDetails]="vendorDetails" [assignmentData]="assignmentListData" (updatedStatus)="taskUpdated($event)"></app-onboarding>
+        <app-history *ngIf="activeTab==='history'" [assignmentConfig]="assignmentConfig" [assignmentId]="assignmentid" [currency]="assignmentListData?.finance?.currency" [rateModel] = "assignmentListData?.finance?.rate_model" [assignmentListData]="assignmentListData" ></app-history>
+        <app-assignment-approval *ngIf="activeTab==='approval' && showApprovalTab && pendingItem" [programId]="programId" [pendingItem] = "pendingItem" [assignmentSubStatus] = "assignmentSubStatus"
+          [assignmentId]="assignmentid" [currency]="assignmentListData?.finance?.currency" [detailsConfig]="form_config" (checkPendingStatus)="getPendingStatus()" [assignmentListData]="assignmentListData"
+          [jobID]="jobID" [programType]="programType" [timezone]="assignmentListData?.assignment?.timezone" (updateAssignmentData)="getAssignmentList()" (updateLockStatus)="getAssignmentLockStatus($event)">
+        </app-assignment-approval>
+      </div>
+      <ng-template #noRecordFound>
+        <div class="no-matches-found text-center m-4 pt-16 pb-16">
+          <div class="content-area ui-content-wrapper no-content">
+            <div class="no-data">
+              <img src="./assets/images/no-data-lst.svg" alt="no offers" width="100" class="img-fluid" />
+              <h4 class="pt-16">{{'no_records_found'|i18next}}</h4>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+  </section>
+</div>
+<div class="meta-tooltip position-absolute" *ngIf="assignmentListData?.assignment?.impersonated_by" [ngClass]="{'active' : assignmentMetaTooltip}">
+  <div class="p-12">
+    <p class="mb-8">
+      <strong>
+        {{ 'impersonated_by' | i18nextEager }}:
+      </strong><br>
+        <span class="font-weight-medium">
+          {{assignmentListData?.assignment?.impersonated_by?.name}}
+      </span>
+    </p>
+    <p class="mb-8">
+      <strong>{{ 'role_name' | i18nextEager }}: </strong> <br>
+      {{assignmentListData?.assignment?.impersonated_by?.role?.name}}
+    </p>
+    <p class="mb-8">
+      <strong>{{ 'organization_category' | i18nextEager }}: </strong> <br>
+      {{assignmentListData?.assignment?.impersonated_by?.role?.organization_category}}
+    </p>
+    <p>
+      <strong>{{ 'on' | i18nextEager }}: </strong> <br>
+      {{ assignmentListData?.last_updated_at  | localDateFormat }} {{ assignmentListData?.last_updated_at  | localDateFormat:'hh:mm:ss a z' }}
+    </p>
+  </div>
+</div>
+<app-terminate-assignment *ngIf="activeTab !== 'budget' && isTerminate === 'visible'" [hierarchy_id]="assignmentListData?.assignment?.hierarchy?.id" [isTerminate]="isTerminate" (onClose)="onCloseTermination($event)" [actionType]="actionType">
+</app-terminate-assignment>
+<app-evaluation [isEvalution]="isEvalution" [evaluationItems]="evaluationItems" (onClose)="onCloseEvalution($event)">
+</app-evaluation>
+<app-special-temporary-access (submit)="onSubmitAccess($event)" [assignmentId]="assignmentid" [assignmentData]="assignmentListData" [assignmentConfig]="assignmentConfig"></app-special-temporary-access>

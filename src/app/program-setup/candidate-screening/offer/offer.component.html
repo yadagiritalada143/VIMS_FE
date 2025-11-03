@@ -1,0 +1,53 @@
+<div class="p-24 d-flex flex-column">
+  <div class="d-flex align-items-center">
+    <h4 class="font-weight-medium mr-8 fs-15 mb-0 text-black">{{ 'offer_review' | i18next }}</h4>
+    <i class="info-icon material-icons mr-16"
+      [tooltip]="'When enabled, the MSP will be able to review the candidate offer created by HM or any other authorized role before it is released to vendor for acceptance or sent for offer approval.' | i18next"
+      placement="right">help</i>
+    <toggle-button [checked]="isOfferReview" (changed)="offerReview($event)"></toggle-button>
+  </div>
+  <div class="d-flex align-items-center mt-4">
+    <h4 class="font-weight-medium mr-8 fs-15 mb-0 text-black">{{ 'counter_offer' | i18next }}</h4>
+    <i class="info-icon material-icons mr-16"
+      [tooltip]="'When enabled, the vendor will be able to counter the offer released to them for acceptance.' | i18next"
+      placement="right">help</i>
+    <toggle-button [checked]="isCouterOffer" (changed)="onChange($event)"></toggle-button>
+  </div>
+  <div class="d-flex align-items-center mt-16" *ngIf="showApproval">
+    <label class="checkbox-container mb-0">
+      <span class="radio-container_description mr-8">{{ 'approval_required_for_counter_offer_within_budget' | i18next }}</span>
+      <input type="checkbox" name="" id="" (change)="approval($event)"
+        [checked]="currentProgram?.config?.is_counter_offer_within_budget_approval">
+      <span class="checkmark"></span>
+    </label>
+    <i class="info-icon material-icons mr-16"
+        [tooltip]="'When enabled, the system will send all offers countered by vendor irrespective of budget for approval (as set in the offer approval matrix).' | i18next"
+        placement="right">help</i>
+  </div>
+  <div>
+    <div class="d-flex align-items-center mt-4">
+      <h4 class="font-weight-medium mr-8 fs-15 mb-0 text-black">{{ 'counter_offer_review' | i18next }}</h4>
+      <i class="info-icon material-icons mr-16"
+        [tooltip]="'When enabled, the MSP will be able to review the countered offer by vendor before it is released again to the vendor for acceptance or sent for offer approval.' | i18next"
+        placement="right">help</i>
+      <toggle-button [disabled]="!currentProgram?.config?.is_counter_offer"
+        [checked]="currentProgram?.config?.offer?.counter_offer_review"
+        (changed)="CounterOfferReview($event)"></toggle-button>
+    </div>
+    <p class="mt-2 text-red fs-12" *ngIf="!currentProgram?.config?.is_counter_offer">
+      {{ 'please_enable_counter_offer_to_enable_counter_offer_review' | i18next }}
+    </p>
+  </div>
+    <div class="tab-inner d-flex align-items-center justify-content-between bor-top mt-16">
+      <div class="tab-left-content d-flex align-items-center">
+        <div class="c-text-content">
+          <p class="subtitle font-weight-medium text-black">{{ 'enable_approvals_on_offer_module' | i18next }} </p>
+          <p>{{ 'when_this_setting_is_enabled_the_system_will_trigger_defined_approvals_when_the_offer_budget_is_greater_than_job_budget.' | i18next}}</p>
+          <p>{{'please_note_that_this_setting_applies_only_to_the_old_workflow_engine.' | i18next }}</p>
+        </div>
+      </div>
+      <div class="tab-right-content d-flex justify-content-end" >
+        <toggle-button [disabled]="false" [checked]="currentProgram?.config?.is_approval_for_offers" (changed)="onChangeOfferApproval($event)"></toggle-button>
+      </div>
+    </div>
+</div>

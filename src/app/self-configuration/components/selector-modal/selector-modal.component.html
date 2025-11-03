@@ -1,0 +1,165 @@
+<div class="d-flex flex-wrap">
+    <div class="mr-16 mb-16">
+        <button type="button" [disabled]="loading" (click)="openDialog()" class="c-btn c-btn-add d-flex align-items-center">
+            <i class="material-icons mr-4">add</i>{{'add' | i18next}}
+        </button>
+    </div>
+    <ng-container *ngFor="let option of (options | uniqueKey: 'value' | keysort: 'name')">
+        <div *ngIf="!hideItemBadge && option?.is_selected" class="item-badge d-flex mr-16 mb-16 py-2">
+            <div *ngIf="!wordDefault" 
+                class="d-flex align-items-center ml-12 cursor-pointer">
+                <icon size="16px" class="material-outlined" 
+                    [tooltip]="option?.is_default?'Marked as Default':'Select to mark as Default'"
+                    placement="bottom"
+                    [color]="option?.is_default?'#0044C5':'#5f6d89'" 
+                    [name]="option?.is_default?'bookmark':'bookmark_border'" 
+                    (click)="removeDefault(option?._it)">
+                </icon> 
+            </div>
+            <span class="px-12" [style]="{'line-height':'36px'}"
+                [ngClass]="option?.is_default?'blue-color':''"
+            > 
+                {{ option?.name | i18next }} 
+                <span *ngIf="wordDefault && option?.is_default">
+                    {{' (Default)' | i18next}}</span>
+                </span>
+            <div *ngIf="showEditable" class="d-flex align-items-center cursor-pointer mr-8">
+                <icon size="16px" class="material-outlined" 
+                    placement="bottom"
+                    [name]="option?.is_editable?'edit':'edit_off'"
+                    [color]="option?.is_editable?'#0044C5':'#5f6d89'"
+                    [tooltip]="option?.is_editable?'Marked as Editable':'Select to mark as Editable'"
+                    (click)="removeEditable(option?._it)">
+                </icon>
+            </div>
+            <div class="d-flex align-items-center mr-8">
+                <icon size="16px" class="cursor-pointer pt-3" 
+                    name="cancel" color="#51C6D5"
+                    (click)="removeSelection(option?._it)"
+                ></icon>
+            </div>
+        </div>
+    </ng-container>
+    
+    <ngx-skeleton-loader *ngIf="!hideItemBadge && loading" 
+        class="pl-16 py-2 d-flex" count="2"
+        animation="progress"
+        [theme]="{
+            'width': '120px',
+            'height': '40px',
+            'background-color': '#ECEDFF',
+            'border-top': '0',
+            'margin-right': '16px'
+        }"> 
+    </ngx-skeleton-loader>
+</div>
+
+<app-svms-modal
+    [title]="title"
+    [visibility]="dialogVisibility"
+    (onClose)="updateEntries(false)"
+>
+
+    <app-svms-modal-body class="common-checkbox-modal">
+
+        <div class="c-search-panel-wrapper mb-16 position-relative">
+            <div class="c-search-panel position-absolute">
+                <div class="position-relative" placement="top">
+                    <i class="material-icons">search</i>
+                <input type="search" class="custom-form-control ml-8" [(ngModel)]="input" (keyup)="searchTerm()" (ngModelChange)="searchTerm()"
+                    placeholder="{{'Search...' | i18next}}" />
+                </div>
+            </div>
+        </div>
+
+        <div  *ngIf="!loading && !optionsCopy?.length; else scrollbar" class="content-panel d-flex align-items-center justify-content-center">
+            <p> {{ 'no_records_found' | i18next }} </p>
+        </div>
+
+        <ng-template #scrollbar>
+            <div class="content-panel w-100">
+                <perfect-scrollbar (psYReachEnd)="scrolledToEnd()">
+
+                    <ng-container *ngFor="let option of (optionsCopy | uniqueKey: 'value' | keysort: 'name')">
+                        <div *ngIf="showEntry(option)" class="content-item d-flex align-items-center justify-content-between my-8"
+                            [ngClass]="option?.is_selected?'selected-item':''">
+    
+                        <label class="c-input-checkbox mb-0">
+                            <input class="mr-8" [checked]="option?.is_selected" type="checkbox" (click)="changeSelection(option?._it)">
+                            <span class="cb-ui"></span>
+                            <span class="cb-label">{{ option?.name | i18next }}</span>
+                        </label>
+                            <div class="d-flex align-items-center flex-wrap" *ngIf="option?.is_selected">
+                                <div class="pl-16 d-flex align-items-center cursor-pointer" *ngIf="showDefault" (click)="changeDefault(option?._it)">
+                                    <icon cuClass="d-flex" size="16px" class="material-outlined" 
+                                    [color]="option?.is_default?'#0044C5':'#5f6d89'"
+                                    [name]="option?.is_default?'bookmark':'bookmark_border'"
+                                    >
+                                    </icon>
+                                    <p class="small pl-8" [ngClass]="option?.is_default?'blue-color':''"> {{ 'default' | i18next }} </p>
+                                </div>
+                                <div class="pl-16" *ngIf="showEditable">
+                                    <icon size="16px" cuClass="d-flex" class="material-outlined cursor-pointer" 
+                                        [name]="option?.is_editable?'edit':'edit_off'"
+                                        [color]="option?.is_editable?'#0044C5':'#5f6d89'"
+                                        (click)="changeEditable(option?._it)">
+                                    </icon>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container>
+        
+                    <ng-container *ngIf="loading">
+                        <div *ngFor="let loader of [1, 2, 3]" class="d-flex ml-8 my-32">
+                            <div class="circle">
+                                <ngx-skeleton-loader count="1" animation="progress" appearance="circle" [theme]="{
+                                    width: '20px',
+                                    height: '20px',
+                                    float: 'left',
+                                    'margin-bottom': '0px',
+                                    'margin-right': '16px',
+                                    'background-color': '#ECEDFF',
+                                    'border-top': '0'
+                                }"></ngx-skeleton-loader>
+                            </div>
+                            <div class="lines w-100">
+                                <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                                    width: '50%',
+                                    height: '12px',
+                                    float: 'left',
+                                    'top': '8px',
+                                    'background-color': '#ECEDFF',
+                                    'border-bottom': '0px'
+                                }"></ngx-skeleton-loader>
+                            </div>
+                        </div>
+                    </ng-container>
+        
+                </perfect-scrollbar>
+            </div>   
+        </ng-template>
+
+    </app-svms-modal-body>
+
+    <app-svms-modal-footer>
+        <div class="d-flex justify-content-between w-100">
+            <div class="d-flex">
+                <div>&nbsp;</div>
+                <div *ngIf="validatorFn && validatorFn(optionsCopy)" class="d-flex align-items-center">
+                    <div class="h-100 pt-4">
+                        <icon name="error" size="20px" color="#FD1F1F"></icon>
+                    </div>
+                    <p class="validation-msg ml-8">
+                        {{ validatorFn(optionsCopy) | i18next }}
+                    </p>
+                </div>
+            </div>
+            <div class="d-flex align-items-center ml-8">
+                <button [disabled]="validatorFn && validatorFn(optionsCopy)" *accessControl class="btn btn-primary" (click)="updateEntries(true)">
+                    {{ 'add' | i18next }}
+                </button>
+            </div>
+        </div>
+    </app-svms-modal-footer>
+
+</app-svms-modal>

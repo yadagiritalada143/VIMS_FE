@@ -1,0 +1,79 @@
+<div class="notification-page-wrapper">
+    <div class="card">
+      <div class="notification-settings-head position-relative d-flex justify-content-between align-items-center p-24">
+        <div class="d-flex">
+            <a (click)="navigateBack()">
+              <icon name="arrow_back"></icon>
+            </a>
+            <h4 class="ml-24 font-weight-medium mb-0">
+              {{'User based notification settings'|i18next}}
+            </h4>
+          </div>
+          <ng-template [ngIf]="false" [ngIfElse]="savebtn"></ng-template>
+      </div>
+      <div class="setting-top-menu d-flex">
+        <ng-template [ngIf]="false" [ngIfElse]="filters"></ng-template>
+      </div>
+      <div class="border-bottom">
+        <ng-container *ngIf="(notificationconfigs | keyvalue)?.length; else noDataFound">
+          <span class="d-flex align-items-center px-24 py-16">
+            <input type="checkbox" class="mr-8" [(ngModel)]="selectAll" (change)="selectAllEvent()" [disabled]="!notificationSetting.userRole">
+            <span>{{ 'select_all' | i18next }}</span>
+          </span>
+          <ng-container *ngFor="let notification of notificationconfigs | keyvalue; let i = index;">
+            <section class="accordion-item" *ngIf="!notification.isNotShow">
+              <p class="accordion-trigger d-flex align-items-center justify-content-between mb-0"
+                 [ngClass]="{'active' : accordionItem === i}">
+                <span class="d-flex align-items-center">
+                  <input type="checkbox" class="mr-8" [ngModel]="notification.value.is_checked"
+                    [disabled]="checkIsDisabled(notification.value.eventList)"
+                    (ngModelChange)="selectParentEvent(notification, !notification.value.is_checked)">
+                  <span>{{notification.key | i18next}}</span>
+                </span>
+                <span *ngIf="!notification?.value?.eventList?.length">{{ 'no_event_found!' | i18next }}</span>
+                <icon *ngIf="notification?.value?.eventList?.length" [name]="notification.show ? 'expand_more' : 'expand_less'" (click)="notification.show = !notification.show"></icon>
+              </p>
+              <div class="accordion-content" [ngClass]="{'active' : notification.show}">
+                <div class="notification-type-wrapper">
+                  <ng-container *ngFor="let event of notification.value.eventList; let i=index">
+                    <div class="notification-type py-12 px-64" *ngIf="!event.isNotShow">
+                      <div class="d-flex align-items-center">
+                        <input type="checkbox" class="mr-8" [(ngModel)]="event.is_checked"
+                          [disabled]="!notificationSetting.userRole"
+                          (click)="selectChildEvent(notification, i, !event.is_checked)">
+                        <span class="item-name font-weight-medium">{{event.event_name}}</span> <span
+                          class="tag {{event.event_type}}">{{event.event_type}}</span>
+                      </div>
+                      <p class="mt-8 small" *ngIf="event?.description"> {{event.description}} </p>
+                    </div>
+                  </ng-container>
+                </div>
+              </div>
+            </section>
+          </ng-container>
+        </ng-container>
+        <ng-template #noDataFound>
+          <div class="container d-flex justify-content-center align-items-center">
+            <h4>{{ 'no_event_found!' | i18next }}</h4>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+  
+  <ng-template #filters>
+    <div class="d-flex align-item-center justify-content-end btn_wraper pr-24"
+      [ngStyle]="{'opacity': notificationSetting.userRole ? 1 : 0.4}">
+      <button class="btn xx-small filter-btn"><i class="material-icons">filter_list</i></button>
+      <button *ngFor="let option of filterOptions; let i = index" class="btn xx-small btn-outine"
+        [disabled]="!notificationSetting.userRole"
+        [ngClass]="{'btn-primary': option.active, 'btn-outine': !option.active}"
+        (click)="updateFilter(i)">{{option.name}}</button>
+    </div>
+  </ng-template>
+  
+  <ng-template #savebtn>
+    <button class="btn userbtn btn-primary small position-relative" (click)="save()" *accessControl
+      [disabled]="!notificationSetting.userRole">{{ 'save' | i18next }}</button>
+  </ng-template>
+  

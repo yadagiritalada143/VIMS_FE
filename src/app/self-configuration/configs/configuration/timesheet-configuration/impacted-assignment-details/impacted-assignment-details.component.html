@@ -1,0 +1,41 @@
+<div class="impacted-assignment">
+  <header class="section-header p-24 d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+      <i (click)="backClicked()" class="material-icons back-arrow-icon cursor-pointer mr-16">arrow_back</i>
+      <h3 class="font-weight-semibold mb-0">{{'impacted_assignment_details' | i18next }}</h3>
+    </div>
+  </header>
+
+
+  <section class="section-body-content">
+    <div class="d-flex">
+      <div>
+        <aside class="search-results" [scrollWindow]="false" infinite-scroll [infiniteScrollDistance]="scrollDistance"
+          [infiniteScrollUpDistance]="scrollUpDistance" [infiniteScrollThrottle]="throttle"
+          (scrolled)="onScrollDown($event)" (scrolledUp)="onUp($event)">
+          <div *ngFor="let impactedAssignment of impactedAssignmentList; let index = index">
+            <div class="impacted-item" [ngClass]="{'active': selectedAssignmentId === impactedAssignment.id}"
+              (click)="onAssignmentClick(impactedAssignment.id)">
+              <p class="impacted-item-title font-weight-medium mb-4">{{impactedAssignment.assignment_title}}</p>
+              <div class="d-flex align-items-center justify-content-start">
+                <p class="small mr-32">{{impactedAssignment.code}}</p>
+                <div class="d-flex" *ngIf="impactedAssignment?.user?.name">
+                  <i class="material-icons-outlined mr-4">person</i>
+                  <p class="small">{{impactedAssignment?.user?.name}}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+      <div class="table-view-item" *ngIf="impactedAssignmentList?.length">
+        <div class="table-list-wrapper">
+          <vms-table [vmsTableConfig]="tableConfig" [currentPage]="pageNo" [vmsDataSource]="impactedTimesheetList"
+            (changeRecords)="changerecords($event)" (changePage)="onPaginationClick($event)" [loading]="loader"
+            [totalItem]="totalRecords" [itemsPerPage]="itemPerPage">
+          </vms-table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

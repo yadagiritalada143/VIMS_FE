@@ -1,0 +1,129 @@
+<form [formGroup]="formGroup">
+  <app-program-config-control
+    subtitle="Work Location Read only"
+    description="When enabled, the system will not allow user to modify the “Work Location” field during Job creation.
+    In an event when there is no “Work Location” value pre-populated, this flag will be overwritten and the application
+    will allow user to select the value manually."
+    [type]="ControlType.TOGGLE"
+    formControlName="is_work_location_read_only"
+  >
+  </app-program-config-control>
+
+  <div formGroupName="job_description">
+    <app-program-config-control 
+      subtitle="Job Description Mandatory"
+      description="When this flag is enabled, the job description field will be required when creating a job."
+      [type]="ControlType.TOGGLE" 
+      formControlName="required"
+    >
+    </app-program-config-control>
+  
+    <app-program-config-control 
+      subtitle="Allow Job Description Upload"
+      description="When enabled, the system will provide an option to upload the job description."
+      [type]="ControlType.TOGGLE" 
+      formControlName="attachment"
+    >
+    </app-program-config-control>
+  
+    <app-program-config-control 
+      *ngIf="formGroup?.value?.job_description?.attachment" 
+      directoryIcon="true" 
+      subtitle="Job Description Upload Mandatory"
+      description="Selecting this option will require that a file to be uploaded to the job which outlines the job description."
+      [type]="ControlType.TOGGLE" 
+      formControlName="attachment_mandate"
+    >
+    </app-program-config-control>
+  </div>
+
+  <app-program-config-control
+    subtitle="Display all Managers During Create Job and Create Offer"
+    description="If enabled, then when a user who is associated to a User Role with “My Own” or “True Own” access, all managers will be displayed in the “Job Manager” dropdown while creating a Job/Offer. Otherwise, ONLY the manager who is creating the Job/Offer will be displayed in the dropdown for the “Job Manager” field."
+    [type]="ControlType.TOGGLE"
+    formControlName="allow_independent_hm_selection"
+  >
+  </app-program-config-control>
+
+  <app-program-config-control
+    subtitle="Allow Max and Min Rates to be the Same"
+    description="When this flag is enabled, the system will allow Min and Max Rates to have same value during job creation."
+    [type]="ControlType.TOGGLE"
+    formControlName="allow_equal_min_max_rate"
+  >
+  </app-program-config-control>
+
+  <app-program-config-control
+    subtitle="Job Budget Calculation"
+    description="Identify whether 'Total Estimated Budget' on the job is calculated on basis of Max Rate or Average Rate (i.e. average of Min and Max Rates)"
+    [type]="ControlType.DROPDOWN"
+    formControlName="job_budget_calculation"
+    [dropdownItems]="jobBudgetRates"
+  ></app-program-config-control>
+
+  <!--
+  <div formGroupName="maximum_job_duration">
+    <app-program-config-control
+      subtitle="Maximum Job Duration"
+      description='When enabled, the system will restrict Jobs from being created for a duration longer than the defined maximum duration per "Duration & Unit of Measure"'
+      [type]="ControlType.TOGGLE"
+      formControlName="value"
+    ></app-program-config-control>
+
+    <app-program-config-control
+      *ngIf="formGroup?.get('maximum_job_duration.value')?.value"
+      [directoryIcon]="true" subtitle="Duration"
+      description='Select maximum job duration in days, months or years.'
+      [type]="ControlType.NUMBERSELECTOPTION"
+      formControlName="count"
+      [dropdownItems]="jobDurationOptions"
+      [required]="true" [precision]="0"
+      [isRequired]="true"
+      [selectedValue]="jobDuration"
+      (emitOptionChanged)="jobDuration = $event"
+    ></app-program-config-control>
+  </div>
+  -->
+
+  <app-program-config-control
+    subtitle="Default Hours Per Day"
+    description="The number entered here will be set as default working hours per day which is used to calculate the estimated spend during job creation."
+    formControlName="hours_per_day"
+    [type]="ControlType.NUMERIC"
+    min="0.5" max="24" 
+    precision="2" [isRequired]="true"
+    errorText="Valid range: 0.5-24 hrs"
+  ></app-program-config-control>
+
+  <app-program-config-control
+    subtitle="Default Working Days Per Week"
+    description="The number entered here will be set as default working days per week which is used to calculate the estimated spend during job creation."
+    [type]="ControlType.NUMERIC"
+    formControlName="week_working_days"
+    min="1" max="7"
+    [isRequired]="true"
+    errorText="Valid Range: 1-7 days"
+  ></app-program-config-control>
+
+  <app-program-config-control
+    subtitle="Additional Amount Adjustment Type"
+    description="When calculating estimated spend during job creation, the system allows the end user to add an additional amount. The type selected here will be the default method when adding additional spend."
+    [type]="ControlType.RADIO"
+    formControlName="adjustment_type"
+    [radioItems]="additionAmountType"
+  ></app-program-config-control>
+
+  <app-program-config-control 
+    subtitle="Enable Auto Opt-in"
+    description="When enabled, system will automatically Opt-in the Job for the distributed vendors."
+    [type]="ControlType.TOGGLE" 
+    formControlName='enable_auto_opt_in'
+  ></app-program-config-control>
+  
+  <app-program-config-control 
+    subtitle="Allow Pre-Identified Candidates"
+    description="When enabled, system will allow the user to add pre-indentified candidates on the Job."
+    [type]="ControlType.TOGGLE" 
+    formControlName='allow_pre_identified_candidates'
+  ></app-program-config-control>
+</form>

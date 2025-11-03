@@ -1,0 +1,1085 @@
+<div class="create-candidate position-relative">
+  <div class="create-wrapper p-24 px-m-0 py-m-0">
+    <a class="back-btn cursor-pointer" (click)="backToPage()">
+      <icon class="d-inline-block" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon> {{ 'back_to_list' | i18next }}
+    </a>
+    <div class="create-form  pt-32">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="font-weight-medium mb-0 page-title-mobile">{{ heading | i18next}}</h3>
+
+        <!-- <p class="small help">
+          <a href="javascript:void(0)">
+            <icon class="mr-8" size="20px" name="help"></icon>
+            How to Create a new candidate?
+          </a>
+        </p> -->
+      </div>
+      <div class="mt-12">
+        <app-logs [log]="logs"></app-logs>
+        <app-logs [log]="mtpLogs" *ngIf="mtpEnabled"></app-logs>
+      </div>
+
+      <div class="card bg-light mt-24">
+        <div>
+          <form [formGroup]="createCandidates">
+            <section class="basic-info">
+                <div>
+                  <div class="resume-wrapper p-32">
+                    <div class="d-flex justify-content-between profile-resume-box">
+                      <div class="profile-image">
+                        <p class="small text-left mb-12">{{ 'profile_image' | i18next }}</p>
+                        <svms-upload-user-avatar [avatar]="candidateData?.avatar" (nfilename)="getProfileImage($event)"></svms-upload-user-avatar>
+                      </div>
+                      <div class="resume-uploader">
+                        <h4 class="font-weight-medium text-left">{{ 'resume' | i18next }} <span class="require" *ngIf="isResumeRequired">*</span></h4>
+                        <svms-resume-uploader [candidateResumeData]="candidateResumeData" (resumeData)="getResumeData($event)"
+                          exts=".pdf, .doc, .docx"></svms-resume-uploader>
+                          <p class="validation-msg"
+                          *ngIf="resumeError && isResumeRequired">
+                          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                          {{ 'resume_is_required' | i18next }}.
+                          </p>
+                      </div>
+                    </div>
+                    <div class="text-left mt-32">
+                      <div class="personal-info">
+                        <h4 class="section-heading font-weight-medium  mb-32">{{ 'basic_info' | i18next }}</h4>
+                        <div class="form-group-row">
+                          <div class="form-group" *ngIf="!getPrefixSuffixFlag()">
+                            <label>{{ 'prefix' | i18next }}</label>
+                            <ng-select  placeholder="{{ 'select' | i18next }}" [searchable]="false"
+                              formControlName="prefix">
+                              <ng-option [value]="''">{{ 'select' | i18next }}</ng-option>
+                              <ng-option [value]="'Mr'">{{ 'mr' | i18next }}</ng-option>
+                              <ng-option [value]="'Mrs'">{{ 'mrs' | i18next }}</ng-option>
+                              <ng-option [value]="'Miss'">{{ 'miss' | i18next }}</ng-option>
+                              <ng-option [value]="'Dr'">{{ 'dr' | i18next }}</ng-option>
+                              <ng-option [value]="'Prof'">{{ 'prof' | i18next }}</ng-option>
+                              <ng-option [value]="'MX'">{{ 'mx' | i18next }}</ng-option>
+                              <ng-option [value]="'IND'">{{ 'ind' | i18next }}</ng-option>
+                              <ng-option [value]="'Misc'">{{ 'misc' | i18next }}</ng-option>
+                            </ng-select>
+                            <p class="validation-msg"
+                              *ngIf="((createCandidates.controls.prefix.touched && createCandidates.controls['prefix'].errors) || (isSubmited &&  createCandidates.controls['prefix'].errors))">
+                              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>{{ 'prefix_is_required' | i18next }}
+                              </p>
+                          </div>
+                          <div class="form-group">
+                            <label>{{ 'first_name' | i18next }} <span class="require">*</span></label>
+                            <input  [ngClass]="{'error':(createCandidates.controls['firstname'].invalid || nameError[0]) && (createCandidates.controls['firstname'].dirty || createCandidates.controls['firstname'].touched || isSubmited )}"  [pattern]="nameValidation" type="text" class="form-control" formControlName="firstname"
+                              placeholder="{{ 'enter_first_name' | i18next }}" (keyup)="nameValidater(0)">
+
+                              <p class="validation-msg"
+                              *ngIf="((createCandidates.controls.firstname.touched && createCandidates.controls['firstname'].errors?.required) || (createCandidates.controls['firstname'].errors?.required && isSubmited))">
+                              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'first_name_is_required' | i18next }}.
+                              </p>
+                              <p class="validation-msg"
+                              *ngIf="((createCandidates.controls.firstname.touched && (createCandidates.controls['firstname'].errors?.pattern || nameError[0])) || ((createCandidates.controls['firstname'].errors?.pattern || nameError[0]) && isSubmited))">
+                              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'please_enter_only_characters' | i18next }}
+                              </p>
+                              <p class="validation-msg"
+                            *ngIf="((createCandidates.controls.firstname.touched && createCandidates.controls['firstname'].errors?.minlength) || (createCandidates.controls['firstname'].errors?.minlength && isSubmited))">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'enter_minimum' | i18next }} 1 {{ 'characters' | i18next }} </p>
+                          </div>
+                          <div class="form-group">
+                            <label>{{ 'middle_name' | i18next }}</label>
+                            <input [pattern]="nameValidation" type="text" class="form-control" formControlName="middlename" placeholder="{{ 'enter_middle_name' | i18next }}"
+                              [ngClass]="{'error':(createCandidates.controls['middlename'].invalid || nameError[1]) && (createCandidates.controls['middlename'].dirty || createCandidates.controls['middlename'].touched || isSubmited )}"
+                              (keyup)="nameValidater(1)"
+                              >
+                              <p class="validation-msg"
+                              *ngIf="((createCandidates.controls.middlename.touched && createCandidates.controls['middlename'].errors?.required) || (createCandidates.controls['middlename'].errors?.required && isSubmited))">
+                              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'no_special_characters' | i18next }}
+                              </p>
+                              <p class="validation-msg"
+                              *ngIf="((createCandidates.controls.middlename.touched && (createCandidates.controls['middlename'].errors?.pattern || nameError[1])) || ((createCandidates.controls['middlename'].errors?.pattern || nameError[1]) && isSubmited))">
+                              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'please_enter_only_characters' | i18next }}
+                              </p>
+                          </div>
+                          <div class="form-group">
+                            <label>{{ 'last_name' | i18next }} <span class="require">*</span></label>
+                            <input type="text" class="form-control" formControlName="lastname" placeholder="{{ 'enter_last_name' | i18next }}"
+                              [ngClass]="{'error':(createCandidates.controls['lastname'].invalid || nameError[2]) && (createCandidates.controls['lastname'].dirty || createCandidates.controls['lastname'].touched || isSubmited )}"
+                              (keyup)="nameValidater(2)"
+                               >
+                              <p class="validation-msg"
+                              *ngIf="((createCandidates.controls.lastname.touched && createCandidates.controls['lastname'].errors?.required) || (createCandidates.controls['lastname'].errors?.required && isSubmited))">
+                              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'last_name_is_required' | i18next }}.
+                              </p>
+                              <p class="validation-msg"
+                              *ngIf="((createCandidates.controls.lastname.touched && (createCandidates.controls['lastname'].errors?.pattern || nameError[2])) || ((createCandidates.controls['lastname'].errors?.pattern || nameError[2]) && isSubmited))">
+                              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'please_enter_only_characters' | i18next }}
+                              </p>
+                              <p class="validation-msg"
+                              *ngIf="((createCandidates.controls.lastname.touched && createCandidates.controls['lastname'].errors?.minlength) || (createCandidates.controls['lastname'].errors?.minlength && isSubmited))">
+                              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'enter_minimum' | i18next }} 1 {{ 'characters' | i18next }} </p>
+                          </div>
+                          <div class="form-group" *ngIf="!getPrefixSuffixFlag()">
+                            <label>{{ 'suffix' | i18next }} </label>
+                            <ng-select  placeholder="{{ 'select' | i18next }}" [searchable]="false"
+                              formControlName="suffix">
+                              <ng-option [value]="''">{{ 'select' | i18next }}</ng-option>
+                              <ng-option [value]="'Jr'">{{ 'jr' | i18next }}</ng-option>
+                              <ng-option [value]="'Sr'">{{ 'sr' | i18next }}</ng-option>
+                              <ng-option [value]="'III'">{{ 'iii' | i18next }}</ng-option>
+                              <ng-option [value]="'IV'">{{ 'iv' | i18next }}</ng-option>
+                              <ng-option [value]="'V'">{{ 'v' | i18next }}</ng-option>
+                            </ng-select>
+                          </div>
+                        </div>
+                        <div class="form-group-row">
+                          <div class="form-group position-relative">
+                            <label>{{ 'date_of_birth' | i18next }} <span class="require" *ngIf="isDobRequired">*</span></label>
+                            <app-dob-calendar formControlName="dob" [isNotValid]="((createCandidates.controls.dob.touched && createCandidates.controls['dob'].errors) || (createCandidates.controls['dob'].errors && isSubmited))" (dobChange)="updatedDate($event)">
+                            </app-dob-calendar>
+                            <!-- <svms-datepicker [inputdateFormat]="'MM/DD'" [placeholder]="'MM/DD'|i18next" [readonly]="false" id="date1"
+                              formControlName="dob" [options]="options" I18n [customYear]="defaultDOBYear"
+                              [ngClass]="{'error':createCandidates.controls['dob'].invalid && (createCandidates.controls['dob'].dirty || createCandidates.controls['dob'].touched || isSubmited )}">
+                            </svms-datepicker> -->
+                            <p class="validation-msg"
+                              *ngIf="((createCandidates.controls.dob.touched && createCandidates.controls['dob'].errors) || (createCandidates.controls['dob'].errors && isSubmited))">
+                              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                              {{ 'date_of_birth_is_required' | i18next }}.
+                            </p>
+                          </div>
+                          <div class="form-group">
+                            <label>{{ 'country' | i18next }} <span class="require" *ngIf="isCountryRequired">*</span></label>
+                            <div class="mr-8 position-relative search-candidate">
+                              <ng-select bindLabel="name" [clearable]="true" placeholder="{{ 'search_country' | i18next }}" ngDefaultControl formControlName="country" (change)="setCountry('primary')" (clear)="clearCountry()"
+                              [ngClass]="{'error':((createCandidates.controls.country.touched && createCandidates.controls['country'].errors) || (createCandidates.controls['country'].errors && isSubmited))}"
+                              >
+                              <ng-option *ngFor="let country of allCountryList" [value]="country.name">{{country.name|i18next}}</ng-option>
+                            </ng-select>
+                            <div class="position-absolute search-cand">
+                              <icon name="search" size="20px" type="material"
+                                  class="d-flex" cuClass="d-flex"></icon>
+                            </div>
+                            </div>
+                            <p class="validation-msg"
+                            *ngIf="((createCandidates.controls.country.touched && createCandidates.controls['country'].errors) || (createCandidates.controls['country'].errors && isSubmited))">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'country_is_required' | i18next }}.
+                            </p>
+                          </div>
+                          <div class="form-group" *ngIf="isStateIdVisible">
+                            <div class="d-flex">
+                              <label>{{'state/national_id' | i18next}} ({{'last'|i18next}} 3 {{'digits'|i18next}}) <span class="require">*</span> </label>
+                            </div>
+                            <input type="text" class="form-control" [ngClass]="{'error':createCandidates.controls['stateid'].invalid && (createCandidates.controls['stateid'].dirty || createCandidates.controls['stateid'].touched || isSubmited )}"  placeholder="{{ 'enter_state/national_id' | i18next }}" formControlName="stateid">
+
+                            <p class="validation-msg"
+                            *ngIf="((createCandidates.controls.stateid.touched && createCandidates.controls['stateid'].errors?.required) || (createCandidates.controls['stateid'].errors?.required && isSubmited))">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'please_enter_state/national_id' | i18next }}.</p>
+                            <p class="validation-msg"
+                            *ngIf="((createCandidates.controls.stateid.touched && createCandidates.controls['stateid'].errors?.minlength) || (createCandidates.controls['stateid'].errors?.minlength && isSubmited))">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'enter_minimum' | i18next }} 3 {{ 'digits' | i18next }} </p>
+                            <p class="validation-msg"
+                            *ngIf="((createCandidates.controls.stateid.touched && createCandidates.controls['stateid'].errors?.pattern) || (createCandidates.controls['stateid'].errors?.pattern && isSubmited))">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>{{ 'enter_numeric_value' | i18next }}</p>
+                            <p class="validation-msg"
+                            *ngIf="((createCandidates.controls.stateid.touched && createCandidates.controls['stateid'].errors?.maxlength) || (createCandidates.controls['stateid'].errors?.maxlength && isSubmited))">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'enter_maximum' | i18next }} 3 {{ 'digits' | i18next }} </p>
+                          </div>
+
+                          <div class="form-group" *ngIf="!isVendor">
+                            <label I18n>{{ 'vendor' | i18next }}&nbsp;<span class="require">*</span></label>
+                            <div class="mr-8 position-relative search-candidate">
+                              <ng-select [loading]='vendorLoading' loadingText='Loading....' [typeahead]="input$" formControlName="vendor_id"
+                                placeholder="{{ 'search_vendor' | i18next }}"
+                                [ngClass]="{'error':createCandidates.controls['vendor_id'].invalid && (createCandidates.controls['vendor_id'].dirty || createCandidates.controls['vendor_id'].touched || isSubmited )}"
+                                (scrollToEnd)="getVendorAssociatedJob()">
+                                <ng-option [value]="v.id" *ngFor="let v of vendorListFilter">{{v?.name}}</ng-option>
+                              </ng-select>
+                            <div class="position-absolute search-cand">
+                              <icon name="search" size="20px" type="material"
+                                  class="d-flex" cuClass="d-flex"></icon>
+                          </div>
+                            </div>
+
+                            <p class="validation-msg"
+                            *ngIf="((createCandidates.controls.vendor_id.touched && createCandidates.controls['vendor_id'].errors) || (createCandidates.controls['vendor_id'].errors && isSubmited))">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'vendor_is_required' | i18next }}.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-left mt-32">
+                      <div class="contact-infos">
+                        <h4 class="section-heading font-weight-medium  mb-32">{{ 'contact_info' | i18next }}</h4>
+                        <div class="form-group-row no-block">
+                          <div class="form-group">
+                            <label>{{ 'email_address' | i18next }} ({{ 'primary' | i18next }}) <span class="require">*</span></label>
+                            <div class="d-flex position-relative">
+                              <icon class="icon-bg d-flex" size="16px" name="mail_outline" type="material"></icon>
+                              <input type="email" multiple  [ngClass]="{'error':createCandidates.controls['email'].invalid && (createCandidates.controls['email'].dirty || createCandidates.controls['email'].touched || isSubmited )}" [pattern]="emailvalidation"  placeholder="{{ 'enter_primary_email_address' | i18next }}" class="form-control remove-radius"
+                              formControlName="email">
+
+                              <icon class="field-info-icon" theme="outlined" name="help_outline" type="material" size="16px"
+                                tooltip="{{'primary_email_is_used_as_your_main_email_' | i18next}} {{'for_creating_account_&_communication' | i18next}}"
+                                placement="right" delay="100"></icon>
+
+                            </div>
+                            <p class="validation-msg"
+                              *ngIf="((createCandidates.controls.email.touched && createCandidates.controls['email'].errors) || (isSubmited && createCandidates.controls['email'].errors))">
+                              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'invalid_email_format' | i18next }}.
+                              </p>
+                          </div>
+                          <button class="btn small btn-outine rounded-circle btn-add-secondary" (click)="addSecondaryEmail()" tooltip="{{ 'add_secondary_email' | i18next }}" placement="right" delay="100" [disabled]="secondaryemail">
+                            <icon class="d-flex" size="16px" name="add" type="material"></icon>
+                          </button>
+                        </div>
+                        <div class="form-group-row no-block" *ngIf="secondaryemail">
+                          <div class="form-group">
+                            <label>{{ 'email_address' | i18next }} ({{ 'secondary' | i18next }})</label>
+                            <div class="d-flex position-relative">
+                              <icon class="icon-bg d-flex" size="16px" name="mail_outline" type="material"></icon>
+                              <input type="email" placeholder="{{ 'enter_secondary_email_address' | i18next }}" class="form-control remove-radius"
+                              formControlName="secondaryemail"  [ngClass]="{'error':createCandidates.controls['secondaryemail'].invalid && (createCandidates.controls['secondaryemail'].dirty || createCandidates.controls['secondaryemail'].touched || isSubmited )}">
+                              <icon class="field-info-icon" theme="outlined" name="help_outline" type="material" size="16px" tooltip="{{ 'secondary_email_address' | i18next }}" placement="right" delay="100"></icon>
+                            </div>
+                            <p class="validation-msg"
+                            *ngIf="((createCandidates.controls.secondaryemail.touched && createCandidates.controls['secondaryemail'].errors) || (isSubmited && createCandidates.controls['secondaryemail'].errors))">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'invalid_email_format' | i18next }}.
+                            </p>
+                          </div>
+                          <button class="btn small btn-outine rounded-circle btn-add-secondary" (click)="deleteSecondaryEmail()" tooltip="{{ 'remove_secondary_email' | i18next }}" placement="right" delay="100">
+                            <icon class="d-flex" size="16px" name="remove" type="material"></icon>
+                          </button>
+                        </div>
+                        <div class="form-group-row no-block">
+                          <div class="form-group">
+                            <label>{{ 'phone_number' | i18next }} ({{ 'primary' | i18next }}) <span class="require" *ngIf="isPhoneNoRequired">*</span></label>
+                            <div class="d-flex align-items-center country-searchable position-relative">
+                              <ng-select [loading]='countryLoading' loadingText='Loading....' [searchable]="true" [clearable]="false"
+                                [(ngModel)]="createCandidates.value.phoneFormat" ngDefaultControl formControlName="phoneFormat"
+                                (change)="phoneLengthValidation()">
+                                <ng-option *ngFor="let country of allCountryList" [value]="country.iso_code_2">
+                                  <div class="d-flex" [attr.title]="country?.name">
+                                  <img src="../../../assets/images/flag/{{country.iso_code_2.toLowerCase()}}.png" width="20px" class="mr-4" />
+                                  <span>+{{country.isd_code}}</span>
+                                </div>
+                                </ng-option>
+                              </ng-select>
+                              <input type="number" [pattern]="mobNumberPattern" formControlName="phone"
+                                [ngClass]="{'error':createCandidates.controls['phone'].invalid && (createCandidates.controls['phone'].dirty || createCandidates.controls['phone'].touched || isSubmited)}"
+                                class="form-control remove-radius" placeholder="{{ 'enter_primary_phone_number' | i18next }}" (keypress)="keyPressNumbers($event)">
+                              <icon class="field-info-icon" theme="outlined" name="help_outline" type="material" size="16px"
+                                tooltip="{{ 'primary_phone_number' | i18next }}" placement="right" delay="100"></icon>
+                            </div>
+                            <p *ngIf="((createCandidates.get('phone').touched && (createCandidates.get('phone').errors?.pattern || createCandidates.get('phone').invalid)) || (isSubmited && (createCandidates.get('phone').errors?.pattern || createCandidates.get('phone').invalid) ))"
+                              class="validation-msg">
+                              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                              {{ 'invalid_phone_number_format' | i18next }}.
+                            </p>
+
+                          </div>
+                          <button class="btn small btn-outine rounded-circle btn-add-secondary" (click)="addSecondaryPhone()"
+                            tooltip="Add Secondary Phone Number" placement="right" delay="100" [disabled]="secondaryphone">
+                            <icon class="d-flex" size="16px" name="add" type="material"></icon>
+                          </button>
+                        </div>
+                        <div class="form-group-row no-block" *ngIf="secondaryphone">
+                          <div class="form-group">
+                            <label>{{ 'phone_number' | i18next }} ({{ 'secondary' | i18next }})</label>
+                            <div class="d-flex align-items-center country-searchable position-relative">
+                              <ng-select [loading] = 'countryLoading' loadingText = 'Loading....' [searchable]="true" [clearable]="false" [(ngModel)]="createCandidates.value.secondary_phoneFormat" ngDefaultControl (change)="setCountry('secondary')" formControlName="secondary_phoneFormat">
+                                <ng-option *ngFor="let country of allCountryList" [value]="country.iso_code_2">
+                                  <img src="../../../assets/images/flag/{{country.iso_code_2.toLowerCase()}}.png" width="20px" class="mr-4" />
+                                  <span>+{{country.isd_code}}</span>
+                                </ng-option>
+                              </ng-select>
+                              <input type="number" [pattern]="mobNumberPattern" class="form-control  remove-radius" placeholder="{{ 'enter_secondary_phone_number' | i18next }}"
+                                formControlName="phonesecondary" >
+                                <icon class="field-info-icon" theme="outlined" name="help_outline" type="material" size="16px" tooltip="{{ 'secondary_phone_number' | i18next }}" placement="right" delay="100"></icon>
+                            </div>
+                            <p *ngIf="(
+                            (createCandidates.get('phonesecondary').touched &&
+                                    (createCandidates.get('phonesecondary').errors?.pattern || createCandidates.get('phonesecondary').errors?.required || createCandidates.get('phonesecondary').invalid)) || (isSubmited && (createCandidates.get('phonesecondary').errors?.pattern || createCandidates.get('phonesecondary').invalid) ))
+                                  " class="validation-msg">
+                              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                              {{ 'invalid_phone_number_format' | i18next }}.
+                            </p>
+                          </div>
+                          <button class="btn small btn-outine rounded-circle btn-add-secondary" (click)="deleteSecondaryPhone()" tooltip="{{ 'remove_secondary_email' | i18next }}" placement="right" delay="100">
+                            <icon class="d-flex" size="16px" name="remove" type="material"></icon>
+                          </button>
+                        </div>
+                        <div class="form-group-row no-block">
+                          <div class="form-group">
+                            <label>{{ 'address' | i18next }} ({{ 'primary' | i18next }})<span class="require"  *ngIf="isCandidateAddress">*</span></label>
+                            <div class="d-flex position-relative">
+                              <icon class="icon-bg d-flex" size="16px" theme="outlined" name="home" type="material"></icon>
+                              <search-address class="address-no-radius"  [ngClass]="{'error':createCandidates.controls['address'].invalid && (createCandidates.controls['address'].dirty || createCandidates.controls['address'].touched || isSubmited)}"  [adressType]="'geocode'" [respType]="addressRespType" (customAddress)="getCustomAddress($event)" (setAddress)="getAddress($event)" [country]="countryShortName" id="addressField" formControlName="address" #candidateAddress>
+                              </search-address>
+                              <icon class="field-info-icon" theme="outlined" name="help_outline" type="material" size="16px" tooltip="{{ 'primary_address' | i18next }}" placement="right" delay="100"></icon>
+                            </div>
+
+                            <p class="validation-msg"
+                            *ngIf="((createCandidates.controls.address.touched && createCandidates.controls['address'].errors) || (isSubmited && createCandidates.controls['address'].errors))">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'invalid_address_format' | i18next }}.</p>
+                          </div>
+                          <button class="btn small btn-outine rounded-circle btn-add-secondary" (click)="addSecondaryAddress()" tooltip="{{ 'add_secondary_address' | i18next }}" placement="right" delay="100" [disabled]="secondaryaddress">
+                            <icon class="d-flex" size="16px" name="add" type="material"></icon>
+                          </button>
+                        </div>
+                        <div class="form-group-row">
+                          <div class="form-group">
+                            <label>{{ 'city' | i18next }} <span class="require" *ngIf="isCandidateAddress">*</span></label>
+                            <input formControlName="city_name_primary" type="text" class="form-control" placeholder="{{ 'city' | i18next }}"
+                              [ngClass]="{'error':createCandidates.controls['city_name_primary'].invalid && (createCandidates.controls['city_name_primary'].dirty || createCandidates.controls['city_name_primary'].touched || isSubmited)}">
+                            <p class="validation-msg"
+                              *ngIf="((createCandidates.controls.city_name_primary.touched && createCandidates.controls['city_name_primary'].errors) || (isSubmited && createCandidates.controls['city_name_primary'].errors))">
+                              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'city_is_required' | i18next }}.
+                            </p>
+                          </div>
+                          <div class="form-group">
+                            <label>{{ 'county' | i18next }}</label>
+                            <input formControlName="county_name_primary" type="text" class="form-control" placeholder="{{ 'county' | i18next }}">
+                          </div>
+                          <div class="form-group">
+                            <label>{{ 'state' | i18next }} <span class="require" *ngIf="isCandidateAddress">*</span></label>
+                            <input formControlName="state_name_primary" type="text" class="form-control" placeholder="{{ 'state' | i18next }}"
+                              [ngClass]="{'error':createCandidates.controls['state_name_primary'].invalid && (createCandidates.controls['state_name_primary'].dirty || createCandidates.controls['state_name_primary'].touched || isSubmited)}">
+                            <p class="validation-msg"
+                              *ngIf="((createCandidates.controls.state_name_primary.touched && createCandidates.controls['state_name_primary'].errors) || (isSubmited && createCandidates.controls['state_name_primary'].errors))">
+                              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'state_is_required' | i18next }}.
+                            </p>
+                          </div>
+                          <div class="form-group">
+                            <label>{{ 'country' | i18next }}</label>
+                            <input formControlName="country_name_primary" type="text" class="form-control" placeholder="{{ 'country' | i18next }}">
+                          </div>
+                          <div class="form-group">
+                            <label>{{ 'zip_code' | i18next }} <span class="require" *ngIf="isCandidateAddress">*</span></label>
+                            <input formControlName="pinCode_primary" type="text" class="form-control" placeholder="{{ 'zip_code' | i18next }}"
+                              [ngClass]="{'error':createCandidates.controls['pinCode_primary'].invalid && (createCandidates.controls['pinCode_primary'].dirty || createCandidates.controls['pinCode_primary'].touched || isSubmited)}">
+                            <p class="validation-msg"
+                              *ngIf="((createCandidates.controls.pinCode_primary.touched && createCandidates.controls['pinCode_primary'].errors) || (isSubmited && createCandidates.controls['pinCode_primary'].errors))">
+                              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'zip_code_is_required' | i18next }}.
+                            </p>
+                          </div>
+                        </div>
+                        <div class="form-group-row no-block" *ngIf="secondaryaddress">
+                          <div class="form-group">
+                            <label>{{ 'address' | i18next }} ({{ 'secondary' | i18next }})</label>
+                            <div class="d-flex position-relative">
+                              <icon class="icon-bg d-flex" size="16px" theme="outlined" name="home" type="material"></icon>
+                              <search-address  [respType]="addressRespType" [adressType]="'geocode'" #address2 formControlName="addresssecondary" [country]="countryShortName" (customAddress)="getCustomSecondaryAddress($event)" (setAddress)="getSecondaryAddress($event)" class="address-no-radius">
+                              </search-address>
+                              <icon class="field-info-icon" theme="outlined" name="help_outline" type="material" size="16px" tooltip="{{ 'secondary_address' | i18next }}" placement="right" delay="100"></icon>
+                            </div>
+                          </div>
+                          <button class="btn small btn-outine rounded-circle btn-add-secondary" (click)="deleteSecondaryAddress()" tooltip="Remove Secondary Address" placement="right" delay="100">
+                            <icon class="d-flex" size="16px" name="remove" type="material"></icon>
+                          </button>
+                        </div>
+                        <div class="form-group-row" *ngIf="secondaryaddress">
+                          <div class="form-group">
+                            <label>{{ 'city' | i18next }}</label>
+                            <input formControlName="city_name_secondary" type="text" class="form-control" placeholder="{{ 'city' | i18next }}">
+                          </div>
+                          <div class="form-group">
+                            <label>{{ 'county' | i18next }}</label>
+                            <input formControlName="county_name_secondary" type="text" class="form-control" placeholder="{{ 'county' | i18next }}">
+                          </div>
+                          <div class="form-group">
+                            <label>{{ 'state' | i18next }}</label>
+                            <input formControlName="state_name_secondary" type="text" class="form-control" placeholder="{{ 'state' | i18next }}">
+                          </div>
+                          <div class="form-group">
+                            <label>{{ 'country' | i18next }}</label>
+                            <input formControlName="country_name_secondary" type="text" class="form-control" placeholder="{{ 'country' | i18next }}">
+                          </div>
+                          <div class="form-group">
+                            <label>{{ 'zip_code' | i18next }}</label>
+                            <input formControlName="pinCode_secondary" type="text" class="form-control" placeholder="{{ 'zip_code' | i18next }}">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-left mt-32">
+                      <app-duplicate-candidates [duplicateCandidates]="duplicateCandidates" [currentProgram]="currentProgram"
+                        [showDuplicateCandidateLoader]="showDuplicateCandidateLoader" (viewProfileAction)="viewProfile($event)"></app-duplicate-candidates>
+                    </div>
+                    <div class="text-left mt-32">
+                      <div class="qualification">
+                        <div class="d-flex mb-32 column-direction">
+                          <h4 class="section-heading font-weight-medium  mr-24">{{ 'qualifications' | i18next }}</h4>
+                          <nav class="qualification-dropdown">
+                              <p class="d-flex align-items-center"><span class="mr-12">{{ 'add_qualification_blocks' | i18next }}</span> <icon class="d-flex" size="16px" name="keyboard_arrow_down" type="material"></icon></p>
+                            <ul>
+                              <li *ngIf="certificationTypeId">
+                                <div class="checkbox-wrapper d-inline-block">
+                                  <label class="checkbox-container">
+                                    <input type="checkbox" name="certifications" [(ngModel)]="certifications"  [ngModelOptions]="{standalone: true}" (click)="openCertifications()">
+                                    <span class="checkmark"></span>
+                                    <span class="label">{{ 'certifications' | i18next }}</span>
+                                  </label>
+                                </div>
+                              </li>
+                              <li *ngIf="credentialTypeId">
+                                <div class="checkbox-wrapper d-inline-block">
+                                  <label class="checkbox-container">
+                                    <input type="checkbox" name="credentials" [(ngModel)]="credentials"  [ngModelOptions]="{standalone: true}" (click)="openCredentials()">
+                                    <span class="checkmark"></span>
+                                    <span class="label">{{ 'credentials' | i18next }}</span>
+                                  </label>
+                                </div>
+                              </li>
+                              <li *ngIf="specialityTypeId">
+                                <div class="checkbox-wrapper d-inline-block">
+                                  <label class="checkbox-container">
+                                    <input type="checkbox" name="specialization" [(ngModel)]="specialization"  [ngModelOptions]="{standalone: true}" (click)="openSpecialization()">
+                                    <span class="checkmark"></span>
+                                    <span class="label">{{ 'specialization' | i18next }}</span>
+                                  </label>
+                                </div>
+                              </li>
+                              <li *ngIf="vaccineTypeId">
+                                <div class="checkbox-wrapper d-inline-block">
+                                  <label class="checkbox-container">
+                                    <input type="checkbox" name="vaccination" [(ngModel)]="vaccination"  [ngModelOptions]="{standalone: true}" (click)="openVaccination()">
+                                    <span class="checkmark"></span>
+                                    <span class="label">{{ 'vaccination' | i18next }}</span>
+                                  </label>
+                                </div>
+                              </li>
+                              <li *ngIf="skillTypeId">
+                                <div class="checkbox-wrapper d-inline-block">
+                                  <label class="checkbox-container">
+                                    <input type="checkbox" name="skills" [(ngModel)]="skills"  [ngModelOptions]="{standalone: true}" (click)="openSkills()">
+                                    <span class="checkmark"></span>
+                                    <span class="label">{{ 'skills' | i18next }}</span>
+                                  </label>
+                                </div>
+                              </li>
+                              <li *ngIf="educationTypeId">
+                                <div class="checkbox-wrapper d-inline-block">
+                                  <label class="checkbox-container">
+                                    <input type="checkbox" name="education" [(ngModel)]="education"  [ngModelOptions]="{standalone: true}" (click)="openEducation()">
+                                    <span class="checkmark"></span>
+                                    <span class="label">{{ 'education' | i18next }}</span>
+                                  </label>
+                                </div>
+                              </li>
+                            </ul>
+                          </nav>
+                        </div>
+                        <div class="q-item p-16" *ngIf="certifications && certificationTypeId">
+                          <div class="d-flex justify-content-between">
+                            <div class="d-flex">
+                              <h4 class="font-weight-medium mb-0 mr-16">{{ 'certifications' | i18next }}</h4>
+                              <button class="btn small btn-outine rounded-circle btn-add-item" (click)="addCertificate($event)">
+                                <icon class="d-flex" size="16px" name="add" type="material"></icon>
+                              </button>
+                            </div>
+                            <button class="close-item" (click)="closeQualification('certification')">
+                              <icon size="14px" name="close" type="material" cuClass="icon-cu"></icon>
+                            </button>
+                          </div>
+                          <div class="delete-confirmation" *ngIf="certificationDelete">
+                            <div class="d-flex justify-content-between">
+                              <p>{{ 'are_you_sure_you_want_to_delete_the_entire_certification_block' | i18next }}?</p>
+                              <div>
+                                <button class="Yes" (click)="confirmDelete('certification')">{{ 'yes' | i18next }}</button>
+                                <button class="no" (click)="removeDialog('certification')">{{ 'no' | i18next }}</button>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="qualif-block-set">
+                          <ul class="item-list" *ngFor="let certi of certificationsArr, let i = index">
+                            <li class="clearfix position-relative  mb-12">
+                              <a class="edit-item mr-24" (click)="editPanel('CERTIFICATION',certi, i)" *ngIf="!viewMode">
+                                <icon class="d-flex mr-8" size="24px" name="edit" type="material" cuClass="d-flex"></icon>
+                              </a>
+                              <a (click)="deleteSingleQualification('CERTIFICATION',i)" class="edit-item remove-item" *ngIf="!viewMode">
+                                <icon class="d-flex" size="24px" name="delete_forever" type="material" cuClass="d-flex"></icon>
+                              </a>
+                              <figure class="bullet float-left text-center d-flex mt-12">
+                                <img src="/assets/images/badge.svg" alt="">
+                              </figure>
+                              <div class="item-description float-right pt-12">
+                                <h4 *ngIf="certi?.certification_name">{{certi?.certification_name}}</h4>
+                                <p *ngIf="certi?.authority">{{certi?.authority}}</p>
+                                <p  *ngIf="certi?.initial_date">Issued {{certi.initial_date | localDateFormat:'dd MMM y'}} .
+                                  {{certi.expiration_date ? 'Expiration Date ' + (certi.expiration_date | localDateFormat:'dd MMM y') : 'No Expiration Date'}}
+                                </p>
+                                <p class="mt-8" *ngIf="certi?.certification_id">{{ 'certificate_id' | i18next }} <a href="javascript:void()">{{certi.certification_id}}</a></p>
+                                <div *ngIf="certi.files">
+
+                                  <div *ngFor="let file of certi.files, let i = index">
+
+                                    <figure class="item-img mt-16 float-left mr-16" >
+
+                                        <img  *ngIf="file?.raw && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')" [src]="file?.raw " (click)="openFile(file)" alt="">
+
+                                        <img  *ngIf="file?.url && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')" [src]="file?.url" alt="" (click)="openFile(file)">
+
+                                        <img *ngIf="checkValidFileType(file.filename) == 'pdf'" src="/assets/images/pdf.svg" alt="" (click)="openFile(file)">
+
+                                        <img *ngIf="checkValidFileType(file.filename) == 'docx' || checkValidFileType(file.filename) == 'doc' " src="/assets/images/word.svg" alt="" (click)="openFile(file)">
+
+                                      <figcaption>{{file?.filename}}</figcaption>
+                                    </figure>
+
+                                  </div>
+
+                                </div>
+
+                              </div>
+                            </li>
+                          </ul>
+                          </div>
+                          <div class="no-document text-center mb-32" *ngIf="!certificationsArr.length">
+                            <img src="/assets/images/certifications.svg" alt="">
+                            <p class="font-weight-medium">{{ 'you_have_not_added_any_certifications' | i18next }}</p>
+                            <p class="small mb-8">{{ 'you_can_add_your_certifications_here' | i18next }}</p>
+                          </div>
+                        </div>
+                        <div class="q-item p-16" *ngIf="credentials && credentialTypeId">
+                          <div class="d-flex justify-content-between">
+                            <div class="d-flex">
+                              <h4 class="font-weight-medium mb-0 mr-16">{{ 'credentials' | i18next }}</h4>
+                              <button class="btn small btn-outine rounded-circle btn-add-item" (click)="addCredentials($event)">
+                                <icon class="d-flex" size="16px" name="add" type="material"></icon>
+                              </button>
+                            </div>
+                            <button class="close-item" (click)="closeQualification('credentials')">
+                              <icon size="14px" name="close" type="material" cuClass="icon-cu"></icon>
+                            </button>
+                          </div>
+                          <div class="delete-confirmation" *ngIf="credentialsDelete">
+                            <div class="d-flex justify-content-between">
+                              <p>{{ 'are_you_sure_you_want_to_delete_the_entire_credentials_block' | i18next }}?</p>
+                              <div>
+                                <button class="Yes" (click)="confirmDelete('credentials')">{{ 'yes' | i18next }}</button>
+                                <button class="no" (click)="removeDialog('credentials')">{{ 'no' | i18next }}</button>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="qualif-block-set">
+                          <ul class="item-list" *ngFor="let cred of credentialsArr, let i = index">
+                            <li class="clearfix position-relative  mb-12">
+                              <a (click)="editPanel('CREDENTIAL', cred,i)" class="edit-item mr-24" *ngIf="!viewMode">
+                                <icon class="d-flex mr-8" size="24px" name="edit" type="material" cuClass="d-flex"></icon>
+                              </a>
+                              <a (click)="deleteSingleQualification('CREDENTIALS',i)" class="edit-item remove-item" *ngIf="!viewMode">
+                                <icon class="d-flex" size="24px" name="delete_forever" type="material" cuClass="d-flex"></icon>
+                              </a>
+                              <figure class="bullet float-left text-center d-flex mt-12">
+                                <img src="/assets/images/verified.svg" alt="">
+                              </figure>
+                              <div class="item-description float-right pt-12">
+                                <h4 *ngIf="cred?.credential_name">{{cred.credential_name}}</h4>
+                                <p *ngIf="cred?.issuing_authority" >{{cred?.issuing_authority}} Issued {{cred.initial_issue_date | localDateFormat:'dd MMM y'}} .
+                                  {{cred.expiration_date ? 'Expiration Date ' + (cred.expiration_date | localDateFormat:'dd MMM y') : 'No Expiration Date'}}
+                                </p>
+                                <p  class="mt-8" *ngIf="cred?.credential_id">Credential ID <a class="text-underline"
+                                    href="javascript:void()">{{cred.credential_id}}</a></p>
+                                <div *ngFor="let file of cred.files, let i = index">
+                                  <figure class="item-img mt-16 float-left mr-16">
+                                    <img  *ngIf="file?.raw && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')" [src]="file?.raw " alt="">
+
+                                    <img  *ngIf="file?.url && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')" [src]="file?.url" alt="">
+
+                                    <img *ngIf="checkValidFileType(file.filename) == 'pdf'" src="/assets/images/pdf.svg" alt="">
+
+                                    <img *ngIf="checkValidFileType(file.filename) == 'docx' || checkValidFileType(file.filename) == 'doc' " src="/assets/images/word.svg" alt="">
+                                    <figcaption>{{file?.filename}}</figcaption>
+                                  </figure>
+                                </div>
+                              </div>
+                            </li>
+                          </ul>
+                          </div>
+                          <div class="no-document text-center mb-32" *ngIf="!credentialsArr.length">
+                            <img src="/assets/images/credentials.svg" alt="">
+                            <p class="font-weight-medium">{{ 'you_have_not_added_any_credentials' | i18next }}</p>
+                            <p class="small mb-8">{{ 'you_can_add_your_credentials_here' | i18next }}</p>
+                          </div>
+                        </div>
+                        <div class="q-item p-16" *ngIf="specialization && specialityTypeId">
+                          <div class="d-flex justify-content-between">
+                            <div class="d-flex">
+                              <h4 class="font-weight-medium mb-0 mr-16">{{ 'specialization' | i18next }}</h4>
+                              <button class="btn small btn-outine rounded-circle btn-add-item" (click)="addSpecialization($event)">
+                                <icon class="d-flex" size="16px" name="add" type="material"></icon>
+                              </button>
+                            </div>
+                            <button class="close-item" (click)="closeQualification('specialization')">
+                              <icon size="14px" name="close" type="material" cuClass="icon-cu"></icon>
+                            </button>
+                          </div>
+                          <div class="delete-confirmation" *ngIf="specializationDelete">
+                            <div class="d-flex justify-content-between">
+                              <p>{{ 'are_you_sure_you_want_to_delete_the_entire_spcialization_block' | i18next }}?</p>
+                              <div>
+                                <button class="Yes" (click)="confirmDelete('specialization')">{{ 'yes' | i18next }}</button>
+                                <button class="no" (click)="removeDialog('specialization')">{{ 'no' | i18next }}</button>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="qualif-block-set">
+                          <ul class="item-list" *ngFor="let speciality of specialityArr, let i = index">
+                            <li class="clearfix position-relative  mb-12">
+                              <a (click)="editPanel('SPECIALITY', speciality,i)" class="edit-item mr-24" *ngIf="!viewMode">
+                                <icon class="d-flex mr-8" size="24px" name="edit" type="material" cuClass="d-flex"></icon>
+                              </a>
+                              <a (click)="deleteSingleQualification('SPECIALIZATION',i)" class="edit-item remove-item" *ngIf="!viewMode">
+                                <icon class="d-flex" size="24px" name="delete_forever" type="material" cuClass="d-flex"></icon>
+                              </a>
+                              <figure class="bullet float-left text-center d-flex mt-12">
+                                <img src="/assets/images/emergency.svg" alt="">
+                              </figure>
+                              <div class="item-description float-right pt-12 full-width">
+                                <h4 *ngIf="speciality?.speciality_name">{{speciality.speciality_name}}</h4>
+                                <p *ngIf="speciality?.experience_level">{{speciality.experience_level}}</p>
+                                <p *ngIf="speciality?.description" class="mt-8">{{speciality.description}}
+                                </p>
+                                <div *ngFor="let file of speciality.files, let i = index">
+                                  <figure class="item-img mt-16 float-left mr-16">
+                                    <img  *ngIf="file?.raw && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')" [src]="file?.raw " alt="">
+
+                                    <img  *ngIf="file?.url && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')" [src]="file?.url" alt="">
+
+                                    <img *ngIf="checkValidFileType(file.filename) == 'pdf'" src="/assets/images/pdf.svg" alt="">
+
+                                    <img *ngIf="checkValidFileType(file.filename) == 'docx' || checkValidFileType(file.filename) == 'doc' " src="/assets/images/word.svg" alt="">
+                                    <figcaption>{{file?.filename}}</figcaption>
+                                  </figure>
+                                </div>
+                              </div>
+                            </li>
+                          </ul>
+                          </div>
+                          <div class="no-document text-center mb-32" *ngIf="!specialityArr.length">
+                            <img src="/assets/images/specialities.svg" alt="">
+                            <p class="font-weight-medium">{{ 'you_have_not_added_any_specialities' | i18next }}</p>
+                            <p class="small mb-8">{{ 'you_can_add_your_specialities_here' | i18next }}</p>
+                          </div>
+                        </div>
+                        <div class="q-item p-16" *ngIf="vaccination && vaccineTypeId">
+                          <div class="d-flex justify-content-between">
+                            <div class="d-flex">
+                              <h4 class="font-weight-medium mb-0 mr-16">{{ 'vaccination' | i18next }}</h4>
+                              <button class="btn small btn-outine rounded-circle btn-add-item" (click)="addVaccination($event)">
+                                <icon class="d-flex" size="16px" name="add" type="material"></icon>
+                              </button>
+                            </div>
+                            <button class="close-item" (click)="closeQualification('vaccination')">
+                              <icon size="14px" name="close" type="material" cuClass="icon-cu"></icon>
+                            </button>
+                          </div>
+                          <div class="delete-confirmation" *ngIf="vaccinationDelete">
+                            <div class="d-flex justify-content-between">
+                              <p>{{ 'are_you_sure_you_want_to_delete_the_entire_vaccination_block' | i18next }}?</p>
+                              <div>
+                                <button class="Yes" (click)="confirmDelete('vaccination')">{{ 'yes' | i18next }}</button>
+                                <button class="no" (click)="removeDialog('vaccination')">{{ 'no' | i18next }}</button>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="qualif-block-set">
+                          <ul class="item-list" *ngFor="let vaccine of vaccinationsArr, let i = index">
+                            <li class="clearfix position-relative  mb-12">
+                              <a (click)="editPanel('VACCINATION', vaccine,i)" class="edit-item mr-24" *ngIf="!viewMode">
+                                <icon class="d-flex mr-8" size="24px" name="edit" type="material" cuClass="d-flex"></icon>
+                              </a>
+                              <a (click)="deleteSingleQualification('VACCINATION',i)" class="edit-item remove-item" *ngIf="!viewMode">
+                                <icon class="d-flex" size="24px" name="delete_forever" type="material" cuClass="d-flex"></icon>
+                              </a>
+                              <figure class="bullet float-left text-center d-flex mt-12">
+                                <img src="/assets/images/vaccination.svg" alt="">
+                              </figure>
+                              <div class="item-description float-right pt-12 full-width">
+                                <h4 *ngIf="vaccine?.vaccine_name">{{vaccine.vaccine_name}}</h4>
+                                <p *ngIf="vaccine?.provider">{{vaccine.provider}}</p>
+                                <p *ngIf="vaccine?.vaccination_date">Issued {{vaccine.vaccination_date | localDateFormat:'dd MMM y'}} {{vaccine.expiration_date ? 'Expiration Date ' + (vaccine.expiration_date | localDateFormat:'dd MMM y') : 'No Expiration Date'}}
+                                </p>
+                                  <div *ngFor="let file of vaccine.files, let i = index">
+                                    <figure class="item-img mt-16 float-left mr-16">
+
+                                      <img  *ngIf="file?.raw && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')" [src]="file?.raw " alt="">
+
+                                      <img  *ngIf="file?.url && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')" [src]="file?.url" alt="">
+
+                                      <img *ngIf="checkValidFileType(file.filename) == 'pdf'" src="/assets/images/pdf.svg" alt="">
+
+                                      <img *ngIf="checkValidFileType(file.filename) == 'docx' || checkValidFileType(file.filename) == 'doc' " src="/assets/images/word.svg" alt="">
+                                      <figcaption>{{file.filename}}</figcaption>
+                                    </figure>
+                                  </div>
+                              </div>
+                            </li>
+                          </ul>
+                          </div>
+                          <div class="no-document text-center mb-32" *ngIf="!vaccinationsArr.length">
+                            <img src="/assets/images/vaccinations.svg" alt="">
+                            <p class="font-weight-medium">{{ 'you_have_not_added_any_vaccinations' | i18next }}</p>
+                            <p class="small mb-8">{{ 'you_can_add_your_vaccinations_here' | i18next }}</p>
+                          </div>
+                        </div>
+                        <div class="q-item p-16" *ngIf="skills && skillTypeId">
+                          <div class="d-flex justify-content-between">
+                            <div class="d-flex">
+                              <h4 class="font-weight-medium mb-0 mr-16">{{ 'skills' | i18next }}</h4>
+                              <button class="btn small btn-outine rounded-circle btn-add-item" (click)="addSkills($event)">
+                                <icon  class="d-flex" size="16px" name="add" type="material"></icon>
+                              </button>
+                            </div>
+                            <button class="close-item" (click)="closeQualification('skills')">
+                              <icon size="14px" name="close" type="material" cuClass="icon-cu"></icon>
+                            </button>
+                          </div>
+                          <div class="delete-confirmation" *ngIf="skillsDelete">
+                            <div class="d-flex justify-content-between">
+                              <p>{{ 'are_you_sure_you_want_to_delete_the_entire_skills_block' | i18next }}?</p>
+                              <div>
+                                <button class="Yes" (click)="confirmDelete('skills')">{{ 'yes' | i18next }}</button>
+                                <button class="no" (click)="removeDialog('skills')">{{ 'no' | i18next }}</button>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="qualif-block-set">
+                          <ul class="item-list" *ngFor="let skill of skillsArr, let i = index">
+                            <li class="clearfix position-relative  mb-12">
+                              <a (click)="editPanel('SKILL',skill,i)" class="edit-item mr-24" *ngIf="!viewMode">
+                                <icon class="d-flex mr-8" size="24px" name="edit" type="material" cuClass="d-flex"></icon>
+                              </a>
+                              <a (click)="deleteSingleQualification('SKILLS',i)" class="edit-item remove-item" *ngIf="!viewMode">
+                                <icon class="d-flex" size="24px" name="delete_forever" type="material" cuClass="d-flex"></icon>
+                              </a>
+                              <figure class="bullet float-left text-center d-flex mt-12">
+                                <img src="/assets/images/medicine.svg" alt="">
+                              </figure>
+                              <div class="item-description float-right pt-12 full-width">
+                                <h4 *ngIf="skill?.skill_name">{{skill.skill_name}}</h4>
+                                <p *ngIf="skill?.experience_level" >Experience : {{skill.experience_level}}</p>
+                                <p *ngIf="skill?.description"  class="mt-8">{{skill.description}}
+                                </p>
+                                <div *ngFor="let file of skill.files, let i = index">
+                                  <figure class="item-img mt-16 float-left mr-16">
+                                    <img  *ngIf="file?.raw && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')" [src]="file?.raw " alt="">
+
+                                    <img  *ngIf="file?.url && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')" [src]="file?.url" alt="">
+
+                                    <img *ngIf="checkValidFileType(file.filename) == 'pdf'" src="/assets/images/pdf.svg" alt="">
+
+                                    <img *ngIf="checkValidFileType(file.filename) == 'docx' || checkValidFileType(file.filename) == 'doc' " src="/assets/images/word.svg" alt="">
+                                    <figcaption>{{file?.filename}}</figcaption>
+                                  </figure>
+                                </div>
+                              </div>
+                            </li>
+                          </ul>
+                          </div>
+                          <div class="no-document text-center mb-32" *ngIf="!skillsArr.length">
+                            <img src="/assets/images/skills.svg" alt="">
+                            <p class="font-weight-medium">{{ 'you_have_not_added_any_skills' | i18next }}</p>
+                            <p class="small mb-8">{{ 'you_can_add_your_skills_here' | i18next }}</p>
+                          </div>
+                        </div>
+                        <div class="q-item p-16" *ngIf="education && educationTypeId ">
+                          <div class="d-flex justify-content-between">
+                            <div class="d-flex">
+                              <h4 class="font-weight-medium mb-0 mr-16">{{ 'education' | i18next }} <span class="require" *ngIf="isEducationRequired">*</span></h4>
+                              <button class="btn small btn-outine rounded-circle btn-add-item" (click)="addEducation($event)">
+                                <icon class="d-flex" size="16px" name="add" type="material"></icon>
+                              </button>
+                            </div>
+                            <button class="close-item" (click)="closeQualification('education')">
+                              <icon size="14px" name="close" type="material" cuClass="icon-cu"></icon>
+                            </button>
+                          </div>
+                          <div class="delete-confirmation" *ngIf="educationDelete">
+                            <div class="d-flex justify-content-between">
+                              <p>{{ 'are_you_sure_you_want_to_delete_the_entire_education_block' | i18next }}?</p>
+                              <div>
+                                <button class="Yes" (click)="confirmDelete('education')">{{ 'yes' | i18next }}</button>
+                                <button class="no" (click)="removeDialog('education')">{{ 'no' | i18next }}</button>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="qualif-block-set">
+                          <ul class="item-list" *ngFor="let educ of educationArr, let i = index">
+                            <li class="clearfix position-relative  mb-12">
+                              <a (click)="editPanel('EDUCATION', educ, i)" class="edit-item mr-24" *ngIf="!viewMode">
+                                <icon class="d-flex mr-8" size="24px" name="edit" type="material" cuClass="d-flex"></icon>
+                              </a>
+                              <a (click)="deleteSingleQualification('EDUCATION', i)" class="edit-item remove-item" *ngIf="!viewMode">
+                                <icon class="d-flex" size="24px" name="delete_forever" type="material" cuClass="d-flex"></icon>
+                              </a>
+                              <figure class="bullet float-left text-center d-flex mt-12">
+                                <img src="/assets/images/educations.svg" alt="">
+                              </figure>
+                              <div class="item-description float-right pt-12">
+                                <h4 *ngIf="educ?.education_name">{{educ.education_name}}</h4>
+                                <p>{{educ.institution}}</p>
+                                <p>{{educ.degree}}</p>
+                                <p class="mt-8">{{educ.start_date ? (educ.start_date | localDateFormat:'dd MMM y') : ''}}
+                                  {{educ.start_date && educ.end_date ? '-' : '' }}
+                                  {{educ.end_date ? (educ.end_date | localDateFormat:'dd MMM y') : ''}}</p>
+                                <div *ngFor="let file of educ.files, let i = index">
+                                  <figure class="item-img mt-16 float-left mr-16">
+                                    <img  *ngIf="file?.raw && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')" [src]="file?.raw " alt="">
+
+                                    <img  *ngIf="file?.url && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')" [src]="file?.url" alt="">
+
+                                    <img *ngIf="checkValidFileType(file.filename) == 'pdf'" src="/assets/images/pdf.svg" alt="">
+
+                                    <img *ngIf="checkValidFileType(file.filename) == 'docx' || checkValidFileType(file.filename) == 'doc' " src="/assets/images/word.svg" alt="">
+                                    <figcaption>{{file?.filename}}</figcaption>
+                                  </figure>
+                                </div>
+                              </div>
+                            </li>
+                          </ul>
+                          </div>
+                          <div class="no-document text-center mb-32" *ngIf="!educationArr.length">
+                            <img src="/assets/images/credentials.svg" alt="">
+                            <p class="font-weight-medium">{{ 'you_have_not_added_any_education' | i18next }}</p>
+                            <p class="small mb-8">{{ 'you_can_add_your_education_here' | i18next }}</p>
+                          </div>
+                        </div>
+                        <div class="q-item p-16 text-center" *ngIf="!education && !skills && !vaccination && !specialization && !credentials && !certifications">
+                          <img src="../../../assets/images/no-qualification.svg" alt="">
+                          <p class="font-weight-medium text-black mt-16">
+                            {{ 'you_are_not_adding_any_qualification_blocks_yet' | i18next }} !
+                          </p>
+                          <p class="small">
+                            {{ 'here_you_can_add_the_additional_qualifications_blocks_like_credentials' | i18next }}, {{ 'specialities_etc' | i18next }}.
+                          </p>
+                        </div>
+                        <p class="validation-msg" *ngIf="((educationArr?.length == 0 && isSubmited)|| isEducationRemoved) && isEducationRequired">
+                          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                          {{ 'education_is_required' | i18next }}.
+                        </p>
+                      </div>
+                    </div>
+                    <!--  custom fields Section -->
+                     <div class="text-left mt-32">
+                      <app-custom-fields moduleName="CANDIDATES" (isCustomFieldsFormValid)="setCustomFieldsFormValue($event)"
+                        (customFieldUpdated)="customFieldUpdated($event)" [custom_fields]="candidateData?.custom_fields"
+                        [showLabel]="false" [uploadS3RefName]="'candidates'" [isDisabled]="false" [isCreate]="!candidate_id" #customfields ></app-custom-fields>
+
+                        <p class="validation-msg" *ngIf="(!isCustomFieldsFormValid && customfields.customFieldsForm.touched) || (isSubmited && !isCustomFieldsFormValid)">
+                          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                          {{ 'custom_fields_are_required' | i18next }}.
+                        </p>
+                     </div>
+                  </div>
+                </div>
+
+            </section>
+            <section class="advanced-profile" *ngIf="advancedProfile">
+              <div class="p-32 pt-0">
+                <div class="social-media mt-12">
+                  <div class="add-new position-relative">
+                    <button class="btn small btn-outine" type="buttn" (click)="addSocialLink()">
+                      <icon size="20px" name="add" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+                      {{ 'add_new' | i18next }}
+                    </button>
+                  </div>
+                  <h4 class="section-heading d-flex mb-24 pb-0  font-weight-medium">
+                    {{ 'social_media' | i18next }}
+                  </h4>
+                  <div class="form-group-row social-app-row" *ngFor="let social of socialProfileArr, let i = index">
+                    <div class="form-group mr-0 social-application">
+                      <label>{{ 'application' | i18next }}</label>
+
+
+                      <ng-select [searchable]="false"    placeholder="{{ 'select_application' | i18next }}"
+                        ngDefaultControl class="no-right-border" [ngModelOptions]="{standalone: true}"
+                        [(ngModel)]="social.type" (change)="selectSocialApp(social)">
+
+                        <ng-option [value]="link.type" [disabled]="link.disabled"  *ngFor="let link  of social_links" >
+                          <img [src]="link.image_path" class="mr-12">
+                          <span>{{link.title}}</span>
+                        </ng-option>
+                      </ng-select>
+                    </div>
+                    <div class="form-group">
+                      <label>{{ 'enter_application_link' | i18next }}</label>
+                      <input type="text"
+                        class="form-control no-left-border"
+                        [ngModelOptions]="{standalone: true}"
+                        name="sociallink{{i}}"
+                        placeholder="{{ 'enter_your_profile_url' | i18next }}" [(ngModel)]="social.link"
+                        (keyup)="checkSocialApp(social)" hyperlink #applicationLink ="ngModel">
+                      <span class="validation-msg" *ngIf="applicationLink.invalid && applicationLink.touched && applicationLink.dirty" >
+                        {{ 'please_enter_valid_link' | i18next }}
+                      </span>
+                    </div>
+                    <div class="form-group add-remove">
+                      <label>&nbsp;</label>
+                      <a (click)="deleteSocialLink(i)" class="add-link">
+                        <icon class="remove-icon" size="24px" name="remove_circle" type="material" cuClass="d-flex">
+                        </icon>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div class="professional mt-12">
+                  <h4 class="section-heading d-flex mb-24 font-weight-medium">
+                    {{ 'professional_info' | i18next }}
+                  </h4>
+
+                  <div class="form-group-row">
+                    <div class="form-group">
+                      <label>{{ 'job_category' | i18next }}</label>
+                      <div class="has-info-icon select-max-width position-relative">
+                        <icon class="on-select" theme="outlined" name="help_outline" type="material" size="16px" tooltip="Job Category" placement="right" delay="100"></icon>
+                        <ng-select [loading]='jobLoading' loadingText = "{{'Loading....' | i18next}}" formControlName="category"  (search)="searchCategoryFromTitleDropdown($event)" (clear)="clearJobCategory()"
+                          [ngClass]="{'error': createCandidates.controls['category'].invalid && isSubmited}" [searchable]="true" [multiple]="false"
+                          placeholder="{{'search_job_category_-_title' | i18next}}"
+                          ngDefaultControl>
+                          <ng-option [value]="jcat.id" *ngFor="let jcat of filterCategory" >
+                           {{jcat.category_name}}
+                          </ng-option>
+                        </ng-select>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label>{{ 'title' | i18next }}</label>
+                      <div class="has-info-icon select-max-width position-relative">
+                        <icon class="on-select" theme="outlined" name="help_outline" type="material" size="16px" tooltip="Title" placement="right" delay="100"></icon>
+                        <ng-select [loading]="jobTitleLoading" loadingText = 'Loading....' formControlName="title"  (search)="getJobTitle($event)"
+                          [ngClass]="{'error': createCandidates.controls['title'].invalid && isSubmited}"   [searchable]="true" [multiple]="false" [items]="jobTitleData"
+                          bindLabel="bindLabel"  bindValue="bindLabel" placeholder="'{{'eg'|i18next}} {{':'}}{{'senior_ux_designer' | i18next}} {{'Senior Java Developer etc'}}..'"
+                          (change)="mapCategoryWithTitle($event)" (clear)="getJobTitle(null,true)"
+                          ngDefaultControl>
+                        </ng-select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label> {{ 'job_level' | i18next }}</label>
+                    <input type="number" min="1"  onkeypress='return event.charCode >= 48 && event.charCode <= 57'
+                      [ngClass]="{'error': createCandidates.controls['level'].invalid && isSubmited}"
+                      placeholder="{{ 'enter_job_level' | i18next }}" formControlName="level" class="form-control" />
+                    <p class="validation-msg" *ngIf="createCandidates.controls['level'].invalid && isSubmited">
+                      <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                      {{ 'job_level_must_be_between' | i18next }} 1 {{ 'to' | i18next }} 255
+                    </p>
+                  </div>
+
+                </div>
+                <div class="preferences mt-12">
+                  <h4 class="section-heading d-flex mb-24 font-weight-medium">
+                    {{ 'preferences' | i18next }}
+                  </h4>
+                  <div class="form-group-row preference-row">
+                    <div class="form-group mb-0 pb-0">
+                      <label>
+                        {{ 'preferred_rate' | i18next }}
+                      </label>
+                      <div class="d-flex align-items-center gray-bg has-info-icon position-relative">
+                        <icon theme="outlined" name="help_outline"  type="material" size="16px" tooltip="{{ 'preferred_rate' | i18next }}" placement="right" delay="100"></icon>
+                        <ng-select [clearable]="false" [searchable]="false" formControlName="currency">
+                          <ng-option value="$">$</ng-option>
+                        </ng-select>
+                        <input type="number" [ngClass]="{'error': createCandidates.controls['rate'].invalid}" class="form-control padding-info" placeholder="{{ 'eg' | i18next }}: 1123.34"
+                          [pattern]="preferredRatePattern"    formControlName="rate">
+
+
+                      </div>
+                      <p class="validation-msg" *ngIf="createCandidates.controls['rate'].invalid || (createCandidates.controls['rate'].invalid && isSubmited)">
+                        <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                       {{ 'enter_valid_rate_value' | i18next }}
+                      </p>
+                    </div>
+                    <div class="form-group mb-0 pb-0">
+                      <label>
+                        {{ 'availability_date' | i18next }}
+                      </label>
+                      <div class="d-flex align-items-center gray-bg has-info-icon position-relative avl-date">
+                        <icon theme="outlined" name="help_outline"  type="material" size="16px" tooltip="Availability Date" placement="right" delay="100"></icon>
+                        <svms-datepicker  [inputdateFormat]="'MM/DD'" id="date1" formControlName="availability_date" [ngClass]="{'error':createCandidates.controls['availability_date'].invalid && (createCandidates.controls['availability_date'].dirty || createCandidates.controls['availability_date'].touched || isSubmited )}"  [options]="options" I18n>
+                            </svms-datepicker>
+                      </div>
+                    </div>
+                    <div class="form-group mb-0 pb-0">
+                      <label>
+                        {{ 'preferred_location' | i18next }}
+                      </label>
+                      <div class="has-info-icon position-relative">
+                        <icon theme="outlined" name="help_outline" type="material" size="16px" tooltip="" placement="right" delay="100"></icon>
+                        <search-address formControlName="temppreferredlocation" [adressType]="'geocode'" id="address3" [country]="countryShortName"
+                        [selectedPreAddress]="selectedPreAddress"
+                        (setAddress)="setPreferredLocation($event)" (selectedPreAddressUpdate)="preAddressUpdate($event)" class="no-radius" #preferredLocation>
+                        </search-address>
+                      </div>
+                      <ul class="location-list" *ngIf="loadPreferredlocationData">
+                        <li *ngFor="let loc of loadPreferredlocationData; let i =index ">{{loc}}
+                          <a (click)="removePreAddress(i)">
+                            <icon name="close" size="14px" type="material"></icon>
+                        </a>
+                      </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div class="colored-box mt-24 p-16">
+                  <div class="d-flex justify-content-between">
+                    <div class="d-flex">
+                      <div class="icon-box mr-16 d-flex align-items-center justify-content-center">
+                        <icon theme="outlined"  name="event_available" type="material" size="20px" ></icon>
+                      </div>
+                      <div>
+                        <p class="font-weight-medium color-black">{{ 'you_have_any_preferences_in_candidates_availability' | i18next }} ?</p>
+                        <p class="small">{{ 'if_you_want_to_specify_candidate_availability' | i18next }}</p>
+                      </div>
+                    </div>
+                    <button class="btn btn-primary" (click)="editAvailabilityBtn($event)">{{availability_btn |i18next}}</button>
+                  </div>
+                  <div class="d-flex justify-content-between mt-32 available-day-row" *ngIf="editAvailabilityData && editAvailabilityData.length>0">
+
+
+                    <div class="day" *ngFor="let ava of editAvailabilityData">
+                      <p class="small font-weight-medium">{{ava.week_day}}</p>
+                      <ul *ngIf="ava.schedules.length>0">
+                        <li class="filled" *ngFor="let avashe of ava.schedules">
+                          <p>{{avashe.start_time}}</p>
+                          <p>{{avashe.end_time}}</p>
+                        </li>
+                      </ul>
+                      <div *ngIf="!ava.schedules.length"  class="holiday d-flex align-items-center justify-content-center">
+                        <icon  name="event_busy" type="material"  color="#B8C9DB" size="30px" ></icon>
+                      </div>
+
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </section>
+          </form>
+          <div class="form-footer position-relative p-24" [ngClass]="{'p-32':isSuperViewUser}">
+            <button class="advanced-profile" (click)="toggleAdvancedProfile()">{{buttonText | i18next}} <icon class="ml-4" size="24px" [name]="advancedProfile? 'expand_less' : 'expand_more'"></icon></button>
+            <button class="btn large btn-primary float-right create-candidate-btn"  (click)="saveCandidate()" *accessControl>
+              {{saveButtonText | i18next}}
+              <span *ngIf="isSaveLoader" class="loader ml-12"> </span>
+            </button>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="create-sidebar">
+    <app-add-credentials (credentialData)="getCredentialData($event)" *ngIf="credentialTypeId"
+    [credentialTypeId]="credentialTypeId"></app-add-credentials>
+  <app-add-certification (certificateData)="getCertificateData($event)" *ngIf="certificationTypeId"
+    [certificationTypeId]="certificationTypeId"></app-add-certification>
+  <app-add-specialization (specialityData)="getSpecialityData($event)" *ngIf="specialityTypeId"
+    [specialityTypeId]="specialityTypeId"></app-add-specialization>
+  <app-add-vaccination (vaccinationData)="getVaccineData($event)" *ngIf="vaccineTypeId" [vaccineTypeId]="vaccineTypeId">
+  </app-add-vaccination>
+  <app-add-skills (skillData)="getSkillData($event)" *ngIf="skillTypeId" [skillTypeId]="skillTypeId"></app-add-skills>
+  <app-add-education (educationData)="getEducationData($event)" *ngIf="educationTypeId"
+    [educationTypeId]="educationTypeId"></app-add-education>
+  <app-edit-availability  (availabiltiyData)="getEditAvailability($event)" ></app-edit-availability>
+  <app-job-details-sidebar-view></app-job-details-sidebar-view>
+</div>
+

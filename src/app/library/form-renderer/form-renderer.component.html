@@ -1,0 +1,30 @@
+<div class="create-wrapper p-24">
+  <div class="create-form pt-32">
+    <a class="back-btn ml-16" href="javascript:void(0)" *ngIf="is_back_btn" (click)="onClickBackBtn()">
+      <icon class="d-inline-block" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon>
+      {{back_btn_name}}
+    </a>
+    <div class="form-renderer">
+
+      <div class="form-renderer-inner" #form_render_tab>
+
+
+        <h3 class="font-weight-medium">{{config?.title|i18next}}</h3>
+        <div class="card bg-light mt-24">
+
+          <div *ngIf="updateProcess && config">
+            <app-nav-tabs-handler [config]="config?.config?.nav_tabs" [jsonData]="config?.config"
+              [is_update]="is_update" [updateConfig]="updateConfig" [finalUpdateData]="finalUpdateData"
+              [updateValue]="updateValue" (reviewData)="reviewData($event)" [is_review_need]="is_review_need"
+              (onTabChange)="onTabChange($event)" (onBtnClick)="onClickBtn($event)" [candidateId]="candidateId" [isSaveLoader]="isSaveLoader"
+              (onContinueClick)="onContinueClick($event)" (onClickCandidateView)="onCandidateView($event)"
+              (onClickVendorView)="onVendorClick($event)" [assignmentId]="assignmentId">
+              <ng-content></ng-content>
+            </app-nav-tabs-handler>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>

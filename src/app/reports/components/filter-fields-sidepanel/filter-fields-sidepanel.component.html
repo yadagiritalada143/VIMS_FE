@@ -1,0 +1,188 @@
+<svms-sidebar-ng [title]="headerTitle | i18next" [dataVisibility]="'visible'" (onClose)="onCloseSidebar($event)">
+
+  <svms-sidebar-header-content *ngIf="!isViewMode('view')">
+    <div class="d-flex justify-content-end border rounded-sm p-4">
+      <button type="button" class="btn small h-30"
+        [ngClass]="isFieldMode('view_all') ? 'btn-primary' : 'btn-default no-border-button'" (click)="onFieldMode('view_all')">
+        <span>{{ 'view_all' | i18next }}</span>
+      </button>
+
+      <button type="button" class="btn small h-30 ml-12"
+        [ngClass]="isFieldMode('view_active') ? 'btn-primary' : 'btn-default no-border-button'"
+        (click)="onFieldMode('view_active')">
+        <span>{{ 'view_active_fields' | i18next }}</span>
+      </button>
+    </div>
+  </svms-sidebar-header-content>
+
+
+  <svms-sidebar-body-ng [active]="true" class="d-flex flex-column sidebar-body">
+    <div class="p-24">
+      <svms-sidebar-loader *ngIf="isLoading" [message]="loaderMessage | i18next"></svms-sidebar-loader>
+      <app-logs [log]="logs"></app-logs>
+      <!-- Commenting out as part of -->
+      <!-- <div *ngIf="!isLoading" class="border rounded-sm pl-12 pr-12 mb-12">
+        <div class="d-flex justify-content-between">
+          <span class="d-flex align-items-center text-color-blue">{{ 'conversion' | i18next }}</span>
+          <div class="toggle-panel-inner">
+            <span class="toggle-switch" [ngClass]="isConversion ? 'toggle-on' : 'toggle-off'" (click)="onConversion()">
+            </span>
+          </div>
+        </div>
+        <ng-select *ngIf="isConversion" class="pb-12" [clearable]="false" [readonly]="!isConversion" ([ngModel])="selectedConversion">
+        </ng-select>
+      </div> -->
+      <div *ngIf="!isLoading" class="fs-16 font-weight-bold mb-16">
+        {{ 'viewing' | i18next }} {{ (isFieldMode('view_active') ? 'only the Active Fields' : 'all the fields') }}
+      </div>
+      <div class="d-flex flex-column dndList" dndDropzone dndEffectAllowed="copyMove" (dndDrop)="onDropColumn($event)">
+        <div dndPlaceholderRef class="dndPlaceholder"></div>
+
+        <div id="filters" class="border rounded-sm p-12 filter-panel mb-12"
+            [class.disabled]="!column.isEnabled"
+            [class.filter-visible]="column.isFilterVisible"
+            *ngFor="let column of reportColumnList | activeColumnFilter:isFieldMode('view_active') | activeColumnOrder: true"
+            [dndDraggable]="column"
+            [dndEffectAllowed]="'move'"
+            (dndMoved)="onMoved($event)"
+            (dndEnd)="onDragEnd($event)">
+
+          <div class="d-flex align-items-center justify-content-between cursor-pointer">
+            <div class="d-flex align-items-center">
+              <span>
+                <icon size="20px" name="drag_indicator" type="material" cuClass="d-flex" class="d-flex drag-icon"></icon>
+              </span>
+
+              <span class="font-weight-medium ml-8">
+                {{column.title | i18next}}
+              </span>
+            </div>
+
+            <div class="d-flex align-items-center">
+              <span *ngIf="!isViewMode('view')" class="mr-12 color-gray" (click)="column.isEnabled = !column.isEnabled">
+                <icon size="20px" *ngIf="column.isEnabled" name="visibility" type="material" cuClass="d-flex"></icon>
+                <icon size="20px" *ngIf="!column.isEnabled" name="visibility_off" type="material" cuClass="d-flex">
+                </icon>
+              </span>
+
+              <span class="mr-8 color-blue" (click)="getOnClickFilterData(column)">
+                <icon size="20px" name="filter_alt" type="material" cuClass="d-flex"></icon>
+              </span>
+            </div>
+          </div>
+
+          <div *ngIf="column.isFilterVisible">
+            <div *ngIf="!isViewMode('view')" class="radio-group">
+              <div class="radio">
+                <input id="{{column.name}}_comparison" name="{{column.name}}" type="radio"
+                  [checked]="isComparisonMode(column, 'field')">
+                <label for="{{column.name}}_comparison" class="radio-label">{{ 'field_comparison' | i18next }}</label>
+              </div>
+              <div class="radio">
+                <input id="{{column.name}}_user_value" name="{{column.name}}" type="radio"
+                  [checked]="isComparisonMode(column, 'user')">
+                <label for="{{column.name}}_user_value" class="radio-label">{{ 'user_defined_value' | i18next }}</label>
+              </div>
+            </div>
+
+            <div class="py-12 d-flex justify-content-between">
+
+              <input type="text" class="form-control width-35" value="{{column.title}}" [disabled]='true'>
+
+              <ng-select
+                class="text-align-center width-20"
+                [clearable]="false"
+                *ngIf="!isComparisonType(column, 'date')"
+                [(ngModel)]="column.comparisonOperator"
+                [items]="comparisonOperators(column.comparisonType)"
+                bindLabel="label"
+                [readonly]="isViewMode('view')">
+              </ng-select>
+              <ng-select
+                *ngIf="!isComparisonType(column, 'date')"
+                class="width-40 justify-content-end"
+                [multiple]="true"
+                [clearable]="false"
+                [(ngModel)]="column.values"
+                [items]="searchValue?.length<=2 ? filterDataByColumn(column.name): searchedFilteredData"
+                bindLabel="text"
+                [readonly]="isViewMode('view')"
+                (keyup)="searchRequiredId($event,column)"
+                >
+              </ng-select>
+              <div class="form-group-row date-picker-position" *ngIf="isComparisonType(column, 'date')">
+                <div class="form-group position-relative ml-16">
+                  <svms-datepicker
+                    [value]="(column.values[0] != undefined ? (column.values[0].text!=undefined ? (column.values[0].text | localDateFormat : null : null : null : true) : (isString(column.values[0]) ? column.values[0] :'' ))  :'' )"
+                    (onDateChange)="onDateChange($event,column)" [inputdateFormat]="dateFormat" [placeholder]="'Start Date' | i18next" ngDefaultControl>
+                  </svms-datepicker>
+                </div>
+                <div class="form-group position-relative">
+                  <svms-datepicker [options]="(datepickerOptions[column.name]) ?  datepickerOptions[column.name] : null"
+                    [value]="(column.values[1] != undefined ? (column.values[1].text!=undefined ? (column.values[1].text | localDateFormat : null : null : null : true) : (isString(column.values[1]) ? column.values[1] :'' ))  :'' )"
+                    (onDateChange)="onendDateChange($event,column)" [inputdateFormat]="dateFormat" [placeholder]="'End Date' | i18next" ngDefaultControl>
+                  </svms-datepicker>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex justify-conten-start flex-wrap" *ngIf="isComparisonType(column, 'date')">
+              <div *ngFor="let value of column.values">
+                <div *ngIf="(value !=undefined && ((value.text!=undefined && value.text!='') || (isString(value) && value!='')) )" class="d-flex align-items-center border rounded-sm p-4 ml-4 selected-value">
+                  <span>{{value.text ? (value.text | localDateFormat : null : null : null : true) : value}}</span>
+                  <span *ngIf="!isViewMode('view')" class="d-flex align-items-center ml-4 close-icon" (click)="onDeleteDateColumnValue(column, value)">
+                  <icon size="10px" name="close" type="material" cuClass="d-flex"></icon>
+                  </span>
+                </div>
+
+              </div>
+            </div>
+            <div class="d-flex justify-conten-start flex-wrap" *ngIf="!isComparisonType(column, 'date')">
+              <div *ngFor="let value of column.values" class="d-flex align-items-center border rounded-sm p-4 ml-4 selected-value">
+                <span>{{value.text ? value.text : value}}</span>
+                <span *ngIf="!isViewMode('view')" class="d-flex align-items-center ml-4 close-icon" (click)="onDeleteColumnValue(column, value)">
+                  <icon size="10px" name="close" type="material" cuClass="d-flex"></icon>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </svms-sidebar-body-ng>
+  <svms-sidebar-footer-ng>
+    <div *ngIf="isViewMode('full')" class="d-flex align-items-center justify-content-end">
+      <!-- <button type="button" class="btn btn-outline-primary" (click)="onSaveMode(true)">{{ 'save_as_report' | i18next }}</button> -->
+      <!-- Report Filter New UI  -->
+      <ng-container *ngIf="isNewFeatureAllowed" >
+        <button type="button" class="btn btn-outine mr-12" (click)="onCloseSidebar($event)" >{{ 'generate_view' | i18next }}</button>
+        <div class="download-report-btn position-relative mr-12">
+          <ul [ngClass]="{'active' : downloadOption}">
+            <li (click)="downloadReport('xls')" >
+              <a href="javascript:void(0)">
+                {{ 'download_excel' | i18next }}
+              </a>
+            </li>
+          </ul>
+          <button type="button" class="btn btn-primary" (click)="downloadReport('csv')">
+            {{ 'download_csv' | i18next }}
+            <span>
+              <icon [name]="downloadOption? 'keyboard_arrow_up' : 'keyboard_arrow_down'" (click)="chooseDownloadType($event);$event.stopPropagation()" ></icon>
+            </span>
+          </button>
+        </div>
+      </ng-container>
+        <!-- End of code  -->
+      <button type="button" class="btn btn-primary"  (click)="onApplyFilter($event)">{{ 'apply_filters' | i18next }}</button>
+    </div>
+
+    <div *ngIf="isViewMode('save')" class="d-flex align-items-center">
+      <input type="text" class="form-control" placeholder="{{ 'enter_report_name' | i18next }}" [(ngModel)]="reportName">
+      <button type="button" class="btn btn-primary ml-12" (click)="onSaveReport()">{{ 'save' | i18next }}</button>
+      <button type="button" class="btn btn-light ml-12" (click)="onSaveMode(false)">{{ 'cancel' | i18next }}</button>
+    </div>
+
+    <div *ngIf="isViewMode('edit')" class="d-flex align-items-center justify-content-end">
+      <button type="button" class="btn btn-primary" (click)="onUpdateFilter()">{{ 'apply_filters' | i18next }}</button>
+    </div>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

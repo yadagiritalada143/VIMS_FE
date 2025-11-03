@@ -1,0 +1,193 @@
+<!-- Created separate component and not using common one '<app-expression-builder-condition>' beacause of rule builder's API is created in Java Spring Boot, And responses are diffrent then flow management.  -->
+<div class="parent-container position-relative p-16 pl-0">
+    <div class="child-wrapper" dndDropzone dndEffectAllowed="copyMove" (dndDrop)="onDrop($event,outerIndex)" >
+      <div dndPlaceholderRef class="dndPlaceholder"></div>
+      <div class="child-container position-relative draggable pl-0"
+       *ngFor="let inner_group of condition?.inner_condition; let innerIndex = index"
+        [attr.data-index]="innerIndex" [dndDraggable]="inner_group"
+        (dndStart)="onDragStart(innerIndex)"
+         [class.dnone]="(innerIndex===0) || (innerIndex==inner_group?.length - 1)">
+
+         <div [ngClass]="inner_group?.inner_condition?.length > 0 ? 'parent-container position-relative p-16 pl-32' : 'position-relative pl-32'">
+          <span [ngClass]="inner_group?.inner_condition?.length > 0 ? 'child-drag-trigger drag' : 'child-drag-trigger'">
+            <icon name="drag_indicator" size="16px"></icon>
+          </span>
+          <div class="form-group-row align-items-center">
+            <div class="form-group mb-0 pb-0">
+              <ng-select
+                [style]="inner_group.propertyError && !inner_group.selectedProperty ? 'border: 1px solid red; border-radius: 4px;' : ''"
+                [disabled]="!property_options.length"
+                [items]="property_options"
+                (change)="onDataChange($event,'property',outerIndex,innerIndex)"
+                bindLabel="ruleField.name"
+                bindValue="id"  placeholder="{{ 'property' | i18next }}" [(ngModel)]="inner_group.selectedProperty"
+                name="{{'selectedProperty'+outerIndex+''+innerIndex}}">
+              </ng-select>
+            </div>
+            <div class="form-group mb-0 pb-0" *ngIf="inner_group.nest_value && inner_group.selectedProperty && inner_group.custom_fields_options">
+              <ng-select
+                #customFieldValueSearch
+                [style]="inner_group.customFieldError && !inner_group.selectedCustomField ? 'border: 1px solid red; border-radius: 4px;' : ''"
+                [items]="inner_group.custom_fields_options"
+                (change)="onDataChange($event,'customfield',outerIndex,innerIndex)"
+                (clear)="searchValues(customFieldValueSearch?.searchTerm,innerIndex,inner_group,'customfield')"
+                (keyup)="searchValues(customFieldValueSearch?.searchTerm,innerIndex,inner_group,'customfield')"
+                [loading]="inner_group.valueListLoading"
+                loadingText = "{{ 'loading....' | i18next }}"
+                notFoundText = "{{ 'no_data_found' | i18next }}"
+                bindLabel="name"
+                bindValue="id" [placeholder]="inner_group.nestValuePlaceholder" [(ngModel)]="inner_group.selectedCustomField"
+                name="{{'selectedCustomField'+outerIndex+''+innerIndex}}">
+              </ng-select>
+            </div>
+            <div class="form-group mb-0 pb-0">
+              <ng-select  [items]="inner_group.operatorList"
+                [style]="inner_group.operatorError && !inner_group.selectedOperator ? 'border: 1px solid red; border-radius: 4px;' : ''"
+                [disabled]="!inner_group.selectedProperty"
+                bindLabel="sign"
+                bindValue="id" (change)="onDataChange($event,'operator',outerIndex,innerIndex)" placeholder="{{ 'operator' | i18next }}"  name="{{'selectedOperator'+outerIndex+''+innerIndex}}" [(ngModel)]="inner_group.selectedOperator" >
+              </ng-select>
+            </div>
+            <div class="form-group mb-0 pb-0">
+              <input type='number' (keypress)="preventCharacters($event)" [style]="inner_group.valueError && !inner_group.selectedValue ? 'border: 1px solid red; border-radius: 4px;' : ''" *ngIf="inner_group.fieldType == 'NUMBER' || inner_group.fieldType == 'NUMBERS' || inner_group.fieldType == 'PHONE'"
+              (keyup)="onDataChange($event,'value',outerIndex,innerIndex)"
+              class="form-control" [(ngModel)]="inner_group.selectedValue"
+              [placeholder]="inner_group.placeHolder ? inner_group.placeHolder : 'Enter Value' | i18next"/>
+              <input type='text' [style]="inner_group.valueError && !inner_group.selectedValue ? 'border: 1px solid red; border-radius: 4px;' : ''" *ngIf="inner_group.fieldType == 'TEXT'"
+              (keyup)="onDataChange($event,'text',outerIndex,innerIndex)"
+              class="form-control" [(ngModel)]="inner_group.selectedValue"
+              [placeholder]="inner_group.placeHolder ? inner_group.placeHolder : 'Enter Text' | i18next"/>
+              <textarea type='text' [style]="inner_group.valueError && !inner_group.selectedValue ? 'border: 1px solid red; border-radius: 4px;' : ''" *ngIf="inner_group.fieldType == 'TEXTAREA'"
+              (keyup)="onDataChange($event,'text',outerIndex,innerIndex)"
+              class="form-control" [(ngModel)]="inner_group.selectedValue"
+              [placeholder]="inner_group.placeHolder ? inner_group.placeHolder : 'Enter Text' | i18next"></textarea>
+              <ng-select
+                #valuesearch
+                [style]="inner_group.valueError && !inner_group.selectedValue ? 'border: 1px solid red; border-radius: 4px;' : ''"
+                [disabled]="!inner_group.selectedProperty || !inner_group.selectedOperator || !inner_group.valueList"
+                [multiple]="inner_group.isValueMultiselected"
+                (keyup)="searchValues(valuesearch?.searchTerm,innerIndex,inner_group,'selectedvalue')"
+                (clear)="searchValues(valuesearch?.searchTerm,innerIndex,inner_group,'selectedvalue')"
+                [loading]="inner_group.valueListLoading"
+                loadingText = "{{ 'loading....' | i18next }}"
+                notFoundText = "{{ 'no_data_found' | i18next }}"
+                *ngIf="inner_group.fieldType == 'DROPDOWN' || !inner_group.fieldType || inner_group.fieldType == 'PICKLIST'"
+                (change)="onDataChange($event,'value',outerIndex,innerIndex,inner_group)"
+                [placeholder]="inner_group.placeHolder ? inner_group.placeHolder : 'Value' | i18next"
+                [(ngModel)]="inner_group.selectedValue"
+                name="{{'selectedValue'+outerIndex+''+innerIndex}}">
+                <ng-option *ngFor="let valueList of inner_group.valueList" [value]="valueList.id"
+                [disabled]="allSelectedValues.includes(valueList.id)">
+                  <span class="text-capitalize">{{
+                    valueList?.name
+                  }} <span *ngIf="valueList?.code">- {{valueList?.code}}</span></span></ng-option>
+              </ng-select>
+              <ng-select
+                #valuesearch
+                [style]="inner_group.valueError && inner_group.selectedValue == null ? 'border: 1px solid red; border-radius: 4px;' : ''"
+                [disabled]="!inner_group.selectedProperty || !inner_group.selectedOperator"
+                [multiple]="false"
+                (keyup)="searchValues(valuesearch?.searchTerm,innerIndex,inner_group,'selectedvalue')"
+                (clear)="searchValues(valuesearch?.searchTerm,innerIndex,inner_group,'selectedvalue')"
+                [loading]="inner_group.valueListLoading"
+                loadingText = "{{ 'loading....' | i18next }}"
+                notFoundText = "{{ 'no_data_found' | i18next }}"
+                *ngIf="inner_group.fieldType == 'BOOL'"
+                (change)="onDataChange($event,'bool',outerIndex,innerIndex,inner_group)"
+                [placeholder]="inner_group.placeHolder ? inner_group.placeHolder : 'Value' | i18next"
+                [(ngModel)]="inner_group.selectedValue"
+                name="{{'selectedValue'+outerIndex+''+innerIndex}}">
+                <ng-option [value]="true">
+                  <span class="text-capitalize">{{ 'yes' | i18next }}</span></ng-option>
+                <ng-option [value]="false">
+                  <span class="text-capitalize">{{ 'no' | i18next }}</span></ng-option>
+              </ng-select>
+
+              <div class="date-selector position-relative" *ngIf="inner_group.fieldType == 'DATETIME' || inner_group.fieldType == 'DATE'">
+                <svms-datepicker
+                  [style]="inner_group.valueError && !inner_group.selectedValue ? 'border: 1px solid red; border-radius: 4px;' : ''"
+                  [inputdateFormat]="dateFormat"
+                  [disabled]="false"
+                  [(ngModel)]="inner_group.selectedValue"
+                  [placeholder]="inner_group.placeHolder ? inner_group.placeHolder : 'Select Date' | i18next"
+                >
+                </svms-datepicker>
+              </div>
+              <!-- <div class="toggle-panel-inner" *ngIf="inner_group.fieldType == 'BOOL'" [ngClass]="inner_group.selectedValue ? 'if-active' : 'if-inactive'">
+                <span class="toggle-switch" [ngClass]="inner_group.selectedValue ? 'toggle-on' : 'toggle-off'" (click)="onClickToggleFlow(outerIndex,innerIndex,inner_group)"></span>
+              </div> -->
+            </div>
+            <div class="form-group mb-0 pb-0 last" *ngIf="innerIndex == condition.inner_condition?.length - 1">
+              <div class="d-flex align-items-center" [style]="">
+                <icon class="d-flex" name="add_circle" (click)="addInnerGroup();onDataChange($event,'addInnerGroup',outerIndex,innerIndex)" class="add-condition" cuClass="d-flex" size="20px" style="margin-right: 12px;"></icon>
+                <icon class="d-flex" *ngIf="innerIndex != 0" (click)="removeInnerGroup(innerIndex);onDataChange($event,'removeInnerGroup',outerIndex,innerIndex)" name="highlight_off" class="close-condition" size="20px"></icon>
+              </div>
+            </div>
+            <div class="form-group mb-0 pb-0 last" *ngIf="innerIndex < condition.inner_condition?.length - 1">
+              <div class="d-flex align-items-center">
+                <div class="toggle-cb mr-12" [ngClass]="{'active' : inner_group.innerisANDSelected}">
+                  <input type="checkbox" (change)="toggleCheckbox(innerIndex);onDataChange($event,'ANDorOR',outerIndex, innerIndex)">
+                  <div class="cb-text d-flex justify-content-between">
+                    <span>{{ 'and' | i18next }}</span>
+                    <span>{{ 'or' | i18next }}</span>
+                  </div>
+                  <span class="switch"></span>
+                </div>
+                <icon class="d-flex" (click)="removeInnerGroup(innerIndex);onDataChange($event,'removeInnerGroup',outerIndex,innerIndex)" name="highlight_off" class="close-condition" size="20px"></icon>
+              </div>
+            </div>
+          </div>
+         </div>
+
+         <div class="condition-wrapper py-12 d-flex align-items-center position-relative" *ngIf="inner_group.inner_condition?.length">
+          <div class="toggle-cb mr-12" [ngClass]="{'active' : condition.isANDSelected}">
+            <input type="checkbox" (change)="toggleConditionalItem();onDataChange($event,'OuterANDorOR',outerIndex)">
+            <div class="cb-text d-flex justify-content-between">
+              <span >{{ 'and' | i18next }}</span>
+              <span >{{ 'or' | i18next }}</span>
+            </div>
+            <span class="switch"></span>
+          </div>
+          <icon name="highlight_off" (click)="outerRemoveinnerFirstGroup(outerIndex,inner_group);onDataChange($event,'removeOuterGroup',outerIndex)" class="close-condition d-flex" size="20px"></icon>
+        </div>
+
+        <app-expression-builder-condition
+          (removeOuterGroup)="emitToOuterRemoveGroup()"
+          (updatedInnerCondition)="onInnerDataChange($event, 'condition_group')"
+          [currentLevel]="currentLevel+1"
+          [totalLevelAllowed]="totalLevelAllowed"
+          [isEditMode]="false"
+          [moduleList]="moduleList"
+          [selectedModuleCode]="selectedModuleCode"
+          [selectedEvent]="selectedEvent"
+          [propertyList]="propertyList"
+          [outerConditionLength]="inner_group.inner_condition?.length"
+          [condition]="innerConditionGroup"
+          [fullcondition]="inner_group.inner_condition"
+          [outerIndex]="innerConditionInnerIndex"
+          *ngFor="let innerConditionGroup of inner_group.inner_condition; let innerConditionInnerIndex = index"
+        >
+        </app-expression-builder-condition>
+
+        <div *ngIf="currentLevel < totalLevelAllowed" class="mt-12">
+          <a href="javascript:void(0)" class="add-new-group" (click)="addIntentGroup(inner_group)" >
+            <icon name="control_point_duplicate" (change)="onDataChange($event,'addNewGroup',outerIndex)" size="18px"></icon> {{ 'add_new_inner_group_here' | i18next }}
+          </a>
+        </div>
+
+
+      </div>
+    </div>
+
+  </div>
+  <div class="condition-wrapper py-12 d-flex align-items-center position-relative" *ngIf="outerIndex < outerConditionLength - 1">
+    <div class="toggle-cb mr-12" [ngClass]="{'active' : condition.isANDSelected}">
+      <input type="checkbox" (change)="toggleConditionalItem();onDataChange($event,'OuterANDorOR',outerIndex)">
+      <div class="cb-text d-flex justify-content-between">
+        <span >{{ 'and' | i18next }}</span>
+        <span >{{ 'or' | i18next }}</span>
+      </div>
+      <span class="switch"></span>
+    </div>
+    <icon name="highlight_off" (click)="outerRemoveGroup(outerIndex);onDataChange($event,'removeOuterGroup',outerIndex)" class="close-condition d-flex" size="20px"></icon>
+  </div>

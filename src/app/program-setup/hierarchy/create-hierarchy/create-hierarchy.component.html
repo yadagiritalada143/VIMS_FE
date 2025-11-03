@@ -1,0 +1,369 @@
+<svms-sidebar [title]="headerTitle | i18next" [clickOutside]="clickOutside" icon="library_add" [dataVisibility]="createHierarchy" (onClose)="sidebarClose()">
+  <svms-sidebar-body *ngIf="isDataAvilable">
+    <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)">
+      <vms-tab label="{{ 'basic_info' | i18next }}">
+        <form [formGroup]="createHirarcheyLevelFG">
+          <div class="position-relative" *ngIf="!isViewMode && eventParentNode?.id">
+            <div  class="toggle-parent position-absolute d-flex align-items-center"
+              [ngClass]="{'active': sameAsParent}">
+              <span class="status-text mr-12">{{ 'same_as_parent' | i18next }}</span>
+              <span class="toggle-switch" [ngClass]="sameAsParent ? 'toggle_on' : 'toggle_off'"
+                (click)="toggleParent()"></span>
+            </div>
+          </div>
+          <div class="form-group-row">
+            <!-- <div class="form-group" *ngIf="eventParentNode?.id"> -->
+              <div class="form-group">
+              <label *ngIf="!isParent">{{ 'parent' | i18next }}</label>
+              <!-- <ng-select [readonly]="!eventParentNode?.id || isViewMode || sameAsParent ||!sameAsParent" [(ngModel)]="selectedParent" bindLabel="parent" -->
+                <ng-select [readonly]="isViewMode || sameAsParent"  *ngIf="!isParent"
+                 [multiple]="false"
+                 [clearable]="false" [(ngModel)]="selectedParent"
+                 formControlName="parent" (change)="changeParent($event)" [items]="ParentsArray" bindLabel="name" bindValue="id" >
+                </ng-select>
+            </div>
+            <div *ngIf="isParent" class="toggle-panel width-increase" [ngClass]="{'disable':isViewMode || sameAsParent}">
+              <div class="toggle-panel-inner" [ngClass]="toggles.hide_show_root?.value ? 'if-active' : 'if-inactive'">
+                <span class="status-text">{{toggles.hide_show_root?.title}}</span>
+                <span class="toggle-switch" [ngClass]="toggles.hide_show_root?.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle('hide_show_root')"></span>
+              </div>
+            </div>
+            <div class="toggle-panel width-increase-active mt-24" [ngClass]="{'disable':isViewMode || sameAsParent}">
+              <div class="toggle-panel-inner" [ngClass]="toggles.is_enabled?.value ? 'if-active' : 'if-inactive'">
+                <span class="status-text">{{toggles.is_enabled?.title | i18next}}</span>
+                <span class="toggle-switch" [ngClass]="toggles.is_enabled?.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle('is_enabled')"></span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group-row">
+            <div class="form-group">
+              <label>{{ 'hierarchy_name' | i18next }} <span class="require">*</span></label>
+              <!-- <input type="text" formControlName="hierrchy_level_name" class="form-control"
+                [readonly]="!eventParentNode?.id" [readonly]="isViewMode" placeholder="Enter hierarchy name" required> -->
+                <input type="text" formControlName="hierrchy_level_name" class="form-control"
+               [readonly]="isViewMode" placeholder="{{ 'enter_hierarchy_name' | i18next }}" required>
+              <p class="validation-msg"
+                *ngIf="createHirarcheyLevelFG.controls.hierrchy_level_name.touched && createHirarcheyLevelFG.controls['hierrchy_level_name'].errors">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                {{ 'hierarchy_name_is_required' | i18next }}.
+              </p>
+            </div>
+          </div>
+
+          <div class="form-group-row">
+            <div class="form-group">
+              <label>
+                {{ 'hierarchy_code' | i18next }}
+                <span class="require">*</span>
+              </label>
+              <input type="text" formControlName="code" class="form-control"
+                [readonly]="isViewMode" placeholder="{{ 'enter_hierarchy_code' | i18next }}" 
+                [minlength]="4" [maxlength]="20" [mandatePattern]="codePattern"
+                required/>
+              <p class="validation-msg" *ngIf="createHirarcheyLevelFG?.controls?.code?.touched && hierarchyCodeValidationError">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                {{ hierarchyCodeValidationError | i18nextEager }}.
+              </p>
+            </div>
+          </div>
+
+          <!-- <div class="form-group-row">
+            <div class="form-group no-margin-bottom">
+              <label>Country</label>
+              <ng-select
+                formControlName='country'
+                placeholder='Search Country by Name'
+                [multiple]='true'
+                [clearable]='false'
+                [hideSelected]='true'
+                [readonly]='isViewMode'
+                (change)='nullSelectionChecker("country")'
+              >
+
+                <ng-template ng-multi-label-tmp>
+                </ng-template>
+
+                <ng-option
+                  *ngFor='let option of allCountryList;'
+                  [value]='option?.id'>
+                    {{ option?.name }}
+                </ng-option>
+
+              </ng-select>
+            </div>
+          </div>
+
+          <div class='chip-list pb-16'>
+            <div *ngFor="let chip of createHirarcheyLevelFG.get('country')?.value" class='d-flex chip p-4 m-4'>
+              <icon (click)='!isViewMode && checkDefaultChip(chip,"country")'
+                type='material' class='pl-4 icon-adjust'
+                [name]='(!defaultCountry.includes(chip))?"outlined_flag":"flag"' size='16px'
+                [color]='(!defaultCountry.includes(chip))?"#495057":"#4C7FF0"'
+              >
+              </icon>
+              <p class='pl-4'> {{ programCountryMap?.get(chip) }} </p>
+              <icon *ngIf='!isViewMode' (click)='removeChipSelection(chip, "country")'
+                class='pl-4 icon-adjust' type='material'
+                name='close' size='16px'>
+              </icon>
+            </div>
+          </div>
+
+          <label class='error-text pb-8' *ngIf="!validChildChecker('country')">
+            * Please select atleast one default Country
+          </label> -->
+
+          <!-- <div class="form-group-row">
+            <div class="form-group no-margin-bottom">
+              <label>Currency <span class="require">*</span></label>
+              <ng-select
+                formControlName='currency'
+                placeholder='Search Currency by Name'
+                [multiple]='true'
+                [clearable]='false'
+                [hideSelected]='true'
+                [readonly]='isViewMode'
+                (change)='nullSelectionChecker("currency")'
+              >
+
+                <ng-template ng-multi-label-tmp>
+                </ng-template>
+
+                <ng-option
+                  *ngFor='let option of currencyList;'
+                  [value]='option?.id'>
+                    {{ option?.name }}
+                </ng-option>
+
+              </ng-select>
+            </div>
+          </div>
+
+          <div class='chip-list pb-16'>
+            <div *ngFor="let chip of createHirarcheyLevelFG.get('currency')?.value" class='d-flex chip p-4 m-4'>
+              <icon (click)='!isViewMode && checkDefaultChip(chip,"currency")'
+                type='material' class='pl-4 icon-adjust'
+                [name]='(!defaultCurrency.includes(chip))?"outlined_flag":"flag"' size='16px'
+                [color]='(!defaultCurrency.includes(chip))?"#495057":"#4C7FF0"'
+              >
+              </icon>
+              <p class='pl-4'> {{ programCurrencyMap.get(chip) }} </p>
+              <icon *ngIf='!isViewMode' (click)='removeChipSelection(chip, "currency")'
+                class='pl-4 icon-adjust' type='material'
+                name='close' size='16px'>
+              </icon>
+            </div>
+          </div>
+
+          <label class='error-text pb-8' *ngIf="!validChildChecker('currency')">
+            * Please select atleast one default Currency
+          </label> -->
+
+          <!-- Commented Below Code as it was showing two Enforced Rate Card Toggle Option while on edit -->
+          <!-- <div class="position-relative" id="enforceRate" *ngIf="!isViewMode && eventParentNode?.id">
+            <div  class="toggle-parent d-flex align-items-center" [ngClass]="{'disable':isViewMode}"
+            >
+              <span class="status-text">&nbsp;{{ 'enforce_rate_card' | i18next }}</span>
+              <span class="toggle-switch" id="toggleEnforce" [ngClass]="toggles.rate_card_enforce.value ? 'toggle_on' : 'toggle_off'" (click)="onClickToggle('rate_card_enforce')"></span>
+            </div>
+          </div> -->
+          <div *ngIf="!hide()">
+            <div class="form-group-row" *ngIf="!isParent">
+              <div class="form-group">
+                <div class="toggle-panel mt-8 enforce-rate-card-toggle" [ngClass]="{'disable':isViewMode || isParent}">
+                  <div class="toggle-panel-inner" [ngClass]="toggles.rate_card_enforce?.value ? 'if-active' : 'if-inactive'">
+                    <span class="status-text">{{toggles.rate_card_enforce?.title}}</span>
+                    <span class="toggle-switch" [ngClass]="toggles.rate_card_enforce?.value ? 'toggle-on' : 'toggle-off'"
+                          (click)="onClickToggle('rate_card_enforce')"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="!hide()" class="form-group-row">
+            <div class="form-group">
+              <label>{{ 'workflow' | i18next }} <span class="require">*</span></label>
+              <ng-select [clearable]="false" [readonly]="isViewMode || sameAsParent" ngDefaultControl formControlName="workflow"
+                placeholder="{{ 'choose_workflow' | i18next }}">
+                <ng-option [value]="'STANDARD'">{{ 'standard' | i18next }}</ng-option>
+              </ng-select>
+              <p class="validation-msg"
+                *ngIf="createHirarcheyLevelFG.controls.workflow.touched && createHirarcheyLevelFG.controls['workflow'].errors">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                {{ 'workflow_is_required' | i18next }}
+              </p>
+            </div>
+          </div>
+          <div class="form-group-row" >
+            <div class="form-group">
+              <label>{{ 'date_format' | i18next }} <span class="require">*</span></label>
+              <ng-select placeholder="{{ 'choose_date_format' | i18next }}" formControlName="preferred_date_format" [searchable]="false" [readonly]="isViewMode && isParent">
+                <ng-option *ngFor="let format of dateFormats" [value]="format">{{format}}</ng-option>
+              </ng-select>
+            </div>
+          </div>
+          <div class="form-group-row">
+            <div *ngIf="!hide()" class="form-group">
+              <label>{{ 'preferred_language' | i18next }} <span class="require">*</span></label>
+              <ng-select [clearable]="false" placeholder="{{ 'select_language' | i18next }}" [readonly]="isViewMode || sameAsParent"
+                formControlName="preferred_language">
+                <ng-option *ngFor="let lang of languages" [value]="lang.key">{{lang.value}}</ng-option>
+                <!-- <ng-option [value]="'English (United Kingdom)'">English (United Kingdom)</ng-option>
+                <ng-option [value]="'English (Canada)'">English (Canada)</ng-option>
+                <ng-option [value]="'Spanish'">Spanish</ng-option>
+                <ng-option [value]="'French'">French</ng-option> -->
+              </ng-select>
+              <p class="validation-msg"
+                *ngIf="createHirarcheyLevelFG.controls.preferred_language.touched && createHirarcheyLevelFG.controls['preferred_language'].errors">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                {{ 'language_is_required' | i18next }}
+              </p>
+            </div>
+            <div *ngIf="!hide()" class="form-group">
+              <label>{{ 'preferred_currency' | i18next }} <span class="require">*</span></label>
+              <ng-select [clearable]="false" placeholder="{{ 'select_currency' | i18next }}" (change)="selectCurrency($event)" [readonly]="isViewMode || sameAsParent"
+                formControlName="preferred_currency">
+                <ng-option *ngFor="let cur of currencyList" [value]="cur.name">{{cur.name}}</ng-option>
+              </ng-select>
+              <p class="validation-msg"
+                *ngIf="createHirarcheyLevelFG.controls.preferred_currency.touched && createHirarcheyLevelFG.controls['preferred_currency'].errors">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                {{ 'currency_is_required' | i18next }}
+              </p>
+            </div>
+          </div>
+
+          <div class="form-group-row" *ngIf="isParent">
+            <div class="form-group">
+              <label>{{ 'date_format' | i18next }} <span class="require">*</span></label>
+              <ng-select placeholder="{{ 'choose_date_format' | i18next }}" formControlName="preferred_date_format" [searchable]="false" [readonly]="isViewMode && isParent">
+                <ng-option *ngFor="let format of dateFormats" [value]="format">{{format}}</ng-option>
+              </ng-select>
+            </div>
+          </div>
+          <!-- <div class="rate-model flex" [ngClass]="{'disable_radio': isViewMode || sameAsParent }">
+            <p>Rate Model</p>
+            <div class="row no-gutters checkbox-row">
+              <div class="radio-button flex">
+                <input type="radio" id="bill-rate" formControlName="rate_model" value="BILL_RATE" name="rate_model">
+                <label for="bill-rate">Bill Rate (No Markup)</label>
+              </div>
+              <div class="radio-button flex">
+                <input type="radio" id="pay-rate" formControlName="rate_model" value="PAY_RATE" name="rate_model">
+                <label for="pay-rate">Pay Rate (Markup)</label>
+              </div>
+              <div class="checkbox-box flex">
+                <div class="radio-button flex">
+                  <input type="radio" id="markup" formControlName="rate_model" value="MARKUP" name="rate_model">
+                  <label for="markup">Bill Rate (Markup)</label>
+                </div>
+              </div>
+            </div>
+          </div> -->
+          <div class="form-group" [ngClass]="{'disable_radio': isViewMode || sameAsParent }">
+            <label> {{ 'rate_model' | i18next }} </label>
+            <div class="radio-group">
+              <div class="radio-container" [class]="selectedRateModel == 'BILL_RATE' ? 'active' : ''" (click)="changeRatemodel('BILL_RATE')">
+                <input type="radio" formControlName="rate_model" />
+                <span class="checkmark">{{ 'bill_rate' | i18next }} ({{ 'no_markup' | i18next }})</span>
+              </div>
+              <div class="radio-container" [class]="selectedRateModel == 'PAY_RATE' ? 'active' : ''" (click)="changeRatemodel('PAY_RATE')">
+                <input type="radio" formControlName="rate_model" />
+                <span class="checkmark">{{ 'pay_rate' | i18next }} ({{ 'markup' | i18next }})</span>
+              </div>
+              <div class="radio-container" [class]="selectedRateModel == 'MARKUP' ? 'active' : ''" (click)="changeRatemodel('MARKUP')">
+                <input type="radio" formControlName="rate_model" />
+                <span class="checkmark">{{ 'bill_rate' | i18next }} ({{'Markup'}})</span>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="!hide()" class="form-group-row" [ngClass]="{'disable_radio': isViewMode || sameAsParent }">
+            <div class="form-group">
+              <label>{{ 'timesheet_type' | i18next }} <span class="require">*</span></label>
+              <ng-select [items]="timesheetType"
+                bindLabel="label"
+                bindValue="id"
+                formControlName='timesheet_type'
+                placeholder="{{ 'search_timesheet_type_by_name' | i18next }}"
+                (change)="onChangeTimeSheet($event)">
+              </ng-select>
+              <div class='chip-list pb-16'>
+                <div *ngFor="let timesheet of selectedTimesheet; let i = index" class='d-flex chip p-4 m-4'>
+                  <p class='pl-4'> {{ timesheet.label }} </p>
+                  <icon *ngIf='!isViewMode' (click)="selectedTimesheet.splice(i, 1)"
+                    class='pl-4 icon-adjust' type='material'
+                    name='close' size='16px'>
+                  </icon>
+                </div>
+                <p class="validation-msg" *ngIf="selectedTimesheet?.length == 0 &&
+                  createHirarcheyLevelFG?.get('timesheet_type').touched">
+                  <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                  {{ 'please_select_atleast_one_timesheet' | i18next }}.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </vms-tab>
+      <vms-tab label="{{ 'master_data' | i18next }}">
+        <form *ngIf="listOfFundationalDataType?.length" [formGroup]="foundDataTypeFG">
+          <div class="form-group-row" *ngFor="let control of listOfFundationalDataType">
+            <div class="form-group" *ngIf="control?.configuration?.hierarchy_included !=='OFF'">
+              <label>{{control?.name}}<span *ngIf="control?.configuration?.hierarchy_included=='REQUIRED'"
+                  class="require">*</span>
+                <span *ngIf="control?.configuration?.hierarchy_included =='OPTIONAL'" class="require"></span>
+              </label>
+
+              <ng-select bindLabel="{{control?.id}}" [readonly]="isViewMode || sameAsParent" [multiple]="true"
+                [labelForId]="control?.id" [clearable]="false"
+                [(ngModel)]="selectedFoundationalDataTypeIds[control?.id]" placeholder="{{ 'choose_master_data' | i18next }}"
+                ngDefaultControl formControlName="{{control?.name}}" (keyup)='searchingFoundationalTypeId = control?.id'
+                loadingText="{{ 'loading...' | i18next }}" [typeahead]="foundationalInput" [loading]="loader[control?.id]"
+                (input)="changeInput($event,control?.id)" (click)="getAllFoundationalData(control?.id)">
+                <ng-container *ngIf="getfoundationalTypeItems?.length">
+                  <ng-option [value]="data.id" *ngFor="let data of getfoundationalTypeItems(control?.id)">
+                    {{data.name}}
+                  </ng-option>
+                </ng-container>
+              </ng-select>
+            </div>
+          </div>
+        </form>
+        <p class="validation-msg" *ngIf="!this.listOfFundationalDataType?.length">
+          {{ 'no_master_data_available_for_the_program' | i18next }}.
+        </p>
+      </vms-tab>
+      <vms-tab *ngIf="!hide()" label="{{ 'address_&_contact' | i18next }}">
+        <app-address-contact-details *ngIf="allCountryList.length > 0" [showAdditionalContactFields]="true" [editAddress]="isContactDetilsArr" [showSecondaryAddress]="true"
+          [showSecondaryContact]="true" [countryList]="allCountryList" [isViewClicked]="isViewMode || sameAsParent">
+        </app-address-contact-details>
+      </vms-tab>
+    </vms-tab-group>
+  </svms-sidebar-body>
+  <svms-sidebar-footer *ngIf="!isViewMode">
+    <!-- <button class="btn btn-outline float-left" *ngIf="isCustomeFieldButton">Add Custom Fields</button> -->
+    <button type="submit" *ngIf="tabIndex==0" class="btn btn-primary float-right" (click)="onContinue()"
+    [disabled]="createHirarcheyLevelFG?.invalid">
+      {{'continue' | i18next}}
+      <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+    </button>
+    <button type="submit" *ngIf="tabIndex==1 && !hide()"
+      class="btn btn-primary float-right" (click)="onContinue()" [disabled]="foundDataTypeFG?.invalid">
+      {{ 'continue' | i18next }}
+      <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+    </button>
+    <div *accessControl>
+      <button type="submit" *ngIf="tabIndex==1"
+      class="btn btn-primary float-right" (click)="onContinue($event)">
+      <icon size="20px" name="check_circle" type="material" class="icon--on-left d-flex" cuClass="d-flex"></icon>
+      {{ 'save' | i18next }}
+    </button>
+    </div>
+    <button class="btn btn-outline float-left mr-12" *ngIf="tabIndex==0 && !sameAsParent && (isEdit && editHierarchyisParent.length === 0)" (click)="resetForm()">Clear Data</button>
+  </svms-sidebar-footer>
+</svms-sidebar>

@@ -1,0 +1,272 @@
+<svms-sidebar title="Task Details" [dataVisibility]="taskDetails" (onClose)="sidebarClose()">
+  <svms-sidebar-body class="taxk-details">
+    <div class="p-24">
+      <h4 class="mb-32">{{taskData?.name}}</h4>
+      <div class="d-flex top-section">
+        <div class="mr-24 d-flex">
+          <icon class="d-inline-block mr-8" name="category" theme="outlined" size="14px"></icon>
+          <p class="d-inline-block">
+            <span>{{ 'task_type' | i18next }}</span>
+            {{snakeCaseToTitle(taskData?.task_type)}}
+          </p>
+        </div>
+        <div class="mr-24 d-flex">
+          <icon class="d-inline-block mr-8" name="today" theme="outlined" size="14px"></icon>
+          <p class="d-inline-block">
+            <span>{{ 'start_date' | i18next }}</span>
+            {{taskData?.start_date | localDateFormat: '': '':'' : true}}
+          </p>
+        </div>
+        <div class="mr-24 d-flex">
+          <icon class="d-inline-block mr-8" name="event" theme="outlined" size="14px"></icon>
+          <p class="d-inline-block">
+            <span>{{ 'due_date' | i18next }}</span>
+            {{taskData?.due_date | localDateFormat: '': '':'' : true}}
+          </p>
+        </div>
+        <div class="d-flex">
+          <icon class="d-inline-block mr-8" name="recent_actors" theme="outlined" size="14px"></icon>
+          <p class="d-inline-block" style="word-break: break-word;">
+            <span>{{ 'actor' | i18next }}</span>
+            {{ taskData?.actor }}
+          </p>
+        </div>
+      </div>
+      <div class="paragraph-wrapper mb-32 mt-32 p-12" *ngIf="checkSignDoc">
+        <p class="small">{{ 'description' | i18next }}</p>
+        <p class="small">{{showFullText ? taskData?.description :
+          ((taskData?.description?.length > 270) ? ((taskData?.description | slice:0:270)+'
+          ...') :
+          taskData?.description)}} <a (click)="showFullText = !showFullText"
+            *ngIf="(taskData?.description?.length > 270)">{{showFullText ? 'Less' : 'More'}}</a>
+        </p>
+      </div>
+      <h4 class="mt-32 mb-16" *ngIf="taskData?.task_type == 'UPLOAD_CREDENTIAL' || taskData?.task_type !== 'BACKGROUND_CHECK'">{{snakeCaseToTitle(taskData?.task_type)}}
+      </h4>
+      <form *ngIf="!checkSignDoc">
+        <label>
+          {{ 'recipient_email_id' | i18next }}
+        </label>
+        <div class="email-box d-flex justify-content-between position-relative">
+          <input class="form-control" placeholder="Enter email" [(ngModel)] = "recepEmail"
+          name="recepEmail" [readonly]="nonEditable" [pattern]="emailvalidation" #email="ngModel">
+          <a class="edit-emailid" (click)="editEmailField()">
+            <icon name="drive_file_rename_outline" color="#776DE0" theme="outlined" size="14px" *ngIf="nonEditable"></icon>
+            <icon name="close" color="#EB445A" theme="outlined" size="14px" *ngIf="!nonEditable"></icon>
+          </a>
+          <button class="btn btn-outine small" (click)="resendEmail()" *ngIf="nonEditable" [disabled]="recepEmail == ''">
+            <icon name="forward_to_inbox" size="14px" class="icon--on-left"></icon>{{ 'resend_email' | i18next }}</button>
+          <button class="btn btn-outine small save" [disabled]="email.errors?.pattern || recepEmail == ''" *ngIf="!nonEditable" (click)="resendEmail()">
+              <icon name="check_circle" size="14px" class="icon--on-left"></icon>{{ 'resend_email' | i18next }}</button>
+        </div>
+        <p class="validation-msg" *ngIf="email.errors?.pattern">{{ 'this_is_not_a_valid_email' | i18next }}</p>
+        <div class="email-msg-box mt-8" *ngIf="!nonEditable">
+          <icon name="info" size="20px" color="#776DE0" class="mr-12"></icon>
+          {{ 'this_email_id_will_be_used_for_this_task_related_notification_only' | i18next }}.
+        </div>
+      </form>
+      <form [formGroup]="docForm" *ngIf="checkSignDoc">
+        <div class="form-group"  *ngIf="taskData?.task_type == 'BACKGROUND_CHECK'">
+          <label>
+            {{ 'background_company_name' | i18next }} <span class="require">*</span>
+          </label>
+          <textarea class="form-control" rows="4" placeholder="Enter notes" formControlName="details"
+            [readOnly]="!isActor"></textarea>
+        </div>
+        <div class="form-group-row" *ngIf="taskData?.task_type == 'UPLOAD_CREDENTIAL'">
+          <div class="form-group">
+            <label>{{ 'select_credential' | i18next }} <span class="require">*</span></label>
+            <ng-select [clearable]="false" placeholder="Select" formControlName="credential_type"
+              [readonly]="!isActor">
+              <ng-option *ngFor="let credential of credentialArr" [value]="credential?.id">
+                {{credential?.name}}
+              </ng-option>
+            </ng-select>
+          </div>
+          <div class="form-group">
+            <label>{{ 'document_number' | i18next }} <span class="require">*</span></label>
+            <input class="form-control" onpaste="return false"
+              onkeypress="return ((event.charCode>=48 && event.charCode<=57)|| (event.charCode>=65 && event.charCode<=90) || (event.charCode>=97 && event.charCode<=122) )"
+              maxlength="25" placeholder="Enter Document Number" [readOnly]="!isActor"
+              formControlName="document_number">
+          </div>
+        </div>
+        <div class="form-group-row" *ngIf="taskData?.task_type == 'UPLOAD_CREDENTIAL'">
+          <div class="form-group task-datepicker position-relative">
+            <label>{{'issue_date' | i18next}}</label>
+            <svms-datepicker [inputdateFormat]="prefferedfDateFormat" *ngIf="isActor" formControlName="issue_date" id="issuedate"
+              I18n>
+            </svms-datepicker>
+            <input type="text" class="form-control" placeholder="Choose Date" *ngIf="!isActor" readOnly="true"
+              formControlName="issue_date" />
+          </div>
+          <div class="form-group  task-datepicker position-relative">
+            <label>{{'expiry_date' | i18next}}</label>
+            <svms-datepicker [inputdateFormat]="prefferedfDateFormat" *ngIf="isActor" formControlName="expiry_date"
+              id="expirydate" I18n>
+            </svms-datepicker>
+            <input type="text" class="form-control" placeholder="Choose Date" readOnly="true" *ngIf="!isActor"
+              formControlName="expiry_date" />
+          </div>
+        </div>
+        <p class="validation-msg pb-12" *ngIf="invalidDateMesg">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{invalidDateMesg}}
+        </p>
+        <div class="form-group upload-wrapper"
+          *ngIf="taskData?.task_type == 'SIGN_DOCUMENT' ||  taskData?.task_type == 'UPLOAD_CREDENTIAL' || taskData?.task_type == 'ATTACH_DOCUMENT' || taskData?.task_type == 'BACKGROUND_CHECK'">
+          <label>{{ 'attachments' | i18next }} <span class="require" *ngIf="taskData?.task_type !== 'BACKGROUND_CHECK'">*</span></label>
+          <!-- upload doc-->
+          <div class="form-group mb-0">
+            <div class="upload-zone text-center p-32 mb-16">
+              <div class="drop-zone mb-16">
+                <icon size="24px" name="publish" type="material" cuClass="d-flex"></icon>
+              </div>
+              <h4 class="pt-4 mb-4" *ngIf="isActor">{{ 'drag' | i18next }} &amp; {{ 'drop_file_or' | i18next }} <a
+                  (click)="uploadFileInput.click()">{{ 'browse' | i18next }}</a></h4>
+              <input hidden type="file" accept=".pdf, .doc, .docx" #uploadFileInput (change)="uploadFile($event)">
+              <p class="file-format mb-32">{{ 'only_.pdf,_.doc_files_with_maximum_size_of' | i18next }} 7 {{ 'mb' | i18next }}</p>
+            </div>
+            <ul class="uploaded-list" *ngFor="let file of uploadedFileArr, let i = index">
+              <li >
+                <figure *ngIf="file.ext == 'pdf'">
+                  <img src="/assets/images/pdf.svg" alt="">
+                </figure>
+                <figure *ngIf="file.ext == 'docx' || file.ext == 'doc' ">
+                  <img src="/assets/images/word.svg" alt="">
+                </figure>
+                <figure *ngIf="file.ext == 'jpg' || file.ext == 'jpeg' ">
+                  <img src="/assets/images/img-jpg.svg" alt="">
+                </figure>
+                <figure *ngIf="file.ext == 'png'">
+                  <img src="/assets/images/img-png.svg" alt="">
+                </figure>
+
+                <div class="item-description pt-12">
+                  {{file?.name}}
+
+                  <icon  *ngIf="file.signed_status === 'completed'" class="d-inline-block ml-8" size="18px" name="check_circle"
+                    type="material" cuClass="d-flex"></icon>
+                </div>
+
+                <a   *ngIf="(file.signed_status?.toLowerCase() === 'completed' && file?.url) || (disableHelloSign  && !file?.raw) " (click)="downloadAttachment(file)" class="btn btn-outline-primary small float-right btn-success">
+                  <icon class="d-flex mr-8" size="24px" name="file_download" type="material" cuClass="d-flex"></icon> {{ 'download' | i18next }}
+                </a>
+
+                <a   *ngIf="file?.id && file.signed_status != 'completed'  && !disableHelloSign" (click)="helloSign(file,'nonsource')" [ngClass]="{'disableDiv': !isActor }" class="btn btn-primary small float-right">
+                  <icon class="d-flex  mr-8" size="24px" name="draw" type="material" cuClass="d-flex"></icon>  {{ 'sign_document' | i18next }}
+                </a>
+
+                <!-- <a *ngIf="file?.raw" (click)="deleteFile(i)" class="delete-file pt-12">
+                  <icon class="d-flex" size="24px" name="delete_forever" type="material" cuClass="d-flex"></icon>
+                </a> -->
+                <a *ngIf="!file?.is_signed && !is_completed && isActor"
+                (click)="deleteFileById(file, i)" class="float-right">
+                <icon class="d-flex" size="24px" name="delete_forever" type="material" cuClass="d-flex"></icon>
+              </a>
+              </li>
+            </ul>
+            <ul class="uploaded-list error" *ngIf="!isValidFileSize">
+              <li>
+                <div class="item-description">
+                  <icon class="d-inline-block mr-8" size="18px" name="error" type="material" cuClass="d-flex"></icon>
+                  <p class="d-inline-block upload-size" *ngIf="!isImageFile">
+                    {{ 'error' | i18next }} : {{ 'file_size_must_be_less_than' | i18next }} 7{{ 'mb' | i18next }}
+                  </p>
+                  <p class="d-inline-block upload-size" *ngIf="isImageFile">
+                    {{ 'error' | i18next }} : {{ 'file_size_must_be_less_than' | i18next }} 3{{ 'mb' | i18next }}
+                  </p>
+                </div>
+              </li>
+            </ul>
+            <ul class="uploaded-list error" *ngIf="fileNotSupportAlert">
+              <li>
+                <div class="item-description">
+                  <icon class="d-inline-block mr-8" size="18px" name="error" type="material" cuClass="d-flex"></icon>
+                  <p class="d-inline-block upload-size">
+                    {{ 'error' | i18next }} : {{ 'file_type_is_not_supported.' | i18next }} {{ 'please_upload_the_documents_either_in_.pdf,_.doc_format' | i18next }}
+                  </p>
+                </div>
+              </li>
+            </ul>
+            <ng-template [ngIf]="taskData?.source_task?.files?.length > 0">
+              <label> {{ 'source_document' | i18next }}</label>
+              <ul class="uploaded-list" *ngFor="let file of taskData?.source_task?.files, let i = index">
+                <li >
+                  <figure *ngIf="file?.file_name?.split('.')?.pop() == 'pdf'">
+                    <img src="/assets/images/pdf.svg" alt="">
+                  </figure>
+                  <figure
+                    *ngIf="file?.file_name?.split('.')?.pop() == 'docx' || file?.file_name?.split('.')?.pop() == 'doc' ">
+                    <img src="/assets/images/word.svg" alt="">
+                  </figure>
+                  <figure
+                    *ngIf="file?.file_name?.split('.')?.pop() == 'jpg' || file?.file_name?.split('.')?.pop() == 'jpeg' ">
+                    <img src="/assets/images/img-jpg.svg" alt="">
+                  </figure>
+                  <figure *ngIf="file?.file_name?.split('.')?.pop() == 'png'">
+                    <img src="/assets/images/img-png.svg" alt="">
+                  </figure>
+
+                  <div class="item-description pt-12">
+                    {{file?.file_name}}
+
+                    <icon  *ngIf="file.signed_status?.toLowerCase() === 'completed'" class="d-inline-block ml-8" size="18px" tooltip="Verified Document" name="check_circle"
+                      type="material" cuClass="d-flex"></icon>
+                  </div>
+
+                  <a   *ngIf="(file.signed_status?.toLowerCase() === 'completed' && file?.url) || disableHelloSign" (click)="downloadAttachment(file)" class="btn btn-outline-primary small float-right btn-success ">
+                    <icon class="d-flex mr-8" theme="outlined" size="24px" name="file_download" type="material" cuClass="d-flex"></icon> {{ 'download' | i18next }}
+                  </a>
+
+                  <a  *ngIf="file?.id && file.signed_status?.toLowerCase() != 'completed' && !disableHelloSign" (click)="helloSign(file,'source')" class="btn btn-primary small float-right" [ngClass]="{'disableDiv': !isActor }">
+                    <icon class="d-flex  mr-8" size="24px" name="draw" type="material" cuClass="d-flex"></icon> {{ 'sign_document' | i18next }}
+                  </a>
+                </li>
+              </ul>
+            </ng-template>
+          </div>
+          <!-- end upload doc-->
+        </div>
+        <div class="form-group-row" *ngIf="taskData?.task_type == 'BACKGROUND_CHECK'">
+          <div class="form-group position-relative">
+            <label>{{'date_of_completion' | i18next}} <span class="require">*</span></label>
+            <svms-datepicker [inputdateFormat]="prefferedfDateFormat" *ngIf="isActor" formControlName="date_of_completion" id="date_of_completion" [options]="options"
+              I18n>
+            </svms-datepicker>
+            <input type="text" class="form-control" placeholder="Choose Date" *ngIf="!isActor" readOnly="true"
+              formControlName="date_of_completion" />
+          </div>
+          <div class="form-group">
+            <label>{{ 'result' | i18next }} <span class="require">*</span></label>
+            <ng-select [clearable]="false" placeholder="Select" formControlName="result"
+              [readonly]="!isActor">
+              <ng-option value="PASS"> {{ 'pass' | i18next }} </ng-option>
+              <ng-option value="FAIL"> {{ 'fail' | i18next }} </ng-option>
+            </ng-select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>
+            {{ 'notes' | i18next }}
+          </label>
+          <textarea class="form-control" rows="4" placeholder="Enter notes" formControlName="note"
+            [readOnly]="!isActor"></textarea>
+        </div>
+      </form>
+    </div>
+  </svms-sidebar-body>
+  <svms-sidebar-footer class="task-footer" *ngIf="checkSignDoc">
+   <div class="float-left" *accessControl>   <!-- || !isSignFile -->
+      <div class="checkbox-wrapper"  >
+        <label class="checkbox-container"  >
+          <input type="checkbox" name="" [disabled]="!isActor" [checked]="is_completed" (change)="submitCompletedOnboarding()" >
+          <span class="checkmark"></span>
+          <p>{{ 'mark_as_done' | i18next }}</p>
+        </label>
+      </div>
+    </div>
+    <button class="btn btn-primary float-right" *accessControl
+      (click)="saveTaskDetails()" [disabled]="!isActor" >{{ 'save' | i18next }}</button>  <!-- !isActor || (isActor && isSubmitted)  -->
+    <div class="clearfix"></div>
+  </svms-sidebar-footer>
+</svms-sidebar>

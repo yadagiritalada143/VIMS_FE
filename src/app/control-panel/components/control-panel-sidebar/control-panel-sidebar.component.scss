@@ -1,0 +1,176 @@
+@import '../../../../assets/sass/self-config/base/variables.scss';
+
+.c-panel-logo {
+    margin: 13px 0 12px 60px;
+}
+
+nav {
+    position: absolute;
+    left: 0;
+    top: 58px;
+    height: calc(100vh - 58px);
+    overflow: auto;
+    background-color: colors(primary, 1);
+    transition: $transition;
+    z-index: 100;
+    max-width: 60px;
+
+    ul {
+        list-style-type: none;
+
+        &.short-view {
+            display: block;
+            margin-left: 7px;
+            padding-top: $p24;
+            width: 44px;
+
+            li {
+                padding: $p12;
+                margin-bottom: $m16;
+
+                i {
+                    color: colors(primary, 9);
+                    font-size: 20px;
+                }
+
+                &.active {           
+                    background-color: #DDEAFF;
+                    border-radius: $border-radius;
+
+                    i {
+                        color: colors(primary, 6);
+                    }
+                }
+            }
+        }
+
+        &.full-view {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-130px);
+            padding-top: $p24;
+            transition: $transition;
+            li {
+                position: relative;
+                padding: 0 30px;
+                line-height: 26px;
+    
+                a {
+                    color: colors(primary, 9);
+                    font-weight: $font-weight-medium;
+                    display: block;
+                    font-size: 14px;
+                    padding: $p4 10px;
+                    border-radius: $border-radius;
+    
+                    .parent-icon {
+                        position: absolute;
+                        top: 9px;
+                        left: 10px;
+                        font-size: 18px;
+                        color: colors(primary, 7);
+                    }
+    
+                    &:hover {
+                        color: colors(primary, 6);
+                        font-weight: $font-weight-medium;
+                        background-color: #DDEAFF;
+                    }
+                }
+    
+                ul {
+                    margin-top: $m8;
+                    max-height: 0;
+                    overflow: hidden;
+                    transition: $transition;
+    
+                    li {
+                        padding-left: 0;
+                        padding-right: 0;
+                        margin-bottom: $m8;
+    
+                        a {
+                            font-weight: $font-weight-regular;
+                            position: relative;
+                            transition: $transition;
+                            font-size: $font-primary;
+                            border-left: 8px solid transparent;
+    
+                            i {
+                                color: colors(primary, 9);
+                                font-size: 18px;
+                                vertical-align: middle;
+                                margin-right: $m16;
+                            }
+    
+                            &:before {
+                                position: absolute;
+                                top: 0;
+                                left: -30px;
+                                width: 9px;
+                                height: 100%;
+                                background-color: colors(primary, 6);
+                                content: '.';
+                                text-indent: -9999px;
+                                overflow: hidden;
+                                display: none;
+                                visibility: visible;
+                                border-top-right-radius: $border-radius;
+                                border-bottom-right-radius: $border-radius;
+                            }
+    
+                            &:hover {
+                                color: colors(primary, 6);
+                                background-color: transparent;
+                                font-weight: $font-weight-regular;
+    
+                                i {
+                                    color: colors(primary, 6);
+                                }
+                            }
+    
+                            &.active {
+                                color: colors(primary, 6);
+                                font-weight: $font-weight-medium;
+                                background-color: #DDEAFF;
+    
+                                i {
+                                    color: colors(primary, 6);
+                                }
+    
+                                &:before {
+                                    display: block;
+                                }
+                            }
+                        }
+                    }
+    
+                    &.active {
+                        max-height: 1000px;
+                        overflow: inherit;
+                    }
+                }
+    
+                &.parent-active {
+                    margin-bottom: $m24;
+                }
+            }
+        }
+    }
+
+    &:hover {
+        max-width: 354px;
+
+        ul {
+            &.short-view {
+                display: none;
+            }
+    
+            &.full-view { 
+                opacity: 1;
+                visibility: visible;
+                transform: translateX(0);
+            }
+        }
+    }
+}

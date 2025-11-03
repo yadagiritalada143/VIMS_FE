@@ -1,0 +1,53 @@
+<svms-sidebar-ng
+  size="small"
+  [title]="title"
+  [dataVisibility]="withdrawSidebar"
+  (onClose)="sidebarClose()"
+>
+<app-logs [log]="logs"></app-logs>
+  <div class="pl-24 pr-24 pt-32 pb-32" [formGroup]="withdrawForm">
+    <div class="form-group" *ngIf="!acceptCandidate">
+      <label>{{ label|i18next }} <span class="require">*</span></label>
+       <ng-select
+        [clearable]="false"
+        placeholder="{{ 'select_reason' | i18next }}"
+        [searchable]="false"
+        formControlName="reason"
+      >
+        <ng-option [value]="reason?.name ? reason?.name :reason?.label" *ngFor="let reason of rejectReasons">
+          {{reason?.name ? reason?.name : reason?.label }}
+        </ng-option>
+      </ng-select>
+    </div>
+    <div class="form-group">
+      <label>{{ 'notes' | i18next }}</label>
+      <textarea
+        class="form-control"
+        placeholder="{{ 'enter_additional_notes' | i18next }}"
+        rows="7"
+        cols="12"
+        maxlength="3000"
+        formControlName="notes"
+      ></textarea>
+    </div>
+  </div>
+
+  <svms-sidebar-footer-ng>
+    <button
+      type="submit"
+      [disabled]="!withdrawForm.valid || loading"
+      class="btn btn-primary float-right"
+      (click)="withdrawCandidate()"
+    >
+      <icon
+        size="20px"
+        name="check_circle"
+        type="material"
+        class="icon--on-left"
+        cuClass="icon-cu"
+      ></icon>
+      {{ btnLabel |i18next }}
+      <span *ngIf="loading" class="loader ml-12"> </span>
+    </button>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

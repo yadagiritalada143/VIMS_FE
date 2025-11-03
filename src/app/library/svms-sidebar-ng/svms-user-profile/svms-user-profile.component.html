@@ -1,0 +1,42 @@
+<div class="user-profile-view text-center" *ngIf="showProfile">
+
+
+    <figure  class="d-flex align-items-center justify-content-center">
+        <img *ngIf="!!avatar && !showSkelton && !profileImageHide" [src]="avatar" (load)="loaded = true" alt="" [hidden]="!loaded" />
+
+        <span *ngIf="(!loaded || (loaded && !avatar )) && !showSkelton" class="text" alt="">{{ (jobData?.name ? jobData?.name : userName) | shortName: "last" }}</span>
+
+        <img *ngIf="showSkelton && !isClient" src="./assets/images/avatar-default.png" alt="" />
+
+    </figure>
+    <div class="mt-12" *ngIf="showSkelton">
+        <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{'width': '150px', height: '12px', 'border-radius':'16px', 'margin-bottom':'0', 'background-color': '#5c7dbf', 'border-top': '0'}">
+        </ngx-skeleton-loader>
+    </div>
+    <div class="mt-8" *ngIf="showSkelton">
+        <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{'width': '150px', height: '8px', 'border-radius':'16px', 'margin-bottom':'0', 'background-color': '#5c7dbf', 'border-top': '0'}">
+        </ngx-skeleton-loader>
+    </div>
+    <h4 class="mt-12 font-weight-medium" *ngIf="!showSkelton">{{ userName }}</h4>
+    <p class="small mb-16" *ngIf="!showSkelton">{{ userPosition|i18next }}</p>
+    <div class="mt-8" *ngIf="showSkelton">
+        <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{'width': '180px', height: '8px', 'border-radius':'16px', 'margin-bottom':'0', 'background-color': '#5c7dbf', 'border-top': '0'}">
+        </ngx-skeleton-loader>
+    </div>
+    <button class="btn btn-outine small download-resume" *ngIf="candidateData?.resume_url" (click)="downloadAttachment(candidateData?.resume_url)">{{'download_resume' | i18next}}</button>
+    <ul class="social-profile mb-12" *ngIf="socialProfiles && !showSkelton">
+        <li *ngFor="let social of socialProfiles">
+            <a href="{{ social?.link }}" target="_blank">
+                <img [src]="socialprofile_icons[social?.type]" alt="" width="16" />
+            </a>
+        </li>
+    </ul>
+
+    <div class="violet-bg mt-16 p-16 mb-24" *ngIf="jobData?.template_name">
+        <p class="font-weight-medium">{{ jobData?.template_name }}</p>
+        <p class="d-flex justify-content-center align-items-center small">
+            <sidebar-icon color="#FFC409" class="mr-4" size="24px" name="label" type="material" cuClass="icon d-flex"></sidebar-icon>
+            <span>{{ jobData?.job_id }}</span>
+        </p>
+    </div>
+</div>

@@ -1,0 +1,52 @@
+<svms-sidebar [title]="'Manage Onboarding Tasks'|i18next" [dataVisibility]="viewTaskSidebar" (onClose)="closeSidebr()">
+  <svms-sidebar-body>
+    <div class="p-24">
+      <div class="form-group mb-8">
+        <label>{{ 'Checklist Name' | i18next }} <span class="require">*</span></label>
+        <ng-select [items]="onBoardingdata" bindLabel="name" bindValue="id" [(ngModel)]="selectedValue"  placeholder="{{ 'Select' | i18next }}" (change)="setSelectedItem($event)">
+        </ng-select>
+      </div>
+      <div class="d-flex mb-24">
+        <icon name="info" cuClass="d-flex" size="14px" color="#0044C5" class="mt-4 mr-8"></icon>
+        <p class="small text-link">{{ 'By selecting a different Checklist Name, the associated list of tasks will be shown. To save the selection to the Job, click Update. To cancel this change, click Cancel.' | i18next }}</p>
+      </div>
+      <table class="view-task-list">
+        <thead>
+            <tr>
+                <th class="text-left">{{ 'Tasks' | i18next }}</th>
+                <th>
+                    <div class="d-flex align-items-center">
+                        <span class="mr-4">{{ 'Required' | i18next }}</span>
+                        <icon cuClass="d-flex" name="help" size="16px" color="#A3B0C0" textAlignment="left" tooltip="When a Task is identified as required, the onboarding item is required for the individual to start their assignment.  If the Task is not identified as required, then an individual can start their assignment without the onboarding item being completed." placement="left"></icon>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngIf="selectedItem">
+            <tr *ngFor="let task of selectedItem.tasks">
+              <td>{{ task?.name }}</td>
+              <td>
+                <span [ngClass]="task?.is_required ? 'text-red' : 'text-dark'" class="font-weight-medium">
+                  {{ task?.is_required ? 'Yes' : 'No' }}
+                </span>
+              </td>
+           </tr>
+           </ng-container>
+        </tbody>
+      </table>
+    </div>
+  </svms-sidebar-body>
+  <svms-sidebar-footer>
+    <div class="d-flex justify-content-between">
+        <button class="btn btn-light" (click)="closeSidebr()">
+            {{ 'cancel' | i18nextEager }}
+          </button>
+      <button class="btn btn-primary" (click)="update()">
+        <icon size="20px" name="check_circle" type="material" class="icon--on-left" color="#ffffff">
+        </icon
+        >{{ 'update' | i18nextEager }}
+      </button>
+    </div>
+  </svms-sidebar-footer>
+</svms-sidebar>

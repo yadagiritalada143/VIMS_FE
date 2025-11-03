@@ -1,0 +1,25 @@
+<div style="width: 100%;">
+    <!-- <button (click)="copyData()">Copy Config</button> -->
+    <table width='100%' *ngFor="let row of currentConfig?.rows || [], let i=index">
+      <tr style="position: relative;" [ngClass]="{'row-dot-border': selectedRowIndex === i}" appRowRenderer [rowObj]="row"  [rowIndex]="i">
+        <!-- <app-row-renderer [rowObj]="row?.cols" [rowIndex]="i"
+                          (clickDeleteCell)="onClickCellDelete($event)"
+                          (clickDeleteRow)="onClickRowDelete($event)"
+                          (clickCell)="onCellClick($event)"
+                          (clickDeleteItem)="onClickItemDelete($event)">
+        </app-row-renderer> -->
+        <td *ngFor="let col of row?.cols, let j=index">
+          <app-col-renderer [colIndex]="j" [colObject]="col"
+                            (clickDeleteCell)="onClickCellDelete($event)"
+                            (clickCell)="onCellClick($event)"
+                            (clickDeleteItem)="onClickItemDelete($event)">
+          </app-col-renderer>
+        </td>
+        <div class="inline-toolbar" *ngIf="selectedRowIndex === i">
+          <icon title="Delete Row" size="24px" name="delete" type="material" cuClass="d-flex" (onClick)="onClickRowDelete(i)"></icon>
+        </div>
+      </tr>
+    </table>
+  </div>
+  
+  

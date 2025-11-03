@@ -1,0 +1,133 @@
+<header class="timesheet-header py-16 px-24">
+    <div class="header-mobile-wrapper">
+        <!-- Worker Name & location -->
+        <div class="worker-info">
+
+            <div class="grid-group-data">
+                <figure class="user-avatar rounded-circle overflow-hidden  float-left">
+                    <img [src]="basicDetails?.worker?.avatar" *ngIf="basicDetails?.worker?.avatar && !profileImageHide; else showInitialsSection" alt="{{basicDetails?.worker?.initials | i18next }}">
+                    <ng-template #showInitialsSection>
+                        <span class="initials initials__purple  text-uppercase">{{basicDetails?.worker?.initials || '' | i18next }}</span>
+                    </ng-template>
+                </figure>
+                <div class="header-item-info">
+                    <span tooltip="{{basicDetails?.worker?.name || '' | i18next }}" placement="top" delay="500">{{capitalizeWords(basicDetails?.worker?.name) || '' | removePrefixSuffix | i18next }}</span>
+                    <label *ngIf="basicDetails?.work_location?.name" tooltip="{{basicDetails?.work_location?.name | i18next }}" placement="top" delay="500">
+                        <icon name="location_on" theme="round" size="16px" class="mr-4"></icon>
+                        {{basicDetails?.work_location?.name | i18next }}
+                    </label>
+                    <label *ngIf="!basicDetails?.work_location?.name">
+                    <icon name="location_off" color="#b2b2b5" theme="round" size="16px"  ></icon>
+                    {{ 'no_location_found' | i18next }}
+                </label>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="worker-additional-details">
+            <div class="grid-group-data">
+                <icon class="bg-color rounded-circle float-left" color="#7F6FC1" name="assignment_turned_in" theme="outlined" size="18px"></icon>
+                <div class="header-item-info">
+                    <span>
+                        {{ 'assignment_title(id)' | i18next }}
+                    </span>
+                    <label class="font-weight-medium" tooltip="{{assignmentName  | i18next }}" placement="top" delay="500" (click)="openAssignmentDetailPanel()">
+                        <a>{{ assignmentName  | i18next }}</a>
+                    </label>
+                </div>
+            </div>
+            <div class="grid-group-data">               
+                <div class="header-item-info position-relative">
+                    <span>
+                        {{ 'timesheet_manager' | i18next }}
+                    </span>
+                    <figure class="text-truncate d-flex align-items-center justify-content-center manager-images-list">
+
+                        <ng-container *ngFor="let manager of basicDetails?.manager;let i =index">
+                          <div class="manager-avatar-list overflow-hidden d-flex align-items-center justify-content-center cursor-pointer initials__purple" tooltip="{{manager?.name}}" placement="top" *ngIf="manager && i<6">
+                            {{manager?.avatar ? '' : manager?.initials}}
+                            <img class="manager-profile" *ngIf="manager?.avatar" width="20" height="20" src="{{manager?.avatar}}" alt="{{manager?.initials}}">
+                          </div>
+                          <div class="manager-avatar-list overflow-hidden d-flex align-items-center justify-content-center more-name cursor-pointer" placement="top" *ngIf="manager && i==6"  #managerCount>
+                            +{{basicDetails?.manager?.length - 6}}
+                        </div>
+                        </ng-container>
+                        <label  class="ml-24 mt-0" tooltip="{{basicDetails?.manager?.[0]?.name}}" placement="top" delay="500" *ngIf="basicDetails?.manager?.length===1">
+                            {{(basicDetails?.manager?.[0]?.name || "-") | removePrefixSuffix | i18next}}
+                          </label>
+                      </figure>
+                </div>
+            </div>
+            <div class="grid-group-data">
+                <icon class="bg-color rounded-circle float-left" color="#7F6FC1" name="corporate_fare" theme="round" size="18px"></icon>
+                <div class="header-item-info">
+                    <span>
+                        {{ 'vendor' | i18next }}
+                    </span>
+                    <label tooltip="{{basicDetails?.vendor?.name | i18next }}" placement="top" delay="500">
+                        {{basicDetails?.vendor?.name | i18next }}
+                    </label>
+                </div>
+            </div>
+            <div class="grid-group-data">
+                <icon class="bg-color rounded-circle float-left" color="#7F6FC1" name="account_tree" theme="round" size="18px"></icon>
+                <div class="header-item-info">
+                    <span>
+                        {{ 'hierarchy' | i18next }}
+                    </span>
+                    <label tooltip="{{basicDetails?.hierarchy_id?.name | i18next }}" placement="top" delay="500">
+                        {{basicDetails?.hierarchy_id?.name | i18next }}
+                    </label>
+                </div>
+            </div>
+            <div *ngIf="sourcing_model" class="grid-group-data">
+                <icon class="bg-color rounded-circle float-left" color="#7F6FC1" name="account_tree" theme="round" size="18px"></icon>
+                <div class="header-item-info">
+                    <span>
+                        {{ 'sourcing_model' | i18next }}
+                    </span>
+                    <label class="text-capitalize" tooltip="{{sourcing_model | i18next }}" placement="top" delay="500">
+                        {{sourcing_model | i18next }}
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+
+    <!-- <div class="w-100">
+    <p class="small paragraph-label mb-4">
+      {{ 'wipro_project_location_type' | i18next }}
+    </p>
+    <div class="location-select form-group mb-0"
+      *ngIf="!checkForStatus('approved') && !checkForStatus('rejected') && !checkForStatus('pending'); else showLocation">
+      <ng-select [clearable]="false" placeholder="Client Location" [(ngModel)]="selectedLocation"
+        (change)="changeLocation($event)">
+        <ng-option *ngFor="let l of locationData" value="{{l?.label | i18next }}">
+          {{l?.label | i18next }}
+        </ng-option>
+      </ng-select>
+    </div>
+    <ng-template #showLocation>
+      <p class="font-weight-medium">
+        {{selectedLocation | i18next }}
+      </p>
+    </ng-template>
+
+  </div> -->
+</header>
+<div class="more-name-list"  [ngClass]="{'active' : showHideManagerList}" #managerNameDropdown>
+    <h6>{{'Timesheet Managers' | i18nextEager }}</h6>
+    <ul>
+      <ng-container *ngFor="let manager of basicDetails?.manager; let i = index">
+        <li class="d-flex align-items-center" *ngIf="manager && i>=6">
+          <div class="name-avatar" [ngClass]="{'overflow-hidden':manager?.avatar}" placement="top">
+          <img class="manager-profile" *ngIf="manager?.avatar" src="{{manager?.avatar}}" alt="{{manager?.initials}}" width="15" height="15"  srcset="">
+            {{ manager?.avatar ? '' : manager?.initials }}
+          </div>
+          <div>{{ manager?.name }}</div>
+        </li>
+      </ng-container>
+    </ul>
+  </div>

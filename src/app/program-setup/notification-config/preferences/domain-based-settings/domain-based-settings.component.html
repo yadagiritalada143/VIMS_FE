@@ -1,0 +1,51 @@
+<div class="notification-page-wrapper">
+<div class="card">
+  <app-logs [log]="logs"></app-logs>
+  <div class="d-flex align-items-center justify-content-start border-bottom pl-16">
+    <span class="cur material-icons pr-8" (click)="navigateback()">
+      arrow_back
+    </span>
+    <h5> {{ 'domain' | i18next }} {{domainType | titlecase}} </h5>
+  </div><form [formGroup]="domainAddForm">
+  <div class="p-24 d-flex align-items-center justify-content-center domain-main">
+    <div class="form-group mb-0 pb-0">
+      <label for="">{{ 'enter_domain_name' | i18next }} <span class="text-danger"> *</span></label>
+      <input type="text" placeholder="Enter domain name to {{domainType}}" class="form-control" formControlName="domainName" >
+    </div>
+    <button type="button" [disabled]="!domainAddForm?.valid" class="btn btn-success mt-24 ml-16 domain-addbtn" style="flex: 1;" (click)="addDomaintoListAsPerType()" *accessControl>
+      {{ 'add_to' | i18next }} {{domainType}}
+    </button>
+
+  </div>
+</form>
+  <div class="position-relative search_input">
+    <icon class="icon" name="search" size="16px"></icon>
+    <input #searchData class="form-control" placeholder="Enter domain name" type="text" (keyup)="setSearchParam(searchData?.value)">
+  </div>
+
+  <div class="card-content">
+    <section class="table-outer-wrap">
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>{{ 'domain_name' | i18next }}</th>
+              <th class="text-right" *accessControl>{{ 'actions' | i18next }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let domain of filteredDomainLists">
+              <td>
+                {{domain}}
+              </td>
+              <td class="text-right text-black">
+                <icon name="delete" size="20px" class="cur" theme="outlined" (click)="deleteDomainNameFromList(domain)" *accessControl></icon>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
+</div>

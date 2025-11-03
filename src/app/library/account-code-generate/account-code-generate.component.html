@@ -1,0 +1,80 @@
+
+  <svms-sidebar [title]="'Account Code'|i18next" [(dataVisibility)]="visiblity" (onClose)="sidebarClose()">
+    <div>
+      <svms-sidebar-body>
+        <section class="account-code-setup" [formGroup]="accountCodeGenerateForm">
+          <div class="account-form-wrapper account-code">
+            <div class="panel panel-light"
+              *ngIf="!configurationNotExist && accountCodeGenerateForm?.get('foundational_data') && accountCodeGenerateForm?.get('foundational_data').controls?.length > 0">
+              <div class="panel-body p-24">
+
+                <div class="row pt-12">
+                  <div class="col-4" *ngFor="
+                        let item of accountCodeGenerateForm?.get('foundational_data')?.controls;let i = index
+                      ">
+                    <div class="form-group-row" [formGroup]="item">
+                      <div class="form-group pb-8">
+                        <label I18n>{{ item?.get("foundational_data_name")?.value }}
+                          <span class="require" *ngIf="item?.get('is_required')?.value">*</span></label>
+                        <ng-select
+                          [multiple]="false"
+                          [formControl]="item?.get('values')"
+                          bindLabel="name"
+                          placeholder="{{ 'select' | i18next }}"
+                          (search)="getfoundationalData($event ,item , i)"
+                          [readonly]="readOnly"
+                          (change)="onSelectAccountCode($event)">
+                          <ng-option *ngFor="let option of item?.get('options')?.value" [value]="option">
+                            <span [hidden]="hideMasterDataTypeName">{{ option.name }} - </span>
+                            <span *ngIf="option.code">{{option.code}}</span>
+                          </ng-option>
+                        </ng-select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div style="padding: 0px 10px 8px 24px">
+                <label I18n class="mb-12 font-weight-medium">{{ 'account_code' | i18next }} <span class="require">*</span></label>
+                <div class="row">
+                  <div class="account-code-section"
+                    [ngClass]="{'failure-account-code': !isValidAccountCode && accountCodeGenerateForm.get('accountCodeGenerated').dirty && accountCodeGenerateForm.get('accountCodeGenerated').invalid}">
+                    <input type="text" class="form-control"
+                      [ngClass]="{'failure-account-code': !isValidAccountCode && accountCodeGenerateForm.get('accountCodeGenerated').dirty && accountCodeGenerateForm.get('accountCodeGenerated').invalid,
+                                  'success-account-code' : isValidAccountCode}"
+                      formControlName="accountCodeGenerated" placeholder=""
+                      [readonly]="true" style="font-size: 12px;" [hidden]="true">
+
+                      <p style="font-size: 12px;font-weight: 500;"
+                      [ngStyle]="{'color': !isValidAccountCode && accountCodeGenerateForm.get('accountCodeGenerated').dirty && accountCodeGenerateForm.get('accountCodeGenerated').invalid ? '#ce0b25': (isValidAccountCode ? '#42ba96' : '#0F2E4E')}">
+                      {{accountCodeMessage}}</p>
+
+                      <button type="button" class="btn btn-primary account-code-validate" [disabled]="disableSave || readOnly" (click)="createAccountCode()" >
+                        {{ 'validate' | i18next }}
+                      </button>
+                    </div>
+                    <p *ngIf="accountCodeGenerateForm.get('accountCodeGenerated').value"
+                      [ngClass]="{'success-account-code': isValidAccountCode && accountCodeGenerateForm.get('accountCodeGenerated').dirty,
+                                  'validation-msg' : !isValidAccountCode && accountCodeGenerateForm.get('accountCodeGenerated').dirty && accountCodeGenerateForm.get('accountCodeGenerated').invalid}">
+                       {{validationMessage}}
+                    </p>
+
+                </div>
+              </div>
+            </div>
+            <div class="clearfix"></div>
+          </div>
+        </section>
+      </svms-sidebar-body>
+      <svms-sidebar-footer>
+        <div class="d-flex justify-content-end">
+
+          <button type="button" class="btn btn-primary" [disabled]="readOnly || disableContinue" (click)="onBtnContinueClick()">
+            {{ 'continue' | i18next }}
+          </button>
+        </div>
+      </svms-sidebar-footer>
+    </div>
+  </svms-sidebar>

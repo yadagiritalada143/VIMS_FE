@@ -1,0 +1,26 @@
+<app-svms-table
+    [dataSource]="vmsData"
+    [tableOptions]="tableOptions"
+    [coloumnDefintions]="tableColumnConfig"
+>
+</app-svms-table>
+
+<ng-template #status let-value="value">
+    <span class="c-status-ui active" *ngIf="value">
+        {{ 'active' | i18next }}
+      </span>
+    <span class="c-status-ui inactive" *ngIf="!value">
+        {{ 'inactive' | i18next }}
+    </span>
+</ng-template>
+
+<ng-template #count let-value="value">
+    <div class="d-flex justify-content-center">
+        <div class="initial-bg pr-20">{{(value ?? 0) | i18next}}</div>
+    </div>
+</ng-template>
+
+<app-picklist-flyout
+    [(visible)]="sidebarVisibility"
+    (sidebarClosed)="refreshList($event)"
+></app-picklist-flyout>

@@ -1,0 +1,184 @@
+<!-- new -->
+<div class="row">
+  <div class="col-6" *ngFor="
+      let item of questionForm.get('custom_fields')?.controls; let i = index" [hidden] ="!item?.get('is_show').value">
+    <div class="form-group-row" [formGroup]="item"  *ngIf="item?.get('is_show').value"> 
+      <div class="form-group"   *ngIf="item?.get('is_show').value" [ngClass]="{'d-flex align-items-center justify-content-between mb-0': item.get('custom_field_type').value == 'CHECKBOX'}" >
+        <label I18n  class="text-capitalize">{{ item?.get("custom_field_name")?.value }}
+          <span class="require" *ngIf="item?.get('is_required')?.value">*</span></label>
+          
+        <input class="form-control" *ngIf="item.get('custom_field_type').value === 'TEXT'"  type="text"
+          formControlName="values" placeholder='{{item?.get("custom_field_placeholder")?.value}}' />
+          <!-- [ngClass]="{'red': item?.get('is_required')?.value && isLoader}" -->
+          <input class="form-control"  *ngIf="item.get('custom_field_type').value === 'EMAIL'"  type="email"
+          formControlName="values" placeholder='{{item?.get("custom_field_placeholder")?.value}}' />
+          
+          <input class="form-control" *ngIf="item.get('custom_field_type').value === 'NUMBER' ||item.get('custom_field_type').value === 'NUMBERS' "  type="text"
+          formControlName="values" placeholder='{{item?.get("custom_field_placeholder")?.value}}' />
+
+          <input class="form-control" *ngIf="item.get('custom_field_type').value === 'PHONE'"  type="text"
+          formControlName="values" placeholder='{{item?.get("custom_field_placeholder")?.value}}' />
+
+          <textarea class="form-control" *ngIf="item.get('custom_field_type').value === 'TEXTAREA'"  type="text"
+          formControlName="values" placeholder='{{item?.get("custom_field_placeholder")?.value}}'></textarea>
+
+          
+            <div  *ngIf="item.get('custom_field_type').value == 'CHECKBOX'" class="float-right">
+              
+              <input class="float-right" *ngIf="item.get('custom_field_type').value === 'CHECKBOX' && (!item.get('meta_data').value?.datasource?.options || !item.get('meta_data').value)"  type="checkbox"
+              formControlName="values" placeholder='{{item?.get("custom_field_placeholder")?.value}}' />
+
+              <div *ngFor="let check of item.get('meta_data').value?.datasource?.options;let c = index" class="question-checkbox checkbox-wrapper d-inline-block mr-16">
+                <label class="checkbox-container">
+                  <input type="checkbox" name="{{check.name}}"
+                  value="{{check?.answer}}" [(ngModel)]="check.values" [ngModelOptions]="{standalone: true}" [checked]="check.answer">
+                  <span class="checkmark"></span>
+                  <p>{{check?.label}}</p>
+                </label>
+              </div>
+            </div>
+
+            <div *ngIf="item.get('custom_field_type').value == 'MULTI_SELECT_DROPDOWN'" class="d-flex flex-wrap">
+              
+              <input class="form-control" *ngIf="item.get('custom_field_type').value === 'CHECKBOX' && !item.get('meta_data').value?.datasource?.options"  type="checkbox"
+              formControlName="values" placeholder='{{item?.get("custom_field_placeholder")?.value}}' />
+
+              <div *ngFor="let check of item.get('meta_data').value?.datasource?.options;let c = index" class="checkbox-wrapper d-inline-block mr-16">
+                <label class="checkbox-container">
+                  <input type="checkbox" name="{{check.label}}" (change) = "changeDependantFlag(i,check)"
+                  [checked]="check.values" value="{{check?.answer}}" [(ngModel)]="check.values" [ngModelOptions]="{standalone: true}">
+                  <span class="checkmark"></span>
+                  <p>{{check?.label}}</p>
+                </label>
+              </div>
+            </div>
+
+          
+        <div class="checkbox-wrapper d-inline-block"
+          *ngIf="item.get('custom_field_type').value === 'RADIO'">
+          <label class="checkbox-container">
+            <input type="checkbox" formControlName="values">
+            <span class="checkmark"></span>
+          </label>
+        </div>
+        <svms-datepicker  *ngIf="item.get('custom_field_type').value === 'DATE' || item.get('custom_field_type').value === 'DATETIME'" [inputdateFormat]="'yy-mm-dd'" [options]="options" id="date1" I18n
+        formControlName="values">
+      </svms-datepicker>
+      <app-upload-documents  *ngIf="item.get('custom_field_type').value === 'FILE'" [uploadLabel]="item?.get('values')?.value?.name" (oldUploadDataFiles)= "updateoldFiles($event)" (uploadDataFiles)="uploadFiles($event, item?.get('custom_field_name')?.slug , i)"
+      [closePanel]="closePanel" ></app-upload-documents>
+      <!-- <ng-select placeholder="" [formControlName]="values" (change) = "updateDependantField(i)"
+      *ngIf="item.get('custom_field_type').value === 'DROPDOWN'" >
+      <ng-option   [value]= h?.value *ngFor="let h of item.get('meta_data').value?.datasource?.options">{{h?.label}}</ng-option>
+    </ng-select> -->
+    <ng-select (change) = "updateDependantFlag(i)" *ngIf="item.get('custom_field_type').value === 'DROPDOWN'" class="" [items]="item.get('meta_data').value?.datasource?.options" bindLabel="label" bindValue="value" formControlName="values"
+      placeholder="{{ 'select' | i18next }}">
+  </ng-select>
+      <!-- [newUploadfileArr]="newUploadfileArr" [oldUploadfileArr]="oldUploadfileArr" -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- end -->
+<!-- Old data -->
+<!-- <div *ngIf="questionnaireList?.length > 0">
+    <h4 class="font-weight-medium mt-12 mb-24">Questionnaire</h4>
+    <div *ngFor="let questionaire of questionnaireList; let i =index">
+      <div *ngFor="let ques of questionaire?.question; let j =index"> {{ques?.response}}
+        <div *ngIf="ques?.type === 'TEXT' || ques?.type === 'text'" class="form-group">
+          <label>{{ques?.label}} <span *ngIf="ques?.is_required"  class="require">*</span></label>
+          <input type="text" [(ngModel)]="ques.answer" [ngModelOptions]="{standalone: true}" class="form-control" 
+          placeholder="Placeholder text" [ngClass]="{'red': isRequired && ques?.is_required && !ques?.answer}"/>
+        </div>
+         <div *ngIf="ques?.type === 'PHONE' || ques?.type === 'phone'" class="form-group">
+          <label>{{ques?.label}} <span *ngIf="ques?.is_required"  class="require">*</span></label>
+          <input type="phone" [ngClass]="{'red': isRequired && ques?.is_required && (!ques.answer || ques.answer?.length <= 9)}" [(ngModel)]="ques.answer" [ngModelOptions]="{standalone: true}" class="form-control" placeholder="Placeholder phone" />
+        </div>
+
+        <div *ngIf="ques?.type === 'TEXTAREA' || ques?.type === 'textarea'" class="form-group">
+          <label>{{ques?.label}} <span *ngIf="ques?.is_required"  class="require">*</span></label>
+          <textarea rows="3" cols="12" [ngClass]="{'red': isRequired && ques?.is_required  && !ques.answer}" class="form-control" [(ngModel)]="ques.answer" [ngModelOptions]="{standalone: true}" placeholder="textarea"> </textarea>
+        </div>
+        <div *ngIf="ques?.type === 'DATE' || ques?.type === 'date'" class="form-group position-relative">
+          <label>{{ques?.label}} <span *ngIf="ques?.is_required"   class="require">*</span></label>
+          <svms-datepicker [isRequired]="isRequired" [inputdateFormat]="'yy-mm-dd'" [placeholder]="'Choose Date'" [(ngModel)]="ques.answer" [ngModelOptions]="{standalone: true}"></svms-datepicker> 
+        </div>
+        <div *ngIf="ques?.type === 'DATETIME' || ques?.type === 'datetime'" class="form-group position-relative">
+          <label>{{ques?.label}} <span *ngIf="ques?.is_required"   class="require">*</span></label>
+          <svms-datepicker [isRequired]="isRequired" [ngClass]="{'red': isRequired && !ques.answer}" [inputdateFormat]="'yy-mm-dd'" [placeholder]="'Choose Date'" [(ngModel)]="ques.answer" [ngModelOptions]="{standalone: true}"></svms-datepicker> 
+        </div>
+
+        <div *ngIf="ques?.type === 'DROPDOWN' || ques?.type === 'dropdown'" class="form-group">
+          <label>{{ques?.label}} <span *ngIf="ques?.is_required"  class="require">*</span></label> 
+          <ng-select  [ngClass]="{'red': isRequired && ques?.is_required  && !ques.answer}" placeholder="placeholder select" [(ngModel)]="ques.answer" [ngModelOptions]="{standalone: true}" 
+            [clearable]="false" [searchable]="false"
+          [multiple]="false"  [items]="ques?.options" bindValue="options"
+          bindLabel="options">
+         </ng-select>
+        </div>
+        <div *ngIf="ques?.type === 'MULTI_SELECT_DROPDOWN' || ques?.type === 'multiselectdropdown'" class="form-group">
+          <label>{{ques?.label}} <span *ngIf="ques?.is_required"  class="require">*</span></label> 
+          <ng-select [ngClass]="{'red': isRequired && ques?.is_required  && !ques.answer}" placeholder="placeholder select" [(ngModel)]="ques.answer" [ngModelOptions]="{standalone: true}" 
+            [clearable]="false" [searchable]="false"
+          [multiple]="true"  [items]="ques?.meta_data?.datasource?.options" bindValue="label"
+          bindLabel="label">
+         </ng-select>
+        </div>
+        
+
+        <div *ngIf="ques?.type === 'NUMBER' || ques?.type === 'number'" class="form-group">
+          <label>{{ques?.label}} <span *ngIf="ques?.is_required"  class="require">*</span></label>
+          <input [ngClass]="{'red': isRequired && ques?.is_required  && !ques.answer}" type="number" pattern="/^-?\d+\.?\d*$/" onKeyPress="if(this.value.length==12) return false;"  [(ngModel)]="ques.answer" [ngModelOptions]="{standalone: true}" class="form-control" placeholder="Placeholder number" />
+        </div>
+        <div *ngIf="ques?.type === 'EMAIL' || ques?.type === 'email'" class="form-group">
+          <label>{{ques?.label}} <span *ngIf="ques?.is_required"  class="require">*</span></label>
+          <input [ngClass]="{'red': isRequired && ques?.is_required  && !ques.answer}" type="email" [(ngModel)]="ques.answer" [ngModelOptions]="{standalone: true}" 
+          class="form-control" placeholder="Placeholder email" pattern="[A-Za-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"/>
+        </div> 
+        
+       <div *ngIf="ques?.type === 'RADIO' || ques?.type === 'radio'" class="form-group">
+          <label>{{ques?.label}} <span *ngIf="ques?.is_required"  class="require">*</span></label>
+          <div *ngIf="ques?.options" class="d-flex flex-wrap mt-24">
+            <div *ngFor="let check of ques?.options" class="radio-wrapper mr-16">
+              <label class="radio-container ">
+                <input [(ngModel)]="check.answer" value="check.check" name="test" [ngModelOptions]="{standalone: true}" type="radio" >
+                <span class="checkmark"></span>
+              </label>
+              <p class="text-dark ">{{check}}</p>
+            </div> 
+          </div>
+
+        </div> 
+         <div *ngIf="ques?.type === 'TOGGLE' || ques?.type === 'toggle'"  class="form-group">
+          <label>{{ques?.label}} <span *ngIf="ques?.is_required"  class="require">*</span></label>
+          <toggle-button type="radio" (changed)="changeValue($event, i, j)" [checked]="ques.answer"></toggle-button> {{ques?.answer}}
+        </div>
+        <div *ngIf="ques?.type == 'CHECKBOX' || ques?.type == 'checkbox'" class="form-group">
+          <label>{{ques?.label}}</label>
+          <div *ngIf="ques?.options" class="d-flex flex-wrap mt-24">
+            <div *ngFor="let check of ques?.options;let c = index" class="checkbox-wrapper d-inline-block mr-16">
+              <label class="checkbox-container">
+                <input type="checkbox" name="{{check.name}}"
+                value="{{check?.answer}}" [(ngModel)]="check.answer" [ngModelOptions]="{standalone: true}" [checked]="check.answer">
+                <span class="checkmark"></span>
+                <p>{{check?.name}}</p>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="ques?.type === 'CURRENCY' || ques?.type === 'currency'" class="form-group">
+          <label>{{ques?.label}} <span *ngIf="ques?.is_required"  class="require">*</span></label>
+          <div [ngClass]="{'red': isRequired && ques?.is_required  && !ques.answer}" class="input-with-fixed-value position-relative">
+            <span>$</span>
+            <input  type="number" pattern="/^-?\d+\.?\d*$/" onKeyPress="if(this.value.length==4) return false;" [(ngModel)]="ques.answer" [ngModelOptions]="{standalone: true}" class="form-control" placeholder="Enter currency" />
+          </div>
+        </div>
+        <div *ngIf="ques?.type === 'HYPERLINK' || ques?.type === 'hyperlink' || ques?.type === 'Hyperlink'" class="form-group">
+          <label>{{ques?.label}} <span *ngIf="ques?.is_required"  class="require">*</span></label> 
+            <input [ngClass]="{'red': isRequired && ques?.is_required  && !ques.answer}" type="url" [(ngModel)]="ques.answer" [ngModelOptions]="{standalone: true}" class="form-control" placeholder="Enter URL"/> 
+        </div>
+      </div>
+    </div>
+  </div> -->
+<!-- End -->

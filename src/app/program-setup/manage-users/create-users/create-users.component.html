@@ -1,0 +1,137 @@
+<svms-sidebar [title]="formTitle" [clickOutside]="clickOutside" [dataVisibility]="createManageUser"
+  (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <div class="sidebarContent mt-24">
+
+          <div *ngIf="show_org && (!isViewClicked && !isEditClicked)" class="sidebarContent form-group">
+            <label>{{ 'organizations' | i18next }}</label>
+            <ng-select [clearable]="false" [(ngModel)]="selectedOrg" (change)="onChangeOrg()"
+              placeholder="{{ 'organizations' | i18next }}">
+              <ng-option *ngFor="let org of orgLists" [value]="org.id">{{org.name}}</ng-option>
+            </ng-select>
+          </div>
+
+          <div *ngIf="show_org && showVendorDD" class="sidebarContent form-group">
+            <label>{{ 'vendors' | i18next }}</label>
+            <ng-select [clearable]="false" [(ngModel)]="selectedVendor" (change)="onChangeVendor()"
+              placeholder="{{ 'vendors' | i18next }}">
+              <ng-option *ngFor="let vendor of vendorLists" [value]="vendor.id">{{vendor.name}}</ng-option>
+            </ng-select>
+          </div>
+
+          <div class="sidebarContent form-group">
+            <label for="users" I18n>{{ 'select_user_to_add_to_program' | i18next }}<span class="require">*</span></label>
+            <ng-select [disabled]="(!isViewClicked && !isEditClicked) ? null : isDisabled" id="users" placeholder="{{ 'select' | i18next }}"
+              [searchable]="true" (search)="searchUsers($event)" (change)="changeSelectedUser()"
+              [(ngModel)]="formTitle===this.viewData.first_name +' Detail View' || formTitle==='Edit ' + this.editData?.first_name ? selectedUserName : selectedUser">
+              <ng-option *ngFor="let user of users" [value]="user">{{ user['first_name'] + ' ' + user['last_name'] }}
+              </ng-option>
+            </ng-select>
+          </div>
+
+          <div class="sidebarContent form-group" *ngIf="selectedUser" >
+            <div class="form-group">
+              <label I18n>{{ 'user_role' | i18next }}<span class="require">*</span></label>
+              <ng-select #roleRef [disabled]="!isViewClicked ? null : isDisabled" placeholder="{{ 'select_user_role' | i18next }}" [(ngModel)]="selectedRole" (keyup)='roleSearch(roleRef?.searchTerm)' >
+                <ng-option *ngFor="let role of programRoles" [value]="role"> {{role['name']}}</ng-option>
+              </ng-select>
+            </div>
+          </div>
+
+          <div *ngIf="selectedUser" class="sidebarContent selectedUser">
+
+              <div class="user-info">
+                <div class="avatar">
+
+                  <figure class="avatar float-left rounded-circle overflow-hidden mr-12">
+                    <img *ngIf="selectedUser?.avatar" src="{{selectedUser?.avatar}}" alt="" width="74" height="74">
+                    <span class="initials initials__purple initials_width text-capitalize" *ngIf="!selectedUser?.avatar"
+                      alt="">{{ selectedUser?.first_name?.substring(0,1) }} {{ selectedUser?.last_name?.substring(0,1)
+                      }}</span>
+                  </figure>
+
+                  <div class="user-info-bio ml-12">
+                    <span class="mb-4">{{selectedUser?.first_name + ' ' + selectedUser?.last_name }}</span>
+                    <p>{{selectedUser?.role?.name ? selectedUser?.role?.name : 'No Role'}}</p>
+                    <span><i class="material-icons" style="color: #CE0B25">email</i>{{selectedUser?.email}}</span>
+                    <span *ngIf="selectedUser?.contacts"><i class="material-icons"
+                        style="color: #2DD36F">local_phone</i>{{selectedUser?.contacts[0]?.isd_code}}
+                      {{selectedUser?.contacts[0]?.number}}</span>
+                  </div>
+                </div>
+
+                <div class="toggle-panel" [ngClass]="{'disable':isViewClicked1}">
+                  <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+                    <span class="status-text">{{toggle?.title}}</span>
+                    <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="isViewClicked ? null : onClickToggle()"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="super-visor">
+                <p class="super-visor-title">{{ 'supervisor' | i18next }}</p>
+                <div class="super-visor-info">
+                  <figure class="avatar float-left rounded-circle overflow-hidden mr-12">
+                    <img *ngIf="selectedUser?.avatar" src="{{selectedUser?.avatar}}" alt="" width="22" height="22">
+                    <span class="initials initials__purple text-capitalize"
+                      *ngIf="!selectedUser?.supervisor?.avatar && selectedUser?.name" alt="">{{
+                      selectedUser?.selectedUser?.name?.substring(0,2)}}</span>
+                  </figure>
+                  <p *ngIf="selectedUser?.supervisor?.full_name;else elseBlock">{{selectedUser?.supervisor?.full_name}}</p>
+                  <ng-template #elseBlock>
+                    <div>{{selectedUser?.first_name}}</div>
+                  </ng-template>
+                </div>
+              </div>
+
+            <!-- <div class="labor-category">
+              <div class="row">
+                <div class="col">
+                  <div class="form-group">
+                    <p>{{ 'labor_category' | i18next }} {{ '(_if_vendor_)' | i18next }}</p>
+                  </div>
+                  <div class="d-flex align-items-center flex-wrap">
+                    <div class="badge badge-light mr-8 mb-8 rounded-sm d-flex align-i"><span>{{ 'technology' | i18next }}</span> <span
+                      class="ml-8"> <icon name="close" size="14px" type="material" cuClass="d-flex"
+                                          class="d-flex"></icon></span></div>
+                    <div class="badge badge-light mr-8 mb-8 rounded-sm d-flex align-i"><span>{{ 'light_handled' | i18next }}</span> <span
+                      class="ml-8"> <icon name="close" size="14px" type="material" cuClass="d-flex"
+                                          class="d-flex"></icon></span></div>
+                  </div>
+                </div>
+              </div>
+            </div> -->
+
+              <div *ngIf="selectedUser?.addresses?.length" class="region-handled">
+                <div class="row">
+                  <div class="col">
+                    <div class="form-group">
+                      <p>{{ 'region_handled' | i18next }} {{ '(_location_)' | i18next }}</p>
+                    </div>
+                    <div class="d-flex align-items-center flex-wrap">
+                      <div class="badge badge-light mr-8 mb-8 rounded-sm d-flex align-i"
+                        *ngFor="let address of selectedUser.addresses">
+                        <span>{{address.country}}</span>
+                        <span class="ml-8">
+                          <icon name="close" size="14px" type="material" cuClass="d-flex" class="d-flex">
+                          </icon>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+ 
+        </div>
+      </div>
+      
+  </svms-sidebar-body>
+
+  <svms-sidebar-footer>
+    <div class="selectedUser d-flex" style="width: 100%; justify-content: flex-end;">
+      <button *ngIf="!isViewClicked" [disabled]='(selectedRole === undefined || selectedRole === null )' class="btn btn-primary" (click)="onAdd()">{{ 'save' | i18next }}</button>
+    </div>
+  </svms-sidebar-footer>
+
+</svms-sidebar>

@@ -1,0 +1,876 @@
+<td *ngIf="isArray">
+  <span class="d-flex align-items-center flex-wrap">
+    <span class="badge badge-light mr-8 text-nowrap mb-4" *ngFor="let
+    m of vmsRowDataSource">{{(m|i18next) || ' -- '}}</span>
+  </span>
+</td>
+
+<td *ngIf="isManagerList" class="position-relative if-submitted-candidate">
+  <p class="d-flex mobile-justcontent-end">
+  <!-- this is for list for managers  -->
+    <figure  [ngClass]="{'cursor-not-allowed': rowData.disableClicked}" class="text-truncate d-flex align-items-center justify-content-center manager-images-list">
+      <ng-container *ngFor="let manager of rowData?.manager;let i =index">
+        <div class="manager-avatar-list overflow-hidden d-flex align-items-center justify-content-center initials initials__purple" tooltip="{{manager?.name}}" placement="top" *ngIf="manager && i<6">
+        <img *ngIf="manager?.avatar" class="manager-profile" width="20" height="20" src="{{manager?.avatar}}" alt="{{manager?.initials}}">
+          {{manager?.avatar ? '':manager?.initials}}
+        </div>
+        <div class="manager-avatar-list overflow-hidden d-flex align-items-center justify-content-center more-name cursor-pointer" placement="top" *ngIf="manager && i==6" (click)="showMoreName()" #managerCount>
+          +{{rowData?.manager?.length - 6}}
+      </div>
+      </ng-container>
+    </figure>
+    <a  *ngIf="rowData?.manager?.length===1"
+          (click)="clickToView(false)"
+          [ngClass]="{'cursor-not-allowed': rowData.disableClicked}"
+          class="text-truncate d-block ml-24 ml-m-8">{{(getDisplaytext(vmsRowDataSource)|i18nextEager) || ' -- '}}</a>
+  </p>
+</td>
+<td *ngIf="isShowCheckBox && !isArray" class="check-required">
+  <div class="checkbox-box">
+    <div class="checkbox-wrapper">
+      <label class="checkbox-container">
+        <input [disabled]="isCheckBoxReadonly" [checked]="vmsRowDataSource" type="checkbox" name="EDIT">
+        <span class="checkmark"></span>
+      </label>
+    </div>
+  </div>
+</td>
+
+<td *ngIf="isImage && !isMultiUser && !isArray && !isReport && !isCurrency && !isManagerList" [ngClass]="{'pl-24':!isVmsTableExpand && index === 0}"
+  class="position-relative if-submitted-candidate">
+  <div class="checkbox-box float-left mr-8" *ngIf="index === 0 && allowMultiselect" [ngClass]="{'invisible' : checkboxDisabled}">
+    <div class="checkbox-wrapper">
+      <label class="checkbox-container">
+        <input class="checkbox-item" type="checkbox"
+    (change)="rowSelected($event)" [(ngModel)]="rowData.selected">
+        <span class="checkmark"></span>
+      </label>
+    </div>
+  </div>
+
+  <p class="d-flex mobile-justcontent-end" *ngIf="!isContact && vmsRowDataSource && !isPending"
+    [ngClass]="{'paragraph-checkbox' : index === 0 && allowMultiselect}">
+    <span *ngIf="isIcon" class="initials initials__purple"
+      [ngClass]="{'initials_blue':!isVmsTableExpand && index === 1}">
+      {{rowData?.name_initial ? rowData?.name_initial : (getDisplaytext(vmsRowDataSource) | shortName:'last')}}
+    </span>
+    <ng-container *ngIf='!rotuterLinkOnClick'>
+      <a  *ngIf="toolTipVisibility" (click)="clickToView(true)" class="text-truncate d-block"
+        [ngClass]="{'cursor-not-allowed': rowData.disableClicked}"
+        tooltip="{{getDisplaytext(vmsRowDataSource) | i18next}}" placement="right"
+        >{{(getDisplaytext(vmsRowDataSource)|i18next) || ' -- '}}
+      </a>
+      <a  *ngIf="!toolTipVisibility && !showTitleCase"
+        (click)="clickToView(false)"
+        [ngClass]="{'cursor-not-allowed': rowData.disableClicked}"
+        class="text-truncate d-block">{{(getDisplaytext(vmsRowDataSource)|i18next) || ' -- '}}</a>
+      <a  *ngIf="!toolTipVisibility && showTitleCase"
+        (click)="clickToView(false)"
+        [ngClass]="{'cursor-not-allowed': rowData.disableClicked}"
+        class="text-truncate d-block">{{(getDisplaytext(vmsRowDataSource)|i18next) || ' -- ' | snakeToTitleCase}}</a>
+    </ng-container>
+    <a (click)="navigateToRouteLink(rowData,rotuterLinkParams)" *ngIf="rotuterLinkOnClick"
+      class="text-truncate d-block">{{(getDisplaytext(vmsRowDataSource)|i18next) || ' -- '}}
+    </a>
+    <img class="d-flex justify-content-center ml-8 mtp-icon cursor-pointer"
+        src="assets/images/master-profiles.svg"
+        tooltip="{{ 'linked_master_profile' | i18next }}"
+        placement="right"
+        delay="100" *ngIf="rowData.mtp_id && canViewMtp" (click)="navigateToMtpDetails(rowData.mtp_id)"/>
+    <span *ngIf="showPreCandidateFlag && vmsRowDataSource" class="pre-identified-candidate-badge">
+      <icon size="16px" name="verified" type="material" color="#FF9F05" tooltip="{{ 'pre-identified' | i18next }}" placement="right"
+        delay="100">
+      </icon>
+    </span>
+    <ng-container #putIcon></ng-container>
+  </p>
+  <p *ngIf="isPending && vmsRowDataSource" [ngClass]="{'paragraph-checkbox' : index === 0 && allowMultiselect}" class="text-first-field-overflow">
+    <ng-container *ngIf='!rotuterLinkOnClick'>
+      <a  *ngIf="!toolTipVisibility" (click)="clickToView(true)" class="text-ellipsis">
+        {{(vmsRowDataSource.name|i18next) || ' -- '}}
+      </a>
+    </ng-container>
+    <icon *ngIf="vmsRowDataSource.hasNotification" size="16px" [name]="vmsRowDataSource?.icon || 'notifications_active'" type="material"
+      class="icon&#45;&#45;on-left pl-8 pending-icon position-absolute"
+      tooltip="{{(vmsRowDataSource?.pendingRequestType)|i18next}}" [placement]="vmsRowDataSource?.tooltipPlacement || 'bottom'" delay="100" (click)="clickOnPending()">
+    </icon>
+  </p>
+  <p *ngIf="showDoNotRehireFlag && vmsRowDataSource" [ngClass]="{'paragraph-checkbox' : index === 0   }">
+    <icon *ngIf="vmsRowDataSource?.do_not_re_hire" size="16px" [ngClass]= "{'do-not-hire' :vmsRowDataSource?.hasNotification}" name="no_accounts" type="material"
+      class=" icon--on-left pl-8 pending-icon position-absolute"
+      tooltip="{{ 'do_not_re-hire' | i18next }}" placement="bottom" delay="100" (click)="clickOnPending()">
+    </icon>
+  </p>
+  <p *ngIf="isContact && vmsRowDataSource"
+    class="contact-avatar-list d-flex align-items-center justify-content-between">
+    <span class="initials initials__green">{{(vmsRowDataSource|i18next) || ' -- '}}</span>
+    <span class="initials initials__gray">{{(vmsRowDataSource|i18next) || ' -- '}}</span>
+
+  </p>
+  <a href="" *ngIf="isWithdrawal" class="create-candidate d-none">
+    <table-icon size="20px" name="how_to_reg" type="material" cuClass="d-flex" class="flex">
+    </table-icon>
+  </a>
+
+
+  <span class="actions" *ngIf="!isNoOption" [ngClass]="{'active' : showdropdownFirstCol}" [hidden]="rowData?.is_report?.toLowerCase() == 'shared'">
+    <!-- <button class="btn small btn-secondary" (click)="clickToView(true)">
+      <table-icon size="14px" name="visibility" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+      </table-icon>
+      View
+    </button> -->
+    <span class="cursor-pointer p-4 ml-8 float-right option-dd-button" (click)="showDropdownFirstCol()" #optionButton
+      *ngIf="!hideOptions">
+      <table-icon size="24px" name="more_horiz" type="material" cuClass="d-flex" class="flex" theme="outlined">
+      </table-icon>
+    </span>
+    <ng-template [ngIf]="showPreviewIcon">
+      <span class="cursor-pointer p-4 float-right no-preview-mobile" (click)="previewOptionClicked()">
+        <table-icon size="20px" name="remove_red_eye" theme="outlined" type="material" cuClass="d-flex" class="flex">
+        </table-icon>
+      </span>
+    </ng-template>
+
+  </span>
+
+  <span class="actions">
+    <ng-template [ngIf]="infoIcon">
+      <span class="cursor-pointer p-4 float-right no-preview-mobile" (click)="previewOptionClicked()">
+        <table-icon size="20px" name="info" theme="outlined" type="material" cuClass="d-flex" class="flex">
+        </table-icon>
+      </span>
+    </ng-template>
+  </span>
+
+  <span class="max-bill-rate" *ngIf="rowData?.is_budget_exceeded">
+    <table-icon name="warning" tooltip="{{ (rowData?.job_rate_model === 'PAY_RATE' ? 'Pay rate exceeds the maximum job pay rate' : 'Bill rate exceeds the maximum job bill rate') | i18next}}" placement="top"  class="material-icons" size="14px"></table-icon>
+  </span>
+  <!--   <nav class="option-dropdown position-absolute" (mouseleave)="hideDropdownFirstCol()" [ngClass]="{'active' : showdropdownFirstCol}">-->
+  <!--        <ul>-->
+
+  <!--            <li *ngIf="isDetails">-->
+  <!--                <a  (click)="detailViewClick()">-->
+  <!--                    <table-icon size="19px" name="list_alt" type="material" class="d-flex" cuClass="icon&#45;&#45;on-left d-flex">-->
+  <!--                    </table-icon>-->
+  <!--                    Details-->
+  <!--                </a>-->
+  <!--            </li>-->
+  <!--            <li *ngIf="isVieworClone">-->
+  <!--                <a  (click)="clickToClone()">-->
+  <!--                    <table-icon size="19px" name="content_copy" type="material" class="d-flex" cuClass="icon&#45;&#45;on-left d-flex">-->
+  <!--                    </table-icon>-->
+  <!--                    Clone-->
+  <!--                </a>-->
+  <!--            </li>-->
+  <!--            <li *ngIf="isVieworEdit">-->
+  <!--                <a  (click)="clickToEdit()">-->
+  <!--                    <table-icon size="19px" name="create" type="material" class="d-flex" cuClass="icon&#45;&#45;on-left d-flex">-->
+  <!--                    </table-icon>-->
+  <!--                    Edit-->
+  <!--                </a>-->
+  <!--            </li>-->
+  <!--            <li *ngIf="isDisableorDelete">-->
+  <!--                <a  (click)="clickTodisable()">-->
+  <!--                    <table-icon size="19px" name="label_off" type="material" class="d-flex" cuClass="icon&#45;&#45;on-left d-flex">-->
+  <!--                    </table-icon>-->
+  <!--                    <span *ngIf="vmsRowDataSource">Disable</span>-->
+  <!--                    <span *ngIf="!vmsRowDataSource">Enable</span>-->
+  <!--                </a>-->
+  <!--            </li>-->
+  <!--            <li *ngIf="isDelete">-->
+  <!--                <a  (click)="clickTodelete()">-->
+  <!--                    <table-icon size="19px" name="delete" type="material" class="d-flex" cuClass="icon&#45;&#45;on-left d-flex">-->
+  <!--                    </table-icon>-->
+  <!--                    Delete-->
+  <!--                </a>-->
+  <!--            </li>-->
+  <!--            <li *ngIf="isOptOut">-->
+  <!--                <a  (click)="clickToOptOut()">-->
+  <!--                    <table-icon size="19px" name="launch" type="material" class="d-flex" cuClass="icon&#45;&#45;on-left d-flex">-->
+  <!--                    </table-icon>-->
+  <!--                    Opt Out-->
+  <!--                </a>-->
+  <!--            </li>-->
+  <!--            <li *ngIf="isOptIn">-->
+  <!--                <a  (click)="clickToOptIn()">-->
+  <!--                    <table-icon size="19px" name="launch" type="material" class="d-flex" cuClass="icon&#45;&#45;on-left d-flex">-->
+  <!--                    </table-icon>-->
+  <!--                    Opt In-->
+  <!--                </a>-->
+  <!--            </li>-->
+  <!--            <li *ngIf="showUpdate">-->
+  <!--                <a  (click)="clickToUpdate()">-->
+  <!--                    <table-icon size="19px" name="edit" type="material" class="d-flex" cuClass="icon&#45;&#45;on-left d-flex">-->
+  <!--                    </table-icon>-->
+  <!--                    Update-->
+  <!--                </a>-->
+  <!--            </li>-->
+  <!--            <li *ngIf="isSubmitCandidate">-->
+  <!--                <a  (click)="clickToSubmitCandidate()">-->
+  <!--                    <table-icon size="19px" name="publish" type="material" class="d-flex" cuClass="icon&#45;&#45;on-left d-flex">-->
+  <!--                    </table-icon>-->
+  <!--                    Add & Submit Candidate-->
+  <!--                </a>-->
+  <!--            </li>-->
+  <!--            <li *ngFor="let option of (options || [])" (click)="optionClicked(option)">-->
+  <!--                <a >-->
+  <!--                    <table-icon size="19px" *ngIf="option?.icon" [name]="option?.icon" type="material" class="d-flex" cuClass="icon&#45;&#45;on-left d-flex">-->
+  <!--                    </table-icon>-->
+  <!--                    {{option?.name}}-->
+  <!--                </a>-->
+  <!--            </li>-->
+  <!--        </ul>-->
+  <!--    </nav> -->
+  <div class="clearfix"></div>
+</td>
+
+<td *ngIf="isImage && isMultiUser && !isArray && !isManagerList">
+  <ng-container *ngIf="vmsRowDataSource?.length == 1">
+    <span class="initials initials__purple">{{vmsRowDataSource[0].first_name | shortName:'first'}}</span>
+    {{vmsRowDataSource[0].first_name}}
+  </ng-container>
+  <ng-container *ngIf="vmsRowDataSource?.length == 2">
+    <p *ngIf="vmsRowDataSource" class="contact-avatar-list">
+      <span class="initials initials__green">{{vmsRowDataSource[0].first_name | shortName:'first'}}</span>
+      <span class="initials initials__gray">{{vmsRowDataSource[1].first_name | shortName:'first'}}</span>
+    </p>
+  </ng-container>
+  <ng-container *ngIf="vmsRowDataSource?.length > 2">
+    <ul class="manager-avatar-list">
+      <ng-container *ngFor="let item of vmsRowDataSource; let x = index">
+        <li *ngIf="x < 2">
+          {{item.first_name | shortName:'first'}}
+        </li>
+      </ng-container>
+      <li class="more-link">
+        {{vmsRowDataSource?.length - 2}}
+        <div class="more-item-dropdown position-absolute bg-light">
+          <ul>
+            <ng-container *ngFor="let item of vmsRowDataSource; let x = index">
+              <li *ngIf="x > 1">
+                {{item.first_name | shortName:'first'}}
+              </li>
+            </ng-container>
+            <li class="more-link">
+              {{vmsRowDataSource?.length - 2}}
+              <div class="more-item-dropdown position-absolute bg-light">
+                <ul>
+                  <ng-container *ngFor="let item of vmsRowDataSource; let x = index">
+                    <li *ngIf="x > 1">
+                      {{item.first_name | shortName:'first'}}
+                    </li>
+                  </ng-container>
+                </ul>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </li>
+
+    </ul>
+  </ng-container>
+</td>
+<!-- [ngClass]="{'initial-bg':isNumberBadge}"? -->
+<td *ngIf="!isImage && isObjectStatusShow && (isObject() !== 'number') && (isObject() !== 'boolean') && !isExpenseType && !isStatusColor && !isIconList && !isProfileMatch && !isCandidateStatus && !isInterview && !isArray && !isReport && !isCurrency && !isDownloadBtn && !isManagerList && !linearProgressBar && !circularProgressBar"  [ngClass]="{'text-right':(isRateType || isNumberType)}">
+  <span *ngIf="!isFrequency">
+    <span *ngIf="isObjectStatusShow" tooltip="{{vmsRowDataSource?.join(', ') | i18next}}" placement="top" delay="500" [ngClass]="{'text-hover': (hasPermission && vmsRowDataSource)}">
+      <span *ngFor="let data of vmsRowDataSource">
+        <span class="array-element-in-box"> {{data | titlecase |i18next }} </span>
+      </span>
+    </span>
+  </span>
+</td>
+<td *ngIf="!isImage && !isObjectStatusShow && (isObject() !== 'number') && (isObject() !== 'boolean') && !isExpenseType && !isStatusColor && !isIconList && !isProfileMatch && !isCandidateStatus && !isInterview && !isArray && !isReport && !isCurrency && !isDownloadBtn && !isMasked && !isManagerList && !linearProgressBar && !circularProgressBar && !isMultiUser"  [ngClass]="{'text-right':(isRateType || isNumberType)}">
+  <span [ngClass]="{'opt-status-block' : (all?.name === 'opt_option_reason' && isOptOut && notes)}" *ngIf="!isFrequency && ((vmsRowDataSource?.toString() | lowercase) !== 'approved' && (vmsRowDataSource?.toString() | lowercase) !== 'submitted'
+    && (vmsRowDataSource?.toString() | lowercase) !== 'open' && (vmsRowDataSource?.toString() | lowercase) !== 'inactive' && (vmsRowDataSource?.toString() | lowercase) !== 'in-active' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'closed' && (vmsRowDataSource?.toString() | lowercase) !== 'active' && (vmsRowDataSource?.toString() | lowercase) !== 'offer released'
+    && (
+        (vmsRowDataSource?.toString() | lowercase) !== 'pending' ||
+        ((vmsRowDataSource?.toString() | lowercase) == 'pending' && hideBadege )
+    )
+    &&  (vmsRowDataSource?.toString() | lowercase) !== 'accepted'
+    &&  (vmsRowDataSource?.toString() | lowercase) !== 'pending approval' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'pending_approval' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'pending onboarding' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'rejected' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'missing' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'scheduled' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'completed' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'complete' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'cancelled' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'draft' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'withdrawn' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'withdraw' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'offer withdrawn' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'sourcing' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'pending approval sourcing' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'pending acceptance' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'pending interview acceptance' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'deferred' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'in progress' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'in-progress' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'overdue' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'pending review' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'hold' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'pending distribution' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'offer accepted' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'halted' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'filled' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'distributed'  &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'default' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'released' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'approved - modified' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'deleted' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'offer rejected' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'offer withdrawn' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'countered' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'offer countered' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'pending shortlist' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'pending shortlist review' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'shortlist review rejected' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'interview_scheduled' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'consolidated' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'approved modified' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 're-hire check pending' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'pending offer review' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'pending_offer_review' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'countered pending review' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'countered_pending_review' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'countered review cancelled' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'offer cancelled' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'countered_cancelled' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'countered offer review cancelled' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'countered offer pending review' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 're-hire rejected' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'pending offer approval' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'interview cancelled' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'interview accepted' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'pending interview review' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'interview pending acceptance' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'reviewed' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'interview scheduled' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'interview rejected' &&
+     (vmsRowDataSource?.toString() | lowercase) !== 'interview completed' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'awarded' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'failed' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'pending closed' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'cancelled' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'not scheduled') &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'pending interview confirmation' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'pending confirmation' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'counter pending approval' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'counter offer pending approval' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'counter pending review' &&
+    (vmsRowDataSource?.toString() | lowercase) !== 'counter offer pending review'
+    " (click)="openPanel()">
+
+    <span *ngIf="isIcon && vmsRowDataSource && !isArray" class="initials initials__purple"
+      [ngClass]="{'initials_blue':!isVmsTableExpand && index === 1}">
+      {{(rowData?.worker?.candidate?.name ? rowData?.worker?.candidate?.name : vmsRowDataSource) | shortName:'last'}}</span>
+      <span class="wrapper" (click)="onClickedName()" *ngIf="!showTitleCase && !isRateType && !isNumberType "
+        tooltip="{{(getDisplaytext(vmsRowDataSource)) || '--'}}" [placement]="isLastColumn ? 'left' : 'right'" 
+        [ngClass]="{'text-hover': (hasPermission && vmsRowDataSource)}">
+          {{ (getDisplaytext(vmsRowDataSource)) || '--'}}
+        </span>
+        <span *ngIf="all?.name === 'opt_option_reason' && isOptOut && notes" class="float-right">
+          <icon class="note-icon cursor-pointer" color="#8181d6" size="18px" cuClass="d-flex" name="sticky_note_2" type="symbols" [tooltip]="notes ? notes : null" placement="right" variationSettings="'FILL' 0, 'wght' 500, 'GRAD' -25, 'opsz' 48">
+          </icon>
+        </span>
+        <ng-container *ngIf="isRateType">
+          <span [ngClass]="{'text-hover': (hasPermission && vmsRowDataSource)}">
+            {{ (vmsRowDataSource?.amount * 1 || (vmsRowDataSource?.amount | number) === '0') ? ((vmsRowDataSource?.amount) |
+            accuracy: '' : { currencyCode: vmsRowDataSource?.currency, valueType: 'currency' }) : '--' }}
+          </span>
+          <!-- <ng-template #rateSection>
+            <span [ngClass]="{'text-hover': (hasPermission && vmsRowDataSource)}">
+              {{ (vmsRowDataSource * 1 || (vmsRowDataSource | number) === '0') ? ((vmsRowDataSource) | accuracy: accuracyConfig?.AMOUNT :
+              { currencyCode: vmsRowDataSource?.currency } ) : '--' }}
+            </span>
+          </ng-template> -->
+        </ng-container>
+        <span *ngIf="isNumberType" [ngClass]="{'text-hover': (hasPermission && vmsRowDataSource)}">
+          {{ vmsRowDataSource |i18next}}
+        </span>
+
+
+    <span *ngIf="showTitleCase" [ngClass]="{'text-hover': (hasPermission && vmsRowDataSource)}">
+      {{ (vmsRowDataSource | titlecase | i18next)  }}
+    </span>
+    <ng-container #putIcon></ng-container>
+  </span>
+  <span tooltip="{{ isTooltip?.isShow && ((vmsRowDataSource?.toString() | lowercase) == isTooltip?.match || (vmsRowDataSource?.toString() | lowercase) == isTooltip?.secoundMatch)  ? (isTooltip.message | i18next) : ''}}" placement="right"  size="large" *ngIf="!isFrequency && !isObjectStatusShow && ((vmsRowDataSource?.toString() | lowercase) == 'approved' || (vmsRowDataSource?.toString() | lowercase) === 'open' ||
+    (vmsRowDataSource?.toString() | lowercase) === 'inactive' || (vmsRowDataSource?.toString() | lowercase) === 'in-active' ||
+    (vmsRowDataSource?.toString() | lowercase) == 'closed' ||
+    (vmsRowDataSource?.toString() | lowercase) == 'active' ||
+    (vmsRowDataSource?.toString() | lowercase) === 'submitted' ||
+    ((vmsRowDataSource?.toString() | lowercase) == 'pending' && !hideBadege) ||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending approval' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending_approval' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending onboarding' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'rejected' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'scheduled' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'completed' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'complete' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'cancelled' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'draft' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'sourcing' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending approval sourcing' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'withdrawn' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'withdraw' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'offer withdrawn' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'deferred' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'in progress' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'missing' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'in-progress' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'overdue' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending review' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'hold' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending distribution' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'halted' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'default' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'filled'||
+     (vmsRowDataSource?.toString() | lowercase) == 'distributed' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'offer released' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'approved - modified' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'deleted' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'approved modified'||
+     (vmsRowDataSource?.toString() | lowercase) == 'accepted'||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending acceptance'||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending interview acceptance'||
+     (vmsRowDataSource?.toString() | lowercase) == 'offer accepted'||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending closed' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'cancelled' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'offer rejected'||
+     (vmsRowDataSource?.toString() | lowercase) == 'offer withdrawn'||
+     (vmsRowDataSource?.toString() | lowercase) == 'countered'||
+     (vmsRowDataSource?.toString() | lowercase) == 'offer countered'||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending shortlist'||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending shortlist review' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'shortlist review rejected' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'consolidated' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'released' ||
+     (vmsRowDataSource?.toString() | lowercase) == 're-hire check pending' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending offer review' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending_offer_review' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'countered pending review' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'countered_pending_review' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'countered review cancelled' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'offer cancelled' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'countered_cancelled' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'countered offer review cancelled' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'countered offer pending review' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending offer approval' ||
+     (vmsRowDataSource?.toString() | lowercase) == 're-hire rejected' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'interview cancelled' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'interview accepted' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending interview review' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'reviewed' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'interview pending acceptance' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'interview scheduled' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'interview rejected' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'interview completed' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'failed' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'awarded' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'not scheduled'||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending interview confirmation' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'pending confirmation'||
+     (vmsRowDataSource?.toString() | lowercase) == 'counter pending approval' || 
+     (vmsRowDataSource?.toString() | lowercase) == 'counter offer pending approval' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'counter pending review' ||
+     (vmsRowDataSource?.toString() | lowercase) == 'counter offer pending review'
+     )
+  
+     " [class]="(vmsRowDataSource?.toString() | lowercase) !== 'draft' ? 'status-ui' : ((orgStatus?.toString() | lowercase) === 'draft' ? 'status-ui' : 'text-capitalize')" [ngClass]="{'approved': ((vmsRowDataSource?.toString() | lowercase) === 'approved' ||
+        (vmsRowDataSource?.toString() | lowercase) == 'scheduled' || (vmsRowDataSource?.toString() | lowercase) == 'pending acceptance' || (vmsRowDataSource?.toString() | lowercase) == 'pending interview acceptance' ||
+        (vmsRowDataSource?.toString() | lowercase) == 'approved - modified' ||
+        (vmsRowDataSource?.toString() | lowercase) == 'approved modified'),
+        'withdrawn': (vmsRowDataSource?.toString() | lowercase) == 'withdraw' || (vmsRowDataSource?.toString() | lowercase) == 'withdrawn'  || (vmsRowDataSource?.toString() | lowercase) == 'offer withdrawn' ||
+        (vmsRowDataSource?.toString() | lowercase) == 'cancelled',
+        'pending-approval': (vmsRowDataSource?.toString() | lowercase) == 'pending' ||
+        (vmsRowDataSource?.toString() | lowercase) === 'inactive'  ||
+        (vmsRowDataSource?.toString() | lowercase) === 'in-active'  ||
+        (vmsRowDataSource?.toString() | lowercase) == 'pending approval' ||
+        (vmsRowDataSource?.toString() | lowercase) == 'pending_approval' ||
+        (vmsRowDataSource?.toString() | lowercase) == 'overdue' || (vmsRowDataSource?.toString() | lowercase) == 'pending shortlist' ||
+        (vmsRowDataSource?.toString() | lowercase) == 'pending onboarding'||
+        (vmsRowDataSource?.toString() | lowercase) == 'pending interview confirmation' ||
+        (vmsRowDataSource?.toString() | lowercase) == 'pending confirmation' ||
+        (vmsRowDataSource?.toString() | lowercase) == 'counter pending approval' || 
+        (vmsRowDataSource?.toString() | lowercase) == 'counter offer pending approval',
+        'in-progress': (vmsRowDataSource?.toString() | lowercase) == 'in progress' || (vmsRowDataSource?.toString() | lowercase) == 'in-progress',
+        'interview-completed': (vmsRowDataSource?.toString() | lowercase) == 'completed' || (vmsRowDataSource?.toString() | lowercase) == 'complete' || (vmsRowDataSource?.toString() | lowercase) == 'interview completed',
+        'default': (vmsRowDataSource?.toString() | lowercase) == 'default' || (vmsRowDataSource?.toString() | lowercase) == 'deferred',
+        'rejected': (vmsRowDataSource?.toString() | lowercase) == 'rejected' || (vmsRowDataSource?.toString() | lowercase) == 'offer rejected'|| (vmsRowDataSource?.toString() | lowercase) == 'deleted' || (vmsRowDataSource?.toString() | lowercase) == 'interview cancelled' || (vmsRowDataSource?.toString() | lowercase) == 'interview rejected' || (vmsRowDataSource?.toString() | lowercase) == 'failed' || (vmsRowDataSource?.toString() | lowercase) == 'shortlist review rejected',
+        'draft':(vmsRowDataSource?.toString() | lowercase) == 'draft',
+        'sourcing':(vmsRowDataSource?.toString() | lowercase) == 'sourcing',
+        'closed': (vmsRowDataSource?.toString() | lowercase) == 'closed' || (vmsRowDataSource?.toString() | lowercase) == 'filled' || (vmsRowDataSource?.toString() | lowercase) == 'pending closed' || (vmsRowDataSource?.toString() | lowercase) == 'cancelled' ||
+        (vmsRowDataSource?.toString() | lowercase) == 'countered offer review cancelled',
+        'pending-approval-sourcing': (vmsRowDataSource?.toString() | lowercase) == 'pending approval sourcing',
+        'pending-review': (vmsRowDataSource?.toString() | lowercase) == 'pending review' || (vmsRowDataSource?.toString() | lowercase) == 'pending interview review' || (vmsRowDataSource?.toString() | lowercase) == 'reviewed' || (vmsRowDataSource?.toString() | lowercase) == 'pending shortlist review',
+        'active': (vmsRowDataSource?.toString() | lowercase) == 'submitted' || (vmsRowDataSource?.toString() | lowercase) == 'active' ||
+        (vmsRowDataSource?.toString() | lowercase) == 'consolidated' || (vmsRowDataSource?.toString() | lowercase) == 'interview scheduled',
+        'hold': (vmsRowDataSource?.toString() | lowercase) == 'hold',
+        'pending-distribution': (vmsRowDataSource?.toString() | lowercase) == 'pending distribution',
+        'halted': (vmsRowDataSource?.toString() | lowercase) == 'halted',
+        'open': ((vmsRowDataSource?.toString() | lowercase) == 'distributed' || (vmsRowDataSource?.toString() | lowercase) == 'open') || (vmsRowDataSource?.toString() | lowercase) == 'interview pending acceptance',
+        'scheduled': (vmsRowDataSource?.toString() | lowercase) == 'scheduled',
+        'released': (vmsRowDataSource?.toString() | lowercase) == 'released' || (vmsRowDataSource?.toString() | lowercase) == 'offer released',
+        'offer-accepted': (vmsRowDataSource?.toString() | lowercase) == 'offer accepted' || (vmsRowDataSource?.toString() | lowercase) == 'accepted' || (vmsRowDataSource?.toString() | lowercase) == 'interview accepted',
+        'countered': (vmsRowDataSource?.toString() | lowercase) == 'countered' || (vmsRowDataSource?.toString() | lowercase) == 'offer countered',
+        're-hire-check-pending': (vmsRowDataSource?.toString() | lowercase) == 're-hire check pending','re-hire-rejected': (vmsRowDataSource?.toString() | lowercase) == 're-hire rejected','awarded': (vmsRowDataSource?.toString() | lowercase) === 'awarded', 'not-scheduled': (vmsRowDataSource?.toString() | lowercase) === 'not scheduled'
+        ,'offer-withdrawn': (vmsRowDataSource?.toString() | lowercase) == 'offer withdrawn' || (vmsRowDataSource?.toString() | lowercase) == 'countered_cancelled' || (vmsRowDataSource?.toString() | lowercase) == 'offer cancelled' || (vmsRowDataSource?.toString() | lowercase) == 'countered review cancelled' ,
+        'pending-offer-approval': (vmsRowDataSource?.toString() | lowercase) == 'pending offer approval',
+        'pending-offer-review': (vmsRowDataSource?.toString() | lowercase) == 'pending offer review' || (vmsRowDataSource?.toString() | lowercase) == 'pending_offer_review',
+        'missing': (vmsRowDataSource?.toString() | lowercase) == 'missing',
+        'countered-pending-review': (vmsRowDataSource?.toString() | lowercase) == 'countered_pending_review' || (vmsRowDataSource?.toString() | lowercase) == 'countered pending review' || (vmsRowDataSource?.toString() | lowercase) == 'countered offer pending review' ||
+        (vmsRowDataSource?.toString() | lowercase) == 'counter pending review' || (vmsRowDataSource?.toString() | lowercase) == 'counter offer pending review'
+    }">
+    {{( vmsRowDataSource?.toString() | titlecase | i18next) || ' -- '}}
+
+  </span>
+  <div class="frequency" *ngIf='isFrequency'>
+    <div *ngIf='isDataSourceArray' class="frequency__wrapper">
+      <div class="frequency__title">{{ 'weekly' | i18next }}</div>
+      <div class="frequency__block" *ngFor='let day of vmsRowDataSource'
+      [ngClass]="{'monday': day ==='M',
+      'tuesday': day ==='Tu',
+      'wednesday': day ==='W',
+      'thursday': day ==='Th',
+      'friday': day ==='F',
+      'saturday': day ==='Sa',
+      'sunday': day ==='Su'}">
+        {{day | i18next}}
+      </div>
+    </div>
+    <div *ngIf='!isDataSourceArray' class="frequency__wrapper">
+      <div class="frequency__title">{{ 'monthly.day' | i18next }}</div>
+      <div class="frequency__block frequency__day"> {{( vmsRowDataSource?.toString() | lowercase|i18next) || ' -- '}}
+      </div>
+    </div>
+  </div>
+  <!-- <table-icon *ngIf="vmsRowDataSource === null" size="24px" name="remove" type="material" cuClass="icon"></table-icon> -->
+</td>
+<td *ngIf="!isCurrency && (isObject() === 'number') && vmsRowDataSource > 999999999 && !isManagerList && !circularProgressBar">
+  {{ vmsRowDataSource | localDateFormat }}
+  <table-icon *ngIf="vmsRowDataSource === undefined" size="24px" name="remove" type="material" cuClass="icon">
+  </table-icon>
+</td>
+
+<td *ngIf="!isCurrency && (isObject() === 'number') && vmsRowDataSource < 999999999 && !isManagerList && !circularProgressBar">
+  <span (click)="onNumberBadgeClicked()"
+    [ngClass]="{'initial-bg':isNumberBadge,'clickable':enableClick}">{{vmsRowDataSource || ' -- '}}</span>
+  <table-icon *ngIf="vmsRowDataSource === undefined" size="24px" name="remove" type="material" cuClass="icon">
+  </table-icon>
+</td>
+<td *ngIf="isCurrency && !isManagerList" title=" ">
+  <span *ngIf="vmsRowDataSource?.formattedCurrencyAmount; else showDefaultAmountSection" tooltip="{{ vmsRowDataSource?.tooltip  | i18nextEager}}" [placement]="isLastColumn ? 'left' : 'right'">{{vmsRowDataSource?.amount}}</span>
+  <ng-template #showDefaultAmountSection>
+    <span tooltip="{{ vmsRowDataSource?.symbol ? vmsRowDataSource?.symbol : '' }}{{ showTooltip(vmsRowDataSource?.amount,vmsRowDataSource?.currency)}}" [placement]="isLastColumn ? 'left' : 'right'">{{vmsRowDataSource?.symbol ? vmsRowDataSource?.symbol : ''}}{{ (vmsRowDataSource?.amount * 1 || (vmsRowDataSource?.amount | number) === '0') ? (vmsRowDataSource?.amount | accuracy: accuracyConfig?.AMOUNT : { currencyCode: vmsRowDataSource?.currency }) : '--' }}</span></ng-template>
+</td>
+
+<td *ngIf="isStatusColor">
+  <p *ngIf="vmsRowDataSource == 'REQUIRED'" class="hierarchy-required">
+    <span class="red">{{ 'required' | i18next }}</span>
+  </p>
+  <p *ngIf="vmsRowDataSource == 'OPTIONAL'" class="hierarchy-required">
+    <span class="violet">{{ 'optional' | i18next }}</span>
+  </p>
+  <p *ngIf="vmsRowDataSource == 'OFF'" class="hierarchy-required">
+    <span class="grey">{{ 'off' | i18next }}</span>
+  </p>
+</td>
+
+<td *ngIf="isExpenseType">
+  <p *ngIf="vmsRowDataSource && vmsRowDataSource.toLowerCase() === 'expense'">
+    {{ 'expense' | i18next }}
+  </p>
+  <p *ngIf="vmsRowDataSource && vmsRowDataSource.toLowerCase() === 'misc_expense'">
+    {{ 'misc_expense' | i18next }}
+  </p>
+  <p *ngIf="vmsRowDataSource && vmsRowDataSource.toLowerCase() === 'timesheet'">
+    {{ 'timesheet' | i18next }}
+  </p>
+  <p *ngIf="vmsRowDataSource && vmsRowDataSource.toLowerCase() === 'progress update'">
+    {{ 'progress_update' | i18next }}
+  </p>
+  <p *ngIf="vmsRowDataSource && vmsRowDataSource.toLowerCase() !== 'timesheet' &&
+  vmsRowDataSource.toLowerCase() !== 'misc_expense' &&
+   vmsRowDataSource.toLowerCase() !== 'expense' && vmsRowDataSource.toLowerCase() !== 'progress update'">
+    {{vmsRowDataSource|i18next}}
+  </p>
+</td>
+
+<td *ngIf="isCandidateStatus" class="status-column">
+  <span class="submitted position-relative" *ngIf="vmsRowDataSource == 'Submitted'">{{(vmsRowDataSource|i18next) || ' --'}}</span>
+  <span class="sourcing position-relative" *ngIf="vmsRowDataSource == 'Sourcing'">{{(vmsRowDataSource|i18next) || ' -- '}}</span>
+  <span class="rejected position-relative" *ngIf="vmsRowDataSource == 'Rejeceted'">{{(vmsRowDataSource|i18next) || ' -- '}}</span>
+</td>
+<td *ngIf="isMultiUser && vmsRowDataSource">
+  <div class="d-flex int-list position-relative" *ngIf="vmsRowDataSource?.length">
+    <span class="initials initials__purple">{{ vmsRowDataSource[0] | shortName:'last'}}</span>
+    <span *ngIf="vmsRowDataSource?.length > 1">
+      <span class="initials count">
+        +{{vmsRowDataSource[vmsRowDataSource.length - 1] === 'showPopUp' ? vmsRowDataSource.length - 2 : vmsRowDataSource.length - 1}}
+      </span>
+    </span>
+    <label class="fixed-width my-4">
+      {{ vmsRowDataSource[0] || "--" }}
+      <a *ngIf="vmsRowDataSource?.length > 1" (mouseover)="vmsRowDataSource.push('showPopUp')"
+        (mouseleave)="vmsRowDataSource.splice(-1)">
+        +{{vmsRowDataSource[vmsRowDataSource.length - 1] === 'showPopUp' ? vmsRowDataSource.length - 2 : vmsRowDataSource.length - 1}}
+      </a>
+    </label>
+    <div *ngIf="vmsRowDataSource?.length > 1 && vmsRowDataSource[vmsRowDataSource.length - 1] === 'showPopUp'" class="pop-over">
+      <p>{{ 'interviewer' | i18next }}</p>
+      <ul>
+        <li *ngFor="let name of vmsRowDataSource; let i=index">
+          <div *ngIf="i && i < vmsRowDataSource.length - 1" class="mt-8 d-flex align-items-center">
+            <div class="mr-8">
+              <span class="initials initials__purple">{{ name | shortName:'last'}}</span>
+            </div>
+            <div>{{ name }}</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="d-flex int-list position-relative" *ngIf="!vmsRowDataSource?.length">
+    <span>--</span>
+  </div>
+</td>
+<td *ngIf="isIconList">
+  <ng-container *ngFor="let item of vmsRowDataSource | keyvalue">
+    <p class="module-icon-display" *ngIf="(item.key !== 'hierarchy_included')">
+      <span>
+        <span *ngIf="(item.value !== 'OFF')">
+          <table-icon *ngIf="(item.key == 'module_sow')" size="20px" name="article" type="material"
+            cuClass="module-icon  mr-24">
+          </table-icon>
+          <table-icon *ngIf="(item.key == 'module_jobs')" size="20px" name="work_outline" type="material"
+            cuClass="module-icon  mr-24">
+          </table-icon>
+        </span>
+      </span>
+      <span *ngIf="(item.value == true)">
+        <span class="phone-talk" *ngIf="(item.key == 'audio')">
+          <table-icon size="16px" color="#AC54F7" name="phone_in_talk" type="material" cuClass="module-icon  mr-4">
+          </table-icon> {{ 'phone' | i18next }}
+        </span>
+
+        <span class="video-call" *ngIf="(item.key == 'video')">
+          <table-icon size="16px" color="#5E71FE" name="videocam" type="material" cuClass="module-icon  mr-4">
+          </table-icon> {{ 'virtual' | i18next }}
+        </span>
+
+        <span class="face-to-face" *ngIf="(item.key == 'face_to_face')">
+          <table-icon size="16px" color="#1B6BBC" name="people_alt" type="material" cuClass="module-icon  mr-4">
+          </table-icon> {{ 'in_person' | i18next }}
+        </span>
+
+      </span>
+    </p>
+  </ng-container>
+</td>
+
+<td *ngIf="isMasked">
+  <div class="d-flex mask-vision">
+    <div class="mask-hide"></div>
+  </div>
+</td>
+
+<td *ngIf="isObject() === 'boolean' && !isShowCheckBox">
+  <span class="status-ui active" *ngIf="vmsRowDataSource">
+    {{ 'active' | i18next }}
+  </span>
+  <span class="status-ui inactive" *ngIf="!vmsRowDataSource">
+    {{ 'inactive' | i18next }}
+  </span>
+
+
+</td>
+
+<td *ngIf="isProfileMatch && !linearProgressBar && !circularProgressBar" [ngClass]="{'large-width-dropdown' : isWithdrawal}">
+  <div class="match-svg">
+    <svg width="36" height="36" viewBox="0 0 36 36" class="circular-chart orange">
+      <path class="circle-bg" d="M18 2.0845
+          a 15.9155 15.9155 0 0 1 0 31.831
+          a 15.9155 15.9155 0 0 1 0 -31.831" />
+      <path class="circle" [style.strokeDasharray]="svgValue" d="M18 2.0845
+          a 15.9155 15.9155 0 0 1 0 31.831
+          a 15.9155 15.9155 0 0 1 0 -31.831" />
+    </svg>
+  </div>
+  <p class="match-value">{{vmsRowDataSource?.matchValue}}%</p>
+  <span class="actions">
+    <!-- <button *ngIf="vmsRowDataSource.status !== 'SUBMITTED'"
+      class="btn small d-inline-block  btn-secondary font-weight-normal" (click)="clickToView(true)">
+      {{ 'submit_candidate' | i18next }}
+    </button> -->
+
+    <button *ngIf="isViewEnabled" class="btn small btn-secondary d-inline-block font-weight-normal"
+      (click)="clickToViewCandidate()">
+      {{ 'view' | i18next }}
+    </button>
+
+    <button class="btn small btn-light d-inline-block rounded-sm ml-4 no-border" (click)="showOptionDropdown()">
+      <table-icon size="20px" name="more_horiz" type="material" cuClass="d-flex" class="flex">
+      </table-icon>
+    </button>
+  </span>
+  <!-- need for future  use -->
+  <!-- <nav class="option-dropdown position-absolute active" [ngClass]="{'active' : showDropDown}">
+        <ul>
+            <li *ngIf="isViewProfile">
+                <a  (click)="clickToViewProfile()">
+                    <table-icon size="19px" name="how_to_reg" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+                    </table-icon>
+                    {{ 'view_profile' | i18next }}
+                </a>
+            </li>
+            <li *ngIf="isVieworEdit">
+                <a  (click)="clickToEdit()">
+                    <table-icon size="19px" name="create" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+                    </table-icon>
+                    {{ 'edit' | i18next }}
+                </a>
+            </li>
+            <li *ngIf="isEditorReview">
+                <a  (click)="clickToEdit()">
+                    <table-icon size="19px" name="create" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+                    </table-icon>
+                    {{ 'edit' | i18next }} & {{ 'review' | i18next }}
+                </a>
+            </li>
+
+            <li *ngIf="isWithdrawal" class="red-color">
+                <a  (click)="clickWithdrawCandidate()">
+                    <table-icon size="19px" name="person_remove" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+                    </table-icon>
+                    {{(vmsRowDataSource.status == 'SUBMITTED' ? 'Withdraw' : 'Submit')|i18next}} {{ 'candidate' | i18next }}
+                </a>
+            </li>
+        </ul>
+    </nav> -->
+</td>
+<td *ngIf="isInterview">
+  {{vmsRowDataSource || ' -- '}}
+  <span class="actions" *ngIf="!isNoOption">
+    <button class="btn small btn-secondary" (click)="clickToView(true)">
+      <table-icon size="14px" name="visibility" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+      </table-icon>
+      {{ 'view' | i18next }}
+    </button>
+
+    <button class="dropdown-trigger btn small btn-light rounded-sm ml-4" (click)="showOptionDropdown()">
+      <table-icon size="24px" name="more_horiz" type="material" cuClass="d-flex" class="flex">
+      </table-icon>
+    </button>
+  </span>
+  <nav class="option-dropdown custom-width position-absolute" [ngClass]="{'active' : showDropDown}">
+    <ul>
+      <li>
+        <a  (click)="onRescheduleClick()">
+          <table-icon size="19px" name="today" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'reschedule_interview' | i18next }}
+        </a>
+      </li>
+      <li>
+        <a  (click)="clickToEdit()">
+          <table-icon size="19px" name="create" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'edit_interview' | i18next }}
+        </a>
+      </li>
+      <li class="red-color">
+        <a  (click)="onCancelClick()">
+          <table-icon size="19px" name="backspace" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+          </table-icon>
+          {{ 'cancel_interview' | i18next }}
+        </a>
+      </li>
+    </ul>
+  </nav>
+</td>
+<td *ngIf="isDownloadBtn" #downLoadButton>
+  <button (click)="download()"class="btn small btn-outine"><table-icon theme="outlined" name="file_download" cuClass="d-flex" size="18px" color="inherit"></table-icon></button>
+</td>
+<td *ngIf="linearProgressBar && !circularProgressBar">
+<div class="linear-progress-bar d-flex align-items-center">
+  <table-icon name="help" cuClass="d-flex" color="#A3B0C0" size="15px" tooltip="Click to view the candidate score" placement="right"></table-icon>
+  <div class="linear-rail ml-8 mr-12">
+    <!-- use class name as follows:
+      moderate : 35 to 50%
+      good: 51 to 75%
+      excellent: 76 and above
+    -->
+    <span style="width: 10%"></span>
+  </div>
+  <p class="small">10%</p>
+</div>
+</td>
+<td *ngIf="circularProgressBar && !linearProgressBar">
+  <style type="text/css">
+    @property --progress-value {
+      syntax: '<integer>';
+      inherits: false;
+      initial-value: 0;
+    }
+
+    @keyframes html-progress {
+      to { --progress-value: var(--progress-val, 0); }
+    }
+
+    .circular-progress-bar {
+      background:
+      radial-gradient(closest-side, white 79%, transparent 80% 100%),
+      conic-gradient(#84919F calc(var(--progress-value) * 1%), #E9ECEF 0);
+      animation: html-progress 2s 1 forwards;
+      &:before {
+        counter-reset: percentage var(--progress-value);
+        content: counter(percentage) '%';
+        animation: html-progress 2s 1 forwards;
+      }
+
+      &.moderate {
+        background:
+        radial-gradient(closest-side, white 79%, transparent 80% 100%),
+        conic-gradient(#D8834B calc(var(--progress-value) * 1%), #E9ECEF 0);
+      }
+
+      &.good {
+        background:
+        radial-gradient(closest-side, white 79%, transparent 80% 100%),
+        conic-gradient(#0089FF calc(var(--progress-value) * 1%), #E9ECEF 0);
+      }
+
+      &.excellent {
+        background:
+        radial-gradient(closest-side, white 79%, transparent 80% 100%),
+        conic-gradient(#01CA17 calc(var(--progress-value) * 1%), #E9ECEF 0);
+      }
+    }
+  </style>
+  <div class="circular-progress-wrapper d-flex align-items-center">
+    <table-icon name="help" cuClass="d-flex" color="#A3B0C0" size="15px" tooltip="Click to view the candidate score" placement="right"></table-icon>
+    <div [ngClass]="{'moderate':progressVal>=26 &&  progressVal<=50 ,'good':progressVal>=51 &&  progressVal<=75 ,'excellent':progressVal>=76 }" class="circular-progress-bar ml-12 cursor-pointer" (click)="showCandidateScore($event)"></div>
+  </div>
+</td>
+
+<!--<td *ngIf="isReport" class="position-relative if-submitted-candidate">-->
+<!--  <p *ngIf="vmsRowDataSource" [ngClass]="{'paragraph-checkbox' : index === 0 && allowMultiselect}">-->
+<!--    <ng-container>-->
+<!--      <a   (click)="clickToView(true)" class="text-ellipsis"-->
+<!--         tooltip="{{vmsRowDataSource}}" placement="right" delay="500">{{vmsRowDataSource  || ' &#45;&#45; '}}</a>-->
+<!--    </ng-container>-->
+<!--  </p>-->
+
+
+<!--  <span class="actions">-->
+<!--    <span class="cursor-pointer p-4 ml-8 float-right" (click)="showDropdownReport()" #reportOptionButton>-->
+<!--      <table-icon size="24px" name="more_horiz" type="material" cuClass="d-flex" class="flex" theme="outlined">-->
+<!--      </table-icon>-->
+<!--    </span>-->
+<!--  </span>-->
+
+<!--</td>-->

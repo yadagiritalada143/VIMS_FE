@@ -1,0 +1,230 @@
+<svms-sidebar-ng *ngIf="singleDetailData" [dataVisibility]="sidebarVisibility" (onClose)="sidebarClose()" class="single-detail-sidebar">
+  <div class="p-24 d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+      <img
+        *ngIf="singleDetailData.expense_type.icon"
+        [src]="singleDetailData.expense_type.icon"
+        [alt]="singleDetailData.expense_type.title"
+        style="width: 40px"
+      />
+      <span
+        *ngIf="!singleDetailData.expense_type.icon"
+        class="initials initials__purple"
+        style="width: 40px; height: 40px; font-size: 20px"
+        >{{ singleDetailData.expense_type.initials | shortName: 'last' | i18nextEager }}</span
+      >
+      <h4 class="expense-detail-main-header mb-0 ml-8">{{ singleDetailData.expense_type.title }}</h4>
+    </div>
+  </div>
+  <svms-sidebar-body-ng [active]="true">
+    <div class="p-24 expense-detail-container">
+      <div class="form-group-row">
+        <div class="form-group d-flex align-items-center">
+          <icon class="pr-16" name="category" type="material" size="18px"></icon>
+          <div class="d-flex flex-column">
+            <span class="pb-8 expense-title">{{ 'expense_category' | i18nextEager }}</span>
+            <span class="expense-value">{{ singleDetailData.expense_category }}</span>
+          </div>
+        </div>
+        <div class="form-group d-flex align-items-center">
+          <icon class="pr-16" name="event_available" type="material" size="18px"></icon>
+          <div class="d-flex flex-column">
+            <span class="pb-8 expense-title">{{ 'date_incurred' | i18nextEager }}</span>
+            <span class="expense-value"
+              >
+              {{ singleDetailData.start_date  | localDateFormat :'':'':'':true }} {{ 'to' | i18nextEager }}
+              {{ singleDetailData.end_date | localDateFormat :'':'':'':true}}
+              </span
+            >
+          </div>
+        </div>
+      </div>
+      <div class="form-group-row">
+        <div class="form-group d-flex align-items-center">
+          <img
+            *ngIf="singleDetailData.expense_type.icon"
+            [src]="singleDetailData.expense_type.icon"
+            [alt]="singleDetailData.expense_type.title"
+            style="width: 18px; margin-right: 8px"
+          />
+          <span *ngIf="!singleDetailData.expense_type.icon" class="initials initials__purple">{{
+            singleDetailData.expense_type.initials | shortName: 'last' | i18nextEager
+          }}</span>
+          <div class="d-flex flex-column pl-8">
+            <span class="pb-8 expense-title">{{ 'expense_type' | i18nextEager }}</span>
+            <span class="expense-value">{{ singleDetailData.expense_type.title }}</span>
+          </div>
+        </div>
+      </div>
+          <div class="form-group-row">
+            <div class="form-group pr-8">
+              <table class="table">
+                <thead>
+                  <th class="table-header" colspan="2">
+                    {{ 'amount_details' | i18next }}
+                  </th>
+                </thead>
+                <tbody>
+                  <ng-container>
+                    <tr>
+                      <td class="half-width">
+                        <span *ngIf="singleDetailData?.expense_category?.toLowerCase() == 'general expense'">{{
+                          'general_expense_amount' |
+                          i18nextEager }} </span>
+                        <span *ngIf="singleDetailData?.expense_category?.toLowerCase() == 'miscellaneous expense'">{{
+                          'misc._expense_amount' |
+                          i18nextEager }} </span>
+                      </td>
+                      <td class="total-left">
+                        <span class="expense-value"
+                          tooltip="{{showTooltip(singleDetailData?.calculation?.expense_amount,accuracyConfig?.AMOUNT,currency)}}"
+                          placement="bottom" delay="500">
+                          {{ singleDetailData?.calculation?.expense_amount | accuracy: accuracyConfig?.AMOUNT : { currencyCode:
+                          currency } }}
+                        </span>
+                      </td>
+                    </tr>
+                    <ng-container *ngIf="showTaxes && isTypeTaxable && showFeeTaxesRoleBased">
+                      <tr *ngFor="let tax of singleDetailData?.taxes; index as i"
+                        [ngClass]="{ 'pr-8': !(i % 2), 'pl-8': i % 2, 'd-none': hideTaxControl(tax) }">
+                        <ng-container *ngIf="tax['entity_type'] === 'tax'">
+                          <td>
+                            {{ tax?.entity_name | uppercase }}
+                            {{'amount'| i18nextEager}}
+                          </td>
+                          <td class="total-left">
+                            {{ tax?.total_amount | accuracy: accuracyConfig?.AMOUNT : { currencyCode: currency } }}
+                            ({{ tax.amount_value | accuracy: accuracyConfig?.TAX_PERCENTAGE : { currencyCode: currency } }})
+                          </td>
+                        </ng-container>
+                      </tr>
+                    </ng-container>
+                  </ng-container>
+                </tbody>
+                <tfoot class="table-footer" *ngIf="showTaxes && showAmountDetails && isTypeTaxable">
+                  <td>
+                    <span *ngIf="singleDetailData?.expense_category?.toLowerCase() == 'general expense'">Total {{
+                      'general_expense_amount' |
+                      i18nextEager }} </span>
+                    <span *ngIf="singleDetailData?.expense_category?.toLowerCase() == 'miscellaneous expense'">Total {{
+                      'misc._expense_amount' |
+                      i18nextEager }} </span>
+                  </td>
+                  <td class="total-left">
+                    <ng-container>
+                      {{singleDetailData?.calculation?.total_amount | accuracy: accuracyConfig?.AMOUNT : { currencyCode: currency } }}
+                    </ng-container>
+                  </td>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+      <ng-container *ngIf="(isTypeMspApplicable) && showFeeTaxesRoleBased">
+        <div class="d-flex flex-wrap" *ngIf="!is_tax_hidden">
+          <div
+            *ngFor="let tax of singleDetailData.taxes; index as i"
+            class="half-width form-group d-flex align-items-center"
+            [ngClass]="{ 'pr-8': !(i % 2), 'pl-8': i % 2, 'd-none': hideTaxControl(tax) }"
+          >
+          <ng-container *ngIf="tax?.entity_type === 'fee'">
+            <icon class="pr-16" name="attach_money" type="material" size="18px"></icon>
+            <div class="d-flex flex-column">
+              <span class="pb-8 expense-title" *ngIf="(tax?.amount_type === 'percentage') || (tax?.amount_type === 'percent')">{{ tax?.entity_name | i18next | uppercase }} {{ tax?.entity_type | titlecase }} (%)</span>
+              <span class="pb-8 expense-title" *ngIf="(tax?.amount_type === 'fixed_amount')|| (tax?.amount_type === 'fixed')">{{ tax?.entity_name | i18next | uppercase }} {{ tax?.entity_type | titlecase }} (Fixed)</span>
+              <span class="expense-value" tooltip="{{tax?.total_amount | accuracy: accuracyConfig?.AMOUNT : { currencyCode: currency } }}" placement="bottom" delay="100">
+                {{ tax?.total_amount | accuracy: accuracyConfig?.AMOUNT : { currencyCode: currency } }}
+                <ng-container *ngIf="!(tax?.amount_type === 'fixed_amount')|| (tax?.amount_type === 'fixed')">({{ tax?.amount_value | accuracy: accuracyConfig?.TAX_PERCENTAGE : { currencyCode: currency } }})</ng-container>
+              </span>
+            </div>
+          </ng-container>
+          </div>
+        </div>
+        <div class="form-group-row" *ngIf="isTypeMspApplicable || isTypeTaxable">
+          <div class="form-group d-flex align-items-center" *ngIf="showClientBillable">
+            <icon class="pr-16" name="account_balance_wallet" type="material" size="18px"></icon>
+            <div class="d-flex flex-column">
+              <span class="pb-8 expense-title">{{ 'total_client_billable_amount' | i18nextEager }}</span>
+              <span class="expense-value"  tooltip="{{showTooltip(singleDetailData?.calculation?.total_amount,accuracyConfig?.TAX,currency)}}" placement="bottom" delay="100">{{ singleDetailData.calculation.total_amount | accuracy: accuracyConfig?.TAX : { currencyCode: currency } }}</span>
+            </div>
+          </div>
+
+          <div class="form-group d-flex align-items-center" *ngIf="showVendorBillable">
+            <icon class="pr-16" name="account_balance_wallet" type="material" size="18px"></icon>
+            <div class="d-flex flex-column">
+              <span class="pb-8 expense-title">{{ 'total_vendor_billable_amount' | i18nextEager }}</span>
+              <span class="expense-value"  tooltip="{{showTooltip(singleDetailData?.calculation?.vendor_amount_with_tax,accuracyConfig?.TAX,currency)}}"  placement="bottom" delay="100">{{ singleDetailData.calculation.vendor_amount_with_tax | accuracy: accuracyConfig?.TAX : { currencyCode: currency } }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group-row" *ngIf="isTypeMspApplicable || isTypeTaxable">
+          <div class="form-group d-flex align-items-center" *ngIf="showMspBillable">
+            <icon class="pr-16" name="account_balance_wallet" type="material" size="18px"></icon>
+            <div class="d-flex flex-column">
+              <span class="pb-8 expense-title">{{ 'total_msp_billable_amount' | i18nextEager }}</span>
+              <span class="expense-value"  tooltip="{{showTooltip(singleDetailData?.calculation?.msp_amount_with_tax,accuracyConfig?.TAX,currency)}}"   placement="bottom" delay="100">{{ singleDetailData.calculation.msp_amount_with_tax | accuracy: accuracyConfig?.TAX : { currencyCode: currency } }}</span>
+            </div>
+          </div>
+        </div>
+
+      </ng-container>
+      <div class="form-group-row">
+        <div *ngFor="let field of singleDetailData.custom_fields" class="form-group d-flex align-items-center">
+          <icon class="pr-16" name="category" type="material" size="18px"></icon>
+          <div class="d-flex flex-column">
+            <span class="pb-8 expense-title">{{ field.name }}</span>
+            <span class="expense-value">{{ show_only_codes ? field.code : field.value }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="notes-container p-12 mt-16">
+        <div class="notes-header d-flex justify-content-between align-items-center">
+          <div class="notes-icon-header d-flex align-items-center">
+            <icon name="sticky_note_2" type="material" size="18px"></icon>
+            <span class="pl-12">{{ 'notes' | i18nextEager }}</span>
+          </div>
+        </div>
+        <p
+          *ngIf="singleDetailData.expense_item_notes && singleDetailData.expense_item_notes !== 'null'; else noNotes"
+          class="notes-content"
+        >
+          {{ singleDetailData.expense_item_notes }}
+        </p>
+        <ng-template #noNotes>
+          <p class="notes-content">--</p>
+        </ng-template>
+      </div>
+
+       <!-- Custom Fields -->
+       <app-dynamic-custom-fields *ngIf="hierarchyIds" [isDisabled]="true" (isCustomFieldsFormValid)="setCustomFieldsFormValid($event)"
+       (customFieldUpdated)="customFieldUpdated($event);" [custom_fields]="selectedCustomData"
+       [moduleName]="selectedModule" [uploadS3RefName]="selectedModule" [columnInRow]="2" [hierarchyIds]="hierarchyIds">
+     </app-dynamic-custom-fields>
+     <!-- end -->
+
+      <div class="attachments-container">
+        <h5 class="pb-16" *ngIf="singleDetailData?.attachment?.length">{{'Attachment'|i18next  }}</h5>
+        <div *ngIf="singleDetailData.attachment.length" class="d-flex">
+          <div class="d-flex mr-8" *ngFor="let img of singleDetailData.attachment">
+            <!--              <picture>-->
+            <!--                <source media="(min-width:50px) 80px" [srcset]="img.thumbnail" />-->
+            <!--                <img [src]="img.path" [alt]="singleDetailData.expense_type.title" style="width: 80px; height: 80px" alt="attachments" />-->
+            <!--                &lt;!&ndash; temporary fix &ndash;&gt;-->
+            <!--                <a [href]="img.path"> file download</a>-->
+            <!--              </picture>-->
+
+            <div class="attachment-box">
+              <img [src]="attachmentPathByExtension(img)?.previewPath" [alt]="img.thumbnail" class="attachment-box__attachment" />
+              <div class="attachment-box__download-wrapper">
+                <a [href]="attachmentPathByExtension(img)?.downloadPath"
+                  ><img src="../assets/images/app-download-icon.png" alt="download_icon" class="attachment-box__download-wrapper__icon"
+                /></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p *ngIf="!singleDetailData.attachment">{{ 'no_attachments' | i18nextEager }}</p>
+      </div>
+    </div>
+  </svms-sidebar-body-ng>
+</svms-sidebar-ng>

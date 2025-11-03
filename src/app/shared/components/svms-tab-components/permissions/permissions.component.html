@@ -1,0 +1,114 @@
+<div class="permissons-form tab-content-wrapper">
+  <div class="leftPanel">
+    <ul class="vertical-menu">
+      <li *ngFor="let module of moduleGroup; let i = index" (click)="onClickModule(i)"
+        [ngClass]="{'active':visibleModuleIndex == i}" [hidden]="!module?.is_enabled" class="pt-24">{{module?.name}}
+      </li>
+    </ul>
+  </div>
+
+  <div class="rightPanel" [ngSwitch]="viewMode">
+    <div>
+      <div class="row no-gutters text-center border-bottom">
+        <div class="col-md-4">
+        </div>
+        <div class="col-md-8">
+          <div class="row no-gutters">
+            <div class="col checkbox-h d-flex align-items-center justify-content-center">
+              <label>{{ 'off' | i18next }}</label>
+            </div>
+            <div class="col checkbox-h d-flex align-items-center justify-content-center">
+              <label>{{ 'read' | i18next }}</label>
+            </div>
+            <div class="col checkbox-h d-flex align-items-center justify-content-center">
+              <label>{{ 'create' | i18next }}</label>
+            </div>
+            <div class="col checkbox-h d-flex align-items-center justify-content-center">
+              <label>{{ 'edit' | i18next }}</label>
+            </div>
+            <div class="col checkbox-h d-flex align-items-center justify-content-center">
+              <label>{{ 'delete' | i18next }}</label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div *ngFor="let module of moduleGroup; let groupIndex = index"
+        [hidden]="!module.is_enabled || visibleModuleIndex !== groupIndex">
+        <div *ngFor="let module of module.modules; let moduleIndex = index" class="permissions">
+          <div class="row no-gutters border-bottom">
+            <div class="col-md-4 d-flex align-items-center">
+              <label class="mb-0">{{module?.name | i18next}}</label>
+            </div>
+            <div class="col-md-8">
+              <div class="row no-gutters">
+                <div class="col border-left border-right py-12 checkbox-h ">
+                  <div class="checkbox-box">
+                    <div class="checkbox-wrapper">
+                      <label class="checkbox-container">
+                        <input [disabled]="readOnly" (change)="valueChanged(groupIndex, moduleIndex, 'is_enabled')"
+                          [(ngModel)]="module.is_enabled" type="checkbox" name="OFF">
+                        <span class="checkmark"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div class="col border-right py-12 checkbox-h ">
+                  <div class="checkbox-box">
+                    <div class="checkbox-wrapper">
+                      <label class="checkbox-container">
+                        <input [disabled]="readOnly"
+                          (change)="valueChanged(groupIndex, moduleIndex, 'is_read_allowed')"
+                          [(ngModel)]="module.is_read_allowed" type="checkbox" name="READ">
+                        <span class="checkmark"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div class="col border-right py-12 checkbox-h ">
+                  <div class="checkbox-box">
+                    <div class="checkbox-wrapper">
+                      <label class="checkbox-container">
+                        <input [disabled]="readOnly"
+                          (change)="valueChanged(groupIndex, moduleIndex, 'is_create_allowed')"
+                          [(ngModel)]="module.is_create_allowed" type="checkbox" name="CREATE">
+                        <span class="checkmark"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col border-right py-12 checkbox-h ">
+                  <div class="checkbox-box">
+                    <div class="checkbox-wrapper">
+                      <label class="checkbox-container">
+                        <input [disabled]="readOnly"
+                          (change)="valueChanged(groupIndex, moduleIndex, 'is_edit_allowed')"
+                          [(ngModel)]="module.is_edit_allowed" type="checkbox" name="EDIT">
+                        <span class="checkmark"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div class="col py-12 checkbox-h ">
+                  <div class="checkbox-box">
+                    <div class="checkbox-wrapper">
+                      <label class="checkbox-container">
+                        <input [disabled]="readOnly"
+                          (change)="valueChanged(groupIndex, moduleIndex, 'is_delete_allowed')"
+                          [(ngModel)]="module.is_delete_allowed" type="checkbox" name="DELETE">
+                        <span class="checkmark"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>

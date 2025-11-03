@@ -1,0 +1,45 @@
+<aside>
+    <figure class="c-logo">
+        <a href="javascript:void(0)">
+            <img [src]="getLogoUrl" alt="Program logo" height="30">
+        </a>
+    </figure>
+    <nav>
+        <perfect-scrollbar>
+            <ul class="short-view">
+                <ng-container *ngFor="let navparent of navigationList">
+                    <li>
+                        <i class="material-icons">{{navparent?.icon}}</i>
+                    </li>
+                </ng-container>
+
+            </ul>
+            <ul class="full-view">
+                <ng-container *ngFor="let navitem of navigationList">
+                    <li [ngClass]="{'parent-active': navitem?.active}">
+                        <a href="javascript:void(0)" (click)="toggleSubmenu(navitem)">
+                            <i class="material-icons parent-icon">{{navitem?.active ? 'keyboard_arrow_down' :
+                                'keyboard_arrow_right'}}</i>
+                            {{navitem?.name | i18next }}
+                        </a>
+                        <ul [ngClass]="{'active': navitem?.active}">
+                            <ng-container *ngFor="let item of navitem?.submenuItem">
+                                <li>
+                                    <a [routerLink]="getPath('/self-configuration/' + item?.path)" 
+                                        [queryParams]="getQueryParams(item?.path)" 
+                                        [ngClass]="{'active': item?.isActive}"
+                                        title="{{item?.name | i18next}}">
+                                        <span>
+                                            <i class="material-icons-outlined">{{item?.icon}}</i>
+                                            {{item?.name | i18next}}
+                                        </span>
+                                    </a>
+                                </li>
+                            </ng-container>
+                        </ul>
+                    </li>
+                </ng-container>
+            </ul>
+        </perfect-scrollbar>
+    </nav>
+</aside>

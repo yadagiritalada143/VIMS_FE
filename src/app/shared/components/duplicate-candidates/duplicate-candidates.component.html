@@ -1,0 +1,99 @@
+<div class="card bg-light-gray mt-24 d-flex p-12 align-items-center" *ngIf="showDuplicateCandidateLoader">
+  <ngx-skeleton-loader
+    count="1"
+    animation="progress"
+    appearance="circle"
+    [theme]="{
+      width: '100px',
+      height: '100px',
+      float: 'left',
+      'margin-bottom': '0px',
+      'margin-right': '10px',
+      'background-color': '#ECEDFF',
+      'border-top': '0'
+    }"
+  >
+  </ngx-skeleton-loader>
+  <ngx-skeleton-loader
+    count="4"
+    animation="progress"
+    appearance="line"
+    [theme]="{
+      width: '130px',
+      height: '15px',
+      display: 'block',
+      'border-radius': '4px',
+      'background-color': '#dce2e7',
+      'border-top': '0',
+      'margin-bottom': '9px'
+    }"
+  ></ngx-skeleton-loader>
+  <ngx-skeleton-loader
+    count="4"
+    animation="progress"
+    appearance="line"
+    [theme]="{
+      width: '130px',
+      height: '15px',
+      display: 'block',
+      'margin-left': '10px',
+      'border-radius': '4px',
+      'background-color': '#dce2e7',
+      'border-top': '0',
+      'margin-bottom': '9px'
+    }"
+  ></ngx-skeleton-loader>
+</div>
+<app-alert [log]="duplicateCandidatesLogs" *ngIf="!showDuplicateCandidateLoader" (onCollapse)="handleCollapse()" (onExpand)="handleExpand()"></app-alert>
+<ng-container *ngIf="!showDuplicateCandidateLoader && !isCollapsed">
+  <div class="card bg-light-gray mt-24 d-flex p-12 align-items-center" *ngFor="let candidate of this.duplicateCandidates">
+    <figure class="user-avatar rounded-circle float-left">
+        <img [src]="candidate?.avatar" *ngIf="candidate?.avatar && !profileImageHide; else showInitialsSection" alt="{{candidate?.name_initials | i18next }}">
+        <ng-template #showInitialsSection>
+            <div class="initials initials__purple  text-uppercase">{{candidate?.name_initials || '' | i18next }}</div>
+        </ng-template>
+    </figure>
+    <div class="duplicate-candidate-info ml-32">
+      <p class="font-weight-semibold candidate-name-text">
+        {{ formatName(candidate.first_name, candidate.middle_name, candidate.last_name) }}
+      </p>
+      <div class="d-flex my-4">
+        <icon name="label" size="20px" class="d-flex align-items-center label-icon-color" cuClass="icon-cu"> </icon>
+        <p class="section-heading font-weight-medium align-items-center pl-4 candidate-info-text">{{ candidate.unique_id }}</p>
+      </div>
+      <div class="align-items-center my-4 candidate-info-inline">
+        <div class="d-flex pr-24">
+          <icon name="cake" size="16px" class="d-flex align-items-center" cuClass="icon-cu"></icon>
+          <p class="candidate-info-text pl-8">{{ candidate.dob | date:'MM/dd'}}</p>
+        </div>
+        <div class="d-flex pr-24">
+          <icon name="call" size="16px" class="d-flex align-items-center" cuClass="icon-cu"></icon>
+          <p class="candidate-info-text pl-8">+{{ candidate.phone_isdcode }} {{ candidate.phone_number }}</p>
+          <icon name="verified" size="12px" class="d-flex align-items-center verified-icon-color pl-4" cuClass="icon-cu"></icon>
+        </div>
+        <div class="d-flex">
+          <icon name="mail" size="16px" class="d-flex align-items-center" cuClass="icon-cu"></icon>
+          <p class="candidate-info-text pl-8">{{ candidate.email }}</p>
+          <icon name="verified" size="12px" class="d-flex align-items-center verified-icon-color pl-4" cuClass="icon-cu"></icon>
+        </div>
+      </div>
+      <div class="d-flex my-4">
+        <icon name="house" size="16px" class="d-flex align-items-center" cuClass="icon-cu"></icon>
+        <p class="candidate-info-text pl-8">{{ formatAddress(candidate.addresses) }}</p>
+        <icon
+          name="verified"
+          *ngIf="formatAddress(candidate.addresses) !== ''"
+          size="12px"
+          class="d-flex pl-4 align-items-center verified-icon-color"
+          cuClass="icon-cu"
+        ></icon>
+      </div>
+      <button *ngIf="useThisProfileAction.observers.length > 0" class="btn btn-primary small px-8 py-16 mr-24 use-this-profile-btn" (click)="onUserThisProfileButtonClick(candidate)">
+        {{ 'use_this_profile' | i18nextEager }}
+      </button>
+    </div>
+    <button *ngIf="viewProfileAction.observers.length > 0" class="btn btn-primary small float-right px-8 py-16 view-profile-btn mr-24" (click)="onViewProfileButtonClick(candidate)">
+      {{ 'view_profile' | i18nextEager }}
+    </button>
+  </div>
+</ng-container>

@@ -1,0 +1,197 @@
+<svms-sidebar-ng [title]="invoiceDetails?.sow_progress_info?.progress_name !== '' ? invoiceDetails?.sow_progress_info?.progress_name : capitalizeWords(invoiceDetails?.worker?.first_name) + ' ' +
+    capitalizeWords(invoiceDetails?.worker?.last_name)   | i18nextEager" [dataVisibility]="isDetails" [showFooter]="false"
+    (onClose)='clearForm()'>
+    <div class="sidebar-wrapper p-24">
+        <div class="row  mt-12">
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="d-flex flex-column value-group">
+                        <p class="small">{{ 'invoice_number' | i18nextEager }}</p>
+                        <p class="value-content">{{invoiceDetails?.invoice_number ? invoiceDetails?.invoice_number : '--'}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="d-flex flex-column value-group">
+                        <p class="small">{{ 'created_on' | i18nextEager }}</p>
+                        <p class="value-content"> {{invoiceDetails?.created_at ? getDate(invoiceDetails?.created_at, true) : '--'}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row  mt-12">
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="d-flex flex-column value-group">
+                        <p class="small">{{ 'hierarchy' | i18nextEager }}</p>
+                        <p class="value-content">{{invoiceDetails?.hierarchy?.name ? invoiceDetails?.hierarchy?.name : '--'}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="d-flex flex-column value-group">
+                        <p class="small">{{ 'sourcing_model' | i18nextEager }}</p>
+                        <p class="value-content"> {{ invoiceDetails?.sourcing_model !== '' ?  invoiceDetails?.sourcing_model == 'sow'  ? invoiceDetails?.sourcing_model?.toUpperCase() : capitalizeWords(invoiceDetails?.sourcing_model)  : '--' | i18nextEager}} </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="d-flex flex-column value-group">
+                        <p class="small">{{ 'vendor_org_name' | i18nextEager }}</p>
+                        <p class="value-content"> {{invoiceDetails?.vendor?.name ? invoiceDetails?.vendor?.name : '--'}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row  mt-12">
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="subject" size="24px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <h4><strong>{{ 'invoice_detail' | i18nextEager }}</strong></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row  mt-12">
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'worker/_progress_update' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.worker?.first_name ?
+                        capitalizeWords(invoiceDetails?.worker?.first_name) + ' ' +
+                        capitalizeWords(invoiceDetails?.worker?.last_name) || '' :
+                        (invoiceDetails?.sow_progress_info?.progress_name ?
+                        capitalizeWords(invoiceDetails?.sow_progress_info?.progress_name) : '--')}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'timesheet/expense_manager' | i18nextEager }}</label>
+                    <div class="d-flex align-items-center">
+                        <span class="initials initials__purple" *ngIf="invoiceDetails?.ts_es_manager?.initials">{{invoiceDetails?.ts_es_manager?.initials}}</span>
+                        <span class="value-content">{{invoiceDetails?.ts_es_manager?.name !== '' ?
+                            capitalizeWords(invoiceDetails?.ts_es_manager?.name) : '--'}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'assignment_name(id)' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.assignment_title ? invoiceDetails?.assignment_title :'--'}}{{ invoiceDetails?.assignment_id ? "("+ invoiceDetails?.assignment_id +")" : ''}}</span>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'invoice_type' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.invoice_type === "By milestone " ? 'Progress Update' : invoiceDetails?.invoice_type ?
+                        capitalizeWords(invoiceDetails?.invoice_type) : '--' | i18nextEager}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'invoice_type_id' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.ts_es_code ? invoiceDetails?.ts_es_code : '--'}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'duration' | i18nextEager }}</label>
+                    <span class="value-content">{{getDate(invoiceDetails?.invoice_start_date, true)}} -
+                        {{getDate(invoiceDetails?.invoice_end_date, true)}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'total_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{(invoiceDetails?.invoice_calculation?.amount_with_tax || invoiceDetails?.invoice_calculation?.vendor_total_amount) ? (userType !== 'VENDOR') ? (invoiceDetails?.invoice_calculation?.amount_with_tax |  accuracy : accuracyEnum.AMOUNT : { currencyCode: currency }) : (invoiceDetails?.invoice_calculation?.vendor_total_amount |  accuracy : accuracyEnum.AMOUNT : { currencyCode: currency }) : '--' }}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{'total_billable_hours'|i18next}}</label>
+                    <span class="value-content">{{invoiceDetails?.total_billable_hours ? (invoiceDetails?.total_billable_hours | accuracy : accuracyEnum.HOUR) : '--' }}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'erp_external_id_' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.erp_external_id ? invoiceDetails?.erp_external_id :'--'}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'work_location_' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.work_location?.name ? invoiceDetails?.work_location?.name :'--'}}</span>
+                </div>
+            </div>
+        </div>
+        <div class="row  mt-12">
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="business" size="24px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <h4><strong>{{'master_data'|i18next}}</strong></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row  mt-12">
+            <div class="col-md-4 mb-12" *ngFor="let foundationalData of invoiceDetails?.invoice_foundational_data">
+                <div class="value-group">
+                    <label class="value-head">{{foundationalData?.data_type_name}}</label>
+                    <span class="value-content">{{foundationalData?.data_id_value ? foundationalData?.data_id_value : '--'}}</span>
+                </div>
+            </div>
+        </div>
+        <div class="row  mt-12">
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="receipt_long" size="24px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <h4><strong>{{ 'invoice_history' | i18nextEager }}</strong></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="border rounded-sm mb-12 p-12" *ngFor="let allInvoice of invoiceDetails?.all_invoices">
+            <h4 class="font-weight-medium blue-color d-flex align-items-center mb-12">
+                <icon name="label" color="#ffc409" class="mr-8"></icon> <span>{{allInvoice?.invoice_number ? allInvoice?.invoice_number : '--'}}</span>
+            </h4>
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <p class="small">{{ 'total_invoice_amount' | i18nextEager }}</p>
+                    <p class="font-weight-medium">{{allInvoice?.calculation?.amount_with_tax ? (allInvoice?.calculation?.amount_with_tax |  accuracy : accuracyEnum.AMOUNT : { currencyCode: currency }) : '--' }}</p>
+                </div>
+                <div>
+                    <p class="small">{{'client_bill_rate(st)' | i18nextEager}}</p>
+                    <p class="font-weight-medium">{{allInvoice?.calculation?.billrate_breakup?.regular?.client[0]?.rate ? (allInvoice?.calculation?.billrate_breakup?.regular?.client[0]?.rate | accuracy : accuracyEnum.RATE: { currencyCode: currency }) : '--'}}</p>
+                </div>
+                <div>
+                    <p class="small">{{ 'st_hours' | i18nextEager }}</p>
+                    <p class="font-weight-medium">{{allInvoice?.calculation?.billrate_breakup?.regular?.client[0]?.hours ? (allInvoice?.calculation?.billrate_breakup?.regular?.client[0]?.hours | accuracy : accuracyEnum.HOUR) : '--'}}</p>
+                </div>
+                <div>
+                    <p class="small">{{ 'invoice_type_id' | i18nextEager }}</p>
+                    <p class="font-weight-medium">{{allInvoice?.ts_es_code ? allInvoice?.ts_es_code : '--'}}</p>
+                </div>
+                <div>
+                    <p class="small">{{ 'consolidate_id' | i18nextEager }}</p>
+                    <p class="font-weight-medium">{{allInvoice?.consolidate_invoice?.invoice_number ?
+                        allInvoice?.consolidate_invoice?.invoice_number : '--'}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</svms-sidebar-ng>

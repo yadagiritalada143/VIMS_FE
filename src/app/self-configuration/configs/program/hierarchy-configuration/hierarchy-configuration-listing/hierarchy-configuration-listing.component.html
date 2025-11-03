@@ -1,0 +1,27 @@
+<ng-template #statusTemplate let-value="value">
+    <span class="c-status-ui active" *ngIf="value">
+        {{ 'active' | i18next }}
+    </span>
+    <span class="c-status-ui inactive" *ngIf="!value">
+        {{ 'inactive' | i18next }}
+    </span>
+</ng-template>
+
+<ng-template #showData let-value="value">
+    <ng-container *ngFor="let val of value">
+        {{val?.first_name + ' ' + val?.last_name + ',' }}
+    </ng-container>
+</ng-template>
+
+<ng-template #hierarchyTemplate let-$implicit="$implicit" let-value="value">
+    <a [ngClass]="{'level-icon': ($implicit.hierarchy_level > 1)}" href="javascript:void(0)" [ngStyle]="{'margin-left': ($implicit.hierarchy_level-1)*30 + 'px'}" (click)="onViewClick($implicit)">{{$implicit.name}}</a>
+</ng-template>
+<app-svms-table [tableOptions]="tableOptions" [coloumnDefintions]="svmstableColomnDefn"
+    [dataSource]="vmsData"></app-svms-table>
+
+<ng-template #codeTemplate  let-value="value">
+    <span class="text-visibility">
+        {{ value }}
+    </span>
+</ng-template>
+<!-- <app-create-hierarchy></app-create-hierarchy> -->

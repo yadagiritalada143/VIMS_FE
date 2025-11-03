@@ -1,0 +1,39 @@
+<section class="expense-wrapper p-24 pl-m-0 pr-m-0 pt-m-0">
+  <div class="inside-wrap">
+    <a (click)="navigateBackToList()" class="back-link back-mobile">
+      <icon name="chevron_left" type="material" size="24px"></icon>
+      <span>{{ 'back_to' | i18nextEager }} {{ expenseType?.name | i18nextEager }} {{ 'list' | i18nextEager }}</span>
+    </a>
+    <app-status-message *ngIf="accessRemoved || expenseConfigInactive || expenseModuleDisabled"
+      [data]="{ status: 'rejected' | i18nextEager, updated_by: null, date: '' }"
+      [type]="StatusMessageTypes.Expense"
+      [simpleMessage]="
+        (expenseConfigInactive || expenseModuleDisabled
+          ? expenseInactiveMessage
+          : 'Access to enter expense has been removed.') | i18nextEager
+      "></app-status-message>
+    <app-new-expense-header
+      [data]="expenseDetail$ | async"
+      [expenseType]="expenseType"
+    ></app-new-expense-header>
+    <div class="mt-24" *ngIf="expenseData">
+      <app-master-data [isExpenseConfig]="true" [currentTimesheetData] = "expenseData" ></app-master-data>
+    </div>
+    <div class="expense-content mt-16 p-24">
+      <app-no-expense
+        (openCreationSidebar)="createExpense()"
+        [accessRemoved]="accessRemoved || expenseConfigInactive || expenseModuleDisabled"
+        [expenseType]="expenseType"
+        [isDataLoaded]="isDataLoaded"
+      >
+      </app-no-expense>
+    </div>
+  </div>
+</section>
+<app-add-expense
+  *ngIf="isOpenCreating"
+  (closeCreateModal)="toggleIsOpenCreating()"
+  [assignment]="expenseDetail?.assignment"
+  [hierarchyId]="expenseDetail?.assignment.hierarchy?.id"
+  [is_tax_hidden]="is_tax_hidden"
+></app-add-expense>

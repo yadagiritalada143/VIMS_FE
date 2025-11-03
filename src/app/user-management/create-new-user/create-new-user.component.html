@@ -1,0 +1,362 @@
+<svms-sidebar [title]="title | i18next" [size]="'large'" [icon]="'supervised_user_circle'" [dataVisibility]="createUser"
+    (onClose)="sidebarClose()">   
+    <svms-sidebar-body>
+        <div class="mb-24" *ngIf="showSupportingText">
+            <app-supporting-text [support_data]="support_text"></app-supporting-text>
+        </div>
+        <div *ngIf="show_org && !(list_or_create && isViewMode) && !isEditMode">
+            <div class="form-group">
+                <label>{{ 'select_user_type' | i18next }}</label>
+                <div class="form-group-row tab-buttons">
+                    <button type="button" *ngFor="let orgCat of org_catgrs; let i = index" [attr.id]="'tab'+orgCat"
+                        class="btn btn-light" (click)="selectCategory($event)"
+                        [ngClass]="{'btn-r-border-radius': i == org_catgrs.length - 1, 'btn-l-border-radius': i == 0}">
+                        {{orgCat}}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="selectedCatgrs">
+            <div *ngIf="!isEditMode && show_org && (!isControl && selectedCatgrs == 'Vendor' || isControl)" class="form-group">
+                <label>{{'select'|i18next}} {{selectedCatgrs|i18next}}<span class="require">*</span></label>
+                <ng-select [readonly]="(list_or_create && isViewMode)" [(ngModel)]="selectedOrg" [clearable]="true"
+                  placeholder="Select" (change)="selectOrganization()" (search)='searchOrg($event)' [loading]="categoryListLoading">
+                  <ng-option *ngFor="let org of orgLists" [value]="org.id">{{org.name}}</ng-option>
+                </ng-select>
+                <span *ngIf="show_org_error" class="error-text">{{fieldRqdMsg|i18next}}</span>
+            </div>
+            <form [formGroup]="createUserForm" (ngSubmit)="onSubmit()">
+                <div [ngClass]="{'show-org' : show_org}">
+                    <div class="form-group">
+                        <div class="Upload_box_wrapper">
+                            <svms-upload-profile-avatar (click)="!(list_or_create && isViewMode)" [image]="profilePic"
+                                [avatar]="profilePic" (nfilename)="getProfileImage($event)">
+                            </svms-upload-profile-avatar>
+                        </div>
+                    </div>
+                    <h4 *ngIf="!(list_or_create && isViewMode)"><b>{{ 'full_name' | i18next }}</b></h4>
+                    <div class="form-group-row">
+                        <div class="form-group" *ngIf="!getPrefixSuffixFlag()">
+                            <label>{{ 'prefix' | i18next }}</label>
+                            <ng-select [readonly]="list_or_create && isViewMode" formControlName="prefix"
+                                [clearable]="true" placeholder="{{ 'select' | i18next }}">
+                                <ng-option value="Mr">{{ 'mr' | i18next }}.</ng-option>
+                                <ng-option value="Mrs">{{ 'mrs' | i18next }}.</ng-option>
+                                <ng-option value="Miss">{{ 'miss' | i18next }}</ng-option>
+                                <ng-option value="Dr">{{ 'dr' | i18next }}</ng-option>
+                                <ng-option value="Prof">{{ 'prof' | i18next }}</ng-option>
+                                <ng-option value="MX.">{{ 'mx.' | i18next }}</ng-option>
+                                <ng-option value="IND.">{{ 'ind.' | i18next }}</ng-option>
+                                <ng-option value="Misc">{{ 'misc' | i18next }}</ng-option>
+                            </ng-select>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ 'first_name' | i18next }}<span class="require">*</span></label>
+                            <input [readonly]="list_or_create && isViewMode" formControlName="fname" type="text"
+                                placeholder="{{ 'enter_first_name' | i18next }}" class="form-control" />
+                            <span *ngIf="form.fname.touched && form.fname.errors?.required" class="error-text">
+                                {{fieldRqdMsg|i18next}}
+                            </span>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ 'middle_name' | i18next }}</label>
+                            <input [readonly]="list_or_create && isViewMode" formControlName="mname" type="text"
+                                placeholder="{{ 'enter_middle_name' | i18next }}" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label>{{ 'last_name' | i18next }}<span class="require">*</span></label>
+                            <input [readonly]="list_or_create && isViewMode" formControlName="lname" type="text"
+                                placeholder="{{ 'enter_last_name' | i18next }}" class="form-control" />
+                            <span *ngIf="form.lname.touched && form.lname.errors?.required" class="error-text">
+                                {{fieldRqdMsg|i18next}}
+                            </span>
+                        </div>
+                        <div class="form-group" *ngIf="!getPrefixSuffixFlag()">
+                            <label>{{ 'suffix' | i18next }}</label>
+                            <ng-select [readonly]="list_or_create && isViewMode" formControlName="suffix"
+                                [clearable]="true" placeholder="{{ 'select' | i18next }}">
+                                <ng-option value="Jr">{{ 'jr' | i18next }}</ng-option>
+                                <ng-option value="Sr">{{ 'sr' | i18next }}</ng-option>
+                                <ng-option value="III">{{ 'iii' | i18next }}</ng-option>
+                                <ng-option value="IV">{{ 'iv' | i18next }}</ng-option>
+                                <ng-option value="V">{{ 'v' | i18next }}</ng-option>
+                            </ng-select>
+                        </div>
+                    </div>
+                    <div class="tab-section">
+                        <div class="form-group-row tabset">
+                            <div id="tabContactDetails" class="tab active-tab" (click)="tabSelection($event)">{{ 'contact_details' | i18next }}</div>
+                            <div id="tabSocialMedia" class="tab" (click)="tabSelection($event)">{{ 'social_media' | i18next }}</div>
+                        </div>
+                        <div class="tab-contents">
+                            <div id="tabContentContactDetails" class="tab-content">
+                                <div class="form-group">
+                                    <label>{{ 'country' | i18next }}<span class="require">*</span></label>
+                                    <!-- <ng-select [readonly]="list_or_create && isViewMode" formControlName="country"
+                                        [clearable]="false" placeholder="Select" (change)="onCountryChange()" (search)='searchCountry($event)'> -->
+                                    <ng-select [readonly]="list_or_create && isViewMode" formControlName="country"
+                                        [clearable]="true" placeholder="{{ 'select' | i18next }}" (change)="onCountryChange()" (clear)="clearCountry()">
+                                        <ng-option *ngFor="let country of allCountryList" [value]="country.id">
+                                            {{country.name | i18next}}
+                                        </ng-option>
+                                    </ng-select>
+                                    <span *ngIf="form.country.touched && form.country.errors?.required"
+                                        class="error-text">{{fieldRqdMsg|i18next}}</span>
+                                </div>
+                                <div class="form-group-row">
+                                    <div class="form-group">
+                                        <label>{{ 'email_address' | i18next }} ({{ 'primary' | i18next }})<span
+                                                class="require">*</span></label>
+                                        <div class="d-flex position-relative">
+                                            <icon class="icon-bg d-flex" size="16px" name="mail_outline"
+                                                type="material"></icon>
+                                            <input [readonly]="list_or_create && isViewMode" type="email"
+                                                formControlName="user_mail" placeholder="{{ 'enter_primary_email_address' | i18next }}"
+                                                class="form-control remove-radius" [pattern]="emailValidation"
+                                                (input)="changePrimaryEmail($event.target.value)">
+                                        </div>
+                                        <span *ngIf="form.user_mail.touched && form.user_mail.errors?.required"
+                                            class="error-text">{{fieldRqdMsg|i18next}}</span>
+                                        <span *ngIf="form.user_mail.touched && form.user_mail.errors?.pattern"
+                                            class="error-text">{{ 'enter_a_correct_email' | i18next }}.</span>
+                                    </div>
+                                    <button type="button" class="add-remove-icon" (click)="addSecondary('email')"
+                                        [disabled]="emailSecondary">
+                                        <icon size="24px" name="add" type="material" cuClass="icon d-flex mt-36"></icon>
+                                    </button>
+                                </div>
+                                <div *ngIf="emailSecondary" class="form-group-row">
+                                    <div class="form-group">
+                                        <label>{{ 'email_address' | i18next }} ({{ 'secondary' | i18next }})</label>
+                                        <div class="d-flex position-relative">
+                                            <icon class="icon-bg d-flex" size="16px" name="mail_outline"
+                                                type="material"></icon>
+                                            <input [readonly]="list_or_create && isViewMode" type="email"
+                                                formControlName="user_mail_secondary"
+                                                placeholder="{{ 'enter_secondary_email_address' | i18next }}"
+                                                class="form-control remove-radius">
+                                        </div>
+                                        <span *ngIf="form.user_mail_secondary.errors?.pattern"
+                                            class="error-text">{{ 'enter_a_correct_email' | i18next }}.</span>
+                                    </div>
+                                    <button type="button" class="add-remove-icon" (click)="removeSecondary('email')">
+                                        <icon size="24px" name="remove" type="material" cuClass="icon d-flex mt-36">
+                                        </icon>
+                                    </button>
+                                </div>
+                                <ng-container *ngIf="!hideSSO">
+                                    <div class="form-group-row">
+                                        <div class="form-group">
+                                            <label>{{ 'sso_id' | i18next }} </label>
+                                            <div class="d-flex position-relative">
+                                                <icon class="icon-bg d-flex" size="16px" name="public"
+                                                    type="material"></icon>
+                                                <input [readonly]="!hasSSOEditPermission || (list_or_create && isViewMode)" type="text"
+                                                    formControlName="sso_id" placeholder="{{'enter_sso_id' | i18next}}" (keyup)="checkSSOExist()"
+                                                    class="form-control remove-radius" >
+                                            </div>
+                                            <span *ngIf="form.sso_id.touched && form.sso_id.errors?.required"
+                                                class="error-text">{{fieldRqdMsg|i18next}}</span>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                                <div class="form-group-row">
+                                    <div class="form-group">
+                                        <label>{{ 'phone_number' | i18next }} ({{ 'primary' | i18next }})</label>
+                                        <div class="d-flex position-relative">
+                                            <ng-select class="select-bg formatCountry" [clearable]="false" formControlName="phoneFormatCountryPrimary" (change)="phoneLengthValidation()">
+                                                <ng-option [value]="country?.iso_code_2" *ngFor="let country of allCountryList">
+                                                    <div class="d-flex" [attr.title]="country?.name">
+                                                        <img src="../../../assets/images/flag/{{country.iso_code_2.toLowerCase()}}.png" width="20px" class="mr-4" />
+                                                        <span>{{'+'+country?.isd_code}}</span>
+                                                    </div>
+                                                </ng-option>
+                                            </ng-select>
+                                            <input [readonly]="list_or_create && isViewMode" formControlName="phone"
+                                                type="text" placeholder="{{ 'enter_primary_phone_number' | i18next }}"
+                                                class="form-control remove-radius" />
+                                        </div>
+                                        <span
+                                            *ngIf="!(list_or_create && isViewMode) && (form.phone.touched || isEdit) && form.phone.errors?.pattern"
+                                            class="error-text"> {{ 'phone_number_not_valid' | i18next }}.</span>
+                                    </div>
+                                    <button type="button" class="add-remove-icon" (click)="addSecondary('phone')"
+                                        [disabled]="phoneSecondary">
+                                        <icon size="24px" name="add" type="material" cuClass="icon d-flex mt-36"></icon>
+                                    </button>
+                                </div>
+                                <div *ngIf="phoneSecondary" class="form-group-row">
+                                    <div class="form-group">
+                                        <label>{{ 'phone_number' | i18next }} ({{ 'secondary' | i18next }})</label>
+                                        <div class="d-flex position-relative">
+                                            <ng-select class="select-bg formatCountry" [clearable]="false"
+                                                formControlName="phoneFormatCountrySecondary">
+                                                <ng-option [value]="country?.iso_code_2" *ngFor="let country of allCountryList">
+                                                    <img src="../../../assets/images/flag/{{country.iso_code_2.toLowerCase()}}.png" width="20px" class="mr-4" />
+                                                    <span>{{'+'+country?.isd_code}}</span>
+                                                </ng-option>
+                                            </ng-select>
+                                            <input [readonly]="list_or_create && isViewMode" type="text"
+                                                placeholder="{{ 'enter_secondary_phone_number' | i18next }}"
+                                                formControlName="phone_secondary" class="form-control remove-radius" />
+                                        </div>
+                                        <span
+                                            *ngIf="!(list_or_create && isViewMode) && form.phone_secondary.errors?.pattern"
+                                            class="error-text">{{ 'enter_10-digit_number' | i18next }}.</span>
+                                    </div>
+                                    <button type="button" class="add-remove-icon" (click)="removeSecondary('phone')">
+                                        <icon size="24px" name="remove" type="material" cuClass="icon d-flex mt-36">
+                                        </icon>
+                                    </button>
+                                </div>
+                                <div class="form-group-row">
+                                    <div class="form-group">
+                                        <label>{{ 'address' | i18next }} ({{ 'primary' | i18next }})</label>
+                                        <div class="d-flex position-relative">
+                                            <icon class="icon-bg d-flex" size="16px" theme="outlined" name="home"
+                                                type="material"></icon>
+                                            <search-address  [respType]="addressRespType" class="search-address-width remove-radius" (setAddress)="getAddress($event)" [adressType]="'geocode'" (customAddress)="getCustomAddress($event)"
+                                                [country]="countryShortName" formControlName="address" [readonlyMode]="list_or_create && isViewMode" #address1></search-address>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="add-remove-icon" (click)="addSecondary('address')"
+                                        [disabled]="addressSecondary">
+                                        <icon size="24px" name="add" type="material" cuClass="icon d-flex mt-36"></icon>
+                                    </button>
+                                </div>
+                                <div *ngIf="addressSecondary" class="form-group-row">
+                                    <div class="form-group">
+                                        <label>{{ 'address' | i18next }} ({{ 'secondary' | i18next }})</label>
+                                        <div class="d-flex position-relative">
+                                            <icon class="icon-bg d-flex" size="16px" theme="outlined" name="home"
+                                                type="material"></icon>
+                                            <search-address [respType]="addressRespType" class="search-address-width remove-radius" (setAddress)="getSecondaryAddress($event)" [adressType]="'geocode'" (customAddress)="getSecondaryCustomAddress($event)"
+                                                [country]="countrySecondaryShortName" formControlName="address_secondary" [readonlyMode]="list_or_create && isViewMode" #address2></search-address>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="add-remove-icon" (click)="removeSecondary('address')">
+                                        <icon size="24px" name="remove" type="material" cuClass="icon d-flex mt-36">
+                                        </icon>
+                                    </button>
+                                </div>
+                                <h4 *ngIf="!(list_or_create && isViewMode)"><b>{{ 'additional_details' | i18next }}</b>
+                                </h4>
+                                <div class="form-group-row">
+                                    <div class="form-group">
+                                        <label>{{'title' | i18next}}</label>
+                                        <input [readonly]="list_or_create && isViewMode" formControlName="title"
+                                            type="text" placeholder="{{ 'enter_title' | i18next }}" class="form-control" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label>{{ 'supervisor' | i18next }}</label>
+                                        <ng-select [readonly]="list_or_create && isViewMode"
+                                            formControlName="supervisor" [clearable]="true" placeholder="{{ 'select' | i18next }}"
+                                            (search)="SearchSupervisor($event)" [loading] = 'supervisorLoading' loadingText = 'Loading....'>
+                                            <ng-option *ngFor="let member of members" [value]="member.id">
+                                                {{member?.full_name}}
+                                            </ng-option>
+                                        </ng-select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="tabContentSocialMedia" class="tab-content deactive-content tabSocialMedia">
+                                <div class="social-media mt-12">
+                                    <div class="add-new position-relative">
+                                        <button class="btn small btn-outine" type="button" (click)="addSocialLink()"
+                                            [disabled]="addnewDisabled">
+                                            <icon size="20px" name="add" type="material" class="icon--on-left"
+                                                cuClass="icon-cu"></icon>
+                                            {{ 'add_new' | i18next }}
+                                        </button>
+                                    </div>
+                                    <h4 class="section-heading d-flex mb-24 pb-0  font-weight-medium">
+                                        {{ 'social_media' | i18next }}
+                                    </h4>
+                                    <div class="form-group-row" *ngFor="let social of socialProfileArr, let i = index">
+                                        <div class="form-group mr-0 social-application">
+                                            <label>{{ 'application' | i18next }}</label>
+
+
+                                            <ng-select [searchable]="false"
+                                                placeholder="{{ 'select_application' | i18next }}" ngDefaultControl
+                                                class="no-right-border" [ngModelOptions]="{standalone: true}"
+                                                [(ngModel)]="social.type" (change)="selectSocialApp(social)">
+
+                                                <ng-option [value]="link.type" [disabled]="link.disabled"
+                                                    *ngFor="let link  of social_links">
+                                                    <img [src]="link.image_path" class="mr-12">
+                                                    <span>{{link.title}}</span>
+                                                </ng-option>
+                                            </ng-select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>{{ 'enter_application_link' | i18next }}</label>
+                                            <input type="text" class="form-control no-left-border"
+                                                [ngModelOptions]="{standalone: true}" name="sociallink{{i}}"
+                                                placeholder="{{ 'enter_your_profile_url' | i18next }}"
+                                                [(ngModel)]="social.link" (keyup)="checkSocialApp(social)"
+                                                hyperlink #applicationLink="ngModel">
+                                            <span class="validation-msg"
+                                                *ngIf="applicationLink.invalid && applicationLink.touched && applicationLink.dirty">
+                                                {{ 'please_enter_valid_link' | i18next }}
+                                            </span>
+                                        </div>
+                                        <div class="form-group add-remove">
+                                            <label>&nbsp;</label>
+                                            <a (click)="deleteSocialLink(i)" class="add-link">
+                                                <icon class="remove-icon" size="24px" name="remove_circle"
+                                                    type="material" cuClass="d-flex">
+                                                </icon>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <svms-sidebar-footer *ngIf="!onSuccess">
+                    <div *ngIf="!(list_or_create && isViewMode)" class="d-flex"
+                        [ngClass]="{'justify-content-end': isEditMode, 'justify-content-between': !isEditMode}">
+                        <div *ngIf="!isEditMode" class="d-flex mt-12">
+                            <span>
+                                <input type="checkbox" aria-checked="true" checked="true" [disabled]="true">
+                            </span>
+                            <span class="fs-12 ml-8 font-weight-normal">{{ 'send_welcome_email_to_user' | i18next }}</span>
+                        </div>
+                        <button type="submit" *accessControl class="fs-14 font-weight-normal btn btn-primary"
+                            [disabled]="!createUserForm.valid || isSubmited">
+                            <span *ngIf="!isEditMode" class="material-icons fs-16 mr-8">check_circle</span>
+                            <span *ngIf="isEditMode" class="material-icons fs-16 mr-8">edit</span>
+                            {{(isEditMode ? 'Update' : 'Create User')|i18next}}
+                            <span *ngIf="isSaveLoader" class="loader ml-12"></span>
+                        </button>
+                    </div>
+                </svms-sidebar-footer>
+            </form>
+            <div *ngIf="onSuccess" class="on-success">
+                <svms-sidebar-footer>
+                    <div *ngIf="!(list_or_create && isViewMode)" class="d-flex">
+                        <div>
+                            <span class="material-icons">check_circle</span>
+                        </div>
+                        <div class="px-16">
+                            <div class="fs-16 font-weight-medium pb-8">{{ 'user_created_successfully' | i18next }}</div>
+                            <div class="fs-12 font-weight-normal pb-16">
+                                {{ 'successfully_created_the_user_message' | i18next }}
+                                </div>
+                            <div class="d-flex">
+                                <button class="btn btn-light program-btn" (click)="redirectToProfile()">
+                                    {{ 'add_this_user_to_programs' | i18next }}
+                                </button>
+                                <button class="mx-8 btn btn-light later-btn" (click)="doLater()">
+                                    {{ 'i_will_do_this_later' | i18next }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </svms-sidebar-footer>
+            </div>
+        </div>
+    </svms-sidebar-body>
+</svms-sidebar>

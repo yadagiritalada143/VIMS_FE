@@ -1,0 +1,47 @@
+<div class="justify-content-between align-items-center py-12 column-direction" [ngClass]="!showPageSettingData ? 'text-right' : 'd-flex'">
+  <div class="d-flex align-items-center" *ngIf="showPageSettingData">
+    <!-- <p class="mr-8">Show records {{selectedRecords.selected}}</p> -->
+    <p class="mr-8">{{ 'show_records' | i18next }}</p>
+    <ng-select
+      [clearable]="false"
+      [(ngModel)]="selectedRecords.selected"
+      (change)="selectRecord($event)"
+      class="small w-70"
+      class="record-dropdown"
+      [searchable]="false"
+    >
+      <ng-option selected [value]="data" *ngFor="let data of recordsPerPageSettingData">{{ data }}</ng-option>
+    </ng-select>
+
+  </div>
+  <div class="c-pagination font-weight-normal ml-24" [attr.actpage]="currentPage">
+    <a *ngIf="firstpage != currentPage" (click)="onClick($event, '-1')">
+      <icon name="keyboard_arrow_left" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+    </a>
+
+    <a *ngFor="let page of beforePages" [ngClass]="{ active: currentPage === page }" (click)="onClick($event, page.toString())">
+      {{ page }}
+    </a>
+    <span *ngIf="maxPages > 6" class="position-relative">
+      <a #secondBox (click)="showDropDown()" [ngClass]="{ 'background-gray': showMorePage }">
+        <i class="material-icons">more_horiz</i>
+      </a>
+      <div *ngIf="showMorePage" id="scrollbar" class="drop_div" #thirdBox>
+        <div class="d-flex align-items-center">
+          <p class="small">{{ 'go_to_page' | i18next }}</p>
+          <input type="text" class="c-form-control mx-8" value="1" [(ngModel)]="pageNumber" (keyup.enter)="onGoBtnClick($event, pageNumber.toString())" />
+          <button class="btn btn-primary small px-8" (click)="onGoBtnClick($event, pageNumber.toString())">{{ 'go' | i18next }}</button>
+        </div>
+        <div class="error" *ngIf="message">{{ 'this_page_is_not_available' | i18next }}.</div>
+      </div>
+    </span>
+
+    <a *ngFor="let page of afterPages" [ngClass]="{ active: currentPage === page }" (click)="onClick($event, page.toString())">
+      {{ page }}
+    </a>
+
+    <a *ngIf="maxPages != currentPage && maxPages > 1" (click)="onClick($event, '+1')">
+      <icon name="keyboard_arrow_right" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+    </a>
+  </div>
+</div>

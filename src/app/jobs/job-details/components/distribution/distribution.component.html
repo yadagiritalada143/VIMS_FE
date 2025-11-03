@@ -1,0 +1,262 @@
+<ng-container *authorize="'distribute_job'">
+  <div class="mt-24 px-24">
+    <h3 class="font-weight-medium"> {{ 'distribute_job' | i18next }}</h3>
+  </div>
+  <form [formGroup]="jobDestributionForm">
+    <section class="content-section mt-16 mb-24 pt-24 rounded-sm mx-24 border">
+      <div class="px-24 mb-16">
+        <div class="d-flex align-items-center distribute-job column-direction">
+          <div class="w-25 full-page-width">
+            <div class="form-group">
+              <label I18n> {{ 'distribute_method' | i18next }}</label>
+              <ng-select formControlName="job_distribution_method" [clearable]="false"
+                (change)="distributionMethodChange($event)" [readonly]="hide_tiered_distribution_option">
+                <ng-option [value]="'distriubte_immedietaley'">{{ 'distribute_immediately' | i18next }}</ng-option>
+                <ng-option *ngIf="!hide_tiered_distribution_option" [value]="'tiered_distribution'">{{ 'tiered_distribution_schedule' | i18next }}</ng-option>
+              </ng-select>
+            </div>
+          </div>
+          <div class="w-25 mx-8" *ngIf="formControl.job_distribution_method.value === 'tiered_distribution'">
+            <div class="form-group">
+              <label I18n class="text-nowrap">{{ 'tiered_distribution_schedule' | i18next }}</label>
+              <ng-select formControlName="tiered_distribution_schedule" (change)="distributionScheduleSelected($event)"
+                placeholder="Select">
+                <ng-option *ngFor="let item of distributionSchedules" [value]="item">{{item?.name}}
+                </ng-option>
+              </ng-select>
+            </div>
+          </div>
+          <div class="w-100 ml-8 position-relative">
+            <label I18n>{{ 'search_vendors' | i18next }}</label>
+            <div class="form-group position-relative d-flex align-items-center">
+              <div class="position-relative w-100">
+                <icon size="16px" name="search" type="material" class="search-icon" cuClass="icon-cu">
+                </icon>
+                <input #searchInput (keypress)="searchVendor(searchInput.value, 'IMMEDIATE')"
+                  (focus)="searchVendor(searchInput.value, 'IMMEDIATE')" type="text"
+                  class="form-control px-32 search-input" maxlength="254"
+                  placeholder="{{ 'search_for_distribution_recipients' | i18next }}">
+                <div *ngIf="vendorLoader" class="loader"></div>
+                <div *ngIf="showNoVendorMessage" class="autocomplete-items"
+                  (clickOutside)="onClickedOutside(0); searchInput.value=''; showNoVendorMessage=false">
+                  <div class="no-items-found">{{ 'no_items_found' | i18next }}</div>
+                </div>
+                <div *ngIf="vendorsList[0]?.vendorSearch?.length > 0" class="autocomplete-items"
+                  (clickOutside)="onClickedOutside(0); searchInput.value=''">
+                  <div *ngFor="let item of (vendorsList[0]?.vendorSearch || [])"
+                    [hidden]="vendorAlreadyExist(item, vendorsList[0]?.id)"
+                    (click)="addMoreVendor(item, vendorsList[0]?.id); searchInput.value=''">
+                    {{item?.vendor?.name}}
+                  </div>
+                </div>
+              </div>
+              <div class="btn btn-light advanced-btn text-nowrap"
+                (click)="clickViewSubmittedCandidate(true)">
+                <icon size="15px" name="filter_alt" type="material" class="icon--on-right mr-2" cuClass="icon-cu">
+                </icon>
+                <span>{{ 'advance_search' | i18next }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ng-container *ngFor="let vendorSchedule of vendorsList; let ind = index">
+          <!-- selected vendor start -->
+          <div *ngIf="!vendorSchedule.custom" class="d-flex align-items-center justify-content-between mb-8">
+            <h4 class="mt-12" *ngIf="vendorSchedule?.schedule_unit==='IMMEDIATE' ">
+              {{formControl.job_distribution_method.value === 'tiered_distribution' ?
+              'Immediately Distribute to:': ''}}
+            </h4>
+            <h4 class="mt-12" *ngIf="vendorSchedule?.schedule_unit !='IMMEDIATE'">Distribute after
+              {{vendorSchedule?.schedule_value}} no of {{vendorSchedule?.schedule_unit | titlecase}}:</h4>
+            <div *ngIf="formControl.job_distribution_method.value === 'tiered_distribution'"
+              (click)="removeSchedule(ind)" class="delete-icon d-flex justify-content-center cursor-pointer">
+              <icon size="15px" name="delete" type="material" class="icon--on-right" cuClass="icon-cu">
+              </icon>
+            </div>
+          </div>
+          <div *ngIf="vendorSchedule.custom" class="d-flex align-items-center justify-content-between mb-8">
+            <h4 class="d-flex align-items-center">
+              <div class="mr-8">{{ 'distribute_after' | i18next }}</div>
+              <!-- <div class="mr-4 w-150">
+                                <ng-select [(ngModel)]="vendorSchedule.before_after"
+                                    [ngModelOptions]="{standalone: true}">
+                                    <ng-option> {{'After'|i18next=""}}</ng-option>
+                                </ng-select>
+                            </div> -->
+              <input [(ngModel)]="vendorSchedule.schedule_value" [ngModelOptions]="{standalone: true}" type="number"
+                class="form-control mr-8 w-10" min="1" placeholder="3">
+              <div class="w-150">
+                <ng-select [(ngModel)]="vendorSchedule.schedule_unit" [ngModelOptions]="{standalone: true}"
+                  [searchable]="false" placeholder="{{ 'select' | i18next }}">
+                  <ng-option value="{{duration?.value}}" *ngFor="let duration of duration">
+                    {{duration?.name}}
+                  </ng-option>
+                </ng-select>
+              </div>
+              <div class="mx-8">{{ 'of' | i18next }}</div>
+              <div class="w-150">
+                <ng-select [(ngModel)]="vendorSchedule.schedule_after" [ngModelOptions]="{standalone: true}">
+                  <ng-option [value]="'on_submit'">{{ 'submitted_date' | i18next }} </ng-option>
+                  <!-- <ng-option>Last distributed date</ng-option> -->
+                  <ng-option [value]="'final_approval'">{{ 'final_approval_date' | i18next }}</ng-option>
+                  <!-- <ng-option>Job start date</ng-option>
+                                    <ng-option>Respond by date</ng-option> -->
+                </ng-select>
+              </div>
+            </h4>
+            <div class="delete-icon cursor-pointer d-flex justify-content-center" (click)="removeSchedule(ind)">
+              <icon size="15px" name="delete" type="material" class="icon--on-right" cuClass="icon-cu">
+              </icon>
+            </div>
+          </div>
+          <div class="second-line position-relative">
+            <ng-container *ngIf="vendorSchedule?.schedule_unit !='IMMEDIATE'">
+              <label I18n> {{ 'distribution_search' | i18next }}</label>
+              <div class="form-group position-relative d-flex align-items-center">
+                <div class="position-relative w-100">
+                  <icon size="15px" name="search" type="material" class="search-icon" cuClass="icon-cu">
+                  </icon>
+                  <input (keypress)="searchVendor(vendorSchedule.searchValue, vendorSchedule.id)"
+                    [(ngModel)]="vendorSchedule.searchValue"
+                    (focus)="searchVendor(vendorSchedule.searchValue, vendorSchedule.id)"
+                    [ngModelOptions]="{standalone: true}" type="text" class="form-control px-32 search-input"
+                    maxlength="254" placeholder="{{ 'search_for_distribution_recipients' | i18next }}">
+                </div>
+                <div class="autocomplete-items" (clickOutside)="onClickedOutside(ind)"
+                  *ngIf="vendorsList.length > 0 && vendorSchedule.searchValue">
+                  <div *ngFor="let item of (vendorSchedule?.vendorSearch || [])"
+                    (click)="addMoreVendor(item, vendorSchedule.id)">
+                    {{item?.vendor?.name}}
+                  </div>
+                </div>
+                <div class="btn btn-light advanced-btn text-nowrap"
+                  (click)="clickViewSubmittedCandidate(true, ind)">
+                  <icon size="15px" name="filter_alt" type="material" class="icon--on-right mr-2" cuClass="icon-cu">
+                  </icon>
+                  <span>{{ 'advance_search' | i18next }}</span>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+          <div class="d-flex align-items-center flex-wrap">
+            <div class="selected-vendor mr-8 mb-8 selected rounded-sm d-flex align-items-center"
+              *ngFor="let item of vendorSchedule?.vendors; let vIndex= index">
+              <span> {{item?.vendor?.name}}</span>
+              <span>
+                <icon (click)="deleteVendor(ind, 'vendors', vIndex)" size="15px" name="cancel" type="material"
+                  class="d-flex ml-8 cursor-pointer" cuClass="d-flex">
+                </icon>
+              </span>
+            </div>
+            <div class="selected-vendor mr-8 mb-8 selected rounded-sm d-flex align-items-center"
+              *ngFor="let item of vendorSchedule?.moreVendors; let vIndex= index">
+              <span> {{item?.vendor?.name}}</span>
+              <span>
+                <icon (click)="deleteVendor(ind, 'moreVendors', vIndex)" size="15px" name="cancel" type="material"
+                  class="d-flex ml-8 cursor-pointer" cuClass="d-flex">
+                </icon>
+              </span>
+            </div>
+            <div class="selected-vendor mr-8 mb-8 d-flex align-items-center"
+              *ngFor="let item of vendorSchedule?.vendorGroup; let vIndex= index">
+              <div class="initial " *ngFor="let item of item?.vendors;let groupIndex = index" [hidden]="groupIndex > 2"
+                [ngClass]="getColorCode(groupIndex)">
+                {{item?.vendor?.name | shortName:'first'}}</div>
+              <div class="initial more" *ngIf="item?.vendors?.length > 3">
+                {{item?.vendors?.length}}+</div>
+              <span> {{item?.name}}</span>
+              <span>
+                <icon (click)="deleteVendor(ind, 'vendorGroup', vIndex)" size="15px" name="cancel" type="material"
+                  class="d-flex ml-8 cursor-pointer" cuClass="d-flex">
+                </icon>
+              </span>
+            </div>
+          </div>
+          <div
+            *ngIf="vendorSchedule?.vendors?.length || vendorSchedule?.moreVendors?.length || vendorSchedule?.vendorGroup?.length"
+            class="d-flex justify-content-end">
+            <a (click)="vendorSchedule.vendors=[];vendorSchedule.moreVendors=[];vendorSchedule.vendorGroup=[];">
+              {{ 'clear_all' | i18next }}
+              </a>
+          </div>
+          <!-- selected vendor ends -->
+        </ng-container>
+      </div>
+
+      <!-- <buttons -->
+      <div class="d-flex align-items-center justify-content-between px-24 my-16 pt-16 border-top bg-light"
+        [ngClass]="{'justify-content-between' :formControl.job_distribution_method.value === 'tiered_distribution', 'justify-content-end': formControl.job_distribution_method.value !== 'tiered_distribution'}">
+        <div *ngIf="formControl.job_distribution_method.value === 'tiered_distribution'"
+          [ngClass]="{'btn-disabled': !formControl.tiered_distribution_schedule.value}" (click)="addNewTier()"
+          class="btn add_button bg-transparent fs-14">
+          <icon size="20px" name="add" type="material" class="d-flex mr-8" cuClass="icon-cu">
+          </icon>
+          {{ 'add_distribution_tier' | i18next }}
+        </div>
+        <div *ngIf="userBelongToJobModule" class="btn btn-primary" (click)="distribute()" 
+          [ngClass]="{'btn-disabled': !hasVendors || !isValidStatus}">
+          <icon size="20px" name="check_circle" type="material" class="d-flex mr-8" cuClass="icon-cu">
+          </icon>
+          {{ 'distribute' | i18next }}
+        </div>
+        <!-- [ngClass]="has_submission_limit ? 'toggle-on' : 'toggle-off'" -->
+      </div>
+      <!-- <buttons -->
+    </section>
+
+    <div class="position-relative">
+      <div class="position-absolute pr-12 set-submission">
+        <!-- Commented as part of AMFMI-2126 -->
+        <!-- <div class="submission-toggle">
+          <div class="toggle-disable">
+            <div class="toggle-panel-inner pl-0 cursor-pointer" (click)="has_submission_limit = !has_submission_limit">
+              <span class="status-text mr-8">{{'Enable Submission limit'|i18next=""}}</span>
+              <span class="toggle-switch" [ngClass]="has_submission_limit ? 'toggle-on' : 'toggle-off'"></span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group d-flex align-items-center column-direction" *ngIf="has_submission_limit"> -->
+        <div class="d-flex align-items-center">
+          <label class="text-nowrap mb-0 mr-8">{{ 'set_submission_limit_for_all_vendors' | i18next }}</label>
+          <div class="d-flex align-items-center">
+            <input type="number" formControlName="submission_limit" class="form-control submission-input"
+            [ngClass]="{'error': jobDestributionForm.get('submission_limit').invalid}" onlyNumber />
+            <span class="cursor-pointer add-circle mx-8" (click)="changeSubmissionLimit()" *ngIf="userBelongToJobModule">
+              <icon size="20px" name="check_circle" type="material" class="d-flex" cuClass="d-flex">
+              </icon>
+            </span>
+            <span class="cursor-pointer delete-circle" (click)="clearSubmission()" *ngIf="userBelongToJobModule">
+              <icon size="20px" name="close" type="material" class="d-flex" cuClass="d-flex">
+              </icon>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="distribution-listing-items">
+      <vms-table [loading]="loader" [vmsTableConfig]="tableConfig" [vmsDataSource]="jobDistributionList"
+        [open]="isExpand" [totalItem]="totalRecords" [itemsPerPage]="itemsPerPage" (onViewClick)="onClickView($event)"
+        (onExpandClick)="onExpandClick($event)" (onEditClick)="onEditClick($event)"
+        (changePage)="onPaginationClick($event)" (onCreate)="onCreateClick($event)"
+        (onDisableClicked)="disableClicked($event)" (onDeleteClick)="onDeleteClick($event)"
+        (numberBadgeClicked)="columnClicked($event)" (cloneClicked)="cloneClicked($event)" (search)="onSearch($event)"
+        (onListFilter)="onListFilter($event)" (onWithdrawProfileClick)="withdrawalClicked($event)"
+        (onSelectAllClick)="selectAllClicked($event)" (onSelectClick)="selectClicked($event)"
+        (changeRecords)="changeRecords($event)" (onViewSubmittedCandidateClick)="clickViewSubmittedCandidate($event)"
+        (onDistributionOptionClicked)="onDistributionOptionClicked($event)">
+      </vms-table>
+    </div>
+  </form>
+
+  <app-distribution-sidebar [programId]="currentProgram?.id" [vendorIds]="selectedVendorIds"
+    [vendorGroupIds]="selectedVendorGroupIds" [laborCategories]="jobLaborCategories" [workLocationId]="jobDetails?.location?.id">
+  </app-distribution-sidebar>
+
+  <app-update-submision-limit-popup [is_show]="editSubmissionLimit" [vmsData]="editSubmissionData"
+    (onClose)="onSubmissionLimitClose($event)">
+  </app-update-submision-limit-popup>
+
+  <!-- <app-group-name></app-group-name> -->
+  <!-- <app-distribution-release></app-distribution-release> -->
+  <!-- <app-update-release></app-update-release> -->
+</ng-container>

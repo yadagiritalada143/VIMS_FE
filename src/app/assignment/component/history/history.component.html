@@ -1,0 +1,53 @@
+<app-logs [log]="logs"></app-logs>
+<div class="content-area ui-content-wrapper no-content" *ngIf="!historyData">
+  <div class="no-history">
+    <img src="./assets/images/Handsome2.svg" alt="no history" width="165" class="img-fluid">
+    <h5 class="pt-16">{{ 'there_is_no_update_on_this_assignment' | i18nextEager }}</h5>
+    <h6 class="py-4 small">{{ 'there_is_no_history_found_on_assignment' | i18nextEager }}</h6>
+  </div>
+</div>
+
+<div class="history-tl-container p-m-32">
+  <ul class="tl">
+    <li class="tl-item" *ngFor="let event of historyData">
+      <div *ngIf="event?.status?.toLowerCase()!=='rejected'" class="timestamp">
+        <p class="font-weight-medium text-dark"> {{event?.updatedDate}} </p>
+        <span> {{event?.updatedTime}}</span>
+        <p>{{ 'revision' | i18nextEager }} : {{event?.revision}}</p>
+      </div>
+      <div class="timestamp" *ngIf="event?.status?.toLowerCase()==='rejected'">
+        <p class="font-weight-medium text-dark"> {{event?.rejectUpdatedDate}} </p>
+        <span> {{event?.rejectUpdatedTime}}</span>
+        <p>{{ 'revision' | i18nextEager }} : {{event?.revision}}</p>
+      </div>
+      <div class="d-flex history-event-info rounded-sm align-items-center p-16 justify-content-between mb-16 history">
+        <div class="d-flex align-items-center">
+          <div class="ml-16">
+            <h4 class="mb-4"><icon *ngIf="event?.request_title?.indexOf('do not rehire')!==-1" size="18px" name="no_accounts" type="material"></icon>{{ event?.request_title | titlecase|i18next}}</h4>
+            <span class="status-ui my-8 {{event?.status}}">{{event?.status | titlecase | i18nextEager}}</span>
+            <p *ngIf="event?.request_type !== 'evaluate'&& event?.status?.toLowerCase()!=='rejected' && event?.reason_code?.name"><span class="text-dark" >{{ 'reason' | i18nextEager }}: </span> {{event?.reason_code?.name | i18nextEager}}</p>
+            <p *ngIf="event?.status?.toLowerCase()!=='rejected'"><span class="text-dark">{{ 'updated_by' | i18nextEager }}: </span> <a>{{event?.updated_by?.name | i18nextEager}}</a> &nbsp;<span *ngIf="event?.impersonated_by?.name">({{ 'impersonated_by' | i18nextEager }}: {{event?.impersonated_by?.name | i18nextEager}} <span *ngIf="event?.impersonated_by?.role?.name"> - {{event?.impersonated_by?.role?.name | i18nextEager}}</span> <span *ngIf="event?.impersonated_by?.role?.organization_category">({{event?.impersonated_by?.role?.organization_category | i18nextEager}})</span>)</span>
+            </p>
+            <p *ngIf="event?.request_type !== 'evaluate' && event?.status?.toLowerCase()==='rejected' && event?.action?.reasons?.name"><span class="text-dark" >{{'reason'|i18next}}: </span> {{event?.action?.reasons?.name | i18nextEager}}</p>
+            <p *ngIf="event?.status.toLowerCase()==='rejected'"> <span class="text-dark">{{'updated_by'|i18next}}: </span> <a>{{event?.action?.performed_by?.name ? event?.action?.performed_by?.name : '-' | i18nextEager}}</a> &nbsp;<span *ngIf="event?.impersonated_by?.name">({{'impersonated_by'|i18next}}: {{event?.impersonated_by?.name | i18nextEager}} <span *ngIf="event?.impersonated_by?.role?.name"> - {{event?.impersonated_by?.role?.name | i18nextEager}}</span> <span *ngIf="event?.impersonated_by?.role?.organization_category">({{event?.impersonated_by?.role?.organization_category | i18nextEager}})</span>)</span>
+            </p>
+          </div>
+        </div>
+
+        <button type="button" *ngIf="event?.is_view" (click)="viewHistory(event)"
+          class="btn  primary-outline text-primary small">
+          <icon size="16px" name="visibility" type="material" class="icon--on-left" cuClass="icon-cu">
+          </icon>
+          {{ 'view' | i18nextEager }}
+        </button>
+      </div>
+    </li>
+  </ul>
+
+  <vms-paginator *ngIf="historyData && historyData?.length > 0" [maxPages]="maxPages" [itemsPerPage]="itemsPerPage" [recordsPerPageSetting]="recordsPerPageSetting" [currentPage]="currentPage" (changeRecords)="onClickRecords($event)"
+       (changePage)="onPaginationClick($event)">
+    </vms-paginator>
+
+</div>
+<app-assignment-history [assignmentData]="assignmentListData" [ViewHistoryPanel]="ViewHistoryPanel" [rateModel] = "rateModel" (onClose)="sidebarClose()" [customFields]="customFields"></app-assignment-history>
+<app-view-assignment-history-flyout [assignmentConfig]="assignmentConfig" [customFields]="customFields?.[0]"></app-view-assignment-history-flyout>

@@ -1,0 +1,20 @@
+<div *ngIf="!deleted" class="calendar-widget full-size" [ngClass]="{'edit-widget': editMode}">
+  <h5 *ngIf="editMode" class="edit-mode-label font-weight-normal">{{ (widget.label || 'Calendar')|i18next }}</h5>
+  <div *ngIf='isCalendarItems' [formGroup]="optionForm" [ngClass]="{'edit-widget': editMode}">
+    <ng-select *ngIf="!editMode" formControlName="options"  [items]="calendarOptions" [multiple]="true" [placeholder]="widget.formData.label.placholder | i18next" (change)="getSelectedOptionData()" notFoundText="{{'no_items_found' | i18next}}"></ng-select>
+  </div>
+  <full-calendar class="calendar" [widget]="widget" [reportApi]="reportApi" [isCalendarItems]="isCalendarItems" [selectedOptionsValues]="selectedOptionsValues" [viewType]='viewType' ></full-calendar>
+  <div class="tools-widget">
+    <div class="tool-icons">
+      <span class="material-icons icon-build" (click)="openEditWidgetModal()">build_circle</span>
+      <span class="material-icons icon-delete" (click)="deleteWidget()">delete</span>
+    </div>
+  </div>
+  <span class="icon-move"></span>
+</div>
+<div *ngIf="deleted" class="delete-widget">
+  <span class="badge-undo" (click)="undoWidget()">
+    <span class="material-icons icon-undo">undo</span>
+    <span class="text-undo">{{ 'undo' | i18next }}</span>
+  </span>
+</div>

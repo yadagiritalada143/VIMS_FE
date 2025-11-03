@@ -1,0 +1,85 @@
+<div class="pre-identified-table-main">
+    <div *ngIf="isCreateEdit" class="top-head p-16 d-flex justify-content-between align-items-center">
+        <div class="top-left-head">
+            <p class="font-weight-medium text-black">Pre-Identified Candidates</p>
+        </div>
+        <button class="btn btn-primary" (click)="openPreIdCandidateCreation()">
+            <i class="material-icons mr-8">add</i> {{ 'add' | i18next}}
+        </button>
+    </div>
+    <app-create-pre-identified-candidate *ngIf="isCreateCandidate === 'visible'" [isCreateCandidate]="isCreateCandidate"
+        [isEdit]="createJobObject?.editedCandidate" (createdCandidate)="candidate($event)" (onCreateClose)="onCreateClose()"
+        [candidates]="candidates"></app-create-pre-identified-candidate>
+
+    <table *ngIf="isPreDefinedCan" class="pre-identified-view-table">
+        <thead>
+            <tr>
+                <th>
+                    <span class="font-weight-medium">Candidate Name</span>
+                </th>
+                <th *ngIf="isCreateEdit"><span class="font-weight-medium">Email</span>
+                </th>
+                <th>
+                    <span class="font-weight-medium">Phone</span>
+                </th>
+                <th *ngIf="!(userType == 'vendor')">
+                    <span class="font-weight-medium">Vendor</span>
+                </th>
+                <th *ngIf="userType == 'vendor'">
+                    <span class="font-weight-medium">Actions</span>
+                </th>
+                <th *ngIf="isCreateEdit">&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let c of candidates; let i = index">
+                <td>
+                    <div class="font-weight-medium d-flex justify-content-between">
+                        <span>
+                            {{c?.first_name}} {{c?.middle_name}} {{c?.last_name}}
+                        </span>
+                        <span id="notes-container" *ngIf="c?.notes">
+                            <icon class="cursor-pointer icon" size="16px" name="chat" type="symbols"
+                                cuClass="d-flex mr-8 icon" [tooltip]="c?.notes" placement="right"
+                                variationSettings='"wght" 400'></icon>
+                        </span>
+                    </div>
+                    <div *ngIf="!isCreateEdit"><a href="mailto: {{ c?.email }} ">
+                            {{ c?.email?? '--' }}</a></div>
+                </td>
+                <td *ngIf="isCreateEdit"><a href="mailto: {{ c?.email }} ">
+                        {{ c?.email?? '--' }}</a></td>
+                <td>{{ (c?.phone_isdcode && c?.phone_number ? "+"+c?.phone_isdcode+" " : "" ) +  (c?.phone_number ?? '--')}}</td>
+                <td *ngIf="!(userType == 'vendor')">{{c?.vendorName?.name ?? c?.vendor_name}}</td>
+                <td *ngIf="isCreateEdit" class="text-right">
+                    <i *ngIf="c?.candidate_id" class="px-8 material-icons text-right cursor-pointer" (click)="editPreIdCandidate(i , true)">visibility</i>
+                    <i *ngIf="!c?.candidate_id" class="px-8 material-icons text-right cursor-pointer" (click)="editPreIdCandidate(i)">edit</i>
+                    <i *ngIf="!c?.candidate_id" class="material-icons text-right delete-rule cursor-pointer"
+                        (click)="removeCandidate(i)">highlight_off</i>
+                </td>
+                <td *ngIf="(userType == 'vendor') && c.candidate_id == null && loggedInUserId == c?.vendor_id">
+                    <button class="btn btn-primary small" (click)="openCandidateCreationScreen(i)">
+                        <icon class="icon--on-left" color="#ffffff" name="add"></icon> {{ 'Create Candidate' | i18next
+                        }}
+                    </button>
+                </td>
+                <td *ngIf="((userType == 'vendor') && (loggedInUserId !== c?.vendor_id || c?.is_submission_created))">
+                    {{'--'}}
+                </td>
+                <td *ngIf="(userType == 'vendor') && c.candidate_id && !c.is_submission_created">
+                    <button class="btn btn-primary small" (click)="editAndSubmitCandidate(c)">
+                        {{ 'Edit & Submit' |i18next }}
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-center py-32 d-none" colspan="5">
+                    <img src="/assets/images/no-records.svg" alt="">
+                    <h4 class="font-weight-medium mt-24">
+                        {{ 'no_pre-identified_candidate_selected' | i18next }}
+                    </h4>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

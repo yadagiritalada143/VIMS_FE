@@ -1,0 +1,95 @@
+<div class="create-vendor-compliance-Document">
+  <header class="section-header p-24 d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center">
+        <i (click)="backClicked()" class="material-icons back-arrow-icon cursor-pointer mr-16">arrow_back</i>
+        <h3 class="font-weight-semibold mb-0">{{label}} {{'vendor_compliance_document' | i18next }}</h3>
+      </div>
+      <div>
+        <button type="submit" (click)="onSave()" class="c-btn c-btn-success-medium">{{ id?'Update':'Save' | i18nextEager }}</button>
+      </div>
+  </header>
+  <section class="section-body-content">
+      <div class="p-24">
+          <div class="c-form-group-row align-items-end">
+              <div class="c-form-group">
+                <label>{{ 'document_name' | i18next }} <span class="require mr-4">*</span></label>
+                <input type="text" class="c-form-control"  name="document-name" [(ngModel)]="documentName">
+              </div>
+              <div class="c-form-group toggle-width toggle-panel pt-24">
+                  <div class="toggle-panel-inner" [ngClass]="titleToggle?.value ? 'if-active' : 'if-inactive'">
+                  <span class="status-text">{{titleToggle?.value ? 'Active':'Inactive'}}</span>
+                  <span class="toggle-switch" [ngClass]="titleToggle?.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickToggle()"></span>
+                  </div>
+              </div>
+          </div>
+          <div class="c-form-group-row align-items-end">
+              <div class="c-form-group">
+                <label>{{ 'act' | i18next }}</label>
+                <input type="text" class="c-form-control"  name="act" [(ngModel)]="act">
+              </div>
+              <div class="c-form-group toggle-width toggle-panel onboarding-toggle pt-24">
+                <div class="toggle-panel-inner">
+                  <span class="status-text">{{'onboarding' | i18next}}</span>
+                  <toggle-button (click)="is_required_for_onboarding=!is_required_for_onboarding" class="c-toggle-button-switch" [checked]="is_required_for_onboarding"></toggle-button>
+                </div>
+              </div>
+          </div>
+          <!-- <app-toggle-box  title="Onboarding" subtitle="Need Supporting Text" selectbox="true"
+              isMultiple="true" selectrequired="true" selectboxlabel="Select Source(s) for Project">
+          </app-toggle-box> -->
+          <div class="c-form-group-row">
+              <div class="c-form-group">
+                <label>{{ 'document_details' | i18next }}</label>
+                <input type="text" class="c-form-control"  name="act" [(ngModel)]="documentDetails">
+              </div>
+              <div class="c-form-group">
+                  <label>{{ 'frequency' | i18next }} <span class="require mr-4">*</span></label>
+                  <ng-select id="frequency" [(ngModel)]="frequency">
+                    <ng-option *ngFor="let frequency of frequencies" [value]="frequency.value">{{frequency.name}}</ng-option>
+                  </ng-select>
+              </div>
+          </div>
+          <div class="c-form-group-row">
+              <div class="c-form-group">
+                <label>{{ 'document_number' | i18next }} <span class="require mr-4">*</span></label>
+                <input type="text" (keyup)="documentLengthCheck()" class="c-form-control"  name="act" [(ngModel)]="documentNumber">
+               <small *ngIf="isError" class="error-text mt-4">{{'this_field_must_be_at_least_3_characters_long' | i18next}}</small>
+              </div>
+              <div class="c-form-group">
+                  <label>{{ 'number_of_days_to_upload_document' | i18next }} <span class="require mr-4">*</span></label>
+                  <input type="number" class="c-form-control"  name="act" [(ngModel)]="numberOfDays">
+              </div>
+              <div class="c-form-group">
+                  <label>{{ 'number_of_days_to_regain_compliance' | i18next }} <span class="require mr-4">*</span></label>
+                  <input type="number" class="c-form-control"  name="act" [(ngModel)]="regainCompliance">
+              </div>
+          </div>
+          <!-- <div class="c-form-group-row">
+              <div class="c-form-group">
+                  <label>{{ 'Vendors' | i18next }}</label>
+          <ng-select id="vendors" [(ngModel)]="vendor"  [clearable]="true" [multiple]='true'>
+            <ng-option *ngFor="let vendor of vendors" [value]="vendor.id">{{vendor.name}}</ng-option>
+          </ng-select>
+              </div>
+          </div> -->
+          <div class="c-form-group-row">
+              <div class="c-form-group">
+                  <label>{{ 'applicable_locations' | i18next }} <span class="require mr-4">*</span></label>
+                  <ng-select [clearable]="true" [multiple]="true"  id="work_locations" [(ngModel)]="applicableLocations">
+                    <ng-option *ngFor="let location of locations" [value]="location.id">{{location.name}}</ng-option>
+                  </ng-select>
+              </div>
+          </div>
+          <div>
+            <label>{{ 'attachment' | i18next }}</label>
+            <svms-resume-uploader exts=".pdf, .doc, .docx"
+            (resumeData)="uploadFile($event)"
+            deleteMessage="Do you really want to delete ?"
+            [candidateResumeData]="existingUplodedFileName">
+            </svms-resume-uploader>
+          </div>
+
+      </div>
+  </section>
+</div>

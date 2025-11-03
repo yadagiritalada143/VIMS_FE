@@ -1,0 +1,21 @@
+<app-svms-table
+    [dataSource]="vmsData"
+    [tableOptions]="tableOptions"
+    [coloumnDefintions]="tableColumnConfig"
+>
+</app-svms-table>
+
+<ng-template #status let-value="value">
+    <span class="c-status-ui active" *ngIf="value">
+        {{ 'active' | i18next }}
+      </span>
+    <span class="c-status-ui inactive" *ngIf="!value">
+        {{ 'inactive' | i18next }}
+    </span>
+</ng-template>
+
+<app-new-vendor-document
+    [newDocumentVisibility]="panelVisibility"
+    (onVendorDocumentCreated)="sidebarClose($event, true)"
+    (onClose)="sidebarClose($event, false)">
+</app-new-vendor-document>

@@ -1,0 +1,23 @@
+<app-credit-debit [currency]="currentProgram?.defaultCurrency"></app-credit-debit>
+<app-invoice-details-sidepanel></app-invoice-details-sidepanel>
+<app-logs [log]="logs"></app-logs>
+<div class="individual-invoice">
+  <!-- <div class="btn-group position-relative ml-8" (click)="downloadInvoiceReport()" *ngIf="(invoiceLists | json) !== '[]' && isDownloadInvoiceEnable">
+    <button type="button" class="btn btn-primary d-flex align-items-left btn-download-data">
+      <icon size="18px" name="file_download" type="material" theme="outlined" cuClass="d-flex mr-8"></icon>
+      <span>{{ 'download_data' | i18nextEager }}</span>
+    </button>
+  </div> -->
+    <vms-table [vmsTableConfig]="tableConfig" [currentPage]="pageNo" [vmsDataSource]="invoiceLists" (onExpandClick)="onExpandClick($event)" [isFilterCleared] = "isFilterCleared" 
+  [currentTab]="selectedTab" (onOpenPanel)="viewSidePanel($event)" (search)="onSearch($event)" (previewClicked)="previewClicked($event)"
+  (onListFilter)="onListFilter($event)" (onSelectClick)="onselectClick($event)" [loading]="loader"
+  (onRowChecked)="onselectClick($event)" (onSelectAllClick)="onselectAllClick($event)"
+  (onTabClick)="getSelectedTab($event)" (onSort)="onSortClick($event)" (changeRecords)="changerecords($event)" [isCustomDropdown] ="true"  [recordType]="'invoice'"
+  (changePage)="onPaginationClick($event)" [itemsPerPage]="itemPerPage" [isMultipleSelectionDropdown] ="true" [selectedRecordslist]="selectedInvoicelist"
+  [manuallySelectedCount]="selectedInvoiceCount" (onActionButtonClick)="actionButtonClicked($event)" [totalItem]="total_records" [count]="count" (onAllRecordsSelected)="onAllRecordsSelected($event)"
+  (onViewClick)="onClickView($event)" (selectedRecords)="selectedRecord($event)" (onSelectPageData)="onSelectPageData($event)" (onSelectedAllRecordsPage)="onSelectedAllRecordsPage($event)">
+  <div *ngIf="(invoiceLists | json) == '[]'">
+    {{ 'data_not_available' | i18nextEager }}
+  </div>
+</vms-table>
+</div>

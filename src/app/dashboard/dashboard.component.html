@@ -1,0 +1,49 @@
+
+<div [ngClass]="{'outlook-configure' : !isOutlookDisabled }" *authorize="'view_outlook_configuration'">
+  <div *ngIf="!isOutlookDisabled">
+    <div class="alert-primary outlook-block" *ngIf="!calenderAccessToken" role="alert">{{ 'please' | i18nextEager }} <a (click)="outlookIntegration()">{{ 'click_here' | i18nextEager }}</a> {{ 'to_configure_outlook' | i18nextEager }}</div>
+  </div>
+</div>
+<app-logs [log]="logs"></app-logs>
+<div class="main-dash-bg">
+  <div class="dashboard-bg" *ngIf="!hasNoProgram">
+    <app-dashboard-header
+      [assignment]="assignment"
+      (assignmentUUID)="setAssignmentUUID($event)"
+      (onClickSetting)="onClickSetting($event)"
+      (onDelete)="onDelete()"
+      (onSave)="onSave()"
+      (onReset)="onReset()"></app-dashboard-header>
+
+      <div class="row m-0 px-16" *ngIf="discardedTimesheetData?.count && discardedTimesheetData?.count !=0" >
+        <div class="col mb-16 d-flex justify-content-between align-items-center warning-message px-8">
+            <div class="d-flex align-items-center">
+                <icon name="warning" color="#F6AB2B" size="26px" type="material" class="float-left mr-24"></icon>
+                <div>
+                    <p>
+                        <strong class="mb-2">{{ 'discarded_timesheets' | i18nextEager }}</strong>
+                    </p>
+                    <p>{{ 'you_have' | i18nextEager }} {{discardedTimesheetData?.count}} {{ 'discarded_timesheets_from' | i18nextEager }} <span *ngIf="discardedTimesheetData?.start_date">{{discardedTimesheetData?.start_date | localDateFormat }}</span> - <span *ngIf="discardedTimesheetData?.end_date">{{discardedTimesheetData?.end_date | localDateFormat}}</span>. {{ 'please_recreate_and_resubmit_these_discarded_timesheets_again' | i18nextEager }}.</p>
+                </div>
+            </div>
+            <button [routerLink]="['/timesheet/list/all']" class="btn btn-outine small">{{ 'view' | i18nextEager }}</button>
+        </div>
+    </div>
+    
+    <app-dashboard-grid
+      [widgetsData]="widgetsData"
+      [widgetGridItems]="widgetItemsToShow"
+      [assignmentID]="assignmentId"
+      [workerID]="workerId"
+      [orgID]="orgId"
+      [isTimesheetEnable] = "isTimesheetEnabled"
+    ></app-dashboard-grid>
+  </div>
+</div>
+
+<div *ngIf="hasNoProgram" class="no-program-bg">
+  <div class="has-no-program">
+    <img src="../../../assets/images/no-program.svg" alt="landing-image" class="img-fluid" width="220">
+    <h2>{{ 'you_are_not_associated_with_any_programs_yet' | i18nextEager }}</h2>
+  </div>
+</div>

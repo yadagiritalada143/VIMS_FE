@@ -1,0 +1,458 @@
+<form [formGroup]="qualificationForm" [ngClass]="{'disableDiv' : visibility === 'isview'}">
+<div [ngClass]="{'disableDiv' : visibility === 'isview'}">
+  <!-- <div class="col-12 mb-16">
+    <div class="float-left d-flex">
+      <label class="checkbox-container">
+        <input type="checkbox" (change)="checkBillRate()" [checked]="is_max_bill_rate">
+        <span class="checkmark"></span>
+        <p><b>{{ 'submissions_may_exceed_maximum_bill_rate' | i18next }}</b></p>
+    </label>
+
+    </div>
+
+    <div class="d-flex justify-content-end align-items-center">
+      <b class="pr-8">
+        <span>{{ 'allow_expenses' | i18next }}</span>
+      </b>
+      <span class="cursor-pointer">
+        <div class="toggle-panel-inner remove_style">
+          <span (click)="allowExpense()" class="toggle-switch" [ngClass]="is_expense_allowed ? 'toggle-on' : 'toggle-off'">
+          </span>
+        </div>
+      </span>
+    </div>
+  </div> -->
+</div>
+
+<div class="panel panel-light p-0 removesearch" [ngClass]="{'m-height': loader}">
+  <div class="panel-head">
+    <div>
+    <h5 I18n class="mb-8">
+      <icon size="19px" name="school" type="material" class="d-flex mr-4" cuClass="d-flex">
+      </icon>
+      {{ 'qualifications' | i18next }}
+    </h5>
+    <p class="fs-12 mb-8 pr-16 lh-1-5">
+      {{"Select the items below that will be defaulted for this job title when creating a job. The picklist values for the 3
+      fields below come from what has been configurd via the 'Qualification Types' admin object." | i18next}}
+    </p>
+  </div>
+  </div>
+  <!-- <form [formGroup]="qualificationForm" [ngClass]="{'disableDiv' : visibility === 'isview'}"> -->
+    <div class="panel-content ">
+      <div class="no-gutters row">
+        <div class="col-12 m-16 text-center" *ngIf="!credentialTypeId
+                && !specialityTypeId
+                && !vaccineTypeId
+                && !skillTypeId
+                && !educationTypeId && !loader">
+          {{ 'no_qualification_type_found' | i18next }}
+        </div>
+
+
+        <div class="col-12" *ngIf="credentialTypeId">
+          <div class="form-group">
+            <label>{{ 'credentials' | i18next }}</label>
+            <div class="position-relative">
+              <ng-select bindLabel="name" [readonly]="visibility === 'isview'"
+                (search)="searchQualifications('selectedCredential',$event)" formControlName="selectedCredential"
+                [clearable]="false" [searchable]="true" [multiple]="true" [items]="jobCategoryData"
+                (change)="updateQualificationId('selectedCredential')" bindLabel="name" autofocus [multiple]="true"
+                clearAllText="Clear" placeholder="{{ 'search_available_credentials' | i18next }}" ngDefaultControl>
+              </ng-select>
+              <span class="search">
+                <icon size="19px" name="search" type="material" class="d-flex mr-4" cuClass="d-flex">
+                </icon>
+              </span>
+            </div>
+          </div>
+
+          <div class="tabs d-flex flex-wrap">
+            <div class="tabs-panel p-8 mr-8 mb-8" [ngClass]="{'disableDiv' : visibility === 'isview'}"
+              *ngFor="let c of qualificationForm.value.selectedCredential;let i = index">
+              <div class="d-flex justify-content-between align-items-center">
+                <p class="small font-weight-medium">
+                  {{c?.name}}
+                </p>
+                <span class="cursor-pointer" (click)="removeItems('selectedCredential',i)">
+                  <icon size="13px" name="close" type="material" class="d-flex" cuClass="d-flex">
+                  </icon>
+                </span>
+              </div>
+              <div>{{c?.code}}</div>
+              <div class="d-flex justify-content-left align-items-center mt-8">
+                <span class="cursor-pointer">
+                  <div class="toggle-panel-inner remove_style">
+                    <span class="toggle-switch" [ngClass]="c?.is_required ? 'toggle-on' : 'toggle-off'"
+                      (click)="c.is_required = ! c.is_required"></span>
+                  </div>
+                </span>
+
+                <span class="small pl-8">
+                  <span *ngIf="!c?.is_required">{{ 'optional' | i18next }}</span>
+                  <span *ngIf="c?.is_required">{{ 'required' | i18next }}</span>
+                </span>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-12" *ngIf="certificationTypeId">
+          <div class="form-group">
+            <label>{{ 'certification' | i18next }}</label>
+            <div class="position-relative">
+              <ng-select bindLabel="name" [readonly]="visibility === 'isview'"
+                (search)="searchQualifications('selectedCertification',$event)" formControlName="selectedCertification"
+                [clearable]="false" [searchable]="true" [multiple]="true" [items]="jobCertificateData"
+                (change)="updateQualificationId('selectedCertification')" bindLabel="name" autofocus [multiple]="true"
+                clearAllText="Clear" placeholder="{{ 'search_available_certifications' | i18next }}" ngDefaultControl>
+              </ng-select>
+              <span class="search">
+                <icon size="19px" name="search" type="material" class="d-flex mr-4" cuClass="d-flex">
+                </icon>
+              </span>
+            </div>
+          </div>
+
+          <div class="tabs d-flex flex-wrap">
+            <div class="tabs-panel p-8 mr-8 mb-8" [ngClass]="{'disableDiv' : visibility === 'isview'}"
+              *ngFor="let c of qualificationForm.value.selectedCertification;let i = index">
+              <div class="d-flex justify-content-between align-items-center">
+                <p class="small font-weight-medium">
+                  {{c?.name}}
+                </p>
+                <span class="cursor-pointer" (click)="removeItems('selectedCertification',i)">
+                  <icon size="13px" name="close" type="material" class="d-flex" cuClass="d-flex">
+                  </icon>
+                </span>
+              </div>
+              <div>{{c?.code}}</div>
+              <div class="d-flex justify-content-left align-items-center mt-8">
+                <span class="cursor-pointer">
+                  <div class="toggle-panel-inner remove_style">
+                    <span class="toggle-switch" [ngClass]="c?.is_required ? 'toggle-on' : 'toggle-off'"
+                      (click)="c.is_required = ! c.is_required"></span>
+                  </div>
+                </span>
+
+                <span class="small pl-8">
+                  <span *ngIf="!c?.is_required">{{ 'optional' | i18next }}</span>
+                  <span *ngIf="c?.is_required">{{ 'required' | i18next }}</span>
+                </span>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-12 mt-16" *ngIf="specialityTypeId">
+          <div class="form-group">
+            <label>{{ 'speciality' | i18next }}</label>
+            <div class="position-relative">
+              <ng-select bindLabel="name" [readonly]="visibility === 'isview'" formControlName="selectedSpaciality"
+                (search)="searchQualifications('selectedSpaciality',$event)" [clearable]="false" [searchable]="true"
+                [multiple]="true" [items]="jobspacialityData" (change)="updateQualificationId('selectedSpaciality')"
+                bindLabel="name" autofocus placeholder="{{ 'search_speciality' | i18next }}" ngDefaultControl>
+              </ng-select>
+              <span class="search">
+                <icon size="19px" name="search" type="material" class="d-flex mr-4" cuClass="d-flex">
+                </icon>
+              </span>
+              <!-- <input type="text" class="form-control" placeholder="Search Specialty">
+            <span class="cursor-pointer search">
+              <icon size="20px" name="search" type="material" class="d-flex" cuClass="d-flex"></icon>
+            </span> -->
+            </div>
+          </div>
+
+          <div class="tabs d-flex flex-wrap">
+            <div class="tabs-panel tabs-panel-strength p-8 mr-8 mb-8"
+              *ngFor="let c of qualificationForm.value.selectedSpaciality;let i = index">
+              <div class="d-flex justify-content-between align-items-center">
+                <p class="small font-weight-medium">{{c?.name}} </p>
+                <span class="cursor-pointer">
+                  <icon size="13px" name="close" type="material" class="d-flex" cuClass="d-flex"
+                    (click)="removeItems('selectedSpaciality',i)">
+                  </icon>
+                </span>
+              </div>
+              <div>{{c?.code}}</div>
+              <div class="d-flex justify-content-left align-items-center mt-8">
+                <span class="cursor-pointer">
+                  <div class="toggle-panel-inner remove_style">
+                    <span class="toggle-switch" [ngClass]="c?.is_required ? 'toggle-on' : 'toggle-off'"
+                      (click)="c.is_required = ! c.is_required"></span>
+                  </div>
+                </span>
+                <span class="small pl-8">
+                  <span *ngIf="!c?.is_required">{{ 'optional' | i18next }}</span>
+                  <span *ngIf="c?.is_required">{{ 'required' | i18next }}</span>
+                </span>
+
+              </div>
+              <div class="strength w-100">
+                <div class="pt-4 strength-bar">
+                  <ul>
+                    <li *ngFor="let r of [1,2,3];let index = index" (click)="clickOnRatings(c,r)"
+                      [ngClass]="{'active': c.level >= r}">
+                    </li>
+                  </ul>
+                </div>
+                <p class="x-small text-right">
+                  <span>
+                    <span *ngIf="c.level == 1">{{ 'beginner' | i18next }}</span>
+                    <span *ngIf="c.level == 2">{{ 'intermediate' | i18next }}</span>
+                    <span *ngIf="c.level == 3">{{ 'expert' | i18next }}</span>
+                  </span>
+                </p>
+              </div>
+
+              <!-- <div class="d-flex justify-content-between align-items-center">
+                <div class="strength w-100">
+                  <div class="pt-4 strength-bar">
+                    <ul>
+                      <li class="active"></li>
+                      <li class="active"></li>
+                      <li class="active"></li>
+                      <li class="active"></li>
+                      <li></li>
+                    </ul>
+
+                  </div>
+                  <p class="x-small text-right">
+                    Expert
+                  </p>
+                </div>
+              </div> -->
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 mt-16" *ngIf="vaccineTypeId">
+          <div class="form-group">
+            <label>{{ 'vaccination' | i18next }}</label>
+            <div class="position-relative">
+              <ng-select [readonly]="visibility === 'isview'" bindLabel="name" formControlName="selectedVaccination"
+                (search)="searchQualifications('selectedVaccination',$event)" [clearable]="false" [searchable]="true"
+                [multiple]="true" [items]="jobvaccinationData" (change)="updateQualificationId('selectedVaccination')"
+                bindLabel="name" autofocus placeholder="{{ 'search_vaccination' | i18next }}" ngDefaultControl>
+              </ng-select>
+              <span class="search">
+                <icon size="19px" name="search" type="material" class="d-flex mr-4" cuClass="d-flex">
+                </icon>
+              </span>
+              <!-- <input type="text" class="form-control" placeholder="Search Vaccination">
+            <span class="cursor-pointer search">
+              <icon size="20px" name="search" type="material" class="d-flex" cuClass="d-flex"></icon>
+            </span> -->
+            </div>
+          </div>
+
+          <div class="tabs d-flex flex-wrap">
+            <div class="tabs-panel p-8 mr-8 mb-8" [ngClass]="{'disableDiv' : visibility === 'isview'}"
+              *ngFor="let c of qualificationForm.value.selectedVaccination;let i = index">
+              <div class="d-flex justify-content-between align-items-center">
+                <p class="small font-weight-medium">
+                  {{c?.name}}
+                </p>
+                <span class="cursor-pointer">
+                  <icon size="13px" name="close" type="material" class="d-flex" cuClass="d-flex"
+                    (click)="removeItems('selectedVaccination',i)">
+                  </icon>
+                </span>
+
+              </div>
+              <!-- <div class="d-flex justify-content-left align-items-center mt-8"> -->
+              <!-- <span class="cursor-pointer">
+                  <icon size="13px" name="lock" type="material" class="d-flex mr-8" cuClass="d-flex">
+                  </icon>
+                </span> -->
+              <div>{{c?.code}}</div>
+              <div class="d-flex justify-content-left align-items-center mt-8">
+                <span class="cursor-pointer">
+                  <div class="toggle-panel-inner remove_style">
+                    <span class="toggle-switch" [ngClass]="c?.is_required ? 'toggle-on' : 'toggle-off'"
+                      (click)="c.is_required = ! c.is_required"></span>
+                  </div>
+                </span>
+                <span class="small pl-8">
+                  <span *ngIf="!c?.is_required">{{ 'optional' | i18next }}</span>
+                  <span *ngIf="c?.is_required">{{ 'required' | i18next }}</span>
+                </span>
+
+              </div>
+              <!-- </div> -->
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-12 mt-16" *ngIf="skillTypeId">
+          <div class="form-group">
+            <label>{{ 'skills' | i18next }}</label>
+            <div class="position-relative">
+              <ng-select [readonly]="visibility === 'isview'" bindLabel="name" formControlName="selectedSkill"
+                (search)="searchQualifications('selectedSkill',$event)" [clearable]="false" [searchable]="true"
+                [multiple]="true" [items]="jobskillData" (change)="updateQualificationId('selectedSkill')"
+                bindLabel="name" autofocus placeholder="{{ 'search_skills' | i18next }}" ngDefaultControl>
+              </ng-select>
+              <span class="search">
+                <icon size="19px" name="search" type="material" class="d-flex mr-4" cuClass="d-flex">
+                </icon>
+              </span>
+              <!-- <input type="text" class="form-control" placeholder="Search Skills">
+            <span class="cursor-pointer search">
+              <icon size="20px" name="search" type="material" class="d-flex" cuClass="d-flex"></icon>
+            </span> -->
+            </div>
+          </div>
+
+
+
+          <div class="tabs d-flex flex-wrap">
+            <div class="tabs-panel tabs-panel-strength p-8 mr-8 mb-8"
+              *ngFor="let c of qualificationForm.value.selectedSkill;let i = index">
+              <div class="d-flex justify-content-between align-items-center">
+                <p class="small font-weight-medium"> {{c?.name}} </p>
+                <span class="cursor-pointer">
+                  <icon size="13px" name="close" type="material" class="d-flex" cuClass="d-flex"
+                    (click)="removeItems('selectedSkill',i)">
+                  </icon>
+                </span>
+              </div>
+              <div>{{c?.code}}</div>
+              <div class="d-flex justify-content-left align-items-center mt-8">
+                <span class="cursor-pointer">
+                  <div class="toggle-panel-inner remove_style">
+                    <span class="toggle-switch" [ngClass]="c?.is_required ? 'toggle-on' : 'toggle-off'"
+                      (click)="c.is_required = ! c.is_required"></span>
+                  </div>
+                </span>
+                <span class="small pl-8">
+                  <span *ngIf="!c?.is_required">{{ 'optional' | i18next }}</span>
+                  <span *ngIf="c?.is_required">{{ 'required' | i18next }}</span>
+                </span>
+
+              </div>
+              <div class="strength w-100">
+                <div class="pt-4 strength-bar">
+                  <ul>
+                    <li *ngFor="let r of [1,2,3];let index = index" (click)="clickOnRatings(c,r)"
+                      [ngClass]="{'active': c.level >= r}">
+                    </li>
+                  </ul>
+                </div>
+                <p class="x-small text-right">
+                  <span>
+                    <span *ngIf="c.level == 1">{{ 'beginner' | i18next }}</span>
+                    <span *ngIf="c.level == 2">{{ 'intermediate' | i18next }}</span>
+                    <span *ngIf="c.level == 3">{{ 'expert' | i18next }}</span>
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 mt-16" *ngIf="educationTypeId">
+          <div class="form-group">
+            <label>{{ 'education' | i18next }}</label>
+            <div class="position-relative">
+              <ng-select [readonly]="visibility === 'isview'" bindLabel="name" formControlName="selectedEducation"
+                (search)="searchQualifications('selectedEducation',$event)" [clearable]="false" [searchable]="true"
+                [multiple]="true" [items]="jobeducationData" (change)="updateQualificationId('selectedEducation')"
+                bindLabel="name" autofocus placeholder="{{ 'search_education' | i18next }}" ngDefaultControl>
+              </ng-select>
+              <span class="search">
+                <icon size="19px" name="search" type="material" class="d-flex mr-4" cuClass="d-flex">
+                </icon>
+              </span>
+            </div>
+          </div>
+          <div class="tabs d-flex flex-wrap">
+            <div class="tabs-panel w-45 p-8 mr-8 mb-8"
+              *ngFor="let c of qualificationForm.value.selectedEducation;let i = index">
+              <div class="d-flex justify-content-between align-items-center">
+                <p class="small font-weight-medium">
+                  {{c?.name}}
+                </p>
+                <span class="cursor-pointer">
+                  <icon size="13px" name="close" type="material" class="d-flex" cuClass="d-flex"
+                    (click)="removeItems('selectedEducation',i)">
+                  </icon>
+                </span>
+
+              </div>
+              <div>{{c?.code}}</div>
+              <div class="d-flex justify-content-left align-items-center mt-8">
+                <span class="cursor-pointer">
+                  <div class="toggle-panel-inner remove_style">
+                    <span class="toggle-switch" [ngClass]="c?.is_required ? 'toggle-on' : 'toggle-off'"
+                      (click)="c.is_required = ! c.is_required"></span>
+                  </div>
+                </span>
+                <span class="small pl-8">
+                  <span *ngIf="!c?.is_required">{{ 'optional' | i18next }}</span>
+                  <span *ngIf="c?.is_required">{{ 'required' | i18next }}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <!-- </form> -->
+
+
+</div>
+
+<!-- Background checks -->
+<!-- commented as part of V2M-12778 -->
+ <!-- <div class="panel panel-light p-0 mt-24 removesearch" *ngIf="qualificationForm?.value?.background_check_list && qualificationForm?.value?.background_check_list?.length>0">
+  <div class="panel-content my-16">
+    <div class="d-flex align-items-center justify-content-between mb-16">
+      <h4 class="d-flex align-items-center">
+        {{ 'background_checks' | i18next }}
+      </h4>
+      <div>
+        <div class="toggle-panel-inner remove_style">
+          <span (click)="removeBackgroundChecks()" class="toggle-switch" [ngClass]="isbackgroundChecks ? 'toggle-on' : 'toggle-off'">
+          </span>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="isbackgroundChecks">
+    <div class="d-flex align-items-center justify-content-between mb-16" *ngFor="let cl of qualificationForm?.value?.background_check_list;let i = index">
+      <p class="d-flex align-items-center"> {{cl?.name}}</p>
+      <div>
+        <label class="checkbox-container">
+          <input type="checkbox" name="checklist" [checked]="cl?.is_enabled" (change)="cl.is_enabled = !cl.is_enabled">
+          <span class="checkmark"></span>
+      </label></div>
+    </div>
+    </div>
+  </div>
+</div> -->
+
+<!-- end -->
+
+</form>
+
+<div class="row no-gutters mt-24 mb-16">
+  <div class="col-12 d-flex align-items-center justify-content-between">
+    <button type="button" class="btn btn-outline" (click)="backTo()">
+      <icon size="24px" name="keyboard_backspace" theme="outlined" type="material" class="d-flex" cuClass="d-flex">
+      </icon>
+    </button>
+    <!-- [hidden]="visibility === 'isview'" -->
+    <button type="button" class="btn btn-primary" (click)="saveQualification()">
+      {{ 'continue' | i18next }}
+      <icon *ngIf="!isSaveLoader" size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu">
+      </icon>
+      <span *ngIf="isSaveLoader" class="ml-8"><button-loader></button-loader></span>
+    </button>
+  </div>
+</div>

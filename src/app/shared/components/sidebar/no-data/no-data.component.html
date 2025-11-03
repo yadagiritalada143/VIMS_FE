@@ -1,0 +1,41 @@
+<div class="content-area ui-content-wrapper no-content">
+  <div class="no-data" *ngIf="noDataJson">
+    <img [src]="noDataJson?.imageUrl" alt="no data" width="100" class="img-fluid" />
+    <h5 class="pt-16">{{ noDataJson?.headTitle|i18next }}</h5>
+    <p class="py-4 small">{{ noDataJson?.subTitle|i18next }}</p>
+    <button *ngIf="noDataJson?.isButton" (click)="onClickNext()" class="btn btn-outline-primary small">
+      <icon size="15px" name="people" type="material" class="icon--on-right mr-8" cuClass="icon-cu">
+      </icon>
+      <span>{{ noDataJson?.isButton | i18next }}</span>
+    </button>
+    <ng-container *ngIf="(noDataJson?.button && canCreateOffer)">
+     <ng-container *authorize="'create_offer'">
+      <button *ngIf="jobStatus !== 'PENDING_APPROVAL_SOURCING' && jobStatus !== 'PENDING_APPROVAL' && jobStatus !== 'FILLED'" (click)="openCreateOfferSidebar()" class="btn btn-success btn-icon-on-left small mt-4"
+        [disabled]="!canCreateOffer">
+        <icon name="drafts" size="16px" class="d-flex mr-4" cuclass="d-flex" color="inherit"></icon>
+        {{ 'create_offer' | i18next }}
+      </button>
+    </ng-container>
+    </ng-container>
+    <ng-container *ngIf="noDataJson?.editProfileButton">
+      <button (click)="
+          editProfileButton(
+            noDataJson?.candidate_id,
+            noDataJson?.job_id,
+            noDataJson?.reference_page
+          )
+        " class="btn btn-outline-primary small">
+        {{ 'edit_profile' | i18next }}
+      </button>
+    </ng-container>
+  </div>
+  <div class="no-matches-found text-center" *ngIf="!noDataJson">
+    <div class="content-area ui-content-wrapper no-content">
+      <div class="no-data">
+        <img src="./assets/images/no-data-lst.svg" alt="no offers" width="100" class="img-fluid" />
+        <h4 class="pt-16">{{ 'no_records_found' | i18next }}</h4>
+        <!-- <p class="py-4 small">There are no offers created for this job</p> -->
+      </div>
+    </div>
+  </div>
+</div>

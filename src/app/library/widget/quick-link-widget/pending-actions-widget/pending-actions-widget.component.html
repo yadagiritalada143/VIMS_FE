@@ -1,0 +1,18 @@
+<div class="quick-link-widget">
+    <h5 *ngIf="editMode" class="edit-mode-label font-weight-medium">{{ widget.label | i18next}}</h5>
+    <h4 *ngIf="!editMode" class="edit-mode-label font-weight-medium">{{ widget.label | i18next}}</h4>
+    <div class="widget-content-info flex-column align-items-center h-50 justify-content-center">
+
+        <h1 class="font-weight-bold m-0" *ngIf="(totalCount$ | async ) as totalCount ;else: loader">{{ totalCount}}</h1>
+        <ng-template #loader>
+          <ngx-skeleton-loader animation="progress" appearance="line" [theme]="{'height': '10px','width' : '70px', 'margin-bottom': '0' }"> </ngx-skeleton-loader>
+        </ng-template>
+
+    </div>
+    <div class="widget-content-info flex-column align-items-center h-25 justify-content-center">
+        <h5 class="pending-action-text m-0 mt-8 font-weight-normal text-center">{{ 'task_waiting_for_approval' | i18next }}</h5>
+        <p class="pending-action-text m-0 font-weight-normal text-center">{{ 'please_click_on_take_action_for_more_detail' | i18next }}</p>
+        <button class="btn small btn-viewall mt-12" (click)="viewPendingAction()">{{ 'view_all' | i18next }} <icon size="24px" name="chevron_right" type="material" color="inherit" cuclass="d-flex" class="d-flex">
+        </icon></button>
+    </div>
+</div>

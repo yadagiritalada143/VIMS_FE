@@ -1,0 +1,1009 @@
+<div class="create-bg pt-24 px-32">
+  <div class="page-header position-relative">
+    <a href="javascript:void(0)" (click)="backLink()" class="back-link">
+      <icon name="keyboard_backspace" size="20px"></icon>
+    </a>
+    <h3 class="font-weight-medium mb-64">{{ 'timesheet_configuration' | i18next }}</h3>
+  </div>
+  <app-logs [log]="logs"></app-logs>
+  <nav class="tabs">
+    <ul>
+      <li>
+        <a href="javascript:void(0)" (click)="showConfig()" [ngClass]="{'active' : isConfigTabActive}">{{ 'configuration' | i18next }}</a>
+      </li>
+      <li *ngIf="mode && mode != configurationMode.Clone">
+        <a href="javascript:void(0)" (click)="showHistory()" [ngClass]="{'active' : isHistoryTabActive}">{{ 'history' | i18next }}</a>
+      </li>
+    </ul>
+  </nav>
+  <div class="tabs-content">
+    <div class="tab-item" [ngClass]="{'active' : isConfigTabActive}" *ngIf="request && options">
+      <div class="section-bg">
+        <!-- <h4 class="section-title font-weight-medium mb-24">
+          <icon name="insert_drive_file" size="20px"></icon> Timesheet
+        </h4> -->
+
+        <h4 class="section-title font-weight-medium  mb-24 float-left">
+          <icon name="insert_drive_file" size="20px"></icon> {{ 'timesheet' | i18next }}
+        </h4>
+        <div class="toggle-panel float-right" [ngClass]="{ 'disable': mode === configurationMode.View }">
+          <div class="toggle-panel-inner" [ngClass]="request?.status ? 'if-active' : 'if-inactive'">
+            <span class="status-text">{{(request?.status ? 'Active' : 'Inactive') | i18next}}</span>
+            <span class="toggle-switch" [ngClass]="request?.status ? 'toggle-on' : 'toggle-off'"
+              (click)="request.status = !request?.status"></span>
+          </div>
+        </div>
+        <div class="clearfix"></div>
+
+
+        <div class="form-group">
+          <label>{{ 'timesheet_configuration_name' | i18next }}<span class="require">*</span></label>
+          <div>
+            <h4 class="textStyle">{{ 'timesheet_configuration_name_has_to_be_unique_&_will_be_used_as_a_picklist_for_‘timesheet_type__in_the_application_on_an_offer_&_assignment_modules' | i18next }}.</h4>
+            </div>
+          <input [disabled]="mode === configurationMode.View" type="text" class="form-control" [placeholder]="'Enter Name'|i18next"
+            [(ngModel)]="request.title">
+        </div>
+
+        <div class="form-group-row">
+          <div class="form-group">
+            <hierarchy-treeview [disabled]="mode === configurationMode.View"
+              label="Hierarchies"
+              [treeInput]="hierarchies"
+              [allowDefaultSelection]="true"
+              [allowDefaultClear]="false"
+              [selected]="selections"
+              [initialDefaults]="defaultSelections"
+              (changed)="hierarchySelectionChanged($event)"
+              [mandatory] = "true"
+            >
+            </hierarchy-treeview>
+          </div>
+          <!-- <div class="form-group">
+            <label>{{ 'hierarchy' | i18next }} <span class="require">*</span></label>
+            <input type="text" class="form-control" placeholder="{{ 'choose_hierarchy' | i18next }}"
+              [(ngModel)]="request.hierarchy.name" (click)="sidebarOpen()" readonly />
+            <span class="cursor-pointer hierarchy" (click)="sidebarOpen()">
+              <icon size="19px" name="account_tree" type="material" class="d-flex" cuClass="d-flex"></icon>
+            </span> -->
+            <!-- <ng-select [disabled]="mode === configurationMode.View" [clearable]="true" id="hierarchy" placeholder="Select Hierarchy" [searchable]="true"
+             [(ngModel)]="request.hierarchy_id" *ngIf="hierarchies && hierarchies.length > 0">
+              <ng-option *ngFor="let hierarchy of hierarchies" [value]="hierarchy.id">{{hierarchy.name}}</ng-option>
+            </ng-select> -->
+
+          <!-- </div> -->
+          <div class="form-group position-relative">
+            <label>{{ 'timesheet_start_date' | i18next }}</label>
+            <svms-datepicker [disabled]="mode === configurationMode.View" *ngIf="currentprogram?.start_date"
+              [(ngModel)]="request.start_date" [inputdateFormat]="dateFormat" [options]="calendarOptions"
+              id="timesheetstartdate" I18n>
+            </svms-datepicker>
+          </div>
+          <!-- <div class="form-group">
+            <label>{{ 'timesheet_start_date' | i18next }}</label>
+            <svms-datepicker [disabled]="mode === configurationMode.View" *ngIf="currentprogram?.start_date"
+              [(ngModel)]="request.start_date" [inputdateFormat]="'yy-mm-dd'" [options]="calendarOptions"
+              id="timesheetstartdate" I18n>
+            </svms-datepicker>
+          </div> -->
+        </div>
+        <div class="form-group-row">
+          <div class="form-group">
+            <label>{{ 'work_period' | i18next }} <span class="require">*</span></label>
+            <ng-select [disabled]="mode === configurationMode.View" [clearable]="true"
+              id="rules.basic_rules.work_week.period" [(ngModel)]="request.rules.basic_rules.work_week.period"
+              placeholder="{{ 'select_work_period' | i18next }}" [searchable]="false" #periodVal (change)="updateWorkPeriodConfig()">
+              <ng-option *ngFor="let weekPeriod of options.weekPeriods" value="{{weekPeriod.value}}">
+                {{weekPeriod.name}}
+              </ng-option>
+            </ng-select>
+            <div class="xDays" *ngIf="request.rules.basic_rules.work_week.period?.toLowerCase() == 'x weekly'">
+              <label>{{ 'number_of_weeks' | i18next }}<span class="require">*</span></label>
+              <input [disabled]="mode === configurationMode.View" id="title1" type="number" class="form-control"
+                placeholder="{{ 'no_of_weeks' | i18next }}" [(ngModel)]="request.rules.basic_rules.work_week.week_number">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>{{ 'work_location' | i18next }}
+              <!-- <span class="require">*</span> -->
+            </label>
+            <ng-select [disabled]="mode === configurationMode.View" [clearable]="true"
+              id="rules.basic_rules.work_week.location" [(ngModel)]="request.location" [multiple]='true'
+              placeholder="{{ 'select_work_location' | i18next }}" (search)="this.workLocation.next($event)" [searchable]="true">
+              <ng-option *ngFor="let workLocation of locations" value="{{workLocation.id}}">
+                {{workLocation?.name}}
+              </ng-option>
+            </ng-select>
+            <div class="xDays" *ngIf="request.rules.basic_rules.work_week.period?.toLowerCase() == 'x weekly'">
+              <label>{{ 'number_of_weeks' | i18next }}<span class="require">*</span></label>
+              <input [disabled]="mode === configurationMode.View" id="title1" type="number" class="form-control"
+                placeholder="{{ 'no_of_weeks' | i18next }}" [(ngModel)]="request.rules.basic_rules.work_week.week_number">
+            </div>
+          </div>
+        </div>
+        <div class="form-group-row" >
+          <div class="form-group">
+            <label>{{ 'work_period_start_day' | i18next }} <span class="require">*</span></label>
+            <ng-select [disabled]="mode === configurationMode.View" [clearable]="true"
+              placeholder="{{ 'select_work_period_start_day' | i18next }}" [searchable]="false"
+              [(ngModel)]="request.rules.basic_rules.work_week.week_start_day">
+              <ng-option *ngFor="let day of options.days" [value]="day.value">{{day.name}}</ng-option>
+            </ng-select>
+          </div>
+          <div class="form-group" *ngIf="!isWeekly()">
+            <label>{{ 'work_period_start_date' | i18next }} <span class="require">*</span></label>
+            <ng-select [disabled]="mode === configurationMode.View" [clearable]="true"
+              placeholder="{{ 'select_work_period_start_day' | i18next }}" [searchable]="false"
+              [(ngModel)]="request.rules.basic_rules.work_week.month_start_day">
+              <ng-option *ngFor="let day of options.dayNumbers" [value]="day">{{day}}</ng-option>
+            </ng-select>
+          </div>
+          <div *ngIf="isWeekly()" class="form-group"><label>&nbsp;</label></div>
+        </div>
+
+      </div>
+      <div class="section-bg">
+        <h4 class="section-title font-weight-medium mb-24">
+          <icon name="insert_drive_file" size="20px"></icon> {{ 'timesheet_type' | i18next }}
+        </h4>
+        <div class="form-group">
+          <label>{{ 'timesheet_type' | i18next }} <span class="require">*</span></label>
+          <ng-select [disabled]="mode === configurationMode.View" [clearable]="true"
+            id="rules.basic_rules.timesheet_type" placeholder="{{ 'select_timesheet_type' | i18next }}" [searchable]="false"
+            [multiple]='false' [(ngModel)]="request.rules.basic_rules.timesheet_type[0]">
+            <ng-option *ngFor="let type of selectedTimesheet" [value]="type.value">{{type?.label}}</ng-option>
+          </ng-select>
+        </div>
+
+        <!-- day timesheet -->
+        <div class="form-group" *ngIf="isDayTimesheet()">
+        <p class="font-weight-medium mb-8">{{ 'daily_timesheet_settings' | i18next }}</p>
+        <label>{{ 'time_entry_options' | i18next }} <span class="require">*</span></label>
+        <div class="mt-12">
+          <label *ngFor="let d of dayType" class="d-inline-block mr-24" [ngClass]="{'disableDiv': requiredCheck() && d?.checked}">
+            <input  type="checkbox" [(ngModel)]="d.checked" class="mr-8" [checked]="d?.checked" >
+             {{d?.value}} {{ 'day' | i18next }}
+            </label>
+        </div>
+        </div>
+        <!-- end -->
+
+        <div class="form-group" *ngIf="isHourly() && !isDayTimesheet()">
+          <label>{{ 'hours_allocation' | i18next }} <span class="require">*</span></label>
+          <ng-select [disabled]="mode === configurationMode.View" [clearable]="true"
+            placeholder="{{ 'select_hours_allocation' | i18next }}" [searchable]="false"
+            [(ngModel)]="request.rules.basic_rules.hour_type_calculation">
+            <!-- <ng-option value="automation">Automation Allocation</ng-option>
+            <ng-option value="manual">Manual allocation (ST,OT,DT)</ng-option> -->
+            <ng-option *ngFor="let type of options.hoursAllocationTypes" [value]="type.value">{{type.name}}</ng-option>
+          </ng-select>
+        </div>
+        <div class="form-group" *ngIf="isHourly() && !isDayTimesheet()">
+          <label>{{ 'format_type' | i18next }} <span class="require">*</span></label>
+          <ng-select [disabled]="mode === configurationMode.View" [clearable]="true" placeholder="{{ 'select_format_type' | i18next }}"
+            [searchable]="false" [(ngModel)]="request.rules.basic_rules.hours_input_type.type"
+            (change)="request.rules.basic_rules.hours_input_type.format=null;">
+            <ng-option *ngFor="let format of options.hoursInputTypes" [value]="format.value">{{format.name}}</ng-option>
+          </ng-select>
+        </div>
+        <div class="form-group" *ngIf="request?.rules?.basic_rules?.hours_input_type?.type === 'decimal' && !isDayTimesheet()">
+          <label>{{ 'decimal_format' | i18next }} <span class="require">*</span></label>
+          <ng-select [disabled]="mode === configurationMode.View" [clearable]="true" placeholder="{{ 'select_decimal_format' | i18next }}"
+            [searchable]="false" [(ngModel)]="request.rules.basic_rules.hours_input_type.format">
+            <ng-option *ngFor="let format of options.decimalInputTypeFormat" [value]="format.value">{{format.name}}
+            </ng-option>
+          </ng-select>
+        </div>
+        <div class="form-group" *ngIf="request?.rules?.basic_rules?.hours_input_type?.type === 'hours'">
+          <label>{{ 'hours_format' | i18next }} <span class="require">*</span></label>
+          <ng-select [disabled]="mode === configurationMode.View" [clearable]="true" placeholder="{{ 'select_decimal_format' | i18next }}"
+            [searchable]="false" [(ngModel)]="request.rules.basic_rules.hours_input_type.format">
+            <ng-option *ngFor="let format of options.hoursInputTypeFormat" [value]="format.value">{{format.name}}
+            </ng-option>
+          </ng-select>
+        </div>
+        <!-- *ngIf="!isDayTimesheet()" -->
+        <div class="form-group" *ngIf="isCico()">
+          <label>{{ 'time_format' | i18next }} <span class="require">*</span></label>
+          <ng-select [disabled]="mode === configurationMode.View" [clearable]="true" placeholder="{{ 'select_time_format' | i18next }}"
+            [searchable]="false" [(ngModel)]="request.rules.basic_rules.time_format">
+            <ng-option *ngFor="let format of options.timeFormats" [value]="format.value">{{format.name}}</ng-option>
+          </ng-select>
+        </div>
+      </div>
+      <div class="section-bg">
+        <h4 class="section-title font-weight-medium float-left mb-24">
+          <icon name="insert_drive_file" size="20px"></icon> {{ 'project' | i18next }}
+        </h4>
+        <div class="toggle-panel float-right" [ngClass]="{ 'disable': mode === configurationMode.View }">
+          <div class="toggle-panel-inner"
+            [ngClass]="request?.rules?.basic_rules?.project?.is_allow ? 'if-active' : 'if-inactive'">
+            <span class="status-text">{{(request?.rules?.basic_rules?.project?.is_allow ? 'Active' : 'In-Active') | i18next}}</span>
+            <span class="toggle-switch"
+              [ngClass]="request?.rules?.basic_rules?.project?.is_allow ? 'toggle-on' : 'toggle-off'"
+              (click)="updateProjectInfo()"></span>
+          </div>
+        </div>
+        <div class="clearfix"></div>
+        <div class="form-group project-option">
+          <label>{{ 'select_project' | i18next }}</label>
+          <ng-select [disabled]="mode === configurationMode.View || !request?.rules?.basic_rules?.project?.is_allow"
+            [clearable]="true" placeholder="{{ 'select_project' | i18next }}" [(ngModel)]="projectTypes"
+            (change)="onProjectTypeSelection($event)" [searchable]="false" multiple="true">
+            <!-- <ng-option value="Project X">Project X</ng-option> -->
+            <ng-option *ngFor="let option of options.timesheetProjectTypes" [value]="option.value">{{option.name}}
+            </ng-option>
+          </ng-select>
+        </div>
+        <div class="form-group project-option">
+          <label>{{ 'select_options' | i18next }}</label>
+          <ng-select [disabled]="mode === configurationMode.View || !request?.rules?.basic_rules?.project?.is_allow"
+            [clearable]="true" placeholder="{{ 'add_new' | i18next }}" multiple="true" [searchable]="true" [(ngModel)]="secondProjects">
+            <ng-option *ngFor="let option of secondProjectsDropdown" [value]="option.name">{{option.name}}</ng-option>
+          </ng-select>
+        </div>
+        <!--  addTagText="Create New"
+          [addTag]="CreateNewPickListItem"(change)="onProjectSelection($event)" <div class="form-group project-option" >
+          <label>Select Project-x Options</label>
+          <ng-select [disabled]="thirdProjectsDropdown.length == 0" [clearable]="true" placeholder="Add new" multiple="true" [searchable]="true" [(ngModel)]="thirdProjects" >
+            <ng-option *ngFor="let option of thirdProjectsDropdown" [value]="option.name">{{option.name}}</ng-option>
+          </ng-select>
+        </div> -->
+        <!-- <div class="form-group-row">
+          <div class="form-group">
+            <label>Select Options</label>
+            <ng-select [clearable]="true" placeholder="Add new" multiple="true" [searchable]="false" (change)="onProjectSelection($event)">
+              <ng-option *ngFor="let option of secondProjectsDropdown" [value]="option.name">{{option.name}}</ng-option>
+            </ng-select>
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <input type="text" class="form-control">
+          </div>
+        </div> -->
+        <!-- <button class="btn btn-primary" (click)="openProjectModal()">Open Modal</button> -->
+      </div>
+      <div class="section-bg">
+        <h4 class="section-title font-weight-medium float-left mb-24">
+          <icon name="insert_drive_file" size="20px"></icon> {{ 'timesheet_notes' | i18next }}
+        </h4>
+        <div class="toggle-panel float-right" [ngClass]="{ 'disable': mode === configurationMode.View }">
+          <div class="toggle-panel-inner"
+            [ngClass]="request?.rules?.basic_rules?.notes?.is_allow ? 'if-active' : 'if-inactive'">
+            <span class="status-text">{{(request?.rules?.basic_rules?.notes?.is_allow ? 'Active' : 'In-Active') | i18next}}</span>
+            <span class="toggle-switch"
+              [ngClass]="request?.rules?.basic_rules?.notes?.is_allow ? 'toggle-on' : 'toggle-off'"
+              (click)="updateNotesConfig()"></span>
+          </div>
+        </div>
+        <div class="clearfix"></div>
+        <div class="form-group-row" *ngIf="toggleNotes?.value">
+          <div class="form-group">
+            <label>
+              <input type="checkbox" [disabled]="mode === configurationMode.View"
+                [(ngModel)]="request.rules.basic_rules.notes.option.week_level.is_allow" class="mr-12">{{ 'weekly_notes' | i18next }}
+            </label>
+            <ng-select
+              [disabled]="mode === configurationMode.View || !request.rules.basic_rules.notes.option.week_level.is_allow"
+              [clearable]="true" placeholder="{{ 'select_weekly_notes' | i18next }}" [searchable]="false"
+              [(ngModel)]="request.rules.basic_rules.notes.option.week_level.is_mandatory">
+              <ng-option [value]="trueValue">{{ 'mandatory' | i18next }}</ng-option>
+              <ng-option [value]="!trueValue">{{ 'optional' | i18next }}</ng-option>
+            </ng-select>
+          </div>
+          <div class="form-group">
+            <label>
+              <input type="checkbox" class="mr-12" [disabled]="mode === configurationMode.View"
+                [(ngModel)]="request.rules.basic_rules.notes.option.day_level.is_allow"> {{ 'daily_notes' | i18next }}
+            </label>
+            <ng-select
+              [disabled]="mode === configurationMode.View || !request.rules.basic_rules.notes.option.day_level.is_allow"
+              [clearable]="true" placeholder="{{ 'select_daily_notes' | i18next }}" [searchable]="false"
+              [(ngModel)]="request.rules.basic_rules.notes.option.day_level.is_mandatory">
+              <ng-option [value]="trueValue">{{ 'mandatory' | i18next }}</ng-option>
+              <ng-option [value]="!trueValue">{{ 'optional' | i18next }}</ng-option>
+            </ng-select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" class="mr-12" [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.notes.option.project_level.is_allow"> {{'Daily Notes for each
+            activity/project'|i18next}}
+          </label>
+          <ng-select
+            [disabled]="mode === configurationMode.View || !request.rules.basic_rules.notes.option.project_level.is_allow"
+            [clearable]="true" placeholder="{{ 'select_daily_notes__for_each_activity/project' | i18next }}"
+            [searchable]="false" [(ngModel)]="request.rules.basic_rules.notes.option.project_level.is_mandatory">
+            <ng-option [value]="trueValue">{{ 'mandatory' | i18next }}</ng-option>
+            <ng-option [value]="!trueValue">{{ 'optional' | i18next }}</ng-option>
+          </ng-select>
+        </div>
+      </div>
+
+      <div class="section-bg">
+        <h4 class="section-title font-weight-medium float-left mb-24">
+          <icon name="insert_drive_file" size="20px"></icon> {{ 'allow_upload' | i18next }}
+        </h4>
+        <div class="toggle-panel float-right" [ngClass]="{ 'disable': mode === configurationMode.View }">
+          <div class="toggle-panel-inner"
+            [ngClass]="request?.rules?.basic_rules?.upload?.is_allow ? 'if-active' : 'if-inactive'">
+            <span class="status-text">{{(request?.rules?.basic_rules?.upload?.is_allow ? 'Active' : 'In-Active') |i18next}}</span>
+            <span class="toggle-switch"
+              [ngClass]="request?.rules?.basic_rules?.upload?.is_allow ? 'toggle-on' : 'toggle-off'"
+              (click)="request.rules.basic_rules.upload.is_allow = !request.rules.basic_rules.upload.is_allow"></span>
+          </div>
+        </div>
+        <div class="clearfix"></div>
+        <div *ngIf="toggleUpload?.value">
+          <div class="form-group-row">
+            <div class="form-group">
+              <ng-select [disabled]="mode === configurationMode.View" [clearable]="true"
+                placeholder="{{ 'select_allow_upload' | i18next }}" [searchable]="false"
+                [(ngModel)]="request.rules.basic_rules.upload.is_mandatory">
+                <ng-option [value]="trueValue">{{ 'mandatory' | i18next }}</ng-option>
+                <ng-option [value]="!trueValue">{{ 'optional' | i18next }}</ng-option>
+              </ng-select>
+            </div>
+            <div class="form-group">
+              <ng-select [disabled]="mode === configurationMode.View" [clearable]="true"
+                placeholder="{{ 'select_type' | i18next }}" [searchable]="false" [(ngModel)]="uploadLevel"
+                (change)="uploadLevelChanged($event);">
+                <ng-option *ngFor="let level of options.uploadLevels" [value]="level.value">{{level.name}}</ng-option>
+              </ng-select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-bg" *ngIf="!isDayTimesheet()">
+        <h4 class="section-title font-weight-medium float-left mb-24">
+          <icon name="insert_drive_file" size="20px"></icon> {{ 'break_timing' | i18next }}
+        </h4>
+        <div class="toggle-panel float-right" [ngClass]="{ 'disable': mode === configurationMode.View }">
+          <div class="toggle-panel-inner"
+            [ngClass]="request?.rules?.basic_rules?.break?.is_allow ? 'if-active' : 'if-inactive'">
+            <span class="status-text">{{(request?.rules?.basic_rules?.break?.is_allow ? 'Active' : 'In-Active') | i18next}}</span>
+            <span class="toggle-switch"
+              [ngClass]="request?.rules?.basic_rules?.break?.is_allow ? 'toggle-on' : 'toggle-off'"
+              (click)="request.rules.basic_rules.break.is_allow = !request.rules.basic_rules.break.is_allow"></span>
+          </div>
+        </div>
+
+
+        <div *ngFor="let break of request.rules.basic_rules.break.options; index as i">
+
+          <label class="float-right mt-8 mr-12">
+            <input [disabled]="mode === configurationMode.View" type="checkbox" class="mr-8"
+              [(ngModel)]="break.is_paid_inclusive"> {{ 'paid_break' | i18next }}
+          </label>
+          <div class="clearfix"></div>
+          <div class="form-group-row">
+            <div class="form-group">
+              <label>{{ 'break_type' | i18next }}</label>
+              <ng-select [disabled]="mode === configurationMode.View" [clearable]="true" placeholder="{{ 'select_break_type' | i18next }}"
+                [searchable]="false" [(ngModel)]="break.type">
+                <ng-option *ngFor="let breakType of options.breakTypes" [value]="breakType.value">{{breakType.name}}
+                </ng-option>
+              </ng-select>
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <ng-select [disabled]="mode === configurationMode.View" [clearable]="true" placeholder="{{ 'select_break_type' | i18next }}"
+                [searchable]="false" [(ngModel)]="break.is_mandatory">
+                <ng-option [value]="trueValue">{{ 'mandatory' | i18next }}</ng-option>
+                <ng-option [value]="!trueValue">{{ 'optional' | i18next }}</ng-option>
+              </ng-select>
+            </div>
+          </div>
+
+          <div *ngFor="let breakRule of break.break_rule">
+            <div class="hours-box pl-24">
+              <div class="form-group-row">
+                <div class="form-group">
+                  <label class="pt-8">{{ 'hours' | i18next }}</label>
+                </div>
+                <div class="form-group">
+                  <ng-select [disabled]="mode === configurationMode.View" [clearable]="false" [searchable]="false"
+                    [(ngModel)]="breakOperator.min" disabled="true">
+                    <ng-option value=">" selected="true">></ng-option>
+                  </ng-select>
+                </div>
+                <div class="form-group">
+                  <input type="text" [disabled]="mode === configurationMode.View" [placeholder]="'5'"
+                    class="form-control ml-16" [(ngModel)]="breakRule.min_hours">
+                </div>
+                <a href="javascript:void(0)" class="add-link mt-8 ml-8"
+                  [ngClass]="{ 'disable': mode === configurationMode.View }">
+                  <icon name="add_circle" size="24px" color="#C20712" (click)="addBreak(break.break_rule)"></icon>
+                </a>
+              </div>
+            </div>
+            <div class="and-box pl-32">
+              <div class="form-group">
+                <ng-select [disabled]="mode === configurationMode.View" [clearable]="false" [searchable]="false"
+                  [(ngModel)]="breakRule.operator" disabled="true">
+                  <ng-option value="AND" selected="true">{{ 'and' | i18next }}</ng-option>
+                  <ng-option value="OR">{{ 'or' | i18next }}</ng-option>
+                </ng-select>
+              </div>
+            </div>
+            <div class="hours-box-break pl-24 mb-64">
+              <div class="form-group-row">
+                <div class="form-group">
+                  <label class="pt-2">{{ 'hours' | i18next }}</label>
+                </div>
+                <div class="form-group">
+                  <ng-select [disabled]="mode === configurationMode.View" [clearable]="false" [searchable]="false"
+                    [(ngModel)]="breakOperator.max" disabled="true">
+                    <ng-option value=">" selected="true"></ng-option>
+                  </ng-select>
+                </div>
+                <div class="form-group">
+                  <input type="text" [disabled]="mode === configurationMode.View" [placeholder]="'5'"
+                    class="form-control ml-16" [(ngModel)]="breakRule.max_hours">
+                </div>
+                <a href="javascript:void(0)" [ngClass]="{ 'disable': mode === configurationMode.View }"
+                  class="remove-link mt-8 ml-8 mr-24">
+                  <icon name="remove_circle" size="24px" color="#C20712"
+                    (click)=" break.break_rule = removeBreak(breakRule, break.break_rule)"></icon>
+                </a>
+                <label>{{ 'break_max' | i18next }}</label>
+                <div class="form-group">
+                  <input type="text" [disabled]="mode === configurationMode.View" [placeholder]="'60'"
+                    class="form-control mr-16" [(ngModel)]="breakRule.max_duration">
+                </div>
+                <label>{{ 'minutes' | i18next }}</label>
+              </div>
+            </div>
+          </div>
+
+
+
+          <div class="form-group">
+            <label><input type="checkbox" [disabled]="mode === configurationMode.View"
+                [(ngModel)]="break.penality_rule.is_allow" (change)="updatePenaltyRule(break)" class="mr-4">{{ 'penalty_rules' | i18next }}</label>
+          </div>
+          <div class="penalty-rule">
+            <div class="form-group-row">
+              <div class="form-group">
+                <label>{{ 'penalty_rules' | i18next }}</label>
+                <ng-select [disabled]="mode === configurationMode.View || !break.penality_rule.is_allow"
+                  [clearable]="false" [searchable]="false" [(ngModel)]="break.penality_rule.limit">
+                  <ng-option *ngFor="let limit of options.penaltyLimitOptions" [value]="limit.value">{{ 'any' | i18next }} {{limit.name}}
+                  </ng-option>
+                </ng-select>
+              </div>
+              <label class="inline-label">{{ 'break_missed_apply_penalty_rate' | i18next }}</label>
+              <div class="form-group mt-24">
+                <input [disabled]="mode === configurationMode.View || !break.penality_rule.is_allow" type="number"
+                  placeholder="{{ 'x' | i18next }}" class="form-control" [(ngModel)]="break.penality_rule.value">
+              </div>
+              <div class="form-group mt-24">
+                <ng-select [disabled]="mode === configurationMode.View || !break.penality_rule.is_allow"
+                  [clearable]="false" [searchable]="false" [(ngModel)]="break.penality_rule.rate">
+                  <ng-option *ngFor="let limit of options.penaltyRateOptions" [value]="limit.value">{{limit.name}}
+                  </ng-option>
+                </ng-select>
+              </div>
+              <label class="inline-label"> {{ 'hours' | i18next }}</label>
+            </div>
+          </div>
+          <hr *ngIf="i < request.rules.basic_rules.break.options.length-1" />
+        </div>
+
+
+
+      </div>
+
+
+      <div class="add-box" [ngClass]="{ 'disable': mode === configurationMode.View }"
+        *ngIf="options?.breakTypes?.length > request?.rules?.basic_rules?.break?.options?.length">
+        <a href="javascript:void(0)">
+          <icon name="add" size="30px" (click)="addBreakTime();"></icon>
+        </a>
+      </div>
+      <div class="section-bg">
+        <h4 class="section-title font-weight-medium mb-24">
+          <icon name="insert_drive_file" size="20px"></icon> {{ 'extra_hours' | i18next }}
+        </h4>
+        <div class="form-group-row">
+
+          <div class="form-group">
+            {{ 'max_no' | i18next }}. {{ 'of_st_hours' | i18next }} / {{ 'day' | i18next }} <span class="require">*</span>
+          </div>
+          <div class="form-group  small-field">
+            <input type="number" class="form-control" [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.allowed_maximum_daily_hours">
+          </div>
+          <div class="form-group medium-width">
+            {{ 'max_no.of_work_days' | i18next }} / {{ 'week' | i18next }} <span class="require">*</span>
+          </div>
+          <div class="form-group small-field">
+            <input type="number" class="form-control" [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.working_days_in_week" (change)="validateDays()">
+          </div>
+        </div>
+        <div class="form-group-row mb-32">
+
+          <div class="form-group medium-width">
+            {{ 'max_no' | i18next }}. {{ 'of_st_hours' | i18next }} / {{ 'week' | i18next }} <span class="require">*</span>
+          </div>
+          <div class="form-group small-field">
+            <input type="number" class="form-control" [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.allowed_maximum_weekly_hours">
+          </div>
+
+          <ng-template [ngIf]="!isDayTimesheet()">
+          <label class="no-spacing">{{ 'half_day' | i18next }}
+            <!-- <span class="require">*</span> -->
+          </label>
+          <div class="form-group small-field">
+            <input type="number" [placeholder]="'06'|i18next" class="form-control" [disabled]="mode === configurationMode.View">
+          </div>
+          <div class="form-group small-field">
+            <ng-select [clearable]="false" [searchable]="false">
+              <ng-option value=">">></ng-option>
+            </ng-select>
+          </div>
+          <div class="form-group  small-field">
+            <input type="text" placeholder="{{ 'max_hours' | i18next }}" class="form-control"
+              [disabled]="mode === configurationMode.View">
+          </div>
+          </ng-template>
+        </div>
+        <h4 class="section-title font-weight-medium float-left mb-24">
+          <icon name="insert_drive_file" size="20px"></icon> {{ 'select_weekend' | i18next }} / {{ 'week_off_days' | i18next }}
+        </h4>
+        <div class="float-right">
+          <label class="custom-line-height">
+            <input type="checkbox"
+              [disabled]="mode === configurationMode.View || request.rules.basic_rules.working_days_in_week == 7"
+              [(ngModel)]="request.rules.basic_rules.weekend.is_allow_entry"> {{ 'allow_entries_on_weekend_/_week_off_days' | i18next }}
+
+          </label>
+        </div>
+        <div class="clearfix"></div>
+        <div class="form-group-row">
+          <div class="form-group float-left mb-24">
+            <ng-select
+              [disabled]="mode === configurationMode.View || request.rules.basic_rules.working_days_in_week == 7"
+              [clearable]="true" placeholder="{{ 'select_weekend' | i18next }} / {{ 'week_off_days' | i18next }}"
+              [searchable]="false" multiple="true" [(ngModel)]="request.rules.basic_rules.weekend.option">
+              <ng-option *ngFor="let day of options.days" [value]="day.value">{{day.name}}</ng-option>
+            </ng-select>
+          </div>
+          <div class="float-right">
+            <label class="custom-line-height">
+              <input type="checkbox"
+                [disabled]="mode === configurationMode.View || request.rules.basic_rules.working_days_in_week == 7"
+                [(ngModel)]="request.rules.basic_rules.weekend.is_paid"> {{ 'paid_weekend/week_off' | i18next }}
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="section-bg">
+        <h4 class="section-title font-weight-medium float-left mb-24">
+          <icon name="insert_drive_file" size="20px"></icon> {{ 'copy_timesheet' | i18next }}
+        </h4>
+        <div class="toggle-panel float-right" [ngClass]="{ 'disable': mode === configurationMode.View }">
+          <div class="toggle-panel-inner"
+            [ngClass]="request?.rules?.basic_rules?.copy_timesheet?.is_allow ? 'if-active' : 'if-inactive'">
+            <span class="status-text">
+              {{
+              (request?.rules?.basic_rules?.copy_timesheet?.is_allow ? 'Active' :
+              'In-Active') |i18next
+              }}
+            </span>
+            <span class="toggle-switch"
+              [ngClass]="request?.rules?.basic_rules?.copy_timesheet?.is_allow ? 'toggle-on' : 'toggle-off'"
+              (click)="updateCopyTSConfig()"></span>
+          </div>
+        </div>
+        <div class="clearfix"></div>
+        <div class="form-group-row">
+          <div class="form-group">
+            <label>{{ 'copy_timesheet' | i18next }}</label>
+            <ng-select [disabled]="mode === configurationMode.View" [clearable]="true"
+              [(ngModel)]="request.rules.basic_rules.copy_timesheet.option.type" placeholder="{{ 'select_copy_range' | i18next }}"
+              [searchable]="false">
+              <ng-option *ngFor="let copy of options.copyOptions" [value]="copy.value">{{copy.name}}</ng-option>
+            </ng-select>
+          </div>
+          <div class="form-group small-field mt-24">
+            <input type="number"
+              [disabled]="!request.rules.basic_rules.copy_timesheet.is_allow || mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.copy_timesheet.option.period" class="form-control">
+          </div>
+          <label class="inline-label">{{ 'previous_weeks' | i18next }}</label>
+        </div>
+      </div>
+      <div class="section-bg">
+        <h4 class="section-title font-weight-medium float-left">
+          <icon name="insert_drive_file" size="20px"></icon> {{ 'mass_approval' | i18next }}
+        </h4>
+        <!-- [ngClass]="{ 'disable': mode === configurationMode.View }"
+        request?.rules?.basic_rules?.is_allow_mass_approval
+        -->
+        <div class="toggle-panel float-right disable" >
+          <div class="toggle-panel-inner"
+            [ngClass]="currentprogram?.config?.bulk_timesheet_approval ? 'if-active' : 'if-inactive'">
+            <span class="status-text">
+              {{
+              (currentprogram?.config?.bulk_timesheet_approval ? 'Active' :
+              'In-Active') |i18next
+              }}
+            </span>
+            <span class="toggle-switch"
+              [ngClass]="currentprogram?.config?.bulk_timesheet_approval ? 'toggle-on' : 'toggle-off'"></span>
+          </div>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <div class="section-bg" *ngIf="!isDayTimesheet() && !isCico()">
+        <h4 class="section-title font-weight-medium float-left">
+          <icon name="insert_drive_file" size="20px"></icon> {{ 'allow_a_day_cross-over' | i18next }}
+          ({{ 'overnight' | i18next }})
+        </h4>
+        <div class="toggle-panel float-right" [ngClass]="{ 'disable': mode === configurationMode.View }">
+          <div class="toggle-panel-inner"
+            [ngClass]="request?.rules?.basic_rules?.overnight ? 'if-active' : 'if-inactive'">
+            <span class="status-text">
+              {{
+              (request?.rules?.basic_rules?.overnight ? 'Active' :
+              'In-Active') | i18next
+              }}
+            </span>
+            <span class="toggle-switch" [ngClass]="request?.rules?.basic_rules?.overnight ? 'toggle-on' : 'toggle-off'"
+              (click)="request.rules.basic_rules.overnight = !request.rules.basic_rules.overnight"></span>
+          </div>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <div class="section-bg">
+        <h4 class="section-title font-weight-medium mb-24">
+          <icon name="insert_drive_file" size="20px"></icon> {{ 'timesheet_entries' | i18next }}
+        </h4>
+        <div class="form-group-row timesheet-entries">
+          <label class="inline-label mt-0">{{ 'allow_worker_access_to_enter_time' | i18next }}</label>
+          <div class="form-group small-field">
+            <input type="number" [placeholder]="'04'" class="form-control" [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.future_period.option.worker.period">
+          </div>
+          <div class="form-group small-field">
+            <ng-select [clearable]="true" placeholder="{{ 'select_days' | i18next }}" [searchable]="false"
+              [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.future_period.option.worker.type">
+              <ng-option *ngFor="let opt of options.accessOptions" [value]="opt.value"> {{ opt.name }}</ng-option>
+
+            </ng-select>
+          </div>
+          <label class="inline-label mt-0 text-right">{{ 'ahead_of_current_timesheet_period' | i18next }}</label>
+        </div>
+        <div class="form-group-row timesheet-entries">
+          <label class="inline-label mt-0">{{ 'allow_vendor_access_to_enter_time' | i18next }}</label>
+          <div class="form-group small-field">
+            <input type="number" [placeholder]="'04'" class="form-control" [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.future_period.option.vendor.period">
+          </div>
+          <div class="form-group small-field">
+            <ng-select [clearable]="true" placeholder="{{ 'select_days' | i18next }}" [searchable]="false"
+              [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.future_period.option.vendor.type">
+              <ng-option *ngFor="let opt of options.accessOptions" [value]="opt.value"> {{ opt.name }}</ng-option>
+
+            </ng-select>
+          </div>
+          <label class="inline-label mt-0 text-right">{{ 'ahead_of_current_timesheet_period' | i18next }}</label>
+        </div>
+        <div class="form-group-row timesheet-entries">
+          <label class="inline-label mt-0">{{ 'allow_msp_access_to_enter_time' | i18next }}</label>
+          <div class="form-group small-field">
+            <input type="number" [placeholder]="'04'" class="form-control" [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.future_period.option.msp.period">
+          </div>
+          <div class="form-group small-field">
+            <ng-select [clearable]="true" placeholder="{{ 'select_days' | i18next }}" [searchable]="false"
+              [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.future_period.option.msp.type">
+              <ng-option *ngFor="let opt of options.accessOptions" [value]="opt.value"> {{ opt.name }}</ng-option>
+
+            </ng-select>
+          </div>
+          <label class="inline-label mt-0 text-right">{{ 'ahead_of_current_timesheet_period' | i18next }}</label>
+        </div>
+        <div class="form-group-row timesheet-entries">
+          <label class="inline-label mt-0">{{ 'allow_worker_access_to_enter_time' | i18next }}</label>
+          <div class="form-group small-field">
+            <input type="number" placeholder="04" class="form-control" [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.grace_period.option.worker.period">
+          </div>
+          <div class="form-group small-field">
+            <ng-select [clearable]="true" placeholder="{{ 'select_days' | i18next }}" [searchable]="false"
+              [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.grace_period.option.worker.type">
+              <ng-option *ngFor="let opt of options.accessOptions" [value]="opt.value"> {{ opt.name }}</ng-option>
+            </ng-select>
+          </div>
+          <label class="inline-label mt-0 text-right">{{ 'after_assignment_end_date' | i18next }}</label>
+        </div>
+        <div class="form-group-row timesheet-entries">
+          <label class="inline-label mt-0">{{ 'allow_vendor_access_to_enter_time' | i18next }}</label>
+          <div class="form-group small-field">
+            <input type="number" [placeholder]="'04'" class="form-control" [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.grace_period.option.vendor.period">
+          </div>
+          <div class="form-group small-field">
+            <ng-select [clearable]="true" placeholder="{{ 'select_days' | i18next }}" [searchable]="false"
+              [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.grace_period.option.vendor.type">
+              <ng-option *ngFor="let opt of options.accessOptions" [value]="opt.value"> {{ opt.name }}</ng-option>
+
+            </ng-select>
+          </div>
+          <label class="inline-label mt-0 text-right">{{ 'after_assignment_end_date' | i18next }}</label>
+        </div>
+        <div class="form-group-row timesheet-entries">
+          <label class="inline-label mt-0">{{ 'allow_msp_access_to_enter_time' | i18next }}</label>
+          <div class="form-group small-field">
+            <input type="number" [placeholder]="'04'" class="form-control" [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.grace_period.option.msp.period">
+          </div>
+          <div class="form-group small-field">
+            <ng-select [clearable]="true" placeholder="{{ 'select_days' | i18next }}" [searchable]="false"
+              [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.grace_period.option.msp.type">
+              <ng-option *ngFor="let opt of options.accessOptions" [value]="opt.value"> {{ opt.name }}</ng-option>
+
+            </ng-select>
+          </div>
+          <label class="inline-label mt-0 text-right">{{ 'after_assignment_end_date' | i18next }}</label>
+        </div>
+        <div class="form-group-row timesheet-entries">
+          <label class="inline-label mt-0">{{ 'allow_worker_to_enter' | i18next }}</label>
+          <div class="form-group small-field">
+            <input type="number" [placeholder]="'04'" class="form-control" [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.past_period.option.worker.period">
+          </div>
+          <div class="form-group small-field">
+            <ng-select [clearable]="true" placeholder="{{ 'select_days' | i18next }}" [searchable]="false"
+              [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.past_period.option.worker.type">
+              <ng-option *ngFor="let opt of options.accessOptions" [value]="opt.value"> {{ opt.name }}</ng-option>
+
+            </ng-select>
+          </div>
+          <label class="inline-label mt-0 text-right">{{ 'of_passed_unfilled_timesheet' | i18next }}</label>
+        </div>
+        <div class="form-group-row timesheet-entries">
+          <label class="inline-label mt-0">{{ 'allow_vendor_to_enter' | i18next }}</label>
+          <div class="form-group small-field">
+            <input type="number" [placeholder]="'04'" class="form-control" [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.past_period.option.vendor.period">
+          </div>
+          <div class="form-group small-field">
+            <ng-select [clearable]="true" placeholder="{{ 'select_days' | i18next }}" [searchable]="false"
+              [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.past_period.option.vendor.type">
+              <ng-option *ngFor="let opt of options.accessOptions" [value]="opt.value"> {{ opt.name }}</ng-option>
+
+            </ng-select>
+          </div>
+          <label class="inline-label mt-0 text-right">{{ 'of_passed_unfilled_timesheet' | i18next }}</label>
+        </div>
+        <div class="form-group-row timesheet-entries mb-0">
+          <label class="inline-label mt-0">{{ 'allow_msp_to_enter' | i18next }}</label>
+          <div class="form-group small-field">
+            <input type="number" [placeholder]="'04'" class="form-control" [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.past_period.option.msp.period">
+          </div>
+          <div class="form-group small-field mb-0">
+            <ng-select [clearable]="true" placeholder="{{ 'select_days' | i18next }}" [searchable]="false"
+              [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.past_period.option.msp.type">
+              <ng-option *ngFor="let opt of options.accessOptions" [value]="opt.value"> {{ opt.name }}</ng-option>
+
+            </ng-select>
+          </div>
+          <label class="inline-label mt-0 text-right">{{ 'of_passed_unfilled_timesheet' | i18next }}</label>
+        </div>
+      </div>
+
+
+
+      <div class="section-bg">
+        <h4 class="section-title font-weight-medium  mb-24 float-left">
+          <icon name="insert_drive_file" size="20px"></icon> {{ 'modification_timesheet' | i18next }}
+        </h4>
+        <div class="toggle-panel float-right" [ngClass]="{ 'disable': mode === configurationMode.View }">
+          <div class="toggle-panel-inner" [ngClass]="toggleModification?.value ? 'if-active' : 'if-inactive'">
+            <span class="status-text">{{toggleModification?.title | i18next}}</span>
+            <span class="toggle-switch" [ngClass]="toggleModification?.value ? 'toggle-on' : 'toggle-off'"
+              (click)="onClickToggleModification();"></span>
+          </div>
+        </div>
+        <div class="clearfix"></div>
+        <div class="form-group-row modification-row">
+          <div class="form-group">
+            <label>
+              {{ 'allow_vendor_to_perform_modification' | i18next }}
+            </label>
+          </div>
+          <div class="form-group">
+            <input type="number" placeholder="X" class="form-control" [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.hours_modification_period.option.vendor.period">
+          </div>
+          <div class="form-group">
+            <ng-select [clearable]="false" placeholder="{{ 'day' | i18next }}(s)"
+              [disabled]="mode === configurationMode.View" [searchable]="false"
+              [(ngModel)]="request.rules.basic_rules.hours_modification_period.option.vendor.type">
+              <ng-option value="Days">{{ 'days' | i18next }}</ng-option>
+            </ng-select>
+          </div>
+          <!-- <div class="form-group">
+            <ng-select [clearable]="false" placeholder=">" [searchable]="false">
+              <ng-option value=">">></ng-option>
+            </ng-select>
+          </div> -->
+          <div class="form-group wide-field">
+            <ng-select [clearable]="false" placeholder="" [searchable]="false"
+              [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.hours_modification_period.option.vendor.applicable_on">
+              <ng-option *ngFor="let option of options.modificationOptions" [value]="option.value">{{option.name}}
+              </ng-option>
+            </ng-select>
+          </div>
+        </div>
+        <div class="form-group-row modification-row">
+          <div class="form-group">
+            <label>
+              {{ 'allow_msp_to_perform_modification' | i18next }}
+            </label>
+          </div>
+          <div class="form-group">
+            <input type="number" placeholder="{{ 'x' | i18next }}" class="form-control" [disabled]="mode === configurationMode.View"
+              [(ngModel)]="request.rules.basic_rules.hours_modification_period.option.msp.period">
+          </div>
+          <div class="form-group">
+            <ng-select [clearable]="false" placeholder="{{ 'day(s)' | i18next }}" [disabled]="mode === configurationMode.View"
+              [searchable]="false" [(ngModel)]="request.rules.basic_rules.hours_modification_period.option.msp.type">
+              <ng-option value="days">{{ 'days' | i18next }}</ng-option>
+            </ng-select>
+          </div>
+          <!-- <div class="form-group">
+            <ng-select [clearable]="false" placeholder=">" [searchable]="false">
+              <ng-option value=">">></ng-option>
+            </ng-select>
+          </div> -->
+          <div class="form-group wide-field">
+            <ng-select [clearable]="false" [disabled]="mode === configurationMode.View" placeholder=""
+              [searchable]="false"
+              [(ngModel)]="request.rules.basic_rules.hours_modification_period.option.msp.applicable_on">
+              <ng-option *ngFor="let option of options.modificationOptions" [value]="option.value">{{option.name}}
+              </ng-option>
+            </ng-select>
+          </div>
+        </div>
+      </div>
+      <div class="section-bg">
+        <h4 class="section-title font-weight-medium  mb-24 float-left">
+          <icon name="insert_drive_file" size="20px"></icon> {{ 'delete_timesheet' | i18next }}
+        </h4>
+        <div class="toggle-panel float-right" [ngClass]="{ 'disable': mode === configurationMode.View }">
+          <div class="toggle-panel-inner"
+            [ngClass]="request?.rules?.basic_rules?.soft_delete?.is_allow ? 'if-active' : 'if-inactive'">
+            <span class="status-text">
+              {{
+              (request?.rules?.basic_rules?.soft_delete?.is_allow ? 'Active' :
+              'In-Active') | i18next
+              }}
+            </span>
+            <span class="toggle-switch"
+              [ngClass]="request?.rules?.basic_rules?.soft_delete?.is_allow ? 'toggle-on' : 'toggle-off'"
+              (click)="updateSoftDeleteConfig()"></span>
+          </div>
+        </div>
+        <div class="clearfix"></div>
+        <div class="form-group project-option" *ngIf="request.rules.basic_rules?.soft_delete?.option">
+          <label>{{ 'soft_delete_timesheet' | i18next }} </label>
+          <ng-select [disabled]="mode === configurationMode.View || !request?.rules?.basic_rules?.soft_delete?.is_allow"
+            [clearable]="true" placeholder="{{ 'add_new' | i18next }}" multiple="true" [searchable]="true"
+            [(ngModel)]="request.rules.basic_rules.soft_delete.option">
+            <ng-option *ngFor="let option of options.softDeleteOptions" [value]="option.value">{{option.name}}
+            </ng-option>
+          </ng-select>
+        </div>
+      </div>
+      <div class="section-bg">
+        <h4 class="section-title font-weight-medium  mb-24 float-left">
+          <icon name="insert_drive_file" size="20px"></icon> {{ 'manual_upload_timesheet' | i18next }}
+        </h4>
+        <div class="toggle-panel float-right" [ngClass]="{ 'disable': mode === configurationMode.View }">
+          <div class="toggle-panel-inner" [ngClass]="toggleManual?.value ? 'if-active' : 'if-inactive'">
+            <span class="status-text">{{toggleManual?.title | i18next}}</span>
+            <span class="toggle-switch" [ngClass]="toggleManual?.value ? 'toggle-on' : 'toggle-off'"
+              (click)="onClickToggleManual()"></span>
+          </div>
+        </div>
+        <div class="clearfix"></div>
+        <div [ngClass]="{ 'disable': mode === configurationMode.View || !toggleManual.value}">
+          <app-upload-documents></app-upload-documents>
+        </div>
+      </div>
+      <footer class="section-footer" *ngIf="mode != configurationMode.View">
+        <button class="float-left btn btn-light cancel-btn" (click)="backLink()">{{ 'cancel' | i18next }}</button>
+        <!-- <button class="float-right btn btn-primary" (click)="saveAction();">Save</button> -->
+        <button *accessControl type="button" class="btn btn-primary float-right" [disabled]='saveInprogress' (click)="saveAction()">
+          {{ 'save' | i18next }}
+          <span *ngIf="saveInprogress" class="loader ml-12"> </span>
+        </button>
+
+        <div class="clearfix"></div>
+      </footer>
+    </div>
+    <div class="tab-item" [ngClass]="{'active' : isHistoryTabActive}">
+      <div class="section-bg pb-0">
+        <ul class="history-listing">
+          <!-- Timesheet version history -->
+          <li *ngFor='let data of history;'>
+            <div class="float-left left-part">
+              <p class="date"> {{ data?.created_at | localDateFormat}} </p>
+              <p class="small"> {{ data?.created_at | localDateFormat:'hh:mm:ss a z' }} </p>
+              <!-- TODO: Convert to 12:HR format (if needed) -->
+              <p class="small">{{ 'revision' | i18next }} : {{ data?.version }}</p>
+            </div>
+            <div class="float-right right-part position-relative">
+              <h4>{{ 'timesheet_configuration_updated' | i18next }}: <span>{{ data?.title }}</span></h4>
+              <p class="info">{{ 'status' | i18next }} : <span> {{ data?.status | i18next }} </span></p>
+              <p class="info">{{ 'created_by' | i18next }} : <span> {{ data?.name }} </span></p>
+              <button class="btn btn-outine small">
+                <icon name="visibility" size="16px" class="icon--on-left"></icon> {{ 'view' | i18next }}
+              </button>
+            </div>
+            <div class="clearfix"></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<svms-sidebar *ngIf="hierarchies?.length > 0" [title]="'select_hierarchy'" size="small"
+  [dataVisibility]="hierarchyVisibility" (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <label i18n class="pl-24 py-16"> {{ 'select_hierarchy' | i18next }} </label>
+    <svms-hierarchy [hierarchyData]="hierarchies" (selectHierarchyLevel)="selectedHierarchy($event)"
+      [selectedHierarchy]="defaultHierarchy"  [isUserOnly]="false" [userAssociatedHierarchyID]="userAssociateHierarchy">
+    </svms-hierarchy>
+  </svms-sidebar-body>
+
+  <svms-sidebar-footer>
+    <div class="d-flex align-items-center justify-content-end">
+      <button [disabled]="!isHierarchySelected" type="button" class="btn btn-primary"
+        (click)="changeDefaultHierarchy()">
+        {{ 'continue' | i18next }}
+        <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu">
+        </icon>
+      </button>
+    </div>
+  </svms-sidebar-footer>
+</svms-sidebar>
+
+<div class="config-modal position-fixed bg-light rounded-sm overflow-hidden" [ngClass]="{'active' : projectModal}">
+  <div class="p-24">
+    <div class="form-group">
+      <input type="text" placeholder="{{ 'put_your_text_here' | i18next }}" class="form-control">
+    </div>
+    <div class="form-group mb-0">
+      <ng-select [clearable]="false" placeholder="{{ 'please_select' | i18next }}">
+        <ng-option value="Option 1">{{ 'option' | i18next }} 1</ng-option>
+      </ng-select>
+    </div>
+  </div>
+  <div class="config-footer d-flex">
+    <button class="btn btn-light large" (click)="closeConfigModal()">{{ 'cancel' | i18next }}</button>
+    <button class="btn btn-primary large" *accessControl>{{ 'save' | i18next }}</button>
+  </div>
+</div>
+<div class="config-backdrop position-fixed" [ngClass]="{'active' : projectModal}"></div>

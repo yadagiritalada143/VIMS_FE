@@ -1,0 +1,64 @@
+<div class="details">
+
+  <div class="job-template card">
+    <div class="job-template-logo">
+      <icon name="auto_awesome_mosaic" size="24px"></icon>
+    </div>
+    <div class="job-template-info">
+      <p class="small">{{ 'job_template' | i18next }}</p>
+      <p class="value font-weight-medium"> {{
+        mapper.jobTemplates.get(templateSelected) ?
+        mapper.jobTemplates.get(templateSelected)
+        : 'Undefined' | i18next }} ({{ 'level' | i18next }} {{ rateCard?.job_level }}) </p>
+    </div>
+  </div>
+
+  <div class="card card-button button">
+    <button (click)="onCreateClick($event)" class="btn add-rate">
+      <app-header-icon size="39px" name="add" type="material" cuClass="d-flex" class="icon--on-left d-flex"
+                       style="display: inline">
+      </app-header-icon>
+      {{ 'add_new_rate_for' | i18next }} {{
+        mapper.jobTemplates.get(templateSelected) ?
+        mapper.jobTemplates.get(templateSelected)
+        : 'Undefined' | i18next }}
+      ({{ 'level' | i18next }} {{ rateCard?.job_level }})
+    </button>
+  </div>
+
+  <app-add-rate
+    [card]="rateCard"
+    [title]="title"
+    [currency]='currency'
+    [addRateVisibility]="addRateVisibility"
+    [jobTemplateDisabled]='jobTemplateDisabled'
+    [selectedJobTemplate]="templateSelected"
+    (onUpdate)="onUpdate($event)"
+    (onClose)="onCloseAddRate($event)"
+    >
+  </app-add-rate>
+
+  <ng-container *ngIf='templateSelected'>
+    <app-rate-card-uom
+      [currency]='currency'
+      [talent_neuron]='rateCard?.talent_neuron'
+      *ngFor='let rate of rateList;'
+      (onEdit)="onEdit($event)"
+      [job]='rate'
+    >
+    </app-rate-card-uom>
+  </ng-container>
+
+  <app-edit-rate
+      *ngIf="templateSelected"
+      [selectedCard]="rateCard"
+      [currency]='currency'
+      [selectedFilter]="editFilteredRateId"
+      [title]="title"
+      [editRateCardVisibility]="editRateCardVisibility"
+      (onRateUpdate)="onRateUpdate($event)"
+      (onClose)="onCloseEditRate()"
+    >
+  </app-edit-rate>
+
+</div>

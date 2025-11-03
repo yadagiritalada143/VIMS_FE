@@ -1,0 +1,60 @@
+
+<div class="create-wrapper p-24">
+    <div class="page-container ">
+        <div class="row no-gutter">
+            <div class="col-2"></div>
+            <div class="col-8 bg-white p-16">
+                <h3 class="mb-16 font-weight-medium">{{ 'contact_us' | i18nextEager }}</h3>
+                <app-logs [log]="logs"></app-logs>
+                <form [formGroup]="contactForm">
+                    <div class="form-group">
+                        <label class="">{{ 'your_detail' | i18nextEager }} <span class="require">*</span></label>
+                        <input formControlName="details" type="text" name="full_name" readonly disabled
+                            placeholder="{{ 'simplify_msp_alert' | i18nextEager }}" class="form-control text-gray">
+                    </div>
+                    <div class="form-group">
+                        <label>{{ 'support_email' | i18nextEager }} <span class="require">*</span></label>
+                        <input formControlName="email" type="email" disabled name="email_address text-gray" readonly placeholder="{{ 'support@simplifyvms.com' | i18nextEager }}"
+                            class="form-control text-gray">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="d-flex justifiy-content-center align-items-center">{{ 'subject' | i18nextEager }} <span class="require">*</span></label>
+                        <input formControlName="subject" type="text" name="subject"
+                        [ngClass]="{'error':contactForm.controls['subject'].invalid && submited}"
+                        class="form-control text-gray">
+                    </div>
+
+                    <div class="form-group">
+                      <label class="d-flex justifiy-content-center align-items-center">{{'url'|i18next}} <span class="require">*</span></label>
+                      <textarea rows="4" placeholder="{{'enter_url' | i18nextEager}}"
+                        maxlength="2000" formControlName='url'
+                        class="form-control text-gray"
+                        [ngClass]="{'error':(contactForm?.get('url')?.errors?.urlError) ||
+                        (contactForm.controls['url'].invalid && submited)}">
+                      </textarea>
+                      <p *ngIf="contactForm?.get('url')?.errors?.urlError" class="text-red">
+                        {{'only_simplify_domain_url_is_allowed'|i18next}}
+                      </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="d-flex justifiy-content-center align-items-center">{{'message' | i18nextEager}} <span class="require">*</span></label>
+                        <quill-editor [modules]="modules" formControlName="message" [styles]="{height: '200px'}"
+                        [ngClass]="{'error':(contactForm?.get('message')?.errors?.messageError) ||
+                        (contactForm.controls['message'].invalid && submited)}"></quill-editor>
+                        <!-- <textarea formControlName="message" name="message" id="message" [ngClass]="{'error':contactForm.controls['message'].invalid && submited}" class="form-control text-gray" rows="5"></textarea> -->
+                        <p *ngIf="contactForm?.get('message')?.errors?.messageError" class="text-red">
+                          {{'only_simplify_domain_url_is_allowed'|i18next}}
+                        </p>
+                    </div>
+                    <div class="d-flex justifiy-content-center align-items-center">
+                        <button type="submit" class="btn btn-primary mr-4 " [disabled]="contactForm?.invalid" (click)="contact()">{{ 'send' | i18nextEager }}</button>
+                        <button type="reset" class="btn btn-default border-0" routerLink="/dashboard">{{ 'cancel' | i18nextEager }}</button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-2"></div>
+        </div>
+    </div>
+</div>

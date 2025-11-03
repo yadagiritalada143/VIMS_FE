@@ -1,0 +1,82 @@
+<div class="notification-page-wrapper">
+  <div class="card">
+    <app-logs [log]="logs"></app-logs>
+    <div class="row d-flex align-item-center justify-content-start">
+      <div [ngClass]="isViewSuperAdmin ? 'col-md-12' : 'col-md-10'">
+        <div class="d-flex align-item-center justify-content-between">
+          <h4 class="font-weight-medium p-24 mb-0">{{'notifications'|i18next}} </h4>
+          <div class="border-right p-24">
+              <span class="cur material-icons-outlined" tooltip="Notification Preferences" placement="left" (click)="navigateToLink('/notification/config/preferences')">
+                settings
+              </span>
+          </div>
+        </div>
+      </div>
+      <div *accessControl class="col-md-2">
+        <div class="inputs-section mt_10 mr-24 position-relative">
+
+          <span class="mr-24">{{productionToggle ? ('Production'|i18next) : ('Sandbox'|i18next)}}</span> <label
+            class="switch position-relative">
+            <input type="checkbox" class="form-control" [(ngModel)]="productionToggle" [checked]="productionToggle"
+              (click)="ToggleProductionFlag()">
+            <span class="slider round position-absolute"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="position-relative search_input">
+      <i class="material-icons icon">search</i>
+      <input #searchData class="form-control " placeholder="{{'Search'| i18next}}" type="text"
+        (keyup)="setSearchParam(searchData?.value)">
+        <div class="filter-btn">
+          <button class="btn xx-small btn-outine" (click)="setSearchParam('information', true)">{{ 'information' | i18next }}</button>
+          <button class="btn xx-small btn-outine" (click)="setSearchParam('action', true)">{{ 'action' | i18next }}</button>
+          <button class="btn xx-small btn-outine" (click)="setSearchParam('reminder', true)">{{ 'reminder' | i18next }}</button>
+        </div>
+    </div>
+
+    <div class="accordion-item" *ngFor="let notificationconfig of notificationconfigs | keyvalue;">
+      <div class="accordion-trigger" [ngClass]="{'active' : notificationconfig.show}" (click)="notificationconfig.show = !notificationconfig.show">
+        <p class="d-flex align-items-center justify-content-between">
+          {{notificationconfig.key|i18next}}
+          <icon cuClass="d-flex" name="expand_less" *ngIf="notificationconfig.show"></icon>
+          <icon cuClass="d-flex" name="expand_more" *ngIf="!notificationconfig.show"></icon>
+        </p>
+      </div>
+      <div class="accordion-content" [ngClass]="{'active' : notificationconfig.show}">
+        <div class="d-flex align-items-center justify-content-between accordion-child-item py-12 px-24" *ngFor="let event of notificationconfig.value;">
+            <div>
+              <p class="cur d-flex justify-content align-item-center" [ngClass]="!event?.active ? 'disabled-color' : 'list_title'"
+              (click)="navigateToLink('/notification/config/event/template/'+event.id, event)"
+              >
+              {{event?.name | i18next}}
+              <span class="badge_info" *ngIf="event?.type">{{event?.type | i18next}}</span>
+              </p>
+              <p>{{event?.description | i18next}}</p>
+            </div>
+
+          <div class="d-flex align-items-center">
+            <div class="mr-32">
+              <div [ngClass]="!accessControl?'disableDiv':''" class="toggle-panel">
+                <div class="toggle-panel-inner" [ngClass]="event?.active? 'if-active' : 'if-inactive'">
+                  <span class="status-text mr-12">{{ event?.active ?  ('Enabled' | i18next) : ('Disabled' | i18next)}}</span>
+                  <span class="toggle-switch" [ngClass]="event?.active ? 'toggle-on' : 'toggle-off'"
+                   (click)="updateStatus(event)"></span>
+                </div>
+              </div>
+            </div>
+            <div class="mr-32">
+              <a [ngClass]="!event?.active ? 'disabled-color' : 'list_title'" (click)="navigateToLink('/notification/config/event/templatekeys/'+event.id, event)">{{'Manage template Keys'|i18next}}</a>
+            </div>
+            <div>
+              <a [ngClass]="!event?.active ? 'disabled-color' : 'list_title'" (click)="navigateToLink('/notification/config/event/template/'+event.id, event)">{{'Manage template'|i18next}}</a>
+            </div>
+          </div>
+
+              <!-- <div class="list_title">Recipient</div>
+              <div class="list_title">Schedules</div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

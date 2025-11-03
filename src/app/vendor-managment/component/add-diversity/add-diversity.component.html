@@ -1,0 +1,63 @@
+<svms-sidebar title="{{ 'add_diversity' | i18next }}" size="small" [dataVisibility]="visiblity" (onClose)="sideBaClose()">
+  <form [formGroup]="diversityForm">
+    <svms-sidebar-body>
+      <div class="p-24">
+        <div class="form-group">
+          <label>
+            {{ 'country' | i18next }} <span class="require">*</span>
+          </label>
+          <ng-select formControlName="country" placeholder="{{ 'select_country' | i18next }}">
+            <ng-option *ngFor="let country of allCountryList" [value]="country.name">{{country.name|i18next}}</ng-option>
+          </ng-select>
+          <p *ngIf="
+            diversityForm.get('country').touched &&
+                (diversityForm.get('country').errors?.pattern || diversityForm.get('country').invalid)
+              " class="validation-msg">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'country_can_not_be_blank' | i18next }}.
+          </p>
+        </div>
+        <div class="form-group">
+          <label>
+            {{ 'diversity_category' | i18next }} <span class="require">*</span>
+          </label>
+          <ng-select [items]="categoriesList" bindLabel="value" formControlName="category"
+            placeholder="{{ 'select_diversity_category' | i18next }}">
+          </ng-select>
+          <p *ngIf="
+            diversityForm.get('category').touched &&
+                (diversityForm.get('category').errors?.pattern || diversityForm.get('category').invalid)
+              " class="validation-msg">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'diversity_category_can_not_be_blank' | i18next }}.
+          </p>
+        </div>
+        <div class="form-group">
+          <label>
+            {{ 'diversity_certification' | i18next }} <span class="require">*</span>
+          </label>
+          <ng-select [items]="certificationList" bindLabel="name" formControlName="certification"
+            placeholder="{{ 'select_diversity_certification' | i18next }}">
+          </ng-select>
+          <p *ngIf="
+            diversityForm.get('certification').touched &&
+                (diversityForm.get('certification').errors?.pattern || diversityForm.get('certification').invalid)
+              " class="validation-msg">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'diversity_certification_can_not_be_blank' | i18next }}.
+          </p>
+        </div>
+      </div>
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+      <div class="d-flex align-items-center justify-content-between">
+        <button (click)="sideBaClose()" type="button" class="btn btn-outline-secondary">
+          {{ 'cancel' | i18next }}
+        </button>
+        <button [disabled]="diversityForm.invalid" (click)="diversitySubmit(index)" type="button" class="btn btn-primary">
+          {{ 'save' | i18next }}
+        </button>
+      </div>
+    </svms-sidebar-footer>
+  </form>
+</svms-sidebar>

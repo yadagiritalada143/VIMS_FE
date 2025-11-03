@@ -1,0 +1,245 @@
+<svms-sidebar [title]="title |i18next" [size]="'large'" [icon]="'supervised_user_circle'" [dataVisibility]="createUser"
+  (onClose)="sidebarClose()">
+  <div *ngIf="show_org && !(list_or_create && isViewMode)" class="form-group-row p-24 pb-0">
+    <div class="col col-4">
+      <div class="form-group">
+        <label>{{ 'organizations_category' | i18next }}</label>
+        <ng-select [clearable]="false" [(ngModel)]="selectedcatgs" (change)="selectCategory()"
+          placeholder="Organizations Category">
+          <ng-option *ngFor="let orgCat of org_catgs" [value]="orgCat">{{orgCat}}</ng-option>
+        </ng-select>
+      </div>
+    </div>
+    <div class="col col-8">
+      <div class="form-group">
+        <label>{{ 'organizations' | i18next }}<span class="require">*</span></label>
+        <ng-select [readonly]="list_or_create && isViewMode" [(ngModel)]="selectedorg" [clearable]="true" placeholder="Select Organization" (change)="selectOrganization()" (search)='searchOrg($event)'>
+          <ng-option *ngFor="let org of orgLists" [value]="org.id">{{org.name}}</ng-option>
+        </ng-select>
+        <span *ngIf="show_org_error" class="error-text">{{ 'this_field_is_required' | i18next }}.</span>
+      </div>
+    </div>
+  </div>
+
+  <form [formGroup]="createUserForm" (ngSubmit)="onSubmit(false)">
+    <svms-sidebar-body>
+      <!-- <div *ngIf="hideInvite_ui && !(list_or_create && isViewMode)" class="invite-user p-24">
+        <h4 class="font-weight-medium">{{ 'invite_via_email' | i18next }}</h4>
+        <div class="form-group-row no-gutters mt-24">
+          <div class="col-10 pr-16">
+            <div class="d-flex">
+              <div class="form-group mr-0">
+                <label>{{ 'select_user_to_add_to_organisation' | i18next }}<span class="require">*</span></label>
+                <input type="text" placeholder="Enter User Email Address" class="form-control"
+                  [ngModelOptions]="{standalone: true}" [(ngModel)]="invite_mail" />
+              </div>
+              <div class="form-group">
+                <label>{{ 'user_role' | i18next }}<span class="require">*</span></label>
+                <ng-select [clearable]="false" placeholder="Select User Role" [ngModelOptions]="{standalone: true}"
+                  [(ngModel)]="invite_role">
+                  <ng-option>{{ 'custom' | i18next }} 1</ng-option>
+                  <ng-option>{{ 'custom' | i18next }} 1</ng-option>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+          <div class="col-2">
+            <label>&nbsp;</label>
+            <button type="button" (click)="sendEmail()" class="btn btn-outline-secondary bg-white"
+              [disabled]="!inviteValidator(invite_mail)">{{ 'invite_user' | i18next }}</button>
+          </div>
+        </div>
+      </div> -->
+
+      <div class="p-24" [ngClass]="{'show-org' : show_org}">
+        <div class="form-group">
+          <h4 *ngIf="!(list_or_create && isViewMode)" classs="mt-24 font-weight-medium">{{ 'create_new_user' | i18next }}</h4>
+          <div class="Upload_box_wrapper mt-24">
+            <!-- <svms-upload-avatar [image]="userForm?.controls?.avatar?.value"></svms-upload-avatar> -->
+            <svms-upload-avatar (click)="!(list_or_create && isViewMode)" (hideError)="hideError($event)" [image]="createUserForm?.controls?.avatar.value" [removable]='!(list_or_create && isViewMode)' (onRemove)='clearAvatar()'></svms-upload-avatar>
+            <div class="upload-panel-body">
+              <h4 class="mb-4">{{ 'profile_avatar' | i18next }}</h4>
+              <div *ngIf='!isViewMode' class="error-text">{{ 'only' | i18next }} .{{ 'png' | i18next }}, .{{ 'jpg_formats_file_size' | i18next }} 3 {{ 'mb' | i18next }}</div>
+            </div>
+
+            <div class="toggle-panel" [ngClass]="{'disable':isViewMode}">
+              <div class="toggle-panel-inner toggle-background" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+                <span class="status-text">{{toggle?.title | titlecase | i18next}}</span>
+                <span class="toggle-switch" [ngClass]="toggle.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="list_or_create && isViewMode ? null : onClickToggle()"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group-row">
+          <div class="col" *ngIf="!getPrefixSuffixFlag()">
+            <div class="form-group">
+              <label>{{ 'prefix' | i18next }}</label>
+              <ng-select [readonly]="list_or_create && isViewMode" formControlName="prefix"
+                [clearable]="false" placeholder="Prefix">
+                <ng-option [value]="'Mr'">{{ 'mr' | i18next }}</ng-option>
+                <ng-option [value]="'Mrs'">{{ 'mrs' | i18next }}</ng-option>
+                <ng-option [value]="'Miss'">{{ 'miss' | i18next }}</ng-option>
+                <ng-option [value]="'Dr'">{{ 'dr' | i18next }}</ng-option>
+                <ng-option [value]="'Prof'">{{ 'prof' | i18next }}</ng-option>
+                <ng-option [value]="'MX'">{{ 'mx' | i18next }}</ng-option>
+                <ng-option [value]="'IND'">{{ 'ind' | i18next }}</ng-option>
+                <ng-option [value]="'Misc'">{{ 'misc' | i18next }}</ng-option>
+              </ng-select>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="form-group">
+              <label>{{ 'first_name' | i18next }}<span class="require">*</span></label>
+              <input [readonly]="list_or_create && isViewMode" formControlName="fname" type="text"
+                placeholder="{{ 'first_name' | i18next }}" class="form-control" />
+              <span *ngIf="form.fname.touched && form.fname.errors?.required" class="error-text">{{ 'this_field_is_required' | i18next }}.</span>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="form-group">
+              <label>{{ 'middle_name' | i18next }}</label>
+              <input [readonly]="list_or_create && isViewMode" formControlName="mname" type="text"
+                placeholder="{{ 'middle_name' | i18next }}" class="form-control" />
+            </div>
+          </div>
+
+        </div>
+        <div class="form-group-row">
+          <div class="col">
+            <div class="form-group">
+              <label>{{ 'last_name' | i18next }}<span class="require">*</span></label>
+              <input [readonly]="list_or_create && isViewMode" formControlName="lname" type="text"
+                placeholder="{{ 'last_name' | i18next }}" class="form-control" />
+              <span *ngIf="form.lname.touched && form.lname.errors?.required" class="error-text">{{ 'this_field_is_required' | i18next }}.</span>
+            </div>
+          </div>
+          <div class="col" *ngIf="!getPrefixSuffixFlag()">
+            <div class="form-group">
+              <label>{{ 'suffix' | i18next }}</label>
+              <ng-select [readonly]="list_or_create && isViewMode" formControlName="suffix"
+                [clearable]="false" placeholder="Suffix">
+                <ng-option [value]="'Mr'">{{ 'mr' | i18next }}</ng-option>
+                <ng-option [value]="'Mrs'">{{ 'mrs' | i18next }}</ng-option>
+                <ng-option [value]="'Miss'">{{ 'miss' | i18next }}</ng-option>
+                <ng-option [value]="'Dr'">{{ 'dr' | i18next }}</ng-option>
+                <ng-option [value]="'Prof'">{{ 'prof' | i18next }}</ng-option>
+                <ng-option [value]="'MX'">{{ 'mx' | i18next }}</ng-option>
+                <ng-option [value]="'IND'">{{ 'ind' | i18next }}</ng-option>
+                <ng-option [value]="'Misc'">{{ 'misc' | i18next }}</ng-option>
+              </ng-select>
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-group">
+              <label>{{ 'supervisor' | i18next }}<span class="require">*</span></label>
+              <ng-select #supervisor [readonly]="list_or_create && isViewMode" formControlName="supervisor" [clearable]="false"
+                placeholder="{{ 'supervisor' | i18next }}" (keyup)='memberSearch(supervisor?.searchTerm)'>
+                <ng-option *ngFor="let member of members" [value]="member.id">{{member?.full_name}}</ng-option>
+              </ng-select>
+              <span *ngIf="form.supervisor.touched && form.supervisor.errors?.required" class="error-text">{{ 'this_field_is_required' | i18next }}.</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group-row">
+          <div class="col">
+            <div class="form-group">
+              <label>{{ 'title' | i18next }}</label>
+              <input [readonly]="list_or_create && isViewMode" formControlName="title" type="text"
+                placeholder="{{ 'enter_title' | i18next }}" class="form-control" />
+              <span *ngIf="!(list_or_create && isViewMode) && form.title.touched && form.title.errors?.required"
+                class="error-text">{{ 'this_field_is_required' | i18next }}.</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="form-group-row">
+          <div class="col">
+            <div class="form-group">
+              <label>{{ 'email' | i18next }}<span class="require">*</span></label>
+              <input [readonly]="list_or_create && isViewMode" formControlName="user_mail" type="text"
+                placeholder="{{ 'email' | i18next }}" class="form-control">
+              <span *ngIf="form.user_mail.touched && form.user_mail.errors?.required" class="error-text">{{ 'this_field_is_required' | i18next }}.</span>
+              <span *ngIf="form.user_mail.touched && form.user_mail.errors?.email" class="error-text">{{ 'enter_a_correct_email' | i18next }}.</span>
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-group">
+              <label>{{ 'phone' | i18next }}</label>
+              <input [readonly]="list_or_create && isViewMode" formControlName="phone" type="text" placeholder="{{ 'phone' | i18next }}"
+                class="form-control" />
+              <span *ngIf="!(list_or_create && isViewMode) && form.phone.touched && form.phone.errors?.required"
+                class="error-text">{{ 'this_field_is_required' | i18next }}.</span>
+              <span *ngIf="!(list_or_create && isViewMode) && form.phone.touched && form.phone.errors?.pattern"
+                class="error-text">{{ 'enter_10-digit_number' | i18next }}.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group-row">
+          <div class="col">
+            <div class="form-group">
+              <label>{{ 'user_role' | i18next }}<span class="require">*</span></label>
+              <ng-select [readonly]="list_or_create && isViewMode" formControlName="user_role" [clearable]="false"
+                placeholder="{{ 'select' | i18next }}" [items]="roles" bindLabel="name" bindValue="id">
+                <!-- <ng-option *ngFor="let role of roles" [value]="role.id">{{role.name}}</ng-option> -->
+              </ng-select>
+              <span *ngIf="form.user_role.touched && form.user_role.errors?.required" class="error-text">{{ 'this_field_is_required' | i18next }}.</span>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="isVendorSelected">
+
+          <div *ngIf="!(list_or_create && isViewMode)" class="form-group-row">
+            <div class="col">
+              <div class="form-group">
+                <label>{{ 'labor_category_(_if_vendor_)' | i18next }}</label>
+                <ng-select formControlName="labor_category" (keyup)="lcSearch($event, 'labor_category')" [searchable]="true" [clearable]="false" placeholder="{{ 'labor_category' | i18next }}">
+                  <ng-option *ngFor="let labor of labor_categories" [value]="labor.id">{{labor.name}}</ng-option>
+                </ng-select>
+                <span *ngIf="form.labor_category.touched && form.labor_category.errors?.required" class="error-text">{{ 'this_field_is_required' | i18next }}.</span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!(list_or_create && isViewMode)" class="form-group-row">
+            <div class="col">
+              <div class="form-group">
+                <label>{{ 'region_handled' | i18next }} ( {{ 'location' | i18next }} )</label>
+                  <ng-select [clearable]="false" placeholder="{{ 'region_handled' | i18next }}" formControlName='region'
+                    [items]="work_locations" bindLabel="name" bindValue="id">
+                  </ng-select>
+                <span *ngIf="form.region.touched && form.region.errors?.required" class="error-text">{{ 'this_field_is_required' | i18next }}.</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- <div *ngIf="!(list_or_create && isViewMode)" class="form-group-row">
+          <div class="col">
+            <div class="form-group">
+              <label>{{ 'assign_to_program' | i18next }}</label>
+              <ng-select formControlName="assign" [clearable]="false" placeholder="Assign To Program">
+                <ng-option *ngFor="let program of programs" [value]="program.program_id">{{program.name}}</ng-option>
+              </ng-select>
+              <span *ngIf="form.assign.touched && form.assign.errors?.required" class="error-text">{{ 'this_field_is_required' | i18next }}.</span>
+            </div>
+          </div>
+        </div> -->
+      </div>
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+      <div *ngIf="!(list_or_create && isViewMode)" class="d-flex justify-content-between">
+        <button type="button" class="btn btn-light" (click)="onCancel($event)"> {{ 'cancel' | i18next }} </button>
+        <button (click)='onSubmit(true)' class="btn btn-primary" [disabled]="(!createUserForm.valid && !isEditMode) || isSubmited">
+          {{ 'save' | i18next }}
+          <span *ngIf="isSaveLoader" class="loader ml-12"> </span>
+        </button>
+      </div>
+    </svms-sidebar-footer>
+  </form>
+</svms-sidebar>

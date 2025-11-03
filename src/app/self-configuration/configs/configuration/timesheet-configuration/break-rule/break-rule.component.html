@@ -1,0 +1,104 @@
+<app-svms-modal [title]='"Add Break Rule"' size="medium" [visibility]="addBreakRule" (onClose)="sidebarClose()">
+    <app-svms-modal-body>
+        <div *ngFor="let break of request?.rules?.basic_rules.break.options; index as i">
+            <div class="c-form-group-row">
+                <div class="c-form-group">
+                    <label>{{ 'break_type' | i18next }} <span class="require">*</span></label>
+                    <ng-select  [clearable]="true" placeholder="{{'select' | i18next}}"
+                     [(ngModel)]="break.type"  (change)="changeSelection($event)">
+                    <ng-option *ngFor="let breakType of options.breakTypes" [value]="breakType.value">{{breakType.name}}
+                    </ng-option>
+                  </ng-select>
+                </div>
+            </div>
+            <div class="d-flex">
+                <div class="mr-24">
+                    <label class="c-input-checkbox">
+                        <input [(ngModel)]="break.is_paid_inclusive" (change)="changeSelection(break.is_paid_inclusive)" class="mr-8" type="checkbox" value="paidbreak">
+                        <span class="cb-ui"></span>
+                        <span  class="cb-label">{{'Paid Break' | i18next}}</span>
+                    </label>
+                </div>
+                <div class="mr-24">
+                    <label class="c-input-checkbox">
+                        <input [(ngModel)]="break.is_mandatory" (change)="changeSelection(break.is_mandatory)" class="mr-8" type="checkbox" value="mandatory">
+                        <span class="cb-ui"></span>
+                        <span  class="cb-label">{{'Mandatory' | i18next}}</span>
+                    </label>
+                </div>
+            </div>
+            <div class="rule-table mt-16">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="text-uppercase">{{ 'define_rule' | i18next }}</th>
+                            <th class="text-uppercase">{{ 'minimum_break(min)' | i18next }}</th>
+                            <th class="text-uppercase">{{ 'maximum_break(max)' | i18next }}</th>
+                            <th>&nbsp;</th>
+                        </tr>
+                    </thead>
+                    <tbody *ngFor="let breakRule of break.break_rule;index as j">
+                        <tr>
+                            <td>
+                                <div class="rule-conditions d-flex">
+                                    <p>{{ 'hours' | i18next }}</p>
+                                    <p>&gt;</p>
+                                    <input [(ngModel)]="breakRule.min_hours" (keypress)="preventSpecialChar($event)" (change)="changeSelection(breakRule.min_hours)" type="number" class="c-form-control">
+                                    <ng-select [clearable]="false" [(ngModel)]="breakRule.operator" (change)="changeSelection(breakRule.operator)">
+                                        <ng-option>{{ 'and' | i18next }}</ng-option>
+                                    </ng-select>
+                                    <p>{{ 'hours' | i18next }}</p>
+                                    <p>&lt;</p>
+                                    <input [(ngModel)]="breakRule.max_hours" (keypress)="preventSpecialChar($event)" (change)="changeSelection(breakRule.max_hours)" type="number" class="c-form-control">
+                                </div>
+                            </td>
+                            <td>
+                                <input type="number" class="c-form-control min-max-break" (keypress)="preventSpecialChar($event)" [(ngModel)]="breakRule.min_duration" (change)="changeSelection(breakRule.min_duration)">
+                            </td>
+                            <td>
+                                <input [(ngModel)]="breakRule.max_duration" (keypress)="preventSpecialChar($event)" (change)="changeSelection(breakRule.max_duration)" type="number" class="c-form-control  min-max-break">
+                            </td>
+                            <td (click)=" break.break_rule = removeBreak(breakRule, break.break_rule)">
+                               <i class="material-icons">highlight_off</i>
+                            </td>
+                        </tr>
+                        <!-- <tr>
+                            <td>
+                                <div class="rule-conditions d-flex">
+                                    <p>{{ 'hours' | i18next }}</p>
+                                    <p>&gt;</p>
+                                    <input type="text" class="c-form-control">
+                                    <ng-select [clearable]="false">
+                                        <ng-option>AND</ng-option>
+                                    </ng-select>
+                                    <p>{{ 'hours' | i18next }}</p>
+                                    <p>&lt;</p>
+                                    <input type="text" class="c-form-control">
+                                </div>
+                            </td>
+                            <td>
+                                <input type="text" class="c-form-control min-max-break">
+                            </td>
+                            <td>
+                                <input type="text" class="c-form-control  min-max-break">
+                            </td>
+                            <td (click)=" break.break_rule = removeBreak(breakRule, break.break_rule)">
+                               <i class="material-icons">highlight_off</i>
+                            </td>
+                        </tr> -->
+                    </tbody>
+                </table>
+                <button (click)="addBreak(break.break_rule)" class="c-btn c-btn-transparent-bg mb-24"><i class="material-icons">add_circle</i> {{ 'add_another_rule' | i18next }}</button>
+                <app-toggle-box class="penalty-rule-box" title="Penalty Rules" subtitle="By enabling this toggle you can define the penalty rule" selectbox="true"
+             selectrequired="true" placeholderLabel="Select Values" selectboxlabel="Number of Missing Break" inputSelect="true" inputSelectLabel="Applied Penalty Rate Hours" inputSelectRequired="true" [mode]="mode" [configurationMode]="configurationMode" [projectSource]="options.penaltyLimitOptions" [val]="break.penality_rule.rate" [projectTypes]="break.penality_rule.limit" [value]="break.penality_rule.value" [dropDownValue]="options.penaltyRateOptions" [isTrue]="break.penality_rule.is_allow" [index]="i"
+             (isToggleBtnChecked)="toggleValueChange($event,i)" (selectionChanged)="dropdownSelectionChange($event,i)" (textValue)="penaltyTextValue($event,i)" (projectSelectOptionChanged)="applyPenaltyValue($event,i)" [request]="request">
+          </app-toggle-box>
+            </div>
+        </div>
+    </app-svms-modal-body>
+    <app-svms-modal-footer>
+        <div class="text-right">
+            <button (click)="addBreakTime()" class="c-btn c-btn-primary-medium">{{ 'add' | i18next }}</button>
+        </div>
+    </app-svms-modal-footer>
+</app-svms-modal>

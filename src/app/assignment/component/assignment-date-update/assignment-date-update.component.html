@@ -1,0 +1,53 @@
+<svms-sidebar [title]="'Update Assignment Duration'|i18next" [dataVisibility]="specialAccess" (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <app-logs [log]="logs"></app-logs>
+    <form class="p-24" [formGroup]="updateForm">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>{{ 'assignment_start_date' | i18nextEager }}</label>
+            <svms-datepicker formControlName="start_date" [inputdateFormat]="dateFormat" [options]="options" id="date1"
+              I18n #dateFiled>
+            </svms-datepicker>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>{{ 'assignment_end_date' | i18nextEager }}</label>
+            <svms-datepicker formControlName="end_date" [inputdateFormat]="dateFormat" [options]="optionsEndDate"
+              id="date1" I18n #dateFiled
+              [durationStartDate]="updateForm.get('start_date').value"
+              [allowDuration]="true">
+            </svms-datepicker>
+            <p *ngIf="(updateForm?.invalid && updateForm?.get('end_date')?.errors?.invalidDate)"
+            class="text-red">
+            {{ 'Maximum_duration_of_the_assignment_cannot_be_greater_than_milestone_end_date.'| i18next}}
+        </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12">
+        <div class="form-group">
+          <label>{{ 'reason_for_updating_date' | i18nextEager }} {{actionName | titlecase}} <span
+              class="require">*</span></label>
+          <ng-select [clearable]="false" placeholder="{{ 'select' | i18nextEager }}" formControlName="request_reason">
+            <ng-option [value]="reason.id" *ngFor="let reason of reasonList">
+              {{reason.name}}
+            </ng-option>
+          </ng-select>
+        </div>
+      </div>
+      <div class="col-md-12 mt-3">
+        <div class="form-group month-selector">
+          <label>{{ 'notes' | i18nextEager }}</label>
+          <textarea class="form-control no-resize" rows="6" cols="100" formControlName="request_notes"
+            maxlength="1000"></textarea>
+        </div>
+      </div>
+    </form>
+  </svms-sidebar-body>
+  <svms-sidebar-footer>
+    <button [disabled]="updateForm?.invalid" (click)="submit()"
+      class="btn btn-primary float-right" *accessControl>{{ 'update' | i18nextEager }}</button>
+  </svms-sidebar-footer>
+</svms-sidebar>

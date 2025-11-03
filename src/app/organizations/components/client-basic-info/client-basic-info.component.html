@@ -1,0 +1,50 @@
+<form [formGroup]="clientCreate">
+  <div class="Upload_box_wrapper column-direction">
+    <svms-upload-avatar [image]="clientCreate?.controls?.logo?.value" [ngClass]="{'disable':isViewClicked}" (hideError)="getCropImage($event)"></svms-upload-avatar>
+    <div class="upload-panel-body">
+      <h5 *ngIf="!logoComponent?.logoUrl || !isImagePresent">{{ 'client_logo' | i18nextEager }}</h5>
+      <div *ngIf="(!logoComponent?.logoUrl || !isImagePresent) && !isViewClicked" class="error-text">{{ 'only_.png,' | i18nextEager }} {{ 'jpg_formats_with_maximum_file_size_of' | i18nextEager }} 3 {{ 'mb' | i18nextEager }}</div>
+    </div>
+
+    <div class="toggle-panel" [ngClass]="{'disable':isViewClicked}">
+      <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+        <span class="status-text">{{toggle?.title | i18nextEager}}</span>
+        <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+          (click)="onClickToggle()"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>{{ 'client_name' | i18nextEager }}<span class="require">*</span></label>
+    <input type="text" class="form-control" placeholder="{{ 'client_organization_name' | i18nextEager }}" formControlName="org_name" required [readonly]="isViewClicked"
+      [ngClass]="{'error':
+    clientCreate.controls['org_name'].invalid && (clientCreate.controls['org_name'].dirty || clientCreate.controls['org_name'].touched)
+      }" minlength="2">
+    <p class="validation-msg"
+      *ngIf="clientCreate.controls.org_name.touched && clientCreate.controls['org_name'].invalid && clientCreate.controls['org_name'].errors?.required">
+      <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'client_name_is_required' | i18nextEager }}
+    </p>
+    <p class="validation-msg" *ngIf="clientCreate.controls.org_name.errors?.minlength">
+      {{ 'name_must_be_at_least' | i18nextEager }} 2 {{ 'characters_long' | i18nextEager }}.
+    </p>
+    <p class="validation-msg"  *ngIf="!isNameValid">{{duplicateOrg}}</p>
+  </div>
+
+  <div class="form-group">
+    <label>{{ 'organization_type' | i18nextEager }} <span class="require">*</span></label>
+    <input type="text" class="form-control" placeholder="{{ 'client' | i18nextEager }}" formControlName="org_type" readonly>
+  </div>
+
+  <div *ngIf="clientCreate?.controls?.org_type?.value?.toLowerCase() != 'client' && clientCreate?.controls?.org_type?.value?.toLowerCase() != 'msp'" class="form-group" [ngClass]="isViewClicked?'disable':''">
+    <label>{{ 'industry' | i18nextEager }} <span class="require">*</span></label>
+    <ng-select bindLabel="name" [clearable]="false" [multiple]=" true" placeholder="{{ 'industry' | i18nextEager }}" ngDefaultControl
+      formControlName="vendor_industry" [readonly]="isViewClicked">
+      <ng-option [value]="data.id" *ngFor="let data of vendor_industries">{{data.name}}</ng-option>
+    </ng-select>
+    <p class="validation-msg"
+      *ngIf="clientCreate.controls.vendor_industry.touched && clientCreate.controls['vendor_industry'].errors">
+      <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'industry_is_required' | i18nextEager }}
+    </p>
+  </div>
+</form>

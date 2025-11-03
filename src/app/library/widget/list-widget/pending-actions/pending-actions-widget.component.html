@@ -1,0 +1,34 @@
+<div *ngIf="!deleted" class="list-widget" [ngClass]="{'edit-widget': editMode}">
+    <h5 *ngIf="editMode" class="edit-mode-label font-weight-normal">{{ widget.label | i18next }}</h5>
+    <div class="widget-content-info">
+        <div class="widget-header bg-red text-white">
+            <span class="d-flex align-items-center">
+                <span class="material-icons mr-8">auto_graph</span>
+                <h4 class="m-0">{{ widget.label | i18next }}</h4>
+            </span>
+            <span class="notifications-active"></span>
+        </div>
+        <div class="widget-body">
+            <div *ngFor="let item of pending">
+                <a class="d-flex justify-content-between my-16 cursor-pointer" (click)="routeLink(item,editMode)">
+                    <p class="text-secondary">{{ item.label || '' | i18next }}</p>
+                    <h4 class="text-bold" *ngIf="item.loaded">{{ item.count || 0 }}</h4>
+                    <div *ngIf="!item.loaded" class="loader"></div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="tools-widget">
+        <div class="tool-icons">
+            <span class="material-icons icon-build" (click)="openEditWidgetModal()">build_circle</span>
+            <span class="material-icons icon-delete" (click)="deleteWidget()">delete</span>
+        </div>
+    </div>
+    <span class="icon-move"></span>
+</div>
+<div *ngIf="deleted" class="delete-widget">
+    <span class="badge-undo" (click)="undoWidget()">
+        <span class="material-icons icon-undo">undo</span>
+        <span class="text-undo">{{ 'undo' | i18next }}</span>
+    </span>
+</div>

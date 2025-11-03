@@ -1,0 +1,61 @@
+<!--upload-avtar-->
+<div class="upload-panel" [ngClass]="{'after-image-upload': showCropper}">
+    <div class="before-img-upload d-flex flex-column">
+      <icon size="24px" name="cloud_upload" type="material" cuClass="icon" Class="upload-panel-icon"
+        *ngIf="!croppedImage && removable" (click)="fileInput.click()">
+      </icon>
+      <icon size="48px" name="person" type="material" cuClass="icon" Class="profile-icon"
+        *ngIf="!croppedImage && !removable">
+      </icon>
+      <span *ngIf="!croppedImage && removable" (click)="fileInput.click()">{{ 'upload_an_image_or' | i18next }} <a (click)="fileInput.click()">{{ 'browse' | i18next }}</a></span>
+    </div>
+    <input hidden type="file" accept="image/*" #fileInput (change)="fileChangeEvent($event)">
+    <img *ngIf="croppedImage" class="img-after-upload" [src]="croppedImage" [style.z-index]="croppedImage ? '1' : '-1'" />
+    <div *ngIf="removable" class="upload-image-edit" (click)="fileInput.click()">
+      <div class="edit-icon">
+        <icon cuClass="d-flex" name="create" size="30px" type="material"></icon>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="croppedImage && removable" style="text-align: center;display:none;">
+    <button (click)="removeUpload()" class="remove-avatar">{{ 'remove' | i18next }}</button>
+  </div>
+  <!--upload-avtar-->
+
+  <!--crop-image-->
+  <div class="cropping-avtar align-items-center justify-content-center d-none" *ngIf="imageLoad">
+    <div class="cropping-avtar-image rounded-sm position-relative">
+      <div class="close_img_croper" (click)="cancelUpload()">
+        <icon cuClass="d-flex justify-content-end" name="close" size="30px" type="material"></icon>
+      </div>
+      <span class="validation-msg">{{logoValidations}}</span>
+      <div class="image">
+        <image-cropper [imageChangedEvent]="imageChangedEvent" [maintainAspectRatio]="false" [aspectRatio]="4 / 3"
+          [onlyScaleDown]="true" [roundCropper]="false" [canvasRotation]="canvasRotation" [transform]="transform"
+          [alignImage]="'center'" [style.display]="showCropper ? null : 'none'" format="png"
+          (imageCropped)="imageCropped($event)" (imageLoaded)="imageLoaded()" (cropperReady)="cropperReady($event)"
+          (loadImageFailed)="loadImageFailed()">
+        </image-cropper>
+
+      </div>
+      <div class="mt-16 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <button type="button" class="btn btn-light" (click)="zoomIn()">
+            <icon cuClass="d-flex" name="zoom_in" size="24px" type="material"></icon>
+          </button>
+          <button type="button" class="btn btn-light" (click)="zoomOut()">
+            <icon cuClass="d-flex" theme="outlined" name="zoom_out" size="24px" type="material"></icon>
+          </button>
+        </div>
+        <div class="d-flex align-items-center justify-content-end">
+          <button type="reset" class="btn btn-outline-danger mr-16" (click)="cancelUpload()">
+            {{ 'cancel' | i18next }}
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="crop()">
+            {{ 'crop_&_save' | i18next }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--crop-image-->

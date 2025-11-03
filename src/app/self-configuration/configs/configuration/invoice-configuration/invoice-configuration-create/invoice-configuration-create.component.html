@@ -1,0 +1,429 @@
+<header class="section-header page-title-main p-24 d-flex align-items-center justify-content-between">
+    <div class="page-title font-weight-semibold d-flex align-items-center" I18n>
+         <!-- <a href="javascript:void(0)"><i class="material-icons back-arrow-icon mr-16" tooltip="{{'Back'| i18next}}" placement="bottom" (click)="onBack()">arrow_back</i></a> -->
+         {{ 'create_new' | i18next }} {{ 'invoice_configuration' | i18next }}
+    </div>
+    <app-logs [log]="logs"></app-logs>
+    <!-- <button class="c-btn c-btn-success-medium" (click)="saveAction()">Save</button> -->
+    <div>
+        <button class="c-btn c-btn-success-medium d-none">{{ 'action' | i18next }}</button>
+        <button *accessControl class="c-btn c-btn-success-medium" (click)="saveAction()">{{ 'save' | i18next }}</button>
+    </div>
+</header>
+<section [ngClass]="!accessControl?'disableDiv':''" class="section-body-content">
+  <div class="row no-gutters program-details-mobile">
+    <div class="col-12">
+        <div class="invoice-config p-24">
+                <div  class="c-form-group-row invoice-form d-flex justify-content-between">
+                    <div class="c-form-group invoice-c-input">
+                        <label>{{ 'invoice_configuration' | i18next }} {{ 'name' | i18next }} <span class="require">*</span></label>
+                        <input type="text" [(ngModel)]="payload.config_name" class="c-form-control">
+                    </div>
+                    <!-- <div class="c-form-group toggle-width toggle-panel active-inactive-toggle mt-24 d-flex justify-content-between">
+                        <div class="toggle-panel-inner" [ngClass]="payload?.is_active ? 'if-active' : 'if-inactive'">
+                          <span class="is_active-text">{{(payload?.is_active ? 'Active' : 'In-Active') | i18next}}</span>
+                          <span class="toggle-switch" [ngClass]="payload?.is_active ? 'toggle-on' : 'toggle-off'"
+                            (click)="payload.is_active = !payload?.is_active"></span>
+                        </div>
+                    </div> -->
+                </div>
+
+                <div class="c-form-group-row invoice-form d-flex justify-content-between">
+                    <!-- <div class="c-form-group invoice-c-dropdown">
+                        <label>{{'Hierarchy'| i18next}} <span class="require">*</span></label>
+                        <input type="text" [(ngModel)]="hierarchyName" class="c-form-control" disabled>
+                    </div> -->
+                    <div class="c-form-group invoice-c-dropdown position-relative">
+                        <label>{{'invoice_start_date' | i18next}} <span class="require">*</span></label>
+                        <svms-datepicker placeholder="{{dateFormat}}"
+                            [(ngModel)]="payload.invoice_start_date" [inputdateFormat]="dateFormat" ngDefaultControl [options]="calendarOptions"
+                            id="invoiceStartDate" I18n>
+                        </svms-datepicker>
+                    </div>
+                </div>
+        </div>
+
+        <div class="invoice-config-inner">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{'Consolidation' | i18next}}</p>
+            </div>
+            <app-config-common-listing mainIcon="gamepad" [updatedSelectBoxValue]="payload.config.consolidate_invoice.type"
+                (onValueChange)="getConsolidationType($event)" itemLevel="parent" subtitle="Consolidation Selection"
+                description="Define Consolidation Creation Type" [required]="true" selectBox="true" [options]="options.consolidateInvoiceType">
+            </app-config-common-listing>
+                <app-config-common-listing itemLevel="child" [updatedSelectBoxValue]="payload.config.consolidate_invoice.consolidation_day" (onValueChange)="getConsolidationWeekDay($event)"  subtitle="Consolidation Day" 
+                description="Define Auto Consolidation Day" 
+                selectBox="true" [options]="options.weekStartDay" [required]="true"></app-config-common-listing>
+
+                <app-config-common-listing itemLevel="child" [updatedSelectBoxValue]="payload.config.invoice_cycle" (onValueChange)="getConsolidationInvoiceCycle($event)" subtitle="Invoice Cycle" 
+                description="Define Consolidation Cycle Type" 
+                selectBox="true" [options]="options.invoiceCycle" [required]="true"></app-config-common-listing>
+
+                <app-config-common-listing itemLevel="child" [updatedSelectBoxValue]="payload.config.week_start_day" (onValueChange)="getConsolidationWeekDay($event)" subtitle="Week Start Day to Generate Auto Consolidate Invoice"
+                description="Selection of Week day for consolidation"
+                selectBox="true" [options]="options.weekStartDay" [required]="true"></app-config-common-listing>
+
+                <app-config-common-listing itemLevel="child" [updatedSelectBoxValue]="payload.config.consolidate_invoice.consolidation_cycle.cycle_end_at" (onValueChange)="getConsolidationBillingType($event)" subtitle="Consolidation Billing Period" 
+                description="Define Consolidation Period Type" 
+                selectBox="true" [options]="options.invoiceCycle" [required]="true"></app-config-common-listing>
+                <ng-container *ngIf="isHideConsolidationData">
+                <app-config-common-listing itemLevel="child" [updatedToggleValue]="payload?.config?.consolidate_invoice?.consolidate_till_consolidation_day"  (onValueChange)="getconsolidateToggleChange($event)"  subtitle="Consolidate All Invoices Till Date & Time of Consolidation" 
+                description="Here You can define the assignment fields while updating" 
+                toggleSwitch="true"></app-config-common-listing>
+                <app-config-common-listing itemLevel="child" [updatedTimeValue]="payload.config.invoice_generated_time" subtitle="Invoice Generated Time" 
+                description="Define Time of Automation Time for Consolidate Invoice" selectTimeBox="true" (onTimeValueChange)="getTimeValue($event)" [required]="true"></app-config-common-listing>
+
+                <app-config-common-listing itemLevel="child" [updatedSelectBoxValue]="payload.config.client_email" subtitle="Email to Client" 
+                description="Invoice will be sent on that Client email address" textArea="true" (onValueChange)="valueChanged($event, 'client_email')" [required]="true"></app-config-common-listing>
+            
+                <app-config-common-listing itemLevel="child" [updatedSelectBoxValue]="payload.config.msp_email" subtitle="Email to MSP" 
+                description="Invoice will be sent on that MSP email address" 
+                textArea="true" (onValueChange)="valueChanged($event, 'msp_email')" [required]="true"></app-config-common-listing>
+            </ng-container>
+        </div>
+
+        <div class="invoice-config-inner">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{'Generation Logic' | i18next}}</p>
+            </div>
+            <app-config-common-listing mainIcon="view_list" [updatedSelectBoxValue]="payload.config.invoice_generation_logic" (onValueChange)="getInvoiceRolloup($event)" itemLevel="parent"  subtitle="Invoice Rollup Group" 
+            description="This layout we can use for the configuration with toggle on/off button" 
+            selectBox="true" [options]="options.invoiceGenrationLogic" [required]="true"></app-config-common-listing>
+          
+            <app-config-common-listing itemLevel="child" *ngIf="isHideFoundationalSelection" [updatedSelectBoxValue]="payload.config.foundational_selection" (onValueChange)="getFoundationalSelection($event)" subtitle="Foundational Selection" 
+            description="Used for grouping the invoices." 
+            selectBox="true" [options]="foundationalData" [required]="true"></app-config-common-listing>
+           
+            <app-config-common-listing mainIcon="tag" [updatedInputValue]="payload.config.invoice_number?.code" itemLevel="parent" subtitle="Set Consolidated Invoice Number Format" 
+            description="Consolidated Invoice Number" [disabled]="true"  [onlyText]="true"
+            multioptionInput="true" (onValueChange)="getInvoiceNumberData($event, 'invoice_number')"  [options]="options.invoiceCode" [required]="true"></app-config-common-listing>         
+            
+            <app-config-common-listing mainIcon="label" [updatedNumberInput]="payload.config.invoice_number.start_from" [updatedNumberInput]="inoiceNumberValue" [inputNumber]="true" itemLevel="parent" subtitle="Consolidated Invoice Number Starts From" 
+            description="Consolidated Invoice Number Starts From" (onValueChange)="getTextValueChange($event, 'invoice_number')" [required]="true"></app-config-common-listing>
+           
+            <app-config-common-listing mainIcon="tag" [updatedInputValue]="payload.config.batch_number?.code" itemLevel="parent" subtitle="Set Batch Number Format" 
+            description="This layout we can use for the configuration with toggle on/off button" [disabled]="true" 
+            multioptionInput="true" (onValueChange)="getBatchNumberData($event, 'batch_number')"  [options]="options.batchCode" [required]="true" [onlyText]="true"></app-config-common-listing>         
+        
+            <app-config-common-listing mainIcon="label" [updatedNumberInput]="payload.config.batch_number.start_from" itemLevel="parent" subtitle="Batch Starts From" 
+            description="This layout we can use for the configuration with toggle on/off button" 
+             (onValueChange)="getTextValueChange($event, 'batch_number')" [required]="true" [inputNumber]="true"></app-config-common-listing>
+        </div>
+
+        <div class="invoice-config-inner">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{'Invoice Standard Template' | i18next}}</p>
+            </div>
+            <app-config-common-listing mainIcon="newspaper" itemLevel="parent" subtitle="Uploaded Standard Template File"
+            description="This layout we can use for the configuration with toggle on/off button" buttonInput="Add" (onBtnClick)="addStandardTemplate($event)"></app-config-common-listing>
+        </div>
+
+        <div class="invoice-config-inner">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{'Invoice Header' | i18next}}</p>
+            </div>
+            <app-config-common-listing mainIcon="tune" itemLevel="parent" subtitle="Invoice From Address & Logo"
+            description="Logo Image URL Of Invoice Created From" buttonInput="Add" (onBtnClick)="addIvoiceFromAddress($event)"></app-config-common-listing>
+
+            <app-config-common-listing mainIcon="tune" itemLevel="parent" subtitle="Invoice To Address & Logo" description="Address of Invoice Created From" buttonInput="Add" (onBtnClick)="addIvoiceToAddress($event)">
+            </app-config-common-listing>
+
+            <!-- <app-config-common-listing itemLevel="parent" mainIcon="featured_play_list"  subtitle="Header Layout" description="This layout we can use for the configuration with toggle on/off button"
+            addressLayout="true" buttonInput="Change" (onBtnClick)="changeHeaderLayout($event)"></app-config-common-listing> -->
+
+        </div>
+
+        <div class="invoice-config-inner">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{'Payment Authorization'| i18next}}</p>
+                <toggle-button class="c-toggle-button-switch" [checked]="payload.config.pa" (changed)="getPaymentAuthorization($event)"></toggle-button>
+            </div>
+            <ng-container *ngIf="payload.config.pa">
+                <app-config-common-listing mainIcon="tune" [updatedToggleValue]="payload.config.rollback"
+                    itemLevel="parent" subtitle="Rollback"
+                    description="Used to enable or disable Payment Allocation/Client Payment Rollback feature in the invoice."
+                    toggleSwitch="true" (onValueChange)="onToggleChanged('rollback')" [required]="true"></app-config-common-listing>
+                <ng-container *ngIf="payload.config.rollback">
+                    <app-config-common-listing itemLevel="child" [updatedToggleValue]="payload.config.client_rollback"
+                        (onValueChange)="onToggleChanged('client_rollback')"
+                        subtitle="Enable/Disable Rollback Option on Client Payments"
+                        description="Enable And Disable The Client Payment Rollback" toggleSwitch="true" [required]="true">
+                    </app-config-common-listing>
+
+                    <app-config-common-listing itemLevel="child" [updatedToggleValue]="payload.config.vendor_rollback"
+                        (onValueChange)="onToggleChanged('vendor_rollback')"
+                        subtitle="Enable/Disable Rollback Option on Vendor Payments"
+                        description="Enable And Disable The Client Payment Rollback" toggleSwitch="true" [required]="true">
+                    </app-config-common-listing>
+                </ng-container>
+                <app-config-common-listing mainIcon="tune" itemLevel="parent" subtitle="Transaction Complete"
+                    [updatedToggleValue]="isTransactionToggle"
+                    description="Here you can define the assignment fields while updating"
+                    (onValueChange)="transactionToggleChange($event)" toggleSwitch="true"></app-config-common-listing>
+                <ng-container *ngIf="isTransactionToggle">
+                    <app-config-common-listing itemLevel="child"
+                        [updatedSelectBoxValue]="payload.config.transaction_complete.type"
+                        (onValueChange)="getTransactionCompleteType($event)" subtitle="Transaction Complete Type"
+                        description="Defining Invoice Transaction Complete Type" selectBox="true"
+                        [options]="options.transactionCompleteType"></app-config-common-listing>
+                    <ng-container *ngIf="isHideTCDropdown">
+                        <app-config-common-listing itemLevel="child"
+                            [updatedSelectBoxValue]="payload.config.transaction_complete.option"
+                            (onValueChange)="getTransactionCompleteData($event, 'option')" subtitle="Transaction Complete Cycle"
+                            description="Define Consolidation Cycle Type" selectBox="true" [required]="true"  [options]="options.invoiceCycle">
+                        </app-config-common-listing>
+
+                        <app-config-common-listing itemLevel="child"
+                            [updatedSelectBoxValue]="payload.config.transaction_complete.start_day"
+                            (onValueChange)="getTransactionCompleteData($event, 'start_day')"
+                            subtitle="Transaction Complete Start Day" [required]="true" description="Selection of Week day for consolidation"
+                            selectBox="true" [options]="options.weekStartDay">
+                        </app-config-common-listing>
+
+                        <app-config-common-listing itemLevel="child"
+                            [updatedTimeValue]="payload.config.transaction_complete.generate_time"
+                            subtitle="Transaction Complete Generated Time"
+                            description="Define Time of Automation Time for Consolidate Invoice" selectTimeBox="true"
+                            (onTimeValueChange)="onGeneratedTime($event)" [required]="true"></app-config-common-listing>
+        
+                        <app-config-common-listing itemLevel="child"
+                            [updatedSelectBoxValue]="payload.config.transaction_complete.is_notes_mandatory"
+                            (onValueChange)="getTransactionCompleteData($event, 'is_notes_mandatory')"
+                            subtitle="Transaction Complete Notes" description="Defining Invoice Transaction Complete Notes"
+                            selectBox="true" [options]="options.transactionCompleteNotes" [required]="true"></app-config-common-listing>
+                    </ng-container>
+                </ng-container>
+            </ng-container>
+        </div>
+
+        <div class="invoice-config-inner" *ngIf="payload.config.pa">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{'Voucher Details' | i18next}}</p>
+            </div>
+            <app-config-common-listing mainIcon="tune"  itemLevel="parent" [updatedInputValue]="payload.config.voucher_number?.code"  subtitle="Voucher Number Format" 
+            description="Used To Setup Voucher Number Structure (VCN-0001)" [options]="options.voucherCode" [disabled]="true"
+            multioptionInput="true"  [onlyText]="true" (onValueChange)="getVoucherNumberData($event,'voucher_number')" [required]="true"></app-config-common-listing>
+
+            <app-config-common-listing itemLevel="child" [updatedNumberInput]="payload.config.voucher_number.start_from"  [inputNumber]="true"  subtitle="Voucher Number Starts From" 
+            description="Starting String of Voucher Number"  (onValueChange)="getTextValueChange($event,'voucher_number')" [required]="true"></app-config-common-listing>
+        </div>
+        <div class="invoice-config-inner">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{'approval_workflow'| i18next}}</p>
+                <toggle-button class="c-toggle-button-switch" [checked]="payload.config.approval_workflow" (changed)="changeApporvlaWorkflow($event)"></toggle-button>
+            </div>
+        </div>
+        <div class="invoice-config-inner d-none">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{'rebate_discount' | i18next}}</p>
+                <toggle-button class="c-toggle-button-switch" [checked]="payload.config.rebate?.is_enabled"
+                (changed)="rebateToggleChange($event)">
+                </toggle-button>
+            </div>
+            <ng-container *ngIf="payload.config.rebate?.is_enabled">
+                <app-config-common-listing itemLevel="child" [updatedNumberInput]="payload.config.rebate.percentage"
+                    subtitle="Rebate Percentage" description="Rebate Percentage" (onValueChange)="getRebateIsPercentage($event)"
+                    inputNumber="true">
+                </app-config-common-listing>
+            </ng-container>
+        </div>
+        <div class="invoice-config-inner">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{'invoice_modules'| i18next}}</p>
+            </div>
+            <ng-container *ngFor="let invoiceModule of invoiceModules;let i = index">
+                <app-config-common-listing mainIcon="tune" itemLevel="parent"
+                    [updatedToggleValue]="payload.config.invoice_modules[i].is_enabled"
+                    (onValueChange)="updateInvoiceModuleToggle(i)" [subtitle]="invoiceModule.key"
+                    toggleSwitch="false"></app-config-common-listing>
+                <ng-container *ngIf="payload.config.invoice_modules[i].is_enabled">
+                    <app-config-common-listing itemLevel="child"
+                        [updatedToggleValue]="payload.config.invoice_modules[i].fee_taxable"
+                        (onValueChange)="updateFeetaxableModuleToggle(i)" subtitle="Fee Taxable"
+                        toggleSwitch="false"></app-config-common-listing>
+                    <app-config-common-listing itemLevel="child"
+                        [updatedToggleValue]="payload.config.invoice_modules[i].tax_applicable"
+                        (onValueChange)="updateTaxapplicableModuleToggle(i)" subtitle="Tax Applicable"
+                        toggleSwitch="false"></app-config-common-listing>
+                </ng-container>
+            </ng-container>
+        </div>
+
+        <div class="invoice-config-inner">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{'Other Settings' | i18next}}</p>
+            </div>
+            <app-config-common-listing mainIcon="tune" itemLevel="parent" [updatedToggleValue]="payload.config.cancel_approved_consolidated_invoice"  (onValueChange)="onToggleChanged('cancel_approved_consolidated_invoice')" subtitle="Cancel Consolidation on Approved Consolidated Invoice"
+            description="Enable And Disable Consolidate Invoice Approval"
+            toggleSwitch="true"></app-config-common-listing>
+
+            <app-config-common-listing mainIcon="tune" itemLevel="parent" [updatedToggleValue]="payload.config.credit_debit.is_enabled" (onValueChange)="updateCreditDebit()" subtitle="Credit / Debit"
+            description="Credit/ Debit functionality enable or disable"
+            toggleSwitch="true"></app-config-common-listing>
+            <ng-container *ngIf="payload.config.credit_debit.is_enabled">
+                <app-config-common-listing itemLevel="child" [updatedInputValue]="payload.config.credit_debit.code" subtitle="Code"
+                    toggleOptionsInput="true"
+                    (onTextValueChange)="getValueChange($event,'credit_debit')"></app-config-common-listing>
+            </ng-container>
+        </div>
+    </div>
+  </div>
+</section>
+<app-svms-modal title="Standard Template Format" [visibility]="standardTemplateModal" (onClose)="sidebarClose()">
+    <app-svms-modal-body>
+        <div class="c-form-group-row">
+            <div class="c-form-group">
+                <label>{{ 'standard_template_label' | i18next }}</label>
+                <div class="file-input">
+                    <div>
+                        <input type="text" class="c-form-control" [(ngModel)]="payload.config.invoice_template[0].label" (change)="onTeamplateDatachange(payload.config.invoice_template[0].label, payload.config.invoice_template[0].type, payload.config.invoice_template[0].format, false)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-form-group-row">
+            <div class="c-form-group">
+                <label>{{'standard_template_format' | i18next}}</label>
+                <ng-select placeholder="{{'select'|i18next}}" [(ngModel)]="payload.config.invoice_template[0].type" (change)="onTeamplateDatachange(payload.config.invoice_template[0].label, payload.config.invoice_template[0].type, payload.config.invoice_template[0].format, false)">
+                    <ng-option [value]="item.name" *ngFor="let item of standardTemplateFile">
+                        {{item.name}}</ng-option>
+                </ng-select>
+            </div>
+        </div>
+        <div class="c-form-group-row">
+            <div class="c-form-group">
+                <label class="mb-16">{{ 'file_format_download' | i18next }} <a href="javascript:void(0)">{{ 'select_all' | i18next }}</a></label>
+                <div class="d-flex">
+                    <div class="mr-24" *ngFor="let item of options.filoeExtension">
+                        <label class="c-input-checkbox">
+                            <input type="checkbox" [value]="item.value"
+                                [checked]="payload.config.invoice_template[0].format === item.value"
+                                (change)="onTeamplateDatachange(payload.config.invoice_template[0].label, payload.config.invoice_template[0].type, item.value, false)">
+                            <span class="cb-ui"></span>
+                            <span class="cb-label">{{ item.name |i18next}}</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </app-svms-modal-body>
+    <app-svms-modal-footer>
+        <div class="text-right">
+            <button class="c-btn c-btn-primary-medium" (click)="onTeamplateDatachange(payload.config.invoice_template[0].label, payload.config.invoice_template[0].type, payload.config.invoice_template[0].format, true)">{{'Add' | i18next}}</button>
+        </div>
+    </app-svms-modal-footer>
+</app-svms-modal>
+
+<app-svms-modal title="From Address & Logo" [visibility]="fromInvoiceAddess" (onClose)="fromAddressClose()">
+    <app-svms-modal-body>
+        <div class="c-form-group-row">
+            <div class="c-form-group">
+                <label>{{ 'logo' | i18next }}</label>
+                <div class="file-input">
+                    <input type="file" (change)="filesUpload($event,'from_template')">
+                    <div class="styled-interface">
+                        <input type="text" class="c-form-control" [value]="fromTemplateFileName">
+                        <button class="c-btn c-btn-secondary-medium">Select File</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-form-group-row">
+            <div class="c-form-group">
+                <label class="mb-16">{{ 'from_address' | i18next }}</label>
+                <textarea class="c-form-control" [(ngModel)]="payload.config.from_template.address" (change)="fromHeader(payload.config.from_template.logo, payload.config.from_template.address, false)"></textarea>
+            </div>
+        </div>
+    </app-svms-modal-body>
+    <app-svms-modal-footer>
+        <div class="text-right">
+            <button class="c-btn c-btn-primary-medium" (click)="fromHeader(payload.config.from_template.logo, payload.config.from_template.address, true)">{{'Add' | i18next}}</button>
+        </div>
+    </app-svms-modal-footer>
+</app-svms-modal>
+
+<app-svms-modal title="To Address & Logo" [visibility]="toInvoiceAddress" (onClose)="toAddressClose()">
+    <app-svms-modal-body>
+        <div class="c-form-group-row">
+            <div class="c-form-group">
+                <label>{{ 'logo' | i18next }}</label>
+                <div class="file-input">
+                    <input type="file" (change)="filesUpload($event,'to_template')">
+                    <div class="styled-interface">
+                        <input type="text" class="c-form-control" [value]="toTemplateFileName">
+                        <button class="c-btn c-btn-secondary-medium">{{'Select File' | i18next}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-form-group-row">
+            <div class="c-form-group">
+                <label class="mb-16">{{ 'to_address' | i18next }}</label>
+                <textarea class="c-form-control" [(ngModel)]="payload.config.to_template.address" (change)="toHeader(payload.config.to_template.logo, payload.config.to_template.address, false)"></textarea>
+            </div>
+        </div>
+    </app-svms-modal-body>
+    <app-svms-modal-footer>
+        <div class="text-right">
+            <button class="c-btn c-btn-primary-medium" (click)="toHeader(payload.config.to_template.logo, payload.config.to_template.address, true)">{{'Add' | i18next}}</button>
+        </div>
+    </app-svms-modal-footer>
+</app-svms-modal>
+
+<app-svms-modal title="{{'Invoice header layout' | i18next}}" [visibility]="headerLayout" (onClose)="headerLayoutClose()">
+    <app-svms-modal-body>
+       <!--- layout style 1-->
+       <div class="header-layout-popup d-flex justify-content-between py-16 px-12 mb-16 active">
+         <div class="address-box d-flex">
+           <figure class="addrss-logo mr-12"></figure>
+           <div class="addres-line">
+             <p>{{'From' | i18next}}</p>
+             <p>{{'Address' | i18next}}</p>
+           </div>
+         </div>
+         <div class="address-box d-flex">
+           <figure class="addrss-logo mr-12"></figure>
+           <div class="addres-line">
+             <p>{{'To' | i18next}}</p>
+             <p>{{'Address' | i18next}}</p>
+           </div>
+         </div>
+       </div>
+
+       <!--- layout style 2-->
+       <div class="header-layout-popup d-flex justify-content-between py-16 px-12 mb-16">
+        <div class="address-box d-flex">
+            <figure class="addrss-logo mr-12"></figure>
+            <div class="addres-line">
+              <p>{{'To' | i18next}}</p>
+              <p>{{'Address' | i18next}}</p>
+            </div>
+          </div>
+        <div class="address-box d-flex">
+          <figure class="addrss-logo mr-12"></figure>
+          <div class="addres-line">
+            <p>{{'From' | i18next}}</p>
+            <p>{{'Address' | i18next}}</p>
+          </div>
+        </div>
+      </div>
+
+      <!--- layout style 3-->
+      <div class="header-layout-popup py-16 px-12">
+        <div class="address-box d-flex mb-16">
+          <figure class="addrss-logo mr-12"></figure>
+          <div class="addres-line">
+            <p>{{'From' | i18next}}</p>
+            <p>{{'Address' | i18next}}</p>
+          </div>
+        </div>
+        <div class="address-box d-flex">
+          <figure class="addrss-logo mr-12"></figure>
+          <div class="addres-line">
+            <p>{{'To' | i18next}}</p>
+            <p>{{'Address' | i18next}}</p>
+          </div>
+        </div>
+      </div>
+    </app-svms-modal-body>
+</app-svms-modal>

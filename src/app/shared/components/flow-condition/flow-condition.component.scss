@@ -1,0 +1,257 @@
+@import '../../../../assets/sass/abstracts/variables';
+
+.back-btn {
+  icon {
+    vertical-align: middle;
+  }
+}
+
+.form-group {
+  &.flow-state {
+    flex: 1;
+
+    .toggle-panel {
+      width: auto;
+    }
+  }
+}
+
+.parent-container {
+  border: 1px solid #E3E9F0;
+  border-radius: $border-radius;
+
+  .drag-trigger {
+    position: absolute;
+    left: 0;
+    background-color: #E3E9F0;
+    display: block;
+    top: 0;
+    bottom: 0;
+    width: 18px;
+
+    icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      cursor: grab;
+
+      ::ng-deep i {
+        color: #AFB9C5;
+      }
+    }
+  }
+
+  .child-container {
+    margin-bottom: $m12;
+  }
+
+  .child-drag-trigger {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+
+    icon {
+      cursor: grab;
+      display: flex;
+
+      ::ng-deep i {
+        color: #A3B0C0;
+      }
+    }
+  }
+
+  .add-condition {
+    cursor: pointer;
+
+    ::ng-deep i {
+      color: #0044C5;
+    }
+  }
+}
+
+.close-condition {
+  cursor: pointer;
+
+  ::ng-deep i {
+    color: #A3B0C0;
+  }
+}
+
+.toggle-cb {
+  border: 1px solid #E3E9F0;
+  position: relative;
+  border-radius: $border-radius;
+  padding: 3px;
+  max-width: 100px;
+  min-width: 85px;
+
+  input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    z-index: 3;
+    height: 30px;
+  }
+
+  .cb-text {
+    font-size: 12px;
+    color: #7f92a3;
+    line-height: 24px;
+    justify-content: space-between;
+    gap: 2px;
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+
+    span {
+      padding: 0 4px;
+      flex: 1;
+      text-align: center;
+      text-transform: uppercase;
+
+      &:nth-child(2) {
+        color: $light;
+      }
+    }
+  }
+
+  .switch {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 46%;
+    background-color: $color-assets-primary;
+    z-index: 1;
+    border-radius: $border-radius;
+    height: 24px;
+    transform: translateX(101%);
+    transition: $transition;
+    pointer-events: none;
+  }
+
+  &.active {
+    .switch {
+      transform: translateX(0);
+    }
+
+    .cb-text {
+      span {
+        &:first-child {
+          color: $light;
+        }
+
+        &:nth-child(2) {
+          color: #7f92a3;
+        }
+      }
+    }
+  }
+}
+
+.add-new-group {
+  font-size: 13px;
+  color: $color-link;
+
+  icon {
+    vertical-align: middle;
+    margin-left: $m8;
+
+    ::ng-deep i {
+      color: $color-link;
+    }
+  }
+}
+
+.condition-wrapper {
+    position: relative;
+
+    &:before {
+        position: absolute;
+        left: 42px;
+        top: 0;
+        border-left: 1px dashed #7f92a3;
+        width: 1px;
+        height: 16px;
+        visibility: visible;
+        content: '.';
+        text-indent: -9999px;
+        overflow: hidden;
+        display: block;
+    }
+
+    &:after {
+        position: absolute;
+        left: 42px;
+        bottom: 0;
+        border-left: 1px dashed #7f92a3;
+        width: 1px;
+        height: 16px;
+        visibility: visible;
+        content: '.';
+        text-indent: -9999px;
+        overflow: hidden;
+        display: block;
+    }
+
+    &.no-line {
+        &:before, &:after {
+            display: none;
+        }
+    }
+}
+
+.sub-condition-box {
+    background-color: #f4f6f7;
+    border: 1px solid #E3E9F0;
+    padding: $p16 $p8;
+    margin-left: 20px;
+    border-radius: $border-radius;
+}
+
+.level-wrapper {
+    border-left: 1px dashed $color-assets-primary;
+    position: relative;
+    padding-left: $p24;
+    border-radius: $border-radius;
+
+    p {
+        text-transform: uppercase;
+    }
+
+    .level-title {
+        color: $color-assets-primary;
+        padding-top: $p12;
+    }
+
+    .recipents-wrapper {
+        border: 1px solid #E3E9F0;
+        padding: $p16;
+    }
+
+    &:before {
+        position: absolute;
+        top: 0;
+        left: -5px;
+        width: 10px;
+        height: 10px;
+        background-color: $color-assets-primary;
+        border-radius: $rounded-circle;
+        z-index: 2;
+        content: '.';
+        text-indent: -9999px;
+        overflow: hidden;
+        display: block;
+        visibility: visible;
+    }
+
+    .small-col {
+       flex: 1;
+    }
+    .medium-col {
+
+    }
+}

@@ -1,0 +1,25 @@
+<ul class="level-listing">
+    <li>
+        <div class="listing-item">
+            <div class="listing-info">
+                <span class="initials initials__purple">{{renderData?.name   |  shortName:'first'}}</span>
+                <span class="level-title">{{renderData?.name|i18next}}</span>
+            </div>
+            <div class="level-status">
+                <div class="checkbox-wrapper">
+                    <label class="checkbox-container">
+                      <input type="checkbox" name="hierarchy_level" [(ngModel)]="parentCheckboxState" (change)="onSelectLevel()">
+                      <span class="checkmark"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+       <app-child-renderer
+       *ngFor="let childLevel of renderData?.hierarchies"
+       [childRenderData]="childLevel"
+       [parentCheckboxState]="parentCheckboxState"
+       (selectHierarchyLevel)="selectParent($event)"
+       [selectedTreeArr]="selectedTreeArr"
+       ></app-child-renderer>
+    </li>
+</ul>

@@ -1,0 +1,325 @@
+<div class="qualification">
+    <div class="d-flex mb-32">
+      <h4 class="section-heading font-weight-medium  mr-24">{{ 'qualifications' | i18nextEager }}</h4>
+      <nav class="qualification-dropdown">
+          <p class="d-flex align-items-center"><span class="mr-12">{{ 'add_qualification_blocks' | i18nextEager }}</span> <icon class="d-flex" size="16px" name="keyboard_arrow_down" type="material"></icon></p>
+        <ul>
+          <li>
+            <div class="checkbox-wrapper d-inline-block">
+              <label class="checkbox-container">
+                <input type="checkbox" name="certifications" [(ngModel)]="certifications"  [ngModelOptions]="{standalone: true}" (click)="openCertifications()">
+                <span class="checkmark"></span>
+                <span class="label">{{ 'certifications' | i18nextEager }}</span>
+              </label>
+            </div>
+          </li>
+          <li>
+            <div class="checkbox-wrapper d-inline-block">
+              <label class="checkbox-container">
+                <input type="checkbox" name="credentials" [(ngModel)]="credentials"  [ngModelOptions]="{standalone: true}" (click)="openCredentials()">
+                <span class="checkmark"></span>
+                <span class="label">{{ 'credentials' | i18nextEager }}</span>
+              </label>
+            </div>
+          </li>
+          <li>
+            <div class="checkbox-wrapper d-inline-block">
+              <label class="checkbox-container">
+                <input type="checkbox" name="specialization" [(ngModel)]="specialization"  [ngModelOptions]="{standalone: true}" (click)="openSpecialization()">
+                <span class="checkmark"></span>
+                <span class="label">{{ 'specialization' | i18nextEager }}</span>
+              </label>
+            </div>
+          </li>
+          <li>
+            <div class="checkbox-wrapper d-inline-block">
+              <label class="checkbox-container">
+                <input type="checkbox" name="vaccination" [(ngModel)]="vaccination"  [ngModelOptions]="{standalone: true}" (click)="openVaccination()">
+                <span class="checkmark"></span>
+                <span class="label">{{ 'vaccination' | i18nextEager }}</span>
+              </label>
+            </div>
+          </li>
+          <li>
+            <div class="checkbox-wrapper d-inline-block">
+              <label class="checkbox-container">
+                <input type="checkbox" name="skills" [(ngModel)]="skills"  [ngModelOptions]="{standalone: true}" (click)="openSkills()">
+                <span class="checkmark"></span>
+                <span class="label">{{ 'skills' | i18nextEager }}</span>
+              </label>
+            </div>
+          </li>
+          <li>
+            <div class="checkbox-wrapper d-inline-block">
+              <label class="checkbox-container">
+                <input type="checkbox" name="education" [(ngModel)]="education"  [ngModelOptions]="{standalone: true}" (click)="openEducation()">
+                <span class="checkmark"></span>
+                <span class="label">{{ 'education' | i18nextEager }}</span>
+              </label>
+            </div>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <div class="q-item p-16" *ngIf="certifications">
+      <div class="d-flex justify-content-between">
+        <div class="d-flex">
+          <h4 class="font-weight-medium mb-0 mr-16">{{ 'certifications' | i18nextEager }}</h4>
+          <button class="btn small btn-outine rounded-circle btn-add-item" (click)="addCertificate($event)">
+            <icon class="d-flex" size="16px" name="add" type="material"></icon>
+          </button>
+        </div>
+        <button class="close-item" (click)="closeCertifications()">
+          <icon size="14px" name="close" type="material" cuClass="icon-cu"></icon>
+        </button>
+      </div>
+      <div class="delete-confirmation" *ngIf="certificationDelete">
+        <div class="d-flex justify-content-between">
+          <p>{{ 'are_you_sure_you_want_to_delete_the_entire_certification_block' | i18nextEager }}?</p>
+          <div>
+            <button class="Yes" (click)="confirmCertificationDelete()">{{ 'yes' | i18nextEager }}</button>
+            <button class="no" (click)="removeDialog()">{{ 'no' | i18nextEager }}</button>
+          </div>
+        </div>
+      </div>
+      <ul class="item-list" *ngFor="let certi of certificationsArr, let i = index">
+        <li class="clearfix position-relative  mb-12">
+          <a class="edit-item" (click)="editPanel('CERTIFICATION',certi, i)" *ngIf="!viewMode">
+            <icon class="d-flex mr-8" size="24px" name="edit" type="material" cuClass="d-flex"></icon>
+          </a>
+          <figure class="bullet float-left text-center d-flex mt-12">
+            <img src="/assets/images/badge.svg" alt="">
+          </figure>
+          <div class="item-description float-right pt-12">
+            <h4>{{certi.certification_name}}</h4>
+            <p>{{certi.authority}}</p>
+            <p>{{ 'issued' | i18nextEager }} {{certi.initial_date | localDateFormat:'dd MMM y'}} .
+              {{certi.expiration_date ? 'Expired on ' + (certi.expiration_date | localDateFormat:'dd MMM y') : 'No Expiration Date'}}
+            </p>
+            <p class="mt-8">{{ 'credential_id' | i18nextEager }} <a href="javascript:void()">{{certi.certification_id}}</a></p>
+            <div *ngFor="let file of certi.files, let i = index">
+              <figure class="item-img mt-16 float-left mr-16">
+                <img src="/assets/images/certificate.svg" alt="">
+                <figcaption>{{file.name}}</figcaption>
+              </figure>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <div class="no-document text-center mb-32" *ngIf="!certificationsArr.length">
+        <img src="/assets/images/certifications.svg" alt="">
+        <p class="font-weight-medium">{{ 'you_have_not_added_any_certifications' | i18nextEager }}</p>
+        <p class="small mb-8">{{ 'you_can_add_your_certifications_here' | i18nextEager }}</p>
+      </div>
+    </div>
+    <div class="q-item p-16" *ngIf="credentials">
+      <div class="d-flex justify-content-between">
+        <div class="d-flex">
+          <h4 class="font-weight-medium mb-0 mr-16">{{ 'credentials' | i18nextEager }}</h4>
+          <button class="btn small btn-outine rounded-circle btn-add-item" (click)="addCredentials($event)">
+            <icon class="d-flex" size="16px" name="add" type="material"></icon>
+          </button>
+        </div>
+        <button class="close-item" (click)="closeCredentials()">
+          <icon size="14px" name="close" type="material" cuClass="icon-cu"></icon>
+        </button>
+      </div>
+      <ul class="item-list" *ngFor="let cred of credentialsArr, let i = index">
+        <li class="clearfix position-relative  mb-12">
+          <a (click)="editPanel('CREDENTIAL', cred,i)" class="edit-item" *ngIf="!viewMode">
+            <icon class="d-flex mr-8" size="24px" name="edit" type="material" cuClass="d-flex"></icon>
+          </a>
+          <figure class="bullet float-left text-center d-flex mt-12">
+            <img src="/assets/images/verified.svg" alt="">
+          </figure>
+          <div class="item-description float-right pt-12">
+            <h4>{{cred.credential_name}}</h4>
+            <p>{{cred.issuing_authority}} {{ 'issued' | i18nextEager }} {{cred.initial_issue_date | localDateFormat:'dd MMM y'}} . {{ 'expired_on' | i18nextEager }}
+              {{cred.expiration_date | localDateFormat:'dd MMM y'}}</p>
+            <p class="mt-8">{{ 'credential_id' | i18nextEager }} <a class="text-underline"
+                href="javascript:void()">{{cred.credential_id}}</a></p>
+            <div *ngFor="let file of cred.files, let i = index">
+              <figure class="item-img mt-16 float-left mr-16">
+                <img src="/assets/images/certificate.svg" alt="">
+                <figcaption>{{file.name}}</figcaption>
+              </figure>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <div class="no-document text-center mb-32" *ngIf="!credentialsArr.length">
+        <img src="/assets/images/credentials.svg" alt="">
+        <p class="font-weight-medium">{{ 'you_have_not_added_any_credentials' | i18nextEager }}</p>
+        <p class="small mb-8">{{ 'you_can_add_your_credentials_here' | i18nextEager }}</p>
+      </div>
+    </div>
+    <div class="q-item p-16" *ngIf="specialization">
+      <div class="d-flex justify-content-between">
+        <div class="d-flex">
+          <h4 class="font-weight-medium mb-0 mr-16">{{ 'specialization' | i18nextEager }}</h4>
+          <button class="btn small btn-outine rounded-circle btn-add-item" (click)="addSpecialization($event)">
+            <icon class="d-flex" size="16px" name="add" type="material"></icon>
+          </button>
+        </div>
+        <button class="close-item" (click)="closeSpecialization()">
+          <icon size="14px" name="close" type="material" cuClass="icon-cu"></icon>
+        </button>
+      </div>
+      <ul class="item-list" *ngFor="let speciality of specialityArr, let i = index">
+        <li class="clearfix position-relative  mb-12">
+          <a (click)="editPanel('SPECIALITY', speciality,i)" class="edit-item" *ngIf="!viewMode">
+            <icon class="d-flex mr-8" size="24px" name="edit" type="material" cuClass="d-flex"></icon>
+          </a>
+          <figure class="bullet float-left text-center d-flex mt-12">
+            <img src="/assets/images/emergency.svg" alt="">
+          </figure>
+          <div class="item-description float-right pt-12 full-width">
+            <h4>{{speciality.speciality_name}}</h4>
+            <p>{{speciality.experience_level}}</p>
+            <p class="mt-8">{{speciality.description}}
+              <!-- <a class="read-more text-underline"
+                href="#">More</a> -->
+            </p>
+          </div>
+        </li>
+      </ul>
+      <div class="no-document text-center mb-32" *ngIf="!specialityArr.length">
+        <img src="/assets/images/specialities.svg" alt="">
+        <p class="font-weight-medium">{{ 'you_have_not_added_any_specialities' | i18nextEager }}</p>
+        <p class="small mb-8">{{ 'you_can_add_your_specialities_here' | i18nextEager }}</p>
+      </div>
+    </div>
+    <div class="q-item p-16" *ngIf="vaccination">
+      <div class="d-flex justify-content-between">
+        <div class="d-flex">
+          <h4 class="font-weight-medium mb-0 mr-16">{{ 'vaccination' | i18nextEager }}</h4>
+          <button class="btn small btn-outine rounded-circle btn-add-item" (click)="addVaccination($event)">
+            <icon class="d-flex" size="16px" name="add" type="material"></icon>
+          </button>
+        </div>
+        <button class="close-item" (click)="closeVaccination()">
+          <icon size="14px" name="close" type="material" cuClass="icon-cu"></icon>
+        </button>
+      </div>
+      <ul class="item-list" *ngFor="let vaccine of vaccinationsArr, let i = index">
+        <li class="clearfix position-relative  mb-12">
+          <a (click)="editPanel('VACCINATION', vaccine,i)" class="edit-item" *ngIf="!viewMode">
+            <icon class="d-flex mr-8" size="24px" name="edit" type="material" cuClass="d-flex"></icon>
+          </a>
+          <figure class="bullet float-left text-center d-flex mt-12">
+            <img src="/assets/images/vaccination.svg" alt="">
+          </figure>
+          <div class="item-description float-right pt-12 full-width">
+            <h4>{{vaccine.vaccine_name}}</h4>
+            <p>{{vaccine.provider}}</p>
+            <p>{{ 'issued' | i18nextEager }} {{vaccine.vaccination_date | localDateFormat:'dd MMM y'}} . {{ 'expired_on' | i18nextEager }}
+              {{vaccine.expiration_date | localDateFormat:'dd MMM y'}}</p>
+          </div>
+        </li>
+      </ul>
+      <div class="no-document text-center mb-32" *ngIf="!vaccinationsArr.length">
+        <img src="/assets/images/vaccinations.svg" alt="">
+        <p class="font-weight-medium">{{ 'you_have_not_added_any_vaccinations' | i18nextEager }}</p>
+        <p class="small mb-8">{{ 'you_can_add_your_vaccinations_here' | i18nextEager }}</p>
+      </div>
+    </div>
+    <div class="q-item p-16" *ngIf="skills">
+      <div class="d-flex justify-content-between">
+        <div class="d-flex">
+          <h4 class="font-weight-medium mb-0 mr-16">{{ 'skills' | i18nextEager }}</h4>
+          <button class="btn small btn-outine rounded-circle btn-add-item" (click)="addSkills($event)">
+            <icon  class="d-flex" size="16px" name="add" type="material"></icon>
+          </button>
+        </div>
+        <button class="close-item" (click)="closeSkills()">
+          <icon size="14px" name="close" type="material" cuClass="icon-cu"></icon>
+        </button>
+      </div>
+      <ul class="item-list" *ngFor="let skill of skillsArr, let i = index">
+        <li class="clearfix position-relative  mb-12">
+          <a (click)="editPanel('SKILL',skill,i)" class="edit-item" *ngIf="!viewMode">
+            <icon class="d-flex mr-8" size="24px" name="edit" type="material" cuClass="d-flex"></icon>
+          </a>
+          <figure class="bullet float-left text-center d-flex mt-12">
+            <img src="/assets/images/medicine.svg" alt="">
+          </figure>
+          <div class="item-description float-right pt-12 full-width">
+            <h4>{{skill.skill_name}}</h4>
+            <p>{{ 'experience' | i18nextEager }} : {{skill.experience_level}}</p>
+            <p class="mt-8">{{skill.description}}
+              <!-- <a class="read-more text-underline"
+                href="#">More</a> -->
+            </p>
+          </div>
+        </li>
+      </ul>
+      <div class="no-document text-center mb-32" *ngIf="!skillsArr.length">
+        <img src="/assets/images/skills.svg" alt="">
+        <p class="font-weight-medium">{{ 'you_have_not_added_any_skills' | i18nextEager }}</p>
+        <p class="small mb-8">{{ 'you_can_add_your_skills_here' | i18nextEager }}</p>
+      </div>
+    </div>
+    <div class="q-item p-16" *ngIf="education">
+      <div class="d-flex justify-content-between">
+        <div class="d-flex">
+          <h4 class="font-weight-medium mb-0 mr-16">{{ 'education' | i18nextEager }}</h4>
+          <button class="btn small btn-outine rounded-circle btn-add-item" (click)="addEducation($event)">
+            <icon class="d-flex" size="16px" name="add" type="material"></icon>
+          </button>
+        </div>
+        <button class="close-item" (click)="closeEducation()">
+          <icon size="14px" name="close" type="material" cuClass="icon-cu"></icon>
+        </button>
+      </div>
+      <ul class="item-list" *ngFor="let educ of educationArr, let i = index">
+        <li class="clearfix position-relative  mb-12">
+          <a (click)="editPanel('EDUCATION', educ, i)" class="edit-item" *ngIf="!viewMode">
+            <icon class="d-flex mr-8" size="24px" name="edit" type="material" cuClass="d-flex"></icon>
+          </a>
+          <figure class="bullet float-left text-center d-flex mt-12">
+            <img src="/assets/images/educations.svg" alt="">
+          </figure>
+          <div class="item-description float-right pt-12">
+            <h4>{{educ.institution}}</h4>
+            <p>{{educ.degree}}</p>
+            <p class="mt-8">{{educ.start_date | localDateFormat:'dd MMM y'}} - {{educ.end_date | localDateFormat:'dd MMM y'}}</p>
+            <div *ngFor="let file of educ.files, let i = index">
+              <figure class="item-img mt-16 float-left mr-16">
+                <img src="/assets/images/certificate.svg" alt="">
+                <figcaption>{{file.name}}</figcaption>
+              </figure>
+              <!-- <figure class="item-img mt-16 float-left mr-16">
+                <img src="/assets/images/pdf.svg" alt="">
+                <figcaption>Sample PDF Up..</figcaption>
+              </figure> -->
+            </div>
+          </div>
+        </li>
+      </ul>
+      <div class="no-document text-center mb-32" *ngIf="!educationArr.length">
+        <img src="/assets/images/credentials.svg" alt="">
+        <p class="font-weight-medium">{{ 'you_have_not_added_any_education' | i18nextEager }}</p>
+        <p class="small mb-8">{{ 'you_can_add_your_skills_here' | i18nextEager }}</p>
+      </div>
+    </div>
+    <div class="q-item p-16 text-center" *ngIf="!education && !skills && !vaccination && !specialization && !credentials && !certifications">
+      <img src="../../../assets/images/no-qualification.svg" alt="">
+      <p class="font-weight-medium text-black mt-16">
+        {{ 'you_are_not_adding_any_qualification_blocks_yet' | i18nextEager }} !
+      </p>
+      <p class="small">
+        {{ 'here_you_can_add_the_additional_qualifications_blocks_like_credentials' | i18nextEager }},{{ 'specialities_etc' | i18nextEager }}.
+      </p>
+    </div>
+  </div>
+  <app-add-credentials (credentialData)="getCredentialData($event)" *ngIf="credentialTypeId"
+  [credentialTypeId]="credentialTypeId"></app-add-credentials>
+<app-add-certification (certificateData)="getCertificateData($event)" *ngIf="certificationTypeId"
+  [certificationTypeId]="certificationTypeId"></app-add-certification>
+<app-add-specialization (specialityData)="getSpecialityData($event)" *ngIf="specialityTypeId"
+  [specialityTypeId]="specialityTypeId"></app-add-specialization>
+<app-add-vaccination (vaccinationData)="getVaccineData($event)" *ngIf="vaccineTypeId" [vaccineTypeId]="vaccineTypeId">
+</app-add-vaccination>
+<app-add-skills (skillData)="getSkillData($event)" *ngIf="skillTypeId" [skillTypeId]="skillTypeId"></app-add-skills>
+<app-add-education (educationData)="getEducationData($event)" *ngIf="educationTypeId"
+  [educationTypeId]="educationTypeId"></app-add-education>

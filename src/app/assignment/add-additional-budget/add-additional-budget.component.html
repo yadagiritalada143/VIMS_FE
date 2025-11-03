@@ -1,0 +1,92 @@
+<svms-sidebar [title]="formTitle | i18nextEager" [dataVisibility]="isAdditionalBudget" (onClose)="sidebarClose()">
+  <form [formGroup]="editionalBudgetForm" (ngSubmit)="onSubmit()">
+    <svms-sidebar-body>
+      <app-logs [log]="logs"></app-logs>
+      <div class="additional-budget p-24">
+        <div class="form-group">
+          <label I18n>{{ 'enter_additional_budget_amount' | i18nextEager }} <span class="require">*</span></label>
+          <input type="text" class="form-control" placeholder="{{ 'enter_amount' | i18nextEager }}" formControlName="value" inputAccuracy="{{accuracyConfig?.amount}}"
+            [ngClass]="{'error':editionalBudgetForm.controls['value'].invalid && (editionalBudgetForm.controls['value'].dirty || editionalBudgetForm.controls['value'].touched)}">
+        </div>
+        <div class="row no-gutters my-16 d-none">
+          <div class="col">1</div>
+          <div class="col">2</div>
+
+        </div>
+        <div class="form-group-row">
+          <div class="form-group">
+            <label I18n>{{ 'reason_for_adding_additional_budget' | i18nextEager }}<span class="require">*</span></label>
+            <ng-select [items]="causeOfAdditionalBudget" bindLabel="name" bindValue="id" [clearable]="false"
+              [searchable]="false" placeholder="{{ 'choose_reason' | i18nextEager }}" formControlName="request_reason"
+              [ngClass]="{'error':editionalBudgetForm.controls['request_reason'].invalid && (editionalBudgetForm.controls['request_reason'].dirty || editionalBudgetForm.controls['request_reason'].touched)}">
+            </ng-select>
+          </div>
+
+          <div class="form-group">
+            <label I18n> {{ 'effective_date' | i18nextEager }} <span class="require">*</span></label>
+            <div>
+              <svms-datepicker [inputdateFormat]="" ngDefaultControl id="date1" I18n #dateFiled
+                formControlName="effective_date"
+                [ngClass]="editionalBudgetForm.get('effective_date').invalid ? 'error' : ''"
+                [ngClass]="{'error':editionalBudgetForm.controls['effective_date'].invalid && (editionalBudgetForm.controls['effective_date'].dirty || editionalBudgetForm.controls['effective_date'].touched)}">
+              </svms-datepicker>
+            </div>
+          </div>
+        </div>
+
+        <!-- <div class="d-flex align-items-center justify-content-between mb-16">
+          <h4 class="d-flex align-items-center ">
+            <icon class="d-flex mr-8" size="19px" name="add_task" type="material" cuClass="d-flex"></icon>
+            {{ 'list_of_approvers' | i18nextEager }}
+          </h4>
+        </div>
+
+        <label>Approvers</label>
+        <div class="panel-info mb-8 p-16 border">
+          <div class="no-gutters row">
+            <div class="col-12">
+              <div class="d-flex align-items-center">
+                <div class="initials initials-profile initials__green d-flex mr-8 ">SG</div>
+                <div class="d-flex flex-column">
+                  <span class="subtitle-2 font-weight-medium">{{ 'suresh_gupta' | i18nextEager }}</span>
+                  <span class="x-small">{{ 'hiring_manager' | i18nextEager }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-info mb-16 p-16 border">
+          <div class="no-gutters row">
+            <div class="col-12">
+              <div class="d-flex align-items-center">
+                <div class="initials initials-profile initials__green d-flex mr-8 ">SG</div>
+                <div class="d-flex flex-column">
+                  <span class="subtitle-2 font-weight-medium">{{ 'suresh_gupta' | i18nextEager }}</span>
+                  <span class="x-small">{{ 'hiring_manager' | i18nextEager }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> -->
+
+        <!-- <div class="form-group mb-16">
+          <label> Note for Approver(s) </label>
+          <textarea type="textarea" rows="7" cols="12" maxlength="1000" class="form-control" placeholder="{{ 'add_note' | i18nextEager }}"
+            formControlName="request_notes"
+            [ngClass]="{'error':editionalBudgetForm.controls['request_notes'].invalid && (editionalBudgetForm.controls['request_notes'].dirty || editionalBudgetForm.controls['request_notes'].touched)}"></textarea>
+        </div> -->
+      </div>
+
+
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+      <div class="d-flex align-items-center justify-content-end">
+        <button type="submit" class="btn btn-primary">
+          <icon size="24px" name="check_circle" type="material" class="icon--on-right mr-8" cuClass="icon-cu">
+          </icon> {{ 'save' | i18nextEager }}
+        </button>
+      </div>
+
+    </svms-sidebar-footer>
+  </form>
+</svms-sidebar>

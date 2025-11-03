@@ -1,0 +1,76 @@
+<div class="try-out-block p-16 mb-16 d-flex align-items-center justify-content-between rounded-sm">
+    <div>
+        <p class="font-weight-medium try-out-head">{{'Try Out' | i18next }}</p>
+        <p>{{"Click on 'Try Out' to check accuracy configuration" | i18next }}</p>
+    </div>
+    <a class="try-out-btn font-weight-medium text-underline" (click)="openTryOut()">{{'Try Out' | i18next }}</a>
+</div>
+<app-svms-modal class="accuracy-configuration-modal" [title]="title" size="medium" [visibility]="tryOut" (onClose)="sidebarClose()">
+    <app-svms-modal-body>
+        <div class="">
+            <div class="d-flex align-items-center justify-content-between border-top border-bottom p-16">
+                <span>
+                    <span class="text-custom-grey">{{ 'scaling_type' | i18next }}</span>
+                    <span class="text-red pl-4">*</span>
+                    <i class="info-icon material-icons ml-4" tooltip="{{scaling_type_supporting_text | i18next }}" placement="right">help</i>
+                </span>
+                <div>
+                    <ng-select [items]="scalingType" bindLabel="name" bindValue="value"
+                        placeholder="{{ 'select' | i18next }} {{ 'scaling_type' | i18next }}"
+                        [(ngModel)]="scaleExample.type" (change)="tryInputChange()">
+                    </ng-select>
+                </div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between border-bottom p-16">
+                <span>
+                    <span class="text-custom-grey">{{ 'scaling_limit' | i18next }}</span>
+                    <span class="text-red pl-4">*</span>
+                    <i class="info-icon material-icons ml-4" tooltip="{{'Defines the number of decimals to present.' | i18next }}" placement="right">help</i>
+                </span>
+                <div>
+                    <input type="number" class="c-form-control" min="0" max="8" [ngClass]="{'error': scaleLimitError}"
+                        placeholder="{{ 'enter_a_number_between_0_to_8' | i18next }}"
+                        [(ngModel)]="scaleExample.scale" (ngModelChange)="tryInputChange()">
+                    <div *ngIf="scaleLimitError" class="fs-12 pt-4 error-text">
+                        {{scaleLimitErrorMessage | i18next}}
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between border-bottom p-16">
+                <ng-container *ngIf="scaleExample.type !== 'truncate'">
+                    <span>
+                        <span class="text-custom-grey">{{ 'scaling_threshold' | i18next }}</span>
+                        <span class="text-red pl-4">*</span>
+                        <i class="info-icon material-icons ml-4" tooltip="{{'Defines the threshold for rounding up or down. Typically, this value is 5.' | i18next }}" placement="right">help</i>
+                    </span>
+                    <div>
+                        <input type="number" class="c-form-control" min="0" max="9"
+                            [ngClass]="{'error': scaleThresholdError}"
+                            placeholder="{{ 'enter_a_number_between_0_to_9' | i18next }}"
+                            [(ngModel)]="scaleExample.threshold" (ngModelChange)="tryInputChange()">
+                        <div *ngIf="scaleThresholdError" class="fs-12 pt-4 error-text">
+                            {{scaleThresholdErrorMessage | i18next}}
+                        </div>
+                    </div>
+                </ng-container>
+            </div>
+            <div class="d-flex align-items-center justify-content-between p-16">
+                <span>
+                    <span class="text-custom-grey">{{ 'your_input' | i18next }}</span>
+                    <span class="text-red pl-4">*</span>
+                    <i class="info-icon material-icons ml-4" tooltip="{{'Your Input' | i18next }}"placement="right">help</i>
+                </span>
+                <div>
+                    <input type="number" class="c-form-control" placeholder="{{ 'enter_any_number' | i18next }}"
+                        [(ngModel)]="scaleExample.input" (ngModelChange)="tryInputChange()">
+                </div>
+            </div>
+        </div>
+    </app-svms-modal-body>
+    <app-svms-modal-footer>
+        <div class="d-flex align-items-center justify-content-between">
+            <h4 class="font-weight-medium">{{'Result' | i18next }}</h4>
+        <h4 [(ngModel)]="scaleExample.result" class="font-weight-medium">{{ scaleExample?.result || '0.0000'  }}</h4>
+        </div>
+    </app-svms-modal-footer>
+</app-svms-modal>

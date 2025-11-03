@@ -1,0 +1,401 @@
+<svms-sidebar-ng title="{{sidebar_title |i18next}}" [dataVisibility]="editAvailability"
+  (onClose)="sidebarClose()">
+  <div class="sidebar-wrapper">
+    <app-logs [log]="logs"></app-logs>
+    <div class="preferred-availability p-24">
+      <div class="availability-heading">
+        <p class="first d-inline-block">
+          {{ 'days' | i18nextEager }}
+        </p>
+        <p class="second d-inline-block">
+          {{ 'from' | i18nextEager }}
+        </p>
+        <p class="third d-inline-block">
+          {{ 'to' | i18nextEager }}
+        </p>
+      </div>
+      <div [formGroup]="preferredAvailability" class="pl-12 pl-m-0">
+
+        <div class="item-row clearfix" formArrayName="sun">
+          <div class="left-col float-left">
+            <div class="toggle-panel">
+              <div class="toggle-panel-inner justify-content-start"
+                [ngClass]="toggle?.sun?.value ? 'if-active' : 'if-inactive'">
+                <span class="toggle-switch" [ngClass]="toggle?.sun?.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle('sun')"></span>
+                <span class="status-text ml-12">{{ 'sunday' | i18nextEager }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="right-col float-right" *ngFor="let item of sunTime, let i = index" [formGroupName]="i">
+            <div class="select-box-wrap float-left">
+              <div class="form-group-row" [formGroupName]="'time'">
+                <div class="form-group position-relative">
+
+                  <input type="text" (focus)="showTime = 'sun_from'+i" (focusout)="setShowTimeValue(undefined)"
+                    class="form-control"
+                    [ngClass]="{ 'error':preferredAvailability.controls.sun[i]?.time?.from.errors }"
+                    formControlName="from" (change)="checkTimeFormat('sun','from',i)"   (keypress)="checkTimePattern($event)" placeholder="{{ 'from' | i18nextEager }}" maxlength="8">
+
+                  <app-time-panel *ngIf="showTime === 'sun_from'+i"
+                    [searchTime]="preferredAvailability?.value?.sun[i]?.time?.from"
+                    (selectedTime)="setSelectedTime($event, 'sun', i, 'from')" class="text-center"></app-time-panel>
+
+
+                  <!-- <ng-select [clearable]="false" placeholder="Select" [searchable]="false" formControlName="from">
+                    <ng-option [value]="'9 am'">9 am</ng-option>
+                    <ng-option [value]="'10 am'">10 am</ng-option>
+                  </ng-select>     -->
+
+
+                </div>
+                <div class="form-group  position-relative">
+
+
+                  <input type="text" (focus)="showTime = 'sun_to'+i" (focusout)="setShowTimeValue(undefined)"
+                    class="form-control" [ngClass]="{'error':preferredAvailability.controls.sun[i]?.time?.to.errors }"
+                    formControlName="to" (change)="checkTimeFormat('sun','to',i)"  (keypress)="checkTimePattern($event)" placeholder="{{ 'to' | i18nextEager }}" maxlength="8">
+
+                  <app-time-panel *ngIf="showTime === 'sun_to'+i"
+                    [searchTime]="preferredAvailability?.value?.sun[i]?.time?.to"
+                    (selectedTime)="setSelectedTime($event, 'sun', i, 'to')" class="text-center"></app-time-panel>
+                </div>
+              </div>
+            </div>
+            <div class="add-remove-box float-right">
+              <div class="add-remove pt-4" *ngIf="i===0">
+                <a  class="add-link" (click)="onAddTime('sun', false, !toggle?.sun?.value)">
+                  <icon size="22px" name="add" type="material" cuClass="d-flex"></icon>
+                </a>
+              </div>
+              <div class="add-remove pt-4" *ngIf="i>0">
+                <a  class="remove-link" (click)="onRemoveTime('sun', i, !toggle?.sun?.value)">
+                  <icon class="remove-icon" size="22px" name="close" type="material" cuClass="d-flex">
+                  </icon>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="item-row clearfix" formArrayName="mon">
+          <div class="left-col float-left">
+            <div class="toggle-panel">
+              <div class="toggle-panel-inner justify-content-start"
+                [ngClass]="toggle?.mon?.value ? 'if-active' : 'if-inactive'">
+                <span class="toggle-switch" [ngClass]="toggle?.mon?.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle('mon')"></span>
+                <span class="status-text ml-12">{{ 'monday' | i18nextEager }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="right-col float-right" *ngFor="let item of monTime, let i = index" [formGroupName]="i">
+            <div class="select-box-wrap float-left">
+              <div class="form-group-row" [formGroupName]="'time'">
+                <div class="form-group  position-relative custom-width-small">
+
+                  <input type="text" (focus)="showTime = 'mon_from'+i" (focusout)="setShowTimeValue(undefined)"
+                    class="form-control"
+                    [ngClass]="{ 'error':preferredAvailability.controls.mon[i]?.time?.from.invalid &&  preferredAvailability.controls.mon[i]?.time?.from.errors }"
+                    formControlName="from" (change)="checkTimeFormat('mon','from',i)"  (keypress)="checkTimePattern($event)" placeholder="{{ 'from' | i18nextEager }}" maxlength="8">
+
+                  <app-time-panel *ngIf="showTime === 'mon_from'+i"
+                    [searchTime]="preferredAvailability?.value?.mon[i]?.time?.from"
+                    (selectedTime)="setSelectedTime($event, 'mon', i, 'from')" class="text-center"></app-time-panel>
+
+                    <p class="validation-msg"
+
+                    *ngIf="((preferredAvailability.controls.mon[i]?.time?.from.touched && preferredAvailability.controls.mon[i]?.time?.from.errors))">
+                    <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'required' | i18nextEager }}
+                    </p>
+                  <!-- <ng-select [clearable]="false" placeholder="Select" [searchable]="false" formControlName="from">
+                    <ng-option [value]="'9 am'">9 am</ng-option>
+                    <ng-option [value]="'10 am'">10 am</ng-option>
+                  </ng-select> -->
+                </div>
+                <div class="form-group  position-relative custom-width-small">
+                  <input type="text" (focus)="showTime = 'mon_to'+i" (focusout)="setShowTimeValue(undefined)"
+                    class="form-control" [ngClass]="{'error':preferredAvailability.controls.mon[i]?.time?.to.errors }"
+                    formControlName="to" (change)="checkTimeFormat('mon','to',i)" (keypress)="checkTimePattern($event)" placeholder="{{ 'to' | i18nextEager }}" maxlength="8">
+
+                  <app-time-panel *ngIf="showTime === 'mon_to'+i"
+                    [searchTime]="preferredAvailability?.value?.mon[i]?.time?.to"
+                    (selectedTime)="setSelectedTime($event, 'mon', i, 'to')" class="text-center"></app-time-panel>
+                </div>
+              </div>
+            </div>
+            <div class="add-remove-box float-right">
+              <div class="form-group add-remove pt-4" *ngIf="i===0">
+                <a  class="add-link" (click)="onAddTime('mon', false, !toggle?.mon?.value)">
+                  <icon size="22px" name="add" type="material" cuClass="d-flex"></icon>
+                </a>
+              </div>
+              <div class="form-group add-remove pt-4" *ngIf="i>0">
+                <a  class="remove-link" (click)="onRemoveTime('mon', i, !toggle?.mon?.value)">
+                  <icon class="remove-icon" size="22px" name="close" type="material" cuClass="d-flex">
+                  </icon>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="item-row clearfix" formArrayName="tue">
+          <div class="left-col float-left">
+            <div class="toggle-panel">
+              <div class="toggle-panel-inner justify-content-start"
+                [ngClass]="toggle?.tue?.value ? 'if-active' : 'if-inactive'">
+                <span class="toggle-switch" [ngClass]="toggle?.tue?.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle('tue')"></span>
+                <span class="status-text ml-12">{{ 'tuesday' | i18nextEager }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="right-col float-right" *ngFor="let item of tueTime, let i = index" [formGroupName]="i">
+            <div class="select-box-wrap float-left">
+              <div class="form-group-row" [formGroupName]="'time'">
+                <div class="form-group  position-relative custom-width-small">
+                  <input type="text" (focus)="showTime = 'tue_from'+i" (focusout)="setShowTimeValue(undefined)"
+                    class="form-control"
+                    [ngClass]="{ 'error':preferredAvailability.controls.tue[i]?.time?.from.errors }"
+                    formControlName="from" (change)="checkTimeFormat('tue','from',i)" (keypress)="checkTimePattern($event)" placeholder="{{ 'from' | i18nextEager }}" maxlength="8">
+
+                  <app-time-panel *ngIf="showTime === 'tue_from'+i"
+                    [searchTime]="preferredAvailability?.value?.tue[i]?.time?.from"
+                    (selectedTime)="setSelectedTime($event, 'tue', i, 'from')" class="text-center"></app-time-panel>
+                </div>
+                <div class="form-group  position-relative custom-width-small">
+                  <input type="text" (focus)="showTime = 'tue_to'+i" (focusout)="setShowTimeValue(undefined)"
+                    class="form-control" [ngClass]="{'error':preferredAvailability.controls.tue[i]?.time?.to.errors }"
+                    formControlName="to"  (change)="checkTimeFormat('tue','to',i)" (keypress)="checkTimePattern($event)" placeholder="{{ 'to' | i18nextEager }}" maxlength="8">
+
+                  <app-time-panel *ngIf="showTime === 'tue_to'+i"
+                    [searchTime]="preferredAvailability?.value?.tue[i]?.time?.to"
+                    (selectedTime)="setSelectedTime($event, 'tue', i, 'to')" class="text-center"></app-time-panel>
+
+                </div>
+              </div>
+            </div>
+            <div class="add-remove-box float-right">
+              <div class="form-group add-remove pt-4" *ngIf="i===0">
+                <a  class="add-link" (click)="onAddTime('tue', false, !toggle?.tue?.value)">
+                  <icon size="22px" name="add" type="material" cuClass="d-flex"></icon>
+                </a>
+              </div>
+              <div class="form-group add-remove pt-4" *ngIf="i>0">
+                <a  class="remove-link" (click)="onRemoveTime('tue', i, !toggle?.tue?.value)">
+                  <icon class="remove-icon" size="22px" name="close" type="material" cuClass="d-flex">
+                  </icon>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="item-row clearfix" formArrayName="wed">
+          <div class="left-col float-left">
+            <div class="toggle-panel">
+              <div class="toggle-panel-inner justify-content-start"
+                [ngClass]="toggle?.wed?.value ? 'if-active' : 'if-inactive'">
+                <span class="toggle-switch" [ngClass]="toggle?.wed?.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle('wed')"></span>
+                <span class="status-text ml-12">{{ 'wednesday' | i18nextEager }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="right-col float-right" *ngFor="let item of wedTime, let i = index" [formGroupName]="i">
+            <div class="select-box-wrap float-left">
+              <div class="form-group-row" [formGroupName]="'time'">
+                <div class="form-group  position-relative custom-width-small">
+                  <input type="text" (focus)="showTime = 'wed_from'+i" (focusout)="setShowTimeValue(undefined)"
+                    class="form-control"
+                    [ngClass]="{ 'error':preferredAvailability.controls.wed[i]?.time?.from.errors }"
+                    formControlName="from" (change)="checkTimeFormat('wed','from',i)" (keypress)="checkTimePattern($event)" placeholder="{{ 'from' | i18nextEager }}" maxlength="8">
+
+                  <app-time-panel *ngIf="showTime === 'wed_from'+i"
+                    [searchTime]="preferredAvailability?.value?.wed[i]?.time?.from"
+                    (selectedTime)="setSelectedTime($event, 'wed', i, 'from')" class="text-center"></app-time-panel>
+                </div>
+                <div class="form-group  position-relative custom-width-small">
+                  <input type="text" (focus)="showTime = 'wed_to'+i" (focusout)="setShowTimeValue(undefined)"
+                    class="form-control" [ngClass]="{'error':preferredAvailability.controls.wed[i]?.time?.to.errors }"
+                    formControlName="to" (change)="checkTimeFormat('wed','to',i)" (keypress)="checkTimePattern($event)" placeholder="{{ 'to' | i18nextEager }}" maxlength="8">
+
+                  <app-time-panel *ngIf="showTime === 'wed_to'+i"
+                    [searchTime]="preferredAvailability?.value?.wed[i]?.time?.to"
+                    (selectedTime)="setSelectedTime($event, 'wed', i, 'to')" class="text-center"></app-time-panel>
+                </div>
+              </div>
+            </div>
+            <div class="add-remove-box float-right">
+              <div class="form-group add-remove pt-4" *ngIf="i===0">
+                <a  class="add-link" (click)="onAddTime('wed', false, !toggle?.wed?.value)">
+                  <icon size="22px" name="add" type="material" cuClass="d-flex"></icon>
+                </a>
+              </div>
+              <div class="form-group add-remove pt-4" *ngIf="i>0">
+                <a  class="remove-link" (click)="onRemoveTime('wed', i, !toggle?.wed?.value)">
+                  <icon class="remove-icon" size="22px" name="close" type="material" cuClass="d-flex">
+                  </icon>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="item-row clearfix" formArrayName="thu">
+          <div class="left-col float-left">
+            <div class="toggle-panel">
+              <div class="toggle-panel-inner justify-content-start"
+                [ngClass]="toggle?.thu?.value ? 'if-active' : 'if-inactive'">
+                <span class="toggle-switch" [ngClass]="toggle?.thu?.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle('thu')"></span>
+                <span class="status-text ml-12">{{ 'thursday' | i18nextEager }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="right-col float-right" *ngFor="let item of thuTime, let i = index" [formGroupName]="i">
+            <div class="select-box-wrap float-left">
+              <div class="form-group-row" [formGroupName]="'time'">
+                <div class="form-group  position-relative custom-width-small">
+                  <input type="text" (focus)="showTime = 'thu_from'+i" (focusout)="setShowTimeValue(undefined)"
+                    class="form-control"
+                    [ngClass]="{ 'error':preferredAvailability.controls.thu[i]?.time?.from.errors }"
+                    formControlName="from" (change)="checkTimeFormat('thu','from',i)" (keypress)="checkTimePattern($event)" placeholder="{{ 'from' | i18nextEager }}" maxlength="8">
+
+                  <app-time-panel *ngIf="showTime === 'thu_from'+i"
+                    [searchTime]="preferredAvailability?.value?.thu[i]?.time?.from"
+                    (selectedTime)="setSelectedTime($event, 'thu', i, 'from')" class="text-center"></app-time-panel>
+                </div>
+                <div class="form-group  position-relative custom-width-small">
+                  <input type="text" (focus)="showTime = 'thu_to'+i" (focusout)="setShowTimeValue(undefined)"
+                    class="form-control"  (change)="checkTimeFormat('thu','to',i)" [ngClass]="{'error':preferredAvailability.controls.thu[i]?.time?.to.errors }"
+                    formControlName="to" (keypress)="checkTimePattern($event)" placeholder="{{ 'to' | i18nextEager }}" maxlength="8">
+
+                  <app-time-panel *ngIf="showTime === 'thu_to'+i"
+                    [searchTime]="preferredAvailability?.value?.thu[i]?.time?.to"
+                    (selectedTime)="setSelectedTime($event, 'thu', i, 'to')" class="text-center"></app-time-panel>
+                </div>
+              </div>
+            </div>
+            <div class="add-remove-box float-right">
+              <div class="form-group add-remove pt-4" *ngIf="i===0">
+                <a  class="add-link" (click)="onAddTime('thu', false, !toggle?.thu?.value)">
+                  <icon size="22px" name="add" type="material" cuClass="d-flex"></icon>
+                </a>
+              </div>
+              <div class="form-group add-remove pt-4" *ngIf="i>0">
+                <a  class="remove-link" (click)="onRemoveTime('thu', i, !toggle?.thu?.value)">
+                  <icon class="remove-icon" size="22px" name="close" type="material" cuClass="d-flex">
+                  </icon>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="item-row clearfix" formArrayName="fri">
+          <div class="left-col float-left">
+            <div class="toggle-panel">
+              <div class="toggle-panel-inner justify-content-start"
+                [ngClass]="toggle?.fri?.value ? 'if-active' : 'if-inactive'">
+                <span class="toggle-switch" [ngClass]="toggle?.fri?.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle('fri')"></span>
+                <span class="status-text ml-12">{{ 'friday' | i18nextEager }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="right-col float-right" *ngFor="let item of friTime, let i = index" [formGroupName]="i">
+            <div class="select-box-wrap float-left">
+              <div class="form-group-row" [formGroupName]="'time'">
+                <div class="form-group  position-relative custom-width-small">
+                  <input type="text" (focus)="showTime = 'fri_from'+i" (focusout)="setShowTimeValue(undefined)"
+                    class="form-control"
+                    [ngClass]="{ 'error':preferredAvailability.controls.fri[i]?.time?.from.errors }"
+                    formControlName="from" (change)="checkTimeFormat('fri','from',i)"  (keypress)="checkTimePattern($event)" placeholder="{{ 'from' | i18nextEager }}" maxlength="8">
+
+                  <app-time-panel *ngIf="showTime === 'fri_from'+i"
+                    [searchTime]="preferredAvailability?.value?.fri[i]?.time?.from"
+                    (selectedTime)="setSelectedTime($event, 'fri', i, 'from')" class="text-center"></app-time-panel>
+                </div>
+                <div class="form-group  position-relative custom-width-small">
+                  <input type="text" (focus)="showTime = 'fri_to'+i" (focusout)="setShowTimeValue(undefined)"
+                    class="form-control" [ngClass]="{'error':preferredAvailability.controls.fri[i]?.time?.to.errors }"
+                    formControlName="to" (change)="checkTimeFormat('fri','to',i)" (keypress)="checkTimePattern($event)" placeholder="{{ 'to' | i18nextEager }}" maxlength="8">
+
+                  <app-time-panel *ngIf="showTime === 'fri_to'+i"
+                    [searchTime]="preferredAvailability?.value?.fri[i]?.time?.to"
+                    (selectedTime)="setSelectedTime($event, 'fri', i, 'to')" class="text-center"></app-time-panel>
+                </div>
+              </div>
+            </div>
+            <div class="add-remove-box float-right">
+              <div class="form-group add-remove pt-4" *ngIf="i===0">
+                <a  class="add-link" (click)="onAddTime('fri', false, !toggle?.fri?.value)">
+                  <icon size="22px" name="add" type="material" cuClass="d-flex"></icon>
+                </a>
+              </div>
+              <div class="form-group add-remove pt-4" *ngIf="i>0">
+                <a  class="remove-link" (click)="onRemoveTime('fri', i, !toggle?.fri?.value)">
+                  <icon class="remove-icon" size="22px" name="close" type="material" cuClass="d-flex">
+                  </icon>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="item-row clearfix" formArrayName="sat">
+          <div class="left-col float-left">
+            <div class="toggle-panel">
+              <div class="toggle-panel-inner justify-content-start"
+                [ngClass]="toggle?.sat?.value ? 'if-active' : 'if-inactive'">
+                <span class="toggle-switch" [ngClass]="toggle?.sat?.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle('sat')"></span>
+                <span class="status-text ml-12">{{ 'saturday' | i18nextEager }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="right-col float-right" *ngFor="let item of satTime, let i = index" [formGroupName]="i">
+            <div class="select-box-wrap float-left">
+              <div class="form-group-row" [formGroupName]="'time'">
+                <div class="form-group  position-relative custom-width-small">
+                  <input type="text" (focus)="showTime = 'sat_from'+i" (focusout)="setShowTimeValue(undefined)"
+                    class="form-control"
+                    [ngClass]="{ 'error':preferredAvailability.controls.sat[i]?.time?.from.errors }"
+                    formControlName="from" (change)="checkTimeFormat('sat','from',i)" (keypress)="checkTimePattern($event)" placeholder="{{ 'from' | i18nextEager }}" maxlength="8">
+
+                  <app-time-panel *ngIf="showTime === 'sat_from'+i"
+                    [searchTime]="preferredAvailability?.value?.sat[i]?.time?.from"
+                    (selectedTime)="setSelectedTime($event, 'sat', i, 'from')" class="text-center"></app-time-panel>
+                </div>
+                <div class="form-group  position-relative custom-width-small">
+                  <input type="text" (focus)="showTime = 'sat_to'+i" (focusout)="setShowTimeValue(undefined)"
+                    class="form-control" [ngClass]="{'error':preferredAvailability.controls.sat[i]?.time?.to.errors }"
+                    formControlName="to" (change)="checkTimeFormat('sat','to',i)" (keypress)="checkTimePattern($event)" placeholder="{{ 'to' | i18nextEager }}" maxlength="8">
+
+                  <app-time-panel *ngIf="showTime === 'sat_to'+i"
+                    [searchTime]="preferredAvailability?.value?.sat[i]?.time?.to"
+                    (selectedTime)="setSelectedTime($event, 'sat', i, 'to')" class="text-center"></app-time-panel>
+                </div>
+              </div>
+            </div>
+            <div class="add-remove-box float-right">
+              <div class="form-group add-remove pt-4" *ngIf="i===0">
+                <a  class="add-link" (click)="onAddTime('sat', false, !toggle?.sat?.value)">
+                  <icon size="22px" name="add" type="material" cuClass="d-flex"></icon>
+                </a>
+              </div>
+              <div class="form-group add-remove pt-4" *ngIf="i>0">
+                <a  class="remove-link" (click)="onRemoveTime('sat', i, !toggle?.sat?.value)">
+                  <icon class="remove-icon" size="22px" name="close" type="material" cuClass="d-flex">
+                  </icon>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <svms-sidebar-footer-ng>
+    <button type="submit" (click)="saveAvailability()" class="btn btn-primary float-right mr-16">
+      {{ 'save_availability' | i18nextEager }}
+    </button>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

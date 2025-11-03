@@ -1,0 +1,130 @@
+<div class="create-new-vendor-compliance-group">
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <i tooltip="Back" (click)="backClicked()" placement="bottom" class="material-icons back-arrow-icon mr-16 cursor-pointer">arrow_back</i>
+            <h3 class="font-weight-semibold mb-0">{{ title | i18next}}</h3>
+        </div>
+        <div>
+            <button (click)="addDocument()" type="submit" class="c-btn c-btn-success-medium">{{ isUpdateReq?'Update':'Save' | i18nextEager }}</button>
+        </div>
+    </header>
+    <section class="section-body-content">
+        <div class="p-24">
+            <div class="c-form-group-row">
+                <div class="c-form-group">
+                    <label>{{ 'vendor_compliance_document_group_name' | i18next }} <span class="require">*</span></label>
+                    <input [(ngModel)]="groupName" type="text" class="c-form-control"  name="title" maxlength="100" (keypress)="omit_special_char($event)"  placeholder="{{'vendor_compliance_document_group_name' | i18next}}">
+                </div>
+                <div class="c-form-group toggle-width toggle-panel pt-24">
+                    <div class="toggle-panel-inner" [ngClass]="titleToggle?.value ? 'if-active' : 'if-inactive'">
+                    <span class="status-text">{{(titleToggle?.value ? 'Active':'Inactive') | i18next}}</span>
+                    <span class="toggle-switch" [ngClass]="titleToggle?.value ? 'toggle-on' : 'toggle-off'"
+                        (click)="onClickToggle()"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="c-form-group-row">
+                <div class="c-form-group">
+                    <label>{{ 'description' | i18next }}</label>
+                    <textarea [(ngModel)]="description" class="c-form-control" placeholder="{{ 'vendor_compliance_document_group_description' | i18next }}"></textarea>
+                </div>
+            </div>
+            <div class="create-view-table-main">
+                <div class="top-head p-16 d-flex justify-content-between align-items-center">
+                    <div class="top-left-head">
+                        <p class="font-weight-medium">{{'Documents' | i18next}}</p>
+                        <span>{{ 'here_you_can_choose_the_existing_documents_added' | i18next }}</span>
+                    </div>
+                    <button class="c-btn c-btn-primary-medium-left-icon" (click)="selectDocuments = true">
+                        <i class="material-icons">add</i> {{ 'add_documents' | i18next }}
+                    </button>
+                </div>
+
+                <table class="create-view-table" *ngIf="selectedDocument.length > 0">
+                    <thead>
+                        <tr>
+                            <th>
+                                <span> {{'Document Name' | i18next}}
+                                    <div class="sorting">
+                                        <span class="asc">
+                                            <i class="material-icons" (click)="onSortDocument('asc')">arrow_drop_up</i>
+                                        </span>
+                                        <span class="dec">
+                                            <i class="material-icons" (click)="onSortDocument('desc')">arrow_drop_down</i>
+                                        </span>
+                                    </div>
+                                </span>
+
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody *ngFor="let document of documentList">
+                        <tr *ngIf="document.selected">
+                            <td><a href="#"> {{document.name | i18next}}</a></td>
+                            <td (click)="deleteSelectedDocument(document)" class="text-right"><i class="material-icons delete-rule cursor-pointer">highlight_off</i></td>
+                        </tr>
+                        <!-- <tr class="d-none">
+                            <td class="text-center no-document-td">
+                            <img src="/assets/images/no-records.svg" alt="">
+                            <h4 class="font-weight-medium mt-24">
+                              {{ 'no_documents_selected' | i18next }}
+                            </h4>
+                          </td>
+                        </tr> -->
+                    </tbody>
+                </table>
+                <div class="text-center py-32" *ngIf="selectedDocument.length == 0">
+                <img src="/assets/images/no-records.svg" alt="">
+                <h4 class="font-weight-medium mt-24">
+                  {{ 'no_documents_selected' | i18next }}
+                </h4>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<app-svms-modal title="{{ 'select_documents' | i18next }}" [visibility]="selectDocuments" (onClose)="sidebarClose()">
+    <app-svms-modal-body>
+        <div class="c-search-panel-wrapper mb-32 position-relative">
+            <div class="c-search-panel position-absolute">
+                <div class="position-relative" placement="top">
+                    <input  [(ngModel)]="searchText" type="text" [placeholder]="'Search..' | i18next" (keyup)="filterArray()">
+                    <i class="material-icons">search</i>
+                </div>
+            </div>
+        </div>
+        <div class="alert_message alert_error mb-0" *ngIf="documentList.length == 0">
+            <div class="d-flex align-items-center w-100">
+                <div class="d-flex align-items-center justify-content-start">
+                    <i class="material-icons d-flex mr-8">check_circle</i>
+                </div>
+                <div  class="pl-8">
+                    <div class="font-weight-bold mb-0 medium-font">
+                        {{'document_you_are_searching_is_not_available' | i18next}}  
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-form-group-row">
+            <div class="c-form-group mb-0">
+                <div class="mb-32" *ngFor="let document of documentList;">
+                    <div class="checkbox-block active d-flex justify-content-between">
+                        <div class="mr-24">
+                            <label class="c-input-checkbox mb-0">
+                                <input type="checkbox" id="document.id" [(ngModel)]="document.selected" (change)="onChange(document.name)"  >
+                                <span class="cb-ui"></span>
+                                <span class="cb-label">{{document.name | i18next}}</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </app-svms-modal-body>
+    <app-svms-modal-footer>
+        <div class="text-right">
+            <button (click)="selectDocuments=false" class="c-btn c-btn-primary-medium mt-4">{{ 'add' | i18next }}</button>
+        </div>
+    </app-svms-modal-footer>
+</app-svms-modal>

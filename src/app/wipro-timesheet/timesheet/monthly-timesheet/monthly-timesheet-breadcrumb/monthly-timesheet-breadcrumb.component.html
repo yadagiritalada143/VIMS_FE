@@ -1,0 +1,52 @@
+<div class="p-24">
+  <div class="breadcrumb-left float-left">
+    <ul class="timesheet-breadcrumb mb-8">
+      <li class="active d-inline-block">{{ 'timesheet' | i18next }} ({{timesheetData?.display_value ? timesheetData?.display_value :
+        timesheetData?.work_period | i18next }})
+        <!-- Available Class: draft, pending -->
+        <span class="ml-16 status-ui"
+        [ngClass]="{'draft': checkStatusMatch(timesheetStatuses?.DRAFT) || checkStatusMatch(timesheetStatuses?.MISSING) , 'pending-approval':checkStatusMatch(timesheetStatuses?.PENDING), 'rejected': checkStatusMatch(timesheetStatuses?.REJECTED),'approved':checkStatusMatch(timesheetStatuses?.APPROVED), 'withdrawn':checkStatusMatch(timesheetStatuses?.WITHDRAWN),'deferred':checkStatusMatch(timesheetStatuses?.DEFERRED)}">{{timesheetData?.status | i18next }}</span>
+      </li>
+    </ul>
+    <p class="d-inline-block mr-24" *ngIf="infoDetails?.id">
+      <icon name="label" size="16px" color="#FFC409" class="mr-8"></icon> {{infoDetails?.code | i18next }}
+    </p>
+
+    <p class="d-inline-block" *ngIf="infoDetails?.actions_by?.submitted_by; else showUpdatedAtSection">
+      <icon name="update" size="16px" color="#776DE0" class="mr-8"></icon> {{ 'submitted_by' | i18next }} :
+      {{infoDetails?.actions_by?.submitted_by?.user?.name | i18next }}&nbsp; &nbsp;{{ 'on' | i18next }}
+      {{getFormattedDate(infoDetails?.actions_by?.submitted_by?.action_at) | i18next }}
+      {{' at '+ getFormattedTime(infoDetails?.actions_by?.submitted_by?.action_at) | i18next }}
+    </p>
+    <!-- Submit Button-->
+  </div>
+  <button class="float-right btn btn-primary" *ngIf="infoDetails?.actions_allow?.can_submit" [disabled]="disableSubmit"
+      (click)="submitTimesheet()">{{ 'submit_timesheet' | i18next }}</button>
+
+    <!-- Withdraw Button-->
+    <button class="float-right btn btn-primary " *ngIf="infoDetails?.actions_allow?.can_withdraw" [disabled]="disableWithdraw"
+      (click)="withdrawTimesheet()">{{ 'withdraw_timesheet' | i18next }}</button>
+
+    <!-- Modify Button-->
+    <button class="float-right btn btn-primary orange mr-8" *ngIf="infoDetails?.actions_allow?.can_modify"
+      (click)="modifyTimesheet()" [disabled]="disableModifyButton">
+      {{ 'modify' | i18next }}
+    </button>
+    <!-- Approve Button-->
+    <button class="float-right btn btn-primary green mr-8"
+      *ngIf="infoDetails?.actions_allow?.can_approve" (click)="approveTimesheet()" [disabled]="disableApprovalButton">
+      <icon size="20px" name="check_box" type="material" class="icon--on-left" cuClass="icon-cu"></icon> {{ 'approve' | i18next }}
+    </button>
+
+    <!-- Reject Button-->
+    <button class="float-right btn btn-primary red mr-8" *ngIf="infoDetails?.actions_allow?.can_reject"
+      (click)="rejectTimesheet()" [disabled]="disableApprovalButton">
+      <icon size="20px" name="cancel" type="material" class="icon--on-left" cuClass="icon-cu"></icon> {{ 'reject' | i18next }}
+    </button>
+    <div class="clearfix"></div>
+    <ng-template #showUpdatedAtSection>
+      <p class="d-inline-block" *ngIf="infoDetails?.updated_at">
+        <icon name="update" size="16px" color="#776DE0" class="mr-8"></icon> {{ 'last_updated_on' | i18next }} : {{getFormattedDate(infoDetails?.updated_at) | i18next }}
+      </p>
+    </ng-template>
+</div>

@@ -1,0 +1,197 @@
+<section class="add-new-modal" [ngClass]="{'active' : breakModal}">
+    <header class="add-new-header py-12 px-24">
+        <icon class="close-modal" name="close" size="14px" color="#84919F" (click)="closeModal()"></icon>
+        <ul>
+            <li class=""
+                [ngClass]="{'filled': col?.difference?.hours>0 , 'active': col?.dayNumber === selectedDay?.dayNumber}"
+                *ngFor="let col of formData?.data" (click)="selectDay(col)" [hidden]="!col?.isDayAvailable">
+                <p class="date">
+                    {{col?.dayNumber}}
+                    <span>{{col?.day}}</span>
+                </p>
+                <div class="total" [ngClass]="{'negative':col?.difference?.symbol==='-'}">
+                    <spam *ngIf="col?.difference?.symbol==='-'" [ngClass]="{'negative':col?.difference?.symbol==='-'}">-</spam>
+                    <span>{{col?.difference?.hours || 0 }}h </span>
+                    <span>{{col?.difference?.minutes || 0 }}m</span>
+                </div>
+            </li>
+        </ul>
+    </header>
+
+    <app-timesheet-actions-alerts [timeSheet]="timesheetDetails?.timeSheet"
+        [isAssignmentClosed]="timesheetDetails?.isAssignmentClosed"
+        [isTimesheetEnabled]="timesheetDetails?.isTimesheetEnabled">
+    </app-timesheet-actions-alerts>
+
+    <app-timesheet-supporting-text [timesheetStatus]="timesheetDetails?.timeSheet?.data?.status"></app-timesheet-supporting-text>
+    <!-- <ng-container  *ngFor="let col of formData?.data" >
+        <span  *ngIf="errors[col?.day?.toLowerCase()]?.length">
+        <ul class="error-message-box p-16">
+            <li *ngFor="let e of errors[col?.day?.toLowerCase()] ">{{ e  | i18next }}</li>
+        </ul>
+        </span>
+    </ng-container> -->
+
+    <div class="add-time-body p-32">
+        <div class="form-group-row time-entry-loop">
+            <div class="form-group">
+                <label class="font-weight-medium mb-16">
+                    {{ 'time_in_&_time_out' | i18next }}
+                </label>
+                <div class="input-wrapper time-in position-relative" [ngClass]="{'date-active' : selectedDay.show_check_in_time}">
+                    <icon name="south_west" color="#01CA17" size="16px" class="arrow"></icon>
+                    <icon name="schedule" color="#0F2E4E" size="14px" class="time-icon"></icon>
+                    <input (mouseover)="selectedDay.show_check_in_time= true;" (keypress)="checkTimePattern($event)" (change)="checkTimeFormat(selectedDay, 'check_in')"
+                        (focus)="showTimePanel = (selectedDay?.dayNumber+'_check_in'); selectedDay.show_check_in_time= false;"
+                        (focusout)="setShowTimeValue(undefined)" [(ngModel)]="selectedDay.check_in" class="form-control"
+                        [placeholder]="timePlaceHolder" placeholder="-- : -- --">
+
+                        <p class="small position-absolute show-date">
+                            <a class="prev-day" *ngIf="(selectedDay.check_in_date_number!= selectedDay?.dayNumber) && selectedDay.active && config?.overnight" (click)="updateInOutDate('check_in',false, selectedDay)">
+                              <icon name="chevron_left" size="18px"></icon>
+                            </a>
+                            {{ 'date' | i18next }}: {{selectedDay?.check_in_date_number}}
+                            <a class="next-day" *ngIf="(selectedDay.check_in_date_number == selectedDay?.dayNumber) && selectedDay.active && config?.overnight" (click)="updateInOutDate('check_in',true, selectedDay)">
+                              <icon name="chevron_right" size="18px"></icon>
+                            </a>
+                          </p>
+
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="font-weight-medium mb-16">
+                    &nbsp;
+                </label>
+                <div class="input-wrapper time-out position-relative" [ngClass]="{'date-active' : selectedDay?.show_check_out_time}">
+                    <icon name="north_east" color="#FF0000" size="16px" class="arrow"></icon>
+                    <icon name="schedule" color="#0F2E4E" size="14px" class="time-icon"></icon>
+                    <input (mouseover)="selectedDay.show_check_out_time= true;" (keypress)="checkTimePattern($event)" (change)="checkTimeFormat(selectedDay, 'check_out')"
+                        (focus)="showTimePanel = (selectedDay?.dayNumber+'_check_out'); selectedDay.show_check_out_time= false;"
+                        (focusout)="setShowTimeValue(undefined)" [(ngModel)]="selectedDay.check_out"
+                        class="form-control" [placeholder]="timePlaceHolder" placeholder="-- : -- --">
+                        <p class="small position-absolute show-date">
+                            <a class="prev-day" *ngIf="(selectedDay?.check_out_date_number!= selectedDay?.dayNumber) && selectedDay?.active && config?.overnight" (click)="updateInOutDate('check_out',false, selectedDay)">
+                              <icon name="chevron_left" size="18px"></icon>
+                            </a>
+                            {{ 'date'}}: {{selectedDay?.check_out_date_number}}
+                            <a class="next-day" *ngIf="(selectedDay?.check_out_date_number == selectedDay?.dayNumber) && selectedDay?.active && config?.overnight" (click)="updateInOutDate('check_out',true, selectedDay)">
+                              <icon name="chevron_right" size="18px"></icon>
+                            </a>
+                          </p>
+                </div>
+            </div>
+            <div class="form-group">&nbsp;</div>
+            <div class="form-group">&nbsp;</div>
+        </div>
+
+        <!-- Break -->
+        <div *ngIf="config?.break?.is_allow">
+            <div class="" *ngFor="let option of config.break?.options" [ngClass]="{'d-none':(selectedDay?.breaks[option?.type]?.disableBreak || selectedDay?.breaks[option.type]?.allowedBreaks <= 0 || selectedDay?.breaks[option.type]?.breaks?.length > selectedDay?.breaks[option.type]?.allowedBreaks)
+                }">
+                <div class="d-flex align-items-center mb-16"
+                    *ngIf="selectedDay?.breaks[option.type]?.breaks?.length === 0">
+                    <p class="font-weight-medium">
+                        {{option?.type + ' Break' | titlecase | i18next }}
+                    </p>
+                    <icon *ngIf="selectedDay?.breaks[option.type]?.breaks?.length === 0"
+                        class="add-btn ml-8 cursor-pointer" name="add" size="14px"
+                        (click)="addMoreField(selectedDay, option?.type, selectedDay?.breaks[option.type]?.breaks?.length)">
+                    </icon>
+                </div>
+                <div class="form-loop">
+                    <div class="form-group-row time-entry-loop"
+                        *ngFor="let break of selectedDay?.breaks[option?.type]?.breaks;let i = index;">
+                        <div class="form-group">
+                            <label>{{option?.type + ' Break' | titlecase | i18next }}</label>
+                            <div class="input-wrapper time-in position-relative" (mouseover)="selectedDay.show_break_out_time= true;" [ngClass]="{'date-active' : selectedDay.show_break_out_time}">
+                                <icon name="south_west" color="#01CA17" size="16px" class="arrow"></icon>
+                                <icon name="schedule" color="#0F2E4E" size="14px" class="time-icon"></icon>
+                                <input [disabled]="break?.compliant" [placeholder]="timePlaceHolder" type="text"
+                                    class="form-control text-center" [(ngModel)]="break.break_out"
+                                    (keypress)="checkTimePattern($event)"
+                                    (change)="checkTimeFormat(selectedDay, 'temp_break_out', break);breakTimeFormat(break, 'break_out')"
+                                    (focus)="showTimePanel = (selectedDay?.dayNumber+'_temp_break_in'); selectedDay.show_break_in_time= false;"
+                                    (focusout)="setShowTimeValue(undefined);validateBreakOut(selectedDay, option?.type, break, i+1)">
+                                    <p class="small position-absolute show-date">
+                                        <a class="prev-day" *ngIf="(break?.break_out_number != selectedDay?.dayNumber) && selectedDay?.active && config?.overnight" (click)="updateBreaksInOutDate('break_out',false, break,i+1)">
+                                          <icon name="chevron_left" size="18px"></icon>
+                                        </a>
+                                        {{ 'date' | i18next }}: {{break?.break_out_number}}
+                                        <a class="next-day" *ngIf="(break?.break_out_number == selectedDay?.dayNumber) && selectedDay?.active && config?.overnight" (click)="updateBreaksInOutDate('break_out',true, break,i+1)">
+                                          <icon name="chevron_right" size="18px"></icon>
+                                        </a>
+                                      </p>
+                            </div>
+                            <!-- <p class="text-center mt-4"> {{break?.break_out_date | i18next }} </p> -->
+
+
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-wrapper time-out position-relative" (mouseover)="selectedDay.show_break_in_time= true;" [ngClass]="{'date-active' : selectedDay.show_break_in_time}">
+                                <icon name="north_east" color="#FF0000" size="16px" class="arrow"></icon>
+                                <icon name="schedule" color="#0F2E4E" size="14px" class="time-icon"></icon>
+                                <input [disabled]="break?.compliant" [placeholder]="timePlaceHolder" type="text"
+                                    class="form-control text-center" [(ngModel)]="break.break_in"
+                                    (keypress)="checkTimePattern($event)"
+                                    (change)="checkTimeFormat(selectedDay, 'temp_break_in',break);breakTimeFormat(break, 'break_in')"
+                                    (focus)="showTimePanel = (selectedDay?.dayNumber+'_temp_break_in'); selectedDay.show_break_in_time= false;"
+                                    (focusout)="setShowTimeValue(undefined); validateBreak(selectedDay, option?.type, break, i+1)">
+                                    <p class="small position-absolute show-date">
+                                        <a class="prev-day" *ngIf="(break?.break_in_number != selectedDay?.dayNumber) && selectedDay?.active && config?.overnight" (click)="updateBreaksInOutDate('break_in',false, break,i+1)">
+                                          <icon name="chevron_left" size="18px"></icon>
+                                        </a>
+                                        {{ 'date' | i18next }}: {{break?.break_in_number}}
+                                        <a class="next-day" *ngIf="(break?.break_in_number == selectedDay?.dayNumber) && selectedDay?.active && config?.overnight" (click)="updateBreaksInOutDate('break_in',true, break,i+1)">
+                                          <icon name="chevron_right" size="18px"></icon>
+                                        </a>
+                                      </p>
+                            </div>
+
+                            <!-- <p class="text-center mt-4"> {{break?.break_in_date | i18next }} </p> -->
+                        </div>
+                         <div class="form-group"
+                            [ngClass]="{'read-only': (!selectedDay?.breaks[option.type]?.showCompliantReasons) || ((break?.break_out) || (break?.break_in))}">
+                            <label class="font-weight-medium">
+                                {{ 'reason_for_non_compliance___+_option?.type_+___break' | i18next }}
+                            </label>
+                            <ng-select [items]="compliantReasons" bindLabel="name" bindValue="id" [clearable]="true" (change)="validateBreak(selectedDay, option?.type, break, i+1)"
+                                placeholder="Select" [(ngModel)]="break.compliant">
+                            </ng-select>
+                        </div>
+                        <div class="form-group d-flex pt-4">
+                            <icon
+                            [ngClass]="{'read-only':(selectedDay?.breaks[option?.type]?.disableBreak || selectedDay?.breaks[option.type]?.allowedBreaks <= 0 || selectedDay?.breaks[option.type]?.breaks?.length > selectedDay?.breaks[option.type]?.allowedBreaks),
+                            'd-none':(selectedDay?.breaks[option.type]?.allowedBreaks >= 1 && selectedDay?.breaks[option.type]?.breaks?.length >= selectedDay?.breaks[option.type]?.allowedBreaks)}"
+                                class="add-btn cursor-pointer mt-24" name="add" size="14px"
+                                (click)="addMoreField(selectedDay, option?.type, selectedDay?.breaks[option.type]?.breaks?.length)">
+                            </icon>
+                            <icon class="remove-btn cursor-pointer mt-24" name="remove_circle" size="14px"
+                                (click)="deleteBreakField(selectedDay?.breaks[option?.type]?.breaks, i)"></icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End -->
+        <div class="form-group-row">
+            <div class="form-group">
+                <label class="font-weight-medium mb-16">
+                    {{ 'note' | i18next }}
+                </label>
+                <textarea [(ngModel)]="selectedDay.notes" class="form-control min-height"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="add-time-footer p-24 d-flex justify-content-end">
+        <button [disabled]="!selectedDay?.check_in || !selectedDay?.check_out" class="btn btn-light mr-16"
+            (click)="saveData('save&continue')">
+            {{ 'save_&_continue' | i18next }}
+        </button>
+        <button [disabled]="!selectedDay?.check_in || !selectedDay?.check_out" class="btn btn-primary"
+            (click)="saveData('save')">
+            {{ 'save' | i18next }}
+        </button>
+    </div>
+</section>
+<div class="modal-overlay" [ngClass]="{'active' : breakModal}"></div>

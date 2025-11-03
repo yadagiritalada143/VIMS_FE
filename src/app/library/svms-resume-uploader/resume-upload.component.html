@@ -1,0 +1,43 @@
+<div class="resume-box" *ngIf="!resumeFile.name && !viewMode">
+  <div class="resume-wrapper p-16" (click)="fileInput.click()" appDragAndDrop (fileDropped)="onFileDropped($event)">
+    <div *ngIf="progressBar"></div>
+    <div class="d-flex justify-content-between">
+      <div class="drop-zone">
+        <icon size="20px" name="publish" type="material" cuClass="d-flex"></icon>
+      </div>
+      <div class="browse-zone text-left">
+        <p class="" *ngIf="!resumeFile.name && !viewMode">{{ 'drag' | i18next }} &amp; {{ 'drop_file_or' | i18next }} <a >{{ 'browse' | i18next }}</a></p>
+        <input hidden type="file" [accept]="exts" #fileInput (change)="uploadResume($event,'parsing')">
+        <p class="small file-format" *ngIf="!resumeFile.name && !viewMode">{{ 'only' | i18next }} {{exts | uppercase}}
+          {{ 'files_with_maximum_size_of' | i18next }} 10 {{ 'mb' | i18next }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+<ul class="uploaded-list-sidebar" [ngClass]="{'error': fileNotSupportAlert || !isValidFileSize}">
+  <li *ngIf="resumeFile.name">
+    <figure *ngIf="resumeFile.ext && !fileNotSupportAlert">
+      <img [src]="getFileImageSRC(resumeFile.ext)" alt="">
+    </figure>
+    <div class="item-description">
+      {{resumeFile.name}}
+      <icon class="d-inline-block ml-8" size="18px" name="check_circle" type="material" cuClass="d-flex"
+        *ngIf="!fileNotSupportAlert && isValidFileSize"></icon>
+      <p class="upload-size text-left" *ngIf="!fileNotSupportAlert && isValidFileSize">
+        <span *ngIf="resumeFileSize">{{resumeFileSize}} <span *ngIf="mbKbFileSize">{{mbKbFileSize}}</span><span>|</span>{{resumeFile.time | localDateFormat:'d MMM'}}</span>
+      </p>
+      <icon class="d-inline-block ml-8" size="18px" name="error" type="material" cuClass="d-flex"
+        *ngIf="fileNotSupportAlert || !isValidFileSize"></icon>
+      <p class="upload-size  text-left" *ngIf="!isValidFileSize">
+        {{ 'error' | i18next }} : {{ 'file_size_must_be_less_than' | i18next }} 10 {{ 'mb' | i18next }}
+      </p>
+      <p class="upload-size  text-left" *ngIf="fileNotSupportAlert">
+        {{ 'error' | i18next }} : {{ 'file_type_is_not_supported' | i18next }}. {{ 'please_upload_the_resume_either_in' | i18next }} {{exts?.replaceAll(',', ' /') | uppercase}} {{ 'format' | i18next }}
+      </p>
+    </div>
+    <a (click)="deleteResume()" class="delete-resume" *ngIf="resumeFile.name && !viewMode && !isDeleteDisabled">
+      <icon class="d-flex" size="20px" name="delete_forever" type="material" cuClass="d-flex">
+      </icon>
+    </a>
+  </li>
+</ul>

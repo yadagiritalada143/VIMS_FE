@@ -1,0 +1,225 @@
+<svms-sidebar size="medium" title="Interview Details" [dataVisibility]="viewInterviewDetails"
+  (onClose)="sidebarClose()">
+
+  <svms-sidebar-body class="interview-detail-sidebar">
+    <svms-sidebar-extended>
+
+      <div class="extend-bar">
+        <figure class="user-avatar overflow-hidden mb-16">
+          <img src="/assets/images/5.jpg" alt="">
+        </figure>
+        <h4 class="mb-4">{{candidateInfo?.first_name}} {{candidateInfo?.last_name}}</h4>
+        <p>{{candidateInfo?.title}}</p>
+        <div class="social-profile mt-8 mb-32">
+          <div>
+            <a target="_blank" class="mr-12">
+              <img src="../../../assets/images/facebook-icon.svg" alt="" width="20" />
+            </a>
+            <a target="_blank" class="mr-12">
+              <img src="../../../assets/images/linked.svg" alt="" width="20" />
+            </a>
+          </div>
+        </div>
+        <div class="contact-info">
+          <icon class="mr-12" size="18px" name="mail_outline" type="material" cuClass="icon-cu"></icon>
+          <p>
+            <a href="mailto:candidateInfo?.email">{{candidateInfo?.email}}</a>
+          </p>
+        </div>
+        <div class="contact-info">
+          <icon class="mr-12" size="18px" name="call" type="material" cuClass="icon-cu"></icon>
+          <p>
+            <a href="tel:candidateInfo?.phone_number">{{candidateInfo?.phone_isdcode}}{{candidateInfo?.phone_number}}</a>
+          </p>
+        </div>
+        <button class="btn btn-download" (click)="downloadResume()" [disabled]="!candidateInfo?.resume_url">{{ 'download_resume' | i18next }}
+          <icon size="20px" name="save_alt" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+        </button>
+      </div>
+
+    </svms-sidebar-extended>
+
+    <div class="pl-24 pr-24 pt-32 position-relative L-300">
+      <section class="mb-32">
+        <div class="mb-32">
+          <h4 class="mb-8">{{intDetails?.name}}
+            <span class="status-cancelled-ui ml-16" *ngIf="intDetails?.status ==='REJECTED'">{{intDetails?.status | i18next}}</span>
+            <span class="status-cancelled-ui ml-16" *ngIf="intDetails?.status ==='CANCELLED'">{{intDetails?.status | i18next}}</span>
+            <span class="status-active-ui ml-16" *ngIf="intDetails?.status ==='SCHEDULED'">{{intDetails?.status | i18next}}</span>
+            <span class="status-cancelled-ui ml-16" *ngIf="intDetails?.status ==='ACCEPTED'">{{intDetails?.status | i18next}}</span>
+          </h4>
+
+          <p class="job-meta small">
+            <icon class="mr-12 tag" size="14px" name="label" type="material" cuClass="icon-cu"></icon>
+            <span class="mr-24">{{ 'int' | i18next }}-{{candidateInfo?.id}}</span>
+            <icon class="mr-12" size="14px" name="update" type="material" cuClass="icon-cu"></icon>
+            <span>{{ 'created_on' | i18next }} : {{intDetails?.created_on | localDateFormat:'MMM dd ,yyyy'}}</span>
+          </p>
+        </div>
+
+        <div class="no-gutters row align-items-center my-16">
+          <div class="col-md-6">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="supervisor_account" type="material" cuClass="icon-cu"></icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label i18n>{{ 'interview_type' | i18next }}</label></p>
+                <div [ngClass]="{'person':intDetails?.interview_type === 'F2F','telephone':intDetails?.interview_type === 'PHONE','virtual':intDetails?.interview_type === 'VIRTUAL'}">
+                <p class="text-dark" *ngIf="intDetails?.interview_type === 'F2F'">
+                  <icon class="m-8" size="14px" theme="outlined" name="group" type="material" cuClass="icon-cu"></icon>
+                  <span i18n>{{ 'in_person' | i18next }}</span></p>
+                <p class="text-dark" *ngIf="intDetails?.interview_type === 'PHONE'">
+                  <icon class="m-8" size="14px" theme="outlined" name="phone_in_talk" type="material" cuClass="icon-cu"></icon>
+                  <span i18n>{{ 'telephonic' | i18next }}</span></p>
+                <p class="text-dark" *ngIf="intDetails?.interview_type === 'VIRTUAL'">
+                  <icon class="m-8" size="14px" theme="outlined" name="videocam" type="material" cuClass="icon-cu"></icon>
+                  <span i18n>{{ 'virtual' | i18next }}</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="location_on" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label i18n>{{locationLabel | i18next}}</label></p>
+                <p class="text-dark"><span i18n>{{intDetails?.location}}</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="no-gutters row align-items-center my-16">
+          <div class="col-md-6">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="hourglass_top" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label i18n>{{ 'interview_duration' | i18next }}</label></p>
+                <p class="text-dark"><span i18n>{{intDetails?.duration}} {{ 'minutes' | i18next }}</span></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" name="public" type="material" cuClass="icon-cu" theme="outlined"></icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label i18n>{{ 'interview_timezone' | i18next }}</label></p>
+                <p class="text-dark"><span i18n>{{intDetails?.time_zone}}</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="no-gutters row align-items-center my-16">
+          <div class="col-md-6">
+            <div class="d-flex align-items-center">
+              <figure class="avatar float-left mr-8 rounded-circle"><img src="../../../assets/images/5.jpg" alt="">
+              </figure>
+              <div class="">
+                <p class="small d-flex align-items-center"><label i18n>{{ 'interviewer' | i18next }}</label></p>
+                <p class="text-dark"><span i18n>{{interviewer}}</span></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col md-6">
+            <label i18n>{{ 'additional_attendees' | i18next }}</label>
+            <div class="profiles-img" *ngIf="attendeeNames">
+              <span class="initials initials__pink">{{ 'sg' | i18next }}</span>
+              <span class="initials initials__green">{{ 'rh' | i18next }}</span>
+              <span class="initials initials__purple">{{ '10' | i18next }}+</span>
+            </div>
+            <span *ngIf="additionalAttendees.length > 0">{{additionalAttendee()}}</span>
+          </div>
+        </div>
+
+        <div class="form-group my-24">
+          <ng-select bindLabel="name" [clearable]="false">
+            <ng-option>
+              <span class="initials initials__img">
+                <span class="material-icons option-icon">
+                  {{intDetails?.instructions}}list_alt
+                </span>
+              </span> <span class="">{{ 'interview_instructions' | i18next }}</span>
+            </ng-option>
+          </ng-select>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between my-8">
+          <h4 class="d-flex align-items-center ">
+            <icon class="d-flex mr-8" size="19px" name="pending_actions" type="material" cuClass="d-flex"></icon>
+            {{ 'scheduled_date_&_time' | i18next | snakeToTitleCase }}
+          </h4>
+        </div>
+
+        <div class="mb-32">
+          <table>
+            <thead>
+
+              <td>{{ 'date' | i18next | snakeToTitleCase }}</td>
+              <td>{{ 'time' | i18next | snakeToTitleCase }}</td>
+              <td>{{ 'status' | i18next | snakeToTitleCase }}</td>
+
+            </thead>
+            <tbody>
+              <tr class="mb-8" *ngFor="let interview of intDetails?.schedules" [ngClass]="{'schedule-selected':interview?.is_prefered==true,'opacity-out':interview?.is_prefered==false}">
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="logo d-flex align-justify-center rounded-sm mr-8">
+                      <span>{{interview?.date | localDateFormat:'dd'}}</span>
+                    </div>
+                    <div class="">
+                      <p class="small d-flex align-items-center">
+                        {{interview?.date}}
+                      </p>
+                    </div>
+                  </div>
+
+                </td>
+                <td>{{interview?.start_time}} - {{interview?.end_time}}</td>
+                <td>
+                  <icon *ngIf="interview?.is_prefered === true" class="d-flex mr-4 tick" size="24px" name="check_circle" type="material" cuClass="d-flex"></icon>
+                  <div *ngIf="interview?.is_prefered === false" class="more_circle align-justify-center rounded-circle">
+                    <!-- <span class="material-icons text-primary cursor-pointer" *ngIf="interview?.is_prefered === 'false'"> more_horiz</span> -->
+                    <!-- <span class="material-icons text-primary cursor-pointer" *ngIf="interview?.is_prefered === 'true'" > more_horiz</span> -->
+                  </div>
+                </td>
+              </tr>
+              <!-- <tr class="mb-8">
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="logo d-flex align-justify-center rounded-sm mr-8">
+                      <span>23</span>
+                    </div>
+                    <div class="">
+                      <p class="small d-flex align-items-center">
+                        23 April, 2020
+                      </p>
+                    </div>
+                  </div>
+
+                </td>
+                <td>10:00 AM</td>
+                <td>
+                  <div class="more_circle align-justify-center rounded-circle">
+                    <span class="material-icons text-primary cursor-pointer"> more_horiz</span>
+                  </div>
+                </td>
+              </tr> -->
+            </tbody>
+          </table>
+        </div>
+
+
+
+      </section>
+    </div>
+
+  </svms-sidebar-body>
+  <svms-sidebar-footer>
+
+  </svms-sidebar-footer>
+</svms-sidebar>

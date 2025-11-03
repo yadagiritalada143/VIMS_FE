@@ -1,0 +1,420 @@
+<div class="editor-tools" *ngIf="editorType == 'header'">
+  <div class="title-bar d-flex justify-content-between align-items-center px-24">
+    <p>{{ 'header_settings' | i18next }}</p>
+    <button class="btn btn-success small" [disabled]="disableSave" (click)="saveTemplate()" *accessControl>{{ 'save' | i18next }}</button>
+  </div>
+  <div class="editor-part">
+    <app-logs [log]="logs"></app-logs>
+    <perfect-scrollbar [config]="{ suppressScrollX: true, suppressScrollY: false }">
+      <div class="p-24">
+        <div class="mb-32">
+          <label>
+            {{ 'logo' | i18next }}
+          </label>
+          <div class="upload">
+            <span class="upload-overlay">
+              <icon name="add_a_photo"></icon>
+            </span>
+            <input type="file" name="upload">
+          </div>
+        </div>
+        <div>
+          <label>{{ 'logo_position' | i18next }}</label>
+          <div class="logo-position d-flex align-items-center justify-content-between">
+            <div class="ratio-item position-relative">
+              <input type="radio" name="logo_position" value="center">
+              <div class="radio-item-wrapper">
+                <div class="top-element">
+                  <icon name="image" theme="outlined"></icon>
+                </div>
+                <div class="bottom-element">
+                  {{ 'left' | i18next }}
+                </div>
+              </div>
+            </div>
+            <div class="ratio-item position-relative">
+              <input type="radio" name="logo_position" value="right">
+              <div class="radio-item-wrapper">
+                <div class="top-element text-center">
+                  <icon name="image" theme="outlined"></icon>
+                </div>
+                <div class="bottom-element">
+                  {{ 'center' | i18next }}
+                </div>
+              </div>
+            </div>
+            <div class="ratio-item position-relative">
+              <input type="radio" name="logo_position" value="left">
+              <div class="radio-item-wrapper">
+                <div class="top-element text-right">
+                  <icon name="image" theme="outlined"></icon>
+                </div>
+                <div class="bottom-element">
+                  {{ 'right' | i18next }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </perfect-scrollbar>
+  </div>
+</div>
+
+<div class="editor-tools" *ngIf="editorType == 'content'">
+  <div class="title-bar d-flex justify-content-between align-items-center px-24">
+    <div>
+      <p>{{ 'content_settings' | i18next }}</p>
+    </div>
+    <div *accessControl class="d-flex">
+      <button class="btn btn-success small " [disabled]="disableSave" (click)="saveTemplate()" *ngIf="isSuperAdmin">
+        {{ isTemplatePresent ? ('Update'|i18next) : ('Save'|i18next) }}
+      </button>
+      <button class="btn btn-danger small ml-8" [hidden]="notificationData?.defaulted && notificationData?.refId === programId"  (click)="onTemplateDelete()" [disabled]="!isTemplatePresent">{{ 'delete' | i18next }}</button>
+    </div>
+  </div>
+  <div class="editor-part">
+    <app-logs [log]="logs"></app-logs>
+    <perfect-scrollbar [config]="{ suppressScrollX: true, suppressScrollY: false }">
+      <div>
+        <div class="px-24">
+          <div class="status-toggle float-right">
+            <div class="toggle-panel">
+              <div class="toggle-panel-inner" [ngClass]="templateDetails?.notificationConfig?.active ? 'if-active' : 'if-inactive'">
+                <span class="status-text mr-12">{{templateDetails?.notificationConfig?.active ? ('Enabled'|i18next) : ('Disabled'|i18next)}}</span>
+                <span class="toggle-switch" [ngClass]="templateDetails?.notificationConfig?.active ? 'toggle-on' : 'toggle-off'"
+                 (click)="onClickToggleSatus()" ></span>
+              </div>
+            </div>
+          </div>
+          <div class="clearfix"></div>
+          <div class="form-group">
+            <label> {{ 'subject' | i18next }} <span class="require">*</span></label>
+            <input type="text" class="form-control mb-24" [disabled] = "!templateDetails?.notificationConfig?.active" [(ngModel)]="templateDetails.emailTemplate.subject">
+              <label [hidden]="!allowOnlyRootLevel">{{ 'this_is_root_level_template' | i18next }}</label>
+              <div [hidden]="allowOnlyRootLevel">
+              <input type="checkbox" name="header-panel"
+              [(ngModel)]="isRootLevelTemplete" [checked]="isRootLevelTemplete"  class="mr-8" (click)="markAsRootTemplate($event)"> {{ 'set_as_a_root_template' | i18next }}
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="collapse-title no-cursor d-flex align-items-center justify-content-between position-relative">
+            <div class="d-flex align-items-center">
+              <div class="check-box d-flex align-items-center">
+                <label><input type="checkbox" name="header-panel" class="mr-8" [disabled] = "!templateDetails?.notificationConfig?.active" (click)="onCheckboxChange($event)"
+                    [(ngModel)]="templateDetails.notificationConfig.include_header"> {{ 'include_header' | i18next }}</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="collapse-title no-cursor d-flex align-items-center justify-content-between position-relative">
+            <div class="d-flex align-items-center">
+              <div class="check-box d-flex align-items-center">
+                <label> {{ 'body' | i18next }} <span class="require">*</span></label>
+              </div>
+            </div>
+            <div class="d-flex">
+              <button class="btn btn-primary small mb-4 mr-8" type="button" (click)="openPopUp()" [disabled] = "!templateDetails?.notificationConfig?.active">{{ 'edit' | i18next }}</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="collapse-title  no-cursor d-flex align-items-center justify-content-between position-relative">
+            <div class="d-flex align-items-center">
+              <div class="check-box d-flex align-items-center">
+                <label><input type="checkbox" name="footer-panel" class="mr-8" [disabled] = "!templateDetails?.notificationConfig?.active" (click)="onCheckboxChange($event)"
+                    [(ngModel)]="templateDetails.notificationConfig.include_footer">{{ 'include_footer' | i18next }}</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="card">
+          <div class="collapse-title d-flex align-items-center justify-content-between position-relative"
+            (click)="showRecipients()">
+            <div class="d-flex align-items-center">
+              <div class="check-box d-flex align-items-center">
+                <label>{{ 'recipients' | i18next }}</label>
+              </div>
+            </div>
+            <div>
+              <i class="material-icons-outlined more" *ngIf="!recipients">expand_more</i>
+              <i class="material-icons-outlined more" *ngIf="recipients">expand_less</i>
+            </div>
+          </div>
+          <div class="collapse-body" [ngClass]="{'active': recipients}">
+            <div class="p-24">
+              <div class="form-group">
+                <label>{{ 'add_recipients' | i18next }}</label>
+                <ng-select placeholder="{{ 'select' | i18next }}" multiple="true" [(ngModel)]="templateDetails.recipient.keys"
+                  [searchable]="true" loadingText="{{ 'loading....' | i18next }}" notFoundText="{{ 'no_data_found' | i18next }}" [readonly] = "!templateDetails?.notificationConfig?.active"
+                  class="custom-select-dropdown">
+                  <ng-option *ngFor="let templateKey of templateKeys || []" [value]="templateKey?.field_slug">
+                    {{templateKey?.field_name}}</ng-option>
+                </ng-select>
+              </div>
+              <div class="form-group">
+                <label>{{ 'custom_emails' | i18next }}</label>
+                <input type="text" class="form-control" [(ngModel)]="templateDetails.recipient.customEmails" [disabled] = "!templateDetails?.notificationConfig?.active">
+              </div>
+              <div class="form-group">
+                <label>{{ 'exclude_emails' | i18next }}</label>
+                <input type="text" class="form-control" [(ngModel)]="templateDetails.recipient.excludeEmails" [disabled] = "!templateDetails?.notificationConfig?.active">
+              </div>
+              <div class="form-group mb-0 pb-0" [hidden]="!rolesAllowed">
+                <label>{{ 'select_by_user_role' | i18next }}</label>
+                <ng-select placeholder="{{ 'select_by_user_role' | i18next }}" multiple="true" [readonly] = "!templateDetails?.notificationConfig?.active"
+                  [(ngModel)]="templateDetails.recipient.roles" [searchable]="true" loadingText="{{ 'loading....' | i18next }}"
+                  notFoundText="{{ 'no_data_found' | i18next }}" class="custom-select-dropdown">
+                  <ng-option *ngFor="let role of roles || []" [value]="role.id">{{role.name}}</ng-option>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- <div class="card">
+          <div class="collapse-title d-flex align-items-center justify-content-between position-relative"
+            (click)="showSchema()">
+            <div class="d-flex align-items-center">
+              <div class="check-box d-flex align-items-center">
+                <label>Schema</label>
+              </div>
+            </div>
+            <div>
+              <i class="material-icons-outlined more" *ngIf="!schema">expand_more</i>
+              <i class="material-icons-outlined more" *ngIf="schema">expand_less</i>
+            </div>
+          </div>
+          <div class="collapse-body" [ngClass]="{'active': schema}">
+            <div class="form-group-row p-24 pb-0" *ngFor="let schema of templateDetails?.schema">
+              <div class="form-group">
+                <input type="text" name="title" placeholder="String Text" class="form-control" [(ngModel)]="schema.name"
+                  disabled="true">
+              </div>
+              <div class="form-group">
+                <ng-select [clearable]="false" placeholder="Select option" [(ngModel)]="schema.type">
+                  <ng-option *ngFor="let schemaType of schemaTypes" [value]="schemaType?.type">{{schemaType?.name}}
+                  </ng-option>
+                </ng-select>
+              </div>
+            </div>
+            <div class="form-group-row">
+                <div class="form-group">
+                  <input type="text" name="title" placeholder="String Text" class="form-control">
+                </div>
+                <div class="form-group">
+                  <ng-select placeholder="Select option">
+                    <ng-option value="string">string</ng-option>
+                    <ng-option value="string">string</ng-option>
+                  </ng-select>
+                </div>
+            </div>
+          </div>
+        </div> -->
+
+        <div class="card">
+          <div class="collapse-title d-flex align-items-center justify-content-between position-relative"
+            (click)="showUrls()">
+            <div class="d-fleent x align-items-center">
+              <div class="check-box d-flex align-items-center">
+                <label>{{ 'recipient_filters' | i18next }}</label>
+              </div>
+            </div>
+            <div>
+              <i class="material-icons-outlined more" *ngIf="!urls">expand_more</i>
+              <i class="material-icons-outlined more" *ngIf="urls">expand_less</i>
+            </div>
+          </div>
+          <div class="collapse-body" [ngClass]="{'active': urls}">
+            <div class="p-24 pb-0">
+              <form [formGroup]="urlsForm" class="form-group mb-0 pb-0">
+                <div class="d-flex justify-content-between">
+                  <label>url</label>
+                  <i title="{{ 'add_new_endpoint' | i18next }}" [ngClass]="{'fa-disabled' : !templateDetails?.notificationConfig?.active}"
+                   class="material-icons cursor-pointer" (click)="onClickAddurl()">add</i>
+                </div>
+                <div formArrayName="url" class="py-8">
+                  <ng-container *ngFor="let control of urlArray?.controls; let i=index let last= last ">
+                    <ng-container [formGroupName]="i">
+                      <div class="form-group-row">
+                        <div class="form-group">
+                          <input class="form-control" type="text" placeholder="{{ 'enter_the_url' | i18next }}"
+                          formControlName="endpoint" [ngClass]="{'disableTemplate' : !templateDetails?.notificationConfig?.active}"/>
+                        </div>
+                        <div class="form-group py-8 icon-item">
+                            <i *ngIf="last" title="{{ 'add_new_endpoint' | i18next }}" class="material-icons-outlined cursor-pointer"
+                            [ngClass]="{'fa-disabled' : !templateDetails?.notificationConfig?.active}" (click)="onClickAddurl()">{{ 'add' | i18next }}</i>
+                            <i *ngIf="!last" title="{{ 'delete_endpoint' | i18next }}" class="material-icons-outlined cursor-pointer"
+                            [ngClass]="{'fa-disabled' : !templateDetails?.notificationConfig?.active}" (click)="onClickDeleteUrl(i)">delete</i>
+                        </div>
+                      </div>
+                      <div formArrayName="parameters">
+                          <label>{{ 'query_parameters' | i18next }}</label>
+                        <ng-container *ngFor="let parameter of parametersArray(i); let j=index let last = last">
+                          <div class="form-group-row pr-32" [formGroupName]="j">
+                            <div class="form-group">
+                              <input class="form-control p-4" type="text" placeholder="{{ 'enter_the_query_param' | i18next }}"
+                               formControlName="queryParam" [ngClass]="{'disableTemplate' : !templateDetails?.notificationConfig?.active}"/>
+                            </div>
+                            <div class="form-group">
+                              <ng-select placeholder="{{ 'select_option' | i18next }}" formControlName="queryType" [readonly]="!templateDetails?.notificationConfig?.active"
+                              (change)="selectQueryType($event,i,j)">
+                              <ng-option value="Static">{{ 'static' | i18next }}</ng-option>
+                              <ng-option value="Dynamic">{{ 'dynamic' | i18next }}</ng-option>
+                            </ng-select>
+                            </div>
+                            <div class="form-group" *ngIf="urlsForm?.get('url')?.controls[i]?.get('parameters')?.controls[j]?.get('queryType')?.value == 'Static'">
+                              <input class="form-control p-4" type="text" placeholder="{{ 'value' | i18next }}"
+                              formControlName="queryValue" [ngClass]="{'disableTemplate' : !templateDetails?.notificationConfig?.active}"/>
+                            </div>
+                            <div class="form-group" *ngIf="urlsForm?.get('url')?.controls[i]?.get('parameters')?.controls[j]?.get('queryType')?.value == 'Dynamic'">
+                              <ng-select placeholder="{{ 'select' | i18next }}" formControlName="queryValue" [readonly]="!templateDetails?.notificationConfig?.active"
+                              [searchable]="true" loadingText="{{ 'loading....' | i18next }}" notFoundText="{{ 'no_data_found' | i18next }}"
+                              class="custom-select-dropdown select-max-width">
+                              <ng-option *ngFor="let templateKey of templateKeys || []" [value]="templateKey?.field_slug">
+                                {{templateKey?.field_name}}</ng-option>
+                            </ng-select>
+                            </div>
+                            <div class="form-group py-8 icon-item">
+                              <div (click)="onClickAddParameters(i)" *ngIf="last" [ngClass]="{'fa-disabled' : !templateDetails?.notificationConfig?.active}"><i
+                                  title="Add new query param" class="material-icons-outlined cursor-pointer">{{ 'add' | i18next }}</i></div>
+                              <div (click)="onClickDeleteParameters(i,j)" *ngIf="!last" [ngClass]="{'fa-disabled' : !templateDetails?.notificationConfig?.active}"><i
+                                  title="Delete query param" class="material-icons-outlined cursor-pointer ">delete</i></div>
+                              </div>
+                          </div>
+                        </ng-container>
+                      </div>
+                    </ng-container>
+                    <div class="border-bottom mb-16" *ngIf="!last"></div>
+                  </ng-container>
+                </div>
+                <span *accessControl class="d-flex justify-content-end p-8 pb-0 pr-0">
+                  <button class="btn btn-primary small" type="submit" (click)="saveUrlForm()" [disabled] = "!templateDetails?.notificationConfig?.active">{{ 'save' | i18next }}</button>
+                </span>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </perfect-scrollbar>
+  </div>
+</div>
+<div class="editor-tools" *ngIf="editorType == 'footer'">
+  <div class="title-bar d-flex justify-content-between align-items-center px-24">
+    <p>{{ 'footer_settings' | i18next }}</p>
+    <ng-container *accessControl>
+      <button class="btn btn-success small" [disabled]="disableSave" (click)="saveTemplate()" *ngIf="isSuperAdmin">{{ 'save' | i18next }}</button>
+    </ng-container>
+  </div>
+  <div class="editor-part">
+    <perfect-scrollbar [config]="{ suppressScrollX: true, suppressScrollY: false }">
+      <div>
+        <div class="card">
+          <div class="collapse-title d-flex align-items-center justify-content-between position-relative"
+            (click)="footerParagraph = !footerParagraph">
+            <div class="d-flex align-items-center">
+              <div class="check-box d-flex align-items-center">
+                <label>{{ 'paragraph' | i18next }}</label>
+              </div>
+            </div>
+            <div>
+              <i class="material-icons-outlined more" *ngIf="!footerParagraph">expand_more</i>
+              <i class="material-icons-outlined more" *ngIf="footerParagraph">expand_less</i>
+            </div>
+          </div>
+          <div class="collapse-body" [ngClass]="{'active': footerParagraph}">
+            <div class="p-24">
+              <textarea class="form-control paragraph-textarea" placeholder="{{ 'paragraph_goes_here' | i18next }}"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="collapse-title d-flex align-items-center justify-content-between position-relative"
+            (click)="footerSocialLinks = !footerSocialLinks">
+            <div class="d-flex align-items-center">
+              <div class="check-box d-flex align-items-center">
+                <label>{{ 'social_media_links' | i18next }}</label>
+              </div>
+            </div>
+            <div>
+              <i class="material-icons-outlined more" *ngIf="!footerSocialLinks">expand_more</i>
+              <i class="material-icons-outlined more" *ngIf="footerSocialLinks">expand_less</i>
+            </div>
+          </div>
+          <div class="collapse-body" [ngClass]="{'active': footerSocialLinks}">
+            <div class="p-24">
+              <div class="form-group">
+                <label>{{ 'facebook' | i18next }}</label>
+                <input type="text" class="form-control" placeholder="{{ 'facebook_link' | i18next }}">
+              </div>
+              <div class="form-group">
+                <label>{{ 'linkedin' | i18next }}</label>
+                <input type="text" class="form-control" placeholder="{{ 'linkedin_link' | i18next }}">
+              </div>
+              <div class="form-group mb-0 pb-0">
+                <label>{{ 'instagram' | i18next }}</label>
+                <input type="text" class="form-control" placeholder="{{ 'instagram_link' | i18next }}">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="collapse-title d-flex align-items-center justify-content-between position-relative"
+            (click)="footerLinks = !footerLinks">
+            <div class="d-flex align-items-center">
+              <div class="check-box d-flex align-items-center">
+                <label>{{ 'links' | i18next }}</label>
+              </div>
+            </div>
+            <div>
+              <i class="material-icons-outlined more" *ngIf="!footerLinks">expand_more</i>
+              <i class="material-icons-outlined more" *ngIf="footerLinks">expand_less</i>
+            </div>
+          </div>
+          <div class="collapse-body" [ngClass]="{'active': footerLinks}">
+            <div class="p-24">
+              <div class="form-group">
+                <label>{{ 'privacy_policy' | i18next }}</label>
+                <input type="text" class="form-control" placeholder="{{ 'privacy_policy_link' | i18next }}">
+              </div>
+              <div class="form-group  mb-0 pb-0">
+                <label>{{ 'faqs' | i18next }}</label>
+                <input type="text" class="form-control" placeholder="{{ 'faqs_link' | i18next }}">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="collapse-title d-flex align-items-center justify-content-between position-relative"
+            (click)="footerUnsubscribe = !footerUnsubscribe">
+            <div class="d-flex align-items-center">
+              <div class="check-box d-flex align-items-center">
+                <label>{{ 'unsubscribe' | i18next }}</label>
+              </div>
+            </div>
+            <div>
+              <i class="material-icons-outlined more" *ngIf="!footerUnsubscribe">expand_more</i>
+              <i class="material-icons-outlined more" *ngIf="footerUnsubscribe">expand_less</i>
+            </div>
+          </div>
+          <div class="collapse-body" [ngClass]="{'active': footerUnsubscribe}">
+            <div class="p-24 pb-0">
+              <div class="form-group mb-0 pb-0">
+                <label>{{ 'unsubscribe_link' | i18next }}</label>
+                <input type="text" class="form-control" placeholder="{{ 'unsubscribe_link' | i18next }}">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </perfect-scrollbar>
+  </div>
+</div>
+<app-item-properties [isOpen]="isOpenItemProperties" (clickClose)="onCloseItemProperties($event)">
+</app-item-properties>

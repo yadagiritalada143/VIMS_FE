@@ -1,0 +1,42 @@
+<vms-table  *ngIf="(totalRecords >= 0) || (isAdvanceSearch) ||(isSearchedFlag)"  [vmsTableConfig]="tableConfig" [vmsDataSource]="vmsData?.results" [open]="isExpand" [totalItem]="totalRecords"
+  [itemsPerPage]="itemPerPage" (onExpandClick)="onExpandClick($event)"  (onViewClick)="onClickView($event)" (search)="onSearch($event)" (onListFilter)="onListFilter($event)"
+  (onCreate)="onCreateClick($event)" (changePage)="onPaginationClick($event)" (onEditClick)="onEditClick($event)"
+  (onDisableClicked)="onDisableClicked($event)" (columnClicked)="onClickView($event)" (onDeleteClick)="onDeleteClick($event)" (onDetailClick)="onDetailClick($event)" (onSort)="onSortClick($event)">
+<div class="expanded-col" >
+<p>
+{{description}}
+</p>
+<p *ngIf="!description">
+{{ 'data_not_available' | i18next }}
+</p>
+</div>
+</vms-table>
+
+<app-create-rate-card 
+*ngIf="(createCardVisibility === 'visible')" 
+[title]="title" 
+[currencies]="currencies"
+[createCardVisibility]="createCardVisibility" 
+(onClose)="onCloseCreateCard()" 
+(onSaveRateCard)="onSaveRateCard($event)"
+>
+</app-create-rate-card>
+
+<app-edit-rate-card 
+*ngIf="(editCardVisibility === 'visible')" 
+[card]="selectedCard" 
+[title]="title" 
+[editCardVisibility]="editCardVisibility" 
+(onClose)="onCloseEditCard()" 
+(onUpdateRateCard)="onUpdateRateCard($event)"
+>
+</app-edit-rate-card>
+
+<app-view-rate-card 
+*ngIf="(viewCardVisibility === 'visible')" 
+[card]="selectedCard" 
+[title]="title" 
+[viewCardVisibility]="viewCardVisibility" 
+(onClose)="onCloseViewCard()"
+>
+</app-view-rate-card>

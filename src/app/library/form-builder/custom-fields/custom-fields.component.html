@@ -1,0 +1,79 @@
+<div>
+    <div *ngIf="field?.type == fieldTypes.textfield">
+        <input type="text" placeholder="{{field.placeholder|i18next}}" maxlength="100"
+            class="w-100 py-4 px-8 border-0 mt-4 form-control">
+    </div>
+    <div *ngIf="field?.type == fieldTypes.phone">
+        <input type="tel" placeholder="{{field.placeholder|i18next}}" class="w-100 py-4 px-8 border-0 mt-4 form-control">
+    </div>
+    <div *ngIf="field?.type == fieldTypes.time">
+        <input type="time" placeholder="{{field.placeholder|i18next}}" class="w-100 py-4 px-8 border-0 mt-4 form-control">
+    </div>
+    <div *ngIf="field?.type === fieldTypes.date">
+        <svms-datepicker [options]="field?.meta_data?.options"> </svms-datepicker>
+    </div>
+    <div *ngIf="field?.type === fieldTypes.file">
+        <input type="file" *ngIf="field?.meta_data?.allow_multiple" [attr.accept]="acceptedType"
+            placeholder="{{field.placeholder|i18next}}" multiple class="w-100 py-4 px-8 border-0 mt-4 form-control">
+        <input type="file" *ngIf="!field?.meta_data?.allow_multiple" [attr.accept]="acceptedType"
+            placeholder="{{field.placeholder|i18next}}" class="w-100 py-4 px-8 border-0 mt-4 form-control">
+    </div>
+    <div *ngIf="field?.type == fieldTypes.toggle" class="toggle-panel rounded-sm py-4 px-4 mt-4">
+        <div class="toggle-panel-inner" [ngClass]="fieldProperties.selectedToggle ? 'if-active' : 'if-inactive'">
+            <span class="toggle-switch" [ngClass]="fieldProperties.selectedToggle ? 'toggle-on' : 'toggle-off'"
+                (click)="onClickToggle('selectedToggle')" name="enabled" ngDefaultControl
+                [(ngModel)]="fieldProperties.selectedToggle"></span>
+            <span class="status-text">{{field.selectedToggle|i18next}}</span>
+        </div>
+    </div>
+    <div *ngIf="field?.type == fieldTypes.checkbox">
+        <div class="checkbox" *ngFor="let option of field.selectedOption">
+            <div class="checkbox-box">
+                <div class="checkbox-wrapper">
+                    <label class="checkbox-container pb-8">
+                        <input type="checkbox" name="">
+                        <span class="checkmark"></span>
+                        <span class="status-text">{{option.value|i18next}}</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="radio" *ngIf="field?.type == fieldTypes.radio">
+        <div class="checkbox-box">
+            <div class="checkbox-wrapper">
+                <label class="checkbox-container">
+                    <input type="radio" name="required_in_hierarchy" value="OFF">
+                    <span class="checkmark"></span>
+                    <span class="status-text">{{field.value|i18next}}</span>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="field?.type == fieldTypes.textarea">
+        <textarea type="textarea" placeholder="{{field.placeholder|i18next}}" maxlength="2000" cols="12" rows="5"
+            class="w-100 mt-4 py-4 px-8 border-0 form-control"></textarea>
+    </div>
+    <div *ngIf="field?.type == fieldTypes.number">
+        <input type="number" placeholder="{{field.placeholder|i18next}}" class="w-100 py-4 px-8 border-0 mt-4 form-control">
+    </div>
+    <div *ngIf="field?.type == fieldTypes.email">
+        <input type="email" placeholder="{{field.placeholder|i18next}}" class="w-100 py-4 px-8 border-0 mt-4 form-control">
+    </div>
+    <div *ngIf="field?.type == fieldTypes.currency" class="position-relative">
+        <span class="symbol-position" *ngIf="field.currencyType == 'GBP'">£</span>
+        <span class="symbol-position" *ngIf="field.currencyType == 'USD'">$</span>
+        <span class="symbol-position" *ngIf="field.currencyType == 'EUR'">€</span>
+        <input type="number" placeholder="{{field.placeholder|i18next}}" class="w-100 py-4 px-16 border-0 mt-4 form-control">
+
+    </div>
+    <div *ngIf="field?.type == fieldTypes.hyperlink" class="link">
+        <a class="" href="{{field.label}}" target="_blank">{{field.label|i18next}}</a>
+    </div>
+    <div *ngIf="field?.type == fieldTypes.heading">
+        <h4>{{field.label|i18next}}</h4>
+    </div>
+    <div *ngIf="field?.type == fieldTypes.subheading">
+        <h5>{{field.label|i18next}}</h5>
+    </div>
+</div>

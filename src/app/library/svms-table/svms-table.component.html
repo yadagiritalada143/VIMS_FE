@@ -1,0 +1,135 @@
+<app-svms-table-header
+  *ngIf="!!tableOptions && !!tableOptions?.headerConfig"
+  [headerConfig]="tableOptions?.headerConfig"
+  [informativeBubbleText]="informativeBubbleText"
+  [totalRecords]="tableOptions?.totalRecords ?? dataSource?.length"
+  [showLoader]="dataSource?.length > 0 && dataSource[0]?.dummy"
+  (onLoading)="fillDummyRecords()"
+  (onClearFilter)="onClearColumnFilter()"
+  (goToPreviousPage)="backtoPreviousPage($event)"
+  [columnFilterEnabled]="tableOptions?.enableColumnFilter"
+  [colDefinition]="coloumnDefintions"
+  (onApplySetting)="onApplyColumnSetting($event)"
+  (showFilterPanel)="onShowFilters($event)"
+>
+</app-svms-table-header>
+<div
+  class="c-listing-table-wrapper"
+  id="listingwrapper"
+  [ngClass]="{ 'scrlled-bottom': scrolledBottom, 'search-disabled': !tableOptions?.headerConfig?.searchAllowed }"
+>
+  <perfect-scrollbar [config]="scrollConfig">
+    <div class="table-outer">
+      <table class="c-listing-table">
+        <thead [ngClass]="{'mobile-filter-visible' : mobileFilterPanel}">
+          <tr>
+            <ng-container *ngFor="let coloumn of coloumnDefintions | orderBy : 'order'">
+              <th *ngIf="!coloumn?.hidden">
+                <div class="d-flex align-items-center position-relative" [ngClass]="{ 'mb-12': coloumn.searchable }">
+                  <a class="column-order-cta mr-8" *ngIf="coloumn?.customOrder && dataSource[0]?.dummy !='dummy'" href="javascript:void(0)" tooltip="{{ 'change_order' | i18next }}" placement="right" (click)="openColumnOrderScaner()">
+                    <i class="material-icons">edit_note</i>
+                  </a>
+                  <p>{{ coloumn?.header | i18next }}</p>
+                  <span class="sort-icons" *ngIf="coloumn?.sortable">
+                    <span [ngClass]="{ active: sortedColumn?.field == coloumn.field && sortedColumn?.order == 'desc' }">
+                      <i class="material-icons" (click)="sortByDsc(coloumn?.field)">arrow_drop_up</i>
+                    </span>
+                    <span [ngClass]="{ active: sortedColumn?.field == coloumn.field && sortedColumn?.order == 'asc' }">
+                      <i class="material-icons" (click)="sortByAsc(coloumn?.field)">arrow_drop_down</i>
+                    </span>
+                  </span>
+                  <span class="column-order-cta  flow-supportingText" *ngIf="coloumn?.supportingText && dataSource[0]?.dummy !='dummy'">
+                    <i class="material-icons-outlined" tooltip="{{coloumn?.supportingText | i18next}}" placement="right">info</i>
+                  </span>
+                </div>
+
+                <ng-container *ngIf="tableOptions?.enableColumnFilter && coloumn?.header && coloumn?.header !== ''">
+                  <ng-container *ngIf="getColumnFilterField(coloumn?.field) as filterConfig">
+                    <app-svms-coloumn-filter
+                      [field]="filterConfig"
+                      [filterFormGroup]="columnFilterForm"
+                      [headerConfig]="tableOptions?.headerConfig"
+                      (onLoading)="fillDummyRecords()"
+                      (onApplyFilter)="svmsTableHeader?.applyFilters($event, true)"
+                    ></app-svms-coloumn-filter>
+                  </ng-container>
+                </ng-container>
+              </th>
+            </ng-container>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let rowData of dataSource; let i = index"
+            app-svms-table-row
+            [rowData]="rowData"
+            [coloumnDefintions]="coloumnDefintions"
+            [tableOptions]="tableOptions"
+            [rowIndex]="i"
+            [totalRows]="dataSource?.length"
+            [ngClass]="{ active: hoverState == i }"
+            (mouseenter)="hoverClass(i)"
+          ></tr>
+        </tbody>
+      </table>
+      <ng-container *ngIf="!(dataSource?.length > 0) && !tableOptions?.emptyDataTemplate">
+        <ng-container *ngIf="svmsTableHeader?.searchApplied || svmsTableHeader?.filterApplied; else noData">
+          <div class="no-result">
+            <div>
+              <img src="../../../assets/images/undraw-folder.svg" alt="empty-icon" />
+            </div>
+            <div class="mt-8">
+              <h4 class="font-weight-medium">{{ 'no_results_found' | i18next }}</h4>
+            </div>
+            <div>
+              <p>{{ 'no_results_matching_with_your_criteria' | i18next }}</p>
+              <p>{{ 'try_different_or_less_specific_keywords_&_reset_your_filters' | i18next }}</p>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #noData>
+          <div class="no-result">
+            <div>
+              <img src="../../../assets/images/no-records.svg" alt="empty-icon" />
+            </div>
+            <div class="mt-8">
+              <h4 class="font-weight-medium">{{ 'no_records_found' | i18next }}</h4>
+            </div>
+            <div>
+              <p *ngIf="!tableOptions?.headerConfig?.customTitleForNoDataListing">
+                {{
+                  'No ' + tableOptions?.headerConfig?.title + ' added yet, lets create your first ' + tableOptions?.headerConfig?.title
+                    | i18next
+                }}
+              </p>
+              <p *ngIf="tableOptions?.headerConfig?.customTitleForNoDataListing">
+                {{
+                  'No ' + tableOptions?.headerConfig?.customTitleForNoDataListing + ' added yet, lets create your first ' + tableOptions?.headerConfig?.customTitleForNoDataListing
+                    | i18next
+                }}
+              </p>
+            </div>
+          </div>
+        </ng-template>
+      </ng-container>
+      <ng-template
+        [ngTemplateOutlet]="tableOptions?.emptyDataTemplate"
+        *ngIf="!(dataSource?.length > 0) && tableOptions?.emptyDataTemplate"
+      >
+      </ng-template>
+    </div>
+  </perfect-scrollbar>
+</div>
+<footer *ngIf="!!tableOptions" class="c-listing-footer px-24" [ngClass]="!showPageSettingData ? 'c-listing-table-dialog' : ''">
+  <app-svms-table-paginator
+    *ngIf="tableOptions?.pagination && dataSource?.length > 0"
+    [itemsPerPage]="tableOptions?.paginationConfig?.itemsPerPage"
+    [recordsPerPageSetting]="tableOptions?.paginationConfig?.recordsPerPageSetting"
+    [currentPage]="currentPage"
+    (changeRecords)="onClickRecords($event)"
+    [maxPages]="pageCount"
+    [showPageSettingData]="showPageSettingData"
+    (changePage)="onPaginationClick($event)"
+  >
+  </app-svms-table-paginator>
+</footer>

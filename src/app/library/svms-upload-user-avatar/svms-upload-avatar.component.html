@@ -1,0 +1,56 @@
+<!--upload-avtar-->
+<div class="upload-avatar-panel rounded-circle" [ngClass]="{'after-image-upload': showCropper}">
+  <div class="before-img-upload d-flex flex-column">
+    <img class="placeholder-img" src="../../../assets/images/avatar-default.png" alt="" *ngIf="!croppedImage" (click)="fileInput.click()">
+    <span *ngIf="!croppedImage" (click)="fileInput.click()">{{'upload' | i18next}}</span>
+  </div>
+  <input hidden type="file" accept="image/*" #fileInput (change)="fileChangeEvent($event)">
+  <img *ngIf="croppedImage" class="img-after-upload" [src]="croppedImage" [style.z-index]="croppedImage ? '1' : '-1'" />
+  <div class="upload-image-edit">
+    <div class="edit-icon" (click)="fileInput.click()">
+      <icon cuClass="d-flex" name="create" size="30px" type="material"></icon>
+    </div>
+  </div>
+</div>
+<div *ngIf="croppedImage" class="remove-avatar-box">
+  <a href="javascript:void(0)" (click)="removeUpload()" class="remove-avatar">{{ 'remove' | i18next }}</a>
+</div>
+<!--upload-avtar-->
+
+<!--crop-image-->
+<div class="cropping-avtar align-items-center justify-content-center d-none" *ngIf="imageLoad">
+  <div class="cropping-avtar-image rounded-sm position-relative">
+    <div class="close_img_croper" (click)="cancelUpload()">
+      <icon cuClass="d-flex justify-content-end" name="close" size="30px" type="material"></icon>
+    </div>
+    <span class="validation-msg">{{logoValidations}}</span>
+    <div class="image">
+      <image-cropper [imageChangedEvent]="imageChangedEvent" [maintainAspectRatio]="false" [aspectRatio]="4 / 3"
+        [onlyScaleDown]="true" [roundCropper]="false" [canvasRotation]="canvasRotation" [transform]="transform"
+        [alignImage]="'center'" [style.display]="showCropper ? null : 'none'" format="png"
+        (imageCropped)="imageCropped($event)" (imageLoaded)="imageLoaded()" (cropperReady)="cropperReady($event)"
+        (loadImageFailed)="loadImageFailed()">
+      </image-cropper>
+
+    </div>
+    <div class="mt-16 d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-light" (click)="zoomIn()">
+          <icon cuClass="d-flex" name="zoom_in" size="24px" type="material"></icon>
+        </button>
+        <button type="button" class="btn btn-light" (click)="zoomOut()">
+          <icon cuClass="d-flex" theme="outlined" name="zoom_out" size="24px" type="material"></icon>
+        </button>
+      </div>
+      <div class="d-flex align-items-center justify-content-end">
+        <button type="reset" class="btn btn-outline-danger mr-16" (click)="cancelUpload()">
+          {{'Cancel'}}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="crop()">
+          {{ 'crop_&_save' | i18next }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!--crop-image-->

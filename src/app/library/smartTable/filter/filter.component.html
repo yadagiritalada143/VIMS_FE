@@ -1,0 +1,102 @@
+<div class="filter-panel position-fixed bg-light">
+  <a  class="filter-close" (click)="closeFilter()">
+    <icon name="close" size="24px"></icon>
+  </a>
+  <h4 class="pt-16 pl-24 pr-24 font-weight-normal">
+    <table-icon size="19px" name="filter_alt" type="material" cuClass="d-flex" class="float-left mr-4"></table-icon>
+    {{ 'filters' | i18next }}
+  </h4>
+  <form [formGroup]="advanceFilterForm" (submit)="onSearch()">
+    <div class="filter-content">
+
+      <div class="form-group mb-8 pb-0 position-relative" *ngFor="let item of filter">
+        <div class="mb-8">
+          <label>
+            {{item?.title | i18next}}
+            <span *ngIf="item?.mandatory == true" class="require"> {{ " *" }} </span>
+          </label>
+          <!-- <span class="total-count position-absolute" *ngIf="advanceFilterForm.get(item.name) > 0">{{client.length}}</span> -->
+          <input (input)="valueChange()" *ngIf="item.filterType === 'TEXT'" type="text" [name]="item.name" [formControlName]="item.name"
+            class="form-control mb-8" autocomplete="off"
+            placeholder="{{(item?.placeholder ? item?.placeholder : item?.title) | i18next}}">
+          <input (input)="valueChange()" *ngIf="item.filterType === 'NUMBER'" type="number" [name]="item.name" [formControlName]="item.name"
+            class="form-control mb-8" autocomplete="off"
+            placeholder="{{(item?.placeholder ? item?.placeholder : item?.title) | i18next}}">
+
+          <search-address (input)="valueChange()" *ngIf="item.filterType === 'GOOGLEADDRESS'" [formControlName]="item.name" [adressType]="'geocode'" id="address"    [country]="'all'"
+
+             class="no-radius" (setAddress)="getAddress($event)">
+          </search-address>
+        </div>
+        <!-- For Multi Select DropDown -->
+        <div class="mb-8">
+          <ng-select (change)="valueChange()" *ngIf="item.filterType === 'MULTISELECT' && !item.eventEmiiter && !item?.eventListener" [clearable]="false"
+            [multiple]="true" placeholder="{{(item?.placeholder ? item?.placeholder : item?.title) | i18next}}"
+            [formControlName]="item?.name" [hideSelected]="true" ngDefaultControl>
+            <ng-option [value]="data?.value" *ngFor="let data of item?.multiSelectData">{{data?.name}}</ng-option>
+          </ng-select>
+          <ng-select (change)="valueChange()" [typeahead]="item.eventEmiiter" *ngIf="item.filterType === 'MULTISELECT' && item.eventEmiiter && item.changeHandler"
+            [clearable]="false" [multiple]="true" placeholder="{{(item?.placeholder ? item?.placeholder : item?.title) | i18next}}"
+            [formControlName]="item?.name" [hideSelected]="true" [loading]="item?.loading" ngDefaultControl>
+            <ng-option [value]="data?.value" *ngFor="let data of item?.multiSelectData">{{data?.name|i18next}}</ng-option>
+          </ng-select>
+          <ng-select (change)="valueChange()" *ngIf="item.filterType === 'MULTISELECT' && item?.eventListener" (search)="throwEventEmitter($event, item?.eventListener)"
+            [clearable]="false" [multiple]="true" placeholder="{{(item?.placeholder ? item?.placeholder : item?.title) | i18next}}"
+            [formControlName]="item?.name" [hideSelected]="true" [loading]="item?.loading" (open)="throwEventEmitter({term: ''}, item?.eventListener)" ngDefaultControl>
+            <ng-option [value]="data?.value" *ngFor="let data of item?.multiSelectData">{{data?.name}}</ng-option>
+          </ng-select>
+        </div>
+
+        <!-- For Select DropDown -->
+        <div class="mb-8">
+          <ng-select *ngIf="item.filterType === 'SELECT' && !item.eventEmiiter" [clearable]="false" [items]="item?.multiSelectData"
+            bindLabel="name" bindValue="value" placeholder="{{(item?.placeholder ? item?.placeholder : item?.title )| i18next}}"
+            [formControlName]="item?.name" (change)="valueChange()">
+          </ng-select>
+
+          <ng-select  [typeahead]="item.eventEmiiter" *ngIf="item.filterType === 'SELECT' && item.eventEmiiter && item.changeHandler"
+          [clearable]="true"  placeholder="{{(item?.placeholder ? item?.placeholder : item?.title) | i18next}}"
+          [formControlName]="item?.name" [hideSelected]="false" ngDefaultControl (change)="onChange(item,$event); valueChange()">
+          <ng-option [value]="data?.value" *ngFor="let data of item?.multiSelectData">{{data?.name|i18next}}</ng-option>
+        </ng-select>
+
+
+        </div>
+        <div class="mb-8" *ngIf="item.filterType === 'RANGE'">
+          <!-- <label *ngIf="item.filterType === 'RANGE'">{{item?.title}}</label> -->
+          <!-- <span class="total-count position-absolute" *ngIf="advanceFilterForm.get(item.name) > 0">{{client.length}}</span> -->
+          <div class="d-flex">
+            <input (input)="valueChange()" *ngIf="item.filterType === 'RANGE'" type="number" name="min" formControlName="min"
+            class="form-control mb-8" autocomplete="off"
+            placeholder="{{(item?.placeholder ? item?.placeholder : item?.title) | i18next}}">
+            <input (input)="valueChange()" *ngIf="item.filterType === 'RANGE'" type="number" name="max" formControlName="max"
+            class="form-control mb-8 ml-4" autocomplete="off"
+            placeholder="{{(item?.placeholder_1 ? item?.placeholder_1 : item?.title) | i18next}}">
+          </div>
+
+        </div>
+
+        <!-- For DateRange Picker-->
+        <div class="mb-8" *ngIf="item.filterType === 'DATERANGE'">
+          <div  class="form-group position-relative">
+            <svms-datepicker (click)="valueChange()" [inputdateFormat]="" [responsiveDatepicker] = "true" [formControlName]="item?.name" [options]="createdDate"
+              placeholder="{{(item?.placeholder ? item?.placeholder : 'Choose Date Range') | i18next}}" id="startDate" I18n #refdate1>
+            </svms-datepicker>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-footer pt-16 pb-16 pl-24 pr-24">
+      <button [disabled]="!filterDataPresent" class="btn btn-outine float-left" type="reset" (click)="ClearFilter()">
+        <table-icon size="20px" name="highlight_off" type="material" cuClass="d-flex" class="icon--on-left d-flex">
+        </table-icon> {{ 'clear_all_filter' | i18next }}
+      </button>
+      <button [disabled]="!filterDataPresent" class="btn btn-primary float-right" type="submit">
+        <table-icon size="20px" name="check_circle" type="material" cuClass="d-flex" class="icon--on-left d-flex">
+        </table-icon> {{ 'apply' | i18next }}
+      </button>
+    </div>
+  </form>
+</div>
+<div class="filter-backdrop"></div>

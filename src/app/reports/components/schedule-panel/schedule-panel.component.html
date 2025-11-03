@@ -1,0 +1,167 @@
+<ng-container>
+  <svms-sidebar-body>
+    <app-logs [log]="logs"></app-logs>
+    <div [formGroup]="editForm" class="schedule-report-form">
+      <div class="right-sidebar p-24">
+        <div class="right-sidebar">
+          <div class="report-field border rounded-sm p-12 filter-panel mb-16 ifvisible">
+              <div class="input" *ngFor="let selectRow of selectRows" [ngStyle]="{'width': selectRow.width}">
+                <div *ngIf="selectRow?.title" class="d-flex align-items-center justify-content-between">
+                  <span class="pt-8 report-field__title font-weight-medium fs-13">
+                    {{selectRow?.title | i18next}}
+                  </span>
+                </div>
+                <!-- show hide data -->
+                <div class="input-panel">
+                  <div class="report-field__label fs-13" *ngIf="selectRow?.label"
+                    [ngClass]="{'required-field' : selectRow.required}">{{selectRow?.label | i18next}}</div>
+                  <div [ngSwitch]='selectRow.type'>
+                    <div class="fs-12 report-field__wrapper" *ngSwitchCase="'select'"
+                      [ngClass]="selectRow?.multiple? 'multiple-select' : 'single-select'"
+                      [ngStyle]="{'padding-bottom':getEditForm[selectRow.controlName]?.length > 0 ? '2px': '10px'}">
+                      <ng-select [clearable]="false" [placeholder]="selectRow?.placeholder | i18next" [multiple]="selectRow?.multiple"
+                        [items]="selectRow?.options" [bindLabel]="selectRow?.bindLabel" [formControlName]="selectRow.controlName"
+                        [readonly]="viewOnly" (search)="searchItems($event, selectRow)" [loading]="selectRow?.loading"
+                        loadingText="{{'Loading...' | i18next}}">
+                      </ng-select>
+                    </div>
+                    <div class="report-field__wrapper" *ngSwitchCase="'input'">
+                      <input type="text" [formControlName]="selectRow?.controlName" [readonly]="viewOnly" [placeholder]="selectRow?.placeholder | i18next"
+                        class="border report-field__input fs-12">
+                      <p class="email-warning" *ngIf="selectRow?.isWarmingVisible">{{ 'report_name_must_be_unique' | i18next }}</p>
+                    </div>
+                    <fieldset class="report-field__wrapper" *ngSwitchCase="'switcher'" [disabled]="viewOnly">
+                      <div class="status-switcher border">
+                        <div class="status-switcher__title" *ngIf="getEditForm[selectRow.controlName]">{{selectRow?.placeholderTrue | i18next}}</div>
+                        <div class="status-switcher__title" *ngIf="!getEditForm[selectRow.controlName]">{{selectRow?.placeholderFalse | i18next}}</div>
+                        <label class="status-switcher__switch">
+                          <input class="input" type="checkbox" [formControlName]="selectRow.controlName" [readonly]="viewOnly" checked>
+                          <span class="slider round"></span>
+                        </label>
+                      </div>
+                    </fieldset>
+                  </div>
+                </div>
+              </div>
+              <div class="report-field__label fs-13">{{ 'user_email_address_(_created_user(s)_data_permission_rights_will_be_applied_in_the_send_report_)' | i18next }}</div>
+              <input type="text" formControlName="email" placeholder="{{ 'enter_email_address' | i18next }}" [readonly]="viewOnly"
+              class="border email-input fs-12" (keyup)="isValidEmail = true" (keyup.enter)="addEmail()">
+              <p class="email-warning" *ngIf="!isValidEmail">{{ 'invalid_email' | i18next }}</p>
+              <div class="email-box">
+                <div *ngFor='let email of emails' class="email-box__data">
+                  <span *ngIf='!viewOnly' type="material" cuclass="d-flex" placement="right"
+                    class="email-box__icon material-icons-outlined delete-icon" (click)="deleteEmail(email)"> {{ 'clear' | i18next }}
+                  </span>
+                  <p class="email-box__text">{{email}}</p>
+                </div>
+              </div>
+              <div class="pt-8">{{ 'note_one_of_these_fields_are_mandatory' | i18next }}
+                <strong>{{ 'users_as_recipients,_user_email_address' | i18next }}</strong>
+              </div>
+          </div>
+          <div class="field border rounded-sm p-12 filter-panel mb-16 ifvisible single-select">
+            <span class="field__header font-weight-medium">{{ 'schedule_frequency' | i18next }}</span>
+            <div class="form-group-row schedule_freq_form">
+              <div class="form-group mb-0">
+                <label class="field__title required-field field__run-time fs-13">{{ 'run_time' | i18next }}</label>
+                <input type="time" name="time" id="start" class="field__input default-input field__run-time mt-0"
+                formControlName="run_time" [readonly]="viewOnly">
+              </div>
+              <div class="form-group mb-0">
+                <label class="field__title required-field field__time-zone fs-13">{{ 'time_zone' | i18next }}</label>
+                <ng-select [clearable]="false" placeholder="{{ 'time_zone' | i18next }}" class="field__select field__time-zone mt-0"
+                  [readonly]="viewOnly" [items]="timeZone" bindLabel="text" formControlName="time_zone">
+                </ng-select>
+              </div>
+              <div class="form-group mb-0">
+                <fieldset class="field__small-selector picker mt-24" [disabled]="viewOnly">
+                  <input type="radio" id="periodWeekly" name="rpt_run_day" value="Weekly" class="picker__radio"
+                    formControlName="rpt_run_day" (change)="initAdditionalForm()">
+                  <label class="picker__label" for="periodWeekly">{{ 'weekly' | i18next }}</label>
+                  <input type="radio" id="periodMonthly" name="rpt_run_day" value="Monthly" class="picker__radio"
+                    formControlName="rpt_run_day" (change)="initAdditionalForm()">
+                  <label class="picker__label" for="periodMonthly">{{ 'monthly' | i18next }}</label>
+                </fieldset>
+              </div>
+            </div>
+
+
+
+
+            <div *ngIf="getEditForm?.rpt_run_day === 'Weekly'" [formGroup]="daysForm" class="mt-12">
+              <fieldset class="field__selector picker" [disabled]="viewOnly">
+                <span class="field__header font-weight-medium mb-4">{{ 'schedule_day' | i18next }}</span>
+                <div class="field__selector end-selector" style="margin: 0">
+                  <label *ngFor="let day of daysOfWeek" class="container checkbox mr-16">
+                    <input type="checkbox" [formControlName]="day" class="checkbox__input">
+                    <span class="checkbox__label fs-13">{{ day | i18next}}</span>
+                    <span class="checkmark checkbox__checkmark"></span>
+                  </label>
+                </div>
+              </fieldset>
+            </div>
+            <div *ngIf="getEditForm?.rpt_run_day === 'Monthly'" class="field__selector simple-picker"
+              [formGroup]="daysForm">
+
+              <span class="specific-day__title field__header font-weight-medium">{{ 'schedule_day' | i18next }}</span>
+
+              <input type="radio" formControlName="dayOfMonth" id="monthSelectUsial" name="dayOfMonth" value="usual"
+                class="simple-picker__radio" [ngClass]="{'disabled' : viewOnly}" [checked]="getDaysForm?.dayOfMonth === 'usual'">
+              <label class="simple-picker__label fs-12" for="monthSelectUsial">{{'select_a_day_of_the_month' | i18next}}</label>
+              <input type="radio" formControlName="dayOfMonth" id="monthSelectSpecific" name="dayOfMonth"
+                value="specific" class="simple-picker__radio" [ngClass]="{'disabled' : viewOnly}" [checked]="getDaysForm?.dayOfMonth === 'specific'"
+                (click)="changeSpecificDate()">
+              <label class="simple-picker__label fs-12" for="monthSelectSpecific">{{'select_a_specific_day_of_the_month' | i18next}}</label>
+
+              <div class="field__selector" *ngIf="getDaysForm?.dayOfMonth === 'usual'">
+                <ng-select [clearable]="false" placeholder="{{ 'week_of_month' | i18next }}"
+                  class="field__select specific-day__select small-selector fs-14" [items]="weeksOfMonth"
+                  bindLabel="text" formControlName="week" [readonly]="viewOnly">
+                </ng-select>
+                <ng-select [clearable]="false" placeholder="{{ 'day_of_week' | i18next }}"
+                  class="field__select specific-day__select small-selector fs-14" [items]="daysOfWeek" bindLabel="text"
+                  formControlName="day" [readonly]="viewOnly">
+                </ng-select>
+              </div>
+              <div class="specific-day__wrapper" *ngIf="getDaysForm?.dayOfMonth === 'specific'">
+                <span class="specific-day__header field__title field__run-time fs-13">{{ 'select_day' | i18next }}</span>
+                <div class="specific-day__value fs-12">{{ getDaysForm?.date }}</div>
+                <div class="field__select specific-day__select small-selector fs-14">
+                  <ng-select [clearable]="true" [placeholder]="'select_day' | i18next" [items]="daysList"
+                    [formControl]="editForm.controls['is_schedule_day']" (change)="daysForm.patchValue({ date: $event })"
+                    [readonly]="viewOnly">
+                  </ng-select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="field border rounded-sm p-12 filter-panel mb-32 ifvisible d-block">
+            <h4>{{ 'range_of_recurrence' | i18next }}</h4>
+            <div class="form-group-row">
+              <div class="form-group position-relative">
+                <label>{{'start_date' | i18next}} <span class="require">*</span></label>
+                <svms-datepicker [ngClass]="{'disabled' : viewOnly}" [inputdateFormat]="dateFormat" [options]="options" id="start"
+                  I18n [formControl]="editForm.controls['startDate']" (onDateChange)="resetEndDate($event)"></svms-datepicker>
+              </div>
+              <div class="form-group position-relative">
+                <label>{{'end_date' | i18next}}<span class="require">*</span></label>
+                <svms-datepicker [ngClass]="{'disabled' : viewOnly}" [inputdateFormat]="dateFormat" [options]="options2" id="end"
+                  I18n [formControl]="editForm.controls['endDate']"></svms-datepicker>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </svms-sidebar-body>
+  <svms-sidebar-footer *ngIf="!viewOnly">
+    <div class="d-flex align-items-center justify-content-between button-footer">
+      <button type="button" class="btn btn-outline-primary button-footer__button"
+        (click)="onClose()">{{ 'cancel' | i18next }}</button>
+      <button *ngIf="edit" type="button" class="btn btn-primary button-footer__button"
+        (click)="onEdit()">{{ 'save' | i18next }}</button>
+      <button *ngIf="!edit" type="button" class="btn btn-primary button-footer__button" [disabled]="!buttonEnable"
+        (click)="onSchedule()">{{ 'save' | i18next }}</button>
+    </div>
+  </svms-sidebar-footer>
+</ng-container>

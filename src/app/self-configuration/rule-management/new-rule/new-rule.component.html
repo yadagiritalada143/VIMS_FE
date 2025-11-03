@@ -1,0 +1,172 @@
+<div>
+    <header class="section-header page-title-main p-24 d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center">
+        <i tooltip="{{'Back' | i18next}}" placement="bottom" class="material-icons back-arrow-icon mr-16 cursor-pointer" (click)="backToPage()">arrow_back</i>
+        <h3 class="font-weight-semibold mb-0">{{ isEditMode ? 'Edit Rule' : 'Create New Rule' | i18next }}</h3>
+      </div>
+      <div>
+       <button
+          type="submit"
+          [disabled]="!rule_Obj.ruleName || !rule_Obj.moduleId || !rule_Obj.eventId || !rule_Obj.ruleType || !hierarchyListTags?.length || (( !rule_Obj.effectiveStartDate) ||(rule_Obj.effectiveEndDate < rule_Obj.effectiveStartDate))"
+          class="c-btn c-btn-success-medium"
+          (click)="createRule()"
+        *accessControl>
+          {{ 'save' | i18next }}
+        </button>
+      </div>
+    </header>
+    <section class="section-body-content">
+      <div class="p-24" *ngIf="rule_Obj">
+      <form #f="ngForm">
+        <div class="c-form-group-row">
+          <div class="c-form-group title-field">
+            <label>{{ 'rule_title' | i18next }} <span class="require">*</span></label>
+            <input type="text" class="c-form-control" id="ruleName" name="ruleName" #ruleName="ngModel" placeholder="{{'enter_text' | i18next}}" [maxlength]="100" (keydown)="onlyAllowAlphaNumeric($event)" [(ngModel)]="rule_Obj.ruleName" required />
+          </div>
+            <div class="c-form-group toggle-panel toggle-width mt-24">
+              <div class="toggle-panel-inner" [ngClass]="newRule?.value ? 'if-active' : 'if-inactive'">
+                <span class="status-text mr-12">{{ newRule?.title | i18next }}</span>
+                <span class="toggle-switch" [ngClass]="newRule?.value ? 'toggle-on' : 'toggle-off'" (click)="onClickToggleRule(newRule?.toggleName)"></span>
+              </div>
+            </div>
+        </div>
+        <div class="form-group-row">
+          <div class="form-group" >
+            <label>{{ 'module' | i18next }} <span class="require">*</span></label>
+            <ng-select
+              [clearable]="isEditMode ? false : true"
+              [ngClass]="isEditMode ? 'disabled-field' : ''"
+              (change)="dataChange($event, 'module')"
+              id="module"
+              name="module"
+              #module="ngModel"
+              [items]="moduleList"
+              bindLabel="name"
+              bindValue="moduleId"
+              [(ngModel)]="rule_Obj.moduleId"
+              placeholder="{{'Select Module' | i18next}}"
+            >
+            </ng-select>
+          </div>
+          <div class="form-group">
+            <label>{{ 'event' | i18next }} <span class="require">*</span></label>
+            <ng-select
+              [clearable]="isEditMode ? false : true"
+              [ngClass]="(!rule_Obj.moduleId && !eventList?.length) || isEditMode ? 'disabled-field' : ''"
+              (change)="dataChange($event, 'event')"
+              id="event_id"
+              name="event_id"
+              #event_id="ngModel"
+              [items]="eventList"
+              bindLabel="name"
+              bindValue="id"
+              [(ngModel)]="rule_Obj.eventId"
+              placeholder="{{'Select Event' | i18next}}"
+            >
+            </ng-select>
+          </div>
+          <div class="form-group">
+            <label>{{ 'rule_type' | i18next }} <span class="require">*</span></label>
+            <ng-select
+              [clearable]="isEditMode ? false : true"
+              [ngClass]="isEditMode ? 'disabled-field' : ''"
+              id="rule_type"
+              name="rule_type"
+              [items]="ruleTypeList"
+              bindLabel="ruleType"
+              bindValue="id"
+              #rule_type="ngModel"
+              [(ngModel)]="rule_Obj.ruleType"
+              placeholder="{{'Select Rule Type' | i18next}}"
+            >
+            </ng-select>
+          </div>
+        </div>
+        <div class="form-group-row">
+          <div class="form-group date-picker position-relative" >
+            <label> {{ 'effective_start_date' | i18next }} <span class="require">*</span> </label>
+            <svms-datepicker [inputdateFormat]="dateFormat" [options]="start_date_options" id="effectiveStartDate" I18n #effectiveStartDate="ngModel" [(ngModel)]="rule_Obj.effectiveStartDate"
+              name="effectiveStartDate" [ngClass]="isEditMode ? 'disabled-field' : ''">
+            </svms-datepicker>
+          </div>
+          <div class="form-group date-picker position-relative" >
+            <label> {{ 'effective_end_date' | i18next }} </label>
+            <svms-datepicker [inputdateFormat]="dateFormat" [options]="end_date_options"  id="effectiveEndDate" I18n #effectiveEndDate="ngModel" [(ngModel)]="rule_Obj.effectiveEndDate"
+              name="effectiveEndDate" [ngClass]="isEditMode ? 'disabled-field' : ''">
+            </svms-datepicker>
+            <span class="require" *ngIf="rule_Obj.effectiveEndDate < rule_Obj.effectiveStartDate">{{'Effective end date should be grater then Effective start date' | i18next}}</span>
+          </div>
+        </div>
+
+        <ng-container>
+          <div class='form-group treeview-group' [ngClass]="{}">
+            <label>
+              {{ 'hierarchy_' | i18next }}
+              <span class="require">*</span>
+            </label>
+            <ngx-dropdown-treeview
+              buttonClass='btn-outline-light'
+              [config]='hierarchyConfig'
+              [items]='treeViewItems'
+              (selectedChange)='observeSelectedChange($event)'
+              class='hierarchy-tree'>
+            </ngx-dropdown-treeview>
+            <div class='chip-holder' *ngIf="hierarchyListTags?.length !== 0">
+              <div *ngFor="let chipData of hierarchyListTags; index as it" class='d-flex chip p-4 m-4 chip-bg'>
+                <p class='chip-name'> {{ chipData?.name }}</p>
+                <icon (click)='removeSelectedHierarchy(chipData?.id)'
+                  class='close' type='material'
+                  name='close' size='16px'>
+                </icon>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+        <!-- V2M-15550 -->
+        <div class="initial-condition d-none">
+          <div class="condition-title d-flex justify-content-between align-items-center">
+            <div class="condition-title-box">
+              <p class="title-text d-flex align-items-center"><icon class="d-flex" color="#0044C5" name="start" size="20px"></icon> <span class="ml-16 font-weight-medium">{{ 'initial_trigger' | i18next }}</span></p>
+              <p class="initial-paragraph small"><span [ngClass]="{'full-text' : textVisibility}">{{ 'here_is_where_you_can_define_the_condition(s)_for_triggering_this_rule.__for_example,_if_the_client_only_wants_this_rule_to_be_triggered_when_the_currency_is_usd_then_the_trigger_would_be_setup_as_“currency_=_usd”.__it_is_important_to_note_that_this_section_of_the_approval_rule_is_optional_so_if_the_customer_requires_that_the_rule_be_used_all_the_time_(i.e.,_no_conditions_would_trigger_the_rule)_then_simply_leave_this_section_blank.' | i18next }} </span> <a href="javascript:void(0)" (click)="showHideFullText()">{{linkText}}</a></p>
+            </div>
+            <a href="javascript:void(0)" class="close-condition d-flex align-items-center" *ngIf="condition_group.rootCondition?.length" (click)="outerRemoveGroup(-1)">
+              <icon class="d-flex"  name="delete_sweep"  size="18px"></icon> <span class="ml-12">{{ 'clear_all' | i18next }}</span>
+            </a>
+
+          </div>
+          <div class="condition-body p-16">
+            <div class="parent-wrapper position-relative" *ngIf="rule_Obj">
+              <div *ngIf="condition_group.rootCondition?.length && ruleField?.ruleFieldInitialTriggerConfigs?.length > 0">
+                <app-rule-builder-condition
+                  (updatedInnerCondition)="onInnerDataChange($event, 'condition_group')"
+                  (removeInnerOuterGroup)="removeInnerOuterGroup($event)"
+                  [isEditMode]="isEditMode"
+                  [moduleList]="moduleList"
+                  [selectedModuleCode]="rule_Obj.module_code"
+                  [selectedEvent]="rule_Obj.eventId"
+                  [propertyList]="ruleField.ruleFieldInitialTriggerConfigs"
+                  [outerConditionLength]="condition_group.rootCondition?.length"
+                  [condition]="condition"
+                  [fullcondition]="condition_group.rootCondition"
+                  [outerIndex]="outerIndex"
+                  *ngFor="let condition of condition_group.rootCondition; let outerIndex = index"
+                >
+                </app-rule-builder-condition>
+              </div>
+              <div class="add-group position-relative" [ngClass]="{'mt-12 add-more' : condition_group.rootCondition?.length && propertyList?.length > 0}">
+                <button
+                [disabled]="!rule_Obj.moduleId || !rule_Obj.eventId"
+                (click)="addOuterCondition()"
+              >
+                <icon name="add_circle" size="18px" color="#0044C5"></icon> {{ 'group' | i18next }}
+              </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <app-rules-logic *ngIf="showRule" [conditionGroup]="ruleField" [ruleConfigObj]="ruleConfigObj" [isEditMode]="isEditMode" [manageWorkerStatus]="manageWorkerStatus" (ruleLogicData)="getUpdatedRuleLogicData($event)"></app-rules-logic>
+      </form>
+    </div>
+    </section>
+    </div>

@@ -1,0 +1,11 @@
+<ng-container *ngFor="let sideBarSection of sideBarSections">
+    <p class="sidebar-category small font-weight-medium text-uppercase mt-12 ml-12">{{sideBarSection.header}}</p>
+    <ul class="pending-action-list mt-8">
+        <li class="cursor-pointer py-12" *ngFor="let sideBarData of sideBarSection.items" [ngClass]="currentTab == sideBarData.url ? 'pending-action-item' : ''">
+            <div class="sidebar-text d-flex align-items-center justify-content-between px-12" [ngClass]="currentTab == sideBarData.url ? 'list-item' : ''" (click)="changeRoute(sideBarData.url)">
+                <p class="item-name">{{sideBarData.name}}</p>
+                <div class="count-circle" *ngIf="sideBarData.count > 0">{{sideBarData.count}}</div>
+            </div>
+        </li>
+    </ul>
+</ng-container>

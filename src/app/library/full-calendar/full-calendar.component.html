@@ -1,0 +1,107 @@
+<div class="full-calendar-wrapper">
+    <div class="full-calendar full-size p-16" [class.full-calendar-list]="calendarType === 'list'"
+    [class.full-calendar-day]="calendarType === 'day'" [class.full-calendar-week]="calendarType === 'week'">
+        <div class="calendar-header">
+            <div class="d-flex">
+                <span class="calendar-button button-today mr-16" (click)="onChangeCalendarType('today')"
+                    [ngClass]="{'disabled': isButtonTodayDisabled()}">{{ 'today' | i18next }}</span>
+                <span class="calendar-button chevron-left" (click)="onPrevious()">chevron_left</span>
+                <span class="calendar-button chevron-right" (click)="onNext()">chevron_right</span>
+            </div>
+            <div class="title">
+                <h2>{{ getHeader() | i18next }}</h2>
+            </div>
+            <div class="d-flex">
+                <span class="calendar-button button-month" [ngClass]="{'active-type': calendarType === 'month'}"
+                    (click)="onChangeCalendarType('month')">{{ 'month' | i18next }}</span>
+                <span class="calendar-button button-week" [ngClass]="{'active-type': calendarType === 'week'}"
+                    (click)="onChangeCalendarType('week')">{{ 'week' | i18next }}</span>
+                <span class="calendar-button button-day" [ngClass]="{'active-type': calendarType === 'day'}"
+                    (click)="onChangeCalendarType('day')">{{ 'day' | i18next }}</span>
+                <span class="calendar-button button-list" [ngClass]="{'active-type': calendarType === 'list'}"
+                    (click)="onChangeCalendarType('list')">{{ 'list' | i18next }}</span>
+            </div>
+        </div>
+        <div class="calendar-type">
+            <ng-container [ngSwitch]="calendarType">
+                <div class="grid-container-month" *ngSwitchCase="'month'">
+                    <div class="grid-item" *ngFor="let weekDay of weekDaysName">{{ weekDay |i18next}}</div>
+                </div>
+                <div class="grid-container-week" *ngSwitchCase="'week'">
+                    <div class="header-info">
+                        <div class="grid-item"></div>
+                        <div class="grid-item" [ngClass]="{'opacity-8': day.is_current}" *ngFor="let day of weekDays">
+                            {{ day.day_name?.slice(0, 3)|i18next }} {{ day.month_index + 1 }}/{{ day.day_number }}
+                        </div>
+                    </div>
+                    <div class="all-day-info">
+                        <div class="grid-item"><span class="all-day-round">{{ 'all_day' | i18next }}</span></div>
+                        <div class="grid-item" *ngFor="let day of weekDays">
+                            <app-day-view *ngIf="day.events.length; else elseBlock" [day]="day"></app-day-view>
+                            <ng-template #elseBlock>
+                                <div class="no-events">{{ 'no_events' | i18next }}</div>
+                            </ng-template>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-container-day" *ngSwitchCase="'day'">
+                    <div class="header-info">
+                        <div class="grid-item"></div>
+                        <div class="grid-item">{{ this.dayItem.day_name|i18next }}</div>
+                    </div>
+                    <div class="all-day-info">
+                        <div class="grid-item"><span class="all-day-round">{{ 'all_day' | i18next }}</span></div>
+                        <app-day-view *ngIf="dayItem.events.length; else elseBlock" [day]="dayItem" [maxVisibilityItem]="5">
+                        </app-day-view>
+                        <ng-template #elseBlock>
+                            <div class="no-events">{{ 'no_events' | i18next }}</div>
+                        </ng-template>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+        <perfect-scrollbar [config]="{ suppressScrollX: false, suppressScrollY: false }">
+            <div class="calendar-body">
+                <ng-container [ngSwitch]="calendarType">
+                    <div class="grid-container-month" *ngSwitchCase="'month'">
+                        <div class="grid-item" *ngFor="let day of monthDays">
+                            <div class="info-container full-size" [ngClass]="{'disabled': day.disable}">
+                                <div class="date-container" [ngClass]="{'current-day': day.is_current}">{{ day.day_number }}
+                                </div>
+                                <app-day-view [day]="day"></app-day-view>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid-container-week" *ngSwitchCase="'week'">
+                        <div class="grid-container-child" *ngFor="let time of dayTime">
+                            <div class="grid-item">{{ time }}</div>
+                            <div class="grid-item" *ngFor="let day of weekDays"></div>
+                        </div>
+                    </div>
+                    <div class="grid-container-day" *ngSwitchCase="'day'">
+                        <div class="grid-container-child" *ngFor="let time of dayTime">
+                            <div class="grid-item">{{ time }}</div>
+                            <div class="grid-item"></div>
+                        </div>
+                    </div>
+                    <div class="grid-container-list" *ngSwitchCase="'list'">
+                        <div class="grid-container-child" *ngFor="let day of weekDays">
+                            <div class="header-info" [ngClass]="{'current-date': day.is_current}">
+                                <span>{{ day.day_name | i18next }}</span>
+                                <span>{{ day.month_name?.slice(0, 3)|i18next }}&nbsp;{{ day.day_number }}&sbquo;&nbsp;{{ day.year
+                                    }}</span>
+                            </div>
+                            <div class="grid-item">
+                                <app-day-view *ngIf="day.events.length; else elseBlock" [day]="day" [showEventTime]="true"
+                                    [maxVisibilityItem]="20"></app-day-view>
+                                <ng-template #elseBlock>
+                                    <div class="no-events">{{ 'no_events' | i18next }}</div>
+                                </ng-template>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+            </div>
+        </perfect-scrollbar>
+    </div>
+</div>

@@ -1,0 +1,52 @@
+<div id="pagecontainer" class="page-container {{valueEmittedFromChildComponent}}"
+  (dblclick)="sessionService.preventEvent($event)" 
+  (click)="sessionService.mouseActionDetected()" 
+  (keydown)="sessionService.keyboardEvtTriggered()"
+  (wheel)="sessionService.mouseActionDetected()"
+  (mousemove)="sessionService.mouseActionDetected()"
+>
+  <app-sidebar [addZindexClass]='showBackdrop' (buttonClicked)="parentEventHandlerFunction($event)" *ngIf="!isSelfConfig">
+  </app-sidebar>
+  <div class="content" [ngClass]="{'config-active' : isSelfConfig}">
+    <app-header *ngIf="!isSelfConfig"></app-header>
+    <div class="backdrop-Overlay" *ngIf="showBackdrop"></div>
+    <ng-container *ngIf="showRouter">
+      <router-outlet></router-outlet>
+    </ng-container>
+  </div>
+  <div class="notification-panel active" *ngIf="toggleProgramPanel">
+    <app-programs [programs]="programs"></app-programs>
+  </div>
+  <div class="clearfix"></div>
+</div>
+
+<svms-dialog width="480px" height="240px" [visibility]="sessionService.modalVisibility">
+  <svms-dialog-header (close)="sessionService.closeModal()">
+    <h4 class="pt-32"> {{ sessionService.sessionExpired ? 
+      "Your session has timed out due to inactivity" : 
+      "Your session is about to expire due to inactivity" 
+    }} </h4>   
+    
+    <p class="mt-16 blue-text smaller"> {{ sessionService.sessionExpired ? "" : 
+      "You will be logged out in " + sessionService.sessionModalTimerLeft
+    }} </p>
+  </svms-dialog-header>
+
+  <svms-dialog-footer>
+    <ng-container *ngIf="sessionService.sessionExpired; else notExpired">
+      <button class="btn btn-primary"  (click)="sessionService.closeModal(true)">
+        {{ 'login' | i18next }}
+      </button>
+    </ng-container>
+    <ng-template #notExpired>
+      <div class="w-100 d-flex space-between">
+        <button class="btn btn-light ml-32" (click)="sessionService.closeModal(true)">
+          {{ 'log_out' | i18next }}
+        </button>
+        <button class="btn btn-primary mr-32" (click)="sessionService.closeModal()">
+          {{ 'continue_session' | i18next }}
+        </button>
+      </div>
+    </ng-template>
+  </svms-dialog-footer>
+</svms-dialog>

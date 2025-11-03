@@ -1,0 +1,312 @@
+<div class="create-new-task view-detail-page">
+
+    <header class="section-header page-title-main p-24 d-flex align-items-center justify-content-between">
+        <div class="page-title font-weight-semibold d-flex align-items-center">
+            <a href="javascript:void(0)" (click)="backClicked()">
+                <i class="material-icons back-arrow-icon mr-16">arrow_back</i>
+            </a>
+            <div class="ml-16">
+                <h3 class="font-weight-semibold mb-0">{{ pageTitle | i18next}}</h3>
+                <p *ngIf="isViewMode" class="small">
+                    {{ commonViewService.getTimeStamp(taskDetails?.created_on, taskDetails?.modified_on, taskDetails?.username) | i18next }}
+                </p>
+            </div>
+        </div>
+        <div *authorize="'task_manage'">
+            <button *ngIf="!isViewMode" (click)="onSave()" class="c-btn c-btn-success-medium">
+                {{ isEditMode?'Update':'Save' | i18nextEager }}
+            </button>
+            <button *ngIf="isViewMode" class="c-btn c-btn-secondary-medium-left-icon" (click)="switchToEditMode()">
+                <i class="material-icons">drive_file_rename_outline</i>
+                {{ 'edit' | i18next }}
+            </button>
+        </div>
+    </header>
+
+    <ng-container *ngIf="!isViewMode; else viewPanel">
+        <section [formGroup]="taskForm" class="section-body-content">
+            <div class="p-24">
+
+                <div class="c-form-group-row">
+                    <div class="c-form-group">
+                        <label>{{ 'task_name' | i18next }} <span class="require">*</span></label>
+                        <input type="text" [mandatePattern]="namePattern"
+                            class="c-form-control" name="title"
+                            maxlength="100" formControlName="name"
+                            placeholder="{{'Enter Task Name' | i18next}}"
+                        />
+                        <small class="error-text pt-8 display-block"
+                            *ngIf="taskControl('name')?.touched && taskControl('name')?.invalid">
+                            {{ '* Task Name is required' | i18next }}
+                        </small>
+                    </div>
+                    <div class="c-form-group toggle-width toggle-panel pt-24">
+                        <div class="toggle-panel-inner" [ngClass]="status ? 'if-active' : 'if-inactive'">
+                            <span class="status-text pr-12">{{ (status? 'Active' : 'Inactive') | i18next }}</span>
+                            <span class="toggle-switch" [ngClass]="status? 'toggle-on' : 'toggle-off'"
+                                (click)="status = !status"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="c-form-group">
+                    <label>
+                        {{ 'task_type_' | i18next }}
+                        <span class="require">*</span>
+                    </label>
+                    <div class="d-flex mb-24">
+                        <div class="d-flex align-items-center mr-24">
+                            <div>
+                                <label class="mb-0 c-input-radio">
+                                    <input class="mr-8" formControlName="type" type="radio" name="type" value="ONBOARDING">
+                                    <span class="cb-ui"></span>
+                                    <span class="cb-label">{{ 'onboarding' | i18next }}</span>
+                                </label>
+                            </div>
+                        </div>
+                        <!--
+                        <div class="d-flex align-items-center mr-24">
+                            <div class="disabled">
+                                <label class="mb-0 c-input-radio">
+                                    <input class="mr-8" formControlName="type" type="radio" name="type" value="OFFBOARDING">
+                                    <span class="cb-ui"></span>
+                                    <span class="cb-label">{{ 'offboarding' | i18next }}</span>
+                                </label>
+                            </div>
+                        </div>
+                        -->
+                    </div>
+                </div>
+
+                <div class="c-form-group-row">
+                    <div class="c-form-group">
+                        <label>{{ 'activity_type' | i18next }} <span class="require">*</span></label>
+                        <ng-select formControlName="activity" [clearable]="false" placeholder="{{ 'select' | i18next }}">
+                            <ng-container *ngFor="let activity of (activityOptions | keysort:'name' );">
+                                <ng-option [value]="activity?.value">
+                                    {{ activity?.name | i18next }}
+                                </ng-option>
+                            </ng-container>
+                        </ng-select>
+                        <small class="error-text pt-8 display-block"
+                            *ngIf="taskControl('activity')?.touched && taskControl('activity')?.invalid">
+                            {{ '* Activity Type is required' | i18next}}
+                        </small>
+                    </div>
+                    <div class="c-form-group"></div>
+                </div>
+
+                <div class="c-form-group-row">
+                    <div class="c-form-group">
+                        <label>{{ 'description' | i18next }}</label>
+                        <textarea formControlName="description" class="c-form-control"
+                            rows="6" placeholder="{{ 'enter_description' | i18next }}"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <h4 class="font-weight-medium">
+                    {{ 'task_duration' | i18next }}
+                </h4>
+
+                <div class="c-form-group-row">
+                    <div class="c-form-group">
+                        <label>
+                            {{ 'start_date' | i18next }}
+                            <span class="require">*</span>
+                        </label>
+                        <div class="task-duration d-flex">
+                            <div class="start-date-rule position-relative">
+                                <input (change)="datesValidation()" [formControl]="taskControl('start_date.day')" type="number"
+                                    class="c-form-control" [allowUptoNDigitDecimalNumber]="0" placeholder="0"/>
+                                <span>
+                                    {{ 'days' | i18next }}
+                                </span>
+                            </div>
+                            <ng-select [clearable]="false" [formControl]="taskControl('start_date.action')"
+                                class="task-duration-before ml-16" placeholder="{{'Before' | i18next}}" (change)="datesValidation()">
+                                <ng-option value="BEFORE">{{ 'before' | i18next }}</ng-option>
+                                <ng-option value="AFTER">{{ 'after' | i18next }}</ng-option>
+                            </ng-select>
+
+                            <ng-select [clearable]="false" [formControl]="taskControl('start_date.event')"
+                                class="task-duration-end ml-16" placeholder="{{'Assignment End Date' | i18next}}" (change)="datesValidation()">
+                                <ng-container *ngFor="let event of (startEventOptions | keyvalue | keysort:'value')">
+                                    <ng-option [value]="event?.key">
+                                        {{ event?.value | i18next }}
+                                    </ng-option>
+                                </ng-container>
+                            </ng-select>
+                        </div>
+                    </div>
+                </div>
+                <div class="c-form-group-row">
+                    <div class="c-form-group">
+                        <label>
+                            {{ 'due_date' | i18next }}
+                            <span class="require">*</span>
+                        </label>
+                        <div class="task-duration d-flex">
+                            <div class="start-date-rule position-relative">
+                                <input type="number" class="c-form-control" (change)="datesValidation()"
+                                    placeholder="0" [formControl]="taskControl('due_date.day')"
+                                    [allowUptoNDigitDecimalNumber]="0"/>
+                                <span>
+                                    {{ 'days' | i18next }}
+                                </span>
+                            </div>
+                            <ng-select [clearable]="false" [formControl]="taskControl('due_date.action')"
+                                class="task-duration-before ml-16" placeholder="{{'Before' | i18next}}" (change)="datesValidation()">
+                                <ng-option value="BEFORE">{{ 'before' | i18next }}</ng-option>
+                                <ng-option value="AFTER">{{ 'after' | i18next }}</ng-option>
+                            </ng-select>
+
+                            <ng-select [clearable]="false" [formControl]="taskControl('due_date.event')"
+                                class="task-duration-end ml-16" placeholder="{{'Assignment End Date' | i18next}}" (change)="datesValidation()">
+                                <ng-container *ngFor="let event of (dueEventOptions | keyvalue | keysort: 'value')">
+                                    <ng-option [value]="event?.key">
+                                        {{ event?.value | i18next }}
+                                    </ng-option>
+                                </ng-container>
+                            </ng-select>
+                        </div>
+                    </div>
+                </div>
+
+                <small class="error-text pb-16 display-block" *ngIf="!datesValid; else taskRequired;">
+                    {{ '*_due_date_should_be_greater_than_start_date' | i18next }}
+                </small>
+
+                <ng-template #taskRequired>
+                    <small class="error-text pb-16 display-block" *ngIf="showTaskDurationRequired">
+                        {{ '*_please_specify_all_the_required_fields' | i18next }}
+                    </small>
+                </ng-template>
+
+                <h4 class="font-weight-medium">
+                    {{ 'other_settings' | i18next }}
+                </h4>
+
+                <div class="light-blue-box mb-24 py-16 px-24">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="box-text-content pr-64">
+                            <p class="title font-weight-medium">
+                                {{ 'actor' | i18next }}
+                                <span class="require">*</span>
+                            </p>
+                            <p class="small">
+                                {{
+                                    'Select the party who will be responsible for completing this Task.
+                                    Once this is selected the system will require selection of the specific User Role of the Actor.
+                                    For example, if "Client Role" is selected as the Actor then the system will display only the client user roles
+                                    that have been configured for the Program.' | i18next
+                                }}
+                            </p>
+                        </div>
+                        <div class="side-ng-select">
+                            <ng-select formControlName="actor"
+
+                                (change)="taskControl('role')?.setValue(null); fetchUserRoles({ page: 1, term: '' })"
+                                [clearable]="false" placeholder="{{ 'select_actor' | i18next}}">
+                                <ng-container *ngFor="let actor of (actorsList | keysort: 'name');">
+                                    <ng-option [value]="actor?.value">
+                                        {{ actor?.name | i18next }}
+                                    </ng-option>
+                                </ng-container>
+                            </ng-select>
+                        </div>
+                    </div>
+                    <div *ngIf="taskControl('actor')?.value" class="c-form-group-row mt-24">
+                        <div class="c-form-group m-0">
+                            <label>
+                                {{ 'select_user_roles' | i18next }}
+                                <span class="require">*</span>
+                            </label>
+                            <ng-select formControlName="role"
+                                [multiple]="taskControl('actor').value === 'VENDOR'"
+                                [loading]="roleLoading" [clearable]="false"
+                                (search)="fetchUserRoles({ page: 1, term: $event?.term })"
+                                (open)="fetchUserRoles({ page: 1, term: '' })"
+                                (scrollToEnd)="fetchUserRoles()"
+                                placeholder="{{ 'select_user_roles' | i18next }}">
+                                <ng-container *ngFor="let role of (rolesList | keysort: 'name')">
+                                    <ng-option [value]="role?.value">
+                                        {{ (role?.name ?? '--') | i18next }}
+                                    </ng-option>
+                                </ng-container>
+                            </ng-select>
+                        </div>
+                    </div>
+                </div>
+
+                <small class="error-text pb-16 display-block" *ngIf="(taskControl('actor')?.touched && taskControl('actor')?.invalid); else roleCheck;">
+                    {{ '*_actor_selection_is_required' | i18next }}
+                </small>
+
+                <ng-template #roleCheck>
+                    <small class="error-text pb-16 display-block" *ngIf="taskControl('role')?.touched && taskControl('role')?.invalid">
+                        {{ '*_user_roles_selection_is_required' | i18next }}
+                    </small>
+                </ng-template>
+
+                <div class="c-form-group-row">
+                    <div class="c-form-group">
+                        <label>{{ 'attachments' | i18next }}</label>
+                        <div class="file-input">
+                            <input #attachment type="file" multiple="false"
+                                placeholder="{{'No File Selected' | i18next}}" (change)="selectFile($event)"
+                                accept=".pdf,.doc,.docx" style="z-index: -9999"/>
+                            <div class="styled-interface file-attach cursor-pointer" (click)="attachment?.click()">
+                                <input type="text" class="c-form-control" placeholder="{{'No File Selected' | i18next}}" [value]="fileName">
+                                <button class="c-btn c-btn-secondary-medium">
+                                    {{ 'browse' | i18next }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <small class="error-text pt-8 display-block" *ngIf="fileUploadErrorEncountered">
+                            {{ 'only_.pdf,_.doc,_.docx_files_are_supported_with_max_size_of_10mb' | i18next }}
+                        </small>
+
+                    </div>
+                    <div class="c-form-group">
+                        <label>&nbsp;</label>
+                        <button (click)="selectFile()" class="c-btn btn-light" *ngIf="fileName && !isEditMode">
+                            <i class="material-icons py-8">delete</i>
+                        </button>
+                    </div>
+                </div>
+
+                <!--
+                <h4 class="font-weight-medium">{{ 'Associations' | i18next }}</h4>
+                <div class="c-form-group-row">
+                    <div class="c-form-group">
+                        <label>{{ 'checklist' | i18next }}</label>
+                        <ng-select formControlName="checklists"
+                            [loading]="checklistLoading" [multiple]="true"
+                            (search)="fetchChecklist({ page: 1, term: $event?.term })"
+                            (open)="fetchChecklist({ page: 1, term: '' })"
+                            (scrollToEnd)="fetchChecklist()"
+                            placeholder="{{ 'select_checklist_name' | i18next }}">
+                            <ng-container *ngFor="let list of (checkList | keysort: 'name')">
+                                <ng-option [value]="list?.value">
+                                    {{ (list?.name ?? '--') | i18next }}
+                                </ng-option>
+                            </ng-container>
+                        </ng-select>
+                    </div>
+                </div>
+                -->
+            </div>
+        </section>
+    </ng-container>
+
+    <ng-template #viewPanel>
+        <section class="section-body-content">
+            <div class="p-32">
+                <app-common-view-rule-flow [details]="viewDetails">
+                </app-common-view-rule-flow>
+            </div>
+        </section>
+    </ng-template>
+</div>

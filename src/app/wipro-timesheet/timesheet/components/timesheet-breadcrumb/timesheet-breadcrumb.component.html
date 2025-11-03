@@ -1,0 +1,165 @@
+<div class="p-24 d-print-none position-relative-m">
+  <div class="breadcrumb-left float-left">
+    <ul class="timesheet-breadcrumb mb-4">
+      <li class="active d-inline-block">
+
+        <h4 class="float-left">{{ 'timesheet' | i18next }}</h4>
+
+                <!-- {{ 'timesheet' | i18next }} ({{timesheetData?.display_value ? timesheetData?.display_value : timesheetData?.work_period | i18next }}) -->
+
+                <!-- Available Class: draft, pending -->
+        <span class="ml-8 status-ui float-left"
+              [ngClass]="{'draft': checkStatusMatch(timesheetStatuses?.DRAFT) || checkStatusMatch(timesheetStatuses?.MISSING) , 'pending-approval':checkStatusMatch(timesheetStatuses?.PENDING) || checkStatusMatch(timesheetStatuses?.IN_PROGRESS) , 'rejected': checkStatusMatch(timesheetStatuses?.REJECTED),'approved':(checkStatusMatch(timesheetStatuses?.APPROVED) || checkStatusMatch(timesheetStatuses?.APPROVED_MODIFIED)), 'withdrawn':checkStatusMatch(timesheetStatuses?.WITHDRAWN),'deferred':checkStatusMatch(timesheetStatuses?.DEFERRED), 'deleted': checkStatusMatch(timesheetStatuses?.DELETED)}">{{timesheetData?.status | i18next }}</span>
+      </li>
+    </ul>
+    <p class="d-inline-block  mr-16" *ngIf="timeSheet?.data?.code">
+      <icon name="label" size="16px" color="#FFC409"></icon> {{timeSheet?.data?.code | i18next }}
+    </p>
+
+    <p class="d-inline-block ml-16 ml-m-0" *ngIf="timeSheet?.data?.actions_by?.submitted_by; else showUpdatedAtSection">
+      <icon name="update" size="16px" color="#6C757D"></icon> {{ 'submitted_by' | i18next }} :
+      {{timeSheet?.data?.actions_by?.submitted_by?.user?.name | i18next }}{{ 'on' | i18next }}
+      {{timeSheet?.data?.actions_by?.submitted_by?.action_at | localDateFormat  | i18next }}
+      {{ 'at_' | i18next }}
+      {{timeSheet?.data?.actions_by?.submitted_by?.action_at | localDateFormat : 'hh:mm:ss a z'  | i18next }}
+      <ng-template [ngIf]="timeSheet?.data?.actions_by?.submitted_by?.impersonate?.by?.name">(Impersonated by {{ timeSheet?.data?.actions_by?.submitted_by?.impersonate?.by?.name + ' - ' + timeSheet?.data?.actions_by?.submitted_by?.impersonate?.by?.role + ' (' + timeSheet?.data?.actions_by?.submitted_by?.impersonate?.by?.organization_category + ')'  | i18next }})</ng-template>
+    </p>
+
+    <div class="clearfix"></div>
+    <ng-template #showUpdatedAtSection>
+      <p class="d-inline-block" *ngIf="timeSheet?.data?.updated_at">
+        <icon name="update" size="16px" color="#6C757D"></icon> {{ 'last_updated_on' | i18next }} :
+        {{getFormattedDate(timeSheet?.data?.updated_at) | i18next }}
+      </p>
+    </ng-template>
+
+
+
+    <!-- Submit Button-->
+  </div>
+
+
+
+    <div class="float-right breadcrumb-right mt-8">
+      <button class="btn btn-outlne hide-on-desktop breadcrumb-dropdown-trigger" *ngIf="(timeSheet?.data?.actions_allow?.can_delete) || (timeSheet?.data?.actions_allow?.can_delete_daily) || (timeSheet?.data?.actions_allow?.can_discard) || (timeSheet?.data?.actions_allow?.can_modify) || (timeSheet?.data?.actions_allow?.can_perform_workflow)  || (timeSheet?.data?.actions_allow?.can_withdraw)" #breadcrumbDropdownTrigger>
+        <icon name="more_horiz" cuClass="d-flex" size="20px" color="#ffffff"></icon>
+      </button>
+      <div class="ts-breadcrumb-dropdown" [ngClass]="{'active' :buttonDropdown}">
+        <!-- Removed this because of its handled by backend *authorize="'create_timesheet'" -->
+        <ng-template [ngIf]="((timesheetId && timeSheet?.data?.actions_allow?.can_submit) || (isAuthorizedToCreate && isTimesheetEnabled && (!timesheetData?.status || timesheetData?.status === timesheetStatuses?.MISSING)))">
+            <button class="float-right btn btn-primary hide-on-mobile" [disabled]="disableButton || isDisabledButtons" (click)="submitTimesheet()">{{ 'submit_timesheet' | i18next }}</button>
+        </ng-template>
+
+        <ng-template [ngIf]="((timesheetId && timeSheet?.data?.actions_allow?.can_save) || (isAuthorizedToCreate && showSaveButton && isTimesheetEnabled && (!timesheetData?.status || timesheetData?.status === timesheetStatuses?.MISSING)))">
+            <button *accessControl class="float-right btn btn-primary mr-8 green pl-24 pr-24 hide-on-mobile" [disabled]="disableButton || isDisabledButtons"
+                (click)="saveTimesheet()">{{ 'save' | i18next }}</button>
+        </ng-template>
+
+
+        <!-- Withdraw Button-->
+        <ng-container *accessControl>
+        <button [disabled]="isDisabledButtons" class="float-right btn btn-primary " *ngIf="timeSheet?.data?.actions_allow?.can_withdraw"
+            (click)="timesheetActionButton('WITHDRAW_TIMESHEET')">{{ 'withdraw_timesheet' | i18next }}</button>
+         </ng-container>
+        <!-- Delete Button-->
+        <ng-container *accessControl>
+        <button [disabled]="isDisabledButtons" class="float-right btn btn-primary red mr-8" *ngIf="timeSheet?.data?.actions_allow?.can_delete"
+            (click)="timesheetActionButton('DELETE_TIMESHEET')">{{ 'delete_timesheet' | i18next }}</button>
+        </ng-container>
+        <ng-container *ngIf="timesheetData?.status === timesheetStatuses?.PENDING">
+          <ng-container *accessControl>
+            <!-- Approve Button-->
+            <div class="float-right mr-8 position-relative">
+              <button class="btn btn-primary green mr-8 hide-on-mobile" *ngIf="timeSheet?.data?.actions_allow?.can_approve"
+              (click)="openApprovalOPtion()" [disabled]="disableApprovalButton  || isDisabledButtons">
+              {{'approve'|i18next }}
+              <icon *ngIf="timeSheet?.data?.actions_allow?.can_perform_workflow" size="20px" [name]="approvalOption? 'keyboard_arrow_up' : 'keyboard_arrow_down'" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+              </button>
+              <div class="breadcrumb-dropdown hide-on-mobile" *ngIf="timeSheet?.data?.actions_allow?.can_perform_workflow && approvalOption" (mouseleave)="hideApprovalOption()">
+                <ul>
+                  <li>
+                    <a (click)="approveTimesheet('current')">
+                      {{'Current Level Approval'|i18nextEager }}
+                      <span class="d-block">{{'select_to_approve_the_current_approval_level'|i18nextEager }}</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a (click)="approveTimesheet('entire')">
+                      {{'Entire Approval Workflow'|i18nextEager }}
+                      <span class="d-block">{{'select_to_approve_the_entire_approval_workflow'|i18nextEager }}</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <!-- Reject Button-->
+            <button class="float-right btn btn-primary red mr-8 hide-on-mobile" *ngIf="timeSheet?.data?.actions_allow?.can_reject" 
+            (click)="rejectTimesheet()" [disabled]="disableApprovalButton || isDisabledButtons">
+            <icon size="20px" name="cancel" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+            {{ 'reject' | i18next }}
+            </button>
+          </ng-container>
+        </ng-container>
+
+
+        <!-- Modify Button-->
+        <ng-container *accessControl>
+        <button [disabled]="isDisabledButtons" class="float-right btn btn-primary orange mr-8" *ngIf="timeSheet?.data?.actions_allow?.can_modify"
+            (click)="timesheetActionButton('MODIFY_TIMESHEET')">
+            {{ 'modify' | i18next }}
+        </button>
+        <button [disabled]="isDisabledButtons" class="float-right btn btn-primary orange mr-8" *ngIf="timeSheet?.data?.actions_allow?.can_discard"
+            (click)="discardTimesheet()">
+            {{ 'discard_modify' | i18next }}
+        </button>
+
+        <button class="float-right btn btn-primary mr-8" *ngIf="isShowPrint()" (click)="print()">{{ 'print' | i18next }}</button>
+      </ng-container>
+    </div>
+</div>
+<div class="clearfix"></div>
+
+<!--- approve and reject button ui for mobile view -->
+<div class="mobile-view-buttons position-fixed hide-on-desktop">
+  <ng-container *ngIf="timesheetData?.status === timesheetStatuses?.PENDING">
+    <ng-container *accessControl>
+      <!-- Approve Button-->
+      <button class="btn btn-primary green ml-24" *ngIf="timeSheet?.data?.actions_allow?.can_approve"
+      (click)="openApprovalOPtion()" [disabled]="disableApprovalButton  || isDisabledButtons">
+      <icon size="20px" name="check_box" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+      {{ 'approve' | i18next }}
+      </button>
+      <!-- Reject Button-->
+      <button class="btn btn-primary red mr-24" *ngIf="timeSheet?.data?.actions_allow?.can_reject" 
+      (click)="rejectTimesheet()" [disabled]="disableApprovalButton || isDisabledButtons">
+      <icon size="20px" name="cancel" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+      {{ 'reject' | i18next }}
+      </button>
+      <div class="breadcrumb-dropdown" *ngIf="timeSheet?.data?.actions_allow?.can_perform_workflow && approvalOption" (mouseleave)="hideApprovalOption()">
+        <ul>
+          <li>
+            <a (click)="approveTimesheet('current')">
+              {{'Current Level Approval'|i18nextEager }}
+              <span class="d-block">{{'select_to_approve_the_current_approval_level'|i18nextEager }}</span>
+            </a>
+          </li>
+          <li>
+            <a (click)="approveTimesheet('entire')">
+              {{'Entire Approval Workflow'|i18nextEager }}
+              <span class="d-block">{{'select_to_approve_the_entire_approval_workflow'|i18nextEager }}</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </ng-container>
+  </ng-container>
+  <ng-template [ngIf]="((timesheetId && timeSheet?.data?.actions_allow?.can_submit) || (isAuthorizedToCreate && isTimesheetEnabled && (!timesheetData?.status || timesheetData?.status === timesheetStatuses?.MISSING)))">
+    <button class="float-right btn btn-primary" [disabled]="disableButton || isDisabledButtons" (click)="submitTimesheet()">{{ 'submit_timesheet' | i18next }}</button>
+</ng-template>
+
+<ng-template [ngIf]="((timesheetId && timeSheet?.data?.actions_allow?.can_save) || (isAuthorizedToCreate && showSaveButton && isTimesheetEnabled && (!timesheetData?.status || timesheetData?.status === timesheetStatuses?.MISSING)))">
+    <button *accessControl class="float-right btn btn-primary mr-8 green pl-24 pr-24" [disabled]="disableButton || isDisabledButtons"
+        (click)="saveTimesheet()">{{ 'save' | i18next }}</button>
+</ng-template>
+</div>

@@ -1,0 +1,133 @@
+<svms-sidebar *ngIf="createChecklists" [title]="'Edit (' + formValue?.name?.value +')'" [clickOutside]="clickOutside"
+              [dataVisibility]="createChecklists"
+              (onClose)="sidebarClose()">
+  <form [formGroup]="checklistForm">
+    <svms-sidebar-body>
+      <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)">
+        <vms-tab label="Basic Info">
+          <div class="form-group-row">
+            <div class="form-group">
+              <label>{{ 'check_list_name' | i18next }} <span class="require">*</span></label>
+              <input type="text" class="form-control"
+                     name="name"
+                     formControlName="name"
+                     (keyup)="getListNameValue()"
+                     placeholder="{{ 'cpr_cert' | i18next }} 2"
+                     [readOnly]="isViewMode">
+            </div>
+            <div class="toggle-panel mt-24">
+              <div class="toggle-panel-inner">
+                <span class="status-text">{{ (checklistForm.get('is_enabled')?.value?'Active':'Inactive') | i18next }}</span>
+                <toggle-button [disabled]="isViewMode" [checked]="checklistForm.get('is_enabled')?.value"
+                  (changed)="changeListNameStatus($event)">
+                </toggle-button>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>{{ 'description' | i18next }}</label>
+            <textarea class="form-control" rows="6"
+                      placeholder="{{ 'enter_description' | i18next }}..."
+                      formControlName="description"
+                      [readOnly]="isViewMode">
+            </textarea>
+          </div>
+          <div class="form-group" *ngIf="taskList && taskList['length']">
+            <div class="d-flex justify-content-between">
+              <label>{{ 'tasks' | i18next }} <span class="require">*</span></label>
+              <label class="sub-label">{{ 'Mandatory to complete Onboarding' | i18next}}</label>
+            </div>
+            <ul class="task-list">
+              <li *ngFor="let task of selectedTasks; let i = index">
+                <div class="checkbox-wrapper">
+                  <label class="checkbox-container" (click)="changeTaskStatus(task.task_id)">
+                    <span class="task-label">
+                      <icon size="20px" name="subdirectory_arrow_right" type="material"></icon>
+                      <span class="text">{{task.task_name}}</span>
+                    </span>
+                    <span class="checkmark"
+                          [ngClass]="task.selected ? 'checked' : ''"></span>
+                  </label>
+                  <div *ngIf="task.selected" class="d-flex my-auto">
+                    <span class="d-flex mandatory" [ngClass]="task.is_required ? 'selected' : ''"  (click)="task.is_required = !task.is_required"> 
+                      <i class="icon-default material-icons my-auto mx-8">{{task.is_required ? 'bookmark' : 'bookmark_border'}}</i>
+                      <span>{{ 'mandatory' | i18next }}</span>
+                    </span>
+                    <i class="info-icon material-icons my-auto ml-8"
+                      tooltip="{{'When a Task is identified as mandatory, it means that this particular onboarding item is absolutely required for the individual to start their assignment. If the Task is not identified as mandatory then an individual can start their assignment without the onboarding item being completed.' | i18next}}"
+                      placement="left">help</i>
+                  </div>
+                </div>
+              </li>
+            </ul>
+            <button class="btn btn-info show-more" (click)="showMore()" *ngIf="showMoreBtnVisible">{{ 'show_more' | i18next }}</button>
+          </div>
+          <div class="form-group">
+            <label>{{ 'assign_to_job_template' | i18next }}</label>
+
+            <ng-select #selectDropdown [clearable]="true"
+                       placeholder="{{ 'select_template' | i18next }}" multiple="true" formControlName="job_templates"
+                       [readonly]="isViewMode" [closeOnSelect]="true" [typeahead]="input$" >
+                       <ng-option *ngFor='let temp of (templates | keysort: "template_name")' [value]="temp.id">{{ temp?.template_name}}
+                      </ng-option>
+            </ng-select>
+          </div>
+          <p class="template-label font-weight-medium px-12" *ngIf="templates">
+            {{ 'template_name' | i18next }}
+          </p>
+          <ul class="selected-templates">
+            <li *ngFor="let template of templates; let i = index">
+              <div *ngIf="formValue?.job_templates?.value?.includes(template.id)" class="font-weight-medium">
+                {{template.template_name}}
+                <a class="float-right" (click)="selectDropdown.handleClearClick()" href="javascript:void(0)">
+                  <icon size="20px" name="cancel" type="material"></icon>
+                </a>
+              </div>
+            </li>
+          </ul>
+        </vms-tab>
+        <vms-tab label="Dependencies">
+          <table class="dependancy-table" *ngIf="selectedTasks.length || isViewMode">
+            <thead>
+            <tr>
+              <th class="text-left">{{ 'task_name' | i18next }}</th>
+              <th class="text-left">{{ 'dependency' | i18next }}</th>
+              <th class="text-left">{{ 'dependent_task' | i18next }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <ng-container *ngFor="let selectedTask of selectedTasks; let j = index">
+              <tr *ngIf="selectedTask.selected">
+                <td class="font-weight-medium">{{selectedTask.task_name}}</td>
+                <td>
+                  <div class="checkbox-wrapper">
+                    <label class="checkbox-container" (click)="changeDependencyStatus(selectedTask)">
+                      <span class="checkmark" [ngClass]="selectedTask.dependent_task_selected ? 'checked' : ''"></span>
+                    </label>
+                  </div>
+                </td>
+                <td>
+                  <ng-select [clearable]="false" (change)="selectDependency(selectedTask, $event)"
+                             [formControlName]="dependencyName(selectedTask.task_name)"
+                             placeholder="{{ 'select_dependencies' | i18next }}" [readonly]="!selectedTask.dependent_task_selected || isViewMode">
+                    <ng-container *ngFor="let task of getDependencyTasks(selectedTask.task_id)">
+                      <ng-option [value]="task.task_id">{{task.task_name}}</ng-option>
+                    </ng-container>
+                  </ng-select>
+                </td>
+              </tr>
+            </ng-container>
+            </tbody>
+          </table>
+        </vms-tab>
+      </vms-tab-group>
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+      <button type="submit" *accessControl [disabled]="isDisabled()" class="btn btn-primary float-right"
+              (click)="onContinue()">
+        {{tabIndex ? ('Submit'|i18next) : ('Continue'|i18next)}}
+        <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+      </button>
+    </svms-sidebar-footer>
+  </form>
+</svms-sidebar>

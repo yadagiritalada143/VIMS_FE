@@ -1,0 +1,952 @@
+<div class="table-bg" [ngClass]="{ compact: compactView }" [ngClass]="{
+  'no-min-height': tableConfig?.isTopHeader,
+  'fullpage-table': tableConfig?.fullPageTable,
+  'new-view-btn-enabled' : tableConfig?.enableGenricListViewButton
+}" id="smarttable">
+<div class="table-bg-inner">
+  <vms-header *ngIf="!tableConfig?.hideHeader"
+    [searchPlaceHolder]="tableConfig?.searchPlaceHolder" [count]="count"
+    mainmenuName="{{tableConfig?.title | i18next}}" submenuName="{{tableConfig?.subTitle | i18next}}"
+    [isCreateButtonName]="tableConfig?.isCreateButtonName"
+    [isSelectSubmitButtonName]="tableConfig?.isSelectSubmitButtonName"
+    [routeLinkOption]="tableConfig?.routeLinkOption" [routeLinkText]="tableConfig?.routeLinkText"
+    [tableConfig]="tableConfig" [searchValue]="searchTerm" [currentPage]="currentPage" [maxPages]="maxPages"
+    [customDownload]="customDownload" (changePages)="onPaginationClick($event)" (onCreate)="onCreateClick($event)"
+    (onHeaderButtonClick)="onSelectButtonClick($event)" (onDownloadButtonClick)="onDownloadClick($event)" [isFilterCleared]="isFilterCleared"
+    (onSetting)="onSettingClick($event)" (onSearch)="onSearchClick($event)" (onFilter)="onClickHeaderFilter($event)"
+    (onActionButtonClick)="actionButtonClicked($event)" (titleClick)="titleClicked($event)"
+    (baseReportClick)="baseReportClicked($event)" (onListFilter)="listFilter($event)"
+    [ngClass]="{ theme: vmsTableConfig?.isTheme }" (onTabClick)="onTabClicked($event)"
+    (onSortFilter)="onSortClick($event)" (onCandidateFilter)="onFliterCandidate($event)" [currentTab]="isSelectedTab"
+    [selectedRecordsCount]="selectedRecordsCount" (clearSelection)="clearSelection()" [totalItem]="totalItem"
+    [allowReordering]="tableConfig?.allowReordering" (onSelectAllRecordsClick)="onSelectAllRecordsClicked($event)" [selectAllRecordsFromBar]="tableConfig?.selectAllRecordsFromBar"
+    [selectedAllRecordsCount]="selectedAllRecordsCount"
+    (onMonthChangeEvent)="monthChange($event)" (onYearChangeEvent)="yearChange($event)"
+    (showCompareScreen)="showCompareScreen($event)" [compareDisabledBtn]="compareDisabledBtn" (emitScoreFactors)="emitScoreFactors($event)"
+    >
+  </vms-header>
+  <div class="content-area ui-content-wrapper bg-light" *ngIf="columnList"
+    [ngClass]="{ theme: tableConfig?.isTheme }">
+    <div class="content-area-inner px-24">
+      <div class="listing-wrap">
+        <div class="table-outer" [ngClass]="{ 'has-shadow': hasShadow }">
+          <div class="table-overflow" [ngClass]="{'scrlled-bottom' : scrolledBottom}">
+            <perfect-scrollbar [config]="scrollConfig" [disabled]="scrollbarStatus"
+              (psScrollLeft)="scrollLeft($event)" (psScrollRight)="scrollRight($event)">
+              <table class="table regular-table table-listing">
+                <thead *ngIf="!loading && vmsDataSource?.length > 0"
+                  [ngClass]="{ 'no-data': vmsDataSource?.length == 0 }">
+                  <tr>
+                    <th class="checkbox-all pl-24 not-scrollable" *ngIf="tableConfig?.isCheckboxOption">
+                      <div class="checkbox-wrapper position-relative">
+                        <label class="checkbox-container">
+                          <input type="checkbox" [disabled]="customSelected || disabledSelectAll" name="selectall" [(ngModel)]="selectAllValue" />
+                          <div class="checkmark" title="{{getTooltipText(tableConfig?.checkboxTooltip)|i18next}}" (click)="selectAllClick($event)"></div>
+                        </label>
+                        <table-icon class="record-option-trigger" size="20px" [name]="recordConfig? 'expand_less' : 'expand_more'"  #recordOptionTrigger  *ngIf="tableConfig?.subHeaderActionButtons?.length && isCustomDropdown"></table-icon>
+                      </div>
+                    </th>
+                    <th class="position-relative header-column" *ngFor="
+                        let header of tableConfig?.columnList;
+                        let i = index
+                      " [ngClass]="{
+                        'pl-24': !tableConfig?.isExpand && i == 0
+                      }" [hidden]="!columnList[header?.name]" [ngClass]="{ 'not-scrollable': i == 0, 'number-thead' : (isRateType(header) || isNumberType(header)) }"
+                      (mouseover)="showSort(i, 'show')">
+                      <span class="mr-4">{{
+                        (header?.title ? header?.title : header?.name) | i18next
+                        }}</span>
+                      <!-- <table-icon [hidden]="!header?.isSort" size="24px"
+                                          [color]="sortedColumn === header?.name ? 'blue' : ''"
+                                          [name]="((sortedColumn === header?.name) && isSortAsc) ? 'expand_less' : 'expand_more'"
+                                          type="material"
+                                          [cuClass]="header?.iconClass ? header?.iconClass : 'icon'"
+                                          (onClick)="onSortClick(header?.name)" class="sort-icon">
+                                      </table-icon> -->
+                      <span [hidden]="!header?.isSort" class="sorting" [ngClass]="{
+                          active: sortedColumn === header?.name && isSortAsc,
+                          showdata:
+                            showSortIndex === i ||
+                            sortedColumn === header?.name,
+                          displaySort: sortedColumn === header?.name
+                        }">
+                        <!-- <table-icon size="16px" name="arrow_upward" type="material"
+                                              cuClass="d-flex" class="flex">
+                                          </table-icon> -->
+                        <table-icon size="12px" [name]="
+                            sortedColumn === header?.name && isSortAsc
+                              ? 'arrow_downward'
+                              : 'arrow_upward'
+                          " type="material" [cuClass]="
+                            header?.iconClass ? header?.iconClass : 'icon'
+                          " (onClick)="onSortClick(header?.name)" class="sort-icon">
+                        </table-icon>
+                      </span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody *ngIf="!loading && vmsDataSource?.length > 0">
+                  <tr *ngFor="let vmsData of vmsDataSource; let i = index" (mouseleave)="hideOptionDropdown()"
+                    [ngClass]="{
+                      active: hoverState == i,
+                      'dropdown-visible-top':
+                        vmsDataSource?.length > 5 &&
+                        i >= vmsDataSource?.length - 3}" (mouseenter)="hoverClass(i, vmsData)">
+                        <td class="checkbox-td pl-24 not-scrollable" *ngIf="tableConfig?.isCheckboxOption">
+                          <div class="checkbox-wrapper">
+                            <label class="checkbox-container" tooltip="{{(vmsData?.tooltip)|i18next}}" placement="right"
+                            delay="500">
+                              <input type="checkbox" name="select-item" [(ngModel)]="vmsData.isChecked"
+                                (change)="onCheckClick(vmsData, i)" [disabled]="isDisabledCheckbox || vmsData?.disableCheckbox"/>
+                              <div class="checkmark" [ngClass]="{'gray-out': vmsData?.disableCheckbox}" title="{{getTooltipText(tableConfig?.checkboxTooltip)|i18next}}"></div>
+                            </label>
+                          </div>
+                        </td>
+                    <vms-row *ngFor="
+                        let column of tableConfig?.columnList;
+                        let i = index;let last = last" [isVmsTableExpand]="tableConfig?.isExpand" [index]="i" [vmsRowDataSource]="
+                        getColumnData(
+                          column?.isRange
+                            ? column?.rangeNameList
+                            : column?.name,
+                          column,
+                          vmsData
+                        )" [all]="column" [isImage]="column?.isImage"
+                        [notes]="vmsData?.notes"
+                        [isLastColumn]="last"
+                        [isRateType]="isRateType(column)"
+                        [isNumberType]="isNumberType(column)"
+                        [isClickable]="column?.isClickable"
+                      [canViewMtp]="column?.canViewMtp"
+                      [isContact]="column?.isContact" [isExpenseType]="column?.isExpenseType"
+                      [isRedirect]="column?.isRedirect" [showDoNotRehireFlag]="vmsData?.is_display_rehire_flag"
+                      (viewClicked)="onViewClickd($event, vmsData, column)" (cloneClicked)="onCloneClickd(vmsData)"
+                      (deleteClicked)="deleteClick(i, vmsData)" (viewProfileClicked)="clickToViewProfile(i, vmsData)"
+                      (previewClicked)="previewOptionClicked(vmsData)" (editClicked)="EditClicked($event, vmsData)"
+                      (disableClicked)="onDisableClick(i, vmsData)" style="display: contents"
+                      [hidden]="!columnList[column?.name]"
+                      [infoIcon]="column?.infoIcon"
+                      [isObjectStatusShow]="column?.isObjectStatusShow" [isVieworEditFlow]="column?.isVieworEditFlow"
+                       [isVieworEdit]="column?.isVieworEdit" [isEditEditRule]="column?.isEditEditRule" [isDetails]="column?.isDetails"
+                      [isWithdrawal]="column?.isWithdrawal" [isViewProfile]="column?.isViewProfile"
+                       [showPreviewIcon]="column?.showPreviewIcon" [isInterview]="column?.isInterview"
+                      [isViewEnabled]="column?.isViewEnabled" [isVieworClone]="column?.isVieworClone"
+                      [isDisableorDelete]="column?.isDisableorDelete" [isProfileMatch]="column?.isProfileMatch"
+                       [isCandidateStatus]="column?.isCandidateStatus" [isDelete]="column?.isDelete"
+                      [isNoOption]="column?.isNoOption"
+                      [isNoOption]="column?.isNoOption" [hideOptions]="column?.isNoOption" [isAction]="column?.isAction"
+                      [isStatusColor]="column?.isStatusColor" [isCurrency]="column?.isCurrency"
+                      [isIconList]="column?.isIconList" [isShowCheckBox]="column?.isShowCheckBox"
+                       [isCheckBoxReadonly]="column?.isCheckBoxReadonly" [permission]="column?.permission"
+                       [isIcon]="column?.isIcon" [isPending]="column?.isPending" [isDoNotRehire]= "column?.isDoNotRehire" [isMultiUser]="column?.isMultiUser"
+                      [isOptOut]="vmsData?.opt_option === 'opt_out'" [isOptIn]="vmsData?.opt_option === 'opt_in'" [options]="column?.options"
+                      [isNavigation]="column?.isNavigation" (optOutClicked)="onOptOutClicked($event, vmsData)"
+                      [isSubmitCandidate]="column?.isSubmitCandidate" [checkboxDisabled]="checkboxDisabled"
+                      [linearProgressBar]="column?.linearProgressBar" [circularProgressBar]="column?.circularProgressBar"
+                      (onSubmittedCandidateClick)="onSubmittedCandidateClicked($event, vmsData)"
+                      (click)="columnClick(column, vmsData)" (baseReportClick)="baseReportClicked($event)"
+                      (numberBadgeClicked)="onNumberBadgeClicked(column, vmsData)"
+                      (onNameClicked)="onRowNameClick(column, vmsData)"
+                      (withdrawProfileClicked)="clickToWithdrawProfile(i, vmsData)"
+                      (onScheduleInterviewClick)="clickToScheduleInterview(i, vmsData)"
+                      (onRehireCheckClick)="clickTorRehireCheck(i, vmsData)"
+                      (onOfferReviewClick)="clickToOfferReview(i, vmsData)"
+                      (onEditOfferClick)="clickToEditOfferReview(i, vmsData)"
+                      (onCancelOfferClick)="clickToCancelOfferReview(i, vmsData)"
+                      (onWithdrawProfileClick)="clickToWithdrawProfile(i, vmsData)"
+                      (viewDetailClicked)="clickToDetails(i, vmsData)"
+                      (onNavigateClickView)="clickToViewDetails($event)"
+                      (rescheduleInterviewClicked)="clickToRescheduleInterview(i, vmsData)"
+                      (onCreateOfferClick)="clickToCreateOffer(i, vmsData)"
+                      (onRejectCandidateClick)="clickToRejectCandidate(i, vmsData)"
+                      (cancelInterviewClicked)="clickToCancelInterview(i, vmsData)"
+                      (onClickToReviewInterview)="clickToReviewInterview(i, vmsData)"
+                      (onCompleteInterviewClick)="clickToCompleteInterview(i, vmsData)"
+                      (viewSubmittedCandidate)="clickToViewSubmittedCandidate(i, vmsData)"
+                      (onOpenPanel)="clickToViewPanel(i, vmsData)" [isOpenView]="column?.isOpenView"
+                      [toolTipVisibility]="column?.toolTipVisibility" [ngClass]="{ 'not-scrollable has-border': i == 0 }"
+                      (onOptionClicked)="optionClicked(i, vmsData)" [rotuterLinkOnClick]='rotuterLinkOnClick'
+                      [rotuterLinkParseFn]='rotuterLinkParseFn' [rotuterLinkParams]='rotuterLinkParams'
+                      [rowData]='vmsData' [enableClick]="column?.enableClick"
+                      [allowMultiselect]="tableConfig?.allowMultiselect" (onRowChecked)="onRowSelect($event)"
+                      (onPendingIconClick)="onPendingIconClicked($event, vmsData)" data-title="{{!column?.toolTipVisibility ? (column.title | i18next) : null}}" [isDownloadBtn]="column?.isDownloadBtn" (downloadDoc)="downloadDocument($event)" (candidateScore)="showCandidateScore($event)"
+                      [showTitleCase]="column?.showTitleCase" [isTooltip]="column?.isTooltip"
+                      [isMasked]="column?.isMasked" [isManagerList]="column?.isManagerList"
+                      [orgStatus]="vmsData?.orgStatus || vmsData?.status || vmsData?.expense_status || vmsData?.invoice_status"
+                      (onMtpViewClick)="navigateToMtpDetails(vmsData.mtp_id)"
+                      [refName]="refName"
+                      >
+                      <!-- 'orgStatus' is added as part of a corner case of SOW, where the amfam_contract_id can have a text
+                        value as 'draft', but it shouldn't highlight like the statuses in other places in the table. -->
+                    </vms-row>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="dotloader" *ngIf="loading"></div>
+              <div *ngIf="!loading && (vmsDataSource?.length === 0 || vmsDataSource == null)">
+                <app-no-data (clickOnNext)="onClickNext($event)" [noDataJson]="tableConfig?.tableNoDataObj" [jobStatus]="currentJobStatus"
+                (createOffer)="createoffer($event)"></app-no-data>
+              </div>
+            </perfect-scrollbar>
+          </div>
+        </div>
+
+        <div *ngIf="!tableConfig?.hideResultCount" class="total-result d-none">
+          <div class="total-result-box overflow-hidden">
+            {{ vmsDataSource?.length }} {{ 'results' | i18next }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <vms-paginator *ngIf="
+      !loading &&
+      !tableConfig?.hideBottomPagination &&
+      vmsDataSource?.length > 0
+    " [itemsPerPage]="itemsPerPage" [recordsPerPageSetting]="recordsPerPageSetting" [currentPage]="currentPage" (changeRecords)="onClickRecords($event)"
+    [maxPages]="maxPages" (changePage)="onPaginationClick($event)">
+  </vms-paginator>
+  <div class="clearfix"></div>
+</div>
+</div>
+<div class="record-option-config p-16 rounded-sm" [ngClass]="{'active' : recordConfig}" id="recordpopup" #recordOptionConfig>
+<div class="d-flex mb-12">
+  <div class="radio-wrap mr-12">
+    <input type="radio" name="record_option" [checked]="selectPageData" (click)="selectRadioButton($event, 'selectPageData')">
+    <span></span>
+  </div>
+   <span class="radio-label">{{ 'select_all' | i18next }} {{vmsDataSource?.length}} {{ 'records_on_this_page' | i18next }}</span>
+</div>
+<div class="d-flex mb-12">
+  <div class="radio-wrap mr-12">
+    <input type="radio" name="record_option" [checked]="isAllRecordsSelected"
+      (click)="selectRadioButton($event, 'selectAllData')">
+    <span></span>
+  </div>
+  <span class="radio-label">{{ 'select_all' | i18next }} {{totalItem}} {{ 'records' | i18next }}</span>
+</div>
+<div class="d-flex ">
+  <div class="radio-wrap mr-12">
+    <input type="radio" name="record_option" value="custom" [checked]="customSelected" (click)="selectRadioButton($event, 'custom')">
+    <span></span>
+  </div>
+  <div>
+    <div  class="radio-label"><div class="d-flex align-items-bottom flex-wrap"><div>{{ 'select_first' | i18next }}</div>  <input type="number" [(ngModel)]="countInput" class="form-control w-25 mx-12 mb-8 popup-input">{{ 'records' | i18next }} <div> {{ 'out_of_total' | i18next }} {{totalItem}}</div></div></div>
+    <div class="form-group mt-4 mb-0" *ngIf="customSelected">
+      <span class="error-message" *ngIf="countInput === 0">{{ 'please_enter_invoice_count_greater_than_0' | i18next }}  </span>
+      <span class="error-message" *ngIf="countInput > totalItem" >{{ 'no_of_invoice_entered_exceeds_total_invoice_count..' | i18next }}</span>
+
+    </div>
+  </div>
+</div>
+<div class="d-flex justify-content-end mt-16">
+  <button class="btn btn-primary mr-8" [disabled]="(!countInput || countInput > totalItem) && customSelected || (!selectPageData && !isAllRecordsSelected && !customSelected)" (click)="selectRadioButton($event, 'apply')">{{ 'apply' | i18next }}</button>
+  <button class="btn btn-outine" (click)="closeRecordConfig()">{{ 'close' | i18next }}</button>
+</div>
+</div>
+<nav class="dropdown-box-wrapper" *ngIf="rowDropdownTrigger" id="{{'rowDropdown-'+refName}}" (clickOutside)="hideDropdownBox($event)" [exclude]="'.option-dd-button'" (touchend)="hideTouchDropdownBox($event)">
+<ul id="{{'dropdownUnorderList-'+refName}}">
+  <li class="no-action-message"  *ngIf="noActionMessages">
+    <a >
+      {{ 'no_actions_available' | i18next }}
+    </a>
+  </li>
+  <!-- detail button ui -->
+  <li *ngIf="isDetails">
+    <a  (click)="clickToDetails(true, selectedVmsData)">
+      {{ 'details' | i18next }}
+    </a>
+  </li>
+  <li *ngIf="isVieworClone">
+    <a  (click)="onCloneClickd(selectedVmsData)">
+      {{ 'clone' | i18next }}
+    </a>
+  </li>
+
+  <li *ngIf="isDisableorDelete">
+    <a  (click)="onDisableClick(true, selectedVmsData)">
+
+      <span *ngIf="selectedVmsData?.is_enabled">{{ 'disable' | i18next }}</span>
+      <span *ngIf="!selectedVmsData?.is_enabled"
+        (click)="onDisableClick(true,selectedVmsData)">{{ 'enable' | i18next }}</span>
+    </a>
+  </li>
+  <li *ngIf="isDelete">
+    <a  (click)="deleteClick(true, selectedVmsData)">
+      {{ 'delete' | i18next }}
+    </a>
+  </li>
+  <li *ngIf="isDeleteFlow">
+    <a  (click)="deleteClick(true, selectedVmsData)">
+      {{ 'delete' | i18next }}
+    </a>
+  </li>
+
+  <li *authorize="'opt_job'">
+    <a *ngIf="(userType == 'VENDOR') && ((selectedVmsData?.orgStatus | lowercase) == jobStatus.SOURCING || (selectedVmsData?.orgStatus | lowercase) == jobStatus.HALTED || (selectedVmsData?.orgStatus | lowercase) == jobStatus.HOLD)
+          && (isOptIn || (isOptInOptOut && selectedVmsData?.opt_option == 'pending_opt_action'))"
+       (click)="onOptInClicked(true, selectedVmsData)">
+      {{ 'opt_in' | i18next }}
+    </a>
+  </li>
+
+  <li *authorize="'opt_job'">
+    <a *ngIf="(userType == 'VENDOR') && ((selectedVmsData?.orgStatus | lowercase) == jobStatus.SOURCING || (selectedVmsData?.orgStatus | lowercase) == jobStatus.HALTED || (selectedVmsData?.orgStatus | lowercase) == jobStatus.HOLD)
+             && (isOptOut || (isOptInOptOut && selectedVmsData?.opt_option == 'pending_opt_action' || selectedVmsData?.opt_option == 'opt_in'))"
+       (click)="onOptOutClicked(true, selectedVmsData)">
+      {{ 'opt_out' | i18next }}
+    </a>
+  </li>
+  <!-- *ngIf="isOptIn" -->
+  <!-- [hidden]="!isSubmitCandidate"
+*authorize="'submit_candidate'" -->
+
+  <li [hidden]="!isSubmitCandidate || !currentOptStatus || selectedVmsData?.orgStatus === 'halt' || selectedVmsData?.orgStatus === 'hold' " *authorize="'submit_candidate'">
+    <a  (click)="onSubmittedCandidateClicked(true, selectedVmsData)"
+      [ngClass]="{'disabled': (selectedVmsData?.orgStatus | lowercase) == jobStatus.HALTED || (selectedVmsData?.orgStatus | lowercase) == jobStatus.HOLD || (selectedVmsData?.orgStatus | lowercase) == jobStatus.FILLED || ((selectedVmsData?.orgStatus | lowercase) | lowercase) == jobStatus.CLOSED}">
+      {{ 'submit_candidate' | i18next }}
+    </a>
+  </li>
+  <ng-container *ngIf="userType !== 'VENDOR'">
+    <li [hidden]="!isRateInterview || !(selectedVmsData?.status?.toLowerCase() == 'accepted')">
+      <a  (click)="clickToCompleteInterview(true, selectedVmsData)">
+        {{ 'rate_interview' | i18next }}
+      </a>
+    </li>
+  </ng-container>
+
+  <li [hidden]="!isGenericWithdraw || !selectedVmsData?.rollback_allowed">
+    <a  (click)="clickToisGenericWithdraw(true, selectedVmsData)">
+      {{ isGenericWithdrawText|i18next }}
+    </a>
+  </li>
+
+  <li *ngIf="showComplianceOption">
+    <a  (click)="complianceOptionClick(selectedVmsData)">
+      {{ 'compliance' | i18next }}
+    </a>
+  </li>
+  <li [hidden]="!isAddAndSubmit" *authorize="'submit_candidate'">
+    <a *ngIf="((userType | uppercase) == loggedUserType.VENDOR || (userType | uppercase) == loggedUserType.SUPER_ORG || (userType | uppercase) == loggedUserType.MSP)
+          && ((selectedVmsData?.orgStatus | lowercase) == jobStatus.SOURCING || (selectedVmsData?.orgStatus | lowercase) == jobStatus.HALTED || (selectedVmsData?.orgStatus | lowercase) == jobStatus.HOLD || (selectedVmsData?.orgStatus | lowercase) == jobStatus.FILLED || (selectedVmsData?.orgStatus | lowercase) == jobStatus.PENDING_APPROVAL_SOURCING)"
+      >
+      <span *ngIf="(selectedVmsData?.orgStatus | lowercase) == jobStatus.SOURCING || (selectedVmsData?.orgStatus | lowercase) == jobStatus.PENDING_APPROVAL_SOURCING"
+        (click)="optionClicked(selectedVmsData, '')">{{ 'add' | i18next }} & {{ 'submit_candidate' | i18next }} </span>
+      <span
+        *ngIf="(selectedVmsData?.orgStatus | lowercase) == jobStatus.HALTED || (selectedVmsData?.orgStatus | lowercase) == jobStatus.HOLD || (selectedVmsData?.orgStatus | lowercase) == jobStatus.FILLED || (selectedVmsData?.orgStatus | lowercase) == jobStatus.CLOSED"
+        tooltip="Submission activity is unavailable while Job is {{selectedVmsData?.status}}" placement="bottom"
+        delay="500"
+        [ngClass]="{'disabled': (selectedVmsData?.orgStatus | lowercase) == jobStatus.HALTED || (selectedVmsData?.orgStatus | lowercase) == jobStatus.HOLD || (selectedVmsData?.orgStatus | lowercase) == jobStatus.FILLED}">{{ 'add' | i18next }}
+        & {{ 'submit_candidate' | i18next }} </span>
+
+    </a>
+  </li>
+  <li *ngIf="showComplianceOption">
+    <a  (click)="optionClicked(selectedVmsData, '')">
+      {{ 'compliance' | i18next }}
+    </a>
+  </li>
+  <ng-container *ngIf="selectedVmsData?.offer_visibility && selectedVmsData?.status?.toLowerCase() === 'submitted'">
+    <li *authorize="'withdraw_candidate'" class="red-color" [hidden]="!isWithdrawal
+              || selectedVmsData?.candidate_submission_status?.toLowerCase() === 'submitted'
+              || (selectedVmsData?.interviewers?.length && selectedVmsData?.status?.toLowerCase() === 'rejected')
+              || selectedVmsData?.candidate_submission_status?.toLowerCase() === 'interview_accepted'
+              || selectedVmsData?.candidate_submission_status?.toUpperCase() === 'interview_schedule'
+              || selectedVmsData?.candidate_submission_status?.toUpperCase() === 'interview_rejected'
+              || selectedVmsData?.candidate_submission_status?.toUpperCase() === 'interview_completed'
+              || selectedVmsData?.candidate_submission_status?.toUpperCase() === 'pending_interview_review'
+              || selectedVmsData?.status?.toLowerCase() === 'offer accepted' || selectedVmsData?.status?.toLowerCase() === 'cancelled'
+              || selectedVmsData?.status?.toLowerCase() === 'offer released' || selectedVmsData?.status?.toLowerCase() === 'offer withdrawn'
+              || selectedVmsData?.status?.toLowerCase() === 'offer rejected' || selectedVmsData?.status?.toLowerCase() === 're-hire check pending'
+              || selectedVmsData?.status?.toLowerCase() === 'pending offer approval' || selectedVmsData?.status?.toLowerCase() === 'pending_shortlist'
+              || selectedVmsData?.status?.toLowerCase() === 'pending shortlist' || selectedVmsData?.status?.toLowerCase() === 'scheduled'
+              || selectedVmsData?.status?.toLowerCase() === 'pending shortlist review' || selectedVmsData?.status?.toLowerCase() === 'shortlist review rejected'
+              || (selectedVmsData?.job_status?.toLowerCase() === jobStatus.FILLED && (selectedVmsData?.status?.toLowerCase() === 'rejected'
+              || selectedVmsData?.status?.toLowerCase() === 'withdrawn'))">
+      <a  (click)="clickToWithdrawProfile('', selectedVmsData)">{{ 'withdraw_candidate' | i18next }}</a>
+    </li>
+  </ng-container>
+  <ng-container *ngIf="selectedVmsData?.offer_visibility && selectedVmsData?.status?.toLowerCase() !== 'submitted' && selectedVmsData?.opt_option === 'opt_in'">
+    <li *authorize="'resubmit_candidate'" class="red-color" [hidden]="!isWithdrawal
+            || selectedVmsData?.candidate_submission_status?.toLowerCase() === 'submitted'
+            || (selectedVmsData?.interviewers?.length && selectedVmsData?.status?.toLowerCase() === 'rejected')
+            || selectedVmsData?.candidate_submission_status?.toLowerCase() === 'interview_accepted'
+            || selectedVmsData?.candidate_submission_status?.toUpperCase() === 'interview_schedule'
+            || selectedVmsData?.candidate_submission_status?.toUpperCase() === 'interview_rejected'
+            || selectedVmsData?.candidate_submission_status?.toUpperCase() === 'interview_completed'
+            || selectedVmsData?.candidate_submission_status?.toUpperCase() === 'pending_interview_review'
+            || selectedVmsData?.status?.toLowerCase() === 'offer accepted' || selectedVmsData?.status?.toLowerCase() === 'cancelled'
+            || selectedVmsData?.status?.toLowerCase() === 'offer released' || selectedVmsData?.status?.toLowerCase() === 'offer withdrawn'
+            || selectedVmsData?.status?.toLowerCase() === 'offer rejected' || selectedVmsData?.status?.toLowerCase() === 're-hire check pending'
+            || selectedVmsData?.status?.toLowerCase() === 'pending offer approval' || selectedVmsData?.status?.toLowerCase() === 'pending_shortlist' || selectedVmsData?.status?.toLowerCase() === 'offer countered'
+            || selectedVmsData?.status?.toLowerCase() === 'pending shortlist' || selectedVmsData?.status?.toLowerCase() === 'scheduled'
+            || selectedVmsData?.status?.toLowerCase() === 'pending shortlist review' || selectedVmsData?.status?.toLowerCase() === 'shortlist review rejected'
+            || (selectedVmsData?.job_status?.toLowerCase() === jobStatus.FILLED && (selectedVmsData?.status?.toLowerCase() === 'rejected'))
+            || selectedVmsData?.job_status?.toLowerCase() === 'closed' || selectedVmsData?.status?.toLowerCase() === 'interview scheduled'
+            || (selectedVmsData?.status?.toLowerCase()) === 'interview rejected' || (selectedVmsData?.status?.toLowerCase()) === 'interview completed'
+            || selectedVmsData?.status?.toLowerCase() === 'interview accepted' || selectedVmsData?.status?.toLowerCase() === 'interview cancelled'
+            || selectedVmsData?.status?.toLowerCase() === 'pending interview review' || selectedVmsData?.status?.toLowerCase() === 'accepted'
+            || selectedVmsData?.status?.toLowerCase() === 'completed' || selectedVmsData?.status?.toLowerCase() === 'pending acceptance'
+            || selectedVmsData?.status?.toLowerCase() === 'pending interview acceptance' || selectedVmsData?.status?.toLowerCase() === 'pending offer review'
+            || selectedVmsData?.status?.toLowerCase() == 'countered pending review' || selectedVmsData?.status?.toLowerCase() == 'countered offer pending review'
+            || selectedVmsData?.status?.toLowerCase() == 'counter pending review' || selectedVmsData?.status?.toLowerCase() == 'counter offer pending review'
+            || selectedVmsData?.status?.toLowerCase() == 'counter pending approval' || selectedVmsData?.status?.toLowerCase() == 'counter offer pending approval'">
+      <a  (click)="clickToWithdrawProfile('', selectedVmsData)">{{ 'resubmit_candidate' | i18next }}</a>
+    </li>
+  </ng-container>
+
+  <li [hidden]=" userType ==='SUPER_ORG' || !isOfferCandidateWithdrawal || selectedVmsData?.status != 'RELEASED' ||
+  selectedVmsData?.candidate_submission_status == 'WITHDRAWN' || selectedVmsData?.candidate_submission_status == 'REJECTED' "
+    *authorize="'withdraw_candidate'" class="red-color">
+    <a  (click)="clickToWithdrawProfile('', selectedVmsData)">
+      {{ selectedVmsData?.status ? "Withdraw Candidate" :"" | i18next}}
+
+    </a>
+  </li>
+  <!-- Commenting out the below section as no one was able confirm the condition mentioned.
+       Please connect with granthik@simplifyvms.com before updating this part
+  -->
+  <!-- <li [hidden]="selectedVmsData?.status != 'REJECTED' || selectedVmsData?.candidate_submission_status == 'REJECTED' " *authorize="'reject_candidate'"
+    class="red-color">
+    <a  (click)="clickToRejectCandidate('', selectedVmsData)">
+      {{ 'reject_candidate' | i18next }}
+    </a>
+  </li> -->
+
+<ng-container *authorize="'reject_candidate'">
+  <ng-container *ngIf="selectedVmsData?.offer_visibility">
+    <li [hidden]="!(selectedVmsData?.status?.toLowerCase() === 're-hire check pending' && userType == 'MSP')">
+      <a  (click)="clickToRejectCandidate('', selectedVmsData)">
+        {{ 'reject_candidate' | i18next }}
+      </a>
+    </li>
+  </ng-container>
+</ng-container>
+
+  <li
+    [hidden]="!isScheduleInterview || (selectedVmsData?.status?.toLowerCase()=='offer released' ||
+    selectedVmsData?.status?.toLowerCase()=='rejected' || selectedVmsData?.status?.toLowerCase()=='withdrawn' ||
+    selectedVmsData?.status?.toLowerCase()=='offer accepted' || selectedVmsData?.status?.toLowerCase()=='offer rejected' ||
+    selectedVmsData?.status?.toLowerCase()=='pending_shortlist' || selectedVmsData?.status?.toLowerCase()=='pending shortlist' || selectedVmsData?.status?.toLowerCase()=='pending shortlist review' || selectedVmsData?.status?.toLowerCase()=='shortlist review rejected' ||
+    selectedVmsData?.status?.toLowerCase() === 're-hire check pending')
+    || (selectedVmsData?.status?.toLowerCase() == 'completed' && userType == 'VENDOR')
+    || selectedVmsData?.status?.toLowerCase() == 're-hire rejected' || (selectedVmsData?.candidate_submission_status?.toLowerCase() == 'rejected') || selectedVmsData?.status?.toLowerCase() != 'submitted'"
+    *authorize="'schedule_interview'">
+    <a  (click)="clickToScheduleInterview('', selectedVmsData)">
+      {{ 'schedule_interview' | i18next }}
+    </a>
+  </li>
+  <!-- dropdown for interview listing page-->
+  <li [hidden]="!isRescheduleInterview || selectedVmsData?.status?.toLowerCase() == 'pending review' || selectedVmsData?.status?.toLowerCase() == 'completed' || selectedVmsData?.candidate_submission_status?.toLowerCase() == 'rejected'"
+    *authorize="'reschedule_interview'">
+    <a  (click)="clickToRescheduleInterview('', selectedVmsData)">
+      {{ 'reschedule_interview' | i18next }}
+    </a>
+  </li>
+<ng-container *ngIf="selectedVmsData?.offer_visibility">
+  <li
+    [hidden]="!isCreateOffer || selectedVmsData?.status?.toLowerCase() == 'pending review' || selectedVmsData?.offer_status || selectedVmsData?.status?.toLowerCase() == 'offer released' || selectedVmsData?.status?.toLowerCase() == 'offer accepted' || selectedVmsData?.status?.toLowerCase() == 'withdrawn' ||
+    selectedVmsData?.status?.toLowerCase() == 'rejected' || selectedVmsData?.status?.toLowerCase()=='pending_shortlist' ||
+    selectedVmsData?.status?.toLowerCase()=='pending shortlist' || selectedVmsData?.status?.toLowerCase()=='pending shortlist review' || selectedVmsData?.status?.toLowerCase()=='shortlist review rejected' || selectedVmsData?.status?.toLowerCase() === 're-hire check pending' || selectedVmsData?.status?.toLowerCase() === 'pending offer approval' ||
+    selectedVmsData?.job_status == 'PENDING_APPROVAL_SOURCING' || selectedVmsData?.job_status == 'PENDING_APPROVAL' ||
+    selectedVmsData?.job_status == 'FILLED' || selectedVmsData?.status?.toLowerCase() == 're-hire rejected' || selectedVmsData?.offerID
+    || selectedVmsData?.candidate_submission_status == 'REJECTED'"
+    *authorize="'create_offer'">
+    <a  (click)="clickToCreateOffer('', selectedVmsData)">
+      {{ 'create_offer' | i18next }}
+
+    </a>
+  </li>
+</ng-container>
+  <!--  -->
+  <li [hidden]="
+      !isCounterOffer ||
+      ((userType | uppercase) == loggedUserType.CLIENT || (userType | uppercase) == loggedUserType.MSP) ||
+      selectedVmsData?.status == 'REJECTED' || selectedVmsData?.status == 'Pending approval' || selectedVmsData?.candidate_submission_status == 'WITHDRAWN' ||
+      selectedVmsData?.status == 'ACCEPTED' || selectedVmsData?.status == 'COUNTERED' || selectedVmsData?.candidate_submission_status == 'REJECTED' ||
+      (userType === 'VENDOR' && !currentProgram?.config.is_counter_offer) || selectedVmsData?.status == 'Countered Pending Review' || selectedVmsData?.status.toLowerCase() == 'pending review' || selectedVmsData?.status.toLowerCase() == 'countered review cancelled'||
+      selectedVmsData?.status?.toLowerCase() == 'counter pending approval' || selectedVmsData?.status?.toLowerCase() == 'counter offer pending approval'
+      || selectedVmsData?.status?.toLowerCase() == 'counter pending review' || selectedVmsData?.status?.toLowerCase() == 'counter offer pending review'
+      || selectedVmsData?.status?.toLowerCase() == 'countered offer pending review'
+    " *authorize="'counter_offer'">
+    <a  (click)="clickToCounterOffer('', selectedVmsData)">
+      <!-- <table-icon
+        size="19px"
+        name="today"
+        type="material"
+        class="d-flex"
+        cuClass="icon--on-left d-flex"
+      >
+      </table-icon> -->
+      {{ 'counter_offer' | i18next }}
+    </a>
+  </li>
+  <li [hidden]="!(selectedVmsData?.status?.toLowerCase() === 're-hire check pending' && selectedVmsData?.is_show_rehire)">
+    <a  (click)="clickTorRehireCheck('', selectedVmsData)">
+      {{ 'rehire_check' | i18next }}
+
+    </a>
+  </li>
+  <li [hidden]="!((selectedVmsData?.status?.toLowerCase() === 'pending review' || selectedVmsData?.status?.toLowerCase() === 'countered offer pending review' || selectedVmsData?.status?.toLowerCase() === 'countered pending review') && userType == 'MSP') || (selectedVmsData?.candidate_submission_status == 'REJECTED') || (!isOfferReview) || offerNewWorkflow">
+    <a  (click)="clickToOfferReview('', selectedVmsData)">
+      {{ 'review' | i18next }}
+    </a>
+  </li>
+
+  <!--Shortlist Review-->
+
+  <ng-container *ngIf="selectedVmsData?.status?.toLowerCase() === 'pending shortlist review'">
+    <ng-container *ngIf="(currentProgram?.config?.submission?.is_shortlisting_enabled &&
+    currentProgram?.config?.submission?.hm_shortlist_review && selectedVmsData?.job_manager_id == userInfo?.id) || userType === 'SUPER_ORG'">
+      <li>
+        <a  (click)="clickToShortListReview('', selectedVmsData)">
+          {{ 'review' | i18next }}
+        </a>
+      </li>
+      <li>
+        <a  (click)="shortlistReviewReject('', selectedVmsData)">
+          {{ 'reject' | i18next }}
+        </a>
+      </li>
+    </ng-container>
+  </ng-container>
+
+  <!--Shortlist Review-->
+
+  <ng-container *authorize="'amend_offer'">
+  <li *ngIf="(selectedVmsData?.status?.toLowerCase() == 'countered pending review' || selectedVmsData?.status?.toLowerCase() === 'countered offer pending review' || selectedVmsData?.status?.toLowerCase() === 'pending review')"  [hidden]="(selectedVmsData?.status?.toLowerCase() === 'pending review' && userType == 'CLIENT') || (selectedVmsData?.candidate_submission_status == 'REJECTED') || (!isOfferReview) || offerNewWorkflow">
+    <a  (click)="clickToEditOfferReview('', selectedVmsData)">
+      {{ 'edit' | i18next }}
+    </a>
+  </li>
+  </ng-container>
+  <li [hidden]="(selectedVmsData?.status?.toLowerCase() === 'pending review' && userType == 'CLIENT' )|| !( (selectedVmsData?.status?.toLowerCase() === 'countered pending review' || selectedVmsData?.status?.toLowerCase() === 'countered offer pending review' || selectedVmsData?.status?.toLowerCase() === 'pending review') && userType == 'MSP' ) || (selectedVmsData?.candidate_submission_status == 'REJECTED') || ((!isOfferReview)) || offerNewWorkflow">
+    <a  (click)="clickToCancelOfferReview('', selectedVmsData)">
+      {{ 'cancel' | i18next }}
+    </a>
+  </li>
+  <li [hidden]="
+      !isAcceptOffer ||
+      ((userType | uppercase) == loggedUserType.CLIENT || (userType | uppercase) == loggedUserType.MSP) ||
+      selectedVmsData?.status == 'REJECTED' ||  selectedVmsData?.status == 'Pending approval' || selectedVmsData?.candidate_submission_status == 'WITHDRAWN' ||
+      selectedVmsData?.status == 'ACCEPTED' || selectedVmsData?.status == 'COUNTERED' || selectedVmsData?.candidate_submission_status == 'REJECTED' ||
+      selectedVmsData?.status == 'WITHDRAWN' || selectedVmsData?.status == 'Countered Pending Review' || selectedVmsData?.status.toLowerCase() == 'countered review cancelled' || selectedVmsData?.status.toLowerCase() == 'pending review'||
+      selectedVmsData?.status?.toLowerCase() == 'counter pending approval' || selectedVmsData?.status?.toLowerCase() == 'counter offer pending approval'
+      || selectedVmsData?.status?.toLowerCase() == 'counter pending review' || selectedVmsData?.status?.toLowerCase() == 'counter offer pending review'
+      || selectedVmsData?.status?.toLowerCase() == 'countered offer pending review'
+
+    " *authorize="'update_offer'">
+    <a  (click)="clickToAcceptOffer('', selectedVmsData)">
+      <!-- <table-icon
+        size="19px"
+        name="today"
+        type="material"
+        class="d-flex"
+        cuClass="icon--on-left d-flex"
+      >
+      </table-icon>-->
+      {{ 'accept_offer' | i18next }}
+    </a>
+  </li>
+  <!-- <li [hidden]="
+      !isRejectOffer ||
+      userType == selectedVmsData?.stages[0]?.created_by?.org_type ||
+      selectedVmsData?.status == 'REJECTED' ||
+      selectedVmsData?.status == 'ACCEPTED'
+    " *authorize="'update_offer'">
+    <a  (click)="clickToRejectOffer('', selectedVmsData)">
+      Reject Offer
+    </a>
+  </li> -->
+
+  <ng-template [ngIf]="isRejectOffer && (
+    ((userType | uppercase) == loggedUserType.SUPER_ORG || (userType | uppercase) == loggedUserType.VENDOR) &&
+   (selectedVmsData?.status == 'RELEASED' ||  selectedVmsData?.status != 'COUNTERED'))">
+    <li *authorize="'update_offer'" [hidden]="selectedVmsData?.candidate_submission_status === 'WITHDRAWN' || selectedVmsData?.status === 'WITHDRAWN' ||
+    selectedVmsData?.status === 'ACCEPTED' || selectedVmsData?.status === 'REJECTED' || selectedVmsData?.candidate_submission_status == 'REJECTED'
+    || selectedVmsData?.status == 'Countered Pending Review' || selectedVmsData?.status.toLowerCase() == 'pending review' || selectedVmsData?.status.toLowerCase() == 'countered review cancelled' 
+    || selectedVmsData?.status?.toLowerCase() == 'counter pending approval' || selectedVmsData?.status?.toLowerCase() == 'counter offer pending approval'
+    || selectedVmsData?.status?.toLowerCase() == 'counter pending review' || selectedVmsData?.status?.toLowerCase() == 'counter offer pending review'
+    || selectedVmsData?.status?.toLowerCase() == 'countered offer pending review'
+    ">
+      <a  (click)="clickToRejectOffer('', selectedVmsData)">
+        {{ 'reject_offer' | i18next }}
+      </a>
+    </li>
+  </ng-template>
+  <ng-template [ngIf]="isOnboardingCandidate && (
+    (userType | uppercase) == loggedUserType.SUPER_ORG &&
+   (selectedVmsData?.status?.toLowerCase() == 'accepted'))">
+    <li>
+      <a  (click)="clickToOnboardingCandidate('', selectedVmsData)">
+        {{ 'on-boarding' | i18next }}
+      </a>
+    </li>
+  </ng-template>
+  <ng-container *authorize="'amend_offer'">
+    <li [hidden]="selectedVmsData?.status.toLowerCase() == 'accepted' 
+    || selectedVmsData?.status.toLowerCase() == 'countered' 
+    || selectedVmsData?.status.toLowerCase() == 'released' 
+    || selectedVmsData?.status.toLowerCase() == 'pending review' 
+    || selectedVmsData?.status.toLowerCase() == 'countered pending review'
+    || selectedVmsData?.status.toLowerCase() == 'countered offer pending review'
+    || selectedVmsData?.status.toLowerCase() == 'counter pending review' 
+    || selectedVmsData?.status.toLowerCase() == 'counter offer pending review'
+    || selectedVmsData?.status.toLowerCase() == 'countered review cancelled' 
+    || selectedVmsData?.status.toLowerCase() == 'pending approval'
+    || selectedVmsData?.status.toLowerCase()=='counter pending approval'
+    || selectedVmsData?.status.toLowerCase()=='counter offer pending approval'" 
+    *ngIf="isEditOffer && (selectedVmsData?.candidate_submission_status != 'REJECTED'
+    || selectedVmsData?.status == 'REJECTED' || selectedVmsData?.status == 'OFFER_REJECTED')">
+      <a  (click)="clickToEditOfferReview('', selectedVmsData)">
+        {{ 'edit_offer' | i18next }}
+      </a>
+    </li>
+  </ng-container>
+  <!-- Specific to job edit only -->
+  <li id="view-dropdown" [hidden]="!isVieworEdit">
+    <a  (click)="EditClicked(false, selectedVmsData)">
+      {{ 'view' | i18next }}
+    </a>
+  </li>
+
+  <li [hidden]="!isVieworEdit">
+    <a  (click)="EditClicked(true, selectedVmsData)">
+      {{ 'edit' | i18next }}
+    </a>
+  </li>
+
+  <li [hidden]="!isVieworEditFlow">
+    <a  (click)="ViewClicked(false, selectedVmsData)">
+      {{ 'view' | i18next }}
+    </a>
+  </li>
+
+  <li [hidden]="!isVieworEditFlow">
+    <a  (click)="EditClicked(true, selectedVmsData)">
+      {{ 'edit' | i18next }}
+    </a>
+  </li>
+
+  <li [hidden]="!isEditEditRule">
+    <a  (click)="EditClicked(true, selectedVmsData)">
+      {{ 'edit_this_rule' | i18next }}
+    </a>
+  </li>
+
+  <li [hidden]="!isEditEditRule">
+    <a  (click)="ViewClicked(false, selectedVmsData)">
+      {{ 'view_this_rule' | i18next }}
+    </a>
+  </li>
+  <li [hidden]="!isVieworEditCandidate" *authorize="'update_candidate'">
+    <a  (click)="EditClicked(true, selectedVmsData)">
+      {{ 'edit_candidate' | i18next }}
+    </a>
+  </li>
+  <ng-container *ngIf="selectedVmsData?.offer_visibility">
+  <li [hidden]="!isEditInterview || (selectedVmsData?.status?.toLowerCase() == 'completed') "
+    *authorize="'edit_interview'">
+    <a  (click)="EditClicked('', selectedVmsData)">
+      {{ 'edit_interview' | i18next }}
+    </a>
+  </li>
+  </ng-container>
+  <li class="red-color" [hidden]="!isCancelInterview || selectedVmsData?.status?.toLowerCase() == 'pending review' || (selectedVmsData?.status?.toLowerCase() == 'completed') || (selectedVmsData?.status?.toLowerCase() == 'cancelled') || (selectedVmsData?.candidate_submission_status?.toLowerCase() == 'rejected')"
+    *authorize="'cancel_interview'">
+    <a  (click)="clickToCancelInterview('', selectedVmsData)">
+      {{ 'cancel_interview' | i18next }}
+    </a>
+  </li>
+  <ng-container *ngIf="selectedVmsData?.offer_visibility">
+  <li [hidden]="!isInterviewReview || !(selectedVmsData?.status?.toLowerCase() === 'pending review' && userType == 'MSP')">
+    <a  (click)="clickToReviewInterview('', selectedVmsData)">
+      {{ 'review' | i18next }}
+    </a>
+  </li>
+  </ng-container>
+
+  <li [hidden]="!isEditInterviewReview || !(selectedVmsData?.status?.toLowerCase() === 'pending review' && userType == 'MSP')"
+    *authorize="'cancel_interview'">
+    <a  (click)="clickToEditInterviewReview('', selectedVmsData)">
+      {{ 'edit' | i18next }}
+    </a>
+  </li>
+  <li [hidden]="!isCancelInterviewReview || !(selectedVmsData?.status?.toLowerCase() === 'pending review' && userType == 'MSP')"
+    *authorize="'cancel_interview'">
+    <a  (click)="clickToCancelInterviewReview('', selectedVmsData)">
+      {{ 'cancel' | i18next }}
+    </a>
+  </li>
+
+  <!-- <li *ngIf="isRescheduleInterview">
+    <a  (click)="clickToRescheduleInterview('',selectedVmsData)">
+      <table-icon size="19px" name="today" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+      </table-icon>
+      Reschedule Interview
+    </a>
+  </li>
+  <li *ngIf="isEditClicked">
+    <a  (click)="EditClicked('',selectedVmsData)">
+      <table-icon size="19px" name="create" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+      </table-icon>
+      Edit Interview
+    </a>
+  </li>
+  <li class="red-color" *ngIf="isCancelInterview">
+    <a  (click)="clickToCancelInterview('',selectedVmsData)">
+      <table-icon size="19px" name="backspace" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+      </table-icon>
+      Cancel Interview
+    </a>
+  </li> -->
+  <!-- started for job list -->
+  <ng-container>
+    <ng-template
+     [ngIf]="(selectedVmsData?.is_belongs_to_job_module || selectedVmsData?.is_super_view_user) && isDistribute && (selectedVmsData?.orgStatus | lowercase) === jobStatus.OPEN">
+      <li *authorize="'distribute_job'">
+        <a  (click)="jobOptionListClicked('distribute')">
+          {{ 'distribute' | i18next }}
+        </a>
+      </li>
+    </ng-template>
+    <ng-template
+      [ngIf]="(selectedVmsData?.is_belongs_to_job_module || selectedVmsData?.is_super_view_user) && isDistribute && (userType | uppercase) == loggedUserType.MSP && (selectedVmsData?.orgStatus | lowercase) === jobStatus.PENDING_APPROVAL_HOLD">
+      <li *authorize="'distribute_job'">
+        <a  (click)="jobOptionListClicked('distribute')">
+          {{ 'distribute' | i18next }}
+        </a>
+      </li>
+    </ng-template>
+    <!-- <ng-template
+      [ngIf]="(selectedVmsData?.is_belongs_to_job_module || selectedVmsData?.is_super_view_user) && (userType | uppercase) == loggedUserType.SUPER_ORG && isApprove &&  ((selectedVmsData?.orgStatus | lowercase) === jobStatus.PENDING_APPROVAL || (selectedVmsData?.orgStatus | lowercase) === jobStatus.PENDING_APPROVAL_SOURCING)">
+      <li *authorize="'approve_job'">
+        <a  (click)="jobOptionListClicked('approve')">
+          {{ 'approve' | i18next }}
+        </a>
+      </li>
+    </ng-template>
+    <ng-template
+      [ngIf]="(selectedVmsData?.is_belongs_to_job_module || selectedVmsData?.is_super_view_user) && (userType | uppercase) == loggedUserType.SUPER_ORG && isReject &&  ((selectedVmsData?.orgStatus | lowercase) === jobStatus.PENDING_APPROVAL || (selectedVmsData?.orgStatus | lowercase) === jobStatus.PENDING_APPROVAL_SOURCING)">
+      <li *authorize="'reject_job'">
+        <a  (click)="jobOptionListClicked('reject')">
+          {{ 'reject' | i18next }}
+        </a>
+      </li>
+    </ng-template> -->
+    <ng-template
+      [ngIf]="selectedVmsData?.is_belongs_to_job_module && (isRelease && (selectedVmsData?.orgStatus | lowercase) === jobStatus.PENDING_APPROVAL_HOLD || (selectedVmsData?.orgStatus | lowercase) === jobStatus.PENDING_APPROVAL_HALTED || (selectedVmsData?.orgStatus | lowercase) === jobStatus.HALTED || (selectedVmsData?.orgStatus | lowercase) === jobStatus.HOLD)">
+      <ng-container *accessControl>
+      <li *authorize="'release_job'">
+        <a  (click)="jobOptionListClicked('release')">
+          {{ 'release' | i18next }}
+        </a>
+      </li>
+    </ng-container>
+    </ng-template>
+    <ng-template
+      [ngIf]="selectedVmsData?.is_belongs_to_job_module && (isHold && (selectedVmsData?.orgStatus | lowercase) === jobStatus.PENDING_APPROVAL || (selectedVmsData?.orgStatus | lowercase) === jobStatus.PENDING_APPROVAL_SOURCING || (selectedVmsData?.orgStatus | lowercase) === jobStatus.PENDING_APPROVAL_HOLD || (selectedVmsData?.orgStatus | lowercase) === jobStatus.PENDING_APPROVAL_HALTED || (selectedVmsData?.orgStatus | lowercase) === jobStatus.OPEN || (selectedVmsData?.orgStatus | lowercase) === jobStatus.SOURCING || (selectedVmsData?.orgStatus | lowercase) === jobStatus.HALTED)">
+      <ng-container *accessControl>
+      <li *authorize="'hold_job'">
+        <a  (click)="jobOptionListClicked('hold')">
+          {{ 'hold' | i18next }}
+        </a>
+      </li>
+    </ng-container>
+    </ng-template>
+    <ng-template
+      [ngIf]="selectedVmsData?.is_belongs_to_job_module && (isReDistribute && (selectedVmsData?.orgStatus | lowercase) === jobStatus.PENDING_APPROVAL_SOURCING || (selectedVmsData?.orgStatus | lowercase) === jobStatus.SOURCING)">
+      <li *authorize="'distribute_job'">
+        <a  (click)="jobOptionListClicked('reDistribute')">
+          {{ 're_distribute' | i18next }}
+        </a>
+      </li>
+    </ng-template>
+    <ng-template
+      [ngIf]="selectedVmsData?.is_belongs_to_job_module && (isHaltSubmission && (selectedVmsData?.orgStatus | lowercase) === jobStatus.PENDING_APPROVAL_SOURCING  || (selectedVmsData?.orgStatus | lowercase) === jobStatus.OPEN || (selectedVmsData?.orgStatus | lowercase) === jobStatus.SOURCING)">
+      <ng-container *accessControl>
+      <li *authorize="'halt_job'">
+        <a  (click)="jobOptionListClicked('halt-submission')">
+          {{ 'halt_submissions' | i18next }}
+        </a>
+      </li>
+    </ng-container>
+    </ng-template>
+    <ng-template
+      [ngIf]="selectedVmsData?.is_belongs_to_job_module && (isClose && !((selectedVmsData?.orgStatus | lowercase) === jobStatus.DRAFT || (selectedVmsData?.orgStatus | lowercase) === jobStatus.FILLED || (selectedVmsData?.orgStatus | lowercase) === jobStatus.CLOSED))">
+      <li *authorize="'close_job'">
+        <a  (click)="jobOptionListClicked('close')">
+          {{ 'close' | i18next }}
+        </a>
+      </li>
+    </ng-template>
+    <ng-template [ngIf]="(selectedVmsData?.is_belongs_to_job_module || selectedVmsData?.is_super_view_user) && ((isRejectedJob && (selectedVmsData?.orgStatus | lowercase) === jobStatus.REJECTED) || (isDraftJob && (selectedVmsData?.orgStatus | lowercase) === jobStatus.DRAFT))" >
+      <li *authorize="'update_job'">
+        <a  (click)="EditClicked(true, selectedVmsData)">
+          {{ 'edit' | i18next }}
+        </a>
+      </li>
+    </ng-template>
+    <ng-template
+      [ngIf]="(selectedVmsData?.is_belongs_to_job_module || selectedVmsData?.is_super_view_user) && isEditJob && ((selectedVmsData?.orgStatus | lowercase) === jobStatus.SOURCING || (selectedVmsData?.orgStatus | lowercase) === jobStatus.OPEN)">
+      <li *authorize="'edit_approved_job'">
+        <a  (click)="EditClicked(true, selectedVmsData)">
+          {{ 'edit' | i18next }}
+        </a>
+      </li>
+    </ng-template>
+    <ng-template [ngIf]="selectedVmsData?.is_belongs_to_job_module && isDraftJob && (selectedVmsData?.orgStatus | lowercase) === jobStatus.DRAFT">
+      <ng-container *accessControl>
+      <li *authorize="'close_job'">
+        <a  (click)="draftOptionClicked('remove')" [class]="selectedVmsData?.is_deletable ? '' : 'disabled'">
+          {{ 'remove' | i18next }}
+        </a>
+      </li>
+      </ng-container>
+    </ng-template>
+    <!-- <ng-template
+      [ngIf]="selectedVmsData?.is_belongs_to_job_module && isDraftJob && (selectedVmsData?.orgStatus | lowercase) === jobStatus.DRAFT">
+      <ng-container *accessControl>
+        <li *authorize="'close_job'">
+          <a  (click)="draftOptionClicked('close')">
+            {{'close'|i18next}}
+          </a>
+        </li>
+      </ng-container>
+    </ng-template> -->
+    <!-- <ng-template [ngIf]="(selectedVmsData?.is_belongs_to_job_module || selectedVmsData?.is_super_view_user) && isEditAndReview && (selectedVmsData?.orgStatus | lowercase) === jobStatus.PENDING_REVIEW">
+      <li *authorize="'review_job'">
+        <a   (click)="EditClicked(true, selectedVmsData)">
+          {{ 'edit' | i18next }}
+        </a>
+      </li>
+    </ng-template> -->
+    <!-- <ng-template [ngIf]="selectedVmsData?.is_belongs_to_job_module && isReview && (selectedVmsData?.orgStatus | lowercase) === jobStatus.PENDING_REVIEW">
+      <li *authorize="'review_job'">
+        <a  (click)="jobOptionListClicked('review')">
+          {{ 'review' | i18next }}
+        </a>
+      </li>
+    </ng-template> -->
+    <ng-template
+      [ngIf]="(selectedVmsData?.is_belongs_to_job_module || selectedVmsData?.is_super_view_user) && isAddAndSubmit && ((userType | uppercase) == loggedUserType.CLIENT) && ((selectedVmsData?.orgStatus | lowercase) === jobStatus.SOURCING || (selectedVmsData?.orgStatus | lowercase) === jobStatus.PENDING_APPROVAL_SOURCING)">
+      <li *authorize="'submit_candidate'">
+        <a  (click)="optionClicked(selectedVmsData, '')"
+          [ngClass]="{'disabled': (selectedVmsData?.orgStatus | lowercase) == jobStatus.HALTED || (selectedVmsData?.orgStatus | lowercase) == jobStatus.HOLD || (selectedVmsData?.orgStatus | lowercase) == jobStatus.FILLED || ((selectedVmsData?.orgStatus | lowercase) | lowercase) == jobStatus.CLOSED}">
+          {{ 'submit_candidate' | i18next }}
+        </a>
+      </li>
+    </ng-template>
+    <ng-template [ngIf]="(selectedVmsData?.is_belongs_to_job_module || selectedVmsData?.is_super_view_user) && isCloneJob">
+      <li *authorize="'create_job'">
+        <a  (click)="CloneJobClicked(true, selectedVmsData)"
+          [ngClass]="{'disabled': selectedVmsData?.disableCloneJob}">
+          {{ 'clone_job' | i18next }}
+        </a>
+      </li>
+    </ng-template>
+  </ng-container>
+  <!-- end for job list -->
+
+  <!-- start for distribution list -->
+  <ng-container *accessControl>
+  <ng-container *ngIf="selectedVmsData?.is_belongs_to_job_module">
+    <li [hidden]="!tableConfig?.isDistributionList || selectedVmsData?.reflected_job_status == 'hold' || selectedVmsData?.reflected_job_status == 'filled'">
+      <a  (click)="distributionOptionClicked('hold')">
+        {{ 'hold' | i18next }}
+      </a>
+    </li>
+    <li [hidden]="!tableConfig?.isDistributionList || selectedVmsData?.reflected_job_status == 'sourcing' || selectedVmsData?.reflected_job_status == 'filled'">
+      <a  (click)="distributionOptionClicked('release')">
+        {{ 'release' | i18next }}
+      </a>
+    </li>
+    <li [hidden]="!tableConfig?.isDistributionList || selectedVmsData?.reflected_job_status == 'hold' ||
+        selectedVmsData?.reflected_job_status == 'halted' || selectedVmsData?.reflected_job_status == 'filled'">
+      <a  (click)="distributionOptionClicked('halt')">
+        {{ 'halt' | i18next }}
+      </a>
+    </li>
+    <li [hidden]="!tableConfig?.isDistributionList || selectedVmsData?.reflected_job_status == 'hold' ||
+        selectedVmsData?.reflected_job_status == 'halted' || selectedVmsData?.reflected_job_status == 'filled'">
+      <a  (click)="distributionOptionClicked('submission_limit')">
+        {{ 'edit_submission_limit' | i18next }}
+      </a>
+    </li>
+    <!-- <li>Edit Submission Limit
+              <a  (click)="distributionOptionClicked('halt-submission')">
+                  Halt Submission
+              </a>
+          </li>
+          <li>
+              <a  (click)="distributionOptionClicked('update-distribution')">
+                  Update Distribution
+              </a>
+          </li>
+          <li>
+              <a  (click)="distributionOptionClicked('remove-destribution')">
+                  Remove Distribution
+              </a>
+          </li>
+          <li>
+              <a  (click)="distributionOptionClicked('remove-ds')">
+                  Remove from DS
+              </a>
+          </li>
+          <li>
+              <a  (click)="distributionOptionClicked('remove-sd')">
+                  Remove from SD
+              </a>
+          </li> -->
+    <li [hidden]="!tableConfig?.isDistributionList || selectedVmsData?.distribution_status !== 'scheduled'">
+      <a  (click)="distributionOptionClicked('remove-sd')">
+        {{ 'remove_from_sd' | i18next }}
+      </a>
+    </li>
+  </ng-container>
+  </ng-container>
+  <!-- end for distribution list -->
+
+  <div *ngFor="let data of tableConfig?.columnList || []">
+    <div *ngFor="let option of data?.options" (click)="optionClicked(option, selectedVmsData)">
+      <li *ngIf="option?.name && (option?.isVisible ? option?.isVisible(selectedVmsData) : true)">
+        <a >
+          {{ option?.name | i18next}}
+        </a>
+      </li>
+    </div>
+  </div>
+  <ng-template [ngIf]="selectedVmsData?.showDynamicOptions">
+    <ng-container *ngFor="let option of selectedVmsData?.options">
+      <div *ngIf="option?.name"  (click)="optionClicked(option, selectedVmsData)">
+        <li>
+          <a >
+            {{ option?.name|i18next }}
+          </a>
+        </li>
+      </div>
+    </ng-container>
+  </ng-template>
+</ul>
+</nav>
+<div class="more-name-list" id="managerlistDropdown" *ngIf="showManagerList" (clickOutside)="hideManagerDropdown($event)" [exclude]="'.more-name'">
+  <h6>{{ managerListTitle | i18nextEager }}</h6>
+  <ul>
+      <ng-container *ngFor="let manager of managerList; let i = index">
+        <li class="d-flex align-items-center" *ngIf="manager && i>=6">
+          <div class="name-avatar" [ngClass]="{'overflow-hidden':manager?.avatar}" placement="top">
+            <img class="manager-profile" *ngIf="manager?.avatar" src="{{manager?.avatar}}" alt="{{manager?.initials}}" width="15" height="15"  srcset="">
+              {{ manager?.avatar ? '' : manager?.initials }}
+            </div>
+            <div>{{ manager?.name }}</div>
+        </li>
+      </ng-container>
+      <!-- for image use -->
+      <!-- <li class="d-flex align-items-center">
+        <div class="name-avatar overflow-hidden" tooltip="JS" placement="top">
+          <img class="manager-profile" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80" alt="Avatar_image" width="15" height="15"  srcset="">
+        </div> <div>Jaskirit</div>
+      </li> -->
+  </ul>
+</div>
+<app-switch-new-ui></app-switch-new-ui>

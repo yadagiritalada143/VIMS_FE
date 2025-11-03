@@ -1,0 +1,94 @@
+<ng-container *ngFor="let coloums of coloumnDefintions | orderBy : 'order'">
+  <td *ngIf="!coloums?.hidden && !rowData?.dummy" [attr.title]="coloums.header" #parentTemplate>
+    <ng-container *ngIf="!coloums.templateRef; else loadTemplate">
+      <a  *ngIf="coloums.primary && !coloums?.isRemoveHyperlink">
+        <span  [ngClass]="{
+          'cursor-pointer': coloums?.onClick
+        }" class="text-visibility" (mouseover)="getField()" (click)="onClick(coloums)" #firstColumn *ngIf="coloums.type != ColumnType.TEMPLATE">
+        <icon [name]="coloums?.primaryIconUrl" theme="outlined" class="mr-8" size="18px"  cuClass="align-middle" *ngIf="getColumnValue(coloums.primaryIconField) == true"></icon>
+        <span class="text-container" [tooltip]="tooltiptext" placement="top" [attr.data-value]="getColumnValue(coloums.field)">{{ getColumnValue(coloums.field, coloums.placeholder) | i18next }}</span>
+        <icon [name]="coloums?.secondaryIconUrl" theme="outlined" class="ml-8" size="18px"  cuClass="align-middle" *ngIf="getColumnValue(coloums.secondaryIconField) == true"></icon>
+        </span>
+
+        <span #toolTipRef *ngIf="coloums.type == ColumnType.TEMPLATE"
+           [tooltip]="toolTipRef?.innerText" placement="top"
+           [innerHtml]="getColumnValue(coloums.field) | safeHtml" >
+         </span>
+
+        <app-svms-dropdown
+          [actionLinks]="tableOptions?.actionLinks"
+          [validatorFn]="tableOptions?.linksValidatorFn"
+          [data]="rowData"
+          [position]="dropDownPosition"
+          [parentTemplate]="parentTemplate"
+          *ngIf="tableOptions?.actionLinks?.length > 0"
+        ></app-svms-dropdown>
+      </a>
+      <span *ngIf="coloums.primary && coloums?.isRemoveHyperlink">
+        <span  [ngClass]="{
+          'cursor-pointer': coloums?.onClick
+        }" class="text-visibility" (mouseover)="getField()" (click)="onClick(coloums)" #firstColumn *ngIf="coloums.type != ColumnType.TEMPLATE">
+        <icon [name]="coloums?.primaryIconUrl" theme="outlined" class="mr-8" size="18px"  cuClass="align-middle" *ngIf="getColumnValue(coloums.primaryIconField) == true"></icon>
+        <span class="text-container" [tooltip]="tooltiptext" placement="top" [attr.data-value]="getColumnValue(coloums.field)">{{ getColumnValue(coloums.field, coloums.placeholder) | i18next }}</span>
+        <icon [name]="coloums?.secondaryIconUrl" theme="outlined" class="ml-8" size="18px"  cuClass="align-middle" *ngIf="getColumnValue(coloums.secondaryIconField) == true"></icon>
+        </span>
+
+        <span *ngIf="coloums.type == ColumnType.TEMPLATE"
+           [innerHtml]="getColumnValue(coloums.field) | safeHtml" >
+         </span>
+
+        <app-svms-dropdown
+          [actionLinks]="tableOptions?.actionLinks"
+          [validatorFn]="tableOptions?.linksValidatorFn"
+          [data]="rowData"
+          [position]="dropDownPosition"
+          [parentTemplate]="parentTemplate"
+          *ngIf="tableOptions?.actionLinks?.length > 0"
+        ></app-svms-dropdown>
+        </span>
+
+      <span class="text-visibility" [ngClass]="{'cursor-pointer': coloums?.onClick}"
+      (mouseover)="getFieldSecond()" *ngIf="!coloums.type && !coloums.primary" (click)="onClick(coloums)" #secondColumn>
+      <icon [name]="coloums?.primaryIconUrl" theme="outlined" size="18px" class="mr-8" cuClass="align-middle" *ngIf="getColumnValue(coloums.primaryIconField) == true"></icon>
+      <span class="text-container" [tooltip]="tooltipTextSecond" placement="top" [attr.data-value]="getColumnValue(coloums.field)">{{ getColumnValue(coloums.field, coloums.placeholder) | i18next}}</span>
+      <icon [name]="coloums?.secondaryIconUrl" theme="outlined" *ngIf="getColumnValue(coloums.secondaryIconField)"></icon>
+      </span>
+      <span class="text-visibility" [ngClass]="{'cursor-pointer': coloums?.onClick}" (mouseover)="getFieldDate()" *ngIf="coloums.type == ColumnType.DATE" (click)="onClick(coloums)" #dateColumn>
+        <span class="text-container" [tooltip]="tooltipTextDate" placement="top" [attr.data-value]="getColumnValue(coloums.field) | localDateFormat : null : null : null : true">{{ getColumnValue(coloums.field, coloums.placeholder,coloums.type) | localDateFormat : null : null : null : true}}</span>
+      </span>
+      <span class="text-visibility" [ngClass]="{'cursor-pointer': coloums?.onClick}" (mouseover)="getFieldDateTime()" *ngIf="coloums.type == ColumnType.DATETIME" (click)="onClick(coloums)" #dateTimeColumn>
+        <span class="text-container" [tooltip]="tooltipTextDateTime" placement="top" [attr.data-value]="getColumnValue(coloums.field) | localDateFormat: dateFormat + ' hh:mm:ss'">{{ getColumnValue(coloums.field, coloums.placeholder) | localDateFormat: dateFormat + ' hh:mm:ss a z' }}</span>
+      </span>
+
+      <span class="text-visibility" [ngClass]="{'cursor-pointer': coloums?.onClick}" *ngIf="coloums.type == ColumnType.TEMPLATE && !coloums.primary" (click)="onClick(coloums)">
+        <div
+        [innerHtml]="getColumnValue(coloums.field) | safeHtml" >
+      </div>
+      </span>
+
+    </ng-container>
+
+    <ng-template
+      [ngTemplateOutlet]="coloums.templateRef"
+      #loadTemplate
+      [ngTemplateOutletContext]="{ $implicit: rowData, coloum: coloums, value: getColumnValue(coloums.field) }"
+    >
+      <app-svms-dropdown
+          [actionLinks]="tableOptions?.actionLinks"
+          [validatorFn]="tableOptions?.linksValidatorFn"
+          [data]="rowData"
+          [parentTemplate]="parentTemplate"
+          [position]="dropDownPosition"
+          *ngIf="(tableOptions?.actionLinks?.length > 0) && coloums.showActionLinkForTemplate"
+        ></app-svms-dropdown>
+    </ng-template>
+  </td>
+</ng-container>
+
+<ng-container *ngFor="let coloums of coloumnDefintions">
+  <td *ngIf="!coloums?.hidden && rowData?.dummy">
+    <ngx-skeleton-loader animation="progress"
+                    appearance="line" [theme]="{'height': '10px', 'margin-bottom': '0' }"
+                    *ngIf="rowData?.dummy"> </ngx-skeleton-loader>
+  </td>
+</ng-container>

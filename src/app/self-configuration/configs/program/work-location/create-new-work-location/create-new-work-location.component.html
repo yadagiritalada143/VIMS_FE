@@ -1,0 +1,199 @@
+<div class="new-work-location">
+  <form [formGroup]="workLocationForm">
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <i (click)="backClicked()" tooltip="{{'back' | i18next}}" placement="bottom" class="material-icons back-arrow-icon mr-16 cursor-pointer">arrow_back</i>
+            <h3 class="font-weight-semibold mb-0">{{(isEditMode ? 'edit_work_location' : 'create_new_work_location')  | i18nextEager }}</h3>
+        </div>
+        <div>
+            <button class="c-btn c-btn-success-medium" 
+              [disabled]="!isCFValid || !workLocationForm?.valid" 
+              (click)="onSubmit()">
+                {{ buttonLabel | i18next }}
+            </button>
+        </div>
+    </header>
+    <section class="section-body-content">
+        <div class="p-24">
+            <div class="c-form-group-row">
+                <div class="c-form-group">
+                    <label>{{ 'work_location_name' | i18next }} <span class="require">*</span></label>
+                    <input type="text" formControlName="location" class="c-form-control"  name="title" maxlength="100"  placeholder="{{ 'work_location_name' | i18next }}">
+                    <span *ngIf="form.location.touched && form.location.errors?.required" class="require">{{ 'this_field_is_required' | i18next }}.</span>
+                </div>
+                <div class="c-form-group toggle-width toggle-panel pt-24">
+                    <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+                    <span class="status-text">{{(toggle?.value ? 'active':'inactive') | i18nextEager}}</span>
+                    <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+                        (click)="onClickToggle()"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="c-form-group-row">
+                <div class="c-form-group">
+                    <label>
+                      {{ 'location_code' | i18next }} <span class="require">*</span>
+                    </label>
+                    <!-- <input formControlName="code" type="text" [readonly]="isViewMode || isEditMode" class="form-control" placeholder="{{ 'enter_location_code' | i18next }}" name="code" maxlength="100"> -->
+                    <input formControlName="code" type="text" type="text" [readonly]="isEditMode" class="c-form-control"  name="locationcode"   placeholder="{{ 'work_location_code' | i18next }}">
+                    <span *ngIf="form.code.touched && form.code.errors?.pattern" class="require">{{ 'special_characters_are_not_allowed' | i18next }}.</span>
+                    <span *ngIf="form.code.touched && form.code.errors?.required" class="require">{{ 'this_field_is_required' | i18next }}.</span>
+                </div>
+                <div class="c-form-group"></div>
+                <div class="c-form-group"></div>
+            </div>
+            <div class="c-form-group-row">
+                <div class="c-form-group">
+                    <label>{{ 'description' | i18next }}</label>
+                    <textarea formControlName="description" class="c-form-control" placeholder="{{ 'description' | i18next }}"></textarea>
+                </div>
+            </div>
+            <div class="c-form-group-row">
+                <div class="c-form-group">
+                    <label>{{ 'timezone' | i18next }}</label>
+                    <ng-select formControlName="timezone" [readonly]="isViewMode" [clearable]="true"
+                    placeholder="{{'select_timezone' | i18next}}" [loading]="timezoneLoader">
+                    <ng-option *ngFor="let zone of timezoneList | keysort:'name' | uniqueKey:'id'" [value]="zone?.id">
+                      {{ zone?.name }}
+                    </ng-option>
+                    </ng-select>
+                </div>
+                <div class="c-form-group"></div>
+                <div class="c-form-group"></div>
+            </div>
+            <div class="c-form-group-row">
+              <div class="c-form-group m-0">
+                <label>
+                    {{ 'currency' | i18next }}
+                    <i placement="right" class="tooltip-icon material-icons ml-4" tooltip="{{ 'the_currency_s_added_here_will_appear_as_picklist_options_under_the_currency_field_at_the_job_and_quick_assignment_creation_when_a_user_selects_this_work_location_if_no_currency_s_are_associated_to_this_work_location_then_the_picklist_options_under_the_currency_field_at_the_job_and_quick_assignment_creation_will_appear_based_on_what_has_been_configured_under_program_configuration_platform_currencies' | i18next}}">help</i>
+                </label>
+                <svms-selector-modal
+                    [title]="'select_currency'"
+                    [showDefault]="true"
+                    [offlineSearch]="true"
+                    [showEditable]="false"
+                    [validatorFn]="currencyValidation"
+                    [(options)]="currencyList"
+                    [wordDefault]="true"
+                ></svms-selector-modal>
+                <br/>
+              </div>
+            </div>
+
+            <h4 class="mb-24"> {{ 'address' | i18next }} </h4>
+
+            <div class="c-form-group-row">
+              <div class="c-form-group">
+                <label>{{ 'country' | i18next }} <span class="require">*</span></label>
+                <ng-select formControlName="country" [readonly]="isViewMode" [clearable]="false" placeholder="{{ 'select_country' | i18next }}" (change)="changeCountry($event)" >
+                  <ng-option *ngFor="let country of allCountryList" [value]="country.id">
+                    {{ country?.name }}
+                  </ng-option>
+                </ng-select>
+                <span *ngIf="form.country.touched && form.country.errors?.required" class="require">{{ 'this_field_is_required' | i18next }}.</span>
+              </div>
+            </div>
+
+            <div class="c-form-group-row">
+              <div class="c-form-group">
+                  <label>
+                    {{ 'address_line_1' | i18next }}
+                    <span class="require"> * </span>
+                  </label>
+                  <search-address #searchAddress id="addr" formControlName="address" [adressType]="'geocode'" #address2 [country]="countryShortName" [value]="this.workLocationForm?.get('address')?.value" (setAddress)="setAddressDetails($event)">
+                  </search-address>
+              </div>
+            </div>
+
+            <div class="c-form-group-row">
+              <div class="c-form-group">
+                  <label>{{ 'address_line_2' | i18next }}</label>
+                  <input class="form-control" id="addr_secondary" 
+                    formControlName="address_secondary"
+                    [readonly]="isViewMode"
+                    placeholder="Other Address details"  
+                  />
+              </div>
+          </div>
+
+            <div class="c-form-group-row">
+
+              <div class="c-form-group">
+                <label>
+                  {{ 'city' | i18next }}
+                </label>
+                <input formControlName="city_name" type="text" [readonly]="isViewMode"
+                  class="form-control" placeholder="{{ 'enter_city' | i18next }}" />
+              </div>
+
+              <div class="c-form-group">
+                <label>
+                  {{ 'county' | i18next }}
+                </label>
+                <input formControlName="county_name" type="text" [readonly]="isViewMode"
+                  class="form-control" placeholder="{{ 'enter_county' | i18next }}" />
+              </div>
+
+              <div class="c-form-group">
+                <label>
+                  {{ 'state' | i18next }}
+                </label>
+                <input formControlName="state_name" type="text" [readonly]="isViewMode"
+                  class="form-control" placeholder="{{ 'enter_state' | i18next }}" />
+              </div>
+
+            </div>
+
+            <div class="c-form-group-row">
+              <!--
+                <div class="c-form-group">
+                    <label>{{ 'state' | i18next }}</label>
+                    <ng-select formControlName="state" [readonly]="isViewMode || !stateList?.length" [clearable]="false" (change)="changeCity($event)" placeholder="{{'select_state' | i18next}}/{{'province'|i18next}}">
+                      <ng-option *ngFor="let state of stateList" [value]="state.id">{{state.name}}</ng-option>
+                    </ng-select>
+                    <div *ngIf="noStatePresent" class="warn-text mt-4 mb-8">
+                      {{  ("note : no_state_found_for " | i18nextEager) + noStatePresent }}
+                    </div>
+                </div>
+                <div class="c-form-group">
+                  <label>{{ 'city' | i18next }}</label>
+                  <ng-select formControlName="city" [readonly]="isViewMode || !cityList?.length" [clearable]="false" placeholder="{{'select_state_city'|i18next}}">
+                    <ng-option *ngFor="let city of cityList" [value]="city.id">{{city.name}}</ng-option>
+                  </ng-select>
+                  <div *ngIf="noStatePresent" class="warn-text mt-4 mb-8">
+                    {{ ("note : no_state/province_found_for " | i18nextEager) + noStatePresent }}
+                  </div>
+
+                </div>
+              -->
+                <div class="c-form-group">
+                  <label>
+                    {{ 'zip_code_' | i18next }}
+                    <!-- <span *ngIf="isZipcodeMandatory" class="require">*</span> -->
+                  </label>
+                  <input formControlName="zipcode" type="text" minlength="5" maxlength="6" [mandatePattern]="zipcodePattern"
+                    (mouseleave)="trimSpace($event)" (blur)="trimSpace($event)" [readonly]="isViewMode"
+                    class="form-control" placeholder="{{ 'enter_zip_code' | i18next }}" />
+                  <div *ngIf="form?.zipcode?.touched" class="pt-4">
+                    <p class="error-text" *ngIf="form.zipcode?.errors?.required"> {{ 'this_field_is_required'  | i18next}} </p>
+                    <p class="error-text" *ngIf="form.zipcode?.errors?.minlength"> {{ 'minimum_5_characters_required' | i18next }} </p>
+                  </div>
+                </div>
+                <div class="c-form-group"> &nbsp; </div>
+                <div class="c-form-group"> &nbsp; </div>
+            </div>
+
+            <div *ngIf="allowedCFuserType" class="w-100">
+                <app-custom-fields (mouseleave)="blurActiveElement()"
+                  (isCustomFieldsFormValid)="isCFValid = $event" 
+                  moduleName="WORK_LOCATIONS" showLabel="true" 
+                  [isCreate]="!isEditMode" 
+                  (customFieldUpdated)="updatedCFs = $event"
+                  [custom_fields]="recievedCFs"
+                ></app-custom-fields>
+            </div>
+
+        </div>
+    </section>
+  </form>
+</div>

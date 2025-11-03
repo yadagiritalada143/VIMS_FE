@@ -1,0 +1,1335 @@
+<form class="create-assignment-form" [formGroup]="assignmentCreateForm">
+    <section class="create-wrapper p-24 px-m-0 py-m-0">
+        <div class="create-form pt-32">
+            <h3 class="font-weight-medium page-title-mobile">{{ (!assignmentId ? 'Create Quick' : 'Update') | i18nextEager }} {{ 'assignment' | i18nextEager }}</h3>
+            <div class="card bg-light mt-24 mobile-card-view">
+                <div class="breadcrumb d-flex mobile-comp">
+                    <div class="item pl-24 pr-24  " *ngIf="!this.assignmentId"
+                        [ngClass]="{'finished': (activeTab == 'assignment-info'||  activeTab == 'time-expense' || activeTab == 'finance-info') , 'active': activeTab === 'basic-info'}">
+                        <div>
+                            <span class="num mr-8">1</span>
+                            <icon size="20px" name="done_outline" class="mr-8">
+                            </icon>
+                            <span class="title">{{ 'basic_info' | i18nextEager }}</span>
+                        </div>
+                    </div>
+                    <div class="item pl-24 pr-24"
+                        [ngClass]="{'finished': activeTab == 'time-expense' || activeTab == 'finance-info' , 'active': activeTab === 'assignment-info'}">
+                        <div>
+                            <span class="num mr-8">{{assignmentId ? 1 : 2}}</span>
+                            <icon size="20px" name="done_outline" class="mr-8">
+                            </icon>
+                            <span class="title">{{ 'assignment_info' | i18nextEager }}</span>
+                        </div>
+                    </div>
+                    <div class="item pl-24 pr-24"
+                        [ngClass]="{'finished': activeTab == 'finance-info','active': activeTab === 'time-expense'}">
+                        <div>
+                            <span class="num mr-8">{{assignmentId ? 2 : 3}}</span>
+                            <icon size="20px" name="done_outline" class="mr-8">
+                            </icon>
+                            <span class="title">{{ 'timesheet' | i18nextEager }} & {{ 'expense' | i18nextEager }}</span>
+                        </div>
+                    </div>
+                    <div class="item pl-24 pr-24" [ngClass]="{'active': activeTab === 'finance-info'}">
+                        <div>
+                            <span class="num mr-8">4</span>
+                            <icon size="20px" name="done_outline" class="mr-8">
+                            </icon>
+                            <span class="title">{{ 'financial_details' | i18nextEager }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="basic-info create p-24" *ngIf="activeTab === 'basic-info'">
+                    <div class="form-group-row">
+                        <div class="form-group candidate-dropdown">
+                            <label>{{ 'search_candidate' | i18nextEager }} <span class="require">*</span></label>
+                            <div class="mr-8 position-relative search-candidate">
+                                <ng-select placeholder="{{ 'search_candidate' | i18nextEager }}" formControlName="candidate_uuid"
+                                    (change)="candidateSelected($event)" (search)="getCandidates($event)">
+                                    <ng-option *ngFor="let item of dropDownOptions?.candidate_uuid || []"
+                                        [value]="item?.id">
+                                        <span class="subtitle-2 font-weight-medium">
+                                            {{item?.first_name |titlecase}}
+                                            {{item?.middle_name|titlecase}}
+                                            {{item?.last_name|titlecase}} {{item?.email ? '('+
+                                            item?.email +')' : ''}}</span>
+                                        <span class="mb-0 ml-32 p-4 d-inline-flex align-items-center"
+                                            *ngIf="item?.do_not_rehire">
+                                            <icon name="no_accounts" class="mr-4 d-flex" cuclass="d-flex" size="15px">
+                                            </icon>
+                                            <span>{{ 'do_not_re-hire' | i18nextEager }}</span>
+                                        </span>
+                                        <span class="ml-16 status-ui active" *ngIf="item?.is_enabled">{{ 'active' | i18nextEager }}</span>
+                                        <span class="ml-16 status-ui inactive" *ngIf="!item?.is_enabled">
+                                            {{ 'inactive' | i18nextEager }}
+                                        </span>
+                                    </ng-option>
+                                </ng-select>
+                                <div class="position-absolute search-cand">
+                                    <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex">
+                                    </icon>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group candidate-create-btn">
+                            <label>&nbsp;</label>
+                            <button type="button" class="btn btn-outine btn-primary-color float-right w-100"
+                                (click)="onBtnClickEvent()">
+                                <icon name="add" color="inherit" class="icon--on-left" size="14px"></icon>
+                                {{ 'create_new_candidate' | i18nextEager }}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <!-- candidate dropdown result -->
+                        <div *ngIf="selectedCandidate" class="candidate-panel w-100 my-16">
+                            <div class="d-flex align-items-start column-direction">
+                                <div class="client">
+                                    <div class="logo d-flex align-items-center mr-32 mr-m-0">
+                                        <div *ngIf="selectedCandidate?.first_name !== ''"
+                                            class="initials initials-profile initial-large initials__green d-flex align-justify-center mr-8 text-uppercase">
+                                            {{selectedCandidate?.first_name +' '+
+                                            selectedCandidate?.last_name | shortName}}</div>
+                                        <div class="d-flex flex-column text-capitalize client-name">
+                                            <span
+                                                class="subtitle-2 font-weight-medium">{{selectedCandidate?.name_prefix}}
+                                                {{selectedCandidate?.first_name | titlecase}}
+                                                {{selectedCandidate?.middle_name | titlecase}}
+                                                {{selectedCandidate?.last_name | titlecase}}
+                                                {{selectedCandidate?.name_suffix}}</span>
+                                            <span class="small">{{selectedCandidate?.addresses ?
+                                                (country[selectedCandidate?.addresses[0]?.country]
+                                                | uppercase) : ''}}</span>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="client">
+                                    <div class="d-flex  align-items-center">
+                                        <div class="text-left d-flex align-items-center mr-16">
+                                            <span class="initials initials__lightBlue mr-8">
+                                                <icon class="d-flex blue" size="11px" name="mail" theme="outlined"
+                                                    type="material" cuClass="d-flex">
+                                                </icon>
+                                            </span><a
+                                                class="d-flex">{{selectedCandidate?.email}}</a>
+                                            <icon class="d-flex ml-4" size="12px" name="verified" type="material"
+                                                cuClass="d-flex"></icon>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="client">
+                                    <div class="d-flex  align-items-center">
+                                        <div class="text-left d-flex align-items-center mr-16">
+                                            <span class="initials initials__lightBlue mr-8">
+                                                <icon class="d-flex blue" size="11px" name="phone" theme="outlined"
+                                                    type="material" cuClass="d-flex">
+                                                </icon>
+                                            </span><a
+                                                class="d-flex">{{selectedCandidate?.phone_number
+                                                ?
+                                                (selectedCandidate?.phone_isdcode
+                                                +' '+ selectedCandidate?.phone_number) : ('N/A'|i18next)
+                                                }}</a>
+                                            <icon *ngIf="selectedCandidate?.phone_number" class="d-flex ml-4"
+                                                size="12px" name="verified" type="material" cuClass="d-flex"></icon>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="donot-rehire" *ngIf="selectedCandidate?.do_not_rehire">
+                                    <span class="material-icons" tooltip="{{ 'do_not_re-hire' | i18nextEager }}" placement="left" delay="100">
+                                       {{ 'no_accounts' | i18nextEager }} </span>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <label>{{ 'vendor' | i18nextEager }} <span class="require">*</span></label>
+                        <div *ngIf="user_type == 'vendor' && selectedVendor?.vendor?.name; else showVendorSelectOption">
+                            <input [value]="selectedVendor.vendor.name" class="form-control" type="text" readonly>
+                        </div>
+                        <ng-template #showVendorSelectOption>
+                            <div class="mr-8 position-relative search-candidate">
+                                <ng-select placeholder="{{ 'search_vendor' | i18nextEager }}" formControlName="vendor_id"
+                                    (search)="search('vendor_id', $event)" [items]="dropDownOptions?.vendor_id || []"
+                                    bindLabel="vendor.name" bindValue="vendor.id" (change)="vendorSelected($event)">
+                                </ng-select>
+                                <div class="position-absolute search-cand">
+                                    <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex">
+                                    </icon>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </div>
+                    <div *ngIf="selectedVendor" class="result-panel mb-16">
+                        <div class="client-logo responsive-logo" *ngIf="selectedVendor?.vendor?.logo_url === null">
+                            <img src="assets/images/no-vendor-logo.svg" class="img-fluid" width="100" />
+                        </div>
+                        <div class="client-logo responsive-logo" *ngIf="selectedVendor?.vendor?.logo_url !== null">
+                            <img [src]="selectedVendor?.vendor?.logo_url" alt="" class="img-fluid" />
+                        </div>
+                        <div class="industry">
+                            <p class="font-weight-medium">
+                                {{selectedVendor?.vendor?.industries[0]?.name}}</p>
+                            <span class="txt-11">{{ 'industry' | i18nextEager }}</span>
+                        </div>
+
+                    </div>
+                    <p class="section-heading font-weight-medium mb-24">{{ 'worker_information' | i18nextEager }}</p>
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label>{{ 'worker_source_type' | i18nextEager }} <span class="require">*</span></label>
+                            <ng-select placeholder="{{ 'select_worker_source_type' | i18nextEager }}" formControlName="source_type"
+                                (search)="search('source_type', $event)" [items]="dropDownOptions?.source_type || []"
+                                (change)="workerSourceTypeChanged($event)" bindLabel="label" bindValue="slug">
+                            </ng-select>
+                        </div>
+                        <div class="col-md-4" *ngIf="assignmentControl?.source_type?.value === 'migrated_worker_data'">
+                            <div class="form-group">
+                                <label for="">
+                                    {{ 'source_id' | i18nextEager }}
+                                    <span class="require">*</span>
+                                </label>
+                                <input type="text" class="form-control" placeholder="{{ 'external_system_id' | i18nextEager }}"
+                                    formControlName="source_id">
+                            </div>
+                        </div>
+                        <div class="form-group position-relative">
+                            <label>{{ 'original_tenure_start_date' | i18nextEager }} <span class="require">*</span></label>
+                            <svms-datepicker formControlName="original_start_date" [inputdateFormat]="dateFormat"
+                                [ngClass]="{'disableDiv': allDateFieldDisable['original_start_date']}">
+                            </svms-datepicker>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ 'official_email_address' | i18nextEager }} <span class="require">*</span></label>
+                            <input type="text" class="form-control" placeholder="{{ 'official_email' | i18nextEager }}"
+                                formControlName="official_email">
+                        </div>
+                    </div>
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label>{{ 'sso_id' | i18nextEager }}</label>
+                            <input type="text" class="form-control" placeholder="{{ 'sso_id' | i18nextEager }}" formControlName="sso_id">
+                        </div>
+                        <div class="form-group">
+                            <label>{{ 'worker_classification' | i18nextEager }}</label>
+                            <ng-select placeholder="{{ 'select_worker_classification' | i18nextEager }}"
+                                formControlName="worker_classification"
+                                (search)="search('worker_classification', $event)"
+                                [items]="dropDownOptions?.worker_classification || []" bindLabel="label"
+                                bindValue="value">
+                            </ng-select>
+                        </div>
+                        <div class="form-group">
+                            &nbsp;
+                        </div>
+                    </div>
+                </div>
+                <div class="create p-24" *ngIf="activeTab === 'assignment-info'">
+                    <p class="section-heading font-weight-medium mb-24">{{ 'assignment_association' | i18nextEager }}</p>
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label>{{ 'hierarchy' | i18nextEager }} <span class="require">*</span></label>
+                            <div class="form-group position-relative ">
+                                <input class="form-control" readonly (click)="onClickHirerachy()"
+                                    [disabled]="assignmentId" formControlName="hierarchy_name"
+                                    placeholder="{{ 'choose_hierarchy' | i18nextEager }}">
+                                <span class="cursor-pointer hierarchy" (click)="onClickHirerachy()">
+                                    <icon size="19px" name="account_tree" type="material" class="d-flex"
+                                        cuClass="d-flex"></icon>
+                                </span>
+                                <!-- <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red">
+                                  {{errorMassage[field?.slug]}}
+                                </p> -->
+                            </div>
+                        </div>
+                        <div class="form-group position-relative">
+                            <label>{{ 'sourcing_model' | i18nextEager }} <span class="require">*</span></label>
+                            <ng-select placeholder="{{ 'select' | i18nextEager }}" [items]="dropDownOptions?.sourcing_model || []"
+                                (search)="search('sourcing_model', $event)" bindLabel="label"
+                                [readonly]="assignmentId || (sow_id && sow_project_id)" bindValue="label"
+                                formControlName="sourcing_model"
+                                (change)="getFees();loadTaxFields();sourcingModelChanged();">
+                            </ng-select>
+                        </div>
+                        <ng-container *ngIf="!is_Sourcing_Model_SOW">
+                            <div class="form-group">
+                                <label>{{ 'search_existing_job' | i18nextEager }}</label>
+                                <div class="mr-8 position-relative search-candidate">
+                                    <ng-select placeholder="{{ 'search' | i18nextEager }}" formControlName="job_id"
+                                        [readonly]="assignmentId || sow_id" (search)="search('job_id', $event)"
+                                        (change)="setJobTemplate($event)">
+                                        <ng-option [value]="opt?.id" *ngFor="let opt of dropDownOptions?.job_id || []">
+                                            {{opt?.template_name}} ({{opt?.job_id}})
+                                        </ng-option>
+                                    </ng-select>
+                                    <div class="position-absolute search-cand">
+                                        <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex">
+                                        </icon>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                    <p class="section-heading font-weight-medium mb-24 mt-16">{{ 'assignment_information' | i18nextEager }}</p>
+                    <div class="form-group">
+                        <label>{{ 'assignment_title' | i18nextEager }} <span class="require">*</span></label>
+                        <div class="mr-8 position-relative search-candidate">
+                            <ng-select placeholder="{{ 'search_assignment_title' | i18nextEager }}" formControlName="sow_id"
+                                (change)="getExistingSOWProject($event)" [readonly]="assignmentId || sow_project_id">
+                                <ng-option [value]="es?.id" *ngFor="let es of existingSOW || []">
+                                    {{es?.title}}
+                                </ng-option>
+                            </ng-select>
+                            <div class="position-absolute search-cand">
+                                <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label>{{ 'search_work_location' | i18nextEager }} <span class="require">*</span></label>
+                            <div class="mr-8 position-relative search-candidate">
+                                <ng-select placeholder="{{ 'select_work_location' | i18nextEager }}" formControlName="work_location"
+                                    (search)="search('work_location', $event)" (change)="loadTaxFields()"
+                                    [clearable]="false" [items]="dropDownOptions?.work_location" bindValue="id"
+                                    bindLabel="name">
+                                </ng-select>
+                                <div class="position-absolute search-cand">
+                                    <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex">
+                                    </icon>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group position-relative">
+                            <label>{{ 'search_assignment_manager' | i18nextEager }} <span class="require">*</span></label>
+                            <div class="mr-8 position-relative search-candidate">
+                                <ng-select placeholder="{{ 'search_assignment_manager' | i18nextEager }}"
+                                    (search)="search('assignment_manager', $event)" formControlName="assignment_manager"
+                                    (change)="setManager($event)">
+                                    <ng-option *ngFor="let item of dropDownOptions?.assignment_manager"
+                                        [value]="item?.id">
+                                        {{item?.first_name |titlecase}} {{item?.middle_name|titlecase}}
+                                        {{item?.last_name|titlecase}}</ng-option>
+                                </ng-select>
+                                <div class="position-absolute search-cand">
+                                    <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex">
+                                    </icon>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ 'shift_timing' | i18nextEager }} <span class="require">*</span></label>
+                            <ng-select placeholder="{{ 'select_shift_timing' | i18nextEager }}" [items]="dropDownOptions?.shift_timing"
+                                (search)="search('shift_timing', $event)" bindValue="label" bindLabel="label"
+                                formControlName="shift_timing">
+                            </ng-select>
+                        </div>
+                    </div>
+                    <div class="form-group-row">
+                        <div class="form-group position-relative">
+                            <label>{{ 'assignment_start_date' | i18nextEager }} <span class="require">*</span></label>
+                            <svms-datepicker formControlName="start_date" [inputdateFormat]="dateFormat"
+                                [ngClass]="{'disableDiv': assignmentId}" [options]="startDateOption">
+                            </svms-datepicker>
+                            <p *ngIf="(assignmentCreateForm?.invalid && assignmentCreateForm?.errors?.workerOrignalDateErr)"
+                                class="text-red">
+                                {{assignmentCreateForm?.errors?.workerOrignalDateErr}}
+                            </p>
+                        </div>
+                        <div class="form-group position-relative">
+                            <label>{{ 'assignment_end_date' | i18nextEager }} <span class="require">*</span></label>
+                            <svms-datepicker formControlName="end_date" [inputdateFormat]="dateFormat"
+                                [options]="startDateOption">
+                            </svms-datepicker>
+                            <p *ngIf="(assignmentCreateForm?.invalid && assignmentCreateForm?.errors?.workerDurationDateErr)"
+                                class="text-red">
+                                {{assignmentCreateForm?.errors?.workerDurationDateErr}}
+                            </p>
+                        </div>
+                        <div class="form-group position-relative">
+                            <label>{{ 'worker_original_start_date' | i18nextEager }} <span class="require">*</span></label>
+                            <svms-datepicker formControlName="worker_original_start_date" [inputdateFormat]="dateFormat"
+                                [ngClass]="{'disableDiv': allDateFieldDisable['worker_original_start_date']}">
+                            </svms-datepicker>
+                        </div>
+                    </div>
+                    <p class="section-heading font-weight-medium mb-24 mt-16">{{ 'master_fields' | i18nextEager }}</p>
+                    <div class="form-group-row">
+                        <div class="form-group position-relative">
+                            <label>{{ 'department' | i18nextEager }} <span class="require">*</span></label>
+                            <ng-select placeholder="{{ 'select_department' | i18nextEager }}">
+                                <ng-option>
+                                    {{ 'select_department' | i18nextEager }}
+                                </ng-option>
+                            </ng-select>
+                        </div>
+                        <div class="form-group position-relative">
+                            <label>{{ 'gl_code' | i18nextEager }} <span class="require">*</span></label>
+                            <ng-select placeholder="{{ 'select_gl_code' | i18nextEager }}">
+                                <ng-option>
+                                    {{ 'select_gl_code' | i18nextEager }}
+                                </ng-option>
+                            </ng-select>
+                        </div>
+                        <div class="form-group position-relative">
+                            &nbsp;
+                        </div>
+                    </div>
+                    <p class="section-heading font-weight-medium mb-24 mt-16">{{ 'custom_fields' | i18nextEager }}</p>
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label>{{ 'department' | i18nextEager }} <span class="require">*</span></label>
+                            <ng-select placeholder="{{ 'select_department' | i18nextEager }}">
+                                <ng-option>
+                                    {{ 'select_department' | i18nextEager }}
+                                </ng-option>
+                            </ng-select>
+                        </div>
+                        <div class="form-group position-relative">
+                            <label>{{ 'gl_code' | i18nextEager }} <span class="require">*</span></label>
+                            <ng-select placeholder="{{ 'select_gl_code' | i18nextEager }}">
+                                <ng-option>
+                                    {{ 'select_gl_code' | i18nextEager }}
+                                </ng-option>
+                            </ng-select>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ 'sample_custom_field' | i18nextEager }} <span class="require">*</span></label>
+                            <ng-select placeholder="{{ 'select' | i18nextEager }}">
+                                <ng-option>
+                                    {{ 'select' | i18nextEager }}
+                                </ng-option>
+                            </ng-select>
+                        </div>
+                    </div>
+                </div>
+                <div class="create p-24" *ngIf="activeTab === 'time-expense'">
+                    <div class="toggled-item first">
+                        <div class="item-icon">
+                            <icon name="watch_later" size="24px" color="#86D089"></icon>
+                        </div>
+                        <p class="float-left font-weight-medium">
+                            {{ 'manage_timesheet' | i18nextEager }}
+                            <span>{{ 'here_you_can_manage_timesheet_related_configurations_/_settings_for_this_assignment' | i18nextEager }}</span>
+                        </p>
+                        <div class="item-checkbox float-right">
+                            <toggle-button (changed)="toggleTimesheet($event)">
+                            </toggle-button>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="manage-toggle-content" *ngIf="manageTimesheet">
+                            <div class="form-group-row mt-24">
+                                <div class="form-group">
+                                    <label>{{ 'timesheet_manager' | i18nextEager }} <span class="require">*</span></label>
+                                    <div class="mr-8 position-relative search-candidate">
+                                        <ng-select placeholder="{{ 'search_timesheet_manager' | i18nextEager }}"
+                                            (search)="search('timesheet_manager', $event)"
+                                            formControlName="timesheet_manager" (change)="resetEffectiveDate()">
+                                            <ng-option *ngFor="let item of dropDownOptions?.timesheet_manager"
+                                                [value]="item?.id">
+                                                {{item?.first_name |titlecase}} {{item?.middle_name|titlecase}}
+                                                {{item?.last_name|titlecase}}</ng-option>
+                                        </ng-select>
+                                        <div class="position-absolute search-cand">
+                                            <icon name="search" size="20px" type="material" class="d-flex"
+                                                cuClass="d-flex"></icon>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group position-relative">
+                                    <label>{{ 'timesheet_type' | i18nextEager }} <span class="require">*</span></label>
+                                    <ng-select placeholder="{{ 'select' | i18nextEager }}" [items]="dropDownOptions?.timesheet_type"
+                                        (search)="search('timesheet_type', $event)" bindValue="value" bindLabel="label"
+                                        formControlName="timesheet_type" (change)="resetEffectiveDate()">
+                                    </ng-select>
+                                </div>
+                                <div class="form-group">
+                                    <label>{{ 'straight_time_hours/day' | i18nextEager }} <span class="require">*</span></label>
+                                    <ng-select placeholder="{{ 'select' | i18nextEager }}">
+                                        <ng-option>
+                                            {{ 'select' | i18nextEager }}
+                                        </ng-option>
+                                    </ng-select>
+                                </div>
+                            </div>
+                            <div class="form-group-row mt-24">
+                                <div class="form-group">
+                                    <label>{{ 'working_days/week' | i18nextEager }} <span class="require">*</span></label>
+                                    <ng-select placeholder="{{ 'select' | i18nextEager }}" [items]="dropDownOptions?.days_per_week"
+                                        (search)="search('days_per_week', $event)" bindValue="label" bindLabel="label"
+                                        formControlName="days_per_week" (change)="resetEffectiveDate()">
+                                    </ng-select>
+                                </div>
+                                <div class="form-group position-relative">
+                                    <label>{{ 'ot_exempt' | i18nextEager }} <span class="require">*</span></label>
+                                    <div class="radio-group">
+                                        <div *ngFor="let radioitem of items" class="radio-container">
+                                            <input type="radio" name="ot_exempt_position" [value]="radioitem.value"
+                                                formControlName="ot_exempt_position" (change)="onMarkupChange()">
+                                            <span class="checkmark">{{radioitem.label|i18next}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    &nbsp;
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="toggled-item">
+                        <div class="item-icon">
+                            <icon name="watch_later" size="24px" color="#AB7EFF"></icon>
+                        </div>
+                        <p class="float-left font-weight-medium">
+                            {{ 'manage_expense' | i18nextEager }}
+                            <span>{{ 'here_you_can_enable_of_disable_expense_and_select_expense_manager' | i18nextEager }}</span>
+                        </p>
+                        <div class="item-checkbox float-right">
+                            <toggle-button (changed)="toggleExpense($event)">
+                            </toggle-button>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="manage-toggle-content" *ngIf="manageExpense">
+                            <div class="form-group one-third mt-24">
+                                <label>{{ 'expense_manager' | i18nextEager }} <span class="require">*</span></label>
+                                <div class="mr-8 position-relative search-candidate">
+                                    <ng-select placeholder="{{ 'search_expense_manager' | i18nextEager }}"
+                                        (search)="search('expense_manager', $event)" formControlName="expense_manager">
+                                        <ng-option *ngFor="let item of dropDownOptions?.expense_manager"
+                                            [value]="item?.id">
+                                            {{item?.first_name |titlecase}} {{item?.middle_name|titlecase}}
+                                            {{item?.last_name|titlecase}}</ng-option>
+                                    </ng-select>
+                                    <div class="position-absolute search-cand">
+                                        <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex">
+                                        </icon>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="create p-24 finance-tab" *ngIf="activeTab === 'finance-info'">
+                    <div class="toggled-item">
+                        <div class="item-icon olive medium">
+                            <icon name="credit_score" size="20px" color="#86D089"></icon>
+                        </div>
+                        <p class="float-left font-weight-medium">
+                            {{ 'billable' | i18nextEager }}
+                            <span>{{ 'while_enabling_billable_feature_you_can_set_tax' | i18nextEager }} ,{{ 'fee_and_other_billing_details' | i18nextEager }}</span>
+                        </p>
+                        <div class="item-checkbox float-right">
+                            <toggle-button [checked]="manageBillable" (changed)="toggleBillable($event)">
+                            </toggle-button>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="manage-toggle-content" *ngIf="manageBillable">
+                            <div class="form-group-row mt-24">
+                                <div class="form-group">
+                                    <label>{{ 'rate_model' | i18nextEager }} <span class="require">*</span></label>
+                                    <ng-select [clearable]="false" placeholder="{{ 'select_rate_model' | i18nextEager }}"
+                                        formControlName="rate_model" (change)="onMarkupChange();changeMarkupOption();">
+                                        <ng-option [value]="'billrate'"
+                                            [disabled]="programType === 'MARKUP' || programType ===  'PAY_RATE'">
+                                            {{ 'billrate' | i18nextEager }}
+                                        </ng-option>
+                                        <ng-option [value]="'markup'"
+                                            [disabled]="programType ===  'BILL_RATE' || programType ===  'PAY_RATE'">
+                                            {{ 'markup' | i18nextEager }}
+                                        </ng-option>
+                                        <ng-option [value]="'payrate'"
+                                            [disabled]="programType ===  'BILL_RATE' || programType ===  'MARKUP'">
+                                            {{ 'pay_rate_-_markup' | i18nextEager }}
+                                        </ng-option>
+                                    </ng-select>
+                                </div>
+                                <div class="form-group position-relative">
+                                    <label>{{ 'unit_of_measure' | i18nextEager }} <span class="require">*</span></label>
+                                    <ng-select placeholder="{{ 'select_unit_of_measure' | i18nextEager }}" formControlName="rate_type"
+                                        (search)="search('rate_type', $event)" [items]="dropDownOptions?.rate_type"
+                                        bindValue="value" bindLabel="label" (change)="onMarkupChange()">
+                                    </ng-select>
+                                </div>
+                                <div class="form-group">
+                                    <label>{{ 'currency' | i18nextEager }} <span class="require">*</span></label>
+                                    <ng-select placeholder="{{ 'select_currency' | i18nextEager }}" [items]="dropDownOptions?.currency"
+                                        bindValue="code" bindLabel="label" formControlName="currency"
+                                        (change)="currencyChanged($event)">
+                                    </ng-select>
+                                </div>
+                            </div>
+                            <ng-container
+                                *ngIf="assignmentControl?.rate_model?.value === 'markup' ||  assignmentControl?.rate_model?.value === 'payrate'">
+                                <div class="form-group-row mt-24">
+                                    <div class="form-group">
+                                        <label>{{ 'adjusted_markup' | i18nextEager }} (%) <span class="require">*</span></label>
+                                        <input type="text" class="form-control" placeholder="0" inputAccuracy="{{accuracyConfig?.markup_percentage}}"
+                                            formControlName="adjusted_markup" (change)="onMarkupChange()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>{{ 'vendor_markup' | i18nextEager }} (%) <span class="require">*</span></label>
+                                        <input type="text" class="form-control" placeholder="0" inputAccuracy="{{accuracyConfig?.markup_percentage}}"
+                                            formControlName="vendor_markup" (change)="onMarkupChange()">
+                                    </div>
+                                    <div class="form-group">
+                                        &nbsp;
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+                    <!-- <div class="toggled-item" *ngIf="manageBillable">
+                        <div class="item-icon violet medium">
+                            <icon name="payments" size="20px" color="#AB7EFF"></icon>
+                        </div>
+                        <p class="float-left font-weight-medium">
+                           {{ 'fee(s)' | i18nextEager }}
+                            <span>{{ 'here_different_fees' | i18nextEager }}.</span>
+                        </p>
+                        <div class="clearfix"></div>
+                        <div class="manage-toggle-content">
+                            <table class="finance-table">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase w-25">{{ 'tax_type' | i18nextEager }}</th>
+                                        <th class="text-uppercase w-25">{{'TYPE'|i18next=""}}</th>
+                                        <th class="text-uppercase w-25">{{'FEE'|i18next=""}}</th>
+                                        <th class="text-uppercase w-25">{{ 'applicable_on' | i18nextEager }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <ng-container formArrayName="fee">
+                                        <ng-container *ngFor="let feeForm of feeArray?.controls; let i = index">
+                                            <tr [formGroupName]="i">
+                                                <td class="w-25">
+                                                    <div class="d-flex align-items-center justify-content-between">
+                                                        <p> {{feeForm?.get('name')?.value | uppercase}}</p>
+                                                        <toggle-button [checked]="true"></toggle-button>
+                                                    </div>
+                                                </td>
+                                                <td class="w-25">
+                                                    <div class="form-group">
+                                                        <ng-select placeholder="Select Type"
+                                                            formControlName="amount_type">
+                                                            <ng-option [value]="'percentage'">
+                                                                {{ 'percentage' | i18nextEager }}
+                                                            </ng-option>
+                                                        </ng-select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="fees-input position-relative">
+                                                        <span>$</span>
+                                                        <input type="number" onlyNumber class="form-control"
+                                                            placeholder="Fees" formControlName="amount_value"
+                                                            (change)="calculateMspFee();resetEffectiveDate()">
+                                                    </div>
+                                                </td>
+                                                <td class="w-25">
+                                                    <div class="form-group">
+                                                        <ng-select [disabled]="true" placeholder="{{ 'applicable_on' | i18nextEager }}"
+                                                            formControlName="applicable_on">
+                                                            <ng-option [value]="'vendor_bill_rate'">
+                                                                Vendor Bill Rate
+                                                            </ng-option>
+                                                            <ng-option [value]="'client_bill_rate'">
+                                                                {{ 'client_bill_rate' | i18nextEager }}
+                                                            </ng-option>
+                                                        </ng-select>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </ng-container>
+                                    </ng-container>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="toggled-item" *ngIf="manageBillable">
+                        <div class="item-icon dark-green medium">
+                            <icon name="account_balance" size="20px" color="#AB7EFF"></icon>
+                        </div>
+                        <p class="float-left font-weight-medium">
+                            {{ 'taxes' | i18nextEager }}
+                            <span>{{'Here you can manage timesheet related configurations / Settings for this
+                                assignment'|i18next=""}}</span>
+                        </p>
+                        <div class="clearfix"></div>
+                        <div class="manage-toggle-content">
+                            <table class="finance-table">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase  w-25">{{ 'tax_type' | i18nextEager }}</th>
+                                        <th class="text-uppercase  w-25">{{ 'type' | i18nextEager }}</th>
+                                        <th class="text-uppercase  w-25">{{ 'fee' | i18nextEager }}</th>
+                                        <th class="text-uppercase  w-25">{{ 'applicable_on' | i18nextEager }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <ng-container formArrayName="tax">
+                                        <ng-container *ngFor="let taxForm of taxArray?.controls; let i = index">
+                                            <tr [formGroupName]="i">
+                                                <td class="w-25">
+                                                    <div class="d-flex align-items-center justify-content-between">
+                                                        <p> {{taxForm?.get('name')?.value | uppercase}}</p>
+                                                        <toggle-button [checked]="true"></toggle-button>
+                                                    </div>
+                                                </td>
+                                                <td class="w-25">
+                                                    <div class="form-group">
+                                                        <ng-select placeholder="{{ 'select_type' | i18nextEager }}"
+                                                            formControlName="amount_type">
+                                                            <ng-option [value]="'percentage'">
+                                                                {{ 'percentage' | i18nextEager }}
+                                                            </ng-option>
+                                                        </ng-select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="fees-input position-relative">
+                                                        <div class="form-group">
+
+                                                            <span>$</span>
+                                                            <input type="number" onlyNumber class="form-control"
+                                                                placeholder="Tax" formControlName="amount_value"
+                                                                (change)="recalcualatebudget();resetEffectiveDate()">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="w-25">
+                                                    <div class="form-group">
+                                                        <ng-select [disabled]="true" placeholder="Applicable On"
+                                                            formControlName="applicable_on">
+                                                            <ng-option [value]="'vendor_bill_rate'">
+                                                                {{ 'vendor_bill_rate' | i18nextEager }}
+                                                            </ng-option>
+                                                            <ng-option [value]="'msp_partner_fee'">
+                                                                {{ 'msp_partner_fee' | i18nextEager }}
+                                                            </ng-option>
+                                                            <ng-option [value]="'vms_fee'">
+                                                                {{ 'vms_fee' | i18nextEager }}
+                                                            </ng-option>
+                                                            <ng-option [value]="'msp_fee'">
+                                                                {{ 'msp_fee' | i18nextEager }}
+                                                            </ng-option>
+                                                        </ng-select>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </ng-container>
+                                    </ng-container>
+                            </table>
+                        </div>
+                    </div> -->
+                    <div class="toggled-item" *ngIf="manageBillable">
+                        <div class="item-icon dark-green medium">
+                            <icon name="receipt" size="20px" color="#20B99B"></icon>
+                        </div>
+                        <p class="float-left font-weight-medium">
+                            {{ 'billing_details' | i18nextEager }}
+                            <span>{{ 'here_you_can_manage_timesheet_related_configurations_/_settings_for_this_assignment' | i18nextEager }}</span>
+                        </p>
+                        <div class="clearfix"></div>
+                        <div class="activity-loop-wrapper">
+                            <div class="manage-toggle-content activity-loop">
+                                <!-- <div class="billing-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <input type="text" placeholder="Custom Activity Name" class="form-control">
+                                    </div>
+                                    <a href="javascript:void(0)" class="delete-item">
+                                        <icon name="cancel" size="16px" color="#FC6E6E"></icon>
+                                    </a>
+                                </div> -->
+                                <table class="finance-table activity">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-uppercase"></th>
+                                            <th class="text-uppercase" *ngIf="showClientBillRate">
+                                                {{ 'client_bill_rate' | i18nextEager }}
+                                                <span class="require">*</span>
+                                            </th>
+                                            <th class="text-uppercase" *ngIf="showVendorBillRate">
+                                                {{ 'vendor_bill_rate' | i18nextEager }}
+                                                <span class="require">*</span>
+                                            </th>
+                                            <th class="text-uppercase" *ngIf="showPayrate">
+                                                {{ 'pay_rate' | i18nextEager }}
+                                                <span class="require">*</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="w-25">{{ 'straight_time_rate' | i18nextEager }}</td>
+                                            <td class="w-25" *ngIf="showClientBillRate">
+                                                <div class="fees-input position-relative">
+                                                    <div class="form-group">
+                                                        <div class="input-with-fixed-value position-relative">
+                                                            <span>$</span>
+                                                            <input type="number" onlyNumber class="form-control" inputAccuracy="{{accuracyConfig?.rate}}"
+                                                                placeholder="0.00" formControlName="billrate"
+                                                                (change)="baseRatesChanged('billrate');resetEffectiveDate()">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td *ngIf="showVendorBillRate">
+                                                <div class="form-group">
+                                                    <div class="input-with-fixed-value position-relative">
+                                                        <span>$</span>
+                                                        <input type="number" onlyNumber class="form-control" inputAccuracy="{{accuracyConfig?.rate}}"
+                                                            placeholder="0.00" formControlName="vendor_rate"
+                                                            (change)="baseRatesChanged('vendor_rate');resetEffectiveDate()">
+
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="w-25" *ngIf="showPayrate">
+                                                <div class="form-group">
+                                                    <div class="input-with-fixed-value position-relative">
+                                                        <span>$</span>
+                                                        <input type="number" onlyNumber class="form-control"
+                                                            placeholder="0.00" formControlName="payrate" inputAccuracy="{{accuracyConfig?.rate}}"
+                                                            [disabled]="programType === 'MARKUP'"
+                                                            (change)="baseRatesChanged('payrate');resetEffectiveDate()">
+                                                        <p *ngIf="(assignmentCreateForm?.invalid && assignmentCreateForm?.errors?.gtr)"
+                                                            class="text-red position-absolute">
+                                                            {{assignmentCreateForm?.errors?.gtr}}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <ng-container formArrayName="rate">
+                                            <ng-container *ngFor="let rate of ratesArray?.controls; let i = index">
+                                                <ng-container [formGroupName]="i">
+                                                    <tr>
+                                                        <td class="w-25">
+                                                            {{rate?.get('name')?.value}}
+                                                        </td>
+                                                        <td class="w-25" *ngIf="showClientBillRate">
+                                                            <div class="form-group">
+                                                                <div class="input-with-fixed-value position-relative">
+                                                                    <span>{{currencyObject[currency]}}</span>
+                                                                    <input type="number" onlyNumber class="form-control" inputAccuracy="{{accuracyConfig?.rate}}"
+                                                                        placeholder="0.00" formControlName="billrate"
+                                                                        (change)="baseRatesChangedForAbb(rate?.get('rate_factor')?.value, 'billrate');resetEffectiveDate()">
+                                                                    <!-- <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red position-absolute">
+                                                              {{errorMassage[field?.slug]}}
+                                                            </p> -->
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td *ngIf="showVendorBillRate">
+                                                            <div class="form-group">
+                                                                <div class="input-with-fixed-value position-relative">
+                                                                    <span>{{currencyObject[currency]}}</span>
+                                                                    <input type="number" onlyNumber class="form-control" inputAccuracy="{{accuracyConfig?.rate}}"
+                                                                        placeholder="0.00"
+                                                                        formControlName="vendor_rate">
+                                                                    <!-- <p *ngIf="(is_continue && renderForm.get(field?.slug).invalid)" class="text-red position-absolute">
+                                                              {{errorMassage[field?.slug]}}
+                                                            </p> -->
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="w-25" *ngIf="showPayrate">
+                                                            <div class="form-group">
+                                                                <div class="input-with-fixed-value position-relative">
+                                                                    <span>{{currencyObject[currency]}}</span>
+                                                                    <input type="number" onlyNumber class="form-control" inputAccuracy="{{accuracyConfig?.rate}}"
+                                                                        placeholder="0.00" formControlName="payrate"
+                                                                        [disabled]="programType === 'MARKUP'"
+                                                                        (change)="baseRatesChangedForAbb(rate?.get('rate_factor')?.value, 'payrate');resetEffectiveDate()">
+                                                                    <p *ngIf="(rate?.invalid && rate?.errors?.gtr)"
+                                                                        class="text-red position-absolute">
+                                                                        {{rate?.errors?.gtr}}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </ng-container>
+                                            </ng-container>
+                                        </ng-container>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="manage-toggle-content activity-loop">
+                                <!-- <div class="billing-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <input type="text" placeholder="{{ 'custom_activity_name' | i18nextEager }}" class="form-control">
+                                    </div>
+                                    <a href="javascript:void(0)" class="delete-item">
+                                        <icon name="cancel" size="16px" color="#FC6E6E"></icon>
+                                    </a>
+                                </div> -->
+                                <!-- <div class="col-md-12"
+                                    *ngFor="let activity of activityArray?.controls;let i = index;let last=last"
+                                    formArrayName="activity">
+                                    <div class="scroll-wrapper">
+                                        <table class="w-100 table-assignment" [formGroupName]='i'>
+                                            <thead class="no-border-bottom">
+                                                <tr>
+                                                    <th class="text-uppercase">{{ 'type' | i18nextEager }}</th>
+                                                    <th class="text-uppercase" *ngIf="showClientBillRate">
+                                                        {{ 'client_bill_rate' | i18nextEager }}
+                                                        <span class="require">*</span>
+                                                    </th>
+                                                    <th class="text-uppercase" *ngIf="showVendorBillRate">
+                                                        {{ 'vendor_bill_rate' | i18nextEager }}
+                                                        <span class="require">*</span>
+                                                    </th>
+                                                    <th class="text-uppercase" *ngIf="showPayrate">
+                                                        {{ 'pay_rate' | i18nextEager }}
+                                                        <span class="require">*</span>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="w-25">
+                                                    <td>{{ 'straight_time_rate' | i18nextEager }}</td>
+                                                    <td class="w-25" *ngIf="showClientBillRate">
+                                                        <div class="form-group">
+                                                            <div class="input-with-fixed-value position-relative">
+                                                                <span>$</span>
+                                                                <input type="number" onlyNumber class="form-control"
+                                                                    placeholder="0.00"
+                                                                    formControlName="activity_billrate"
+                                                                    (change)="activityBaseRatesChanged('billrate' , i)">
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td *ngIf="showVendorBillRate">
+                                                        <div class="form-group">
+                                                            <div class="input-with-fixed-value position-relative">
+                                                                <span>$</span>
+                                                                <input type="number" onlyNumber class="form-control"
+                                                                    placeholder="0.00"
+                                                                    formControlName="activity_vendor_rate"
+                                                                    (change)="activityBaseRatesChanged('vendor_rate' , i)">
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="w-25" *ngIf="showPayrate">
+                                                        <div class="form-group">
+                                                            <div class="input-with-fixed-value position-relative">
+                                                                <span>$</span>
+                                                                <input type="number" onlyNumber class="form-control"
+                                                                    placeholder="0.00"
+                                                                    formControlName="activity_payrate"
+                                                                    [disabled]="programType === 'MARKUP'"
+                                                                    (change)="activityBaseRatesChanged('payrate' , i)">
+                                                                <p *ngIf="(assignmentCreateForm?.invalid && activity?.get('activity_payrate')?.errors?.gtr)"
+                                                                    class="text-red position-absolute">
+                                                                    {{ 'pay_rate_can_not_be_greater_than_client_bill_rate' | i18nextEager }}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <ng-container formArrayName='rates'>
+                                                    <ng-container
+                                                        *ngFor="let rate of activity?.controls?.rates?.controls; let k = index">
+
+                                                        <ng-container [formGroupName]="k">
+                                                            <tr>
+                                                                <td class="w-25">
+                                                                    {{rate?.get('name')?.value}}
+                                                                </td>
+                                                                <td class="w-25" *ngIf="showClientBillRate">
+                                                                    <div class="d-flex mb-16 justify-content-end"
+                                                                        *ngIf="assignmentId">
+                                                                        <span class="pr-24 factor-style text-capitalize"
+                                                                            [tooltip]="getFormulatoDisplay(rate?.get('rate_factor')?.value,'pay_rate')"
+                                                                            placement="right">{{rate?.get('rate_factor')?.value}}
+                                                                            {{ 'factor' | i18nextEager }}</span>
+                                                                        <toggle-button
+                                                                            [checked]="rate?.get('enable_bill_rate_edit')?.value"
+                                                                            (changed)="changeEditMode(i,k, 'enable_bill_rate_edit', $event)">
+                                                                        </toggle-button>
+
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <div
+                                                                            class="input-with-fixed-value position-relative">
+                                                                            <span>{{currencyObject[currency]}}</span>
+                                                                            <input type="number" onlyNumber
+                                                                                class="form-control" placeholder="0.00"
+                                                                                formControlName="billrate"
+                                                                                (change)="activityBaseRatesChangedForAbb(rate?.get('rate_factor')?.value, 'billrate', i, k)">
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td *ngIf="showVendorBillRate">
+                                                                    <div class="mb-16" *ngIf="assignmentId">&nbsp;
+
+                                                                    </div>
+
+                                                                    <div class="form-group ">
+                                                                        <div
+                                                                            class="input-with-fixed-value position-relative">
+                                                                            <span>{{currencyObject[currency]}}</span>
+                                                                            <input type="number" onlyNumber
+                                                                                class="form-control" placeholder="0.00"
+                                                                                formControlName="vendor_rate">
+
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td class="w-25" *ngIf="showPayrate">
+                                                                    <div class="d-flex mb-16 justify-content-end"
+                                                                        *ngIf="assignmentId">
+                                                                        <span class="pr-24 factor-style text-capitalize"
+                                                                            [tooltip]="getFormulatoDisplay(rate?.get('rate_factor')?.value,'pay_rate')"
+                                                                            placement="right">{{rate?.get('rate_factor')?.value}}
+                                                                            {{'Factor'|i18next=""}}</span>
+                                                                        <toggle-button
+                                                                            [checked]="rate?.get('enable_pay_rate_edit')?.value"
+                                                                            (changed)="changeEditMode(i, k, 'enable_pay_rate_edit', $event)">
+                                                                        </toggle-button>
+
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <div
+                                                                            class="input-with-fixed-value position-relative">
+                                                                            <span>{{currencyObject[currency]}}</span>
+                                                                            <input type="number" onlyNumber
+                                                                                class="form-control" placeholder="0.00"
+                                                                                [disabled]="programType === 'MARKUP'"
+                                                                                formControlName="payrate"
+                                                                                (change)="activityBaseRatesChangedForAbb(rate?.get('rate_factor')?.value, 'billrate', i, k)">
+                                                                            <p *ngIf="(rate?.invalid && rate?.errors?.gtr)"
+                                                                                class="text-red position-absolute">
+                                                                                {{rate?.errors?.gtr}}
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </ng-container>
+                                                    </ng-container>
+                                                </ng-container>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div> -->
+                            </div>
+                            <!-- <button class="btn btn-primary small mt-16 add-new-btn">
+                                <icon size="14px" name="add" class="icon--on-left" color="inherit"></icon>  {{ 'add_new_activity' | i18nextEager }}
+                            </button> -->
+                        </div>
+                    </div>
+
+                    <!-- billing detail with rate factor start here -->
+                    <!-- <div class="toggled-item" *ngIf="manageBillable">
+                        <div class="item-icon dark-green medium">
+                            <icon name="receipt" size="20px" color="#20B99B"></icon>
+                        </div>
+                        <p class="font-weight-medium mb-24">
+                            {{ 'billing_details' | i18nextEager }}
+                            <span>{{ 'here_you_can_manage_timesheet_related_configurations' | i18nextEager }}</span>
+                        </p> -->
+
+                    <!-- <div class="rate-wrapper">
+                            <p class="font-weight-medium mb-16">{{ 'straight_time_rate' | i18nextEager }}</p>
+                            <div class="form-group-row">
+                                <div class="form-group mb-0 pb-0">
+                                    <label>{{ 'client_bill_rate' | i18nextEager }}</label>
+                                    <div class="fees-input position-relative">
+                                        <span>$</span>
+                                        <input type="text" class="form-control" value="0.00">
+                                    </div>
+                                </div>
+                                <div class="form-group mb-0 pb-0">
+                                    <label>{{ 'vendor_bill_rate' | i18nextEager }}</label>
+                                    <div class="fees-input position-relative">
+                                        <span>$</span>
+                                        <input type="text" class="form-control" value="0.00">
+                                    </div>
+                                </div>
+                                <div class="form-group mb-0 pb-0">
+                                    <label>{{ 'pay_rate' | i18nextEager }} <span class="require">*</span></label>
+                                    <div class="fees-input position-relative">
+                                        <span>$</span>
+                                        <input type="text" class="form-control" value="0.00">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rate-wrapper">
+                            <p class="font-weight-medium mb-16">{{'Over Time Rate'|i18next=""}}</p>
+                            <div class="form-group-row">
+                                <div class="form-group mb-0 pb-0">
+                                    <label>{{ 'client_bill_rate' | i18nextEager }}</label>
+                                    <div class="rate-factor-box d-flex justify-content-between align-items-center">
+                                        <div
+                                            class="left-part d-flex justify-content-between align-items-center position-relative">
+                                            <label class="factor-label mb-0 d-flex align-items-center"
+                                                [ngClass]="{'active' : popoverActive}">
+                                                <input type="checkbox" class="mr-8" (click)="showPopOver($event)"> {{ 'ot_factor' | i18nextEager }}
+                                            </label>
+                                            <icon name="calculate" cuClass="d-flex" size="16px" color="#ADB5BD"
+                                                *ngIf="!rateFactorEdit" (click)="ShowPopOverBox()"></icon>
+                                            <icon name="drive_file_rename_outline" cuClass="d-flex" size="16px"
+                                                color="#4C7FF0" *ngIf="rateFactorEdit" (click)="ShowPopOverBox()">
+                                            </icon>
+                                            <div class="pop-over" [ngClass]="{'active' : popoverActive}"
+                                                (mouseleave)="hidePopOver()">
+                                                <p>{{ 'rate_factor_details' | i18nextEager }}</p>
+                                                <p class="small">{{ 'over_time_bill_rate' | i18nextEager }}</p>
+                                                <div class="d-flex pop-item-wrap mt-16 justify-content-between">
+                                                    <div class="pop-item">
+                                                        1.0 <span>{{ 'pay_rate' | i18nextEager }}</span>
+                                                    </div>
+                                                    <div class="pop-item">
+                                                        1.0 <span>{{ 'bill_rate' | i18nextEager }}</span>
+                                                    </div>
+                                                    <div class="pop-item">
+                                                        $100.00 <span>{{ 'flat_adjustment' | i18nextEager }}</span>
+                                                    </div>
+                                                </div>
+                                                <button *ngIf="rateFactorEdit" class="btn btn-primary small mt-16">
+                                                    <icon size="14px" name="drive_file_rename_outline" theme="outlined"
+                                                        color="inherit" type="material" cuclass="icon-cu"
+                                                        class="icon--on-left"></icon> {{'Edit Rate Factor'|i18next=""}}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="fees-input position-relative">
+                                            <span>$</span>
+                                            <input type="text" class="form-control" value="0.00"
+                                                [disabled]="rateFactorEdit">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group mb-0 pb-0">
+                                    <label>{{'Vendor Bill Rate'|i18next=""}}</label>
+                                    <div class="rate-factor-box d-flex justify-content-between align-items-center">
+                                        <div
+                                            class="left-part d-flex justify-content-between align-items-center position-relative">
+                                            <label class="factor-label mb-0 d-flex align-items-center">
+                                                <input type="checkbox" class="mr-8"> {{ 'ot_factor' | i18nextEager }}
+                                            </label>
+                                            <icon name="calculate" cuClass="d-flex" size="16px" color="#ADB5BD"></icon>
+                                        </div>
+                                        <div class="fees-input position-relative">
+                                            <span>$</span>
+                                            <input type="text" class="form-control" value="0.00">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group mb-0 pb-0">
+                                    <label>{{ 'pay_rate' | i18nextEager }}</label>
+                                    <div class="rate-factor-box d-flex justify-content-between align-items-center">
+                                        <div
+                                            class="left-part d-flex justify-content-between align-items-center position-relative">
+                                            <label class="factor-label mb-0 d-flex align-items-center">
+                                                <input type="checkbox" class="mr-8"> {{ 'ot_factor' | i18nextEager }}
+                                            </label>
+                                            <icon name="calculate" cuClass="d-flex" size="16px" color="#ADB5BD"></icon>
+                                        </div>
+                                        <div class="fees-input position-relative">
+                                            <span>$</span>
+                                            <input type="text" class="form-control" value="0.00">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="rate-wrapper mb-0">
+                            <p class="font-weight-medium mb-16">{{ 'double_time_rate' | i18nextEager }}</p>
+                            <div class="form-group-row">
+                                <div class="form-group mb-0 pb-0">
+                                    <label>{{ 'client_bill_rate' | i18nextEager }}</label>
+                                    <div class="rate-factor-box d-flex justify-content-between align-items-center">
+                                        <div
+                                            class="left-part d-flex justify-content-between align-items-center position-relative">
+                                            <label class="factor-label mb-0 d-flex align-items-center">
+                                                <input type="checkbox" class="mr-8"> {{ 'ot_factor' | i18nextEager }}
+                                            </label>
+                                            <icon name="calculate" cuClass="d-flex" size="16px" color="#ADB5BD"></icon>
+                                        </div>
+                                        <div class="fees-input position-relative">
+                                            <span>$</span>
+                                            <input type="text" class="form-control" value="0.00">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group mb-0 pb-0">
+                                    <label>Vendor Bill Rate</label>
+                                    <div class="rate-factor-box d-flex justify-content-between align-items-center">
+                                        <div
+                                            class="left-part d-flex justify-content-between align-items-center position-relative">
+                                            <label class="factor-label mb-0 d-flex align-items-center">
+                                                <input type="checkbox" class="mr-8"> {{ 'ot_factor' | i18nextEager }}
+                                            </label>
+                                            <icon name="calculate" cuClass="d-flex" size="16px" color="#ADB5BD"></icon>
+                                        </div>
+                                        <div class="fees-input position-relative">
+                                            <span>$</span>
+                                            <input type="text" class="form-control" value="0.00">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group mb-0 pb-0">
+                                    <label>{{ 'pay_rate' | i18nextEager }}</label>
+                                    <div class="rate-factor-box d-flex justify-content-between align-items-center">
+                                        <div
+                                            class="left-part d-flex justify-content-between align-items-center position-relative">
+                                            <label class="factor-label mb-0 d-flex align-items-center">
+                                                <input type="checkbox" class="mr-8"> {{'OT Factor'|i18next=""}}
+                                            </label>
+                                            <icon name="calculate" cuClass="d-flex" size="16px" color="#ADB5BD"></icon>
+                                        </div>
+                                        <div class="fees-input position-relative">
+                                            <span>$</span>
+                                            <input type="text" class="form-control" value="0.00">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
+                    <!-- </div> -->
+                    <!-- billing detail with rate factor end  here -->
+
+                    <div class="toggled-item" *ngIf="manageBillable">
+                        <div class="item-icon violet medium">
+                            <icon name="payments" size="20px" color="#AB7EFF"></icon>
+                        </div>
+                        <p class="font-weight-medium mb-24">
+                            {{ 'billing_summary' | i18nextEager }}
+                            <span>{{ 'here_you_can_define_different_fees_for_msp.' | i18nextEager }} {{ 'vendor_etc' | i18nextEager }}</span>
+                        </p>
+                        <div class="col-md-12">
+                            <div class="budget-section d-flex mb-24">
+                                <div class="budget-item mr-8 p-12">
+                                    <icon color="#ffffff" name="hourglass_empty" size="20"
+                                        class="green mr-12 budget-icon p-3">
+                                    </icon>
+                                    <p class="small">
+                                        {{assignmentControl?.total_working_days?.value}}
+                                        <span>{{ 'total_working_days' | i18nextEager }}</span>
+                                    </p>
+                                </div>
+                                <div class="budget-item mr-8 p-12" *ngIf="assignmentControl?.is_billable?.value">
+                                    <icon color="#ffffff" name="hourglass_empty" size="20"
+                                        class="green mr-12 budget-icon p-3">
+                                    </icon>
+                                    <p class="small">
+                                        {{(assignmentControl?.timesheet_budget?.value || 0) |
+                                        accuracy :  accuracyConfig.amount: { currencyCode: currency } }}
+                                        <span>{{ 'timesheet_budget_amount' | i18nextEager }}</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="budget-section d-flex mb-24" *ngIf="assignmentControl?.is_billable?.value">
+                                <div class="budget-item mr-8 p-12">
+                                    <icon color="#ffffff" name="hourglass_empty" size="20"
+                                        class="green mr-12 budget-icon p-3">
+                                    </icon>
+                                    <p class="small">
+                                        {{(assignmentControl?.gross_allocated_budget?.value || 0) |
+                                        accuracy :  accuracyConfig.amount: { currencyCode: currency } }}
+                                        <span>{{ 'total_estimated_budget_w/o_tax' | i18nextEager }}</span>
+                                    </p>
+                                </div>
+                                <div class="budget-item mr-8 p-12">
+                                    <icon color="#ffffff" name="hourglass_empty" size="20"
+                                        class="green mr-12 budget-icon p-3">
+                                    </icon>
+                                    <p class="small">
+                                        {{(assignmentControl?.estimated_tax?.value || 0) |
+                                        accuracy :  accuracyConfig.tax: { currencyCode: currency } }}
+                                        <span>{{ 'est._tax' | i18nextEager }}</span>
+                                    </p>
+                                </div>
+                                <div class="budget-item mr-8 p-12">
+                                    <icon color="#ffffff" name="hourglass_empty" size="20"
+                                        class="green mr-12 budget-icon p-3">
+                                    </icon>
+                                    <p class="small">
+                                        {{(assignmentControl?.net_allocated_budget?.value || 0) |
+                                        accuracy :  accuracyConfig.amount: { currencyCode: currency } }}
+                                        <span>{{ 'total_estimated_budget' | i18nextEager }}</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="toggled-item first top-border">
+                        <div class="item-icon light-green medium">
+                            <icon name="assignment_turned_in" size="20px" color="#8CC440"></icon>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <p class="font-weight-medium mb-24">
+                               {{ 'assignment_activation' | i18nextEager }}
+                                <span>{{ 'here_you_can_define_the_assignment_activation_flow' | i18nextEager }}</span>
+                            </p>
+                            <div class="activation-dropdown">
+                                <ng-select [items]="assignmentActiveUpon" bindLabel="name" bindValue="value"
+                                    [readonly]="assignmentId" placeholder="{{ 'select' | i18nextEager }}" [clearable]="true"
+                                    formControlName="active_on">
+                                </ng-select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-primary m-3" [disabled]="assignmentCreateForm?.invalid"
+                        (click)="submit()" *ngIf="activeTab === 'finance-info'">{{ 'save_assignment' | i18nextEager }}
+                        <span *ngIf="isSaveLoader" class="ml-8">
+                            <button-loader></button-loader>
+                        </span>
+                    </button>
+                    <button type="button" class="btn btn-primary m-3" *ngIf="activeTab !== 'finance-info'"
+                    [disabled]="disableContinue"  (click)="continue()">{{ 'continue' | i18nextEager }}
+                        <icon size="20px" name="chevron_right" color="inherit" type="material" cuclass="icon-cu"
+                            class="icon--on-right">
+                        </icon>
+                    </button>
+                </div>
+                <!-- <button type="button" class="btn btn-outine btn-primary-color display-hidden"
+                    *ngIf="(!assignmentId && activeTab !== 'candidate-info') || (assignmentId && activeTab === 'finance-info')"
+                    (click)="previous()">
+                    <icon size="24px" name="keyboard_backspace" color="inherit" theme="outlined" type="material"
+                        cuclass="d-flex" class="d-flex"></icon>
+                </button> -->
+            </div>
+        </div>
+    </section>
+</form>
+<svms-sidebar [title]="'select_hierarchy'" icon="" [dataVisibility]="isAddHirerachy" (onClose)="sidebarClose()">
+    <svms-sidebar-body>
+        <svms-hierarchy *ngIf="dropDownOptions['hierarchy_id']?.length > 0"
+            [hierarchyData]="dropDownOptions['hierarchy_id']" (selectHierarchyLevel)="selectHierarchy($event)"
+            [selectedHierarchy]="selectedHierarchy" [isUserOnly]="true"
+            [userAssociatedHierarchyID]="userAssociatedHierarchyID">
+        </svms-hierarchy>
+        <div *ngIf="dropDownOptions['hierarchy_id']?.length === 0"
+            class="content-area ui-content-wrapper no-content bg-light list-not-found">
+            <div class="no-data text-center">
+                <img src="./assets/images/no-data.png" alt="hierarchy-board" class="img-fluid">
+                <h2>{{ 'you_do_not_have_a_hierarchy_created_yet' | i18nextEager }}.</h2>
+            </div>
+        </div>
+    </svms-sidebar-body>
+
+    <svms-sidebar-footer>
+        <!--show this in basic info tabs tabs -->
+        <button type="submit" class="btn btn-primary float-right" (click)="sidebarClose()" [disabled]="disableContinue">
+            {{ 'continue' | i18nextEager }} <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu">
+            </icon>
+        </button>
+    </svms-sidebar-footer>
+</svms-sidebar>
+<app-create-candidate1 [CreateCandidate]="isCreateCandidate" (candidateCreated)="onCandidateCreated($event)"
+    (onClose)="candidateSidebarClose($event)">
+</app-create-candidate1>

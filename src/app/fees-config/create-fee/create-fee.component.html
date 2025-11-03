@@ -1,0 +1,479 @@
+<div class="create-job">
+  <a (click)="onCancel()" class="close-button close_btn cursor-pointer">
+    <icon size="18px" name="west" type="material" cuClass="d-flex"></icon>
+  </a>
+  <div class="create-job-inner p-8">
+
+    <div class="page-title my-24 text-center pt-8 font-weight-medium">
+      {{ 'fee_configuration' | i18nextEager }}
+    </div>
+
+
+    <form [formGroup]="feesForm">
+
+      <div class="panel panel-light p-24 mb-16">
+        <div class="form-group">
+          <label>{{ 'fee_configuration_name' | i18nextEager }} <span class="require">*</span></label>
+          <input type="text" formControlName="title" class="form-control">
+        </div>
+
+        <div class="form-group select-hierarchy">
+          <hierarchy-treeview
+            [filter]="true"
+            [mandatory]="true"
+            [treeInput]="hierarchyTree"
+            [selected]="feesForm.get('hierarchy').value"
+            (changed)="changeSelectedHierarchies($event)"
+          ></hierarchy-treeview>
+        </div>
+
+          <div class="form-group">
+            <label>{{ 'source_model' | i18nextEager }} <span class="require">*</span></label>
+            <div class="d-flex checkbox-row">
+              <div class="checkbox-box">
+                <div class="checkbox-wrapper">
+                  <label class="checkbox-container">
+                    <input type="checkbox" formControlName="source_model_contingent" value="CONTINGENT"
+                      (change)="setSourceModel('source_model_contingent',$event)">
+                    <span class="checkmark"></span>
+                    <p>{{ 'contingent' | i18nextEager }}</p>
+                  </label>
+                </div>
+              </div>
+              <div class="checkbox-box">
+                <div class="checkbox-wrapper">
+                  <label class="checkbox-container">
+                    <input type="checkbox" formControlName="source_model_sow" value="SOW"
+                      (change)="setSourceModel('source_model_sow',$event)">
+                    <span class="checkmark"></span>
+                    <p>{{ 'sow' | i18nextEager }}</p>
+                  </label>
+                </div>
+              </div>
+              <div class="checkbox-box">
+                <div class="checkbox-wrapper">
+                  <label class="checkbox-container">
+                    <input type="checkbox" formControlName="source_model_direct" value="DIRECT_SOURCING"
+                      (change)="setSourceModel('source_model_direct',$event)">
+                    <span class="checkmark"></span>
+                    <p>{{ 'direct_sourcing' | i18nextEager }}</p>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        <div class="form-group">
+          <label>{{ 'labor_category' | i18nextEager }} <span class="require">*</span></label>
+          <ng-select placeholder="{{ 'root' | i18nextEager }}" formControlName="laborCategory" (change)="onChangeLaborCategory($event)">
+            <ng-option *ngFor="let laborCategory of labor_category" [value]="laborCategory?.id">{{laborCategory?.name}}</ng-option>
+          </ng-select>
+          <div class="d-flex flex-wrap mt-4" *ngIf="!isAllLaborCategorySelected">
+            <div class="badge badge-light mt-12 mr-12 rounded-sm" *ngFor="let laborCategory of selectedLaborCategory; let i = index">
+              {{laborCategory?.name}}
+              <span (click)="selectedLaborCategory.splice(i, 1)" href="javascript:void(0)">
+                <icon size="14px" name="cancel" type="material" class="d-flex ml-8" cuClass="d-flex">
+                </icon>
+              </span>
+
+            </div>
+
+          </div>
+          <div class="badge badge-light mt-16 d-inline-flex rounded-sm" *ngIf="isAllLaborCategorySelected">{{ 'all' | i18nextEager }}
+            <span (click)="removeAllLaborCategory()">
+              <icon size="14px" name="cancel" type="material" class="d-flex ml-8" cuClass="d-flex">
+              </icon>
+            </span>
+          </div>
+
+        </div>
+        <div class="form-group">
+          <!-- Removing required as part of V2M-4216 -->
+          <!-- <label>{{ 'select_vendor' | i18nextEager }} <span class="require">*</span></label> -->
+          <label>{{ 'select_vendor' | i18nextEager }}</label>
+          <ng-select placeholder="{{ 'select_vendor' | i18nextEager }}" formControlName="vendors" (change)="onChangeVendor($event)" (search)="searchVendor($event)" [loading]="vendorLoading" loadingText = 'Loading....'>
+            <ng-option *ngFor="let vendor of vendors" [value]="vendor.id">{{vendor.name}}</ng-option>
+          </ng-select>
+          <div class="d-flex flex-wrap mt-4" *ngIf="!isAllVendorSelected">
+            <div class="badge badge-light mt-12 mr-12 rounded-sm" *ngFor="let vendor of selectedVendors; let i = index">
+              {{vendor.name}}
+              <span (click)="selectedVendors.splice(i, 1)" href="javascript:void(0)">
+                <icon size="14px" name="cancel" type="material" class="d-flex ml-8" cuClass="d-flex">
+                </icon>
+              </span>
+            </div>
+          </div>
+          <div class="badge badge-light mt-16 d-inline-flex rounded-sm" *ngIf="isAllVendorSelected">{{ 'all' | i18nextEager }}
+            <span (click)="removeAllVendor()">
+              <icon size="14px" name="cancel" type="material" class="d-flex ml-8" cuClass="d-flex">
+              </icon>
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'effective_date' | i18nextEager }}</label>
+          <svms-datepicker
+            [inputdateFormat]="'yyyy-MM-DD'"
+            [disabled]="false"
+            formControlName="effective_date"
+            [responsiveDatepicker]="true"
+            [placeholder]="'Select Date'"
+          >
+          </svms-datepicker>
+        </div>
+      </div>
+
+      <!-- Hierarchy END -->
+
+      <div class="panel panel-light mb-16">
+        <!-- PARTNER Start -->
+        <div class="panel-header border-bottom px-24 py-16">
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="partner-text"> {{ 'msp_partner_fee' | i18nextEager }} </div>
+            <div class="toggle-panel">
+              <div class="toggle-panel-inner">
+                <span class="status-text">{{toggles.msp.title | i18nextEager}}</span>
+                <span class="toggle-switch" [ngClass]="toggles.msp.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle('msp')"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-content p-24">
+          <div *ngIf="toggles.msp.value">
+
+            <div class="click-type">
+              <div class="mr-24">
+                <p class="mb-16">{{ 'fee_type' | i18nextEager }}</p>
+                <label class="flex">
+                  <span class="type-switch" [ngClass]="buttonOptions.mspFeeType === 'Fixed Amount' ? 'active' : ''"
+                    (click)="feeType($event, 'msp')">
+                    {{ 'fixed_amount' | i18nextEager }}
+                  </span>
+                  <span class="type-switch" [ngClass]="buttonOptions.mspFeeType === 'Percentage' ? 'active' : ''"
+                    (click)="feeType($event, 'msp')">
+                    {{ 'percentage' | i18nextEager }}
+                  </span>
+                </label>
+              </div>
+              <div>
+                <p class="mb-16">{{ 'msp_partner_fee_applicable_for' | i18nextEager }}</p>
+                <label class="flex">
+                  <span class="type-switch" [ngClass]="buttonOptions.mspPartnerType === 'Client' ? 'active' : ''"
+                    (click)="feeType($event, 'msp')">
+                    {{ 'client' | i18nextEager }}
+                  </span>
+                  <span class="type-switch" [ngClass]="buttonOptions.mspPartnerType === 'Vendor' ? 'active' : ''"
+                    (click)="feeType($event, 'msp')">
+                    {{ 'vendor' | i18nextEager }}
+                  </span>
+                </label>
+              </div>
+            </div>
+            <p class="py-16">{{ 'msp_partner_fee_applicable_on' | i18nextEager }}</p>
+
+            <div class="">
+              <div class="row no-gutters mb-12">
+                <p class="col-md-8">{{ 'module' | i18nextEager }}</p>
+                <p class="col-md-4">{{ 'fee' | i18nextEager }}</p>
+              </div>
+              <div class="row no-gutters border rounded-sm p-12 bg-light-gray mb-12">
+                <div class="col-md-8">
+                  <div class="toggle-panel-inner pl-0 bg-transparent border-0 justify-content-start">
+                    <span class="toggle-switch" [ngClass]="toggles.msp.timesheet.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickModule('msp', 'timesheet')"></span>
+                    <span class="ml-16">{{ 'timesheet' | i18nextEager }}</span>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <input type="number" [inputAccuracy]="buttonOptions.mspFeeType === 'Fixed Amount' ? 'fee' : 'fee_percentage'" [placeholder]="'Enter value'" [(ngModel)]="toggles.msp.timesheet.fee" [ngModelOptions]="{standalone: true}"
+                    class="form-control">
+                </div>
+              </div>
+              <div class="row no-gutters border rounded-sm p-12 bg-light-gray mb-12">
+                <div class="col-md-8">
+                  <div class="toggle-panel-inner pl-0 bg-transparent border-0 justify-content-start">
+                    <span class="toggle-switch" [ngClass]="toggles.msp.expense.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickModule('msp', 'expense')"></span>
+                    <span class="ml-16" style="font-size: 11px;">{{ 'expense' | i18nextEager }}</span>
+
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <input type="number" [inputAccuracy]="buttonOptions.mspFeeType === 'Fixed Amount' ? 'fee' : 'fee_percentage'" [placeholder]="'Enter value'" [(ngModel)]="toggles.msp.expense.fee" [ngModelOptions]="{standalone: true}"
+                    class="form-control">
+                </div>
+              </div>
+
+              <div class="row no-gutters border rounded-sm p-12 bg-light-gray mb-12">
+                <div class="col-md-8">
+                  <div class="toggle-panel-inner pl-0 bg-transparent border-0 justify-content-start">
+                    <span class="toggle-switch" [ngClass]="toggles.msp.miscExpense.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickModule('msp', 'miscExpense')"></span>
+                    <span class="ml-16" style="font-size: 11px;">{{ 'misc.expense' | i18nextEager }}</span>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <input type="number" [inputAccuracy]="buttonOptions.mspFeeType === 'Fixed Amount' ? 'fee' : 'fee_percentage'" [placeholder]="'Enter value'" [(ngModel)]="toggles.msp.miscExpense.fee" [ngModelOptions]="{standalone: true}"
+                    class="form-control">
+                </div>
+              </div>
+              <div class="row no-gutters border rounded-sm p-12 bg-light-gray mb-12" *ngIf="isSOW_ProjectSelected">
+                <div class="col-md-8">
+                  <div class="toggle-panel-inner pl-0 bg-transparent border-0 justify-content-start">
+                    <span class="toggle-switch" [ngClass]="toggles.msp.sow_project.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickModule('msp', 'sow_project')"></span>
+                    <span class="ml-16">{{ 'sow_project' | i18nextEager }}</span>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <input type="text" [inputAccuracy]="buttonOptions.mspFeeType === 'Fixed Amount' ? 'fee' : 'fee_percentage'" [placeholder]="'Enter value'" [(ngModel)]="toggles.msp.sow_project.fee" [ngModelOptions]="{standalone: true}"
+                    class="form-control">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- PARTNEER END -->
+
+      <!-- VMS Fee Start -->
+      <div class="panel panel-light mb-16">
+        <div class="panel-header border-bottom px-24 py-16">
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="vms-text"> {{ 'vms_fee' | i18nextEager }} </div>
+
+            <div class="toggle-panel">
+              <div class="toggle-panel-inner">
+                <span class="status-text">{{toggles.vms.title | i18nextEager}}</span>
+                <span class="toggle-switch" [ngClass]="toggles.vms.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle('vms')"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-content p-24">
+          <div *ngIf="toggles.vms.value">
+            <div class="click-type">
+              <div class="mr-24">
+                <p class="mb-16">{{ 'fee_type' | i18nextEager }}</p>
+                <label class="flex">
+                  <span class="type-switch" [ngClass]="buttonOptions.vmsFeeType === 'Fixed Amount' ? 'active' : ''"
+                    (click)="feeType($event, 'vms')">
+                    {{ 'fixed_amount' | i18nextEager }}
+                  </span>
+                  <span class="type-switch" [ngClass]="buttonOptions.vmsFeeType === 'Percentage' ? 'active' : ''"
+                    (click)="feeType($event, 'vms')">
+                    {{ 'percentage' | i18nextEager }}
+                  </span>
+                </label>
+              </div>
+              <div>
+                <p class="mb-16">{{ 'vms_fee_applicable_for' | i18nextEager }}</p>
+                <label class="flex">
+                  <span class="type-switch" [ngClass]="buttonOptions.vmsPartnerType === 'Client' ? 'active' : ''"
+                    (click)="feeType($event, 'vms')">
+                    {{ 'client' | i18nextEager }}
+                  </span>
+                  <span class="type-switch" [ngClass]="buttonOptions.vmsPartnerType === 'Vendor' ? 'active' : ''"
+                    (click)="feeType($event, 'vms')">
+                    {{ 'vendor' | i18nextEager }}
+                  </span>
+                </label>
+              </div>
+            </div>
+            <p class="py-16">{{ 'msp_partner_fee_applicable_on' | i18nextEager }}</p>
+            <div class="">
+              <div class="row no-gutters mb-12">
+                <p class="col-md-8">{{ 'module' | i18nextEager }}</p>
+                <p class="col-md-4">{{ 'fee' | i18nextEager }}</p>
+              </div>
+              <div class="row no-gutters border rounded-sm p-12 bg-light-gray mb-12">
+                <div class="col-md-8">
+                  <div class="toggle-panel-inner pl-0 bg-transparent border-0 justify-content-start">
+                    <span class="toggle-switch" [ngClass]="toggles.vms.timesheet.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickModule('vms', 'timesheet')"></span>
+                    <span class="ml-16">{{ 'timesheet' | i18nextEager }}</span>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <input type="number" [inputAccuracy]="buttonOptions.vmsFeeType === 'Fixed Amount' ? 'fee' : 'fee_percentage'" [placeholder]="'Enter value'" [(ngModel)]="toggles.vms.timesheet.fee" [ngModelOptions]="{standalone: true}"
+                    class="form-control">
+                </div>
+              </div>
+              <div class="row no-gutters border rounded-sm p-12 bg-light-gray mb-12">
+                <div class="col-md-8">
+                  <div class="toggle-panel-inner pl-0 bg-transparent border-0 justify-content-start">
+                    <span class="toggle-switch" [ngClass]="toggles.vms.expense.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickModule('vms', 'expense')"></span>
+                    <span class="ml-16" style="font-size: 11px;">{{ 'expense' | i18nextEager }}</span>
+
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <input type="number" [inputAccuracy]="buttonOptions.vmsFeeType === 'Fixed Amount' ? 'fee' : 'fee_percentage'" [placeholder]="'Enter value'" [(ngModel)]="toggles.vms.expense.fee" [ngModelOptions]="{standalone: true}"
+                    class="form-control">
+                </div>
+              </div>
+              <div class="row no-gutters border rounded-sm p-12 bg-light-gray">
+                <div class="col-md-8">
+                  <div class="toggle-panel-inner pl-0 bg-transparent border-0 justify-content-start">
+                    <span class="toggle-switch" [ngClass]="toggles.vms.miscExpense.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickModule('vms', 'miscExpense')"></span>
+                    <span class="ml-16" style="font-size: 11px;">{{ 'misc.expense' | i18nextEager }}</span>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <input type="number" [inputAccuracy]="buttonOptions.vmsFeeType === 'Fixed Amount' ? 'fee' : 'fee_percentage'" [placeholder]="'Enter value'" [(ngModel)]="toggles.vms.miscExpense.fee" [ngModelOptions]="{standalone: true}"
+                    class="form-control">
+                </div>
+              </div>
+              <div class="row no-gutters border rounded-sm p-12 bg-light-gray" *ngIf="isSOW_ProjectSelected">
+                <div class="col-md-8">
+                  <div class="toggle-panel-inner pl-0 bg-transparent border-0 justify-content-start">
+                    <span class="toggle-switch" [ngClass]="toggles.vms.sow_project.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickModule('vms', 'sow_project')"></span>
+                    <span class="ml-16">{{ 'sow_project' | i18nextEager }}</span>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <input type="number" [inputAccuracy]="buttonOptions.vmsFeeType === 'Fixed Amount' ? 'fee' : 'fee_percentage'" [placeholder]="'Enter value'" [(ngModel)]="toggles.vms.sow_project.fee" [ngModelOptions]="{standalone: true}"
+                    class="form-control">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- VMS Fee END -->
+
+      <!-- MSP Penalty Start -->
+      <div class="panel panel-light mb-16">
+        <div class="panel-header border-bottom px-24 py-16">
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="partner-text"> {{ 'msp_penalty' | i18nextEager }} </div>
+            <div class="toggle-panel">
+              <div class="toggle-panel-inner">
+                <span class="status-text">{{toggles.penalty.title | i18nextEager}}</span>
+                <span class="toggle-switch" [ngClass]="toggles.penalty.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle('penalty')"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-content p-24">
+          <div *ngIf="toggles.penalty.value">
+            <div class="click-type">
+              <div class="mr-24">
+                <p class="mb-16">{{ 'fee_type' | i18nextEager }}</p>
+                <label class="flex">
+                  <span class="type-switch" [ngClass]="buttonOptions.penaltyFeeType === 'Fixed Amount' ? 'active' : ''"
+                    (click)="feeType($event, 'penalty')">
+                    {{ 'fixed_amount' | i18nextEager }}
+                  </span>
+                  <span class="type-switch" [ngClass]="buttonOptions.penaltyFeeType === 'Percentage' ? 'active' : ''"
+                    (click)="feeType($event, 'penalty')">
+                    {{ 'percentage' | i18nextEager }}
+                  </span>
+                </label>
+              </div>
+
+              <div>
+                <p class="mb-16">{{ 'msp_penalty_fee_applicable_for' | i18nextEager }}</p>
+                <label class="flex">
+                  <span class="type-switch" [ngClass]="buttonOptions.penaltyPartnerType === 'Client' ? 'active' : ''"
+                    (click)="feeType($event, 'penalty')">
+                    {{ 'client' | i18nextEager }}
+                  </span>
+                  <span class="type-switch" [ngClass]="buttonOptions.penaltyPartnerType === 'Vendor' ? 'active' : ''"
+                    (click)="feeType($event, 'penalty')">
+                    {{ 'vendor' | i18nextEager }}
+                  </span>
+                </label>
+              </div>
+            </div>
+            <p class="py-16">{{ 'vmsp_penalty_fee_applicable_on' | i18nextEager }}</p>
+            <div>
+              <div class="row no-gutters mb-12">
+                <p class="col-md-8">{{ 'module' | i18nextEager }}</p>
+                <p class="col-md-4">{{ 'fee' | i18nextEager }}</p>
+              </div>
+              <div class="row no-gutters border rounded-sm p-12 bg-light-gray">
+                <div class="col-md-8">
+                  <div class="toggle-panel-inner pl-0 bg-transparent border-0 justify-content-start">
+                    <span class="toggle-switch" [ngClass]="toggles.penalty.timesheet.value ? 'toggle-on' : 'toggle-off'"
+                      (click)="onClickModule('penalty', 'timesheet')"></span>
+                    <span class="ml-16">{{'Timesheet'}}</span>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <input type="number" [inputAccuracy]="buttonOptions.penaltyFeeType === 'Fixed Amount' ? 'fee' : 'fee_percentage'" [placeholder]="'Enter value'" [(ngModel)]="toggles.penalty.timesheet.fee" [ngModelOptions]="{standalone: true}"
+                    class="form-control">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+      </div>
+      <!-- MSP Penalty END -->
+
+      <!-- Create Footer Start -->
+      <div class="panel panel-light p-24 mb-16">
+
+        <table class="bg-light-gray rounded-sm table-msp">
+          <tr>
+            <th class="text-left">{{ 'summary' | i18nextEager }}</th>
+            <th class="text-left">{{ 'msp_partner_fee' | i18nextEager }}</th>
+            <th class="text-left">{{ 'vms_fee' | i18nextEager }}</th>
+            <!-- <th class="text-left">MSP Program/Fee</th> -->
+            <th class="text-left">{{ 'penalty_fee' | i18nextEager }}</th>
+          </tr>
+          <tr>
+            <td>{{ 'timesheet' | i18nextEager }}</td>
+            <td>{{(toggles.msp.timesheet.value && toggles.msp.value ? toggles.msp.timesheet.fee == "" ? "-" : (toggles.msp.timesheet.fee | accuracy : buttonOptions.mspFeeType == 'Fixed Amount' ? 'fee' : 'fee_percentage' : {isEdit:true}) : "-") }}{{toggles.msp.timesheet.fee == "" ? "" : toggles.msp.timesheet.value && toggles.msp.value ? buttonOptions.mspFeeType == "Fixed Amount" ? " Fixed Amount" : "%" : ""}} {{toggles.msp.timesheet.fee == "" ? "" : toggles.msp.timesheet.value && toggles.msp.value ? buttonOptions.mspPartnerType === 'Vendor' ? "Vendor" : "Client" : ""}}</td>
+            <td>{{(toggles.vms.timesheet.value && toggles.vms.value ? toggles.vms.timesheet.fee == "" ? "-" : (toggles.vms.timesheet.fee | accuracy : buttonOptions.vmsFeeType == 'Fixed Amount' ? 'fee' : 'fee_percentage' : {isEdit:true}) : "-") }}{{toggles.vms.timesheet.fee == "" ? "" : toggles.vms.timesheet.value && toggles.vms.value ? buttonOptions.vmsFeeType == "Fixed Amount" ? " Fixed Amount" : "%" : ""}} {{toggles.vms.timesheet.fee == "" ? "" : toggles.vms.timesheet.value && toggles.vms.value ? buttonOptions.vmsPartnerType === 'Vendor' ? "Vendor" : "Client" : ""}}</td>
+            <!-- <td>{{toggles.msp.timesheet.fee}}{{buttonOptions.mspFeeType == "Fixed Amount" ? "Fixed" : "%"}} {{buttonOptions.mspPartnerType === 'Vendor' ? "Vendor" : "Client"}}</td> -->
+            <td>{{(toggles.penalty.timesheet.value && toggles.penalty.value ? toggles.penalty.timesheet.fee == "" ? "-" : (toggles.penalty.timesheet.fee | accuracy : buttonOptions.penaltyFeeType == 'Fixed Amount' ? 'fee' : 'fee_percentage' : {isEdit:true}) : "-")}}{{toggles.penalty.timesheet.fee == "" ? "" : toggles.penalty.timesheet.value && toggles.penalty.value ? buttonOptions.penaltyFeeType == "Fixed Amount" ? " Fixed" : "%" : ""}} {{toggles.penalty.timesheet.fee == "" ? "" : toggles.penalty.timesheet.value && toggles.penalty.value ? buttonOptions.penaltyPartnerType === 'Vendor' ? "Vendor" : "Client" : ""}}</td>
+          </tr>
+          <tr>
+            <td>{{ 'expense' | i18nextEager }}</td>
+            <td>{{(toggles.msp.expense.value && toggles.msp.value ? toggles.msp.expense.fee == "" ? "-" : (toggles.msp.expense.fee | accuracy : buttonOptions.mspFeeType == 'Fixed Amount' ? 'fee' : 'fee_percentage' : {isEdit:true}) : "-") }}{{toggles.msp.expense.fee == "" ? "" : toggles.msp.expense.value && toggles.msp.value ? buttonOptions.mspFeeType == "Fixed Amount" ? " Fixed Amount" : "%": ""}} {{toggles.msp.expense.fee == "" ? "" : toggles.msp.expense.value && toggles.msp.value ? buttonOptions.mspPartnerType === 'Vendor' ? "Vendor" : "Client" : ""}}</td>
+            <td>{{(toggles.vms.expense.value && toggles.vms.value ? toggles.vms.expense.fee == "" ? "-" : (toggles.vms.expense.fee | accuracy : buttonOptions.vmsFeeType == 'Fixed Amount' ? 'fee' : 'fee_percentage' : {isEdit:true}) : "-") }}{{toggles.vms.expense.fee == "" ? "" : toggles.vms.expense.value && toggles.vms.value ? buttonOptions.vmsFeeType == "Fixed Amount" ? " Fixed Amount" : "%" : ""}} {{toggles.vms.expense.fee == "" ? "" : toggles.vms.expense.value && toggles.vms.value ? buttonOptions.vmsPartnerType === 'Vendor' ? "Vendor" : "Client" : ""}}</td>
+            <!-- <td>4% Client</td> -->
+            <!-- <td>{{toggles.penalty.expense.fee}}{{buttonOptions.penaltyFeeType == "Fixed Amount" ? "Fixed" : "%"}} {{buttonOptions.penaltyPartnerType === 'Vendor' ? "Vendor" : "Client"}}</td> -->
+          </tr>
+          <tr>
+            <td>{{ 'misc._expense' | i18nextEager }}</td>
+            <td>{{(toggles.msp.miscExpense.value && toggles.msp.value ? toggles.msp.miscExpense.fee == "" ? "-" : (toggles.msp.miscExpense.fee | accuracy : buttonOptions.mspFeeType == 'Fixed Amount' ? 'fee' : 'fee_percentage' : {isEdit:true}) : "-") }}{{toggles.msp.miscExpense.fee == "" ? "" : toggles.msp.miscExpense.value && toggles.msp.value ? buttonOptions.mspFeeType == "Fixed Amount" ? " Fixed Amount" : "%" : ""}} {{toggles.msp.miscExpense.fee == "" ? "" : toggles.msp.miscExpense.value && toggles.msp.value ? buttonOptions.mspPartnerType === 'Vendor' ? "Vendor" : "Client" : ""}}</td>
+            <td>{{(toggles.vms.miscExpense.value && toggles.vms.value ? toggles.vms.miscExpense.fee == "" ? "-" : (toggles.vms.miscExpense.fee | accuracy : buttonOptions.vmsFeeType == 'Fixed Amount' ? 'fee' : 'fee_percentage' : {isEdit:true}) : "-") }}{{toggles.vms.miscExpense.fee == "" ? "" : toggles.vms.miscExpense.value && toggles.vms.value ? buttonOptions.vmsFeeType == "Fixed Amount" ? " Fixed Amount" : "%" : ""}} {{toggles.vms.miscExpense.fee == "" ? "" : toggles.vms.miscExpense.value && toggles.vms.value ? buttonOptions.vmsPartnerType === 'Vendor' ? "Vendor" : "Client" : ""}}</td>
+            <!-- <td>4% Client</td> -->
+            <!-- <td>{{toggles.penalty.timesheet.fee}}{{buttonOptions.penaltyFeeType == "Fixed Amount" ? "Fixed" : "%"}} {{buttonOptions.penaltyPartnerType === 'Vendor' ? "Vendor" : "Client"}}</td> -->
+          </tr>
+          <tr *ngIf="isSOW_ProjectSelected">
+            <td>{{ 'sow_project' | i18nextEager }}</td>
+            <td>{{(toggles.msp.sow_project.value && toggles.msp.value ? toggles.msp.sow_project.fee == "" ? "-" : (toggles.msp.sow_project.fee | accuracy : buttonOptions.mspFeeType == 'Fixed Amount' ? 'fee' : 'fee_percentage' : {isEdit:true}) : "-")}}{{toggles.msp.sow_project.fee == "" ? "" : toggles.msp.sow_project.value && toggles.msp.value ? buttonOptions.mspFeeType == "Fixed Amount" ? " Fixed Amount" : "%" : ""}} {{toggles.msp.sow_project.fee == "" ? "" : toggles.msp.sow_project.value && toggles.msp.value ? buttonOptions.mspPartnerType === 'Vendor' ? "Vendor" : "Client" : ""}}</td>
+            <td>{{(toggles.vms.sow_project.value && toggles.vms.value ? toggles.vms.sow_project.fee == "" ? "-" : (toggles.vms.sow_project.fee | accuracy : buttonOptions.vmsFeeType == 'Fixed Amount' ? 'fee' : 'fee_percentage' : {isEdit:true}) : "-")}}{{toggles.vms.sow_project.fee == "" ? "" : toggles.vms.sow_project.value && toggles.vms.value ? buttonOptions.vmsFeeType == "Fixed Amount" ? " Fixed Amount" : "%" : ""}} {{toggles.vms.sow_project.fee == "" ? "" : toggles.vms.sow_project.value && toggles.vms.value ? buttonOptions.vmsPartnerType === 'Vendor' ? "Vendor" : "Client" : ""}}</td>
+            <!-- <td>{{toggles.msp.timesheet.fee}}{{buttonOptions.mspFeeType == "Fixed Amount" ? "Fixed" : "%"}} {{buttonOptions.mspPartnerType === 'Vendor' ? "Vendor" : "Client"}}</td> -->
+          </tr>
+        </table>
+
+    </div>
+      <!-- Create Footer END -->
+      <!-- Buttons Start -->
+      <div class="mt-24 d-flex align-items-center justify-content-between mb-16">
+        <!-- Removing the condition ' || selectedVendors <= 0' from disabled attribute in buttons as part of V2M-4216 -->
+        <button class="btn btn-outline-secondary bg-light text-black" [ngClass]='{"hidden": isEditMode}'
+          [disabled]="!feesForm.get('title').value || !hierarchySelected || selectedSourceModel <= 0 || selectedLaborCategory <= 0"  (click)="onSave(false)" *accessControl>{{ 'save_&_add_more' | i18nextEager }}</button>
+        <button class="btn btn-primary float-right" [disabled]="!feesForm.get('title').value || !hierarchySelected || selectedSourceModel <= 0 || selectedLaborCategory <= 0" (click)="onSave(true)" *accessControl>{{ 'save' | i18nextEager }}</button>
+      </div>
+      <!-- Buttons END -->
+    </form>
+  </div>
+</div>

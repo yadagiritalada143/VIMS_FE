@@ -1,0 +1,181 @@
+<div *ngIf="tableConfig && tableItems" class="drag-table">
+
+    <div class="drag-table-header d-flex">
+
+        <td *ngIf="tableConfig?.showDraggable === true" class="centered wx-48">
+            <div class="entry-inner">
+                {{ '' | i18next }}
+            </div>
+        </td>
+
+        <ng-container *ngFor="let column of tableConfig.columns;">
+            <div [ngStyle]="{'width': ((column.width || '120') + 'px')}" class="left-align">
+                <div *ngIf="column.showHeader; else emptyHeader" class="entry-inner">
+                    {{ column.headerName | i18next }}
+                </div>
+                <ng-template #emptyHeader>
+                </ng-template>
+            </div>
+        </ng-container>
+
+        <td *ngIf="tableConfig?.showIcons === true && !readonly" class="centered wx-100">
+            <div class="entry-inner">
+                {{ '' | i18next }}
+            </div>
+        </td>
+
+    </div>
+
+    <ng-container *ngIf="tableItems && !tableItems.length; else table">
+        <div class="centered vw-90">
+            <button type="button" (click)="addNewEntry()"
+                class="btn btn-primary">
+                {{ 'add_entry' | i18next }}
+            </button>
+        </div>
+    </ng-container>
+
+    <ng-template #table>
+
+        <div dndDropzone dndEffectAllowed="copyMove" (dndDrop)="onDrop($event)">
+            <div dndPlaceholderRef class="dndPlaceholder"></div>
+
+            <div class="drag-table-row d-flex"
+                [ngStyle]="{'background-color': 'white'}"
+                *ngFor="let row of tableItems; index as it;"
+                [dndDisableIf]="!isRenderDraggableAllowed(it)"
+                [dndDisableDragIf]="!isRenderDraggableAllowed(it)"
+                [attr.data-index]="it" [dndDraggable]="row" (dndStart)="onDragStart(it)"
+                [class.dnone]="(it===0) || (it === tableItems.length - 1)"
+            >
+
+                <td *ngIf="tableConfig?.showDraggable === true" class="centered wx-48">
+                    <div class="entry-inner">
+                        <ng-container *ngIf="isRenderDraggableAllowed(it); else emptyDraggable">
+                            <icon size="20px" type="material" name="drag_indicator">
+                            </icon>
+                        </ng-container>
+                        <ng-template #emptyDraggable> {{ ' ' }} </ng-template>
+                    </div>
+                </td>
+
+                <div *ngFor="let column of tableConfig.columns; index as row_it"
+                    [ngClass]="(column.type === 'READONLY')?'left-align':'centered'"
+                    [ngStyle]="{'width': ((column.width || '120') + 'px')}"
+                >
+                    <div *ngIf="row[column.headerKey]" class="entry-inner">
+
+                        <ng-container *ngIf="column.type === 'READONLY'">
+                            {{ row[column.headerKey].name | i18next }}
+                        </ng-container>
+
+                        <ng-container *ngIf="column.type === 'NUMBER'">
+                            <div class="d-flex px-8">
+                                <input type="number" class="form-control"
+                                    [(ngModel)]='row[column.headerKey].value'
+                                    [disabled]="row[column.headerKey].disabled || false"
+                                    [allowUptoNDigitDecimalNumber]="parseValidNum(row[column.headerKey].decimalPrecision)"
+                                    [placeholder]="(row[column.headerKey].placeholder || ('Select ' + column.headerName)) | i18next"
+                                    [ngClass]="isEmptyInput(row[column.headerKey], it, row[column.headerKey].value)?'error-border':''"
+                                />
+                            </div>
+                        </ng-container>
+
+                        <ng-container *ngIf="column.type === 'NUMBER-RANGE'">
+                            <div class="d-flex px-8">
+                                <input type="number" class="form-control"
+                                    [(ngModel)]='row[column.headerKey].min_value'
+                                    [disabled]="row[column.headerKey].disabled || false"
+                                    [allowUptoNDigitDecimalNumber]="parseValidNum(row[column.headerKey].decimalPrecision)"
+                                    [placeholder]="(row[column.headerKey].min_placeholder || ('Select ' + column.headerName)) | i18next"
+                                    [ngClass]="isEmptyInput(row[column.headerKey], it, row[column.headerKey].min_value)?'error-border':''"
+                                />
+                                <summary class="block"> {{ ' - ' }} </summary>
+                                <input type="number" class="form-control"
+                                    [(ngModel)]='row[column.headerKey].max_value'
+                                    [disabled]="row[column.headerKey].disabled || false"
+                                    [allowUptoNDigitDecimalNumber]="parseValidNum(row[column.headerKey].decimalPrecision)"
+                                    [placeholder]="(row[column.headerKey].max_placeholder || ('Select ' + column.headerName)) | i18next"
+                                    [ngClass]="isEmptyInput(row[column.headerKey], it, row[column.headerKey].max_value)?'error-border':''"
+                                />
+                            </div>
+                        </ng-container>
+
+                        <ng-container *ngIf="column.type === 'SELECT'">
+                            <ng-select [ngStyle]="{'width': ((column.width - 16 || '120') + 'px')}"
+                                [placeholder]="(row[column.headerKey].placeholder || ('Select '+ column.headerName)) | i18next"
+                                [multiple]="row[column.headerKey].multiple"
+                                [(ngModel)]="row[column.headerKey].selected"
+                                (change)="changeHandler($event, it, column.headerKey)"
+                                (open)="searchEntries({term: '', open: true }, it, column.headerKey)"
+                                (search)="searchEntries($event, it, column.headerKey)"
+                                [loading]="row[column.headerKey].loading || false"
+                                [clearable]="row[column.headerKey].clearable"
+                                [ngClass]="isEmptySelect(row[column.headerKey], it)?'error-border':''"
+                                [disabled]="row[column.headerKey].disabled || false"
+                                [readonly]="row[column.headerKey].disabled || false"
+                            >
+                                <ng-option *ngFor="let item of row[column.headerKey].options"
+                                    [value]="item.value" [disabled]="item.disabled"
+                                >
+                                    {{ (item.name | i18next)  }}
+                                </ng-option>
+
+                                <ng-template ng-footer-tmp
+                                    *ngIf="row[column.headerKey].metadata && (row[column.headerKey].metadata.total_records > row[column.headerKey].metadata.record_count)">
+                                    <span class="show-more" (click)="searchEntries({
+                                        term: row[column.headerKey].metadata.search_term, show: true
+                                    }, it, column.headerKey)">
+                                        {{ 'show_more...' | i18next }}
+                                    </span>
+                                </ng-template>
+
+                            </ng-select>
+                        </ng-container>
+
+                        <ng-container *ngIf="column.type === 'DATEPICKER'">
+                            <div class="d-flex px-8">
+                                <svms-datepicker class="mr-8"
+                                    [options]="row[column.headerKey].options || this.dateStartOptions"
+                                    [disabled]="row[column.headerKey].disabled || false"
+                                    [inputdateFormat]="this.defaultDateFormat"
+                                    [placeholder]="('start_date' | i18next)"
+                                    [(ngModel)]="row[column.headerKey].start_date"
+                                >
+                                </svms-datepicker>
+                                <svms-datepicker
+                                    [options]="row[column.headerKey].options || this.dateEndOptions"
+                                    [disabled]="row[column.headerKey].disabled || false"
+                                    [inputdateFormat]="this.defaultDateFormat"
+                                    [placeholder]="('end_date' | i18next)"
+                                    [(ngModel)]="row[column.headerKey].end_date"
+                                >
+                                </svms-datepicker>
+                            </div>
+                        </ng-container>
+
+                    </div>
+                </div>
+
+                <td *ngIf="row.iconsList && !readonly" class="d-flex justify-content-end align-items-center wx-100">
+                    <icon *ngFor="let iconsEntry of row.iconsList;"
+                        [name]="iconsEntry.name"
+                        [size]="iconsEntry.size || '20px'"
+                        [color]="iconsEntry.color"
+                        [ngClass]="iconsEntry.class?iconsEntry.class:''"
+                        [type]="iconsEntry.type || 'material'"
+                        [theme]="iconsEntry.theme"
+                        [cuClass]="iconsEntry.cuClass"
+                        (click)="emitClickListener(it, iconsEntry.name)"
+                        class="pr-16"
+                    >
+                    </icon>
+                </td>
+            </div>
+        </div>
+
+    </ng-template>
+
+</div>
+
+<div style="height: 164px"></div>

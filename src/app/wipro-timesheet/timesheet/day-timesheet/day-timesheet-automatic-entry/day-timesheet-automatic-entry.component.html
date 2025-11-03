@@ -1,0 +1,439 @@
+
+
+
+<div class="timesheet-page d-print-none manual-mode day-timesheet" [ngClass]="{'note-mandatory': (config?.notes?.option && config?.notes?.option?.project_level?.is_allow && config?.notes?.option?.project_level?.is_mandatory), 'note-optional': (config?.notes?.option && config?.notes?.option?.project_level?.is_allow && !config?.notes?.option?.project_level?.is_mandatory),
+'note-disabled': (config?.notes?.option && !config?.notes?.option?.project_level?.is_allow), 'fixed-btn-plceholder' : (timeSheet?.data?.actions_allow?.can_reject || timeSheet?.data?.actions_allow?.can_approve)}">
+  <div class="detail-page-wrapper">
+    <section class="description-panel p-32 position-relative">
+      <a class="back-btn back-mobile" (click)="navigateBackTo()">
+        <icon class="d-inline-block" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon>
+<span>{{'back_to ' | i18next}}{{(redirectSow ? 'SOW' : (redirectTimesheetFlyout ? redirectTimesheetFlyout : 'Timesheets'))|i18next }}</span>
+      </a>
+      <app-timesheet-actions-alerts  [timeSheet]="timeSheet" [isAssignmentClosed]="isAssignmentClosed" [isTimesheetEnabled]="isTimesheetEnabled"></app-timesheet-actions-alerts>
+      <app-timesheet-supporting-text [timesheetStatus]="timeSheet?.data?.status"></app-timesheet-supporting-text>
+     <div class="create-wrapper mt-24 mt-m-0">
+        <div class="card bg-light mb-24 mobile-header mb-m-0">
+          <app-timesheet-breadcrumb  (onPrint)="Print()" (onSave)="saveHourlyTimeSheet($event);" [disableButton]="disableButton"
+            [timeSheet]="timeSheet"  [is_need_create]="timeSheet?.data?.is_need_create" [isAssignmentClosed]="isAssignmentClosed" [isTimesheetEnabled]="isTimesheetEnabled" [config]="config">
+          </app-timesheet-breadcrumb>
+          <app-timesheet-header [sourcing_model]="sourcing_model" [currentTimesheetData]="currentTimesheetData">
+          </app-timesheet-header>
+        </div>
+          <app-master-data *ngIf="timesheetTab == 'timesheet'"  [currentTimesheetData] = "currentTimesheetData" ></app-master-data>
+        <div class="card bg-light mt-24 mt-m-0 p-m-0">
+          <app-timesheet-tab [isShowMultiApproval]="isShowMultiApproval" (activeTab)="showTimesheetTab($event)"></app-timesheet-tab>
+          <div *ngIf="timesheetTab == 'timesheet'" class="d-flex justify-content-between automatic-header pb-16 mt-16 px-24 px-m-16">
+            <h4 class="ts-data-wrap-head font-weight-medium mb-0">
+              <label class="hide-on-mobile">{{ getDateFromString(currentTimesheetData?.start_date) | localDateFormat:'MMMM y' : "": "": true  | i18nextEager }}</label> <span
+              class="date-range font-weight-normal ml-8 ml-m-0">({{ getDateFromString(currentTimesheetData?.start_date) | localDateFormat:"": "": "": true  | i18nextEager }} - {{ getDateFromString(currentTimesheetData?.end_date) |
+                localDateFormat:"": "": "": true | i18next }})</span>
+          </h4>
+          <div class="d-flex position-relative" (clickOutside)="dropdownToggle = false;">
+            <ng-template
+              [ngIf]="isVisibleOptions()">
+              <button class="btn btn-outine small copy-btn" *ngIf="showCopyButton" (click)="showCopywidget = true;" >
+                <icon class="icon--on-left" name="content_copy" size="12px"></icon> {{ 'copy_previous' | i18next }}
+              </button>
+
+              <button class="btn btn-outine small more-btn-icon ml-12" (click)="dropdownToggle = true;">
+                <icon cuClass="d-flex" name="more_horiz" size="24px"></icon>
+              </button>
+            </ng-template>
+
+            <ng-template [ngIf]="(!currentTimesheetData?.status || currentTimesheetData?.status == timesheetStatuses?.DRAFT) && timeSheet?.data?.actions_allow?.action_alert?.type?.toLowerCase() != ActionAlertType?.ARCHIVE?.toLowerCase()">
+            <div class="clear-data-dropdown" (mouseleave)="dropdownToggle= false;" [ngClass]="{'active' : dropdownToggle}" >
+
+                <button *authorize="'create_timesheet'" class="clear-btn" (click)="clearTimesheetLogs()"
+                  [disabled]="disableClearAllButton">
+                  <icon class="mr-8" name="remove_circle_outline" theme="outlined" size="22px" type="material"></icon>
+                  {{ 'clear' | i18next }}
+                  {{ 'all' | i18next }}
+                </button>
+            </div>
+          </ng-template>
+          </div>
+        </div>
+<div class="responsive-timesheet-view" *ngIf="timesheetTab == 'timesheet'">
+  <div class="timesheet-view-item" *ngFor="let weekdays of weekDates;index as i"  [ngClass]=" {'holiday': !weekdays.active || weekdays.isWeekend || weekdays.holiday,  'weekend' : weekdays.holiday }">
+    <div [ngClass]="{'mobile-timesheet-view-item': !weekdays.active}" (click)="showFullDayView(i)">
+    <div class="d-flex justify-content-between align-items-center p-4">
+      <p class="day">
+        {{ weekdays.dayNumber}}
+        <span class="d-flex align-items-center">
+          <span class="mr-4">{{ weekdays.day}}</span>
+          <icon *ngIf="weekdays.isWeekend" name="weekend" title="Weekend" cuClass="d-flex" class="holiday-icon" type="material"
+            color="#ED6161" size="18px"></icon>
+          <icon *ngIf="weekdays.holiday" name="celebration" title="Holiday" cuClass="d-flex" class="holiday-icon"
+            type="material" color="#ED6161" size="18px"></icon>
+        </span>
+      </p>
+      <div class="d-flex justify-content-between">
+        <p [ngClass]=" {'input-spacing' : weekdays.holiday || weekdays.isWeekend && !weekdays.active }">{{formData?.totals[weekdays?.day]}}
+          <i class="add-time material-icons cursor-pointer ml-24 mr-4" *ngIf="!weekdays.active"  [hidden]="!((timeSheet?.data?.actions_allow?.can_save) || (isAuthorizedToCreate && isTimesheetEnabled && (!currentTimesheetData?.status && currentTimesheetData?.status !== timesheetStatuses?.MISSING)))">lock</i>
+          <i class="add-time material-icons cursor-pointer ml-24 mr-4" *ngIf="!isDataPresent(formData.totals[weekdays?.day]) && weekdays.active" [hidden]="!((timeSheet?.data?.actions_allow?.can_save) || (isAuthorizedToCreate && isTimesheetEnabled && (!currentTimesheetData?.status && currentTimesheetData?.status !== timesheetStatuses?.MISSING)))">more_time</i>
+         <i class="add-time material-icons cursor-pointer ml-24 mr-4" *ngIf="isDataPresent(formData.totals[weekdays?.day])" [hidden]="!((timeSheet?.data?.actions_allow?.can_save) || (isAuthorizedToCreate && isTimesheetEnabled && (!currentTimesheetData?.status || currentTimesheetData?.status === timesheetStatuses?.MISSING)))">drive_file_rename_outline</i>
+        </p>
+      </div>
+    </div>
+    <p>
+      {{formData?.notes[weekdays?.day]}}
+    </p>
+  </div>
+  </div>
+</div>
+  
+          <div *ngIf="timesheetTab == 'timesheet'" class="sheet-wrapper automation day-automatic-mobile-record d-flex mb-16 column-direction">
+            <div class="headings project-headings-mobile">
+              <div class="col-item">
+                <p>{{ 'project' | i18next }}</p>
+              </div>
+
+              <ng-container *ngIf="isAuthorizedToCreate && !isAssignmentClosed && isTimesheetEnabled; else showDisabledFields">
+                <div class="col-item" *ngFor="let col of formData?.rowData; index as i; last as isLast">
+                  <div class="d-flex align-items-start">
+                    <div class="no-project-selectbox" *ngIf="!config?.project?.is_allow">
+                      {{ 'no_project' | i18next }}
+                      <!-- <ng-select [clearable]="false" placeholder="{{ 'select_project' | i18next }}"
+                      (change)="updateDropDown(col)" disabled="true"
+                     >
+                      <ng-option value="" disabled="true">{{ 'select_project' | i18next }}</ng-option>
+                    </ng-select> -->
+                    </div>
+                    <div class="project-selectbox" *ngIf="config?.project?.is_allow">
+                      <ng-select [clearable]="false" placeholder="{{ 'select_project' | i18next }}" name="col{{i | i18next }}" [(ngModel)]="col.projectCode" tooltip="{{col.projectCode | i18next }}" placement="right" delay="500"
+                      (change)="updateDropDown(col);setProjectValues(col);getProject('')" loadingText="Loading..." [clearOnBackspace]="true"
+                      [loading]="projectLoading[i]" clearAllText="Clear" (search)="projectLoading[i]= true;this.getProjects.next($event)" [searchable]="true"
+                      class="{{(!col.projectCode && projectRequiredCheck) || (col.duplicate) ? 'error-border' : '' }}">
+                      <ng-option value="" disabled="true">{{ 'select_project' | i18next }}</ng-option>
+                      <ng-container *ngFor="let inv of dropDownItems">
+                        <ng-option [value]="inv.projectCode" [disabled]="inv.isSelected">
+                          {{inv.projectCode | i18next }}
+                        </ng-option>
+                      </ng-container>
+                    </ng-select>
+
+                                                                <!-------------Notes with project name------------------>
+                      <div class="notes-title-first-col"
+                      *ngIf="col?.projectCode && config?.notes?.is_allow  && config?.notes?.option?.project_level?.is_allow">
+                      <div class="project-code" [ngClass]="{'last-col' : isLast}">
+                      <icon class="mr-8" name="text_snippet" theme="outlined" size="18px" type="material"></icon> {{col?.projectCode | i18next }}
+                       </div>
+                       {{ 'project_notes' | i18next }}
+                        </div>
+                                                                <!-------------End Notes with project name------------------>
+                
+                    </div>
+                    <button class="delete-btn ml-8 mt-8" *ngIf="formData?.rowData?.length > 1 && isAllowAction()" (click)="deleteRow(i, col)">
+                      <icon  name="remove_circle" color="#4B91BF" size="22px"></icon>
+                    </button>
+                  </div>
+                  <div [ngClass]="{'min-height-div': isAuthorizedToCreate && !isAssignmentClosed && isTimesheetEnabled}" class="" *ngIf='isLast && config?.project?.is_allow' >
+                    <a (click)="addProjectRow(false);" *ngIf="formData?.rowData.length == (i+1) && (dropDownItems?.length !== formData?.rowData.length) && (dropDownItems?.length > formData?.rowData?.length)">
+                      <icon name="add" size="18px" type="material"></icon> {{ 'add_new' | i18next }}
+                    </a>
+                  </div>
+                </div>
+            </ng-container>
+            <ng-template #showDisabledFields>
+              <div class="col-item read-only code-space" *ngFor="let col of formData?.rowData; index as i; last as isLast" tooltip="{{col.projectCode | i18next }}" placement="right" delay="500" [hidden]="!config?.project?.is_allow">
+                {{col.projectCode | i18next }}
+                <div class="notes-title-first-col" [ngClass]="{'max-height-paragraph': config?.project?.is_allow}"
+                *ngIf="col?.projectCode && config?.notes?.is_allow  && config?.notes?.option?.project_level?.is_allow">
+                <div class="project-code" [ngClass]="{'last-col' : isLast}">
+                    <icon class="mr-8" name="text_snippet" theme="outlined" size="18px"
+                        type="material"></icon> {{col?.projectCode | i18next }}
+                </div>
+            </div>
+              </div>
+               <div class="col-item read-only" [ngClass]="{'code-number-space':(!isAuthorizedToCreate || isAssignmentClosed || !isTimesheetEnabled)}" placement="right" delay="500" [hidden]="config?.project?.is_allow">
+                {{ 'no_project' | i18next }}
+              </div>
+            </ng-template>
+
+
+              <div class="col-item total-head total-billable-hour font-weight-medium">
+                <a class="mt-0">{{ 'total_(days)' | i18next }} </a>
+              </div>
+
+
+
+              <!-- Hided notes and bill -->
+              <ng-template [ngIf]="currentTimesheetData?.status && currentTimesheetData?.status !== timesheetStatuses?.MISSING">
+                <div class="col-item total-head total-billable-hour font-weight-medium">
+                  <a class="mt-0" (click)="billableBreakup = !billableBreakup">{{ 'total_billable_days' | i18next }} <icon [name]="billableBreakup? 'expand_less' : 'expand_more'" size="18px" type="material"></icon></a>
+                </div>
+                <div class="col-item-wrapper billable-breakup" *ngIf="billableBreakup">
+                  <ng-container *ngFor="let hour_data of timeSheet?.data?.hour_data?.type | keyvalue: unsorted"  >
+                    <div class="col-item read-only" *ngIf="hour_data?.key !== 'total_billable' || hour_data?.key !== 'total_billable'">
+                      <span class="project-item" tooltip="{{ hour_data?.value  | i18next }}" placement="right" delay="500">{{ hour_data?.value  | i18next }}</span>
+                    </div>
+                  </ng-container>
+                </div>
+              </ng-template>
+              
+              <div class="col-item last" *ngIf="config?.notes?.option?.day_level?.is_allow">
+                <icon class="mr-8" name="text_snippet" theme="outlined" size="18px" type="material"></icon>
+                {{'daily_notes' | i18next }}
+              </div>
+            </div>
+            <ng-container *ngFor="let week of weekDates;index as i">
+
+              <div class="day-col day-col-mobile" [id]="i"
+              [ngClass]=" { 'holiday': !week.active || week.isWeekend,  'field-error' : (errors[week.day] && errors[week.day].length > 0) }">
+                <div class="error-message-box p-16">
+                  <p>{{ 'error' | i18next }}</p>
+                  <ul>
+                    <li *ngFor="let e of errors[week.day] ">{{ e  }}</li>
+                  </ul>
+                </div>
+                <div class="col-item first bb-0">
+                  <div class="d-flex-m justify-content-between-m">
+                      <p class="hide-on-desktop">Time Entry</p>
+                      <div class="d-flex-m align-items-center-m">
+                          <p class="font-weight-medium mr-m-4">
+                              <label>{{ week.day | i18next }}</label>
+                              <icon *ngIf="week.isWeekend" name="weekend" class="holiday-icon"  type="material" color="#ED6161" size="20px"></icon>
+                    <icon *ngIf="week.holiday" name="celebration" class="holiday-icon"  type="material" color="#ED6161" size="20px"></icon>
+                          </p>
+                          <span class="day-number-m"> {{ week.dayNumber | i18next }}</span>
+                      </div>
+                  </div>
+                  <icon name="close" class="hide-on-desktop close-column" color="#ffffff" size="18px" (click)="hideDayCol(i)"></icon>
+                  <span class="error-indicator" *ngIf="errors[week.day] && errors[week.day].length > 0">
+                      <icon name="info" type="material" color="#EB445A" size="20px"
+                          class="error-icon"></icon>
+                  </span>
+              </div>
+                <ng-container *ngIf="isAuthorizedToCreate && !isAssignmentClosed && isTimesheetEnabled; else showDisabledValues">
+                <div class="select-row project-loop p-m-0" *ngFor="let row of formData?.rowData;index as j;let last = last">
+                  <div class="mobile-project-container">
+                    <div class="project-mobile-view mb-m-0" *ngIf="config?.project?.is_allow">
+                      <div class="d-flex justify-content-between align-items-center">
+                      <ng-select [clearable]="false" placeholder="{{'Select Project'|i18next }}" name="row{{j | i18next }}" [(ngModel)]="row.projectCode"
+                      (change)="updateDropDown(row);setProjectValues(row);getProject('')" loadingText="Loading..." [clearOnBackspace]="true"
+                      [loading]="projectLoading[j]" clearAllText="Clear" (search)="projectLoading[j]= true;this.getProjects.next($event)" [searchable]="true"
+                      class="flex-grow-1 min-width {{(!row.projectCode && projectRequiredCheck) || (row.duplicate) ? 'error-border' : '' }}">
+                      <ng-option value="" disabled="true">{{'Select Project'|i18next }}</ng-option> 
+                      <ng-container *ngFor="let inv of dropDownItems">                                     
+                        <ng-option [value]="inv.projectCode" [disabled]="inv.isSelected">
+                          {{inv.projectCode | i18next }}
+                        </ng-option>
+                      </ng-container>
+                    </ng-select>
+                    <div class="delete-btn-box" *ngIf="formData?.rowData?.length > 1 && isAllowAction()">
+                      <button class="delete-btn ml-8"  (click)="deleteRow(j, row)">
+                        <icon  name="remove_circle" color="#F01919" size="22px"></icon>
+                      </button>
+                    </div>
+                    </div>
+                    </div>
+                  </div>
+                  <div class="mobile-hours" data-title="Time Worked">
+                    <ng-select [disabled]="!week.active" (change)="validationError($event, week)" [searchable]="false" placeholder="{{ 'select' | i18next }}" [(ngModel)]="row[week.day]">
+                      <ng-option class="text-right" [value]="d.value" [disabled]="d.disabled" *ngFor="let d of dayType">
+                        <span class="float-left" >{{d.value }}</span>
+                        <span class="hours-type">{{d.name }}</span>
+                      </ng-option>
+                    </ng-select>
+                  </div>
+                 <div class="mobile-category">
+                  <p class="in-decimal" *ngIf="row[week.day]" tooltip="{{showWorkTime(row[week.day]) }}" placement="top">
+                    {{showWorkTime(row[week.day]) }}
+                  </p>
+                 </div>
+                  <!-- <input type="text" class="form-control text-center" [(ngModel)]="row[week.day]"
+                                      [disabled]="!week.active" (change)="validationError($event, week)"> -->
+                  
+                  <!-- <div class="mt-28" *ngIf="formData?.rowData.length == (i+1) && config?.project?.is_allow"></div> -->
+                  <div class="mt-28"
+                    *ngIf="((formData?.rowData?.length === 1 || last) && config?.notes?.option && !config?.notes?.option?.project_level?.is_allow) && config?.project?.is_allow">
+                  </div>
+                  <div class="mt-28 b2" [ngClass]="{'mt-85': row?.projectCode && (formData.rowData.length != 0 || !last) && config?.notes?.option && config?.notes?.option?.project_level?.is_allow && config?.project?.is_allow}" *ngIf="config?.project?.is_allow && (row?.projectCode || formData.rowData.length && (dropDownItems.length !== formData.rowData.length)) && (row?.projectCode || (formData.rowData.length === 0 || last)) && ((config?.notes?.option && config?.notes?.option?.project_level?.is_allow && config?.notes?.option?.project_level?.is_mandatory) || (config?.notes?.option && config?.notes?.option?.project_level?.is_allow && !config?.notes?.option?.project_level?.is_mandatory))">
+                  </div>
+                  <div *ngIf="row?.projectCode  && config?.notes?.is_allow && config?.notes?.option?.project_level?.is_allow"
+                    class="note-col project-note position-relative" data-title="Project Notes">
+                    <a class="add-note"
+                      [ngClass]="{'read-only':(!isAuthorizedToCreate || isAssignmentClosed || !isTimesheetEnabled)}"
+                      (click)="projectNote(i,j)"
+                      *ngIf="week?.active && !row[week?.dayNumber] && !config?.notes?.option?.project_level?.is_mandatory"
+                      tooltip="Add project note" placement="bottom" delay="500">
+                      <icon name="add" size="16px" type="material"></icon>
+                    </a>
+                    <!-- show this paragraph when text enterered-->
+                  
+                    <!-- <h1>dd:: {{row | json | i18next }}{{row[week.dayNumber] | i18next }}</h1> -->
+                  
+                    <ng-template [ngIf]="row && row[week?.dayNumber] && !config?.notes?.option?.project_level?.is_mandatory">
+                      <span class="small" [ngClass]="{'max-height-paragraph': config?.project?.is_allow}" (click)="projectNote(i,j)">
+                        {{row[week?.dayNumber] }}
+                      </span>
+                    </ng-template>
+                    <div class="add-note-box"
+                      [class.active]="(projectNoteFirst === i && projectNoteSecond === j) || config?.notes?.option?.project_level?.is_mandatory"
+                      (mouseout)="projectNoteFirst = null;projectNoteSecond =null">
+                      <textarea [disabled]="!week.active" [focusMe]="projectNoteFirst === i && projectNoteSecond === j"
+                        id="{{'projectNote'}}{{i}}{{j}}" #notearea{{i}}{{j}}
+                        [attr.disabled]="(isAuthorizedToCreate && !isAssignmentClosed && isTimesheetEnabled)? null : true"
+                        placeholder="Enter Your Note" rows="4" [(ngModel)]="row[week.dayNumber]"
+                        (ngModelChange)="validateNotes()"></textarea>
+                    </div>
+                </div>
+                <div [ngClass]="{'mb-30': last && config?.notes?.option && config?.notes?.option?.project_level?.is_allow && config?.project?.is_allow}">
+                                            
+                </div>
+                </div>
+                </ng-container>
+                <ng-template #showDisabledValues>
+                  <div class="col-item read-only" [attr.data-title]="row?.projectCode ? row?.projectCode : 'No Project'" *ngFor="let row of formData?.rowData;index as i" [ngClass]="{'code-space': !row[week.day]}">
+                    {{row[week.day] || 0 }}<br>
+                    <ng-template [ngIf]="config?.notes?.option?.project_level?.is_allow">
+                      <p class="small" [ngClass]="{'max-height-paragraph': config?.project?.is_allow}">
+                        {{row[week?.dayNumber] }}
+                      </p>
+                    </ng-template>
+                    <!-- else holiday -->
+                    <ng-container *ngIf="row[week.day];">
+                      <p class="text-truncate">
+                        {{showWorkTime(row[week.day])}}
+                      </p>
+                    </ng-container>
+                    <!-- <ng-template #holiday>
+                      <p class="">
+                        {{ week.isWeekend ? 'Week Off' : 'Holiday' |i18next }}
+                      </p>
+                    </ng-template> -->
+                  </div>
+                </ng-template>
+
+
+                  <div class="col-item total-col-border" data-title="Total (days)" [ngClass]="{'has-decimal' : (config?.hours_input_type?.type !== 'decimal')}" >
+                    {{formData?.totals[week?.day]}}
+                    <!-- <span *ngIf="config?.hours_input_type?.type !== 'decimal'" class="inDecimals d-block">({{ inDecimals(col?.total)  | i18next }})</span>
+                    <div class="mt-34" *ngIf="formData?.rowData.length == (i+1) && isAuthorizedToCreate && !isAssignmentClosed && isTimesheetEnabled && config?.project?.is_allow"></div> -->
+                  </div>
+
+
+                <ng-template [ngIf]="currentTimesheetData?.status && currentTimesheetData?.status !== timesheetStatuses?.MISSING">
+                  <ng-container  *ngFor="let hour_data of formData?.automatic | keyvalue: unsorted">
+                    <div class="col-item total-head font-weight-medium" data-title="Total Billable Days" *ngIf="hour_data?.key === 'total_billable'">
+                      <div class="text-truncate fixed-width" title="{{ formData?.automatic[hour_data?.key] && formData?.automatic[hour_data?.key][week.day] ? formData?.automatic[hour_data?.key][week.day] : '0.00' }}">{{ formData?.automatic[hour_data?.key] && formData?.automatic[hour_data?.key][week.day] ? formData?.automatic[hour_data?.key][week.day] : '0.00' }}</div>
+                    </div>
+                  </ng-container>
+                  <div class="col-item-wrapper" *ngIf="billableBreakup">
+                    <ng-container  *ngFor="let hour_data of formData?.automatic | keyvalue: unsorted">
+                      <div class="col-item"  data-title="Total Billable Days" *ngIf="hour_data?.key !== 'date' && hour_data?.key !== 'total' && hour_data?.key !== 'total_billable' && hour_data?.key !== 'rate'">
+                        {{ formData?.automatic[hour_data?.key] && formData?.automatic[hour_data?.key][week.day] ? formData?.automatic[hour_data?.key][week.day] : '0.00' }}
+                      </div>
+                    </ng-container>
+                  </div>
+                </ng-template>
+                
+                <div class="col-item last text-center position-relative task-note-box"
+                  *ngIf="config?.notes?.option?.day_level?.is_allow">
+                  <a class="add-note hide-on-mobile" [ngClass]="{'read-only':(!isAuthorizedToCreate || isAssignmentClosed || !isTimesheetEnabled)}" (click)="editNote(i)"
+                    *ngIf="week.active && !formData.notes[week.day]" tooltip="Add Note"  placement="bottom" delay="500">
+                    <icon name="add" size="16px" type="material"></icon>
+                  </a>
+                  <p class="hide-on-desktop">Task Notes</p>
+                  <!--  show this paragraph when text enterered -->
+                  <ng-template [ngIf]="formData.notes[week.day]">
+                    <p class="small max-height-paragraph hide-on-mobile" (click)="editNote(i)">
+                      {{formData.notes[week.day] }}
+                    </p>
+                  </ng-template>
+                  <div class="add-note-box" [class.active]="selectedIndex === i" (mouseout)="selectedIndex = null;">
+                    <textarea  [focusMe]="selectedIndex === i" [attr.disabled]="(isAuthorizedToCreate && !isAssignmentClosed && isTimesheetEnabled)? null : true" placeholder="{{ 'enter_your_note' | i18next }}" rows="4" [(ngModel)]="formData.notes[week.day]"></textarea>
+                  </div>
+                </div> 
+                <div class="responsive-view-buttons hide-on-desktop">
+                  <div class="add-project-mobile" *ngIf='config?.project?.is_allow'>
+                    <button (click)="addProjectRow(false);" *ngIf="(formData.rowData.length <= dropDownItems?.length-1) && !(!isAuthorizedToCreate || isAssignmentClosed || !isTimesheetEnabled) ">+ {{'Add new'|i18nextEager }}</button>
+                  </div>
+                  <div class="d-flex justify-content-center hide-on-desktop">
+                    <button class="hide-day-col-mobile btn btn-success"
+                      [disabled]="!(((projectCodesValidation?.length === formData.rowData?.length) || !dropDownItems?.length) && ((!!formData.notes[week.day] && config?.notes?.option?.day_level?.is_mandatory && config?.notes?.is_allow) || !(config?.notes?.option?.day_level?.is_mandatory && config?.notes?.is_allow))
+                                        && (((((projectNotesValidation(week.dayNumber)?.length === formData.rowData?.length)  || !dropDownItems?.length)) && config?.notes?.is_allow  && config?.notes?.option?.project_level?.is_mandatory) || !(config?.notes?.is_allow  && config?.notes?.option?.project_level?.is_mandatory)))"
+                      *ngIf="!(!isAuthorizedToCreate || isAssignmentClosed || !isTimesheetEnabled)" (click)="hideDayCol(i)">Done</button>
+
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+
+            <div class="total-col total-col-mobile" [ngClass]="{'non-editable':(!isAuthorizedToCreate || isAssignmentClosed || !isTimesheetEnabled)}">
+              <div class="col-item first-item">
+                <p class="total-heading">{{ 'total_(days)' | i18next }}</p>
+              </div>
+              <div class="col-item total-col-item" [ngClass]="{'has-decimal' : (config?.hours_input_type?.type !== 'decimal'), 'code-number-space':(!isAuthorizedToCreate || isAssignmentClosed || !isTimesheetEnabled),'notes-enable': (config?.notes?.is_allow && config?.notes?.option?.project_level?.is_allow && col?.projectCode), 'ht-155' : col?.projectCode && (formData.rowData.length != 0 || !last) && config?.notes?.option && config?.notes?.option?.project_level?.is_allow && config?.project?.is_allow, 'ht-184' : col?.projectCode && last && config?.notes?.option && config?.notes?.option?.project_level?.is_allow && config?.project?.is_allow, 'ht-125' : ((currentTimesheetData?.status === timesheetStatuses?.PENDING) || (currentTimesheetData?.status === timesheetStatuses?.APPROVED)) && col?.projectCode && config?.notes?.option && config?.notes?.option?.project_level?.is_allow && config?.project?.is_allow}" *ngFor="let col of formData?.rowData;index as i; let last = last">
+                <div class="top-bottom-spacing mt-m-0" [ngClass]="{'read-only' : currentTimesheetData?.status == 'pending'}">{{col.total  }}</div>
+                <div class="mt-34" *ngIf="formData?.rowData?.length == (i+1) && isAuthorizedToCreate && !isAssignmentClosed && isTimesheetEnabled && config?.project?.is_allow"></div>
+              </div>
+
+              <ng-template [ngIf]="currentTimesheetData?.status && currentTimesheetData?.status !== timesheetStatuses?.MISSING">
+                <div class="col-item total-head billable-item font-weight-medium">
+                  {{formData?.grandTotal }}
+                </div>
+              </ng-template>
+
+              <!-- <ng-template [ngIf]="currentTimesheetData?.status && currentTimesheetData?.status !== timesheetStatuses?.MISSING">
+                <ng-container *ngFor="let hour_data of formData?.automatic?.total | keyvalue: unsorted">
+                  <div class="col-item total-head billable-item font-weight-medium" *ngIf="hour_data?.key === 'total_billable'" [ngClass]="{'breakup-active' : billableBreakup}">
+                    {{formData?.automatic.total[hour_data?.key] ? (formData?.automatic.total[hour_data?.key] | number : '1.2-2'): '0.00' | i18next }}
+                  </div>
+                </ng-container>
+                <div class="col-item-wrapper activewrap" *ngIf="billableBreakup">
+                  <ng-container *ngFor="let hour_data of formData?.automatic?.total | keyvalue: unsorted">
+                    <div class="col-item billable-item" *ngIf="hour_data?.key !== 'date' && hour_data?.key !== 'total' && hour_data?.key !== 'total_billable' && hour_data?.key !== 'rate'">
+                      {{ formData?.automatic.total[hour_data?.key] ? (formData?.automatic.total[hour_data?.key] | number : '1.2-2'): '0.00' | i18next }}
+                    </div>
+                  </ng-container>
+                </div>
+              </ng-template> -->
+            </div>
+          </div>
+
+          <div class="footer-note mt-16 p-16" *ngIf="timesheetTab == 'timesheet' && config?.notes?.option?.timesheet_level?.is_allow">
+            <p class="mb-4"> {{ 'timesheet_notes' | i18next }}</p>
+            <textarea  [attr.disabled]="(isAuthorizedToCreate && !isAssignmentClosed && isTimesheetEnabled)? null : true" class="form-control no-resize" placeholder="{{ 'add_note' | i18next }}" rows="5"
+              [(ngModel)]="formData.notes['timesheet_level']"></textarea>
+          </div>
+          <ng-template [ngIf]="timesheetTab == 'timesheet' && currentTimesheetData?.status && currentTimesheetData?.status !== timesheetStatuses?.DRAFT && currentTimesheetData?.status !== timesheetStatuses?.MISSING && isShowTimesheetBilling()">
+            <app-timesheet-billing-details-new *ngIf="timeSheet?.data?.billable_info_by_api" [timesheetId]="currentTimesheetData?.timesheet_uuid"></app-timesheet-billing-details-new>
+            <app-timesheet-billing-details [billingData]="billing_data"></app-timesheet-billing-details>
+          </ng-template>
+          <div [hidden]="timesheetTab !== 'workflows'" class="p-16"> 
+            <app-multi-workflow [moduleName]="'timesheets'" [moduleStatus]="currentTimesheetData?.status"
+              [multiApprovals]="multiApprovals" [moduleId]="currentTimesheetData?.timesheet_uuid"></app-multi-workflow>
+          </div>
+        </div>
+        <app-timesheet-revision-history *ngIf="currentTimesheetData?.timesheet_uuid && timesheetTab == 'timesheet'" [timesheetId]="this.currentTimesheetData?.timesheet_uuid" (reloadPage)="initializeTimesheet()"></app-timesheet-revision-history>
+      </div>
+      
+
+            <!-- Custom Fields -->
+            <div *ngIf="timesheetTab == 'timesheet'" class="card timesheet-custom-field bg-light mb-24 mb-m-0 py-16 mt-m-0" [ngClass]="{'px-24 my-24': customFields?.length > 0}">
+              <app-dynamic-custom-fields *ngIf="assignmentDetails?.assignment?.hierarchy?.id" [dateFormat]="dateFormatEnum.FORMATYMD" [isDisabled]="(!isAuthorizedToCreate || isAssignmentClosed || !isTimesheetEnabled)"
+                (isCustomFieldsFormValid)="setCustomFieldsFormValid($event)" (customFieldUpdated)="customFieldUpdated($event);"
+                [custom_fields]="selectedCustomData" [moduleName]="'TIMESHEETS'" [uploadS3RefName]="'timesheets'" [columnInRow]="3" [hierarchyIds]="assignmentDetails?.assignment?.hierarchy?.id">
+              </app-dynamic-custom-fields>
+            </div>
+            <!-- end -->
+    </section>
+  </div>
+
+   <app-copy-timesheet-widget  [showCopywidget]="showCopywidget" [config]="config" (copiedTimesheet)="copyTimesheetInSelectedWeek($event)"></app-copy-timesheet-widget>
+
+   <ng-template  [ngIf]="timeSheet?.data?.actions_allow?.can_reject || hasOverrideApprovalPermission">
+    <app-timesheet-reject></app-timesheet-reject>
+  </ng-template>
+  <ng-template  [ngIf]="timeSheet?.data?.actions_allow?.can_modify || timeSheet?.data?.actions_allow?.can_delete || timeSheet?.data?.actions_allow?.can_withdraw">
+    <app-timesheet-action-flyout></app-timesheet-action-flyout>
+  </ng-template>
+
+
+</div>
+
+
+<!-- Print component -->
+<app-hourly-print-component [billingData]="billing_data" [formData]="formData" [weekDates]="weekDates" [timeSheetData]="timeSheet?.data" ></app-hourly-print-component>
+<!-- End -->

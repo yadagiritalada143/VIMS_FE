@@ -1,0 +1,90 @@
+<form [formGroup]="picklistForm" class="form-group">
+  <div class="d-flex align-items-center justify-content-between">
+    <label class="text-lightgray mb-0">{{ type | titlecase }} {{ 'values' | i18next }}<span class="require pl-8">*</span></label>
+    <div *ngIf="showMultiselect" class="toggle">
+      <div class="toggle-panel pb-0">
+        <div
+          class="toggle-panel-inner pr-0 justify-content-end"
+          [ngClass]="picklistForm.get('isMultiselect')?.value ? 'if-active' : 'if-inactive'"
+        >
+          <span
+            class="toggle-switch"
+            [ngClass]="{
+              'toggle-on': picklistForm.get('isMultiselect')?.value,
+              'toggle-off': !picklistForm.get('isMultiselect')?.value,
+              disable: !isEditMode
+            }"
+            (click)="toggle('isMultiselect', picklistForm.get('isMultiselect')?.value)"
+          ></span>
+          <span class="ml-8">{{ 'multi-select' | i18next }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="position-relative mb-8">
+    <input type="text" formControlName="newValue" placeholder="{{ 'enter_value' | i18next }}" class="form-control" [readonly]="!isEditMode" />
+    <span class="position-absolute field-btn">
+      <button
+        type="button"
+        [disabled]="!picklistForm.get('newValue')?.value?.replaceAll(' ','')?.length "
+        class="btn btn-primary small font-weight-normal"
+        (click)="addNewValue()"
+      >
+        + {{ 'add' | i18next }}
+      </button>
+    </span>
+  </div>
+  <ul
+    dndDropzone
+    dndEffectAllowed="copyMove"
+    formArrayName="picklistOptions"
+    class="options-list mt-4"
+    (dndDrop)="onDropField($event)"
+    #optionsList
+  >
+    <li
+      *ngFor="let option of picklistOptions.controls; let i = index"
+      draggable="true"
+      [dndDraggable]="option.value"
+      dndEffectAllowed="move"
+      class="d-flex justify-content-between option"
+    >
+      <ng-container [formGroupName]="i">
+        <span class="d-flex align-items-center small">
+          <icon size="16px" name="drag_indicator" type="material" cuClass="d-flex" class="d-flex drag-icon gray-icon mr-12"></icon>
+          <input
+            type="text"
+            formControlName="label"
+            [readonly]="!isEditMode"
+            class="border-0 fs-12 outline-0"
+            (change)="editOption($event, i)"
+          />
+        </span>
+        <div class="d-flex align-items-center">
+          <div class="checkbox-box">
+            <div class="checkbox-wrapper">
+              <label class="checkbox-container">
+                <input
+                  type="radio"
+                  formControlName="selected"
+                  value="ON"
+                  [attr.disabled]="isEditMode ? null : true"
+                  (click)="changeCheckbox(i, option.value.selected)"
+                />
+                <span class="checkmark"></span>
+              </label>
+            </div>
+          </div>
+          <icon
+            name="close"
+            size="14px"
+            type="material"
+            [ngClass]="{ disable: !isEditMode }"
+            class="close-icon cursor-pointer"
+            (click)="removeOption(i)"
+          ></icon>
+        </div>
+      </ng-container>
+    </li>
+  </ul>
+</form>

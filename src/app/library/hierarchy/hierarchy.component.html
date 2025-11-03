@@ -1,0 +1,24 @@
+<ul class="level-listing" *ngFor="let herarchy of hierarchyData, let i = index">
+  <li [ngClass]="{disabled: herarchy?.isDisabled}">
+      <div class="listing-item">
+          <div class="listing-info">
+              <span class="initials initials__purple">{{herarchy.name | shortName:'first'}}</span>
+              <span class="level-title">{{herarchy.name|i18next}}</span>
+          </div>
+          <div class="level-status">
+              <div class="checkbox-wrapper">
+                  <label class="checkbox-container">
+                      <input type="checkbox" [attr.disabled]="checkDisabled(herarchy?.id) ? true : null"
+                          name="hierarchy_level" [(ngModel)]="parentCheckboxState[herarchy.id]"
+                          (change)="onSelectLevel(i, herarchy?.id)">
+                      <span class="checkmark"></span>
+                  </label>
+              </div>
+          </div>
+      </div>
+      <hierarchy-child-renderer *ngFor="let childLevel of herarchy?.hierarchies" [isReadMode]="isReadMode"
+          [isUserOnly]="isUserOnly" [childRenderData]="childLevel" [selectedTreeArr]="selectedHierarchy"
+          [parentCheckboxState]="parentCheckboxState[herarchy.id]" (selectHierarchyLevel)="selectParent($event)">
+      </hierarchy-child-renderer>
+  </li>
+</ul>

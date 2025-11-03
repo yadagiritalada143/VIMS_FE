@@ -1,0 +1,73 @@
+<svms-sidebar-ng [title]="panelHeading |i18next" [dataVisibility]="addEducation" (onClose)="sidebarClose()">
+  <div class="sidebar-wrapper">
+    <app-logs [log]="logs"></app-logs>
+    <form [formGroup]="addEducationForm">
+      <div class="p-24 education-outer">
+        <div class="form-group">
+          <label>{{ 'select_education' | i18nextEager }} <span class="require">*</span></label>
+          <ng-select [loading] = 'educationListLoading' loadingText = "{{'Loading....' | i18nextEager}}" [clearable]="false" [typeahead]="input$" placeholder="{{ 'select' | i18nextEager }}"  formControlName="educationType" [ngClass]="{'error': ((addEducationForm.controls.educationType.touched && addEducationForm.controls['educationType'].errors) || (submitEducationError && addEducationForm.controls['educationType'].errors)
+          )}">
+            <ng-option [value]="type.id" *ngFor="let type of educationList">{{type.name}}</ng-option>
+          </ng-select>
+          <p class="validation-msg"
+            *ngIf="((addEducationForm.controls.educationType.touched && addEducationForm.controls['educationType'].errors) || (submitEducationError && addEducationForm.controls['educationType'].errors))">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'education_type_is_required' | i18nextEager }}.
+          </p>
+        </div>
+        <div class="form-group">
+          <label>{{ 'institution' | i18nextEager }}</label>
+          <input type="text" class="form-control" placeholder="{{ 'enter_details' | i18nextEager }}" formControlName="institution">
+        </div>
+        <div class="form-group">
+          <label>{{ 'degree' | i18nextEager }}</label>
+          <input type="text" class="form-control" placeholder="{{ 'enter_details' | i18nextEager }}" formControlName="degree">
+
+        </div>
+        <div class="form-group-row">
+          <div class="form-group">
+            <label>{{ 'major' | i18nextEager }}</label>
+            <input type="text" class="form-control" placeholder="{{ 'enter_details' | i18nextEager }}" formControlName="major">
+          </div>
+          <div class="form-group">
+            <label>{{ 'minor' | i18nextEager }}</label>
+            <input type="text" class="form-control" placeholder="{{ 'enter_details' | i18nextEager }}" formControlName="minor">
+          </div>
+        </div>
+        <div class="form-group-row">
+          <div class="form-group position-relative date-field">
+            <label>{{'from' | i18nextEager}}</label>
+            <svms-datepicker [inputdateFormat]="defaultDateFormat" [placeholder]="'select_date'|i18next"  ngDefaultControl
+              formControlName="from" id="date1" I18n #startDate>
+            </svms-datepicker>
+          </div>
+          <div class="form-group position-relative date-field">
+            <label>{{'to'| i18nextEager}}</label>
+            <svms-datepicker [inputdateFormat]="defaultDateFormat" [options]="to_options" [placeholder]="'select_date'|i18next" ngDefaultControl
+              formControlName="to" id="date1" I18n #endDate>
+            </svms-datepicker>
+          </div>
+          <div class="form-group position-relative date-field">
+            <label>{{ 'gpa' | i18nextEager }}</label>
+            <input type="text" class="form-control" placeholder="{{ 'enter_score' | i18nextEager }}" formControlName="gpa">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{{ 'notes' | i18nextEager }}</label>
+          <textarea class="form-control notes" rows="4" formControlName="notes" placeholder="{{ 'enter_notes' | i18nextEager }}"></textarea>
+        </div>
+        <app-upload-documents uploadLabel="{{ 'upload_education_documents' | i18nextEager }}"
+          (uploadDataFiles)="uploadFiles($event)" (oldUploadDataFiles)= "updateoldFiles($event)"  [oldUploadfileArr]="oldUploadfileArr" [newUploadfileArr]="newUploadfileArr" [closePanel]="closePanel"></app-upload-documents>
+      </div>
+    </form>
+  </div>
+
+  <svms-sidebar-footer-ng>
+    <button type="submit" class="btn btn-primary float-right" (click)="saveEducation('save')">
+      {{btnText |i18next}}
+    </button>
+    <button type="submit" class="btn btn-outine float-right mr-16" (click)="saveEducation('saveThenAdd')">
+      {{ 'add_new' | i18nextEager }}
+    </button>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

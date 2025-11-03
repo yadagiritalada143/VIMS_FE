@@ -1,0 +1,35 @@
+<svms-sidebar-ng title="{{ 'modify_expense' | i18nextEager }}" [dataVisibility]="sidebarVisibility" (onClose)="sidebarClose()">
+  <app-logs [log]="logs"></app-logs>
+  <svms-sidebar-body-ng [active]="true">
+    <form [formGroup]="modifyForm" class="p-24">
+      <div class="form-group-row">
+        <div class="form-group">
+          <label for="modify_reason">{{ 'modify_reason' | i18nextEager }} <span class="require">*</span></label>
+          <ng-select formControlName="modify_reason" [placeholder]="'Select Reason for Modification' | i18nextEager">
+            <ng-option *ngFor="let reason of modifyReasons$ | async" [value]="reason.name">
+              {{ reason.name }}
+            </ng-option>
+          </ng-select>
+          <p *ngIf="modifyForm.get('modify_reason').touched && modifyForm.get('modify_reason').errors"
+             class="validation-msg">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'modify_reason_is_required' | i18nextEager }}.
+          </p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="modify_notes">{{ 'notes' | i18nextEager }}</label>
+        <textarea name="notes" rows="4" [placeholder]="'Enter Notes' | i18nextEager" class="form-control textarea-without-resize"
+                  formControlName="modify_notes"></textarea>
+      </div>
+    </form>
+  </svms-sidebar-body-ng>
+  <svms-sidebar-footer-ng>
+    <div class="d-flex justify-content-end">
+      <button *accessControl class="btn btn-primary btn-orange ml-16" (click)="modify()" [disabled]="!modifyForm.valid || isLoadingModify">
+        <span *ngIf="isLoadingModify" class="mr-8"><button-loader></button-loader></span>
+        {{ 'modify' | i18nextEager }}
+      </button>
+    </div>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

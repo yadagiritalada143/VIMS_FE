@@ -1,0 +1,28 @@
+<div class="submission-dialog position-fixed bg-light rounded-sm overflow-hidden" [ngClass]="{'active': is_show}">
+  <form [formGroup]="submissionLimitForm" (ngSubmit)="onSave()">
+    <div class="p-16">
+      <div class="modal-header d-flex align-items-center justify-content-between pb-24">
+        <h4 class="font-weight-medium text-dark">{{ 'set_distribution_limit' | i18next }}</h4>
+        <span class="cursor-pointer" (click)="close()">
+          <icon size="24px" name="close" type="material" cuClass="d-flex" color="gray"></icon>
+        </span>
+      </div>
+      <div class="form-group pb-8">
+        <label>{{ 'submission_limit' | i18next }}</label>
+        <input type="number" class="form-control" formControlName="submission_limit" (keyup)="validateInput($event)"
+          [ngClass]="{'error': submissionLimitForm.get('submission_limit').invalid &&
+        (submissionLimitForm.get('submission_limit').dirty ||
+         submissionLimitForm.get('submission_limit').touched) || showError}" onlyNumber />
+        <div *ngIf="showError" class="error-text">
+          {{vmsData?.submission_limit}}{{ 'please_change_the_value_for_update_is_already_set' | i18next }}
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer d-flex align-items-center justify-content-end p-16 border-top">
+      <button class="btn btn-outline-secondary small mr-12" type="reset" (click)="close()">{{ 'cancel' | i18next }}</button>
+      <button class="btn  btn-primary small" type="submit">{{ 'update' | i18next }}</button>
+      <div class="clearfix"></div>
+    </div>
+  </form>
+</div>
+<div class="dialog-backdrop position-fixed" [ngClass]="{'active': is_show}"></div>

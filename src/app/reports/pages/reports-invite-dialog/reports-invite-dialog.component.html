@@ -1,0 +1,48 @@
+<div class="confirmation-dialog position-fixed bg-light rounded-sm p-16 active">
+    <div class="d-flex justify-content-between">
+        <div class="fs-16 font-weight-medium">{{ 'share_to_members' | i18next }}</div>
+        <div class="cursor-pointer" (click)="close()">
+            <icon name="close" size="20px" class="my-auto"></icon>
+        </div>
+    </div>
+    <span class="py-16 d-flex justify-content-between share-member-dropdown">
+        <ng-select class="width-webkit" bindLabel="name" [searchable]="true"
+            placeholder="{{ 'search_user_by_name_or_email_address' | i18next }}" (search)="this.userSearch.next($event)"
+            [loading]='userLoading' loadingText='Loading...' (clear)="searchUsers()" [(ngModel)]="selectedUsers"
+            ngDefaultControl [multiple]="true">
+            <ng-option *ngFor="let option of userList" [value]="option">
+                <div [title]="option?.email">
+                    <div class="initials initials__purple text-capitalize">
+                        {{ option?.first_name | slice: 0:1 }}{{ option?.last_name | slice: 0:1 }}
+                    </div>
+                    <span class="text-capitalize">{{ option?.full_name }}</span>
+                </div>
+            </ng-option>
+        </ng-select>
+        <button class="btn medium btn-primary ml-16" (click)="share()" [disabled]="!selectedUsers">{{ 'share' | i18next }}</button>
+    </span>
+    <div class="fs-16 font-weight-medium">{{ 'people_with_access' | i18next }}</div>
+    <div *ngIf="sharedTo && sharedTo?.length" class="mt-16 pr-16 members-list">
+        <div *ngFor="let member of sharedTo; ; let idx = index" class="py-16"
+            [ngClass]="{'border-bottom': idx < sharedTo.length - 1}">
+            <div class="d-flex justify-content-between">
+                <div class="d-flex">
+                    <div class="member-initials font-weight-normal mr-16 text-capitalize">
+                        {{ member?.first_name | slice: 0:1 }}{{ member?.last_name | slice: 0:1 }}
+                    </div>
+                    <div>
+                        <div class="fs-13 font-weight-medium">{{member?.name}}</div>
+                        <div class="fs-12 font-weight-normal pt-4 text-truncate">{{member?.email}}</div>
+                    </div>
+                </div>
+                <div class="my-auto pl-8">
+                    <a class="fs-13" (click)="remove(member)">{{ 'remove' | i18next }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="!(sharedTo && sharedTo?.length)" class="w-100 text-center p-16">
+        {{message | i18next}}
+    </div>
+</div>
+<div class="dialog-backdrop position-fixed active"></div>

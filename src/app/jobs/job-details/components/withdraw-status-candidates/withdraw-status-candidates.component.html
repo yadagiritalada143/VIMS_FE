@@ -1,0 +1,38 @@
+<div class="description-card detail-page-responsive-list pl-m-0 pr-m-0">
+  <div class="dotloader" *ngIf="dataLoader"></div>
+  <div *ngIf="viewGrid && !dataLoader" class="overflow-box">
+    <vms-table
+      *ngIf="tableLoaded"
+      [vmsTableConfig]="tableConfig"
+      [vmsDataSource]="vmsData?.candidate"
+      [loading]="dataLoading"
+      [open]="isExpand"
+      [totalItem]="totalRecords"
+      [itemsPerPage]="itemsPerPage"
+      [rotuterLinkOnClick] = 'true'
+      [rotuterLinkParams] = 'rotuterLinkParams'
+      [rotuterLinkParseFn] = 'rotuterLinkParseFn'
+      (changePage)="onPaginationClick($event)"
+      [currentPage]="pageNumber"
+      (search)="onSearch($event)"
+      (onListFilter)="onListFilter($event)"
+      (onSelectAllClick)="selectAllClicked($event)"
+      (onSelectClick)="selectClicked($event)"
+      (clickOnNext)="onClickNext($event)"
+      (onViewSubmittedCandidateClick)="clickViewSubmittedCandidate($event)"
+      (onUpdateRecord)="onUpdateRecordClick($event)"
+      (onCreateOfferClick)="clickToCreateOffer($event)"
+      (previewClicked)="previewClicked($event)"
+      (changeRecords)="onClickRecords($event)"
+      (onWithdrawProfileClick)="reSubmitCandidate($event)"
+      (onSort)="onSortClick($event)"
+      refName="WITHDRAWN">
+    </vms-table>
+  </div>
+
+  <app-grid-view
+    *ngIf="!viewGrid"
+    [gridData]="gridVewJson"
+    [gridContentType]="gridContentType"
+  ></app-grid-view>
+</div>

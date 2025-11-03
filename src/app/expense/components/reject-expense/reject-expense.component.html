@@ -1,0 +1,33 @@
+<svms-sidebar-ng title="{{ 'reject_expense' | i18nextEager }}" [dataVisibility]="rejectExpense" (onClose)="sidebarClose()">
+  <svms-sidebar-body-ng [active]="true">
+    <form [formGroup]="rejectionForm" class="p-24">
+      <div class="form-group-row">
+        <div class="form-group">
+          <label for="status_reason">{{ 'reject_reason' | i18nextEager }} <span class="require">*</span></label>
+          <ng-select formControlName="status_reason" placeholder="{{ 'select_reason_for_rejection' | i18nextEager }}">
+            <ng-option *ngFor="let reason of rejectionReasons$ | async" [value]="reason.name">{{ reason.name }}
+            </ng-option>
+          </ng-select>
+          <p *ngIf="rejectionForm.get('status_reason').touched && rejectionForm.get('status_reason').errors"
+            class="validation-msg">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'reject_reason_is_required' | i18nextEager }}.
+          </p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{ 'notes' | i18nextEager }}</label>
+        <textarea name="notes" rows="4" [placeholder]="'Enter Notes' | i18nextEager" class="form-control textarea-without-resize"
+          formControlName="status_note"></textarea>
+      </div>
+    </form>
+  </svms-sidebar-body-ng>
+  <svms-sidebar-footer-ng>
+    <div class="d-flex justify-content-end">
+      <button *accessControl class="btn btn-primary btn-red ml-16" (click)="reject()" [disabled]="!rejectionForm.valid || isLoadingReject">
+        <span *ngIf="isLoadingReject" class="mr-8"><button-loader></button-loader></span>
+        <icon size="20px" name="block" type="material" class="icon--on-left"> </icon>{{ 'reject' | i18nextEager }}
+      </button>
+    </div>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

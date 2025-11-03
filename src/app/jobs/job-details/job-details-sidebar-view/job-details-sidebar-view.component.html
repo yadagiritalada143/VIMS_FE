@@ -1,0 +1,50 @@
+<div *ngIf="isSidebarVisible !== 'hidden'">
+  <svms-sidebar-ng [dataVisibility]="isSidebarVisible" dataProfilePanel="profilepanel" (onClose)="sidebarClose()"
+    [showHeader]="showSidebarHeader" [showFooter]="showSidebarFooter" (onClose)="sidebarClose()"
+    [clickOutside]="clickOutside">
+    <svms-sidebar-nav [profileVisibility]="profilevisible" [selectedIndex]="selectedIndex"
+      [avatar]="candidateData?.avatar" [userName]="candidateData?.first_name + ' ' + candidateData?.last_name"
+      [userPosition]="candidateData?.title" [candidateInfo]="candidateData" [socialProfiles]="candidateData?.social_profiles" [jobData]="jobData"
+      [showOnlyCandidateProfile]="showOnlyCandidateProfile" [showSkelton]="showSkelton"
+      (onSelectedIndexChange)="handleTabChangeEvent($event)" (onSelectedsubIndexChange)="handleSubTabChange($event)">
+
+      <svms-sidebar-body-ng label="Candidate Profile" [active]="showOnlyCandidateProfile" icon="account_circle">
+        <app-candidate-profile-sidebar [data]="payloadData" [showSkelton]="showSkelton"
+          *ngIf="tabMenu == 'FETCH_CANDIDATE_PROFILE'" [showUseThisProfile]="showUseThisProfile">
+        </app-candidate-profile-sidebar>
+      </svms-sidebar-body-ng>
+
+      <svms-sidebar-body-ng label="Resume" icon="article" [active]="tabMenu == 'FETCH_CANDIDATE_RESUME'">
+        <app-resume-details [data]="payloadData"  *ngIf="tabMenu == 'FETCH_CANDIDATE_RESUME'">
+        </app-resume-details>
+      </svms-sidebar-body-ng>
+
+      <svms-sidebar-body-ng label="Submission Details" icon="inbox" [active]="tabMenu == 'FETCH_SUBMISSION_DETAIL'">
+        <app-submission-details [data]="payloadData" *ngIf="tabMenu == 'FETCH_SUBMISSION_DETAIL'">
+        </app-submission-details>
+      </svms-sidebar-body-ng>
+
+      <svms-sidebar-body-ng label="Interview Details" icon="forum" [subMenuItems]='interviews'
+        [active]="tabMenu == 'FETCH_INTERVIEW_DETAILS'">
+        <app-interview-details-sidebar [data]="payloadData" [InterviewId]="interviewId"
+          *ngIf="tabMenu == 'FETCH_INTERVIEW_DETAILS'"></app-interview-details-sidebar>
+      </svms-sidebar-body-ng>
+
+      <svms-sidebar-body-ng label="Offer Details" [active]="tabMenu == 'FETCH_OFFER_DETAILS'" icon="mark_as_unread">
+        <app-offer-details [data]="payloadData" *ngIf="tabMenu == 'FETCH_OFFER_DETAILS'">
+        </app-offer-details>
+      </svms-sidebar-body-ng>
+
+      <!-- <svms-sidebar-body-ng
+        label="Assignment"
+        icon="assignment"
+        [active]="tabMenu == 'FETCH_ASSIGNMENT_DETAILS'"
+      >
+        <app-assignment-details-sidebar
+          [data]="payloadData"
+          *ngIf="tabMenu == 'FETCH_ASSIGNMENT_DETAILS'"
+        ></app-assignment-details-sidebar>
+      </svms-sidebar-body-ng> -->
+    </svms-sidebar-nav>
+  </svms-sidebar-ng>
+</div>

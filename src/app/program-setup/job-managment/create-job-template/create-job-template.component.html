@@ -1,0 +1,62 @@
+<div class="create-job">
+
+    <div class="create-job-inner p-8">
+        <a (click)="goBack()" class="close-button close_btn cursor-pointer">
+            <icon size="18px" name="close" type="material" cuClass="d-flex"></icon>
+        </a>
+        <div class="page-title my-24 text-center pt-8">
+            {{title}} {{ 'job_template' | i18next }}
+        </div>
+
+        <ul class="add-page-progress-bar mb-32">
+            <li [ngClass]="{'active' : tabIndex >= 1}" class="active">{{ 'basic_info' | i18next }}</li>
+            <li [ngClass]="{'active' : tabIndex >= 2}">{{ 'hierarchy' | i18next }}</li>
+            <li [ngClass]="{'active' : tabIndex >= 3}">{{ 'qualification' | i18next }}</li>
+            <li [ngClass]="{'active' : tabIndex >= 4}">{{ 'others' | i18next }}</li>
+            <li [ngClass]="{'active' : tabIndex >= 5}">{{ 'distribution' | i18next }}</li>
+        </ul>
+
+        <app-basic-job-template [jobTemplateData]="selectedPayloadData" (onSubmit)="makeJobObject($event)"
+            [hidden]="tabIndex !== 1"></app-basic-job-template>
+
+        <div [hidden]="tabIndex !== 2">
+            <!-- defaultHierarchy -->
+            <svms-hierarchy [ngClass]="{'disableDiv' : visibility === 'isview'}" [hierarchyData]="hierarchyData"
+                (selectHierarchyLevel)="selectHierarchy($event)" [selectedHierarchy]="defaultHierarchy"
+                [isUserOnly]="false" [userAssociatedHierarchyID]="userAssociateHierarchy">
+            </svms-hierarchy>
+            <div class="row">
+                <div class="col-12 m-16 text-center" *ngIf="hierarchyData && hierarchyData?.length === 0">
+                    {{ 'no_hierarchy_found' | i18next }}
+                </div>
+            </div>
+
+            <div class="row no-gutters mt-24 mb-16">
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <button type="button" class="btn btn-outline" (click)="tabIndex = 1">
+                        <icon size="24px" name="keyboard_backspace" theme="outlined" type="material" class="d-flex"
+                            cuClass="d-flex">
+                        </icon>
+                    </button>
+
+                    <button type="button" class="btn btn-primary" (click)="tabIndex = 3"
+                        [disabled]="hierarchyData && hierarchyData?.length === 0 || selectedIDs && selectedIDs.length === 0">
+                        {{ 'continue' | i18next }} <icon size="24px" name="arrow_forward" type="material" class="icon--on-right"
+                            cuClass="icon-cu">
+                        </icon>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- [selectedHierarchyLevel]='selectedIDs' -->
+        <app-qualification [jobTemplateData]="selectedPayloadData" [selectedHierarchyLevel]='selectedIDs'
+            [qualificationsFormData]="selectedQualificationData" [hidden]="tabIndex !== 3"
+            (onSubmit)="makeJobObject($event)" (onClose)="changePage($event)"></app-qualification>
+        <app-others [hidden]="tabIndex !== 4" [othersData]="selectedOthersData" (onSubmit)="makeJobObject($event)"
+            (onClose)="changePage($event)"></app-others>
+        <app-distribution [hidden]="tabIndex !== 5" [isSaveLoader]="isSaveLoader"
+            [distributionFormData]="selectedDistributionData" (onSubmit)="makeJobObject($event)"
+            (onClose)="changePage($event)"></app-distribution>
+    </div>
+</div>

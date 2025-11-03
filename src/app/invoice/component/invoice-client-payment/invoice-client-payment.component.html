@@ -1,0 +1,19 @@
+<div class="invoice-client-payment" >
+
+  <vms-table [vmsTableConfig]="tableConfig" (onclickToisGenericWithdrawClick)="paymentRollback($event)" [vmsDataSource]="invoiceLists"   (search)="onSearch($event)"
+  (onListFilter)="onListFilter($event)"  [loading]="loader"
+  (onCreate)="onCreate($event)"  (onSort)="onSortClick($event)" (onViewClick)="onViewClick($event)"
+  (changePage)="onPaginationClick($event)" [itemsPerPage]="itemPerPage"
+   [totalItem]="total_records" [count]="count"
+ >
+  <div *ngIf="(invoiceLists | json) == '[]'">
+    {{ 'data_not_available' | i18next }}
+  </div>
+</vms-table>
+</div>
+<app-create-new-payment-sidebar (closesidebar)="isNewPaymentCreated = false" *ngIf="isNewPaymentCreated"></app-create-new-payment-sidebar>
+
+<app-client-payment-rollback [current_pa_uuid]="current_pa_uuid" *ngIf='showClientPaymentRollBack' [reasonCodes]='reasonCodes'
+(rollbacked)='rollbacked($event)' [consolidatedInvoice]="rollbackData" [basicDetails]="invoiceBasicDetails.data"></app-client-payment-rollback>
+
+

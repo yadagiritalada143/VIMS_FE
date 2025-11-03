@@ -1,0 +1,280 @@
+<aside class="favourite">
+  <app-favorites-report></app-favorites-report>
+</aside>
+<section class="float-content mr-m-0">
+  <header class="content-header">
+    <div class='leftNav'>
+      <h3>{{ 'settings' | i18next }}</h3>
+      <div class="search-form">
+        <input #searchData type="text" placeholder="{{ 'search' | i18next }}" (keyup)="setSearchParam(searchData?.value)">
+        <icon name="search" size="18px"></icon>
+      </div>
+      <div class="clearfix"></div>
+    </div>
+    <div class='rightNav close' (click)="navigateToPreviousRoute()">
+      &#x02A2F;
+    </div>
+  </header>
+  <div class="content-box">
+    <ul class="content-list">
+      <li *ngFor="let setting of _settingsService.filtereddata">
+        <div class="d-flex" *ngIf="showSettingsTitle(setting)">
+          <icon *ngIf="setting?.icon" [name]="setting?.icon" size="18px"></icon>
+          <h5>{{setting?.title | i18next}}</h5>
+        </div>
+        <ul [hidden]="!setting?.isSideMenu" *authorize="setting?.permission">
+          <ng-container *ngFor="let subMenu of setting?.sideBarSubMenu">
+            <li *ngIf="!subMenu?.permission; else elseBlock">
+              <a *ngIf="showNavItem(subMenu)" (click)="redirectProgramMenu(subMenu)">{{subMenu?.title | i18next}}</a>
+            </li>
+            <ng-template #elseBlock>
+              <li *authorize="(subMenu?.permission)">
+                <a *ngIf="showNavItem(subMenu)" (click)="redirectProgramMenu(subMenu)">{{subMenu?.title | i18next }}</a>
+              </li>
+            </ng-template>
+          </ng-container>
+
+          <!-- <li *ngFor="let subMenu of setting?.sideBarSubMenu">
+                    <a (click)="redirectProgramMenu(subMenu)">{{subMenu?.title}}</a>
+                  </li> -->
+        </ul>
+      </li>
+      <!-- <li *ngIf='isSuperAdmin()'>
+        <div class="d-flex">
+          <icon name="cleaning_services" size="18px"></icon>
+          <h5>{{ 'cache_administration' | i18next }}</h5>
+        </div>
+        <ul>
+          <li>
+            <a (click)='openPurgeDialog()'>{{ 'configurator_cache' | i18next }}</a>
+          </li>
+        </ul>
+      </li> -->
+      <!--<li>
+        <div class="d-flex">
+          <icon name="home_max" size="18px"></icon>
+          <h5>Programs</h5>
+        </div>
+        <ul>
+          <li>
+            <a *authorize="'menu_program_details'" [routerLink]="['/program-setup/program-detail']" >Program Details</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">Acitivities</a>
+          </li>
+        </ul>
+      </li>
+      <li *authorize="menu_qualifications"  >
+        <div class="d-flex"  >
+          <icon name="article" theme="outlined" size="18px"></icon>
+          <h5>Qualifications</h5>
+        </div>
+        <ul>
+          <li>
+            <a  [routerLink]="['/qualifications/list']" >View All Qualification Types</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <div class="d-flex">
+          <icon name="domain_verification" size="18px"></icon>
+          <h5>Job Managements</h5>
+        </div>
+        <ul>
+          <li>
+            <a [routerLink]="['/job-template/create']" href="">Create Job Templates</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">View All Job Templates</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <div class="d-flex">
+          <icon name="folder_open" size="18px"></icon>
+          <h5>Foundational Data</h5>
+        </div>
+        <ul>
+          <li>
+            <a href="javascript:void(0)">Create New Foundational Data Type</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">View All Foundational Data Type</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <div class="d-flex">
+          <icon name="payments" theme="outlined" size="18px"></icon>
+          <h5>Rates</h5>
+        </div>
+        <ul>
+          <li>
+            <a href="javascript:void(0)">Add New Rate Card</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">View New Rate Card</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">Add New Rate Factor</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">View New Rate Factor</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <div class="d-flex">
+          <icon name="layers" theme="outlined" size="18px"></icon>
+          <h5>Vendor Management</h5>
+        </div>
+        <ul>
+          <li>
+            <a href="javascript:void(0)">Add New Vendor</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">View All Vendors</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">Vendor Groups</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">Vendor Distribution Scehdule</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">Vendor Compliance</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <div class="d-flex">
+          <icon name="timeline" size="18px"></icon>
+          <h5>Hierarchy</h5>
+        </div>
+        <ul>
+          <li>
+            <a href="javascript:void(0)">Hierarchy Configuration</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <div class="d-flex">
+          <icon name="notifications_none" size="18px"></icon>
+          <h5>Notifications</h5>
+        </div>
+        <ul>
+          <li>
+            <a href="javascript:void(0)">View All Notification Templates By Module</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">Manage Email Template Header</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">Manage Email Template Footer</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <div class="d-flex">
+          <icon name="extension" theme="outlined" size="18px"></icon>
+          <h5>Onboarding Management</h5>
+        </div>
+        <ul>
+          <li>
+            <a href="javascript:void(0)">View All Onboarding Tasks</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">View All Onboarding Checklists</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <div class="d-flex">
+          <icon name="work_outline" size="18px"></icon>
+          <h5>Work Location</h5>
+        </div>
+        <ul>
+          <li>
+            <a href="javascript:void(0)">Add Work Location</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">View All Work Location</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <div class="d-flex">
+          <icon name="radar" size="18px"></icon>
+          <h5>Workflows</h5>
+        </div>
+        <ul>
+          <li>
+            <a href="javascript:void(0)">System Workflows</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">Approval Workflow</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">Tenure Limits</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <div class="d-flex">
+          <icon name="schedule" size="18px"></icon>
+          <h5>Time and Expense Management</h5>
+        </div>
+        <ul>
+          <li>
+            <a href="javascript:void(0)">Timesheet Configuration</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">Rate Configuration</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">Timesheet Rule Configuration</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">Expense Configuration</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <div class="d-flex">
+          <icon name="people" size="18px"></icon>
+          <h5>Manage Users</h5>
+        </div>
+        <ul>
+          <li>
+            <a href="javascript:void(0)">Add New Users</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">View All Users</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <div class="d-flex">
+          <icon name="edit" theme="outlined" size="18px"></icon>
+          <h5>Custom Fields</h5>
+        </div>
+        <ul>
+          <li>
+            <a href="javascript:void(0)">View All Custom Fields By Modules</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <div class="d-flex">
+          <icon name="question_answer" theme="outlined" size="18px"></icon>
+          <h5>Questionnaire</h5>
+        </div>
+        <ul>
+          <li>
+            <a href="javascript:void(0)">Add New Question</a>
+          </li>
+        </ul>
+      </li>-->
+    </ul>
+  </div>
+</section>

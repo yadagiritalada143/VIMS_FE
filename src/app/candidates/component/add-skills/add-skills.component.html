@@ -1,0 +1,51 @@
+<svms-sidebar-ng [title]="panelHeading |i18next" [dataVisibility]="addSkills" (onClose)="sidebarClose()">
+  <div class="sidebar-wrapper">
+    <app-logs [log]="logs"></app-logs>
+    <form [formGroup]="addSkilsForm">
+      <div class="p-24">
+        <div class="form-group">
+          <label>{{ 'select_skill' | i18nextEager }} <span class="require">*</span></label>
+          <ng-select [loading] = 'skillLoading' loadingText = 'Loading....' [clearable]="true" placeholder="{{ 'select' | i18nextEager }}"  formControlName="skillType" [typeahead]="input$">
+            <ng-option [value]="type.id" *ngFor="let type of skillList">{{type.name}}</ng-option>
+          </ng-select>
+          <p class="validation-msg"
+            *ngIf="(addSkilsForm.controls.skillType.touched && addSkilsForm.controls['skillType'].errors)">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'skill_is_required' | i18nextEager }}
+          </p>
+        </div>
+        <div class="form-group">
+          <label>{{ 'experience_level' | i18nextEager }}</label>
+          <ng-select [clearable]="false" placeholder="{{ 'select' | i18nextEager }}" [searchable]="false" formControlName="experienceLevel">
+            <ng-option [value]="'Not Applicable'">{{ 'not_applicable' | i18nextEager }}</ng-option>
+            <ng-option [value]="'Fundamental Awareness (basic knowledge)'">{{ 'fundamental_awareness' | i18nextEager }} ({{ 'basic_knowledge' | i18nextEager }})
+            </ng-option>
+            <ng-option [value]="'Intermediate (practical application)'">{{ 'intermediate' | i18nextEager }} ({{ 'practical_application' | i18nextEager }})</ng-option>
+            <ng-option [value]="' Advanced (applied theory)'"> {{ 'advanced' | i18nextEager }} ({{ 'applied_theory' | i18nextEager }})</ng-option>
+            <ng-option [value]="'Expert (recognized authority)'">{{ 'expert' | i18nextEager }} ({{ 'recognized_authority' | i18nextEager }})</ng-option>
+          </ng-select>
+        </div>
+        <div class="form-group">
+          <label>{{ 'description' | i18nextEager }}</label>
+          <textarea class="form-control disable" rows="4" placeholder="{{ 'enter_description' | i18nextEager }}"
+            formControlName="description"></textarea>
+        </div>
+        <div class="form-group">
+          <label>{{ 'notes' | i18nextEager }}</label>
+          <textarea class="form-control notes" rows="4" placeholder="{{ 'enter_notes' | i18nextEager }}" formControlName="notes"></textarea>
+        </div>
+        <app-upload-documents uploadLabel="{{ 'upload_skill_documents' | i18nextEager }}"
+          (uploadDataFiles)="uploadFiles($event)" [newUploadfileArr]="newUploadfileArr"  (oldUploadDataFiles)= "updateoldFiles($event)"  [oldUploadfileArr]="oldUploadfileArr"  [closePanel]="closePanel"></app-upload-documents>
+      </div>
+    </form>
+  </div>
+
+  <svms-sidebar-footer-ng>
+    <button type="submit" class="btn btn-primary float-right" (click)="saveSkill('save')">
+      {{btnText |i18next}}
+    </button>
+    <button type="submit" class="btn btn-outine float-right mr-16" (click)="saveSkill('saveThenAdd')">
+      {{ 'add_new' | i18nextEager }}
+    </button>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

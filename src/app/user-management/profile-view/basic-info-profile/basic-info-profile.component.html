@@ -1,0 +1,167 @@
+<div class="preference-body section mt-16 rounded-sm p-24">
+  <aside class="profile-sidebar p-16 rounded-sm">
+    <h4 class="mb-16 font-weight-medium">{{ 'contact_info' | i18next }}</h4>
+    <ul class="contact-info">
+      <li>
+        <icon class="float-left mr-12" name="mail" theme="outlined" size="20px" type="material"></icon>
+        <p>
+          <span>{{ 'email' | i18next }}</span>
+          <a class="d-block email" tooltip="{{viewData?.email}}" placement="bottom" delay="500"
+            href="mailto:{{viewData?.email}}">{{viewData?.email}}</a>
+          <a class="d-block email" tooltip="{{viewData?.secondary_email}}" placement="bottom" delay="500"
+            href="mailto:{{viewData?.secondary_email}}">{{viewData?.secondary_email}}</a>
+        </p>
+      </li>
+      <li>
+        <icon class="float-left mr-12" theme="outlined" name="call" size="20px" type="material"></icon>
+        <p>
+          <span>{{ 'phone' | i18next }}</span>
+          <a class="d-block"
+            href="tel:{{viewData && viewData?.contacts[0]?.isd_code}} {{viewData && viewData?.contacts[0]?.number}}">
+            {{viewData && viewData.contacts[0]?.isd_code}}-{{viewData && viewData?.contacts[0]?.number}}</a>
+          <!-- <span *ngIf="viewData && viewData.contacts[1]"> , </span> -->
+          <a class="d-block"
+            href="tel:{{viewData && viewData?.contacts[1]?.isd_code}} {{viewData && viewData?.contacts[1]?.number}}"
+            *ngIf="viewData && viewData.contacts[1]"> {{viewData && viewData.contacts[1]?.isd_code}}-{{viewData
+            && viewData?.contacts[1]?.number}}</a>
+        </p>
+      </li>
+      <li>
+        <icon class="float-left mr-12" theme="outlined" name="home" size="20px" type="material"></icon>
+        <p>
+          <span>{{ 'address' | i18next }}</span>
+          <a class="d-block address" tooltip="{{viewData && viewData?.addresses[0]?.address_line1}}" placement="bottom"
+            delay="500">
+            {{viewData ? viewData.addresses[0]? viewData.addresses[0].address_line1: '--':'--'}}
+          </a>
+          <a class="d-block address" *ngIf="viewData && viewData.addresses[1]"
+            tooltip="{{viewData && viewData?.addresses[1]?.address_line1}}" placement="bottom" delay="500">
+            {{viewData ? viewData.addresses[1]? viewData.addresses[1].address_line1: '--':'--'}}
+          </a>
+        </p>
+      </li>
+    </ul>
+    <h4 class="mb-16 font-weight-medium"
+      *ngIf="viewData && (viewData.social_profiles ? viewData.social_profiles.length : 'false')">
+      {{ 'social_media' | i18next }}</h4>
+    <ul class="social-info" *ngIf="viewData && (viewData.social_profiles ? viewData.social_profiles.length : 'false')">
+      <li *ngFor="let social_profile of viewData?.social_profiles" class="social-icons">
+        <a href="{{social_profile.link}}" target="_blank">
+          <img class="img-fluid" src="assets/images/social-icons-png/{{social_profile.type}}.png" />
+        </a>
+      </li>
+    </ul>
+  </aside>
+  <div class="profile-left-section">
+    <div class="pb-24" *ngIf="viewData?.is_activated && !viewData?.sso_activated && showResendButton">
+      <div class="d-flex justify-content-between align-items-center account_reg p-16">
+        <div class="d-flex ">
+          <icon class="mr-12" size="18px" theme="outlined" name="check_circle" type="material" cuClass="icon-cu">
+          </icon>
+          {{ 'account_activated.' | i18next }}
+        </div>
+      </div>
+    </div>
+    <div class="pb-24" *ngIf="!viewData?.is_activated && viewData?.sso_activated">
+      <div class="d-flex justify-content-between align-items-center account_reg p-16">
+        <div class="d-flex ">
+          <icon class="mr-12" size="18px" theme="outlined" name="check_circle" type="material" cuClass="icon-cu">
+          </icon>
+          {{ 'your_sso_has_been_activated.' | i18next }}
+        </div>
+      </div>
+    </div>
+    <div class="pb-24" *ngIf="viewData?.is_activated && viewData?.sso_activated">
+      <div class="d-flex justify-content-between align-items-center account_reg p-16">
+        <div class="d-flex ">
+          <icon class="mr-12" size="18px" theme="outlined" name="check_circle" type="material" cuClass="icon-cu">
+          </icon>
+          {{ 'your_account_as_well_as_sso_both_have_been_activated.' | i18next }}
+        </div>
+      </div>
+    </div>
+    <div class="pb-24" *ngIf="!viewData?.is_activated  && !viewData?.sso_activated && showResendButton">
+      <!-- (viewData?.sso_id ==='' || !viewData?.sso_id) -->
+      <div class="d-flex justify-content-between align-items-center account_unreg p-16">
+        <div class="d-flex ">
+          <icon class="mr-12" size="18px" theme="outlined" name="person_off" type="material" cuClass="icon-cu">
+          </icon>
+          {{ 'account_unregistered.' | i18next }}
+        </div>
+        <ng-container *accessControl>
+          <button *authorize="'can_resend_invitation'" (click)="resendInvitation()"
+          class="btn btn-white send_email_btn px-24"> {{ 'resend_welcome_email' | i18next }}</button>
+        </ng-container>
+        </div>
+    </div>
+    <div class="d-flex justify-content-between">
+      <h4 class="mb-32 font-weight-medium">
+        <icon class="d-inline-block mr-12" theme="outlined" name="account_circle" size="20px" type="material">
+        </icon>
+        {{ 'base_info' | i18next }}
+      </h4>
+      <div class="d-flex align-items-center">
+        <button class="btn btn-primary small edit-profile mr-12" (click)="editClick()">
+          {{ 'edit_profile' | i18next }}</button>
+        <ng-container *accessControl>
+          <button *ngIf="viewData?.is_activated && (this.userType === 'MSP' || this.userType === 'SUPER_ORG')"
+            class="btn btn-primary small edit-profile"
+            (click)="resetClick()">
+              {{ 'reset_password' | i18next }}
+          </button>
+        </ng-container>
+        <ng-template *accessControl [ngIf]="(!viewData?.is_activated && (viewData?.sso_id ==='' || !viewData?.sso_id)) && (!ssoResult?.is_forced && viewData?.sso_id)">
+          <button class="btn btn-primary small edit-profile ml-12" *authorize="'can_resend_invitation'"
+            (click)="resendInvitation()">
+            {{ 'resend_invitation' | i18next }}
+          </button>
+        </ng-template>
+      </div>
+    </div>
+    <div class="profile-info d-flex justify-content-start mb-32">
+      <p>
+        <span>{{ 'full_name' | i18next }}</span>
+        {{ (getFullName(viewData?.full_name) ?? "") | titlecase }}
+      </p>
+      <p>
+        <span>{{ 'title' | i18next }}</span>
+        {{viewData && (viewData.title || '--')}}
+      </p>
+      <p>
+        <span>{{ 'supervisor' | i18next }}</span>
+        {{viewData ? viewData.supervisor ? viewData.supervisor.full_name : '--' : '--'}}
+      </p>
+    </div>
+    <div class="profile-info d-flex justify-content-start mb-32" style="display: none !important;">
+      <p>
+        <span>{{ 'date_of_birth' | i18next }}</span>
+        <span class="dob-value" *ngIf="viewData && viewData.dob; else dobnew">
+          {{(viewData.dob) | localDateFormat: 'MM/dd' : null : null: true}}
+        </span>
+        <ng-template #dobnew>
+          {{'--'}}
+        </ng-template>
+      </p>
+      <p>
+        <span>{{ 'ethnic_race' | i18next }}</span>
+        {{viewData && (viewData.ethnic_race?.name || '--')}}
+      </p>
+      <p>
+        <span>{{ 'gender' | i18next }}</span>
+        {{viewData && ((viewData.gender | titlecase) || '--')}}
+      </p>
+    </div>
+    <div class="profile-info d-flex justify-content-start mb-32">
+      <p *ngIf="showSsoIdField">
+        <span>{{ 'sso_id' | i18next }}</span>
+        <span class="dob-value" *ngIf="viewData && viewData.sso_id; else alt_sso">
+          {{( viewData.sso_id )}}
+        </span>
+        <ng-template #alt_sso>
+          {{'--'}}
+        </ng-template>
+      </p>
+    </div>
+  </div>
+  <div class="clearfix"></div>
+</div>

@@ -1,0 +1,40 @@
+<app-svms-table
+    [dataSource]="vmsData"
+    [tableOptions]="tableOptions"
+    [coloumnDefintions]="tableColumnConfig"
+>
+</app-svms-table>
+
+<ng-template #recipient let-rowData>
+    <p style="font-weight:600;"> {{ (rowData?.fullName ?? '--')?.split('.')?.join(' ') | titlecase | i18next }} </p>
+    <small class="text-container" style="display: contents;" [title]="rowData?.email"> {{ rowData?.email }} </small>
+</ng-template>
+
+<ng-template #status let-value="value">
+    <span class="c-status-ui" [ngClass]="getStatusClass(value)">
+        {{ getDisplayValue(value) | titlecase | i18next }}
+    </span>
+</ng-template>
+
+<ng-template #subject let-rowData let-value="value">
+    <span (click)="openDialog(rowData)" style="color: #776de0; display: contents;" class="cursor-pointer text-container">
+        {{ value | i18next }}
+    </span>
+</ng-template>
+
+<ng-template #traceId let-value="value">
+    <div class="d-flex">
+        <icon title="Copy Tracking ID" class="d-flex cursor-pointer pr-8 pt-4"
+            (click)="copyText(value)" size="14px" name="content_copy"
+            type="material">
+        </icon>
+        <p class="text-truncate"> {{ value | i18next }} </p>
+    </div>
+</ng-template>
+
+<svms-email-viewer
+    [(visibility)]="showPopup"
+    [subject]="subjectCache"
+    [email]="emailCache"
+>
+</svms-email-viewer>

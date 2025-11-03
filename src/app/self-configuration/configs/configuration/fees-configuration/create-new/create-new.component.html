@@ -1,0 +1,293 @@
+<form  [formGroup]="feesForm" (ngSubmit)="onSubmit()">
+<div class="create-new-fee">
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <i (click)="backClicked()" class="material-icons back-arrow-icon mr-16 cursor-pointer" tooltip="{{'Back' | i18next}}" placement="bottom">arrow_back</i>
+            <h3 *ngIf="!isEditMode" class="font-weight-semibold mb-0">{{ 'create_new' | i18next }} {{ 'fee_configuration' | i18next }}</h3>
+            <h3 *ngIf="isEditMode" class="font-weight-semibold mb-0">{{ 'update_fee_configuration' | i18next }}</h3>
+
+        </div>
+        <div>
+            <button *accessControl [disabled]="!allFieldsFilled() || mspFeeValidationError || vmsFeeValidationError" 
+                type="submit" class="c-btn c-btn-success-medium">
+                {{(!isEditMode ? 'save' : 'update')|i18next}}
+            </button>
+        </div>
+    </header>
+    <section class="section-body-content">
+        <div class="p-24">
+            <div class="c-form-group-row">
+                <div class="c-form-group">
+                    <label>{{ 'fee_configuration_name' | i18next }} <span class="require">*</span></label>
+                    <input type="text" class="c-form-control"  name="title" maxlength="100"  placeholder="{{ 'fee_configuration_name' | i18next }}"
+                    formControlName="title" [ngClass]="{ 'is-invalid': submitted && feeConfigForm.title.errors }">
+                </div>
+                <div class="c-form-group toggle-width toggle-panel pt-24">
+                    <div class="toggle-panel-inner" [ngClass]="titleToggle?.value ? 'if-active' : 'if-inactive'">
+                    <span class="status-text">{{(titleToggle?.value ? 'Active':'Inactive') | i18next}}</span>
+                    <span class="toggle-switch" [ngClass]="titleToggle?.value ? 'toggle-on' : 'toggle-off'"
+                        (click)="onClickToggle()"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="c-form-group-row">
+                <div class="c-form-group">
+                    <div class="form-group select-hierarchy mb-0" *ngIf="hierarchyTree">
+                        <hierarchy-treeview
+                          [filter]="true"
+                          [mandatory]="true"
+                          [treeInput]="hierarchyTree"
+                          [selected]="feesForm.get('hierarchy').value"
+                          (changed)="changeSelectedHierarchies($event)"
+                        ></hierarchy-treeview>
+                      </div>
+                </div>
+            </div>
+            <div class="c-form-group-row">
+                <div class="c-form-group">
+                    <label class="mb-16">{{ 'source_model' | i18next }} <span class="require">*</span></label>
+                    <div class="d-flex">
+                        <div class="mr-24">
+                            <label class="c-input-checkbox">
+                                <input class="mr-8" type="checkbox" formControlName="source_model_contingent" value="CONTINGENT"
+                                (change)="setSourceModel('source_model_contingent',$event)">
+                                <span class="cb-ui"></span>
+                                <span  class="cb-label">{{'Contingent' | i18next}}</span>
+                            </label>
+                        </div>
+                        <div class="mr-24">
+                            <label class="c-input-checkbox">
+                                <input class="mr-8" type="checkbox" formControlName="source_model_sow" value="SOW"
+                                (change)="setSourceModel('source_model_sow',$event)">
+                                <span class="cb-ui"></span>
+                                <span  class="cb-label">{{'SOW' | i18next}}</span>
+                            </label>
+                        </div>
+                        <div class="mr-24">
+                            <label class="c-input-checkbox">
+                                <input class="mr-8" type="checkbox" formControlName="source_model_direct" value="DIRECT_SOURCING"
+                                (change)="setSourceModel('source_model_direct',$event)">
+                                <span class="cb-ui"></span>
+                                <span  class="cb-label">{{'Direct Sourcing' | i18next}}</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="c-form-group-row">
+                <div class="c-form-group">
+                    <label>{{ 'labor_category' | i18next }} <span class="require">*</span></label>
+                    <ng-select
+                        bindValue="id"
+                        bindLabel="name"
+                        [items]="(labor_categories | uniqueKey: 'id' | keysort: 'name')"
+                        placeholder="{{'select_values' | i18next}}"
+                        formControlName="labor_category" multiple="true"
+                        [(ngModel)]="selectedLaborCategories"
+                        (search)="searchLaborCategory($event)"
+                        [loading]="laborCategoryLoading"
+                        [clearable]="!laborCategoryLoading"
+                        (scrollToEnd)="showMoreLaborCategory()"
+                    >
+                    </ng-select>
+                    <!-- <ng-select bindValue="id" bindLabel="name" placeholder="{{ 'select_values' | i18next }}" [items]="labor_categories"
+                    [(ngModel)]="selectedLaborCategories" formControlName="" multiple="true"> -->
+                <!-- </ng-select> -->
+                </div>
+            </div>
+            <div class="c-form-group-row">
+                <div class="c-form-group">
+                    <label>{{ 'vendors' | i18next }} </label>
+                    <ng-select
+                        bindValue="id"
+                        bindLabel="name"
+                        [items]="(vendors | uniqueKey: 'id' | keysort: 'name')"
+                        placeholder="{{'select_values' | i18next}}"
+                        formControlName="vendors" multiple="true"
+                        [ngClass]="{ 'is-invalid': submitted && feeConfigForm.vendors.errors }"
+                        [(ngModel)]="selectedVendors"
+                        (search)="searchVendor($event)"
+                        [loading]="vendorLoading"
+                        [clearable]="!vendorLoading"
+                        (scrollToEnd)="showMoreVendors()"
+                    >
+                    </ng-select>
+                </div>
+            </div>
+            <div class="c-form-group-row">
+                <div class="date-picker c-form-group position-relative mb-0">
+                    <label>{{ 'effective_date' | i18next }} <span class="require">*</span></label>
+                    <svms-datepicker
+                    [inputdateFormat]="dateFormat"
+                    [disabled]="false"
+                    formControlName="effective_date"
+                    [placeholder]="'Select Date' | i18next">
+                    </svms-datepicker>
+                </div>
+            
+                <div class="date-picker c-form-group position-relative mb-0">
+                    <label>{{ 'funding_model' | i18next }} <span class="require">*</span></label>
+                    <ng-select [clearable]="true"
+                    id="fundingModelValue" [(ngModel)]="fundingModelValue" [ngModelOptions]="{standalone: true}"
+                    placeholder="{{'Select Funding Model' | i18next}}" [searchable]="false" #periodVal (change)="updateFundingModel()">
+                    <ng-option *ngFor="let fund of fundingModel" value="{{fund.name}}">
+                        {{fund.name}}
+                    </ng-option>
+                    </ng-select>
+                  </div>
+            </div>
+        </div>
+        <div class="config-item d-flex align-items-center justify-content-between sticky-header">
+           <p class="font-weight-medium blue-color">
+                {{ 'msp_partner_fee' | i18next }}
+                <span class="require">*</span>
+           </p>
+        </div>
+        <div>
+            <app-config-common-listing  [updatedSelectBoxValue]="toggles.msp_partner.feesType" [options]="feesTypeOptions" mainIcon="price_check" itemLevel="parent"  subtitle="Fee Type"
+            description="Select fee type (Percentage/Fixed Amount)" (onValueChange)="dropDownValueChanged($event, 'MspPartnerFeesType')" 
+            selectBox="true" [required]="true" [isDisabed]="mspPartnerFeeTypeDisabled"></app-config-common-listing>
+            <app-config-common-listing  [updatedSelectBoxValue]="toggles.msp_partner.funded_by" [options]="feesApplicationOn" mainIcon="price_check" itemLevel="parent"  subtitle="Funded By"
+            description="Defines the entity that will fund this fee" (onValueChange)="dropDownValueChanged($event, 'MspPartnerFeeApplicationOn')" 
+            selectBox="true" [isDisabed]="isDisabled || isMspPartnerFeeDisabled" [required]="true"></app-config-common-listing>
+            <app-config-common-listing [options]="toggles.msp_partner.mspFees" mainIcon="widgets" itemLevel="parent"  subtitle="Fee Applicable Modules"
+            description="Select fee applicable modules" (onCheckboxValueChange)="onClickCheckBox($event,'MspPartner')"
+            checkboxInput="true" [required]="true"></app-config-common-listing>
+            <app-config-common-listing *ngIf="toggles?.msp_partner?.mspFees[0]?.isSelected" [feesValueInput]="toggles.msp_partner.msp_partner_timesheet_fees"  [showPercentage]="mspPartnerFee" itemLevel="child"  subtitle="Timesheet Fee"
+            description="Enter MSP partner timesheet fee" (onValueChange)="valueChanged($event, 'msp_partner_timesheet_fees')"
+            percentInput="true" [required]="true"></app-config-common-listing>
+            <app-config-common-listing *ngIf="toggles?.msp_partner?.mspFees[1]?.isSelected" [feesValueInput]="toggles.msp_partner.msp_partner_expense_fees"  [showPercentage]="mspPartnerFee" itemLevel="child"  subtitle="Expense Fee"
+            description="Enter MSP partner expense fee" (onValueChange)="valueChanged($event, 'msp_partner_expense_fees')"
+            percentInput="true" [required]="true"></app-config-common-listing>
+            <app-config-common-listing *ngIf="toggles?.msp_partner?.mspFees[2]?.isSelected" [feesValueInput]="toggles.msp_partner.msp_partner_miscExpense_fees"  [showPercentage]="mspPartnerFee" itemLevel="child"  subtitle="Misc. Expense Fee"
+            description="Enter MSP partner misc.Expense fee"  (onValueChange)="valueChanged($event, 'msp_partner_miscExpense_fees')"
+            percentInput="true" [required]="true"></app-config-common-listing>
+            <app-config-common-listing *ngIf="toggles?.msp_partner?.mspFees[3]?.isSelected" [feesValueInput]="toggles.msp_partner.msp_partner_sow_project_fees"  [showPercentage]="mspPartnerFee" itemLevel="child"  subtitle="SOW Project Fee"
+            description="Enter MSP partner SOW project fee" (onValueChange)="valueChanged($event, 'msp_partner_sow_project_fees')"
+            percentInput="true" [required]="true"></app-config-common-listing>
+            <div *ngIf="mspFeeValidationError" class="px-24 mb-24">
+                <div class="c-notifications error">
+                    <div class="notification-text-box d-flex align-items-center justify-content-between">
+                      <i class="type material-icons">report</i>
+                      <div>
+                        <p class="font-weight-medium"> {{ 'error' | i18next }}</p>
+                        <p class="summary"> {{ 'you_can\'t_proceed_without_adding_the_msp_partner_fee_configuration._if_fee_does_not_apply_then_add_zero.' | i18next }}</p>
+                      </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+        <div class="config-item d-flex align-items-center justify-content-between sticky-header">
+            <p class="font-weight-medium blue-color">
+                {{ 'vms_fee' | i18next }}
+                <span class="require">*</span>
+            </p>
+         </div>
+         <div>
+            <app-config-common-listing [updatedSelectBoxValue]="toggles.vms.feesType" [options]="feesTypeOptions" mainIcon="price_check" itemLevel="parent"  subtitle="Fee Type"
+            description="Select fee type (Percentage/Fixed Amount)" (onValueChange)="dropDownValueChanged($event, 'vmsFeeType')"
+            selectBox="true" [required]="true" [isDisabed]="vmsFeeTypeDisabled"></app-config-common-listing>
+            <app-config-common-listing  [updatedSelectBoxValue]="toggles.vms.funded_by" [options]="feesApplicationOn" mainIcon="price_check" itemLevel="parent"  subtitle="Funded By"
+            description="Defines the entity that will fund this fee" (onValueChange)="dropDownValueChanged($event, 'VmsFeeApplicationOn')" 
+            selectBox="true"  [isDisabed]="isDisabled || isVMsFeeDisabled" [required]="true"></app-config-common-listing>
+            <app-config-common-listing [options]="toggles.vms.vmsFees" mainIcon="widgets" itemLevel="parent"  subtitle="Fee Applicable Modules"
+            description="Select fee applicable modules" (onCheckboxValueChange)="onClickCheckBox($event,'VmsFee')"
+            checkboxInput="true" [required]="true"></app-config-common-listing>
+            <app-config-common-listing *ngIf="toggles?.vms?.vmsFees[0]?.isSelected" [feesValueInput]="toggles.vms.vms_timesheet_fees"  [showPercentage]="vmsFeePercentage" itemLevel="child"  subtitle="Timesheet Fee"
+            description="Enter VMS timesheet fee"  (onValueChange)="valueChanged($event, 'vms_timesheet_fees')"
+            percentInput="true" [required]="true"></app-config-common-listing>
+            <app-config-common-listing *ngIf="toggles?.vms?.vmsFees[1]?.isSelected" [feesValueInput]="toggles.vms.vms_expense_fees"  [showPercentage]="vmsFeePercentage" itemLevel="child"  subtitle="Expense Fee"
+            description="Enter VMS expense fee"  (onValueChange)="valueChanged($event, 'vms_expense_fees')"
+            percentInput="true" [required]="true"></app-config-common-listing>
+            <app-config-common-listing *ngIf="toggles?.vms?.vmsFees[2]?.isSelected" [feesValueInput]="toggles.vms.vms_miscExpense_fees"  [showPercentage]="vmsFeePercentage" itemLevel="child"  subtitle="Misc. Expense Fee"
+            description="Enter VMS misc.Expense fee"  (onValueChange)="valueChanged($event, 'vms_miscExpense_fees')"
+            percentInput="true" [required]="true"></app-config-common-listing>
+            <app-config-common-listing *ngIf="toggles?.vms?.vmsFees[3]?.isSelected" [feesValueInput]="toggles.vms.vms_sow_project_fees"  [showPercentage]="vmsFeePercentage" itemLevel="child"  subtitle="SOW Project Fee"
+            description="Enter VMS SOW project fee" (onValueChange)="valueChanged($event, 'vms_sow_project_fees')"
+            percentInput="true" [required]="true"></app-config-common-listing>
+            <div *ngIf="vmsFeeValidationError" class="px-24 mb-24">
+                <div class="c-notifications error">
+                    <div class="notification-text-box d-flex align-items-center justify-content-between">
+                      <i class="type material-icons">report</i>
+                      <div>
+                        <p class="font-weight-medium"> {{ 'error' | i18next }}</p>
+                        <p class="summary"> {{ 'you_can\'t_proceed_without_adding_the_vms_fee_configuration._If_fee_does_not_apply_then_add_zero.' | i18next }}</p>
+                      </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+          <div class="config-item d-flex align-items-center justify-content-between sticky-header">
+            <p class="font-weight-medium blue-color">{{ 'summary' | i18next }}</p>
+         </div>
+         <div class="detail-page-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>{{ 'module' | i18next }}
+                            <div class="sorting">
+                                <span class="asc">
+                                    <i class="material-icons">arrow_drop_up</i>
+                                </span>
+                                <span class="dec">
+                                    <i class="material-icons">arrow_drop_down</i>
+                                </span>
+                            </div>
+                        </th>
+                        <th>{{ 'msp_partner_fee' | i18next }}
+                            <div class="sorting">
+                                <span class="asc">
+                                    <i class="material-icons">arrow_drop_up</i>
+                                </span>
+                                <span class="dec">
+                                    <i class="material-icons">arrow_drop_down</i>
+                                </span>
+                            </div>
+                        </th>
+                        <th>{{ 'vms_fee' | i18next }}
+                            <div class="sorting">
+                                <span class="asc">
+                                    <i class="material-icons">arrow_drop_up</i>
+                                </span>
+                                <span class="dec">
+                                    <i class="material-icons">arrow_drop_down</i>
+                                </span>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            {{ 'timesheet' | i18next }}
+                        </td>
+                        <td>{{toggles.msp_partner.msp_partner_timesheet_fees == "" ? "" : toggles.msp_partner.mspFees[0].isSelected? toggles.msp_partner.funded_by?.toUpperCase() === 'VENDOR' ? "Vendor" : "Client" : ""}} {{(toggles.msp_partner.mspFees[0].isSelected && toggles.msp_partner.value ? toggles.msp_partner.msp_partner_timesheet_fees == "" ? "-" : toggles.msp_partner.msp_partner_timesheet_fees : "-") | precision:2 }} {{toggles.msp_partner.msp_partner_timesheet_fees == "" ? "" : toggles.msp_partner.mspFees[0].isSelected && toggles.msp_partner.value ? toggles?.msp_partner?.feesType?.toUpperCase() == "FIXED" ? "(fixed)" : "%" : ""}} </td>
+                        <td>{{toggles.vms.vms_timesheet_fees == "" ? "" : toggles.vms.vmsFees[0].isSelected? toggles.vms.funded_by?.toUpperCase() === 'VENDOR' ? "Vendor" : "Client" : ""}} {{(toggles.vms.vmsFees[0].isSelected && toggles.vms.value ? toggles.vms.vms_timesheet_fees == "" ? "-" : toggles.vms.vms_timesheet_fees : "-") | precision:2 }} {{toggles.vms.vms_timesheet_fees == "" ? "" : toggles.vms.vmsFees[0].isSelected && toggles.vms.value ? toggles?.vms?.feesType?.toUpperCase() == "FIXED" ? " (fixed)" : "%" : ""}} </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            {{ 'expense' | i18next }}
+                        </td>
+                        <td>{{toggles.msp_partner.msp_partner_expense_fees == "" ? "" : toggles.msp_partner.mspFees[1].isSelected? toggles.msp_partner.funded_by?.toUpperCase() === 'VENDOR' ? "Vendor" : "Client" : ""}} {{(toggles.msp_partner.mspFees[1].isSelected && toggles.msp_partner.value ? toggles.msp_partner.msp_partner_expense_fees == "" ? "-" : toggles.msp_partner.msp_partner_expense_fees : "-") | precision:2 }} {{toggles.msp_partner.msp_partner_expense_fees == "" ? "" : toggles.msp_partner.mspFees[1].isSelected && toggles.msp_partner.value ? toggles?.msp_partner?.feesType?.toUpperCase() == "FIXED" ? "  (fixed)" : "%": ""}} </td>
+                        <td>{{toggles.vms.vms_expense_fees == "" ? "" : toggles.vms.vmsFees[1].isSelected? toggles.vms.funded_by?.toUpperCase() === 'VENDOR' ? "Vendor" : "Client" : ""}} {{(toggles.vms.vmsFees[1].isSelected && toggles.vms.value ? toggles.vms.vms_expense_fees == "" ? "-" : toggles.vms.vms_expense_fees : "-") | precision:2 }} {{toggles.vms.vms_expense_fees == "" ? "" : toggles.vms.vmsFees[1].isSelected && toggles.vms.value ? toggles?.vms?.feesType?.toUpperCase() == "FIXED" ? "  (fixed)" : "%" : ""}}</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            {{"Misc. Expense"|i18next}}
+                        </td>
+                        <td>{{toggles.msp_partner.msp_partner_miscExpense_fees == "" ? "" : toggles.msp_partner.mspFees[2].isSelected? toggles.msp_partner.funded_by?.toUpperCase() === 'VENDOR' ? "Vendor" : "Client" : ""}} {{(toggles.msp_partner.mspFees[2].isSelected && toggles.msp_partner.value ? toggles.msp_partner.msp_partner_miscExpense_fees == "" ? "-" : toggles.msp_partner.msp_partner_miscExpense_fees : "-") | precision:2 }}{{toggles.msp_partner.msp_partner_miscExpense_fees == "" ? "" : toggles.msp_partner.mspFees[2].isSelected && toggles.msp_partner.value ? toggles?.msp_partner?.feesType?.toUpperCase() == "FIXED" ? "  (fixed)" : "%": ""}} </td>
+                        <td>{{toggles.vms.vms_miscExpense_fees == "" ? "" : toggles.vms.vmsFees[2].isSelected? toggles.vms.funded_by?.toUpperCase() === 'VENDOR' ? "Vendor" : "Client" : ""}} {{(toggles.vms.vmsFees[2].isSelected && toggles.vms.value ? toggles.vms.vms_miscExpense_fees == "" ? "-" : toggles.vms.vms_miscExpense_fees : "-") | precision:2 }}{{toggles.vms.vms_miscExpense_fees == "" ? "" : toggles.vms.vmsFees[2].isSelected && toggles.vms.value ? toggles?.vms?.feesType?.toUpperCase() == "FIXED" ? "  (fixed)" : "%" : ""}} </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            {{ 'sow_project' | i18next }}
+                        </td>
+                        <td>{{toggles.msp_partner.msp_partner_sow_project_fees == "" ? "" : toggles.msp_partner.mspFees[3].isSelected? toggles.msp_partner.funded_by?.toUpperCase() === 'VENDOR' ? "Vendor" : "Client" : ""}} {{(toggles.msp_partner.mspFees[3].isSelected && toggles.msp_partner.value ? toggles.msp_partner.msp_partner_sow_project_fees == "" ? "-" : toggles.msp_partner.msp_partner_sow_project_fees : "-") | precision:2 }}{{toggles.msp_partner.msp_partner_sow_project_fees == "" ? "" : toggles.msp_partner.mspFees[3].isSelected && toggles.msp_partner.value ? toggles?.msp_partner?.feesType?.toUpperCase() == "FIXED" ? "  (fixed)" : "%": ""}} </td>
+                        <td>{{toggles.vms.vms_sow_project_fees == "" ? "" : toggles.vms.vmsFees[3].isSelected? toggles.msp_partner.funded_by?.toUpperCase() === 'VENDOR' ? "Vendor" : "Client" : ""}} {{(toggles.vms.vmsFees[3].isSelected && toggles.vms.value ? toggles.vms.vms_sow_project_fees == "" ? "-" : toggles.vms.vms_sow_project_fees : "-") | precision:2 }}{{toggles.vms.vms_sow_project_fees == "" ? "" : toggles.vms.vmsFees[3].isSelected && toggles.vms.value ? toggles?.vms?.feesType?.toUpperCase() == "FIXED" ? "  (fixed)" : "%" : ""}} </td>
+                    </tr>
+                </tbody>
+            </table>
+         </div>
+    </section>
+</div>
+</form>

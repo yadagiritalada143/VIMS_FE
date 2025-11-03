@@ -1,0 +1,65 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        # - npm install --no-bin-links --legacy-peer-deps
+        - npm config set legacy-peer-deps true
+        - npm ci
+    build:
+      commands:
+        - if [ "${AWS_BRANCH}" = "master" ]; then export BFLAG=build; fi
+        - if [ "${AWS_BRANCH}" = "staging" ]; then export BFLAG=build-staging; fi
+        - if [ "${AWS_BRANCH}" = "uat" ]; then export BFLAG=build-uat; fi
+        - if [ "${AWS_BRANCH}" = "testing" ]; then export BFLAG=build-testing; fi
+        - if [ "${AWS_BRANCH}" = "wipro-global-master" ]; then export BFLAG=build-wipro-global-master; fi
+        - if [ "${AWS_BRANCH}" = "wipro-master" ]; then export BFLAG=build-wipro-master; fi
+        - if [ "${AWS_BRANCH}" = "development" ]; then export BFLAG=build-dev; fi
+        - if [ "${AWS_BRANCH}" = "dev-impl" ]; then export BFLAG=build-dev-impl; fi
+        - if [ "${AWS_BRANCH}" = "new-dev-impl" ]; then export BFLAG=build-dev; fi
+        - if [ "${AWS_BRANCH}" = "qa-impl" ]; then export BFLAG=build-demo; fi
+        - if [ "${AWS_BRANCH}" = "development-us" ]; then export BFLAG=build-dev-us; fi
+        - if [ "${AWS_BRANCH}" = "demo" ]; then export BFLAG=build-demo; fi
+        - if [ "${AWS_BRANCH}" = "qa-us" ]; then export BFLAG=build-qa-us; fi
+        - if [ "${AWS_BRANCH}" = "qa-impl" ]; then export BFLAG=build-qa-impl; fi
+        - if [ "${AWS_BRANCH}" = "development-us" ]; then export BFLAG=build-development-us; fi
+        - if [ "${AWS_BRANCH}" = "uat-prod" ]; then export BFLAG=build-uat-prod; fi
+        - if [ "${AWS_BRANCH}" = "uat-prod-amfam" ]; then export BFLAG=build-uat-prod-amfam; fi
+        - if [ "${AWS_BRANCH}" = "Feature/PowerBI-V2M-11366" ]; then export BFLAG=build-dev; fi
+        - if [ "${AWS_BRANCH}" = "oregon-master" ]; then export BFLAG=build-oregon-master; fi
+        - npm run ${BFLAG}
+    postBuild:
+      commands:
+        - rm -rf node_modules
+  artifacts:
+    baseDirectory: dist/svms-web
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+
+#
+# test:
+#   artifacts:
+#     baseDirectory: cypress
+#     configFilePath: "**/mochawesome.json"
+#     files:
+#       - "**/*.png"
+#       - "**/*.mp4"
+#   cache:
+#     paths:
+#       - node_modules/**/*
+#   phases:
+#     preTest:
+#       commands:
+#         - npm ci
+#         # - npm install wait-on
+#         # - npm install mocha mochawesome mochawesome-merge mochawesome-report-generator
+#         - "npm start & npx wait-on http://127.0.0.1:4200"
+#     test:
+#       commands:
+#         - 'npx cypress run --reporter mochawesome --reporter-options "reportDir=cypress/report/mochawesome-report,overwrite=false,html=false,json=true,timestamp=mmddyyyy_HHMMss"'
+#     postTest:
+#       commands:
+#         - npx mochawesome-merge@4 cypress/report/mochawesome-report/*.json > cypress/report/mochawesome.json

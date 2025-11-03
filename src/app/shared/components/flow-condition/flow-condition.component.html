@@ -1,0 +1,167 @@
+  <div class="parent-container position-relative p-16 pl-32">
+    <span class="drag-trigger">
+      <icon name="drag_indicator" size="16px"></icon>
+    </span>
+    <div class="child-wrapper" dndDropzone dndEffectAllowed="copyMove" (dndDrop)="onDrop($event,outerIndex)" *ngIf="condition.inner_condition">
+      <div dndPlaceholderRef class="dndPlaceholder"></div>
+      <div class="child-container position-relative pl-24 draggable" *ngFor="let inner_group of condition.inner_condition; let innerIndex = index" [attr.data-index]="innerIndex" [dndDraggable]="inner_group" (dndStart)="onDragStart(innerIndex)" [class.dnone]="(innerIndex===0) ||
+      (innerIndex==inner_group?.length - 1)">
+        <span class="child-drag-trigger drag">
+          <icon name="drag_indicator" size="16px"></icon>
+        </span>
+        <div class="form-group-row align-items-center">
+          <div class="form-group mb-0 pb-0">
+            <ng-select
+            [items]="propertyList"
+            (change)="onDataChange($event,'property',outerIndex,innerIndex)"
+            bindLabel="value"
+            bindValue="id"  placeholder="{{ 'property' | i18next }}"  [(ngModel)]="inner_group.selectedProperty"
+            name="{{'selectedProperty'+outerIndex+''+innerIndex}}">
+            </ng-select>
+          </div>
+          <div class="form-group mb-0 pb-0">
+            <ng-select  [items]="operatorList"
+            bindLabel="sign"
+            bindValue="id" (change)="onDataChange($event,'operator',outerIndex,innerIndex)" placeholder="{{ 'operator' | i18next }}"  name="{{'selectedOperator'+outerIndex+''+innerIndex}}" [(ngModel)]="inner_group.selectedOperator" >
+            </ng-select>
+          </div>
+          <div class="form-group mb-0 pb-0">
+            <ng-select  [items]="valueList"
+            bindLabel="value"
+            bindValue="id" (change)="onDataChange($event,'value',outerIndex,innerIndex)" placeholder="{{ 'value' | i18next }}" [(ngModel)]="inner_group.selectedValue" name="{{'selectedValue'+outerIndex+''+innerIndex}}">
+            </ng-select>
+          </div>
+          <div class="form-group mb-0 pb-0" *ngIf="innerIndex == condition.inner_condition.length - 1">
+            <div class="d-flex align-items-center" (click)="addInnerGroup(outerIndex);onDataChange($event,'addInnerGroup',outerIndex,innerIndex)">
+              <icon class="d-flex" name="add_circle" class="add-condition" cuClass="d-flex" size="20px"></icon>
+            </div>
+          </div>
+          <div class="form-group mb-0 pb-0" *ngIf="innerIndex < condition.inner_condition.length - 1">
+            <div class="d-flex align-items-center">
+              <div class="toggle-cb mr-12" [ngClass]="{'active' : inner_group.innerisANDSelected}">
+                <input type="checkbox" (change)="toggleCheckbox(outerIndex, innerIndex);onDataChange($event,'ANDorOR',outerIndex, innerIndex)">
+                <div class="cb-text d-flex justify-content-between">
+                  <span>{{ 'and' | i18next }}</span>
+                  <span>{{ 'or' | i18next }}</span>
+                </div>
+                <span class="switch"></span>
+              </div>
+              <icon class="d-flex" (click)="removeInnerGroup(outerIndex,innerIndex);onDataChange($event,'removeInnerGroup',outerIndex,innerIndex)" name="highlight_off" class="close-condition" size="20px"></icon>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <a href="javascript:void(0)" class="add-new-group">
+        <icon name="control_point_duplicate" (change)="onDataChange($event,'addNewGroup',outerIndex)" size="18px"></icon> {{ 'add_new_inner_group' | i18next }}
+      </a>
+    </div>
+  </div>
+  <div class="condition-wrapper py-16 d-flex align-items-center position-relative" *ngIf="outerIndex < outerConditionLength - 1">
+    <div class="toggle-cb mr-12" [ngClass]="{'active' : condition.isANDSelected}">
+      <input type="checkbox" (change)="toggleConditionalItem();onDataChange($event,'OuterANDorOR',outerIndex)">
+      <div class="cb-text d-flex justify-content-between">
+        <span >{{ 'and' | i18next }}</span>
+        <span >{{ 'or' | i18next }}</span>
+      </div>
+      <span class="switch"></span>
+    </div>
+    <icon name="highlight_off" (click)="outerRemoveGroup(outerIndex);onDataChange($event,'removeOuterGroup',outerIndex)" class="close-condition d-flex" size="20px"></icon>
+  </div>
+
+
+  <!-- <div class="parent-container position-relative p-16 pl-32">
+    <span class="drag-trigger">
+      <icon name="drag_indicator" size="16px"></icon>
+    </span>
+    <div class="child-wrapper">
+      <div class="child-container position-relative pl-24 mb-0">
+        <span class="child-drag-trigger">
+          <icon name="drag_indicator" size="16px"></icon>
+        </span>
+        <div class="form-group-row align-items-center">
+          <div class="form-group mb-0 pb-0">
+            <ng-select [clearable]="true" placeholder="Property">
+              <ng-option value="Property 1">Property 1</ng-option>
+              <ng-option value="Property 1">Property 2</ng-option>
+              <ng-option value="Property 1">Property 3</ng-option>
+            </ng-select>
+          </div>
+          <div class="form-group mb-0 pb-0">
+            <ng-select [clearable]="true" placeholder="Operator">
+              <ng-option value="Operator 1">Operator 1</ng-option>
+              <ng-option value="Operator 1">Operator 2</ng-option>
+              <ng-option value="Operator 1">Operator 3</ng-option>
+            </ng-select>
+          </div>
+          <div class="form-group mb-0 pb-0">
+            <ng-select [clearable]="true" placeholder="Value">
+              <ng-option value="Value 1">Value 1</ng-option>
+              <ng-option value="Value 1">Value 2</ng-option>
+              <ng-option value="Value 1">Value 3</ng-option>
+            </ng-select>
+          </div>
+          <div class="form-group mb-0 pb-0">
+            <div class="d-flex align-items-center">
+              <icon class="d-flex" name="add_circle" class="add-condition" cuClass="d-flex" size="20px"></icon>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="condition-wrapper no-line py-16 d-flex align-items-center position-relative">
+      <icon name="subdirectory_arrow_right" color="#D8834B" size="16px"></icon>
+      <div class="toggle-cb mr-12" [ngClass]="{'active' : conditionalSubItem}">
+        <input type="checkbox" (change)="toggleConditionalSubItem()">
+        <div class="cb-text d-flex justify-content-between">
+          <span>{{ 'and' | i18next }}</span>
+          <span>{{ 'or' | i18next }}</span>
+        </div>
+        <span class="switch"></span>
+      </div>
+      <icon name="highlight_off" class="close-condition d-flex" size="20px"></icon>
+    </div>
+    <div class="sub-condition-box mb-12">
+      <div class="child-wrapper">
+        <div class="child-container position-relative pl-24 mb-0">
+          <span class="child-drag-trigger">
+            <icon name="drag_indicator" size="16px"></icon>
+          </span>
+          <div class="form-group-row align-items-center">
+            <div class="form-group mb-0 pb-0">
+              <ng-select [clearable]="true" placeholder="Property">
+                <ng-option value="Property 1">Property 1</ng-option>
+                <ng-option value="Property 1">Property 2</ng-option>
+                <ng-option value="Property 1">Property 3</ng-option>
+              </ng-select>
+            </div>
+            <div class="form-group mb-0 pb-0">
+              <ng-select [clearable]="true" placeholder="Operator">
+                <ng-option value="Operator 1">Operator 1</ng-option>
+                <ng-option value="Operator 1">Operator 2</ng-option>
+                <ng-option value="Operator 1">Operator 3</ng-option>
+              </ng-select>
+            </div>
+            <div class="form-group mb-0 pb-0">
+              <ng-select [clearable]="true" placeholder="Value">
+                <ng-option value="Value 1">Value 1</ng-option>
+                <ng-option value="Value 1">Value 2</ng-option>
+                <ng-option value="Value 1">Value 3</ng-option>
+              </ng-select>
+            </div>
+            <div class="form-group mb-0 pb-0">
+              <div class="d-flex align-items-center">
+                <icon class="d-flex" name="add_circle" class="add-condition" cuClass="d-flex" size="20px"></icon>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <a href="javascript:void(0)" class="add-new-group">
+        <icon name="control_point_duplicate" size="18px"></icon> {{ 'add_new_inner_group' | i18next }}
+      </a>
+    </div>
+  </div> -->

@@ -1,0 +1,51 @@
+<svms-sidebar
+  [title]="'select_hierarchy'"
+  icon=""
+  [dataVisibility]="sidebarVisibility"
+  (onClose)="sidebarClose()"
+  *ngIf="hierarhies"
+>
+  <svms-sidebar-body>
+    <svms-hierarchy
+      *ngIf="hierarhies?.length > 0; else noHierarhies"
+      [hierarchyData]="hierarhies"
+      (selectHierarchyLevel)="selectHierarchy($event)"
+      [selectedHierarchy]="selectedHierarchy"
+      [isUserOnly]="true"
+      [userAssociatedHierarchyID]="userAssociatedHierarchyID"
+    >
+    </svms-hierarchy>
+    <ng-template #noHierarhies>
+      <div
+        class="content-area ui-content-wrapper no-content bg-light list-not-found"
+      >
+        <div class="no-data text-center">
+          <img
+            src="./assets/images/no-data.png"
+            alt="hierarchy-board"
+            class="img-fluid"
+          />
+          <h2>{{ 'you_do_not_have_a_hierarchy_created_yet' | i18next }}.</h2>
+        </div>
+      </div>
+    </ng-template>
+  </svms-sidebar-body>
+
+  <svms-sidebar-footer>
+    <button
+      type="submit"
+      class="btn btn-primary float-right"
+      (click)="sidebarClose()"
+    >
+      {{ 'continue' | i18next }}
+      <icon
+        size="20px"
+        name="chevron_right"
+        type="material"
+        class="icon--on-right"
+        cuClass="icon-cu"
+      >
+      </icon>
+    </button>
+  </svms-sidebar-footer>
+</svms-sidebar>

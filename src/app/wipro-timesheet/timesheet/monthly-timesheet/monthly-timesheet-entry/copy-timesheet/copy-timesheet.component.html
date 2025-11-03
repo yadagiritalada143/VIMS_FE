@@ -1,0 +1,137 @@
+<button class="float-right btn btn-primary small mt-4 copy-btn" *ngIf="showCopyTimesheetButton" (click)="copyTimesheetModal()">{{ 'copy_timesheet' | i18next }}</button>
+<section class="copy-modal" [ngClass]="{'active' : copyModal}">
+  <div class="p-24">
+    <h4 class="mb-16 pb-4 font-weight-medium float-left">{{ 'copy_timesheet_weekly' | i18next }}</h4>
+    <a class="float-right close" (click)="closeCopyTimesheet()">
+      <icon name="close" size="24px"></icon>
+    </a>
+    <div class="clearfix"></div>
+    <div>
+      <div class="calendar-table">
+        <div class="week-head d-flex justify-content-start">
+          <p class="first">&nbsp;</p>
+          <p *ngFor="let day of days;">{{day | i18next }}</p>
+          <p class="last">{{ 'total_hours' | i18next }} & {{ 'days_per_week' | i18next }}</p>
+        </div>
+        <div class="week-day-row active d-flex justify-content-start align-items-center"
+          *ngFor="let row of calendar | chunk: 7; let i = index;first as isFirst;">
+          <div class="week-col week-name">
+            <span>{{ 'week' | i18next }} {{i+1 }}</span>
+          </div>
+          <ng-container *ngFor="let c of row; let j = index">
+            <div class="week-col">
+              <p class="small">{{c?.date?.getDate() | i18next }}</p>
+              <ul class="leave-identification">
+               <ng-template [ngIf]="c?.timesheet?.leave_status === 'full_day'">
+                <li *ngIf="c?.timesheet?.leave_type === 'comp_off'" class="compensated" ></li>
+                <li *ngIf="c?.timesheet?.leave_type === 'weekly_off'" class="weekly-off" ></li>
+                <li  *ngIf="c?.timesheet?.leave_type === 'earned_leave'" class="earned-leave" ></li>
+                <li *ngIf="c?.timesheet?.leave_type === 'leave'" class="leave-unpaid" ></li>
+                <li *ngIf="c?.timesheet?.leave_type === 'client_holiday'" class="client-holiday" ></li>
+               </ng-template>
+               <ng-template [ngIf]="c?.timesheet?.leave_status === 'half_day'">
+                <li class="half-day" ></li>
+                <li [ngClass]="{'leave-unpaid': c?.timesheet?.leave_type === 'leave', 'earned-leave': c?.timesheet?.leave_type === 'earned_leave', 'compensated': c?.timesheet?.leave_type === 'comp_off'}"></li>
+               </ng-template>
+               <ng-template [ngIf]="!c?.timesheet?.leave_status && c?.timesheet?.check_out && c?.timesheet?.check_in">
+                <li class="full-day"></li>
+                <!-- <li [ngClass]="{'leave-unpaid': c?.timesheet?.leave_type === 'leave', 'earned-leave': c?.timesheet?.leave_type === 'earned_leave', 'compensated': c?.timesheet?.leave_type === 'comp_off'}"></li> -->
+               </ng-template>
+                <!-- <li class="leave-unpaid"></li> -->
+              </ul>
+            </div>
+            <!--<div>
+                <p class="small">02</p>
+                <p class="small font-weight-medium color-dark daily-hour">8 H</p>
+              </div>
+               <div>
+                <p class="small">03</p>
+                <p class="small font-weight-medium color-dark daily-hour">8 H</p>
+              </div>
+              <div>
+                <p class="small">04</p>
+                <p class="small font-weight-medium color-dark daily-hour">8 H</p>
+              </div>
+              <div>
+                <p class="small">05</p>
+                <p class="small font-weight-medium color-dark daily-hour">8 H</p>
+              </div>
+              <div>
+                <p class="small">06</p>
+                <p class="small font-weight-medium color-dark daily-hour">8 H</p>
+              </div>
+              <div class="small">
+                <p class="small">07</p>
+                <p class="small font-weight-medium color-dark daily-hour">8 H</p>
+              </div> -->
+
+          </ng-container>
+          <!-- copy to Section  *ngIf="isFirst"-->
+          <div class="total-hr"*ngFor="let b of billingData;let j = index;first as isFirst; last as isLast"  [hidden]="i!=j">
+
+             <div class="d-flex item  justify-content-between align-items-center"
+             [ngClass]="{'active': allowCopyPasteCheck[i]?.allowCopy || checkIfSelected(i), 'pasted':allowCopyPasteCheck[i]?.pasted,
+             'paste-active': (allowCopyPasteCheck[i]?.allowPaste && copyIndex >= 0 && !checkIfSelected(i)) }">
+              <div class="week-count p-12">
+                <ng-template [ngIf]="!checkIfSelected(i)">
+                  <p class="small">{{b?.billing_hours || '0.00' | i18next }} </p>
+                  <p class="small" *ngIf="workingWeekDays[i]">{{workingWeekDays[i] | i18next }} Days</p>
+                </ng-template>
+
+                <ng-template [ngIf]="checkIfSelected(i)">
+                  <p class="small">{{ 'copied_from_week' | i18next }} {{copyIndex+1 }}</p>
+                </ng-template>
+              </div>
+              <ng-template [ngIf]="checkIfSelected(i)" >
+                <button class="undo-btn mr-16" (click)="undoData(i)"><icon name="undo" class="mr-4" size="14px"></icon> {{ 'undo' | i18next }}</button>
+              </ng-template>
+              <ng-template  [ngIf]="!checkIfSelected(i) && workingWeekDays[i]">
+                <button class="copy-btn" *ngIf="copyIndex == undefined || copyIndex == i" [ngClass]="{'active': copyIndex === i}" (click)="copyData(i)"><icon name="content_copy" class="mr-4" size="14px" ></icon>{{ 'copy' | i18next }}</button>
+                <button class="paste-btn mr-16" [disabled]="copyIndex === i || !allowCopyPasteCheck[i]?.allowPaste" (click)="pasteData(i)"><icon name="content_paste" class="mr-4" size="14px"></icon> {{ 'paste' | i18next }}</button>
+              </ng-template>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="abbr">
+      <ul>
+        <li class="full-day">
+          {{ 'full_day' | i18next }}
+        </li>
+        <li class="leave-unpaid">
+          {{ 'leave_(unpaid)' | i18next }}
+        </li>
+        <li class="weekly-off">
+          {{ 'weekly_off' | i18next }}
+        </li>
+        <li class="half-day">
+          {{ 'half_day' | i18next }}
+        </li>
+        <li class="earned-leave">
+          {{ 'earned_leave' | i18next }}
+        </li>
+        <li class="compensated">
+          {{ 'compensated_time_off' | i18next }}
+        </li>
+        <li class="client-holiday">
+          {{ 'holidayname' | i18next }}
+        </li>
+      </ul>
+    </div>
+  </div>
+  <footer class="copy-timesheet-footer">
+    <ng-template [ngIf]="pasteIndexes?.length > 0">
+      <p class="float-left small">
+        <icon name="warning" color="#F86F6FF2" class="mr-16 mt-8 float-left" size="24px"></icon> {{ 'while_you_are_clicking_on_the_save_button_your_current_data_will_be_replaced_with_the_selected_week' | i18next }}
+      </p>
+      <button *accessControl class="btn btn-primary float-right save-btn" [ngClass]="{'save-active': saveActive}" [disabled]="isSubmitted" (click)="updateTimesheet()">
+         {{ 'save' | i18next }} <img src="../../../../../assets/images/loader.gif" alt=""></button>
+    </ng-template>
+    <div class="clearfix"></div>
+  </footer>
+</section>
+<div class="backdrop-Overlay copy-modal-overlay" [ngClass]="{'active' : copyModal}"></div>

@@ -1,0 +1,44 @@
+<div class="px-24 reports-saved-bg pl-m-0 pr-m-0">
+  <div class="header-top py-24 d-flex aign-items-center justify-content-between">
+      <a routerLink="/reports" class="d-flex align-items-center text-primary header-top__back">
+          <icon size="24px" name="keyboard_arrow_left" type="material" cuClass="d-flex"></icon>
+          <span>{{ 'back_to_reports' | i18next }}</span>
+      </a>
+      <!-- <div class="d-flex align-items-center header-top__info">
+        <icon size="20px" name="help" type="material" cuClass="d-flex"></icon>
+        <span>{{ 'how_to_save_a_report' | i18next }} ?</span>
+      </div> -->
+  </div>
+<app-logs [log]="logs"></app-logs>
+<div class="saved-report-table">
+  <vms-table
+    [vmsTableConfig]="curentConfig"
+    [vmsDataSource]="vmsData"
+    [totalItem]="totalRecords"
+    [itemsPerPage]="limitRecords"
+    [loading]="dataLoading"
+    (onViewClick)="onClickView($event)"
+    (onViewScheduleClick)="onViewScheduleClick($event)"
+    (onSort)="onSortClick($event)"
+    (changePage)="onPaginationClick($event)"
+    (onEditClick)="onEditClick($event)"
+    (changeRecords)="onClickRecords($event)"
+    (search)="onSearch($event)"
+    (onTitleClicked)= "onTitleClick($event)"
+    (onBaseReportClicked)= "onBaseReportClicked($event)">
+  </vms-table>
+</div>
+
+<svms-sidebar-ng
+  [title]="(this.selectedReport?.viewOnly ? 'View Schedule' : 'Edit Schedule') | i18next"
+  [dataVisibility]="editVisibility"
+  (onClose)="closeEditView()"
+>
+  <svms-schedule-panel
+    [setReport]="selectedReport"
+    (closeView)="finishEditing($event)"
+    [edit]="true"
+  ></svms-schedule-panel>
+</svms-sidebar-ng>
+
+</div>

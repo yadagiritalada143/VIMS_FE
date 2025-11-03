@@ -1,0 +1,102 @@
+<!-- Button for going back-->
+<div class="wrapper p-24 pt-32">
+  <div class="user-preference-wrap">
+    <a class="back-btn d-flex align-items-center" (click)="goBack()">
+      <icon class="d-flex" cuclass="d-flex" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon>
+      <span class="ml-4"> {{ 'back' | i18next }} </span>
+    </a>
+
+    <header class="preference-header mt-16">
+      <div class="header-img position-relative">
+        <!-- <a class="change-image rounded-sm position-absolute px-8">Change Image</a> -->
+        <!-- <input hidden type="file" #fileInput (change)="fileChangeEvent($event)"> -->
+        <figure class="user-avatar mr-32 position-absolute float-left">
+          <div>
+            <img [src]="viewData?.avatar" alt="" *ngIf="viewData && viewData.avatar">
+            <span class="initials" *ngIf="!viewData?.avatar">{{ viewData?.full_name | shortName: 'last'}}</span>
+            <a href="javascript:void(0)" class="delete-image cursor-pointer" *ngIf="viewData?.avatar">
+              <icon class="d-inline-flex"(click)="deleteProfile()" cuclass="d-inline-flex" name="delete" color="#545454" theme="outlined"  size="24px" type="material"></icon>
+            </a>
+          </div>
+          <!-- Edit profile image link-->
+          <a href="javascript:void(0)" class="avatar-control" (click)="onEditClick()">
+            <icon class="d-inline-block" name="create" size="14px" type="material"></icon>
+          </a>
+
+        </figure>
+        <div class="float-left font-weight-medium mr-16">
+          <h3 class="float-left font-weight-medium mr-16">{{ (getFullName(viewData?.full_name) ?? "") | titlecase }}</h3>
+            <!-- {{viewData && (viewData.name_prefix )}} {{viewData && (viewData.first_name | titlecase)}} {{viewData && (viewData.last_name | titlecase)}} {{viewData && (viewData.name_suffix)}}</h3>
+          <ng-template #withmiddlename>
+            <h3 *ngIf="viewData" class="float-left font-weight-medium mr-16">
+              {{viewData && (viewData.name_prefix )}} {{viewData && (viewData.first_name | titlecase)}} {{viewData && (viewData.middle_name | titlecase)}} {{viewData && (viewData.last_name | titlecase)}} {{viewData && (viewData.name_suffix)}}</h3>
+          </ng-template> -->
+        </div>
+        <span class="status-ui float-left" [ngClass]="isActive ? 'active' : 'inactive'">{{(isActive? 'enabled' : 'disabled') | i18next}}</span>
+        <div class="clearfix"></div>
+      </div>
+      <nav>
+        <vms-tab-group>
+          <vms-tab label="{{ 'profile' | i18next }}" [active]="!isProgram">
+            <vms-basic-info-profile (onEditClick)="onEditClick()" (onResetClick)="onResetClick()" [viewData]="viewData">
+            </vms-basic-info-profile>
+          </vms-tab>
+          <vms-tab label="{{ 'programs' | i18next }}" [active]="isProgram" *ngIf="showProgramTab">
+            <vms-program-attachedtto [viewData]="viewData" [openAddToProgram]="openAddToProgram">
+            </vms-program-attachedtto>
+          </vms-tab>
+        </vms-tab-group>
+        <!-- <a href="javascript:void(0)" class="edit-theme">
+          <icon class="d-inline-block" name="format_color_fill" size="22px" type="material"></icon>
+        </a> -->
+      </nav>
+    </header>
+  </div>
+</div>
+
+<vms-create-new-user reloadPage="reloadPage" [viewData]="viewData"
+  [list_or_create]="list_or_create" [createUser]="createUser"
+  (onUpdate)="handleUpdate()"></vms-create-new-user>
+
+<svms-sidebar title="Reset Password" [size]="'large'" [icon]="'supervised_user_circle'"
+    (onClose)="sidebarClose()" [dataVisibility]="isAddHirerachy">
+  <svms-sidebar-body>
+      <div class="account-form-wrapper">
+        <div class="form-wrapper">
+          <div class="form-group mb-0">
+            <label>{{ 'enter_password' | i18next }} <span class="require">*</span></label>
+            <div class="position-relative">
+              <input type="password" class="form-control medium password-field no-radius" [ngClass]="{'error': isPasswordError}"
+              [(ngModel)]="password" placeholder="{{ 'enter_password' | i18next }}" (ngModelChange)="changePassword(password)"
+              appPasswordToggle>
+            </div>
+          </div>
+          <div class="output-checker mb-24">
+            <vms-password-strength [passwordToCheck]="password">
+            </vms-password-strength>
+          </div>
+          <div class="validation-alert p-8 alert-error overflow-hidden d-flex mb-16"
+            *ngIf="isPasswordError || isRePasswordError">
+            <icon name="error_outline" size="24px" type="material" class="d-flex mr-16 justify-content-align-center"></icon>
+            <p class="small" *ngIf="errorMessage">
+              {{errorMessage | i18next}}
+            </p>
+          </div>
+
+          <div class="form-group mb-8">
+            <label>{{ 'confirm_password' | i18next }} <span class="require">*</span></label>
+            <input type="password" class="form-control medium" [ngClass]="{'error': isRePasswordError}"
+              [(ngModel)]="rePassword" (ngModelChange)="checkPassword(rePassword)" placeholder="{{ 'confirm_password' | i18next }}" appPsswordToggle>
+          </div>
+          <div class="row">
+            <div class="col">
+              <button [disabled]="isInvalid || invalidPassword" class="account-btn btn btn-secondary float-right" (click)="basicDetail()">{{ 'save' | i18next }} &amp; {{ 'continue' | i18next }}
+                <icon class="icon--on-right d-flex" cuClass="intro-btn" name="keyboard_backspace" size="24px" type="material">
+                </icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </svms-sidebar-body>
+  </svms-sidebar>

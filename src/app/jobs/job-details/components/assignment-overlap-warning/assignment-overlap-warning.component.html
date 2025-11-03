@@ -1,0 +1,24 @@
+<app-svms-modal title="{{'warning'}}" [visibility]="showWarning" (onClose)="onClose()">
+    <app-svms-modal-body class="font-weight-medium">
+      <div class="px-12 overlap-warning">
+        <p class="warning-para">{{"assignment_overlap_warning_prefix"|i18next}} </p>
+        <div class="my-8">
+            <table class="warning-table">
+                <thead>
+                    <tr>
+                    <th>{{'assignment_id'| i18next}}</th>
+                    <th>{{'dates'|i18next}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let assignment of assignmentData">
+                    <td>{{ assignment?.code }}</td>
+                    <td> {{ assignment?.start_date | localDateFormat : '' : '' : '' : true}} {{'assignment_overlap_to'| i18next}} {{ assignment?.end_date | localDateFormat : '' : '' : '' : true}}</td>
+                  </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="warning-para">{{"assignment_overlap_warning_suffix" | i18next}}</p>
+      </div>  
+    </app-svms-modal-body>
+  </app-svms-modal>

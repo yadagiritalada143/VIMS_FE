@@ -1,0 +1,45 @@
+<ng-template #customFieldStatus let-row let-value="value">
+  <span class="c-status-ui active" *ngIf="value == 'Active'">
+    {{ 'active' | i18next }}
+  </span>
+  <span class="c-status-ui inactive" *ngIf="value == 'Inactive'">
+    {{ 'inactive' | i18next }}
+  </span>
+</ng-template>
+
+<ng-template #requiredStatus let-value="value">
+  <div class="check-required">
+      <div class="checkbox-box">
+          <div class="checkbox-wrapper">
+              <label class="checkbox-container">
+                  <input [disabled]="'true'" [checked]="value" type="checkbox" name="EDIT">
+                  <span class="checkmark"></span>
+              </label>
+          </div>
+      </div>
+  </div>
+</ng-template>
+
+<app-svms-table
+  [tableOptions]="tableOptions"
+  [coloumnDefintions]="svmstableColomnDefn"
+  [dataSource]="svmsData">
+</app-svms-table>
+
+<ng-template #emptyDataTemplate>
+  <app-no-listing-page
+    clickHere="click here"
+    btnClickUrl="FOUNDATION_DATA_TYPE_CREATE"
+    btnmsg="Create Your First Custom Field"
+    pmsg="If you would like to add Custom Field,"
+    headingmsg="No Custom Field found for the selected program."
+    (onCreateClick)="onCreateClick(true)"
+    #emptyDataTemplate
+  >
+  </app-no-listing-page>
+</ng-template>
+
+<column-custom-order *ngIf="showOrderChangeFlyout" [hideInputBox]="true" (onSave)="changedCustomColoumnOrder($event)" (onClose)="onCloseOrderChangedModel($event)" (onModuleChange)="onReOrderModuleChange($event)" [tableTitle]="tableOptions.headerConfig.title" [dataSource]="allCustomFieldData" [moduleList]="reOrderModules"></column-custom-order>
+
+
+

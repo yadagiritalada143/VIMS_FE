@@ -1,0 +1,73 @@
+<svms-sidebar title="{{ 'add_new_user' | i18next }}" icon="person_add" [dataVisibility]="addnewUser" (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)">
+      <vms-tab label="{{ 'basic_info' | i18next }}">
+        <app-basic-info [simplifyUser]="true"></app-basic-info>
+      </vms-tab>
+      <vms-tab label="{{ 'address_&_contact' | i18next }}">
+        <form [formGroup]="createUser">
+          <!-- <h4 class="float-left mb-24">Primary Address</h4> -->
+          <app-address-contact-details [showAdditionalContactFields]="false" [showSecondaryAddress]="true" [countryList]="allCountryList" [showSecondaryContact]="true"></app-address-contact-details>
+
+          <!-- <h4 class="mb-24">Additional Phone Numbers</h4> -->
+          <!-- <div class="form-group-row">
+            <div class="form-group">
+              <label>{{ 'additional_phone_number' | i18next }} </label>
+              <div class="d-flex align-items-center country-searchable">
+                <ng-select [searchable]="true" [clearable]="false" ngDefaultControl formControlName="additional_phone">
+                  <ng-option *ngFor="let country of allCountryList" [value]="country.iso_code_2">
+                    <img src="../../../assets/images/flag/{{country.iso_code_2.toLowerCase()}}.png" width="20px" class="mr-4" />
+                    <span>+{{country.isd_code}}</span>
+                  </ng-option>
+                </ng-select>
+                <input
+                  type="number"
+                  class="form-control"
+                  placeholder="{{ 'additional_phone_number' | i18next }}"
+                  formControlName="additionalphone"
+                  [pattern]="mobNumberPattern"
+                  [ngClass]="{
+                    error:
+                      createUser.controls['additionalphone'].invalid &&
+                      (createUser.controls['additionalphone'].dirty || createUser.controls['additionalphone'].touched)
+                  }"
+                />
+              </div>
+              <p
+                *ngIf="
+                  createUser.get('additionalphone').touched &&
+                  (createUser.get('additionalphone').errors?.pattern ||
+                    createUser.get('additionalphone').errors?.required ||
+                    createUser.get('additionalphone').invalid)
+                "
+                class="validation-msg"
+              >
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                {{ 'phone_number_not_valid.' | i18next }}
+              </p>
+            </div>
+          </div> -->
+        </form>
+      </vms-tab>
+    </vms-tab-group>
+  </svms-sidebar-body>
+  <svms-sidebar-footer>
+    <!-- <button class="btn btn-outline float-left" *ngIf='userBasic'>
+      <icon size="20px" name="mail" type="material" class="icon--on-left d-flex" cuClass="d-flex"></icon>
+      Invite User
+    </button> -->
+    <button class="btn btn-primary float-right" (click)="nexttab()" *ngIf="userBasic" [disabled]="BasicInfoForm == 'INVALID'">
+      {{ 'continue' | i18next }}
+      <icon size="20px" name="arrow_forward" type="material" class="icon--on-right d-flex" cuClass="d-flex"></icon>
+    </button>
+    <button
+      class="btn btn-primary float-right"
+      *ngIf="userAddressTab"
+      (click)="saveUsers()"
+      [disabled]="BasicInfoForm == 'INVALID' || createUser.status == 'INVALID' || addressForm == 'INVALID'"
+    >
+      <icon size="20px" name="check_circle" type="material" class="icon--on-left d-flex" cuClass="d-flex"></icon>
+      {{ 'create_user' | i18next }}
+    </button>
+  </svms-sidebar-footer>
+</svms-sidebar>

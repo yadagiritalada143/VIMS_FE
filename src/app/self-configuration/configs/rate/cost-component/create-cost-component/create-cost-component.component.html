@@ -1,0 +1,53 @@
+<header class="section-header page-title-main p-24 d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+        <i (click)="backToList()" class="material-icons back-arrow-icon mr-16 cursor-pointer" tooltip="{{'back' | i18next}}" placement="bottom">arrow_back</i>
+        <h3 class="font-weight-semibold mb-0">{{ (isEdit ? 'edit' : 'create_new') | i18next }} {{ 'cost_component' | i18next }}</h3>
+    </div>
+    <div>
+        <button class="c-btn c-btn-success-medium" (click)="submit()">{{ isEdit?'Update':'Save' | i18nextEager }}</button>
+    </div>
+</header>
+
+<section class="section-body-content">
+    <div class="row no-gutters program-details-mobile">
+        <app-logs class="w-100 mx-24 mt-12" [log]="logs"></app-logs>
+
+        <div class="warning-info-box w-100 m-24 px-16 py-8 notification-text-box d-flex align-items-center justify-content-start">
+            <i class="info-color type material-icons">info</i>
+            <div class="align-self-start pl-16">
+                <p class="font-weight-medium">{{ 'information' | i18next }}</p>
+                <p class="summary">{{ 'when' | i18next }}
+                    {{ 'users_create_a_cost_component_within_the_platform,_they_will_need_to_proceed_with_grouping_that_cost_component_via' | i18next | lowercase }} 
+                    <span class="text-underline">{{ 'cost_component_group' | i18next }}</span> 
+                    {{ 'admin_object' | i18next | lowercase }}.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="p-24">
+                <form class="cost-component-form">
+                    <div class="c-form-group-row justify-content-between">
+                        <div class="c-form-group">
+                            <label>{{ 'name' | i18next }}<span class="require">*</span></label>
+                            <input type="text" class="c-form-control" name="name" [(ngModel)]="name">
+                        </div>
+
+                        <div class="c-form-group toggle-width toggle-panel active-inactive-toggle mt-24 d-flex justify-content-between">
+                            <div class="toggle-panel-inner" [ngClass]="isActive ? 'if-active' : 'if-inactive'">
+                                <span class="is_active-text">{{ (isActive ? 'active' : 'inactive') | i18next }}</span>
+                                <span class="toggle-switch" [ngClass]="isActive ? 'toggle-on' : 'toggle-off'" (click)="toggleActive()"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="w-100">
+                        <label>{{ 'code' | i18next }}<span class="require">*</span></label>
+                        <input type="text" class="c-form-control" name="code" [(ngModel)]="code"
+                            [minlength]="4" [maxlength]="20" [mandatePattern]="codePattern">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

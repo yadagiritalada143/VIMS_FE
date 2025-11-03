@@ -1,0 +1,224 @@
+<div class="detailed-page-section">
+    <h4 class="font-weight-medium section-title hide-on-desktop mb-m-0"  *ngIf="submitedCandidateDetail" [ngClass]="{'active' : (detailedValue === 'hprocess')}"  (click)="detailCollapse('hprocess')">
+        <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'hprocess') ? 'remove' : 'add'" type="material"
+        cuClass="icon-cu"></icon>
+      {{'Hiring Process'|i18nextEager}}</h4>
+      <app-notification-cards [ngClass]="(detailedValue === 'hprocess') ? 'active' : 'inactive'" *ngIf="submitedCandidateDetail" [submitedCandidateDetail]="submitedCandidateDetail" [offers]="offers" [interviews]="interviews" [jobId]="jobId" [jobStatus]="this.jobStatus" [candidateId]="CandidateId">
+    </app-notification-cards>
+</div>
+
+
+
+
+<!-- <div class="panel py-16" >
+  <div class="action-pending">
+    <p class="action-text pl-16">You have <span>2</span> Pending Actions</p>
+    <div class="arrows d-flex align-items-center">
+      <div>
+        <icon class="d-flex" size="18px" name="keyboard_arrow_left" theme="outlined" color="#292425" type="material"
+          cuClass="d-flex"></icon>
+      </div>
+      <div>
+        <icon class="d-flex" size="18px" name="keyboard_arrow_right" theme="outlined" color="#292425" type="material"
+          cuClass="d-flex"></icon>
+      </div>
+    </div>
+  </div>
+  <div class="d-flex align-items-center justify-content-between px-16 mt-16" *ngIf="candidateData">
+    <div class="d-flex flex-column">
+      <p class="text-dark">Accepting Interview</p>
+      <p class="small word-break">Interview Created by {{candidateData?.first_name }} {{candidateData?.last_name }} </p>
+      <a class="cursor-pointer" (click)="onViewInterview()" class="mt-24 blue">View Interview</a>
+    </div>
+    <img src="../../../../../../assets/images/notification.svg" />
+  </div>
+</div> -->
+<div class="mb-16 detailed-page-section" *ngIf="candidateData">
+    <h4 class="font-weight-medium section-title hide-on-desktop mb-m-0"  [ngClass]="{'active' : (detailedValue === 'downloadresume')}"  (click)="detailCollapse('downloadresume')">
+        <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'downloadresume') ? 'remove' : 'add'" type="material"
+        cuClass="icon-cu"></icon>
+      {{'Download Resume'|i18nextEager}}</h4>
+    <div class="p-16 panel mb-m-0"  [ngClass]="(detailedValue === 'downloadresume') ? 'active' : 'inactive'">
+        <div class="d-flex align-items-center justify-content-between">
+            <!-- <icon class="d-flex cursor-pointer" size="22px" name="warning_amber" theme="outlined" color="#EDB90B" type="material"
+          cuClass="d-flex"></icon>
+        <icon class="d-flex cursor-pointer" size="22px" name="more_vert" theme="outlined" color="#ADB5BD" type="material"
+          cuClass="d-flex"></icon> -->
+        </div>
+        <div class="dp-candidate-card">
+            <div class="profile mb-8">
+                <!-- <img src="../../../../../../assets/images/user-profile.png"> -->
+                <figure *ngIf="candidateData?.avatar && !profileImageHide " class="">
+                    <img [src]="candidateData?.avatar" alt="{{candidateData?.avatar}}">
+                </figure>
+                <figure *ngIf="!candidateData?.avatar || (profileImageHide && candidateData?.avatar)" class="rounded-circle text-center position-relative mb-0 d-flex justify-content-center align-items-center">
+                    <span *ngIf="candidateData?.name_initials" class="text-capitalize"> {{candidateData?.name_initials}}</span>
+                    <span class="availability rounded-circle online d-none"></span>
+                </figure>
+            </div>
+            <h4>{{(candidateData?.displayName | titlecase) ||'--' }}</h4>
+            <div class="d-flex align-items-center" *ngIf="hideEyeIcon">
+                <icon class="mr-8" size="20px" name="label" color="#FFC409" type="material" cuClass="d-flex"></icon>
+                <p class="small mr-24" >{{ candidateData?.unique_id || '-'}}</p>
+            </div>
+            <div class="d-flex align-items-center mt-4" *ngIf="isUserRole('MSP')">
+                <icon class="mr-8" size="18px" name="corporate_fare" color="#495057" type="material" cuClass="d-flex"></icon>
+                <p class="small mr-24">{{ candidateData?.vendor?.name || ''}} </p>
+            </div>
+            <button type="button" *ngIf="candidateData?.resume_url" (click)="downloadAttachment(candidateData?.resume_url)" class="btn btn-outline-primary mt-8 pl-4 pr-8 ">
+              <icon class="mr-8" size="20px" name="file_download" theme="outlined" type="material" cuClass="d-flex"></icon>
+              {{ 'download_resume' | i18nextEager }}
+            </button>
+
+            <button type="button" *ngIf="!candidateData?.resume_url" class="btn btn-outline-primary mt-8 pl-4 pr-8 " disabled>
+              <icon class="mr-8" size="20px" name="file_download_off" theme="outlined" type="material" cuClass="d-flex"></icon>
+              {{ 'resume_not_available' | i18nextEager }}
+            </button>
+        </div>
+    </div>
+    <div class="master-talent-profile-btn cursor-style"  *ngIf="submitedCandidateDetail && showMtpDetailsPermission && candidateData.mtp_id" (click)="masterTalentProfileDetail()">
+      <icon class="d-flex" size="24px" name="group" type="material" cuClass="module-icon mr-24"></icon>
+        {{'view_master_talent_profile' | i18nextEager}}
+    </div>
+</div>
+
+<div class="detailed-page-section" *ngIf="isUserRole('MSP')">
+    <h4 class="font-weight-medium section-title hide-on-desktop mb-m-0"  [ngClass]="{'active' : (detailedValue === 'vendor')}"  (click)="detailCollapse('vendor')">
+        <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'vendor') ? 'remove' : 'add'" type="material"
+        cuClass="icon-cu"></icon>
+      {{'Vendor'|i18nextEager}}</h4>
+    <div class="p-16 panel mb-16 mb-m-0" [ngClass]="(detailedValue === 'vendor') ? 'active' : 'inactive'">
+        <div class="d-flex align-items-center vendor-info">
+            <div class="avatar">
+              <img  [src]="candidateData?.vendor?.logo_url && candidateData?.vendor?.logo_url !=='' ? candidateData?.vendor?.logo_url : 'assets/images/no-vendor-logo.svg'" alt="{{candidateData?.vendor?.logo_url}}"/>
+            </div>
+            <div class="d-flex flex-column justify-content-center ml-8 company-details">
+              <span class="text-gray mb-8">{{'Vendor'|i18nextEager}}</span>
+              <span class="text-dark">{{ candidateData?.vendor?.name || ''}}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="detailed-page-section">
+    <h4 class="font-weight-medium section-title hide-on-desktop mb-m-0" *ngIf="jobData && submitedCandidateDetail"  [ngClass]="{'active' : (detailedValue === 'binfo')}"  (click)="detailCollapse('binfo')">
+        <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'binfo') ? 'remove' : 'add'" type="material"
+        cuClass="icon-cu"></icon>
+      {{'Job Detail'|i18nextEager}}</h4>
+      <div class="candidate-job-view-right-panel panel mb-16" [ngClass]="(detailedValue === 'binfo') ? 'active' : 'inactive'" *ngIf="jobData && submitedCandidateDetail">
+        <div class="d-flex align-items-center justify-content-between p-16 border-bottom pl-m-0 pr-m-0">
+          <div class="d-flex align-items-center">
+              <div class="initials initials-purple">
+                  <icon class="d-flex" size="20px" name="work_outline" color="white" type="material" cuClass="d-flex"></icon>
+              </div>
+              <div class="d-flex flex-column cursor-style" *ngIf="candidateData" (click)="jobDetail()">
+                  <p class="text-dark"> {{jobData?.template_name ||'--' }}</p>
+                  <div class="d-flex align-items-center">
+                      <icon class="mr-8" size="20px" name="label" color="#FFC409" type="material" cuClass="d-flex"></icon>
+                      <p class="small mr-24"> {{ jobData?.job_id || '-'}}</p>
+                  </div>
+              </div>
+          </div>
+          <div class="d-flex">
+              <!-- <icon class="d-flex" size="20px" name="open_in_new" color="#ADB5BD" type="material" cuClass="d-flex"></icon> -->
+          </div>
+      </div>
+    <div class="p-16">
+        <h4 class="font-weight-medium mb-24">
+           {{ 'basic_info' | i18next }}
+        </h4>
+        <div class="d-flex flex-column">
+            <div class="info-item">
+                <div class="d-flex mb-16">
+                    <p>{{ 'labor_category' | i18next }}</p>
+                    <p>{{jobData?.program_industry?.length >= 1 ? jobData?.program_industry[0]?.name : '-'}}</p>
+                </div>
+                <div class="d-flex mb-16">
+                    <p>{{ 'category' | i18next }}</p>
+                    <p>{{jobData?.category?.category_name || '-'}}</p>
+                </div>
+                <div class="d-flex  mb-16">
+                    <p>{{ 'job_manager' | i18next }}</p>
+                    <p class="d-flex align-items-center">
+                        <figure *ngIf="jobData?.job_manager?.avatar" class="mr-8">
+                            <img [src]="candidateData?.avatar" alt="{{candidateData?.avatar}}">
+                        </figure>
+                        <figure *ngIf="!jobData?.job_manager?.avatar && jobData?.job_manager?.name_initials" class="initials d-flex justify-content-center align-items-center">
+                            <span class="text-capitalize"> {{jobData?.job_manager?.name_initials}}</span>
+                            <span class="availability rounded-circle online d-none"></span>
+                        </figure>
+                        <figure *ngIf="!jobData?.job_manager?.avatar && !jobData?.job_manager?.name_initials && jobData?.job_manager?.first_name && jobData?.job_manager?.last_name" class="initials d-flex justify-content-center align-items-center">
+                            <span class="text-capitalize"> {{(jobData?.job_manager?.first_name  || '-') | slice:0:1}}</span>
+                            <span class="text-capitalize"> {{jobData?.job_manager?.last_name | slice:0:1}}</span>
+                            <span class="availability rounded-circle online d-none"></span>
+                        </figure>
+                        {{jobData?.job_manager?.first_name || '-'}} {{jobData?.job_manager?.last_name }}
+                    </p>
+                </div>
+                <div class="d-flex mb-16">
+                  <p>{{ 'work_location' | i18next }}</p>
+                  <div class="location-field">
+                    <p> {{jobData?.location?.name ? jobData?.location?.name : '--' ||
+                        jobData?.hierarchy_location }} - {{jobData?.location?.code ?
+                          jobData?.location?.code : '--'}}</p>
+                          <div class="d-flex align-items-center detail-button">
+                            <div class="tooltip-enabled position-relative">
+                                <button>{{'view_address' | i18next}}</button>
+                                <div class="item-tooltip">
+                                    <p class="small">{{work_location?.address_line_1}}</p>
+                                    <p class="small">{{work_location?.address_line_2}}</p>
+                                    <p class="small">{{work_location?.city_state_zipcode}}</p>
+                                    <p class="small">{{work_location?.country_name}}</p>
+                                </div>
+                            </div>
+                            <icon class="ml-8 cursor-pointer" cuClass="d-flex" name="content_copy" size="14px" color="#0F2E4E" tooltip="Copy Address" placement="right" (click)="copyToClipboard()"></icon>
+                        </div>
+                  </div>
+
+                </div>
+                <div class="d-flex  mb-16">
+                    <p>{{ 'no._of_openings' | i18next }}</p>
+                    <p> {{jobData?.positions|| '0'}}</p>
+                </div>
+                <div class="d-flex  mb-16">
+                    <p>{{ 'job_level' | i18next }}</p>
+                    <p>{{jobData?.level || '--'}}</p>
+                </div>
+                <div class="d-flex  mb-16">
+                    <p>{{ 'job_duration' | i18next }}</p>
+                    <!-- <p>{{jobData?.duration?.weeks + '  weeks'  ||  '-'}}   {{ jobData?.duration?.days + '  days'  || '-'}}</p> -->
+                    <p class="info-item item-value" *ngIf="!dataLoader && jobData?.duration?.weeks <= 1">
+                        {{jobData?.duration?.weeks ? jobData.duration?.weeks + ' week' : ''}}
+                        {{ jobData?.duration?.days ? (jobData.duration?.days > 1 ? jobData.duration?.days + ' days':  jobData.duration?.days + ' day') : ''}}
+                    </p>
+                    <p class="info-item item-value" *ngIf="!dataLoader && jobData?.duration?.weeks >= 2">
+                        {{jobData?.duration?.weeks ? jobData.duration?.weeks + ' weeks' : ''}}
+                        {{ jobData?.duration?.days ? (jobData.duration?.days > 1 ? jobData.duration?.days + ' days' : jobData.duration?.days + ' day') : ''}}
+                    </p>
+
+                </div>
+        <!--        <div class="d-flex  mb-16">
+                    <p>Job Type</p>
+                    <p>{{jobData?.type ? jobData?.type : '--'}}</p>
+                </div>-->
+                <div class="d-flex  mb-16">
+                    <p>{{ 'start_date' | i18next }}</p>
+                    <p>{{jobData?.start_date_timestamp | localDateFormat: '' :'' : '' : true }}</p>
+                  </div>
+                <div class="d-flex">
+                    <p>{{ 'end_date' | i18next }}</p>
+                    <p>{{jobData?.end_date_timestamp | localDateFormat: '' :'' : '' : true }}</p>
+                </div>
+            </div>
+        </div>
+      </div>
+</div>
+<app-withdraw-candidate (onActionSuccess)='onActionSuccess($event)'></app-withdraw-candidate>
+
+
+<app-svms-modal size="largest" title="{{ 'profile_linking' | i18nextEager }}" [visibility]="showMTPLinking" (onClose)="onCloseModal()"> 
+    <app-master-profile-linking [selectedMasterProfileID]="selectedMasterProfileID" 
+    (onClose)="onCloseModal($event)" [mtpMatches]="mtpMatches" 
+    (setSelectedMtpID)="selectedMasterProfileID = $event" [candidateData]="candidateData"></app-master-profile-linking>
+</app-svms-modal>
+<app-master-talent-profile-details [profileId]="profileId" (modelclose)="closemtpModal()" *ngIf="mtpDetails"></app-master-talent-profile-details>

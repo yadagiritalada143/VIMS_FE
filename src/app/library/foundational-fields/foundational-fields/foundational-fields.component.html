@@ -1,0 +1,55 @@
+<h4 class="mt-32 pb-12 font-weight-medium" *ngIf="foundationTypeList?.length > 0">
+  {{'master_data'|i18next}}
+</h4>
+<div class="row">
+  <div class="col-4" *ngFor="let item of foundationalDataArray?.controls; let i = index">
+    <div class="form-group-row" [formGroup]="item">
+      <div class="form-group">
+        <label>{{ item?.get("foundational_data_name")?.value }}
+          <span class="require" *ngIf="item?.get('is_required')?.value">*</span>
+          <i *ngIf="item?.get('financial_master_data_type')?.value" class="info-icon custom-field-info master-field-color material-icons ml-8"
+            tooltip="Changes to this field will have financial impacts." placement="right">payments</i></label>
+        <!-- Settting multiple property to false as currently Job and offer BE is working to support multiple values -->
+        <div [tooltip]="!selectElement?.isOpen && foundationalFieldsTooltipData?.[i] ? foundationalFieldsTooltipData?.[i] : null" placement="top">
+          <ng-select #selectElement [ngClass]="{'disabled': checkDisabled(item?.get('is_readonly')?.value, item?.get('values').value, item?.get('foundational_data_type_id').value)}" [loadingText]="'loading....'| i18next"
+            [loading]='dataLoading && currentDropdownIndex == i' [clearable]="!(item?.get('is_readonly')?.value)"
+            [multiple]="(item?.get('isMultiple')?.value)" bindLabel="name" [formControl]="item?.get('values')"
+            [placeholder]="'select' | i18next" (search)="searchFoundationalData($event, item, i, page = 1, limit = 25)"
+            (change)="onChangeFoundationFields($event, item)" (clear)="onClearFoundationalData($event, item, i)"
+            (scrollToEnd)="loadMoreFoundationalData(fd?.searchTerm, item, i)"
+            notFoundText="{{ 'no_items_found' | i18next }}" #fd>
+            <ng-option *ngFor="let option of item?.get('options')?.value" [value]="option.id">
+              <span [hidden]="hideMasterDataTypeName">{{ option.name }} -</span>
+              {{option?.code}}
+            </ng-option>
+            <ng-option *ngIf="dataLoading && currentDropdownIndex === i">
+              <span >{{ 'loading_more_results...' | i18next }}</span>
+            </ng-option>
+          </ng-select>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="showCustomFields">
+  <ng-container *ngFor="let dependentCustomField of customFieldsList">
+    <div *ngIf="dependentCustomField.customFieldsArray.length > 0" class="panel panel-light p-16 pb-0 mb-12">
+      <label class="mb-12 font-weight-medium">{{dependentCustomField.label}}</label>
+      <div class="panel-wrapper">
+        <div class="panel panel-light p-16 pb-0 mb-12"
+          [ngClass]="{'showonlyone': dependentCustomField.customFieldsArray?.length === 1 || dependentCustomField.customFieldsArray[0]?.showFields?.length > 2}"
+          *ngFor="let customField of dependentCustomField.customFieldsArray">
+          <label>{{ customField?.name}}</label>
+          <div class="row">
+            <div *ngFor="let showField of customField.showFields" class="form-group"
+              [ngClass]="{'col-4': dependentCustomField.customFieldsArray?.length === 1 || dependentCustomField.customFieldsArray[0]?.showFields?.length > 2,
+              'col-6': !(dependentCustomField.customFieldsArray?.length === 1 || dependentCustomField.customFieldsArray[0]?.showFields?.length > 2)}">
+              <label>{{ showField.label}}</label>
+              <input type="text" class="form-control" [value]="showField.value" disabled>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

@@ -1,0 +1,88 @@
+<div class="view-detail-page">
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <i (click)="navigateBack()" class="material-icons cursor-pointer" tooltip="{{'Back' | i18next}}" placement="bottom">arrow_back</i>
+            <div class="ml-16">
+                <h3 class="font-weight-semibold mb-0">{{ templateTitle | i18next}}</h3>
+                <p class="small">
+                    {{ commonViewService.getTimeStamp(jobTemplateData?.created_on, jobTemplateData?.modified_on, jobTemplateData?.username) | i18next }}
+                </p>
+            </div>
+        </div>
+
+        <div *authorize="'job_template_manage'">
+            <button (click)="navigateToEditPage()" class="c-btn c-btn-secondary-medium-left-icon"  [disabled]="btnLoader">
+                <i class="material-icons">drive_file_rename_outline</i>
+                {{ 'edit' | i18next }}
+            </button>
+        </div>
+    </header>
+    <section class="section-body-content">
+        <div class="p-32 pt-0 detail-item-parent">
+
+            <div class="pt-32" *ngFor="let data of jobTemplateViewData;">
+            <h4 class="font-weight-medium mb-16" *ngIf="data?.name">{{ data?.name | i18next}}</h4>
+            <div *ngFor="let subitem of data?.submenuItem" class="detail-item d-flex align-items-center justify-content-between  mb-16">
+                <div class="item-label" *ngIf="(subitem?.label !=='Selected Roles' && subitem?.label !=='Selected Background Checks')">{{ subitem.label | i18next }}</div>
+                <div class="item-label" *ngIf="(subitem?.label =='Selected Roles' && jobTemplateData?.is_description_editable) ||(subitem?.label =='Selected Background Checks' && jobTemplateData?.is_background_check )"><i class="material-icons mr-12">subdirectory_arrow_right</i>
+                    {{ subitem.label | i18next }}
+                </div>
+
+                <div class="item-value" *ngIf="jobTemplateData">
+                    <span *ngIf="subitem?.value =='category' || subitem?.value =='program_industry'">{{jobTemplateData[subitem?.value]?.description ?? jobTemplateData[subitem?.value][0]?.name | i18next}}</span>
+                    <span class="description-field" *ngIf="subitem?.value =='description'" [innerHtml]="jobTemplateData[subitem?.value]" ></span>
+                    <span class="description-field" *ngIf="subitem?.value =='jd_parsing_file'">
+                        <div *ngIf="jobTemplateData[subitem?.value]?.length">
+                            <div class="description-download" *ngFor="let file of jobTemplateData[subitem?.value]">
+                                <a *ngIf="file?.raw" class="d-flex" [href]="file?.raw" target="_blank">
+                                    <icon size="24px" name="file_download" type="material" cuClass="d-flex"></icon>
+                                    <span>{{ file?.name || '-' }}</span>
+                                </a>
+                                <a *ngIf="file?.key" class="d-flex" (click)="downloadS3Attachment(file)">
+                                    <icon size="24px" name="file_download" type="material" cuClass="d-flex"></icon>
+                                    <span>{{ file?.name || '-' }}</span>
+                                </a>
+                            </div>
+                        </div>
+                    </span>
+                    <span class="description-field" *ngIf="subitem?.value =='is_enabled'">{{ (jobTemplateData[subitem?.value] ? 'active' : 'inactive') | i18next }}</span>
+                    <span *ngIf="subitem?.value !=='is_enabled' && subitem?.value !=='category' && subitem?.value!=='hierarchy' && subitem?.value !=='program_industry' && subitem?.value !=='roles_icon' && subitem?.value!=='user_role' && subitem?.value!=='qualification' && subitem?.value!=='default_fields' && subitem?.value !=='backgroundcheckValue' && subitem?.value!=='rates' && subitem?.value!='description' && subitem?.value!='is_expense_allowed' && subitem?.value !='is_expense_allowed_editable' && subitem?.value !='is_allow_express_offer' && subitem?.value !='jd_parsing_file' && subitem?.value !='resume_mandatory' && !subitem?.useI18">{{jobTemplateData[subitem?.value]}}</span>
+                    <span *ngIf="subitem?.useI18">{{jobTemplateData[subitem?.value] | i18nextEager}}</span>
+                    <div class="item-value" *ngIf="subitem?.value =='hierarchy'">
+                        <ul *ngFor="let data of jobTemplateData?.hierarchy">
+                            <li>{{data?.name}}</li>
+                        </ul>
+                    </div>
+                        <div class="item-value font-weight-medium" *ngIf="subitem?.value =='roles_icon' || subitem?.value =='background_check_icon' || subitem?.value =='is_qualification_enabled_icon' || subitem?.value =='is_limit_submission_available'  || subitem?.value =='onboardingChecklist' || subitem?.value =='maxBillRate' || subitem?.value =='is_expense_allowed' || subitem?.value =='is_expense_allowed_editable' || subitem?.value =='is_allow_express_offer' || subitem?.value =='resume_mandatory' ">
+                            <a *ngIf="(subitem?.value =='roles_icon' && jobTemplateData?.is_description_editable) || (subitem?.value =='background_check_icon' && jobTemplateData?.is_background_check) || (subitem?.value =='is_qualification_enabled_icon' && jobTemplateData?.is_qualification_enabled) || (subitem?.value =='is_limit_submission_available' && jobTemplateData?.available_start_date_limit?.is_enabled)|| (jobTemplateData?.is_onboarding_checklist && subitem?.value == 'onboardingChecklist') || (jobTemplateData?.is_submission_exceed_max_bill_rate && subitem?.value =='maxBillRate') || (jobTemplateData?.is_expense_allowed_editable && subitem?.value =='is_expense_allowed_editable') || (jobTemplateData?.is_expense_allowed && subitem?.value =='is_expense_allowed') || (jobTemplateData?.allow_express_offer && subitem?.value =='is_allow_express_offer') || (jobTemplateData?.resume_mandatory && subitem?.value =='resume_mandatory')" class="d-flex align-items-center Enabled"><i class="material-icons">toggle_on</i><span>{{'enabled'|i18next}}</span></a>
+                            <a *ngIf="(subitem?.value =='roles_icon' && !jobTemplateData?.is_description_editable) || (subitem?.value =='background_check_icon' && !jobTemplateData?.is_background_check) || (subitem?.value =='is_qualification_enabled_icon' && !jobTemplateData?.is_qualification_enabled) || (subitem?.value =='is_limit_submission_available' && !jobTemplateData?.available_start_date_limit?.is_enabled) || (!jobTemplateData?.is_onboarding_checklist && subitem?.value == 'onboardingChecklist') || (!jobTemplateData?.is_submission_exceed_max_bill_rate && subitem?.value =='maxBillRate') || (!jobTemplateData?.is_expense_allowed_editable && subitem?.value =='is_expense_allowed_editable') || (!jobTemplateData?.is_expense_allowed && subitem?.value =='is_expense_allowed') || (!jobTemplateData?.allow_express_offer && subitem?.value =='is_allow_express_offer') || (!jobTemplateData?.resume_mandatory && subitem?.value =='resume_mandatory')"  class="d-flex align-items-center Disabled"><i class="material-icons">toggle_off</i><span>{{'disabled'|i18next}}</span></a>
+                        </div>
+                        <div class="item-value" *ngIf="jobTemplateData?.is_description_editable && subitem?.value=='user_role'">
+                            <ul *ngFor="let roles of jobTemplateData?.user_roles">
+                                <li>{{roles?.name | i18next}}</li>
+                            </ul>
+                        </div>
+                        <div class="item-value" *ngIf="jobTemplateData?.is_background_check && subitem?.value =='backgroundcheckValue'">
+                            <ul *ngFor="let bg of this.backgroundcheckValue">
+                                <li>{{bg | i18next}}</li>
+                            </ul>
+                        </div>
+                        <div class="item-value" *ngIf="subitem?.value=='qualification'">
+                            <ul *ngFor="let qualification of jobTemplateData?.[subitem?.label]">
+                                <li *ngIf="qualification?.label == subitem?.label">{{qualification?.name}}</li>
+                            </ul>
+                        </div>
+                        <div *ngIf="subitem?.value=='default_fields'">
+                            <span> {{jobTemplateData?.[subitem?.label]?.[0]?.name}} </span>
+                        </div>
+                        <div class="item-value" *ngIf="subitem?.value=='rates'">
+                            <ul *ngFor="let rates of jobTemplateData?.rates">
+                                <li>{{rates?.name || 'Undefined' | i18next}}</li>
+                            </ul>
+                        </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </section>
+</div>

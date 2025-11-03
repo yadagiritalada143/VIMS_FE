@@ -1,0 +1,233 @@
+<h4 class="mt-32 pb-12 font-weight-medium" *ngIf="customFields?.length> 0">{{ 'custom_fields' | i18next }}</h4>
+<div class="row">
+  <div [ngClass]="item?.get('is_single_row')?.value ? 'col-12' : 'col-4'"
+    *ngFor=" let item of customFieldsForm.get('custom_fields')?.controls; let i = index"
+    [hidden]="!item?.get('is_show')?.value">
+    <div class="form-group-row" [formGroup]="item" *ngIf="item?.get('is_show')?.value">
+      <div class="form-group custom-field-form" *ngIf="item?.get('is_show')?.value">
+        <!-- TOOGLE BUTTON -->
+        <div
+          [ngClass]="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.TOGGLE?.toUpperCase() ? 'd-flex align-items-center pt-32': ''">
+          <toggle-button
+            *ngIf="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.TOGGLE?.toUpperCase()"
+            class="mt-4" [disabled]="isDisabled || item?.get('is_readonly')?.value || !item?.get('can_edit')?.value"
+            [checked]="item?.get('values')?.value" (change)="updateDependantFlag(i)" (changed)="modifyToggle(item,$event)"></toggle-button>
+
+          <!-- LABEL with Required and Help Text, if available -->
+          <label I18n class="display-inline-flex mx-0 mb-8"
+            [ngClass]="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.TOGGLE?.toUpperCase() ? 'toggle-label pt-4' : ''">
+            <span>{{ item?.get("custom_field_label")?.value}}</span>
+            <span class="require ml-4" *ngIf="item?.get('is_required')?.value">*</span>
+            <i *ngIf="item?.get('supporting_text')?.value" class="info-icon custom-field-info material-icons ml-8"
+              tooltip="{{item?.get('supporting_text')?.value}}" placement="right">help</i>
+          </label>
+        </div>
+
+        <!-- TEXT -->
+        <input *ngIf="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.TEXT?.toUpperCase()"
+          type="text" formControlName="values" class="form-control"
+          placeholder="{{item?.get('custom_field_placeholder')?.value}}"
+          [readonly]="isDisabled || item?.get('is_readonly').value || !item?.get('can_edit').value" />
+
+        <!-- TEXTAREA -->
+        <textarea
+          *ngIf="item.get('custom_field_type').value?.toUpperCase() === customFieldsEnum.TEXTAREA?.toUpperCase()"
+          formControlName="values" class="form-control"
+          placeholder="{{item?.get('custom_field_placeholder')?.value }}"
+          [readonly]="isDisabled || item?.get('is_readonly')?.value || !item?.get('can_edit')?.value" rows="3">
+        </textarea>
+
+        <!-- PASSWORD -->
+        <div *ngIf="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.PASSWORD?.toUpperCase()"
+          class="password">
+          <input type="password" formControlName="values" class="form-control" appPasswordToggle
+            autocomplete="new-password" placeholder="{{item?.get('custom_field_placeholder')?.value}}"
+            [readonly]="isDisabled || item?.get('is_readonly').value || !item?.get('can_edit').value" />
+        </div>
+
+        <!-- HYPERLINK -->
+        <a *ngIf="item.get('custom_field_type').value.toUpperCase() === customFieldsEnum.HYPERLINK?.toUpperCase()"
+          class="text-primary mt-32 anchor-text" [hrefParse]="item?.get('meta_data').value?.url" rel="noopener"
+          target="_blank">{{item?.get('meta_data')?.value?.url}}</a>
+
+        <!-- EMAIL -->
+        <div *ngIf="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.EMAIL?.toUpperCase()">
+          <input type="email" formControlName="values" class="form-control" [pattern]="emailPattern"
+            placeholder="{{item?.get('custom_field_placeholder')?.value}}"
+            [readonly]="isDisabled || item?.get('is_readonly')?.value || !item?.get('can_edit')?.value"
+            [ngClass]="{'error': item.invalid && item?.get('values')?.value && (item.dirty || item.touched)}" />
+          <p *ngIf="item.invalid && item?.get('values')?.value && (item.dirty || item.touched)" class="error-text mt-4">
+            {{ 'given_email_id_is_not_in_proper_format' | i18next }}
+          </p>
+        </div>
+
+        <!-- PHONE -->
+        <div *ngIf="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.PHONE?.toUpperCase()">
+          <input type="text" formControlName="values" class="form-control" [mandatePattern]="alphaNumericPattern"
+            placeholder="{{item?.get('custom_field_placeholder')?.value}}" (keyup)="phoneLengthValidator(item, $event)"
+            [readonly]="isDisabled || item?.get('is_readonly')?.value || !item?.get('can_edit')?.value"
+            [ngClass]="{'error': item.invalid && item?.get('values')?.value && (item.dirty || item.touched)}" />
+            <p *ngIf="getPhoneCFErrorText(item)" class="error-text mt-4">
+              {{ getPhoneCFErrorText(item) | i18next }}
+            </p>
+        </div>
+
+        <!-- CURRENCY -->
+        <div *ngIf="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.CURRENCY?.toUpperCase()"
+          class="currency-field position-relative">
+          <span>
+            {{ '' | accuracy: accuracyConfig?.AMOUNT : { currencyCode: (item?.get('meta_data')?.value?.currency ? item?.get('meta_data')?.value?.currency : 'USD'), display:
+            currencyConfig.SYMBOL } }}
+          </span>
+          <input type="number" onwheel="return false" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)" formControlName="values" class="form-control" onlyNumber
+            placeholder="{{item?.get('custom_field_placeholder')?.value}}"
+            [readonly]="isDisabled || item?.get('is_readonly').value || !item?.get('can_edit').value" />
+        </div>
+
+        <!-- RADIO -->
+        <div *ngIf="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.RADIO?.toUpperCase()">
+          <ng-container *ngFor="let option of (item?.get('meta_data')?.value?.datasource?.options || []) | keysort:'ref_order'">
+            <div class="form-check form-check-inline">
+              <input type="radio" formControlName="values" (change)="updateDependantFlag(i)" [id]="option?.value" [value]="option?.value"
+                [readonly]="item?.get('is_readonly').value || !item?.get('can_edit').value" />
+              <label [for]="option?.value" class="label-corrector"> {{ option?.label }} </label>
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- CHECKBOX -->
+        <div *ngIf="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.CHECKBOX?.toUpperCase()">
+          <ng-container *ngFor="let option of (item?.get('meta_data')?.value?.datasource?.options || []) | keysort:'ref_order'">
+            <div class="form-check form-check-inline">
+              <input type="checkbox" [id]="option?.value" [checked]="option.checked"
+                (change)="selectedValues(item, option?.label, $event.target.checked, i)"
+                [disabled]="item?.get('is_readonly').value || !item?.get('can_edit').value" />
+              <label [for]="option?.value" class="label-corrector"> {{ option?.label }} </label>
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- RAW FILE -->
+        <app-upload-documents
+          *ngIf="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.RAW_FILE?.toUpperCase()"
+          [uploadLabel]="item?.get('values')?.value?.name" (oldUploadDataFiles)="updateoldFiles($event)"
+          (uploadDataFiles)="uploadFiles($event, item?.get('custom_field_name')?.slug , i)" [closePanel]="closePanel"
+          [showLabel]="_showLabel"></app-upload-documents>
+
+        <!-- FILE & IMAGE -->
+        <app-upload-document-s3
+          *ngIf="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.IMAGE?.toUpperCase() || item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.FILE?.toUpperCase()"
+          [uploadLabel]="item?.get('values')?.value?.name" [refName]="this.moduleName" [multiple]="false"
+          [oldUploadedFiles]="[item?.get('values')?.value]"
+          (uploadDataFiles)="uploadFiles($event, item?.get('custom_field_name')?.slug , i)" [closePanel]="closePanel"
+          [showLabel]="false" [isDisable]="isDisabled || item?.get('is_readonly').value || !item?.get('can_edit').value">
+        </app-upload-document-s3>
+
+        <!-- DROPDOWN -->
+        <ng-select
+          *ngIf="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.DROPDOWN?.toUpperCase()"
+          formControlName="values" [items]="item.get('meta_data').value?.datasource?.options | keysort: 'ref_order'" bindLabel="label"
+          bindValue="value" [placeholder]="item.get('custom_field_placeholder')?.value"
+          [multiple]="item.get('meta_data').value?.datasource?.is_multi_select" (change)="updateDependantFlag(i)"
+          [readonly]="isDisabled || item?.get('is_readonly').value || !item?.get('can_edit').value">
+        </ng-select>
+
+        <!-- PICKLIST -->
+        <ng-select
+          *ngIf="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.PICKLIST?.toUpperCase()"
+          formControlName="values" [items]="item?.get('picklist_data')?.value?.picklist_item" bindLabel="label"
+          bindValue="value" placeholder='{{(item?.get("custom_field_placeholder")?.value ?? "Select")}}'
+          [multiple]="item?.get('picklist_data')?.value?.multiselect"
+          [readonly]="isDisabled || item?.get('is_readonly').value || !item?.get('can_edit').value">
+        </ng-select>
+
+        <!--  SOURCE  -->
+        <ng-select
+          *ngIf="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.SOURCE?.toUpperCase()"
+          formControlName="values" [items]="item.get('meta_data').value?.options" bindLabel="label" bindValue="value"
+          [placeholder]="item.get('custom_field_placeholder')?.value"
+          [multiple]="item.get('meta_data').value?.datasource?.is_multi_select" (change)="updateDependantFlag(i)"
+          (keyup)="searchSourceFieldValues(sourcevaluesearch?.searchTerm,item.value)"
+          (clear)="searchSourceFieldValues('',item.value)" #sourcevaluesearch
+          [readonly]="isDisabled || item?.get('is_readonly')?.value || !item?.get('can_edit')?.value">
+        </ng-select>
+
+        <!-- NUMBER -->
+        <div *ngIf="item.get('custom_field_type')?.value === customFieldsEnum.NUMBERS && !item.get('meta_data')?.value?.show_in_thousands && !item.get('meta_data')?.value?.decimal">
+          <input type="number" formControlName="values" class="form-control"
+            placeholder="{{item?.get('custom_field_placeholder')?.value}}"
+            [allowUptoNDigitDecimalNumber]="item.get('meta_data')?.value?.decimal? item.get('meta_data')?.value?.decimal: null"
+            [min]="item.get('meta_data')?.value?.range_applicable ? item.get('meta_data')?.value?.range?.range_min : null "
+            [max]="item.get('meta_data')?.value?.range_applicable ? item.get('meta_data')?.value?.range?.range_max : null"
+            [readonly]="isDisabled || item?.get('is_readonly').value || !item?.get('can_edit').value" />
+          <p *ngIf="item?.controls['values']?.invalid && item?.controls['values']?.touched && customFieldsForm?.invalid && item.get('custom_field_type')?.value === 'NUMBERS' && item.get('values')?.value "
+            class="error-text mt-4">
+            {{ 'please_enter_value_between_configured_range_min' | i18next }}
+            {{item.get('meta_data')?.value?.range?.range_min}} {{ 'and_max' | i18next }}
+            {{(item.get('meta_data')?.value?.range?.range_max) }}
+          </p>
+        </div>
+
+        <!-- NUMBER SHOW IN THOUSAND -->
+        <div *ngIf="item.get('custom_field_type')?.value === customFieldsEnum.NUMBERS && (item.get('meta_data')?.value?.show_in_thousands || item.get('meta_data')?.value?.decimal)">
+          <input type="text" formControlName="values" class="form-control"
+            placeholder="{{item?.get('custom_field_placeholder')?.value}}"
+            [allowUptoNDigitDecimalNumber]="item.get('meta_data')?.value?.decimal? item.get('meta_data')?.value?.decimal: null"
+            (change)="getCommaSaparatedValue(item?.get('values')?.value,item?.get('custom_field_id')?.value)"
+            [min]="item.get('meta_data')?.value?.range_applicable ? item.get('meta_data')?.value?.range?.range_min : null "
+            [max]="item.get('meta_data')?.value?.range_applicable ? item.get('meta_data')?.value?.range?.range_max : null"
+            [readonly]="isDisabled || item?.get('is_readonly').value || !item?.get('can_edit').value" />
+          <p *ngIf="(item?.controls['values']?.invalid && item?.controls['values']?.touched && customFieldsForm?.invalid && item.get('custom_field_type')?.value === 'NUMBERS' && item.get('values')?.value) || (item.get('range_error')?.value)"
+            class="error-text mt-4">
+            {{'please_enter_value_between_configured_range_Min' | i18next}}
+            {{item.get('meta_data')?.value?.range?.range_min}} {{'and_max' | i18next}}
+            {{(item.get('meta_data')?.value?.range?.range_max) }}
+          </p>
+        </div>
+        <!-- DATE -->
+        <svms-datepicker
+          *ngIf="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.DATE?.toUpperCase()"
+          formControlName="values" [inputdateFormat]="program.defaultDateFormat" [clearInputDate]="true" (clearDate)="item.get('values').setValues('')"
+          [placeholder]="item.get('custom_field_placeholder')?.value" [options]="options" id="date1" I18n
+          [disabled]="isDisabled || item?.get('is_readonly').value || !item?.get('can_edit').value"
+          [ngClass]="{'disableDiv': isDisabled || item?.get('is_readonly').value || !item?.get('can_edit').value }">
+        </svms-datepicker>
+
+        <!-- DATE & TIME -->
+        <div
+          *ngIf="item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.DATETIME?.toUpperCase()">
+          <div class="form-group-row">
+            <svms-datepicker [inputdateFormat]="program.defaultDateFormat" [clearInputDate]="true" (clearDate)="onDateTimeChange(item)"
+            [placeholder]="item.get('custom_field_placeholder')?.value" [options]="options" id="date2" I18n
+            [disabled]="isDisabled || item?.get('is_readonly').value || !item?.get('can_edit').value"
+            [ngClass]="{'disableDiv': isDisabled || item?.get('is_readonly').value || !item?.get('can_edit').value }"
+            [(ngModel)]="item.get('date_time_obj').value.date" [ngModelOptions]="{standalone: true}"
+            (onDateChange)="onDateTimeChange(item)">
+          </svms-datepicker>
+          <input type="text" class="form-control col-4" [mandatePattern]="timeTypePattern"
+            [pattern]="timePattern" [customAction]="timeFieldAction"
+            placeholder="{{item.get('custom_field_placeholder').value}}"
+            [readonly]="isDisabled || item?.get('is_readonly')?.value || !item?.get('can_edit')?.value"
+            [(ngModel)]="item.get('date_time_obj').value.time" [ngModelOptions]="{standalone: true}"
+            (change)="onDateTimeChange(item,dTime)" #dTime="ngModel" ngModel/>
+          </div>
+          <p *ngIf="dTime?.invalid && (dTime?.dirty || dTime?.touched || dTime?.value)" class="error-text mt-4">
+            {{ timeErrorText | i18next }}
+          </p>
+        </div>
+
+        <!-- TIME -->
+        <ng-container
+          *ngIf=" item?.get('custom_field_type')?.value?.toUpperCase() === customFieldsEnum.TIME?.toUpperCase()">
+          <input type="text" formControlName="values" class="form-control" [mandatePattern]="timeTypePattern"
+            [pattern]="timePattern" [customAction]="timeFieldAction"
+            placeholder="{{item.get('custom_field_placeholder').value}}"
+            [readonly]="isDisabled || item?.get('is_readonly')?.value || !item?.get('can_edit')?.value" />
+          <p *ngIf="item.invalid && (item.dirty || item.touched || item?.value)" class="error-text mt-4">
+            {{ timeErrorText | i18next }}
+          </p>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>

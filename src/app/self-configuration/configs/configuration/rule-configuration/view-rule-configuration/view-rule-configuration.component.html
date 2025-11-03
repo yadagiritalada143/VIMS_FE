@@ -1,0 +1,89 @@
+<div class="view-detail-page">
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <i (click)="backClicked()" class="material-icons back-arrow-icon cursor-pointer mr-16">arrow_back</i>
+            <div>
+                <h3 class="font-weight-semibold mb-0" *ngIf="ruleConfigData?.title">{{ruleConfigData?.title}}</h3>
+                <p class="small">{{commonView.getTimeStamp(created_on, modified_on) | i18next}}</p>
+            </div>
+            
+        </div>
+        <button class="c-btn c-btn-secondary-medium-left-icon" (click)="editRuleConfig()">
+          <i class="material-icons">drive_file_rename_outline</i> {{'edit' | i18next}}
+      </button>
+    </header>
+    <section class="section-body-content">
+        <div class="px-32 py-16">
+            <h4 class="font-weight-medium mb-16">{{ 'basic_details' | i18next }}</h4>
+            <app-common-view-rule-flow [details]="details" *ngIf="details.length > 0"></app-common-view-rule-flow>
+            <div class="d-flex align-items-center">
+                <i class="material-icons mr-12">playlist_add_check</i>
+                <div>
+                    <p>{{ 'rules' | i18next }}</p>
+                    <!-- <p class="small">{{ 'Supporting text required' | i18next }}</p> -->
+                </div>
+            </div>
+            <div class="break-ui mx-0 my-16" *ngFor="let mainRule of ruleConfigData?.rules_config;">
+              <div *ngFor="let rule of mainRule?.rules">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                  <div class="d-flex align-items-center">
+                    <p class="dark font-weight-medium mr-16">{{mainRule?.name}}</p>
+                  </div>
+                </div>
+                <div class="d-flex mb-16">
+                  <div class="d-flex mr-32">
+                    <p class="small">{{ 'rule_duration' | i18next }} : <span class="values">{{getRuleDuration(rule?.periodicity,mainRule?.apply_on)}}</span></p>
+                  </div>
+                  <div class="d-flex mr-32">
+                    <p class="small">{{ 'rule_apply' | i18next }} : <span class="values">{{getRuleApply(mainRule?.apply_on)}}</span></p>
+                  </div>
+                  <div class="d-flex mr-32">
+                    <p class="small">{{'weekend_days'| i18next}} : <span class="values">{{ getRuleApply(mainRule?.apply_on)?.toLowerCase() == 'weekend' ?  getWeekendDay(mainRule?.slug) : 'All' }}</span></p>
+                  </div>
+                  <div class="d-flex">
+                    <p class="small">{{ 'apply_rate' | i18next }} : <span class="values mr-4">{{getRateFactorName(rule?.rate_factor)}}</span> 
+                      <!-- <a href="#">(View Rate Factor)</a> -->
+                    </p>
+                  </div>
+                </div>
+                <div class="d-flex">
+                  <div class="mr-64 pr-24" *ngIf="rule?.conditions?.length > 0 && rule?.conditions[0]?.type">
+                    <p class="dark font-weight-medium small text-uppercase">CONDITIONS</p>
+                    <div *ngFor="let condition of rule.conditions;">
+                      <p *ngIf="condition?.type">{{getConditionType(condition?.type)}} {{getConditionOperator(condition?.operator)}} {{condition?.value}} {{condition?.logical_operator}} </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- <div class="break-ui mx-0 my-16">
+                <div>
+                  <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div class="d-flex align-items-center">
+                      <p class="dark font-weight-medium mr-16">Double Time</p>
+                    </div>
+                  </div>
+                  <div class="d-flex mb-16">
+                    <div class="d-flex mr-32">
+                      <p class="small">Rule Duration : <span class="values">Daily</span></p>
+                    </div>
+                    <div class="d-flex mr-32">
+                      <p class="small">Rule Apply : <span class="values">Weekend</span></p>
+                    </div>
+                    <div class="d-flex">
+                      <p class="small">Apply Rate : <span class="values mr-4">Night Shift</span> <a href="#">(View Rate Factor)</a></p>
+                    </div>
+                  </div>
+                  <div class="d-flex">
+                    <div class="mr-64 pr-24">
+                      <p class="dark font-weight-medium small text-uppercase">CONDITIONS</p>
+                      <div>
+                        <p>Hours &gt; 2 AND Hours &lt; 1</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div> -->
+        </div>
+    </section>
+</div>

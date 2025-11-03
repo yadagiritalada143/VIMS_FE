@@ -1,0 +1,45 @@
+<div class="view-detail-page">
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <div class="d-flex">
+            <i tooltip="Back" placement="bottom" class="material-icons back-arrow-icon cursor-pointer" (click)="backtoList()">arrow_back</i>
+            <div class="ml-16">
+                <h3 class="font-weight-semibold mb-0">{{flowData?.name|i18next}}</h3>
+                <p class="small"> {{ commonViewService.getTimeStamp(flowData?.created_on, flowData?.modified_on) | i18next }} </p>
+            </div>
+        </div>
+        <div>
+            <div *authorize="'work_flow_manage'">
+                <button *accessControl class="c-btn c-btn-secondary-medium-left-icon" (click)="editFlow()">
+                    <i class="material-icons">drive_file_rename_outline</i> {{'edit'|i18next}}
+                </button>
+            </div>
+        </div>
+    </header>
+    <section class="section-body-content">
+        <div class="px-32 py-16">
+            <h4 class="font-weight-medium mb-16">{{'workflow_details'|i18next}}</h4>
+            <app-common-view-rule-flow [details]="details" *ngIf="details?.length > 0"></app-common-view-rule-flow>
+            <div class="info-box" *ngIf="flowData?.default_conditions?.length>0">
+                <p class="info-header">
+                    {{ 'condition' | i18next }}
+                </p>
+                <div class="p-12">
+                   <div [innerHtml]="flowData?.default_conditions">
+                   </div>
+                </div>
+            </div>
+            <h4 class="font-weight-medium mb-16 mt-24">{{ 'levels' | i18next }}</h4>
+            <div class="info-box" *ngFor="let level of flowData?.each_level; let i = index;">
+                <p class="info-header">
+                    {{ 'level_' | i18next }}{{i+1}}
+                </p>
+                <div class="p-12">
+                   <div [innerHTML]="level?.conditions">
+                   </div>
+                   <p class="font-weight-medium mt-12 mb-8 text-uppercase">{{ 'recipients' | i18next }}</p>
+                   <div [innerHTML]="level?.recipients"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

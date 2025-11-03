@@ -1,0 +1,129 @@
+<div class="create-new-timesheet">
+  <header class="section-header p-24 d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center">
+          <i (click)="backClicked()" class="material-icons back-arrow-icon cursor-pointer mr-16">arrow_back</i>
+          <h3 class="font-weight-semibold mb-0" *ngIf="dataLoader">{{mode === configurationMode?.View ? 'View Rule Configuration': mode === configurationMode?.Edit ? 'Edit Timesheet Rule Configuration' : 'Create New Rule Configuration' | i18next }}</h3>
+      </div>
+      <div *ngIf="mode !== configurationMode?.View">
+          <button *ngIf="dataLoader" type="submit" class="c-btn c-btn-success-medium" (click)="saveAction()">{{mode === configurationMode?.Edit ? 'Update' : 'save' |i18next}}</button>
+      </div>
+  </header>
+  <section class="section-body-content">
+    <app-logs [log]="logs"></app-logs>  
+    <div class="p-24 pb-0">
+          <div class="c-form-group-row">
+              <div class="c-form-group">
+                <label>{{ 'rule_configuration_name' | i18next }} <span class="require mr-4">*</span> <i class="tooltip-icon material-icons" tooltip="{{ 'timesheet_configuration_name_has_to_be_unique_&_will_be_used_as_a_picklist_for_‘timesheet_type__in_the_application_on_an_offer_&_assignment_modules.' | i18next }}" placement="right">help</i></label>
+                <input [disabled]="mode === configurationMode?.Edit" [ngClass]="{'disableDiv': mode === configurationMode?.View}" type="text" class="c-form-control" [(ngModel)]="request.title"  name="configuration-name"
+                  placeholder="{{'configuration_name'|i18next}}">
+                
+              </div>
+              <div class="c-form-group toggle-width pt-24">
+                <div class="toggle-panel">
+                  <div class="toggle-panel-inner" [ngClass]="request?.status ? 'if-active' : 'if-inactive'">
+                    <span class="status-text">{{(request?.status ? 'Active' : 'InActive') | i18next}}</span>
+                    <span class="toggle-switch" [ngClass]="request?.status ? 'toggle-on' : 'toggle-off'"
+                      (click)="onToggle()"></span>
+                    <app-svms-modal title="Timesheet List" size="large" [visibility]="isDialogVisible" (onClose)="onModalClose()">
+                      <app-svms-modal-body>
+                        <app-svms-table [coloumnDefintions]="impactedTimesheetColomnDefn"
+                        [tableOptions]="tableOptions"
+                        [showPageSettingData]="false"
+                         [dataSource]="configtimesheetList"></app-svms-table>
+                      </app-svms-modal-body>
+                    </app-svms-modal>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="c-notifications warning mb-24" *ngIf="ruleAssignmentCount > 0 && isToggled">
+              <div class="notification-text-box d-flex align-items-center justify-content-between">
+                <i class="type material-icons">warning</i>
+                <p>{{'by_inactivating_this_timesheet_rule_configuration,_impacted_assignments_and_timesheets_will_continue_to_use_this_timesheet_rule_configuration_unless_an_assignment_update_is_made_to_associate_a_new_timesheet_configuration_to_the_assignment.' | i18next}}</p>
+              </div>
+              <button class="c-btn c-btn-danger" (click)="showRuleImpactedAssignment()">{{'view_details'|i18next}}</button>
+            </div>
+            <div class="c-form-group-row" *ngIf="totalRecords && isToggleChanged">
+              <div class="alert alert-warning d-flex align-items-center c-form-group">
+                <icon name="warning" size="26px" type="material" class="float-left mr-24"></icon>
+                <div class="alert-content float-left w-100">
+                  <h3 class="mb-0">{{'warning'|i18next}}</h3>
+                  <p>
+                    {{'disabling_this_rule_configuration_will_affect' | i18next}} {{totalRecords}} {{'timesheets._please_view_the_details_before_proceeding' | i18next}}
+                  </p>
+                </div>
+                <div class="view-details-btn d-flex">
+                  <button (click)="viewImpactedTimesheetList()">
+                    {{'view_details' | i18next}}
+                  </button>
+                  <button (click)="onUpdateToggle()">
+                    {{'save' | i18next}}
+                  </button>
+                </div>
+                <span class="cursor-pointer position-absolute">
+                  <icon name="clear" size="16px" type="material" class="ml-8 d-flex" cuClass="cu-icon">
+                  </icon>
+                </span>
+              </div>
+            </div>
+           <div>
+            <div class="c-form-group-row" >
+              <div class="c-form-group">
+                <label>{{ 'timesheet_configuration' | i18next }} <span class="require mr-4">*</span> <i class="tooltip-icon material-icons" tooltip="{{ 'select_timesheet_configuration_from_the_below_list' | i18next }}" placement="right">help</i>  </label>
+                <ng-select [ngClass]="{'disableDiv': mode === configurationMode?.View || mode === configurationMode?.Edit }" [disabled]="mode === configurationMode?.Edit"  [placeholder]="'select_timesheet_configuration' | i18next" [clearable]="true" (change)="setHierarchyLocation($event)"
+                [(ngModel)]="request.basic_config_id" [multiple]='false' [searchable]="false">
+                    <ng-option *ngFor="let timesheet of timesheets" value="{{timesheet.id}}">
+                      {{timesheet?.title}}
+                    </ng-option>
+                  </ng-select>
+              </div>
+            </div>
+
+            <div class="c-form-group-row">
+              <div class="c-form-group">
+                <hierarchy-treeview
+                [disabled]="mode === configurationMode?.View || mode === configurationMode?.Edit"
+                label="{{'Hierarchies' | i18next}}"
+                [treeInput]="hierarchies"
+                [allowDefaultSelection]="true"
+                [allowDefaultClear]="false"
+                [selected]="selections"
+                [initialDefaults]="defaultSelections"
+                [mandatory]="true"
+                [decoupleChildFromParent]="true"
+                (changed)="hierarchySelectionChanged($event)">
+                </hierarchy-treeview>
+              </div>
+            </div>
+<!-- 
+            <div [ngClass]="{'disableDiv': mode === configurationMode.View}"  class="c-form-group-row">
+              <div class="c-form-group">
+                <label>{{ 'work_locations' | i18next }} <i class="tooltip-icon material-icons" tooltip="{{ 'here_you_can_see_the_work_locations' | i18next }}" placement="right">help</i></label>
+                <ng-select [ngClass]="{'disableDiv': mode === configurationMode.View || mode === configurationMode.Edit}" [disabled]="mode === configurationMode.View || mode === configurationMode?.Edit" [clearable]="false" 
+                  [(ngModel)]="request.location" [multiple]='true' id="rules.basic_rules.work_week.location"
+                  [placeholder]="'select_work_location' | i18next" (search)="this.workLocation.next($event)" [searchable]="true">
+                  <ng-option *ngFor="let workLocation of locations" value="{{workLocation?.id}}">
+                    {{workLocation?.name}}
+                  </ng-option>
+                </ng-select>
+              </div>
+            </div> -->
+      </div>
+      </div>
+      <div *ngIf="dataLoader" [ngClass]="{'disableDiv': mode === configurationMode?.View || mode === configurationMode?.Edit}">
+      <app-config-common-listing class="define-rules" mainIcon="playlist_add_check" itemLevel="parent" subtitle="Rules"
+            description="" buttonInput="Define Rule" [isHideButton]="mode === configurationMode?.View || mode === configurationMode?.Edit"
+            buttonIcon="add" addRuleTime="true" [mode]="mode" [ruleConfigs] = "request?.rules_config" [basic_config_id] = "request?.basic_config_id"  (onBtnClick)="openAddRuleModal($event)"></app-config-common-listing>
+      <div class="p-24" *ngIf="request?.rules_config[0]?.name == '' || request?.rules_config[0]?.name == null " >
+        <div class="no-rule-created d-flex align-items-center px-16 py-12">
+          <i class="material-icons mr-16">info</i>
+          <div class="no-rule-created-text">
+            <p class="font-weight-medium">{{'no_rules_created'|i18next}}</p>
+            <p>{{'you_are_not_adding_any_rules_yet,_click'|i18next}} <a href="javascript:void(0)" (click)="openAddRuleModal($event)"> “+Define Rule”</a> {{'button_to_create_a_new_rule'|i18next}}</p>
+          </div>
+         </div> 
+       </div> 
+      </div>
+  </section>
+</div>
+<app-add-rule [request]="request" (selectConfigRule)="selectConfigRule($event)" (toggleValue)="toggleValue($event)"></app-add-rule>

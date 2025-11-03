@@ -1,0 +1,43 @@
+<app-custom-fields-tabs></app-custom-fields-tabs>
+
+<vms-table
+  *ngIf="tableLoaded"
+  [vmsTableConfig]="tableConfig"
+  [vmsDataSource]="vmsData"
+  [loading]="dataLoading"
+  [open]="isExpand"
+  (onListFilter)="onListFilter($event)"
+  (search)="onSearch($event)"
+  [totalItem]="totalRecords"
+  [itemsPerPage]="itemsPerPage"
+  (onCreate)="onClickCreateCustomFields($event)"
+  (onEditClick)="editCustomFields($event)"
+  (onReorderClicked)="onReorderCustomFields()"
+  (onViewClick)="viewCustomField($event)"
+  (onDisableClicked)="changeCustomFieldStatus($event)"
+  (changePage)="getCustomFieldsList($event)"
+  (changeRecords)="onClickRecords($event)"
+  (onSort)="onSortClick($event)"
+  (onDeleteClick)="onDeleteClicked($event)"
+>
+</vms-table>
+
+<app-create-custom-fields
+  *ngIf="isCreateCustomFields === 'visible'"
+  [createCustomFields]="isCreateCustomFields"
+  [isEditMode]="editClicked"
+  [customFieldsId]="selectedFieldsId"
+  [moduleName]="moduleName"
+  (onClose)="onCloseCreateCustomFields($event)"
+>
+</app-create-custom-fields>
+
+<app-reordering-custom-fields
+  *ngIf="isReorderCustomFields == 'visible'"
+  [createCustomFields]="isReorderCustomFields"
+  [moduleName]="moduleName"
+  (onSave)="onSaveReorderCustomFields($event)"
+  [totalRecords]="totalRecords"
+  (onClose)="onCloseReorderCustomFields($event)"
+>
+</app-reordering-custom-fields>

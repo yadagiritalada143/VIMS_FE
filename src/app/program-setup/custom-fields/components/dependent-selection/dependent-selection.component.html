@@ -1,0 +1,44 @@
+<form [formGroup]="dependentSelectionForm">
+  <ng-container formArrayName="selection">
+    <div *ngFor="let control of selectionArray.controls; let i = index" class="d-flex selection-item">
+      <div class="tab-body mt-8 border p-24 rounded-sm">
+        <ng-container [formGroupName]="i">
+          <div *ngIf="dropdownSelection?.length" class="form-group">
+            <label class="text-lightgray">{{ 'drop_down_from_selection' | i18next }} <span class="require ml-8">*</span></label>
+            <ng-select
+              [clearable]="false"
+              [placeholder]="'Select Value' | i18next"
+              [items]="selectionOptions"
+              [readonly]="!isEditMode"
+              bindLabel="label"
+              formControlName="valueFromSelection"
+              class="type-select"
+              (change)="selectionChange()"
+            >
+            </ng-select>
+          </div>
+          <app-custom-dependent [ngStyle]="{'display': (isResultingFieldAllowed?'block':'none')}"
+            [moduleName]="moduleName"
+            [programId]="programId"
+            [dependLabel]="dependLabel"
+            [conditionFields]="fieldsForSelection(i)"
+            [isEditMode]="isEditMode"
+            [selectedHierarchies]="selectedHierarchies"
+            (selectDependent)="changeDependent($event, i)"
+            (changeDependentValidity)="changeDependentValidity.emit($event)"
+          ></app-custom-dependent>
+        </ng-container>
+      </div>
+      <div class="remove-item align-items-center mt-8">
+        <button [disabled]="!isEditMode" class="btn btn-primary rounded icon border-0 remove-btn" (click)="removeSelection(i)">
+          <icon size="28px" name="remove" type="material" cuClass="icon d-flex"></icon>
+        </button>
+      </div>
+    </div>
+  </ng-container>
+  <div *ngIf="dropdownSelection?.length" class="mt-8 d-flex justify-content-center align-items-center add-linked-module rounded-sm">
+    <button class="btn btn-white rounded icon border-0" [disabled]="!isEditMode" (click)="addNewSelection()">
+      <icon size="30px" name="add" type="material" cuClass="icon d-flex"></icon>
+    </button>
+  </div>
+</form>

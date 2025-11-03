@@ -1,0 +1,23 @@
+<div class="generic-list-page">
+  <app-svms-table [tableOptions]="tableOptions" [coloumnDefintions]="svmstableColomnDefn"
+    [dataSource]="svmsData"></app-svms-table>
+
+
+  <ng-template #mtpid let-rowData let-value="value">
+    <p class="text-truncate blue-text cursor-pointer" (click)="navigateToMTProfile(rowData)"> {{ value }} </p>
+  </ng-template>
+
+  <ng-template #do_not_rehire let-rowData let-value="value">
+    <div *ngIf="value; else elseBlock">{{ 'Yes' | i18next}}</div>
+    <ng-template #elseBlock>{{'No'| i18next}}</ng-template>
+  </ng-template>
+
+  <ng-template #talent_name let-rowData let-value="value">
+    <p class="text-truncate blue-text cursor-pointer" (click)="navigateToMTProfile(rowData)">
+      <span class="initials initials__purple text-capitalize">{{ value | slice: 0:1 }}
+      </span>
+      {{ value }}
+    </p>
+  </ng-template>
+</div>
+<app-master-talent-profile-details [profileId]="profileId" (modelclose)="closemtpModal()" *ngIf="mtpDetails"></app-master-talent-profile-details>

@@ -1,0 +1,61 @@
+<svms-sidebar title="{{title | i18next}}" [clickOutside]="clickOutside" [icon]="" [dataVisibility]="createManageVendorDocumentGroup"
+              (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <form [formGroup]="createVendorComplianceForm">
+      <div class="create-vendor-compliance-data-form">
+        <label i18n>{{ 'group_name' | i18next }} <span class="require">*</span></label>
+        <div class="d-flex">
+          <div class="pl-0 create-client w-100">
+            <div class="form-group">
+              <input type="text" formControlName="name" ngDefaultControl [readonly]="isViewMode"
+                     class="form-control">
+              <small
+                *ngIf="createVendorComplianceForm.get('name').invalid && createVendorComplianceForm.get('name').touched"
+                class="error-text">{{ 'this_field_is_required' | i18next }}</small>
+            </div>
+          </div>
+
+          <div class="toggle-panel" [ngClass]="{'disableDiv': isViewMode}">
+            <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+              <span class="status-text">{{toggle?.title | i18next}}</span>
+              <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+                    (click)="onClickToggle()"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pl-0 create-client w-100 mt-24">
+          <label i18n>{{ 'description' | i18next }}</label>
+          <div class="form-group">
+            <textarea type="text" formControlName="description" ngDefaultControl
+                      [readonly]="isViewMode"
+                      class="form-control" placeholder="{{ 'enter_description...' | i18next }}"></textarea>
+          </div>
+        </div>
+
+        <div class="pl-0 create-client w-100 mt-24">
+          <label i18n>{{ 'add_documents' | i18next }} <span class="require">*</span></label>
+          <div class="form-group">
+            <div class="document" *ngFor="let document of documentList"
+                 (click)="SelectDocument(document.id)" [ngClass]="document.selected ? 'selected' : 'not-selected'">
+              {{ document.name }}
+              <span class="material-icons">check</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </svms-sidebar-body>
+
+  <svms-sidebar-footer *accessControl>
+    <!--show this in hierarchy tabs -->
+    <button type="submit" class="btn btn-primary float-right" *ngIf="!isViewMode"
+            (click)="addDocument()" [disabled]="createVendorComplianceForm.invalid || !documentSelected">
+      <icon *ngIf="!isSaveLoader" size="20px" name="check_circle" type="material" class="icon--on-left"
+            cuClass="icon-cu"></icon>
+      <span *ngIf="isSaveLoader" class="ml-8"><button-loader></button-loader></span>
+      &nbsp;&nbsp;{{ 'save' | i18next }}
+    </button>
+  </svms-sidebar-footer>
+
+</svms-sidebar>

@@ -1,0 +1,83 @@
+<app-svms-modal size="large" title="{{ 'try_out' | i18nextEager }}" [visibility]="_isShowTryOutModal" (onClose)="closeTryOut()">
+    <hr>
+    <app-svms-modal-body>
+        <app-logs class="w-100 mx-24 mt-12" [log]="logs"></app-logs>
+        <div class="mt-12 c-form-group-row justify-content-between">
+            <div class="c-form-group">
+                <label>{{ 'pay_rate' | i18next }}<span class="require">*</span></label>
+                <div class="input-with-fixed-value position-relative">
+                    <span>$</span>
+                    <input type="number" class="c-form-control" name="pay_rate" [(ngModel)]="pay_rate"
+                        (blur)="calculateTryOut(); isValidateMetaData();" inputAccuracy="{{accuracyConfig?.RATE}}">
+                </div>
+            </div>
+            <div class="c-form-group">
+                <label>{{ 'mark_up' | i18next }}<span class="require">*</span></label>
+                <div class="input-with-fixed-value position-relative">
+                    <span>%</span>
+                    <input type="number" class="c-form-control" name="markup" [(ngModel)]="markup"
+                        (blur)="calculateTryOut(); isValidateMetaData();" inputAccuracy="{{accuracyConfig?.MARKUP_PERCENTAGE}}">
+                </div>
+            </div>
+            <!-- table -->
+        </div>
+        <ng-container *ngIf="_selectedCostComponents.length > 0; else noData">
+            <table class="cost-component-group-table border ">
+                <thead>
+                    <tr class="border-bottom info-bg-color">
+                        <th class="text-left w-150">{{ 'level' | i18next }}</th>
+                        <th class="text-left">{{ 'name' | i18next }}</th>
+                        <th class="text-left">{{ 'unit' | i18next }}</th>
+                        <th class="text-left w-15">{{ 'value' | i18next }}</th>
+                        <th class="text-left w-15">{{ 'cost_amount' | i18next }}</th>
+                        <th class="text-left w-15">{{ 'total_amount' | i18next }}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let component of _selectedCostComponents; let ind = index;">
+                        <tr class="border-bottom">
+                            <td>
+                                <input name="component_level" class="c-form-control" type="number" [(ngModel)]="component.level"
+                                    (keyup)="restrictLevelInput($event, ind)" (blur)="calculateTryOut(); isValidateMetaData();">
+                            </td>
+                            <td>{{component.component_name}}</td>
+                            <td>
+                                <container-element [ngSwitch]="component.unit">
+                                   <div *ngSwitchCase="'PERCENTAGE'">{{'percentage' | i18next}}</div>
+                                   <div *ngSwitchCase="'FLAT AMOUNT'">{{'flat_amount' | i18next}}</div>
+                                </container-element>
+                            </td>
+                            <td>{{component.value}}</td>
+                            <td>{{component.cost_amount}}</td>
+                            <td>{{component.total_amount}}</td>
+                        </tr>
+                    </ng-container>
+                    <tr class="border-bottom">
+                        <td></td>
+                        <td>{{'mark-Up' | i18next}}</td>
+                        <td>{{'percentage' | i18next}}</td>
+                        <td>{{markup}}</td>
+                        <td>{{markup_cost_amount}}</td>
+                        <td>{{markup_total_amount}}</td>
+                    </tr>
+                    <tr class=" info-bg-color">
+                        <td colspan="5">{{'bill_rate' | i18next}}</td>
+                        <td>{{bill_rate}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </ng-container>
+        <ng-template #noData>
+            <div class="no-matches-found text-center p-64 border border-top">
+                <div class="content-area ui-content-wrapper no-content">
+                    <div class="no-data">
+                        <img src="./assets/images/no-records.svg" alt="no cost" width="100"
+                            class="img-fluid" />
+                        <h4 class="pt-16">{{'no_cost_component_added'|i18next}}</h4>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+    </app-svms-modal-body>
+</app-svms-modal>

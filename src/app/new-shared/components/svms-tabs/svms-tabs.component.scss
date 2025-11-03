@@ -1,0 +1,77 @@
+@import "./../../../../assets/sass/abstracts/variables";
+
+.tabs {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+  display: flex;
+  z-index: 1;
+  width: 100%;
+  li:not(:last-child) {
+      margin-right: 24px;
+  }
+  li {
+      font-size: 14px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      position: relative;
+      transition: $transition;
+      padding-bottom: 14px !important;
+      span {
+          color: black;
+          font-size: 14px;
+      }
+      .count {
+          border: 1px solid $color-pink-10;
+          border-radius: 13px !important;
+          min-width: 26px;
+          display: block;
+          text-align: center;
+          color: $initials-purple-10;
+          margin-left: 6px !important;
+          font-weight: 500;
+          font-size: 12px;
+          background: $color-white;
+          line-height: 15px;
+      }
+      &:hover {
+          span {
+              color: $color-assets-primary;
+          }
+          .count {
+              color: $color-white;
+              border-color: var(--color-assets-primary);
+              background-color: var(--color-assets-primary);
+          }
+      }
+      &:after {
+          position: absolute;
+          bottom: -3px;
+          left: 0;
+          right: 0;
+          background: $color-assets-primary;
+          height: 3px;
+          content: ".";
+          text-indent: -9999px;
+          overflow: hidden;
+          display: none;
+          visibility: visible;
+          display: block;
+          opacity: 0;
+          transition: $transition;
+      }
+      &.active-tab {
+          span {
+              color: $color-assets-primary;
+          }
+          .count {
+              color: $color-white;
+              border-color: var(--color-assets-primary);
+              background-color: var(--color-assets-primary);
+          }
+          &:after {
+              opacity: 1;
+          }
+      }
+  }
+}

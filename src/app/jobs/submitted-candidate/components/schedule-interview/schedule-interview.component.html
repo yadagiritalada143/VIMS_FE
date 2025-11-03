@@ -1,0 +1,226 @@
+<div class="create-wrapper p-24">
+  <div class="create-form pt-32">
+    <h3 class="font-weight-medium">{{ 'schedule_interview' | i18next }}</h3>
+    <div class="card bg-light mt-24" [formGroup]="scheduleInterviewForm">
+      <div class="breadcrumb d-flex">
+        <div class="item pl-24 pr-24" (click)="goTointerviewDetails()"
+          [ngClass]="{active : interviewDetails, finished : dateAndTime }"><span class="mr-8">1</span>
+          <icon class="mr-8" size="20px" name="done_outline"></icon> {{ 'interview_details' | i18next }}
+        </div>
+        <div class="item pl-24 pr-24" (click)="goTodateTime()" [ngClass]="{active : dateAndTime}"><span
+            class="mr-8">2</span>
+          <icon class="mr-8" size="20px" name="done_outline"></icon> {{ 'date' | i18next }} & {{ 'time' | i18next }}
+        </div>
+      </div>
+      <div class="p-32">
+        <div *ngIf="interviewDetails">
+          <div class="form-group">
+            <label> {{ 'interview_title' | i18next }} <span class="require">*</span></label>
+            <input type="text" class="form-control" formControlName="title"
+              placeholder="{{ 'initial_interview,_technical_interview' | i18next }}">
+          </div>
+
+          <div class="form-group">
+            <label> {{ 'interviewer' | i18next }} <span class="require">*</span></label>
+            <ng-select placeholder="{{ 'select_interviewer' | i18next }}" formControlName="interviewer" [multiple]=" true">
+              <ng-option *ngFor="let client of clients" [value]="client.id">{{client.first_name}}
+                {{client?.middle_name}} {{client.last_name}}</ng-option>
+            </ng-select>
+          </div>
+
+          <div class="form-group">
+            <label> {{ 'additional_attendees' | i18next }} <span class="require">*</span></label>
+            <ng-select placeholder="{{'Select ' + ('Additional Attendees' | i18next)}}" formControlName="attendees" [multiple]=" true">
+              <ng-option *ngFor="let client of clients" [value]="client.id">{{client.first_name}}
+                {{client?.middle_name}} {{client.last_name}}</ng-option>
+            </ng-select>
+          </div>
+
+          <label> {{ 'interview_type' | i18next }} <span class="require">*</span></label>
+          <div class="interview-tab d-flex my-16">
+            <button class="btn btn-tab  mr-8" (click)="selectInterviewType('virtual')"
+              [class.active]="interviewTypeIndex === 0"><i class="d-flex icon--on-left material-icons"
+                style="font-size: 18px;">videocam</i> {{ 'virtual' | i18next }}</button>
+            <button class="btn btn-tab  mr-8" (click)="selectInterviewType('inPerson')"
+              [class.active]="interviewTypeIndex === 1"> <i class="d-flex icon--on-left material-icons"
+                style="font-size: 18px;">people_alt</i> {{ 'in_person' | i18next }}</button>
+            <button class="btn btn-tab  mr-8" (click)="selectInterviewType('call')"
+              [class.active]="interviewTypeIndex === 2"><i class="d-flex icon--on-left material-icons"
+                style="font-size: 18px;">phone_in_talk</i> {{ 'over_phone' | i18next }}</button>
+          </div>
+          <div class="tab-content my-16">
+
+            <div class="virtual" *ngIf="interviewTypeIndex === 0">
+              <div class="form-group">
+                <label> {{ 'interview_joining_link' | i18next }} <span class="require">*</span></label>
+                <input type="text" class="form-control" formControlName="joinLink" placeholder="http://">
+              </div>
+            </div>
+
+            <div class="inperson" *ngIf="interviewTypeIndex === 1">
+              <div class="form-group">
+                <label> {{ 'interview_location' | i18next }}<span class="require">*</span></label>
+                <search-address [adressType]="'geocode'" (setAddress)="getAddress($event)" id="addressField"
+                  formControlName="location">
+                </search-address>
+              </div>
+            </div>
+
+
+            <div class="overphone" *ngIf="interviewTypeIndex === 2">
+              <div class="form-group">
+                <label>{{ 'enter_phone_number' | i18next }}<span class="require">*</span></label>
+                <input type="number" class="form-control" formControlName="phone" placeholder="{{ 'enter_phone_number' | i18next }}">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>{{ 'interview_timezone' | i18next }}<span class="require">*</span></label>
+              <ng-select placeholder="{{ 'select_timezone' | i18next }}" formControlName="timezone">
+                <ng-option *ngFor="let zone of timezones">{{zone.name}}</ng-option>
+              </ng-select>
+            </div>
+
+            <div class="form-group">
+              <label>{{ 'interview_instruction' | i18next }}<span class="require">*</span></label>
+              <textarea type="textarea" rows="7" cols="12" formControlName="instruction" maxlength="1000"
+                class="form-control" placeholder="{{ 'enter_instructions' | i18next }}"></textarea>
+
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="dateAndTime" class="date-time-tab">
+          <header>
+            <h4 class="float-left font-weight-medium">
+              <icon class="d-inline-block mr-12" size="20px" name="event"></icon> {{ 'recommended_dates' | i18next }}
+            </h4>
+            <div class="header-right float-right">
+              <p class="d-inline-block lead mb-24">
+                <icon class="d-inline-block mr-4" size="20px" name="watch_later"></icon> {{ 'time_slots' | i18next }}
+              </p>
+              <label class="float-right"><input class="mr-4" type="checkbox" name="available"
+                  (click)="toggleAvailability()"> {{ 'available_only' | i18next }}</label>
+            </div>
+
+            <div class="clearfix"></div>
+          </header>
+          <div class="date-picker-holder float-left">
+            <svms-datepicker [hideDisplayValue]="true" id="date1" I18n [options]="options" alwaysVisible="true">
+            </svms-datepicker>
+          </div>
+          <div class="time-picker-holder float-right">
+              <div class="scroller">
+                <div class="form-group mb-8">
+                  <ng-select placeholder="Select Duration">
+                    <ng-option value="1 hour"><span>{{ 'duration' | i18next }}:</span> 1 Hour</ng-option>
+                    <ng-option value="1 hour"><span>{{ 'duration' | i18next }}:</span> 2 Hour</ng-option>
+                    <ng-option value="1 hour"><span>{{ 'duration' | i18next }}:</span> 3 Hour</ng-option>
+                    <ng-option value="1 hour"><span>{{ 'duration' | i18next }}:</span> 4 Hour</ng-option>
+                  </ng-select>
+                </div>
+                <ul>
+                  <li [ngClass]="{'disabled' : avaliableOnly}">
+                    <label class="radio-container">
+                      <input type="checkbox" name="time-slot">
+                      <span class="checkmark">09:00 AM - 10:00 AM</span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="radio-container">
+                      <input type="checkbox" name="time-slot">
+                      <span class="checkmark">10:00 AM - 11:00 AM</span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="radio-container">
+                      <input type="checkbox" name="time-slot">
+                      <span class="checkmark">11:00 AM - 12:00 AM</span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="radio-container">
+                      <input type="checkbox" name="time-slot">
+                      <span class="checkmark">12:00 AM - 01:00 PM</span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="radio-container">
+                      <input type="checkbox" name="time-slot">
+                      <span class="checkmark">09:00 AM - 10:00 AM</span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="radio-container">
+                      <input type="checkbox" name="time-slot">
+                      <span class="checkmark">09:00 AM - 10:00 AM</span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="radio-container">
+                      <input type="checkbox" name="time-slot">
+                      <span class="checkmark">09:00 AM - 10:00 AM</span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="radio-container">
+                      <input type="checkbox" name="time-slot">
+                      <span class="checkmark">09:00 AM - 10:00 AM</span>
+                    </label>
+                  </li>
+                </ul>
+              </div>
+          </div>
+          <div class="clearfix"></div>
+          <div class="selected-date-time d-flex mb-16 mt-32">
+            <p class="font-weight-medium">{{ 'january' | i18next }} 2</p>
+            <ul>
+              <li>10:00 AM - 11:00 AM <icon class="d-inline-block ml-4" size="12px" name="close"></icon>
+              </li>
+              <li>10:00 AM - 11:00 AM <icon class="d-inline-block ml-4" size="12px" name="close"></icon>
+              </li>
+              <li>10:00 AM - 11:00 AM <icon class="d-inline-block ml-4" size="12px" name="close"></icon>
+              </li>
+            </ul>
+          </div>
+          <div class="selected-date-time d-flex mb-16">
+            <p class="font-weight-medium">{{ 'january' | i18next }} 03</p>
+            <ul>
+              <li>10:00 AM - 11:00 AM <icon class="d-inline-block ml-4" size="12px" name="close"></icon>
+              </li>
+              <li>10:00 AM - 11:00 AM <icon class="d-inline-block ml-4" size="12px" name="close"></icon>
+              </li>
+              <li>10:00 AM - 11:00 AM <icon class="d-inline-block ml-4" size="12px" name="close"></icon>
+              </li>
+              <li>10:00 AM - 11:00 AM <icon class="d-inline-block ml-4" size="12px" name="close"></icon>
+              </li>
+              <li>10:00 AM - 11:00 AM <icon class="d-inline-block ml-4" size="12px" name="close"></icon>
+              </li>
+            </ul>
+          </div>
+          <div class="selected-date-time d-flex mb-16">
+            <p class="font-weight-medium">{{ 'january' | i18next }} 04</p>
+            <ul>
+              <li>10:00 AM - 11:00 AM <icon class="d-inline-block ml-4" size="12px" name="close"></icon>
+              </li>
+              <li>10:00 AM - 11:00 AM <icon class="d-inline-block ml-4" size="12px" name="close"></icon>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-footer p-24">
+        <button class="float-left btn btn-outine" *ngIf="dateAndTime">
+          <icon name="keyboard_backspace" size="20px" (click)="goTointerviewDetails()"></icon>
+        </button>
+        <button type="submit" class="float-right btn btn-primary" (click)="clickToContinue(btnText)">
+          {{btnText}}
+          <icon *ngIf="!dateAndTime" size="20px" name="chevron_right" type="material" class="icon--on-right"
+            cuClass="icon-cu"></icon>
+        </button>
+        <div class="clearfix"></div>
+      </div>
+    </div>
+  </div>
+

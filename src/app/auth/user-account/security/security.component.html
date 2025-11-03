@@ -1,0 +1,78 @@
+<div class="create-wrapper p-24 pt-32">
+  <div class="user-preference-wrap">
+    <app-user-preference-header [profileUser]="profileUser"  (loadData)="getUser()" [programMember]="programMember"></app-user-preference-header>
+    <div class="preference-body mt-16 rounded-sm p-24">
+      <div class="security-form float-left">
+        <h4 class="mb-24 font-weight-medium">
+         {{ 'change_password' | i18nextEager }}
+        </h4>
+        <div class="form-group position-relative">
+          <input type="password"  [ngClass]="{'error': isCurrentPasswordError}"  [(ngModel)]="passwordObject.old_password" (ngModelChange)="CheckCurrentPassword($event)" appPasswordToggle class="form-control medium" autocomplete="new-password" placeholder="{{ 'enter_your_current_password' | i18nextEager }}">
+        </div>
+        <div class="form-group position-relative" [ngClass]="{'mb-0 pb-0': passwordStrength }">
+          <input type="password"  [ngClass]="{'error': isPasswordError}"  [(ngModel)]="passwordObject.new_password" (ngModelChange)="checkNewPassword(passwordObject.new_password)" appPasswordToggle class="form-control medium"
+            placeholder="{{ 'enter_your_new_password' | i18nextEager }}" (keyup)="showPassowrdStrength(); passwordChange(passwordObject.new_password)">
+        </div>
+        <div *ngIf="passwordStrength">
+          <!-- password strength required -->
+          <vms-password-strength [passwordToCheck]="passwordObject.new_password"  (passwordStrengthChanged)="getPasswordStrength($event)">
+          </vms-password-strength>
+        </div>
+        <div class="validation-alert p-8 alert-error overflow-hidden d-flex mb-16"
+        *ngIf="isPasswordError || isRePasswordError || isCurrentPasswordError">
+
+        <p class="validation-msg" *ngIf="errorMessage">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{errorMessage | i18nextEager}}
+        </p>
+      </div>
+        <div class="form-group position-relative">
+          <input type="password" [ngClass]="{'error': isRePasswordError}" [(ngModel)]="passwordObject.confirmed_password" (ngModelChange)="checkPassword(passwordObject.confirmed_password)" class="form-control medium" appPasswordToggle placeholder="{{ 'retype_password' | i18nextEager }}">
+        </div>
+        <div class="form-group mb-0  pb-0">
+          <button class="btn btn-primary large font-weight-normal" (click)="updatePassword()">{{ 'change_password' | i18nextEager }}</button>
+        </div>
+      </div>
+      <div class="security-right-panel float-right">
+        <figure class="mb-32">
+          <img src="../../../../assets/images/secure-data-pana.svg" alt="">
+        </figure>
+        <p class="small">{{ 'it_is_not_a_bad_idea_to_change_your_password' | i18nextEager }} {{ 'often_for_a_more_secure_account' | i18nextEager }}, {{ 'we_recommend_that_you_set_a_strong_password_that_is_at_least' | i18nextEager }} 8 {{ 'characters_long_and_includes_mix_of_letters' | i18nextEager }}, {{ 'numbers_and_symbols' | i18nextEager }}</p>
+      </div>
+      <div class="clearfix"></div>
+    </div>
+    <div class="preference-body mt-16 rounded-sm p-24">
+      <div class="security-form float-left">
+        <h4 class="mb-24 font-weight-medium">
+          {{ 'username' | i18nextEager }}
+        </h4>
+        <div class="form-group mb-0  pb-0" *ngIf="profileUser?.username || create_username ">
+          <label>{{ 'user_name' | i18nextEager }}</label>
+          <div class="position-relative user-field">
+            <input type="text" class="form-control"  onkeypress="return (event.charCode > 64 &&
+            event.charCode < 91) || (event.charCode > 96 && event.charCode < 123) || event.charCode === 32 ||event.charCode ===46 || event.charCode === 45|| (event.charCode >= 48 && event.charCode <= 57) " [(ngModel)]="username" [disabled]="readOnlyField" (ngModelChange)="checkUserName($event); checkValidUserName();">
+            <icon class="clear-btn position-absolute" *ngIf="!readOnlyField" name="close" size="18px" type="material" (click)="resetUserName()">
+            </icon>
+            <icon class="create-btn position-absolute" [ngClass]="{'editing': !readOnlyField}"
+              [name]="readOnlyField? 'create' : 'done'" size="18px" type="material" (click)="toggleEdit()"></icon>
+              <!-- <p *ngIf="userNameAlreadyExist"> User Name is already taken.</p> -->
+              <!-- <icon name="error_outline" *ngIf="userNameAlreadyExist" size="24px" type="material" class="pt-0 float-left mr-8"></icon> -->
+            <p class="validation-msg" *ngIf="isUserNameError">
+              <!-- <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>  -->
+              {{isUserNameError | i18nextEager}}
+            </p>
+          </div>
+        </div>
+
+        <!-- create button if user name is not available-->
+        <div class="form-group  mb-0 pb-0" *ngIf="!profileUser?.username && !create_username">
+          <button class="btn btn-primary large font-weight-normal green-color" (click)="createUserName()">{{ 'create_your_user_name' | i18nextEager }}</button>
+        </div>
+      </div>
+      <div class="security-right-panel float-right">
+        <p class="small">{{ 'username_is_a_name_you_created' | i18nextEager }}, {{ 'or_one_assigned_to_you' | i18nextEager }}.{{ 'if_you_do_not_recall_creating_a_username' | i18nextEager }}, {{ 'or_dont_remember_the_name_you_chose' | i18nextEager }}, {{ 'try_using_your_e-mail_address_as_your_username' | i18nextEager }}. </p>
+      </div>
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</div>

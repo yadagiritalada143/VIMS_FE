@@ -1,0 +1,14 @@
+<div class="events-view" (clickOutside)="onClickOutside()" [ngStyle]="{'left': clickPosition?.x + 'px', 'top': clickPosition?.y + 'px' }">
+    <div class="events-close" (click)="onCloseModal()">
+        <span class="material-icons">{{ 'close' | i18next }}</span>
+    </div>
+    <div class="day-info">
+        <span>{{day?.day_number}}</span>
+        <span>{{day?.day_name}}</span>
+    </div>
+    <div class="event-items">
+        <div class="event-item" [ngStyle]="{'background-color': event.color}" (click)="onEventClick(event)" *ngFor="let event of events">
+            {{event.title|i18next}}
+        </div>
+    </div>
+</div>

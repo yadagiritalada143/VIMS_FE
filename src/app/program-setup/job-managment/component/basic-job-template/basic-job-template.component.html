@@ -1,0 +1,205 @@
+<form [formGroup]="basicJobTemplateForm" >
+  <div class="panel panel-light p-0">
+    <div class="panel-head">
+      <h5 I18n>
+        <icon size="19px" name="category" type="material" class="d-flex mr-4" cuClass="d-flex">
+        </icon>
+        {{ 'job_template_details' | i18next }}
+      </h5>
+    </div>
+    <div class="panel-content ">
+      <div class="form-group">
+      <label i18n>{{ 'job_template_title' | i18next }} <span class="require">*</span></label>
+      <div class="d-flex">
+        <div class="pl-0 create-client w-100">
+          <input type="text"
+           autofocus [readonly]="visibility" placeholder="{{ 'enter_job_template_title' | i18next }}" formControlName="template_name"
+          [ngClass]="{'error': basicJobTemplateForm.controls['template_name'].invalid && isSubmited}" class="form-control" (ngModelChange)="this.templateName.next($event)"   />
+          <!-- (ngModelChange)="checkNameExist()" -->
+        <p class="validation-msg"
+          *ngIf="basicJobTemplateForm.controls['template_name'].invalid && basicJobTemplateForm.controls['template_name'].errors?.required && isSubmited">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'job_template_title_is_required' | i18next }}
+        </p>
+        <p class="validation-msg"
+          *ngIf="basicJobTemplateForm.controls['template_name'].invalid && basicJobTemplateForm.controls['template_name'].errors?.pattern && isSubmited">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'please_enter_valid_job_title' | i18next }}
+        </p>
+        <p class="validation-msg"
+        *ngIf="jobTemplateInfo?.code == 0 && basicJobTemplateForm.controls['template_name'].valid">
+        <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+        {{ 'job_template_title_already_exists' | i18next }}
+      </p>
+        </div>
+        <div class="ml-8" *ngIf="visibility">
+          <div class="toggle-panel" [ngClass]="{'disableDiv': visibility === 'isview'  ? true : false}">
+            <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+              <span class="status-text">
+                <span *ngIf="toggle?.value">{{ 'active' | i18next }}</span>
+                <span *ngIf="!toggle?.value">{{ 'inactive' | i18next }}</span>
+              </span>
+              <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+                (click)="onClickToggle()"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="mb-4"> {{ 'job_template_code' | i18next }}</label>
+        <p class="fs-12 lh-1-5 mb-4">{{ 'can_be_used_as_an_identifier_for_the_job._for_informational_purpose_only.' | i18next }}</p>
+        <input type="text"
+          autofocus [readonly]="visibility === 'isview'"
+          placeholder="{{ 'enter_job_template_code' | i18next }}" formControlName="template_code"
+          [ngClass]="{'error': basicJobTemplateForm.controls['template_code'].invalid && isSubmited}" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <label class="mb-4"> {{ 'job_category' | i18next }} - {{ 'title' | i18next }} / {{'O*NET Code'}} <span class="require">*</span></label>
+        <p class="fs-12 lh-1-5 mb-4">{{ 'o*net_(or_occupational_information_network)_codes_will_help_align_this_program_s_job_titles_to_nationally_recognized_standard_occupational_classifications,_which_can_provide_a_basis_for_rate_cards.__to_learn_more,_visit' | i18next }} <a href="https://www.onetcodeconnector.org/" target="_blank" class="text-underline">{{ 'onetcodeconnector.org' | i18next }}</a>{{ '._if_not_intent_to_use_this_field,_select__others__in_the_drop_down.' | i18next }}</p>
+        <div class="position-relative search-job mb-16">
+          <!-- bindValue -->
+          <ng-select formControlName="category" onkeypress="return (event.charCode > 64 && 
+            event.charCode < 91) || (event.charCode > 96 && event.charCode < 123) || event.charCode === 32 || (event.charCode >= 48 && event.charCode <= 57) " [readonly]="visibility" (search)="this.usersearchCategory.next($event)"
+            [ngClass]="{'error': basicJobTemplateForm.controls['category'].invalid && isSubmited}" bindLabel="name" (change)="updateDescription($event)"
+            [clearable]="false" [searchable]="true" [multiple]="false" [items]="jobCategoryData"
+            bindLabel="bindLabel" placeholder="{{ 'search_job_category_-_title' | i18next }}"
+            ngDefaultControl>
+          </ng-select>
+          <p class="validation-msg" *ngIf="basicJobTemplateForm.controls['category'].invalid && isSubmited">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'job_template_category_is_required' | i18next }}
+          </p>
+          <span class="search">
+            <icon size="19px" name="search" type="material" class="d-flex mr-4" cuClass="d-flex">
+            </icon>
+          </span>
+
+        </div>
+
+        <!-- program industries -->
+        <div class="form-group managers" *ngIf="industries && industries?.length > 0">
+          <label class="mb-4"> {{ 'labor_category' | i18next }} <span class="require">*</span></label>
+          <p class="fs-12 lh-1-5 mb-4">{{ 'this_will_associate_your_job_template_to_a_specific_labor_category._in_addition,this_will_also_help_define_the_vendor_setting_for_labor_category_association.' | i18next }}</p>
+          <ng-select bindLabel="name" [searchable]="true" (search)="this.programIndustries.next($event)"
+            label="id" placeholder="{{ 'select_program_industry' | i18next }}" formControlName="program_industry"
+            [multiple]="false" ngDefaultControl [readonly]="visibility === 'isview'"
+            [ngClass]="{'error': basicJobTemplateForm.controls['program_industry'].invalid && isSubmited}">
+            <ng-option *ngFor="let option of industries" [value]="option?.id">
+              <span class="text-capitalize">{{ option?.name }}</span>
+            </ng-option>
+          </ng-select>
+          <p class="validation-msg" *ngIf="basicJobTemplateForm.controls['program_industry'].invalid && isSubmited">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'labor_category_is_required' | i18next }}
+          </p>
+        </div>
+        <!-- end -->
+
+
+        <div class="form-group">
+          <label> {{ 'job_level' | i18next }}</label>
+          <input type="number" min="1" [readonly]="visibility" onkeypress='return event.charCode >= 48 && event.charCode <= 57'
+            [ngClass]="{'error': basicJobTemplateForm.controls['level'].invalid && isSubmited}"
+            placeholder="{{ 'enter_job_level' | i18next }}" formControlName="level" class="form-control" />
+          <p class="validation-msg" *ngIf="basicJobTemplateForm.controls['level'].invalid && isSubmited">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'job_level_must_be_between' | i18next }} 1 {{ 'to' | i18next }} 255
+          </p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 py-8 d-flex align-items-center justify-content-between">
+          <h4 I18n class="d-flex">
+            <icon size="24px" name="description" theme="outlined" type="material" class="d-flex mr-8" cuClass="d-flex">
+            </icon>
+            <span>{{ 'job_description' | i18next }}</span>
+          </h4>
+          <!-- <span>
+            <icon size="24px" name="fullscreen" theme="outlined" type="material" class="d-flex mr-8" cuClass="d-flex">
+            </icon>
+          </span> -->
+        </div>
+        <div class="col-12"  >
+          <quill-editor  [readOnly] = "isEdit"  [modules]="modules" formControlName="description" [styles]="{height: '200px'}"></quill-editor>
+        </div>
+        <div class="col-12 mt-24">
+          <div class="checkbox">
+            <div class="checkbox-box">
+              <div class="checkbox-wrapper">
+                <label class="checkbox-container pb-8" [ngClass]="{'disableDiv' : visibility === 'isview'}">
+                  <input (change)="checkRoles()" [readonly]="visibility === 'isview'" type="checkbox" checked name="" formControlName="is_description_editable">
+                  <span class="checkmark"></span>
+                  <p>{{ 'job_template_allow_user_role' | i18next }}</p>
+                  <p class="fs-12 lh-1-5 mb-4"> {{'job_template_allow_user_role_description' | i18next}} </p>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-12" *ngIf="basicJobTemplateForm.value.is_description_editable" [ngClass]="{'disableDiv' : visibility === 'isview'}">
+          <div class="rounded-sm shadow bg-white">
+            <label>{{ 'select_user_roles' | i18next }} <span class="require">*</span></label>
+            <!-- formControlName="user_roles" -->
+            <ng-select #userSelect (change)="selectdRoles($event)" [ngClass]="{'error': basicJobTemplateForm.controls['user_roles'].invalid && isSubmited}"
+            bindLabel="name" [clearable]="false" [searchable]="true" [multiple]="false"
+            placeholder="{{ 'select_user_role' | i18next }}" ngDefaultControl [readonly]="visibility === 'isview'">
+            <ng-option *ngFor="let user of userRoles" [value]="user">
+              {{user?.name }} 
+            </ng-option>
+          </ng-select>
+
+            <!-- <ng-select (change)="selectdRoles($event)" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectdUserRoles" [ngClass]="{'error': basicJobTemplateForm.controls['user_roles'].invalid && isSubmited && !basicJobTemplateForm.value.user_roles}"
+               class="w-100" [clearable]="false"  (search)="rolesearch.next($event)" [items]="userRoles" 
+              placeholder="Select User Role" [readonly]="visibility === 'isview'" 
+              bindLabel="name" [searchable]="true">
+            </ng-select> -->
+            <!-- [multiple]="true" -->
+            <div class="d-flex align-items-center flex-wrap">
+            <div class="badge rounded-sm badge-blue mt-12 mr-8" *ngFor="let u of basicJobTemplateForm.value.user_roles;let i = index">
+              <span> {{u?.name}} </span>
+              <span>
+                <icon (click)="removeRoles(u,i)" color="inherit" size="15px" name="cancel" type="material" cuclass="d-flex" class="d-flex ml-8 cursor-pointer">
+                </icon>
+              </span>
+            </div>
+
+            <p class="validation-msg" *ngIf="basicJobTemplateForm.controls['user_roles'].invalid && isSubmited && !basicJobTemplateForm?.value?.user_roles">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'user_roles_is_required' | i18next }}
+            </p>
+
+          </div>
+          </div>
+        </div>
+
+        <!-- <div class="col-12 mt-24" [ngClass]="{'disableDiv' : visibility === 'isview'}">
+          <div class="checkbox">
+            <div class="checkbox-box">
+              <div class="checkbox-wrapper">
+                <label class="checkbox-container pb-8">
+                  <input [readonly]="visibility === 'isview'" type="checkbox" checked name="" formControlName="allow_user_description">
+                  <span class="checkmark"></span>
+                  <p>{{ 'allow_msp_to_update_the_job_description_while_creating' | i18next }}/{{ 'editing_the_job' | i18next }} & {{ 'assignments' | i18next }}</p>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div> -->
+      </div>
+    </div>
+  </div>
+</form>
+<div class="row no-gutters mt-24 mb-16">
+  <div class="col-12 d-flex justify-content-end">
+    <button [disabled]="isNamePresent || jobTemplateInfo?.code == 0" type="button" class="btn btn-primary" (click)="addBasicInfo()">
+      {{ 'continue' | i18next }}
+      <icon size="24px" name="arrow_forward" type="material" class="icon--on-right" cuClass="icon-cu">
+      </icon>
+    </button>
+  </div>
+</div>

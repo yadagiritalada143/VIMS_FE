@@ -1,0 +1,26 @@
+<ng-container *ngIf="isTemplateRenderAllowed">
+    <nav ngbNav #nav="ngbNav" class="nav-tabs d-flex mt-32">
+        <li ngbNavItem>
+            <a class="nav-link" ngbNavLink> 
+                {{ 'tax_table' | i18next }} 
+            </a>
+            <ng-template ngbNavContent>
+                <perfect-scrollbar [config]="{ 
+                    suppressScrollX: false, 
+                    suppressScrollY: false,
+                    maxScrollbarLength: 240
+                }">
+                    <svms-drag-table 
+                        [readonly]="isViewMode"
+                        [config]="taxTableConfig" 
+                        [items]="taxTableEntries" 
+                        (create)="attachNewRow()">
+                    </svms-drag-table>
+                </perfect-scrollbar>
+            </ng-template>
+        </li>
+    </nav>
+
+    <div [ngbNavOutlet]="nav" class="mt-2"></div>
+
+</ng-container>

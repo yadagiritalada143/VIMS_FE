@@ -1,0 +1,200 @@
+<svms-sidebar title="{{currentDoc?.name | i18next}}" size="small" [dataVisibility]="visiblity" (onClose)="sideBaClose()">
+  <div>
+    <svms-sidebar-body>
+      <div *ngIf="currentDoc" class="compliance-sidebar p-24">
+        <h4>
+          <icon class="mr-16 d-inline-block" size="24px" name="notes" type="material" cuClass="d-flex"></icon>
+          {{ 'summary' | i18next }}
+        </h4>
+        <table class="document-compliance">
+          <tr>
+            <td>{{ 'act' | i18next }}</td>
+            <td>{{currentDoc?.act|i18next}}</td>
+          </tr>
+          <tr>
+            <td>{{ 'document_details' | i18next }}</td>
+            <td>{{currentDoc?.name}}</td>
+          </tr>
+          <tr>
+            <td>{{ 'frequency' | i18next }}</td>
+            <td>{{currentDoc?.frequency}}</td>
+          </tr>
+          <tr>
+            <td>{{ 'form_details' | i18next }}</td>
+            <td>{{currentDoc?.document_number}}</td>
+          </tr>
+          <tr>
+            <td>{{ 'last_updated' | i18next }}</td>
+            <td>
+              {{currentDoc?.uploaded_document?.modified_on ? (currentDoc?.uploaded_document?.modified_on | localDateFormat) : '--'}}
+          </td>
+          </tr>
+          <tr>
+            <td>{{ 'expiration_date' | i18next }}</td>
+            <td>
+              {{currentDoc?.uploaded_document?.expiry_on ? (currentDoc?.uploaded_document?.expiry_on | localDateFormat) : '--'}}
+            </td>
+          </tr>
+          <tr>
+            <td>{{ 'next_update_due' | i18next }}</td>
+            <td>
+              {{currentDoc?.uploaded_document?.next_expiry_on ? (currentDoc?.uploaded_document?.next_expiry_on | localDateFormat) : '--'}}
+            </td>
+          </tr>
+          <tr>
+            <td>{{ 'audit_status' | i18next }}</td>
+            <td>{{currentDoc?.uploaded_document ? currentDoc?.uploaded_document?.status: 'PENDING' | titlecase}}</td>
+          </tr>
+          <tr>
+            <td>{{ 'audited_by' | i18next }}</td>
+            <td>{{currentDoc?.uploaded_document?.complied_by?.first_name}} </td>
+          </tr>
+          <tr>
+            <td>{{ 'audit_date/time' | i18next }}</td>
+            <td *ngIf="currentDoc?.uploaded_document?.complied_on && currentDoc?.uploaded_document?.complied_on > 0 ">
+              {{currentDoc?.uploaded_document?.complied_on | localDateFormat: dateFormat + ', h:mm a'}}</td>
+          </tr>
+        </table>
+        <!-- <div class="p-24">
+          <div class="form-group" *ngIf="userType === 'VENDOR' && update">
+            <label>Upload Credential Documents</label>
+            <div class="resume-wrapper p-24 mt-16" appDragAndDrop (fileDropped)="onFileDropped($event)">
+              <div class="drop-zone mb-16">
+                <icon size="24px" name="publish" type="material" cuClass="d-flex"></icon>
+              </div>
+              <h4 class="pt-4 mb-4">Drag &amp; Drop file or <a (click)="fileUpload.click()">Browse</a></h4>
+              <input hidden (change)="handleUpload($event)" type="file" multiple="false" accept=".doc,.pdf,.docx"
+                #fileUpload>
+              <p class="file-format mb-32">Only .pdf, .doc files with maximum size
+                of 10 MB</p>
+
+            </div>
+          </div>
+          <div class="form-group" *ngIf="userType === 'SUPER_ORG' && update">
+            <label>
+              Notes
+            </label>
+            <textarea class="form-control"></textarea>
+          </div>
+        </div> -->
+        <div class="uploaded-doc mt-32">
+          <div class="p-16 position-relative" *ngIf="currentDoc?.uploaded_document?.file_name || readyToUploadDoc">
+            <img [src]="isPdf ? '../../../../assets/images/pdf.svg' : fileExtension == 'zip' ? '../../../../assets/images/zip.svg' : '../../../../assets/images/word.svg'"
+              class="float-left mr-24" alt="">
+            <div class="doc-info float-left">
+              <p>
+                <a *ngIf="readyToUploadDoc"
+                  class="d-flex align-items-center font-weight-medium cursor-pointer">
+                  {{readyToUploadDoc?.name}}
+                  <icon class="d-flex" size="24px" name="delete_forever" type="material" cuClass="d-flex" color="red" (click)="deleteUpload()"></icon>
+                  <icon (click)="download()" class="ml-12" size="16px" name="save_alt" type="material" cuClass="d-flex"></icon>
+                </a>
+                <a target="_blank"
+                  *ngIf="!readyToUploadDoc" class="d-flex align-items-center font-weight-medium cursor-pointer">
+                  {{currentDoc?.uploaded_document?.file_name}}
+                  <span *ngIf="currentDoc?.allowed_to_edit"><icon class="d-flex" size="24px" name="delete_forever" type="material" cuClass="d-flex" color="red" (click)="deleteUpload()"></icon></span>
+                  <icon (click)="download()"  class="ml-12" size="16px" name="save_alt" type="material" cuClass="d-flex"></icon>
+                </a>
+              </p>
+              <p class="small" *ngIf="!readyToUploadDoc">{{'last_updated_on' | i18next}}
+                {{currentDoc?.uploaded_document?.modified_on | localDateFormat}}</p>
+            </div>
+            <!-- delete doc button goes here-->
+            <a href="javascript:void(0)" class="delete-doc d-none">
+              <icon size="24px" color="#CE0B25" name="delete_forever" type="material"></icon>
+            </a>
+            <div class="clearfix"></div>
+          </div>
+          <!-- file not uploaded section here-->
+          <input hidden (change)="handleUpload($event)" type="file" multiple="false"
+            accept=".doc,.docx,application/msword,.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel,text/plain,application/pdf, application/x-zip-compressed"
+            #fileUpload>
+          <!-- <div class="text-center no-file pb-16 "
+            *ngIf="!currentDoc?.uploaded_document?.file_name && !update && userType == 'VENDOR'">
+            <img src="../../../../assets/images/no-file.svg" class="mb-12" alt="">
+            <p>
+              {{ 'there_is_no_files_updated_yet,' | i18next }} <a class="cursor-pointer" (click)="fileUpload.click()">{{ 'update_now' | i18next }}</a>
+            </p>
+          </div> -->
+          <!-- file drag and drop section start here-->
+          <div class="text-center p-16 pt-32 uploading-panel" appDragAndDrop (fileDropped)="onFileDropped($event)"
+            *ngIf="update">
+
+            <h4 class="mb-0">{{ 'drag_&_drop_file_or' | i18next }} <a (click)="openFile(fileUpload)"
+                class="cursor-pointer">{{ 'browse' | i18next }}</a></h4>
+            <p class="small">{{ 'only_.pdf,_.doc,_.csv,_.xls,_.txt,_.zip(without_preview)' | i18next }} {{ 'files_with_maximum_size_of_10_mb' | i18next }}</p>
+          </div>
+          <div class="top-border mt-16 p-16 d-flex">
+            <div class="with-icon d-flex" *ngIf="!update">
+              <icon size="16px" class="mr-16" name="bookmark_border" type="material"></icon>
+              <p>
+                <span>{{ 'audit_status' | i18next }}</span>
+                {{(currentDoc?.uploaded_document ? currentDoc?.uploaded_document?.status: 'PENDING') | titlecase}}
+              </p>
+            </div>
+            <div class="form-group  mw-50" *ngIf="userType !== 'VENDOR' && update && (currentDoc?.uploaded_document || readyToUploadDoc)">
+              <label>{{ 'audit_status' | i18next }}</label>
+              <ng-select [(ngModel)]="status" placeholder="{{ 'select_status' | i18next }}">
+                <ng-option [value]="'COMPLIANT'">
+                  {{'COMPLIANT'| i18next | titlecase}}
+                </ng-option>
+                <ng-option [value]="'NON-COMPLIANT'">
+                  {{'NON-COMPLIANT'|i18next | titlecase}}
+                </ng-option>
+                <ng-option [value]="'NOT-APPLICABLE'">
+                  {{'NOT-APPLICABLE' | i18next | titlecase}}
+                </ng-option>
+              </ng-select>
+            </div>
+
+            <div class="form-group position-relative mw-50"
+              *ngIf="update && (readyToUploadDoc || currentDoc?.uploaded_document?.file_name)">
+              <label>{{'expiration_date' | i18next}}</label>
+              <svms-datepicker [clearInputDate]="true" [inputdateFormat]="dateFormat" [(ngModel)]="docExpirationDate" [options]="options"
+                ngDefaultControl id="date1" I18n #dateFiled>
+              </svms-datepicker>
+            </div>
+            <div class="with-icon d-flex" *ngIf="!update">
+              <icon size="16px" class="red-bg mr-16" name="event" type="material"></icon>
+              <p>
+                <span>{{ 'expiration_date' | i18next }}</span>
+                <ng-container *ngIf="currentDoc?.uploaded_document?.expiry_on">
+                  {{currentDoc?.uploaded_document?.expiry_on | localDateFormat}}</ng-container>
+                <ng-container *ngIf="!currentDoc?.uploaded_document?.expiry_on">-</ng-container>
+              </p>
+            </div>
+          </div>
+          <div class="px-16 pb-16" *ngIf="userType !== 'VENDOR' && update && (currentDoc?.uploaded_document || readyToUploadDoc)">
+            <div class="form-group mb-0">
+              <label>{{ 'audit_note' | i18next }} <span class="mandatory">*</span></label>
+              <textarea [(ngModel)]="notes" [ngClass]="{'red-border': isNotesMandatory}" (ngModelChange)="valueChanged($event)" rows="5" class="form-control"
+                placeholder="{{ 'audit_note' | i18next }}"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="!currentDoc" class="compliance-sidebar p-24">
+        <div class="form-group">
+          <label>{{ 'document_title' | i18next }}</label>
+          <ng-select [clearable]="false" placeholder="{{ 'plese_select' | i18next }}" (change)="docSelected($event)">
+            <ng-option [value]="doc" *ngFor="let doc of complianceList">
+              {{doc?.name}}
+            </ng-option>
+          </ng-select>
+        </div>
+      </div>
+    </svms-sidebar-body>
+    <svms-sidebar-footer *accessControl>
+      <ng-container *ngIf="currentDoc">
+        <div class="d-flex justify-content-end" *authorize="'update_program_compliance_document'">
+          <button *ngIf="!update" (click)="updateClicked()" [disabled]="!currentDoc?.allowed_to_edit" type="button" class="btn btn-primary">
+            {{ 'update' | i18next }}
+          </button>
+          <button *ngIf="update" [disabled]="!readyToUploadDoc" (click)="save()" type="button" class="btn btn-primary">
+            {{ 'save' | i18next }}
+          </button>
+        </div>
+      </ng-container>
+    </svms-sidebar-footer>
+  </div>
+</svms-sidebar>

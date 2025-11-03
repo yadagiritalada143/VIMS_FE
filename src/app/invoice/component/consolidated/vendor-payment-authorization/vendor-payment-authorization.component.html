@@ -1,0 +1,80 @@
+<div class="payment-authorisation border-right">
+  <div class="header px-16 py-12 d-flex align-items-center justify-content-between border-bottom">
+    <div class="d-flex align-items-center">
+      <div class="checkbox-box">
+        <div class="checkbox-wrapper">
+          <label class="checkbox-container">
+            <input type="checkbox" [(ngModel)]='allSelected' (change)='selectAll($event)' *ngIf="this.invoiceList && this.invoiceList.length > 0">
+            <span class="checkmark"></span>
+          </label>
+        </div>
+      </div>
+      <icon name="price_check" color="#000000" class="d-flex ml-12" cuclass="d-flex" size="18px"></icon>
+      <p class="text-black font-weight-medium">{{ 'vendor_payment_allocation' | i18nextEager }}</p>
+      <div class="ml-24 vendor-select">
+        <ng-select [items]="vendors" placeholder="{{ 'select_vendor' | i18nextEager }}" [clearOnBackspace]="true"
+          [searchable]="true" [clearable]="true" bindLabel="name" bindValue="id"
+          (change)='vendorChangedHandler($event)'>
+        </ng-select>
+      </div>
+    </div>
+    <div class="d-flex align-items-center cursor-pointer" (click)="backToInvoice()">
+      <icon name="update" color="#000000" class="d-flex ml-12" cuclass="d-flex" size="18px"></icon>
+      <p class="text-black ml-8">{{ 'history' | i18nextEager }}</p>
+    </div>
+  </div>
+  <div class="payment-list d-flex flex-column no-data-wrapper" [ngClass]="{'align-justify-center': !invoiceList || invoiceList.length == 0}">
+    <ng-container *ngIf="!invoiceList || invoiceList.length == 0" >
+      <app-no-data [noDataJson]="noData"></app-no-data>
+    </ng-container>
+    <ng-container *ngIf="invoiceList && invoiceList.length > 0">
+      <div class="p-16 border-bottom" *ngFor='let invoice of invoiceList'>
+        <div class="d-flex align-items-center justify-content-between payment-check">
+          <div class="d-flex align-items-center">
+            <div class="checkbox-box" [ngClass] = "{'checkbox-box-disabled' : !invoice.isParent}">
+              <div class="checkbox-wrapper">
+                <label class="checkbox-container">
+                  <input type="checkbox" [disabled] = "!invoice.isParent" [(ngModel)]='invoice.isSelected' (change)='selectInvoice($event, invoice)'>
+                  <span class="checkmark"></span>
+                </label>
+              </div>
+            </div>
+            <p class="text-active font-weight-medium">{{ invoice?.invoice_number}}</p>
+            <div class="status-tab expense align-justify-center ml-24">
+              <icon name="account_balance_wallet" color="inherit" class="d-flex mr-4" cuclass="d-flex" size="14px">
+              </icon>
+              <span> {{ invoice?.type | titlecase | i18nextEager}}</span>
+            </div>
+          </div>
+          <p class="text-black font-weight-medium"> {{ invoice?.vendor_amount?.vendor_amount | accuracy :accuracyEnum.AMOUNT : { currencyCode: invoice.currency } }}</p>
+
+        </div>
+        <div class="mt-24 d-flex align-items-center justify-content-between">
+
+          <!-- <div class="d-flex flex-column">
+            <p class="small text-gray">{{ 'po_number' | i18nextEager }}</p>
+            <p class="small text-black">#{{ invoice?.foundational_data?.project_po }}</p>
+          </div>  -->
+          <div class="d-flex flex-column">
+            <p class="small text-gray">{{ 'cons' | i18nextEager }}. {{ 'invoice_id' | i18nextEager }}</p>
+            <p class="small text-black">{{ paymentAllocationDetails?.data?.consolidate_invoice?.invoice_number }}</p>
+          </div>
+          <div class="d-flex flex-column">
+            <p class="small text-gray">{{ 'invoice_duration' | i18nextEager }}</p>
+            <p class="small text-black" *ngIf="invoice">{{ invoice?.invoice_start_date | date | localDateFormat : '' : '' : '' : true}} - {{
+              invoice?.invoice_end_date | date | localDateFormat : '' : '' : '' : true}}</p>
+          </div>
+          <div class="d-flex flex-column">
+            <p class="small text-gray">{{ 'batch_number' | i18nextEager }}</p>
+            <p class="small text-black">{{ paymentAllocationDetails?.data?.consolidate_invoice?.batch_number }}</p>
+          </div>
+          <div class="d-flex flex-column">
+            <p class="small text-gray">{{ 'worker_name' | i18nextEager }}</p>
+            <p class="small text-black">{{ invoice?.worker?.name | titlecase }}</p>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+  </div>
+</div>

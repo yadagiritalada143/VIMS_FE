@@ -1,0 +1,56 @@
+<div class="account-intro-wrap text-center">
+  <header class="intro-header">
+    <div class="left">
+    </div>
+    <div class="middle">
+      <img src="../../../../assets/images/intro-pattern.png" alt="" width="326" height="65">
+    </div>
+    <div class="right">
+    </div>
+  </header>
+  <div class="intro-content" *ngIf="isValid == 'valid'">
+    <figure>
+      <img src="../../../../assets/images/intro-emoji.png" alt="" width="63" height="63">
+    </figure>
+    <h1>{{ 'welcome_to' | i18nextEager }} <span>@</span>{{ 'simplify' | i18nextEager }}</h1>
+    <h4>{{ 'our_mission_is_to_make_you_more_productive' | i18nextEager }}. {{ 'this_will_only_take_a_minute_to_setup_your_account' | i18nextEager }}.</h4>
+    <button class="account-btn btn btn-secondary mx-auto" (click)="setPassword()">{{ 'let_s_do_it' | i18nextEager }}! <icon
+        class="icon--on-right d-flex" cuClass="intro-btn" name="keyboard_backspace" size="19px" type="material"></icon>
+    </button>
+  </div>
+  <div class="invalid-token" *ngIf="isValid == 'invalid'">
+    <div *ngIf="!newInvitation">
+      <img src="./assets/images/link-expired.svg" alt="Invalid token" width="303" class="img-fluid">
+      <h2 class="mt-64 font-weight-semibold">{{ 'this_invitation_is_already_expired' | i18nextEager }}.</h2>
+      <!-- <p class="font-weight-medium">
+        {{ 'please_click_this_button_to_request' | i18nextEager }}
+        <span>{{ 'simplifyvms_admin_invitation' | i18nextEager }}</span>
+      </p> -->
+      <p class="font-weight-medium">
+        {{ 'please_contact_your_administrator_to_recieve_a_new_invitation.' | i18nextEager }}
+      </p>
+      <!-- <button class="account-btn btn btn-secondary mx-auto" (click)="requestNewInvitation()">
+        {{ 'resend_activation_email' | i18nextEager }} 
+        <icon class="icon--on-right d-flex" cuClass="intro-btn" 
+          name="keyboard_backspace" size="24px" type="material">
+        </icon>
+      </button> -->
+    </div>
+    <div *ngIf="newInvitation">
+      <icon size="69px" name="check_circle" type="material" class="success-icon" cuClass="success"></icon>
+      <h3 class="font-weight-semibold">
+        {{ 'your_request_has_been_sent_successfully_with' | i18nextEager }} {{newInvitationMessage}}
+      </h3>
+      <p>
+        {{ 'please_check_your_inbox_for_new_invitation' | i18nextEager }}
+      </p>
+    </div>
+  </div>
+  <footer class="intro-footer">
+    <div class="left"></div>
+    <div class="middle" *ngIf="isValid == 'valid'">
+      <img src="../../../../assets/images/inro-character.png" alt="" width="498" height="202">
+    </div>
+    <div class="right"></div>
+  </footer>
+</div>

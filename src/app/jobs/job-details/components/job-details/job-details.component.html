@@ -1,0 +1,882 @@
+    <div class="description-card p-24 mb-24">
+        <section class="content-section mobile-re-order pb-64">
+            <div class="content-part jobdetails-section">
+                <ng-container *ngIf="support_text?.job_details_page">
+                    <div class="mb-24">
+                        <app-supporting-text [support_data]="support_text?.job_details_page"></app-supporting-text>
+                    </div>
+                </ng-container>
+                <div *ngIf="isShowStatus" class="notifications pb-32 mb-12">
+                    <ul>
+                        <li class="float-left mr-16 rounded-sm p-12">
+                            <icon class="rounded-circle d-inline-block" size="14px" name="mark_email_unread"
+                                type="material" cuClass="icon-cu"></icon>
+                            <h4 class="d-inline-block ml-12 mr-16 mb-0">{{ 'pending_approval_request' | i18next }}</h4>
+                            <button class="d-inline-block btn small btn-secondary"
+                                (click)="openApprovalModal()">{{ 'view' | i18next }}</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="detailed-page-section">
+                <h5 class="section-title position-relative mb-24 mb-m-0" [ngClass]="{'active' : (detailedValue === 'jobDescription')}" (click)="detailCollapse('jobDescription')">
+                    <icon class="mr-8 icon-primary-bg hide-on-mobile" theme="outlined" size="15px" name="notes" type="material"
+                        cuClass="icon-cu"></icon>
+                    <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'jobDescription') ? 'remove' : 'add'" type="material"
+                        cuClass="icon-cu"></icon> 
+                    {{ 'job_description' | i18next }}
+                </h5>
+                <div [ngClass]="(detailedValue === 'jobDescription') ? 'active' : 'inactive'">
+                <div *ngIf="dataLoader">
+                    <ngx-skeleton-loader count="5" animation="progress" appearance="line"
+                        [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                    </ngx-skeleton-loader>
+                </div>
+                <div *ngIf="!dataLoader && jobDetails?.description" class="description mb-16"
+                    [ngClass]="{'short-view' : !toggleDescription && (jobDetails?.description?.length > maxContentLength)}"
+                    [innerHTML]="toggleDescription ? jobDetails?.description : jobDetails?.description?.substr(0, maxContentLength)">
+                </div>
+                <div *ngIf="!dataLoader && !jobDetails?.description?.length && !jobDetails?.job_description_file?.length" class="col-md-12 text-center">
+                    {{ 'no_data_available' | i18next }}
+                </div>
+                <button *ngIf="jobDetails?.description?.length > maxContentLength" class="more-link mb-16" (click)="contentViewToggle()">
+                    {{ (toggleDescription ? 'view_less' : 'read_more') | i18next }}
+                </button>
+                <div *ngIf="!dataLoader && jobDetails?.jd_parsing_file?.length">
+                    <div class="description-download" *ngFor="let file of jobDetails?.jd_parsing_file">
+                        <a *ngIf="file?.raw" class="d-flex" [href]="file?.raw" target="_blank">
+                            <icon size="24px" name="file_download" type="material" cuClass="d-flex"></icon>
+                            <span>{{ file?.name || '-' }}</span>
+                        </a>
+                        <a *ngIf="file?.key" class="d-flex" (click)="downloadS3Attachment(file)">
+                            <icon size="24px" name="file_download" type="material" cuClass="d-flex"></icon>
+                            <span>{{ file?.name || '-' }}</span>
+                        </a>
+                    </div>
+                </div>
+                </div>
+                </div>
+
+                <div *ngIf="jobDetails?.job_description_file?.length > 0" class="detailed-page-section mt-32 mt-m-0">
+                    <h5 class="section-title position-relative mb-24 mb-m-0" [ngClass]="{'active' : (detailedValue === 'jobAttachment')}" (click)="detailCollapse('jobAttachment')">
+                        <icon class="mr-8 icon-primary-bg hide-on-mobile attachment-icon" theme="outlined" size="15px" name="attach_file" type="material"
+                            cuClass="icon-cu"></icon>
+                        <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'jobAttachment') ? 'remove' : 'add'" type="material"
+                            cuClass="icon-cu"></icon> 
+                        {{ 'additional_attachments' | i18next }}
+                    </h5>
+                    <div [ngClass]="(detailedValue === 'jobAttachment') ? 'active' : 'inactive'">
+                    <div *ngIf="dataLoader">
+                        <ngx-skeleton-loader count="5" animation="progress" appearance="line"
+                            [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                        </ngx-skeleton-loader>
+                    </div>
+                    <div *ngIf="!dataLoader">
+                        <div class="description-download" *ngFor="let file of jobDetails?.job_description_file">
+                            <ng-container *ngIf="user_type!==UserTypeEnum.VENDOR || (user_type===UserTypeEnum.VENDOR && file?.is_vendor_allowed_to_view)">
+                                <a *ngIf="file?.raw" class="d-flex" [href]="file?.raw" target="_blank">
+                                    <icon size="24px" name="file_download" type="material" cuClass="d-flex"></icon>
+                                    <span>{{ file?.name || '-' }}</span>
+                                </a>
+                                <a *ngIf="file?.key" class="d-flex" (click)="downloadS3Attachment(file)">
+                                    <icon size="24px" name="file_download" type="material" cuClass="d-flex"></icon>
+                                    <span>{{ file?.name || '-' }}</span>
+                                </a>
+                            </ng-container>
+                        </div>
+                    </div>
+                    </div>
+                    </div>
+                <div class="mt-32 detailed-page-section mt-m-0">
+                    <h5 class="section-title position-relative mb-24 mb-m-0" [ngClass]="{'active' : (detailedValue === 'masterdata')}"  (click)="detailCollapse('masterdata')">
+                        <icon class="mr-8 icon-success-bg hide-on-mobile" size="15px" name="layers" type="material" cuClass="icon-cu">
+                        </icon>
+<icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'masterdata') ? 'remove' : 'add'" type="material"
+                        cuClass="icon-cu"></icon>  
+                        {{ 'master_data' | i18next }}
+                    </h5>
+                    <div [ngClass]="(detailedValue === 'masterdata') ? 'active' : 'inactive'">
+                    <div class="row">
+                        <div class="mb-24 col-md-4" *ngIf="dataLoader">
+                            <p class="small label">
+                                <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                    [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                </ngx-skeleton-loader>
+                            </p>
+                        </div>
+                        <div class="mb-24 col-md-4" *ngIf="dataLoader">
+                            <p class="small label">
+                                <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                    [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                </ngx-skeleton-loader>
+                            </p>
+                        </div>
+                        <div class="mb-24 col-md-4" *ngIf="dataLoader">
+                            <p class="small label">
+                                <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                    [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                </ngx-skeleton-loader>
+                            </p>
+                        </div>
+                    </div>
+                    <div *ngIf="!dataLoader" class="row">
+                        <div class="col-md-4" *ngFor="let found of jobDetails?.foundational_data">
+                            <div class="value-group row-direction-m">
+                                <label class="value-head">{{found?.name}}
+                                    <icon *ngIf="found?.configuration?.financial_master_data_type === 'true'" name="payments" type="material"
+                                        theme="outlined" color="#4c7ff0" size="16px" cuClass="icon-cu" class="mx-8 position-absolute"></icon>
+                                </label>
+                                <span class="value-content" *ngFor="let fData of found?.foundation_data; let i = index">
+                                    <span *ngIf="found?.foundation_data.length > 1">{{i + 1}}. </span>
+                                    <span *ngIf="!hideMasterDataTypeName">{{fData?.name}}</span>
+                                    <span *ngIf="fData?.code && !hideMasterDataTypeName"> - {{fData?.code}}</span>
+                                    <span *ngIf="fData?.code && hideMasterDataTypeName">{{fData?.code}}</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div *ngIf="!jobDetails?.foundational_data?.length" class="col-md-12 text-center">
+                            {{ 'no_data_available' | i18next }}
+                        </div>
+                    </div>
+
+                    <!--Show foundation related custom fields-->
+                    <div *ngIf="foundationCustomFieldsList && foundationCustomFieldsList.length > 0">
+                        <div *ngFor="let foundationCustomField of foundationCustomFieldsList" class="panel panel-light p-16 pb-0 mb-12">
+                            <label I18n class="mb-12 font-weight-medium">{{foundationCustomField.label}}</label>
+                            <div class="panel-wrapper">
+                                <div class="panel panel-light p-16 pb-0 mb-12"
+                                    *ngFor="let foundData of foundationCustomField.foundationalData"
+                                    [ngClass]="{'showonlyone': foundationCustomField.foundationalData?.length === 1 || foundData.customFields?.length > 2}">
+                                    <label class="mb-12 font-weight-regular">{{foundData?.label}} </label>
+                                    <div class="row">
+                                        <div class="col-4 value-group row-direction-m" *ngFor="let customField of foundData.customFields"
+                                            [ngClass]="{'col-4': foundationCustomField.foundationalData?.length === 1 || foundData.customFields?.length > 2,
+                                      'col-6': !(foundationCustomField.foundationalData?.length === 1 || foundData.customFields?.length > 2)}">
+                                            <label class="value-head">{{customField?.label}} </label>
+                                            <span class="value-content">
+                                                <span>{{customField?.value}}</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                <div class="mt-32 detailed-page-section mt-m-0">
+                    <h5 class="section-title position-relative mb-24 mb-m-0" [ngClass]="{'active' : (detailedValue === 'customField')}" (click)="detailCollapse('customField')">
+                        <icon class="mr-8 icon-info-bg hide-on-mobile" size="15px" name="extension" type="material" cuClass="icon-cu"></icon>
+                        <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'customField') ? 'remove' : 'add'" type="material"
+                        cuClass="icon-cu"></icon>
+                        {{ 'custom_fields' | i18next }}
+                    </h5>
+                    <div [ngClass]="(detailedValue === 'customField') ? 'active' : 'inactive'">
+                    <div class="row">
+                        <div class="mb-24 col-md-4" *ngIf="dataLoader || loadCustomDetails">
+                            <p class="small label">
+                                <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                    [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                </ngx-skeleton-loader>
+                            </p>
+                        </div>
+                        <div class="mb-24 col-md-4" *ngIf="dataLoader || loadCustomDetails">
+                            <p class="small label">
+                                <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                    [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                </ngx-skeleton-loader>
+                            </p>
+                        </div>
+                        <div class="mb-24 col-md-4" *ngIf="dataLoader || loadCustomDetails">
+                            <p class="small label">
+                                <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                    [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                </ngx-skeleton-loader>
+                            </p>
+                        </div>
+                    </div>
+                    <div *ngIf="!dataLoader && !loadCustomDetails" class="row">
+                        <div class="col-md-4" *ngFor="let custom of jobDetails?.custom_fields" [hidden]="custom?.value === null || custom?.value === undefined || custom?.value === ''">
+                            <div class="value-group row-direction-m" *ngIf="custom?.type !== 'FILE' && custom?.type !== 'DATETIME' && custom?.type !== 'DATE' && custom?.type!=='HYPERLINK' && custom?.type!=='PASSWORD' && custom?.type!='IMAGE'">
+                                <label class="value-head">{{custom?.label || custom?.slug}}</label>
+                                <span class="value-content" *ngIf="custom?.value?.name">{{custom?.value?.name}}</span>
+                                <div *ngIf="custom?.type!='NUMBERS' && custom?.type!='CURRENCY' && !custom?.value?.name" class="value-content word-wrap d-flex-1-m"> <span class="value-content d-flex-1-m">{{isObjectArray(custom?.value) ? custom?.value?.join(', ') : custom?.value }}</span></div>
+                                <div *ngIf="(custom?.type=='NUMBERS' || custom?.type=='CURRENCY') && !custom?.value?.name" class="value-content d-flex-1-m"><span><span *ngIf="custom?.currency">{{'' | accuracy : '' : { currencyCode: custom?.currency, display: 'symbol' } }}</span> {{custom?.value}}</span></div>
+                            </div>
+                            <div class="value-group row-direction-m" *ngIf="custom?.type === 'FILE' || custom?.type === 'IMAGE' ">
+                                <label class="value-head">{{custom?.label || custom?.slug}}</label>
+                                <a *ngIf="custom?.value?.raw" class="value-content d-flex-1-m" [href]="custom?.value?.raw" target="_blank">
+                                    {{ custom?.value?.name || '-' }}
+                                </a>
+                                <a *ngIf="custom?.value?.key" class="value-content d-flex-1-m" (click)="downloadS3Attachment(custom.value)">
+                                    {{ custom?.value?.name }}
+                                </a>
+                            </div>
+                            <div class="value-group row-direction-m" *ngIf="custom?.type === 'DATETIME' || custom?.type == 'DATE'">
+                                <label class="value-head">{{custom?.label || custom?.slug}}</label>
+                                <span *ngIf="custom?.type == 'DATE'" class="value-content">{{ custom?.value | localDateFormat : '': '':'' : true }}</span>
+                                <span *ngIf="custom?.type == 'DATETIME'" class="value-content">{{ custom?.value?.split(' ')?.[0] | localDateFormat : '': '':'' : true }} {{ custom?.value?.split(' ')?.[1] }}</span>
+                            </div>
+                            <div class="value-group row-direction-m" *ngIf="custom?.type === 'HYPERLINK' || custom?.type === 'PASSWORD'">
+                                <label class="value-head">{{custom?.label || custom?.slug}}</label>
+                                <ng-container *ngIf="custom?.type === 'HYPERLINK'">
+                                    <span class="value-content d-flex-1-m">
+                                        <a class="text-primary" [href]="custom?.value" target="_blank"> {{ custom?.value }}</a>
+                                    </span>
+                                </ng-container>
+                                <ng-container *ngIf="custom?.type === 'PASSWORD'">
+                                    <span class="value-content d-flex-1-m">
+                                        {{ '*'.repeat(custom?.value?.length) }}
+                                    </span>
+                                </ng-container>
+                            </div>
+                        </div>
+                        <div *ngIf="!jobDetails?.custom_fields?.length" class="col-md-12 text-center">
+                            {{ 'no_data_available' | i18next }}
+                        </div>
+                    </div>
+                </div>
+                </div>
+                <div *ngIf="jobDetails?.is_qualification_enabled" class="mt-32 detailed-page-section mt-m-0">
+                    <h5 class="section-title position-relative mb-24 mb-m-0" [ngClass]="{'active' : (detailedValue === 'qualifications')}" (click)="detailCollapse('qualifications')">
+                        <icon class="mr-8 icon-qualification-bg hide-on-mobile" size="15px" name="school" type="material"
+                            cuClass="icon-cu"></icon>
+                    <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'qualifications') ? 'remove' : 'add'" type="material"
+                        cuClass="icon-cu"></icon> 
+                        {{ 'qualifications' | i18next }}
+                    </h5>
+                    <div [ngClass]="(detailedValue === 'qualifications') ? 'active' : 'inactive'">
+                    <div *ngIf="dataLoader" class="d-flex mb-8">
+                        <div class="q-label">
+                            <p>
+                                <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                    [theme]="{'width': '90%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                </ngx-skeleton-loader>
+                            </p>
+                        </div>
+                        <div class="q-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '50%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </div>
+                    </div>
+                    <div *ngIf="dataLoader" class="d-flex mb-8">
+                        <div class="q-label">
+                            <p>
+                                <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                    [theme]="{'width': '90%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                </ngx-skeleton-loader>
+                            </p>
+                        </div>
+                        <div class="q-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '50%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </div>
+                    </div>
+                    <div *ngIf="!dataLoader">
+                        <table class="my-16" *ngIf="jobDetails?.qualification_types?.length > 0">
+                            <thead class="table-header">
+                                <tr>
+                                    <th>
+                                        {{ 'qualifications_type' | i18next }}
+                                    </th>
+                                    <th> {{ 'required' | i18next }} </th>
+                                    <th> {{ 'optional' | i18next }} </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-container>
+                                    <tr *ngFor="let qualification of jobDetails?.qualification_types; let i = index ">
+                                        <td>{{qualification?.name | titlecase}}</td>
+                                        <td>
+                                            <div class="input-data">
+                                                <div *ngFor="let value of qualification?.qualifications" class="mx-4">
+                                                    <span *ngIf="value?.is_required" class="light-bg text-block">{{ value?.name | titlecase }}</span>
+                                                </div>
+                                                <span *ngIf="qualificationType?.[i]?.required" >--</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-data">
+                                                <div *ngFor="let value of qualification?.qualifications" class="mx-4">
+                                                    <span *ngIf="!value?.is_required" class="light-bg text-block">{{ value?.name | titlecase }}</span>
+                                                </div>
+                                                <span *ngIf="qualificationType?.[i]?.optional" >--</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                            </tbody>
+                        </table>
+                        <div *ngIf="!jobDetails?.qualification_types?.length || jobDetails?.qualification_types?.length == 0"
+                            class="q-value col-md-12 text-center">
+                            {{ 'no_data_available' | i18next }}
+                        </div>
+                    </div>
+                    </div>
+                    <!-- <div class="d-flex">
+            <div class="q-label">
+              <p>Skills</p>
+            </div>
+            <div class="q-value" *ngIf="jobDetails?.qualifications?.length">
+              <ul *ngFor="let skill of jobDetails.qualifications">
+                <li *ngIf="skill?.qualification_type == 'Skill'">{{skill?.values[0]?.name}}</li>
+              </ul>
+            </div>
+            <div class="q-value" *ngIf="!jobDetails?.qualifications?.length">
+              No data available
+            </div>
+          </div> -->
+                </div>
+
+                <!-- Pre-Identified Candidates Section : START -->
+                <div *ngIf="allow_pre_identified_candidates" class="mt-32 detailed-page-section pre-candidates-section mt-m-0">
+                    <h5 class="section-title position-relative mb-24 mb-m-0"
+                        [ngClass]="{'active' : (detailedValue === 'preidentifiedCndidate')}"
+                        (click)="detailCollapse('preidentifiedCndidate')">
+                        <icon class="mr-8 icon-pre-candidate-bg hide-on-mobile" size="15px" name="people" type="material" cuClass="icon-cu"></icon>
+                        <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px"
+                            [name]="(detailedValue === 'preidentifiedCndidate') ? 'remove' : 'add'" type="material" cuClass="icon-cu">
+                        </icon>
+                        {{ 'pre-identified_candidates' | i18next }}
+                    </h5>
+                    <ng-container *ngIf="preCandidates && preCandidates?.length">
+                        <app-pre-identified-candidate [preIdCandidates]="preCandidates" [jobDetails]="jobDetails"></app-pre-identified-candidate>
+                    </ng-container>
+                    <div *ngIf="!preCandidates || !preCandidates?.length" class="col-md-12 text-center">
+                        {{ 'no_data_available' | i18next }}
+                    </div>
+                </div>
+                <!--Load Account Code view Section-->
+                <div *ngIf="jobDetails?.account_code_data?.account_code">
+                  <div *authorize="'show_account_code'">
+                    <h4 class="mt-32 pb-12 font-weight-medium">{{ 'account_code_' | i18next }}
+                    </h4>
+                    <div class="row mb-12">
+                        <div class="col-md-6 font-weight-normal" >
+                            <input type="text" class="form-control" [ngModel]="jobDetails?.account_code_data?.account_code" placeholder=""
+                                 [readonly]="true" style="font-size: 14px;
+                                 border: none;background-color: transparent">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-light w-30" (click)="showAccountCode='visible'">
+                                <icon class="d-flex" size="18px" name="remove_red_eye" type="material" theme="outlined"
+                                    cuClass="d-flex">
+                                </icon>
+                            </button>
+                        </div>
+                    </div>
+                    <app-account-code-generate [module]="'job'" [accountCodeFields]="jobDetails?.account_code_data"
+                        (onClose)="onCloseSideBar($event)" [visiblity]="showAccountCode"
+                        [entityId]="jobDetails?.id" [readOnly]="true">
+                    </app-account-code-generate>
+                  </div>
+
+                </div>
+            </div>
+
+            <aside class="detail-sidebar mb-m-0">
+                <ng-container *ngIf="support_text?.basic_info_page">
+                    <div class="mb-16">
+                      <app-supporting-text [support_data]="support_text?.basic_info_page"></app-supporting-text>
+                    </div>
+                </ng-container>
+                <div class="bg-gray detailed-page-section mb-24 p-16 p-m-0 mb-m-0">
+                    <h4 class="section-title position-relative mb-24 mb-m-0" [ngClass]="{'active' : (detailedValue === 'basicInfo')}" (click)="detailCollapse('basicInfo')">
+                        <icon class="mr-8 icon-blue-bg hide-on-mobile" size="15px" name="info" type="material" cuClass="icon-cu">
+                        </icon>
+<icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'basicInfo') ? 'remove' : 'add'" type="material"
+cuClass="icon-cu"></icon> 
+                        {{ 'basic_info' | i18next }}
+                    </h4>
+                    <div [ngClass]="(detailedValue === 'basicInfo') ? 'active' : 'inactive'">
+                    <div class="d-flex mb-24">
+                        <!-- <p class="info-item">{{ 'job_category' | i18next }}</p> -->
+                        <p class="info-item">{{ 'labor_category' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item item-value" *ngIf="!dataLoader">
+                            <!-- {{jobDetails?.category?.category_name ? jobDetails.category?.category_name : '--' }} -->
+                            {{jobDetails?.program_industry?.length > 0 && jobDetails?.program_industry[0]?.name ?
+                            jobDetails?.program_industry[0]?.name : '--'}}
+                        </p>
+                    </div>
+                    <div class="d-flex mb-24" *ngIf="showJobType">
+                        <p class="info-item">{{ 'job_type' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item item-value" *ngIf="!dataLoader">
+                            {{jobDetails?.job_type?.length ? jobDetails?.job_type?.[0] : '--' }}</p>
+                    </div>
+                    <div class="d-flex mb-24" *ngIf="checkVendorUser() || checkMSPUser() || checkClientUser">
+                        <p class="info-item">{{ 'job_template' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item item-value" *ngIf="!dataLoader">
+                            {{jobDetails?.template_name ? jobDetails?.template_name : '--' }}</p>
+                    </div>
+                    <div class="d-flex mb-24" *ngIf="showTemplateCode && (checkVendorUser() || checkMSPUser() || checkClientUser)">
+                        <p class="info-item">{{ 'job_template_code' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item item-value" *ngIf="!dataLoader">
+                            {{jobDetails?.template_code ? jobDetails?.template_code : '--' }}</p>
+                    </div>
+                    <div class="d-flex mb-24"
+                        *ngIf="(checkMSPUser() || checkClientUser) &&  jobDetails?.hierarchy && jobDetails?.hierarchy?.length ">
+                        <p class="info-item">{{ 'hierarchy' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item  item-value" *ngIf="!dataLoader">{{jobDetails?.hierarchy[0]?.name || '--' }}
+                        </p>
+                    </div>
+                    <div class="d-flex mb-24" *ngIf="checkVendorUser() || checkMSPUser() || checkClientUser ">
+                        <p class="info-item">{{ 'work_location' | i18next }} </p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <div class="info-item item-value" *ngIf="!dataLoader">
+                            <p class="info-item item-value text-capitalize">
+                                {{jobDetails?.location?.name ? jobDetails?.location?.name : '--' ||
+                                jobDetails?.hierarchy_location }} - {{jobDetails?.location?.code ?
+                                jobDetails?.location?.code : '--'}}</p>
+                                <div *ngIf="work_location?.is_data_present" class="d-flex align-items-center detail-button">
+                                    <div class="tooltip-enabled position-relative">
+                                        <button>{{'view_address' | i18next}}</button>
+                                        <div class="item-tooltip">
+                                            <p class="small">{{work_location?.address_line_1}}</p>
+                                            <p class="small">{{work_location?.address_line_2}}</p>
+                                            <p class="small">{{work_location?.city_state_zipcode}}</p>
+                                            <p class="small">{{work_location?.country_name}}</p>
+                                        </div>
+                                    </div>
+                                    <icon class="ml-8 cursor-pointer" cuClass="d-flex" name="content_copy" size="14px" color="#0F2E4E" tooltip="Copy Address" placement="right" (click)="copyToClipboard()"></icon>
+                                </div>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-24">
+                        <p class="info-item">{{ 'start_date' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item  item-value" *ngIf="!dataLoader">{{(jobDetails?.start_date ? jobDetails?.start_date?.split('T')?.[0] : '--') | localDateFormat : '' : '' : '' : true }}</p>
+                    </div>
+                    <div class="d-flex mb-24">
+                        <p class="info-item">{{ 'end_date' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item  item-value" *ngIf="!dataLoader">{{(jobDetails?.end_date ? jobDetails?.end_date?.split('T')?.[0] : '--') | localDateFormat : '' : '' : '' : true }}
+                        </p>
+                    </div>
+                    <div class="d-flex mb-24" *ngIf="checkVendorUser() || checkMSPUser() ||  checkClientUser ">
+                        <p class="info-item">{{ 'duration' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '24px', 'border-radius':'0px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item item-value" *ngIf="!dataLoader && jobDetails?.duration?.weeks <= 1">
+                            {{jobDetails?.duration?.weeks + ' week'}}
+                            {{ jobDetails?.duration?.days ? (jobDetails.duration?.days > 1 ? jobDetails.duration?.days + ' days':  jobDetails.duration?.days + ' day') : '0 day'}}
+                        </p>
+                        <p class="info-item item-value" *ngIf="!dataLoader && jobDetails?.duration?.weeks >= 2">
+                            {{jobDetails?.duration?.weeks ? jobDetails.duration?.weeks + ' weeks' : ''}}
+                            {{ jobDetails?.duration?.days ? (jobDetails.duration?.days > 1 ? jobDetails.duration?.days + ' days':  jobDetails.duration?.days + ' day') : '0 day'}}
+                        </p>
+                    </div>
+                    <div class="d-flex mb-24" *ngIf="showAllowedExpense && (checkVendorUser() || checkMSPUser() || checkClientUser)">
+                        <p class="info-item">{{'expense_allowed' | i18next}}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item item-value" *ngIf="!dataLoader">
+                            {{jobDetails?.is_expense_allowed ? 'Yes' : 'No' }}</p>
+                    </div>
+                    <div class="d-flex mb-24" *ngIf="(checkVendorUser() || checkMSPUser() || checkClientUser) && !hide_ot_exempt">
+                        <p class="info-item">{{ 'ot_exempt' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item item-value" *ngIf="!dataLoader">
+                            {{(jobDetails?.is_ot_exempt ? 'Yes' : 'No') | i18next }}</p>
+                    </div>
+                    <div *ngIf="(!isVendorNeutral && user_type?.toUpperCase() === UserTypeEnum.VENDOR) || user_type?.toUpperCase() !== UserTypeEnum.VENDOR" class="d-flex mb-24">
+                        <p class="info-item">{{ 'job_manager' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="circle"
+                                [theme]="{'width': '21px', height: '21px', 'border-radius':'50%', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item d-flex align-items-center item-value" *ngIf="!dataLoader">
+                        <figure class="d-inline-block mr-8"
+                            *ngIf="jobDetails?.job_manager?.first_name || jobDetails?.job_manager?.last_name">
+                            <div class="initials initials__purple text-capitalize">
+                                {{ jobDetails?.job_manager?.first_name | slice: 0:1 }}{{
+                                jobDetails?.job_manager?.last_name | slice: 0:1}}
+                            </div>
+                            <!-- <img src="../../../assets/images/5.jpg" alt=""> -->
+                        </figure>
+                        <span *ngIf="jobDetails?.job_manager"
+                            class="text-capitalize">{{jobDetails?.job_manager?.first_name ?
+                            jobDetails?.job_manager.first_name : '--'}}
+                            {{jobDetails?.job_manager?.middle_name}}
+                            {{jobDetails?.job_manager?.last_name}}</span>
+                        </p>
+                    </div>
+                    <div class="d-flex mb-24">
+                        <p class="info-item">{{ 'number_of_positions' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item d-flex align-items-center item-value" *ngIf="!dataLoader">
+                            {{jobDetails?.positions ? jobDetails?.positions : '0'}}
+                            <icon *ngIf="hasReducePermission && jobDetails?.positions > 1" (click)="openCreateEstimateOpen(true)" class="ml-16 cursor-pointer" tooltip="reduce_positions" placement="right" size="14px" name="drive_file_rename_outline" theme="outlined" color="#495057" type="material" cuClass="d-flex"></icon>
+                        </p>
+                    </div>
+                    <div *ngIf="jobDetails?.filled_positions" class="d-flex mb-24">
+                        <p class="info-item">{{ 'filled_positions' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item  item-value" *ngIf="!dataLoader">
+                            {{jobDetails?.filled_positions}}</p>
+                    </div>
+                    <div class="d-flex mb-24">
+                        <p class="info-item">{{ 'job_level' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item  item-value" *ngIf="!dataLoader">{{jobDetails?.level ? jobDetails.level :
+                            '--'}}</p>
+                    </div>
+                    <div class="d-flex" *ngIf="jobDetails?.source_job_id">
+                        <p class="info-item">{{ 'cloned_from' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item  item-value" *ngIf="!dataLoader">{{jobDetails?.source_job_id}}</p>
+                    </div>
+                </div>
+                </div>
+                <ng-container *ngIf="support_text?.financial_details_page && !hideRateAuthority">
+                    <div class="mb-16">
+                      <app-supporting-text [support_data]="support_text?.financial_details_page"></app-supporting-text>
+                    </div>
+                </ng-container>
+                <div class="bg-gray detailed-page-section p-16 p-m-0" *ngIf="!hideRateAuthority">
+                    <h4 class="section-title position-relative mb-24 mb-m-0" [ngClass]="{'active' : (detailedValue === 'financialInfo')}" (click)="detailCollapse('financialInfo')">
+                        <icon class="mr-8 icon-blue-bg hide-on-mobile" size="15px" name="payments" type="material" cuClass="icon-cu">
+                        </icon>
+<icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'financialInfo') ? 'remove' : 'add'" type="material"
+                       cuClass="icon-cu"></icon>
+                        {{ 'financial_info' | i18next }}
+                    </h4>
+                    <div [ngClass]="(detailedValue === 'financialInfo') ? 'active' : 'inactive'">
+
+                    <div class="d-flex mb-24" *ngIf="jobDetails?.unit_of_measure">
+                        <p class="info-item">{{ "unit_of_measure" | i18next }}</p>
+                          <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                              [theme]="{'width': '80%', height: '16px', 'border-radius':'15px','margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p *ngIf="!dataLoader" class="info-item item-value">
+                            {{ jobDetails?.unit_of_measure | titlecase }}
+                        </p>
+                    </div>
+
+                    <div class="d-flex mb-24" *ngIf="!hideRateAuthority && showRatesPerRateModel(ratemodel === 'PAY_RATE' ? 'pay' : 'bill')">
+                      <p class="info-item">{{(ratemodel === 'PAY_RATE' ? 'Min Pay Rate' : 'Min Bill Rate')|i18next}}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item  item-value" *ngIf="!dataLoader && jobDetails?.rate_model != 'PAY_RATE'">
+                            {{(jobDetails?.min_bill_rate ? jobDetails?.min_bill_rate : 0.00) | accuracy : 'rate' : { currencyCode: jobDetails?.currency } }}
+                        </p>
+                        <p class="info-item  item-value" *ngIf="!dataLoader && jobDetails?.rate_model === 'PAY_RATE'">
+                          {{(jobDetails?.min_pay_rate ? jobDetails?.min_pay_rate : 0.00) | accuracy : 'rate' : { currencyCode: jobDetails?.currency } }}
+                        </p>
+                    </div>
+
+                    <div class="d-flex mb-24" *ngIf="!hideRateAuthority && showRatesPerRateModel(ratemodel === 'PAY_RATE' ? 'pay' : 'bill')">
+                      <p class="info-item">{{(ratemodel === 'PAY_RATE' ? 'Max Pay Rate' : 'Max Bill Rate')|i18next}}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item  item-value" *ngIf="!dataLoader && jobDetails?.rate_model != 'PAY_RATE'">
+                            {{(jobDetails?.max_bill_rate ? jobDetails?.max_bill_rate : 0.00) | accuracy : 'rate' : { currencyCode: jobDetails?.currency } }}
+                        </p>
+                        <p class="info-item  item-value" *ngIf="!dataLoader && jobDetails?.rate_model === 'PAY_RATE'">
+                          {{(jobDetails?.max_pay_rate ? jobDetails?.max_pay_rate : 0.00) | accuracy : 'rate' : { currencyCode: jobDetails?.currency } }}
+                        </p>
+                    </div>
+                    <ng-container *ngIf="(+jobDetails?.max_pay_rate !== 0 || +jobDetails?.max_bill_rate !== 0); else showOthers">
+                    <ng-container *ngIf="user_type == UserTypeEnum.VENDOR">
+                        <div *ngIf="ratemodel?.toLowerCase() == RATE_MODEL_ENUM.BILL_RATE && Allow_vendor_to_enter_client_bill_rate">
+                            <div class="d-flex mb-24">
+                                <p class="info-item">{{'min_client_bill_rate' |i18next}}</p>
+                                <p *ngIf="dataLoader" class="info-item item-value">
+                                    <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                    [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                                </ngx-skeleton-loader>
+                            </p>
+                            <p class="info-item item-value" *ngIf="!dataLoader">
+                                {{(jobDetails?.min_bill_rate ? jobDetails?.min_bill_rate : 0.00) | accuracy : 'rate' : { currencyCode: jobDetails?.currency } }}
+                            </p>
+                            </div>
+
+                            <div class="d-flex mb-24">
+                                <p class="info-item">{{'max_client_bill_rate' |i18next}}</p>
+                                <p *ngIf="dataLoader" class="info-item item-value">
+                                    <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                    [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                                </ngx-skeleton-loader>
+                            </p>
+                            <p class="info-item item-value" *ngIf="!dataLoader">
+                                {{(jobDetails?.max_bill_rate ? jobDetails?.max_bill_rate : 0.00) | accuracy : 'rate' : { currencyCode: jobDetails?.currency } }}
+                            </p>
+                            </div>
+                        </div>
+                        <div *ngIf="ratemodel?.toLowerCase()==RATE_MODEL_ENUM.MARKUP">
+                        <div class="d-flex mb-24">
+                            <p class="info-item">{{ 'min_pay_rate' | i18next }}</p>
+                            <p *ngIf="dataLoader" class="info-item item-value">
+                                <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item item-value" *ngIf="!dataLoader">
+                            {{(jobDetails?.vendor_min_pay_rate ? jobDetails?.vendor_min_pay_rate : 0.00) | accuracy : 'rate' : { currencyCode: jobDetails?.currency } }}
+                        </p>
+                        </div>
+                        <div class="d-flex mb-24" >
+                            <p class="info-item">{{ 'max_pay_rate' | i18next }}</p>
+                            <p *ngIf="dataLoader" class="info-item item-value">
+                                <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item item-value" *ngIf="!dataLoader">
+                            {{(jobDetails?.vendor_max_pay_rate ? jobDetails?.vendor_max_pay_rate : 0.00) | accuracy : 'rate' : { currencyCode: jobDetails?.currency } }}
+                        </p>
+                    </div>
+                    </div>
+                        <div class="d-flex mb-24" >
+                            <p class="info-item">{{ 'min_vendor_bill_rate' | i18next }}</p>
+                            <p *ngIf="dataLoader" class="info-item item-value">
+                                <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item item-value" *ngIf="!dataLoader">
+                            {{(jobDetails?.vendor_min_bill_rate ? jobDetails?.vendor_min_bill_rate : 0.00) | accuracy : 'rate' : { currencyCode: jobDetails?.currency } }}
+                        </p>
+                    </div>
+                        <div class="d-flex mb-24" >
+                            <p class="info-item">{{ 'max_vendor_bill_rate' | i18next }}</p>
+                            <p *ngIf="dataLoader" class="info-item item-value">
+                                <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item item-value" *ngIf="!dataLoader">
+                            {{(jobDetails?.vendor_max_bill_rate ? jobDetails?.vendor_max_bill_rate : 0.00) | accuracy : 'rate' : { currencyCode: jobDetails?.currency } }}
+                        </p>
+                    </div>
+                    <div class="d-flex mb-24" *ngIf="ratemodel?.toLowerCase()!=RATE_MODEL_ENUM.BILL_RATE">
+                        <p class="info-item">{{ 'mark-up' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                            [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                        </ngx-skeleton-loader>
+                    </p>
+                    <p class="info-item item-value" *ngIf="!dataLoader">
+                        {{(jobDetails?.vendor_markup?.sourced_markup ? jobDetails?.vendor_markup?.sourced_markup : (jobDetails?.vendor_markup?.payrolled_markup ? jobDetails?.vendor_markup?.payrolled_markup :0.00) ) | accuracy : 'markup_percentage' : { currencyCode: jobDetails?.currency } }}
+                    </p>
+                </div>
+                </ng-container>
+                    <div class="d-flex mb-24">
+                        <p class="info-item">{{ (isMaxBudgetCalculation ? 'Total Estimated Budget' : 'Estimated Budget') |i18next}}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item  item-value" *ngIf="!dataLoader">
+                            <span *ngIf="!isMaxBudgetCalculation">
+                              {{(jobDetails?.budget_estimate ? jobDetails?.budget_estimate : 0.00) | accuracy : 'amount' : { currencyCode: jobDetails?.currency } }}
+                            </span>
+                            <span *ngIf="isMaxBudgetCalculation">
+                                {{(jobDetails?.max_budget ? jobDetails?.max_budget : (jobDetails?.budget_estimate ? jobDetails?.budget_estimate : 0.00)) | accuracy : 'amount' : { currencyCode: jobDetails?.currency } }}
+                              </span>
+                        </p>
+                    </div>
+
+                    <ng-container *authorize="'view_mark_up_details'">
+                        <div class="d-flex mb-24"
+                            *ngIf="checkMSP1User() && jobDetails?.rate_markup_info?.markup_mode!=null
+                                                   && jobDetails?.rate_markup_info?.markup_mode!='BILL_RATE'
+                                                   && !isMaxBudgetCalculation">
+                            <p class="info-item">{{ 'average_markup' | i18next }}</p>
+                            <p *ngIf="dataLoader" class="info-item item-value">
+                                <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                    [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                                </ngx-skeleton-loader>
+                            </p>
+                            <p class="info-item  item-value" *ngIf="!dataLoader">
+                                {{(jobDetails?.rate_markup_info?.avg_markup ? jobDetails?.rate_markup_info?.avg_markup : "0.00") | accuracy : 'markup_percentage'}}
+                            </p>
+                        </div>
+                        <div class="d-flex mb-24"
+                            *ngIf="checkMSP1User() && jobDetails?.rate_markup_info?.markup_mode!='BILL_RATE' && jobDetails?.rate_markup_info?.markup_mode!=null && !isMaxBudgetCalculation">
+                                <p class="info-item">{{ 'min_markup' | i18next }}</p>
+                                <p *ngIf="dataLoader" class="info-item item-value">
+                                    <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                        [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                                    </ngx-skeleton-loader>
+                                </p>
+                                <p class="info-item  item-value" *ngIf="!dataLoader">
+                                    {{(jobDetails?.rate_markup_info?.min_markup ? jobDetails?.rate_markup_info?.min_markup : "0.00") | accuracy : 'markup_percentage' }}
+                                </p>
+                        </div>
+                        <div class="d-flex mb-24"
+                            *ngIf="checkMSP1User() && jobDetails?.rate_markup_info?.markup_mode!=null && jobDetails?.rate_markup_info?.markup_mode!='BILL_RATE'">
+                            <p class="info-item">{{ 'max_markup' | i18next }}</p>
+                            <p *ngIf="dataLoader" class="info-item item-value">
+                                <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                    [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                                </ngx-skeleton-loader>
+                            </p>
+                            <p class="info-item  item-value" *ngIf="!dataLoader">
+                                {{(jobDetails?.rate_markup_info?.max_markup ? jobDetails?.rate_markup_info?.max_markup : "0.00") | accuracy : 'markup_percentage'}}
+                            </p>
+                        </div>
+                    </ng-container>
+                    <div class="d-flex mb-24"
+                        *ngIf="!check_SA_User && checkVendorUser() && jobDetails?.rate_markup_info?.markup_mode!=null && jobDetails?.rate_markup_info?.markup_mode!='BILL_RATE'">
+                        <p class="info-item">{{ 'sourced_markup' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item  item-value" *ngIf="!dataLoader">
+                            {{(jobDetails?.rate_markup_info?.sourcedmarkup ? jobDetails?.rate_markup_info?.sourcedmarkup : "0.00") | accuracy : 'markup_percentage'}}
+                        </p>
+                    </div>
+                    <div class="d-flex mb-24"
+                        *ngIf="!check_SA_User && checkVendorUser() && jobDetails?.rate_markup_info?.markup_mode!=null && jobDetails?.rate_markup_info?.markup_mode!='BILL_RATE'">
+                        <p class="info-item">{{ 'payroll_markup' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item  item-value" *ngIf="!dataLoader">
+                            {{(jobDetails?.rate_markup_info?.payrollmarkup ? jobDetails?.rate_markup_info?.payrollmarkup : "0.00") | accuracy : 'markup_percentage'}}
+                        </p>
+                    </div>
+
+                    <div class="d-flex mb-24" *ngIf="!isMaxBudgetCalculation && (jobDetails?.min_budget || jobDetails?.max_budget)">
+                        <p class="info-item">{{ 'budget_range' | i18next }}</p>
+                        <p *ngIf="dataLoader" class="info-item item-value">
+                            <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="theme1">
+                            </ngx-skeleton-loader>
+                        </p>
+                        <p class="info-item  item-value" *ngIf="!dataLoader">
+                            {{(jobDetails?.min_budget ? jobDetails?.min_budget : 0.00) | accuracy : 'amount' : { currencyCode: jobDetails?.currency } }} -
+                            {{(jobDetails?.max_budget ? jobDetails?.max_budget : 0.00) | accuracy : 'amount' : { currencyCode: jobDetails?.currency } }}
+                        </p>
+                    </div>
+
+                    <div class="d-flex mb-24" *ngIf="jobDetails?.allow_express_offer">
+                        <p class="info-item">{{"timesheet_type"|i18next}}</p>
+                          <p *ngIf="dataLoader" class="info-item item-value">
+                              <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                  [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                              </ngx-skeleton-loader>
+                          </p>
+                          <p class="info-item  item-value" *ngIf="!dataLoader">
+                              {{timeSheetType ?? '--'}}
+                          </p>
+                      </div>
+                      <div class="d-flex mb-24" *ngIf="user_type.toLowerCase() != 'vendor'">
+                        <p class="detail-button" (click)="openCreateEstimateOpen(false)">
+                          <button>{{ 'view_detailed_estimate' | i18next }}</button>
+                        </p>
+                    </div>
+                </ng-container>
+                <ng-template #showOthers>
+                    <div class="d-flex mb-24" *ngIf="jobDetails?.allow_express_offer">
+                        <p class="info-item">{{"timesheet_type"|i18next}}</p>
+                          <p *ngIf="dataLoader" class="info-item item-value">
+                              <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                                  [theme]="{'width': '80%', height: '16px', 'border-radius':'15px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+                              </ngx-skeleton-loader>
+                          </p>
+                          <p class="info-item  item-value" *ngIf="!dataLoader">
+                              {{timeSheetType ?? '--'}}
+                          </p>
+                      </div>
+                </ng-template>
+                </div>
+                </div>
+            </aside>
+        </section>
+    </div>
+<app-pending-approval-request (reloadPage)="reloadDetailsPage($event)"></app-pending-approval-request>
+<!-- <app-create-pre-identified-candidate [isCreateCandidate]="isCreateCandidate" [isEdit]="editCandidateData"
+  (createdCandidate)="editCandidate($event)" (onCreateClose)="onCreateClose()"></app-create-pre-identified-candidate> -->
+  <app-job-budget-estimate-view (onCreateClose)="closePopup($event)" (onUpdateReduceData)="onUpdateReduceData($event)" [showReduceFlyout]="showReduceFlyout" [isCreateEstimate]="isCreateEstimate" [jobData]="jobDetails"></app-job-budget-estimate-view>
+
+  <app-svms-modal title="{{ 'warning' | i18next }}" [visibility]="modalVisibility" (onClose)="onCloseModal()">
+      <app-svms-modal-body>
+        <p>{{ "are_you_sure_you_want_to_update_the_'number_of_positions?'_once_updated_it_cannot_be_reverted." | i18next }}</p>
+      </app-svms-modal-body>
+      <app-svms-modal-footer>
+        <div class="d-flex justify-content-end">
+        <div class="d-flex">
+          <button class="btn btn-light" (click)="onCloseModal()">{{ 'no' | i18next }}</button>
+          <button class="btn btn-primary ml-16" (click)="onPositionUpdate(true)">{{ 'yes' | i18next }}</button>
+        </div>
+      </div>
+    </app-svms-modal-footer>
+    </app-svms-modal>

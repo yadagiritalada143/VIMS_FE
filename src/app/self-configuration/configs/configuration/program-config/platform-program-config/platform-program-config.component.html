@@ -1,0 +1,27 @@
+<form [formGroup]="formGroup">
+    <ng-container *ngFor="let config of programControls">
+        <app-program-config-control *ngIf="config?.isSelected"
+          [title]="config?.title"
+          [subtitle]="config.subtitle"
+          [description]="config.description"
+          [type]="config.type"
+          [formControlName]="config.formControlName"
+          [dropdownItems]="config.dropDrownData"
+          [directoryIcon]="config.directoryIcon"
+          [placeholderText]="config.placeholderText"
+          [selectedValue]="config?.selectedValue"
+          [loading]="config?.loading  ?? false"
+          [disabled]="config?.disabled ?? false"
+          [sortNotRequired]="config?.sortNotRequired ?? false"
+          [nonEditable]="config?.nonEditable ?? []"
+          [isRequired]="config?.isRequired || false"
+          [timerMin]="config?.timerMin || 0"
+          [programDetails]="programDetails"
+          [errorText]="config?.errorText"
+          (saveProgramDetails)="setEnableNotificationDetails()"
+          (hideModulesSection)="hideModulesSection()"
+          [showEnableNotificationSection]="showEnableNotificationSection"
+          (emitOptionChanged)="changeNumberSelectOption($event, config)"
+        ></app-program-config-control>
+    </ng-container>
+</form>

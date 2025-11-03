@@ -1,0 +1,538 @@
+.workflow-page {
+    border: 1px solid $color-border-secondary;
+    border-radius: $border-radius;
+    
+    nav {
+        overflow: hidden;
+        height: 55px;
+        .nav-item {
+            line-height: 55px;
+            color: #84919F;
+            font-size: 13px;
+
+            &:before {
+                background-color: $light;
+                width: 30px;
+                height: 55px;
+                content: '.';
+                text-indent: -9999px;
+                overflow: hidden;
+                display: block;
+                visibility: visible;
+                position: absolute;
+                top: 0;
+                left: -27px;
+                z-index: 1;
+            }
+
+            &:after {
+                position: absolute;
+                right: 12px;
+                top: 0;
+                width: 55px;
+                height: 55px;
+                border-right: 1px solid $color-border-secondary;
+                border-bottom: 1px solid $color-border-secondary;
+                content: '.';
+                text-indent: -9999px;
+                display: block;
+                overflow: hidden;
+                transform: rotate(-45deg);
+                background-color: $light;
+                z-index: 2;
+            }
+
+            span {
+                position: relative;
+                z-index: 4;
+                display: block;
+                margin-right: 29px;
+                padding-left: 50px;
+
+                &:before {
+                    position: absolute;
+                    top: 50%;
+                    left: 26px;
+                    transform: translateY(-50%);
+                    font-family: 'Material Icons';
+                    font-size: 18px;
+                    display: block;
+                    visibility: visible;
+                }
+            }
+
+            &.active {
+                &:before {
+                    background-color: #FAFCFF;
+                }
+                span {
+                    background-color: #FAFCFF;
+                }
+                
+                &:after {
+                    background-color: #FAFCFF;
+                }
+            }
+            &.lock {
+                span {
+                    // color: #009514;
+                    &:before {
+                        content: 'lock';
+                    }
+                }
+            }
+
+            &.done {
+                span {
+                    color: #009514;
+                    &:before {
+                        color: #009514;
+                        content: 'check_circle';
+                    }
+                }
+            }
+
+            
+            &.rejected {
+                span {
+                    color: #FF2929;
+                    &:before {
+                        font-family: 'Material Icons Outlined';
+                        color: #FF2929;
+                        content: 'person_off';
+                    }
+                }
+            }
+
+            &.pending {
+                span {
+                    color: #1890ff;
+                    &:before {
+                        font-family: 'Material Icons Outlined';
+                        color: #1890ff;
+                        content: 'hourglass_top';
+                    }
+                }
+            }
+        }
+    }
+
+    .workflow-accordion-title {
+        border-top: 1px solid $color-border-secondary;
+        padding: $p16 $p16 $p16 $p24;
+
+        .item-label {
+            
+            icon {
+                i {
+                    font-size: 20px;
+                    
+                }
+
+                &.active-label{
+                    i {
+                        color: #1890ff;
+                    } 
+                } 
+            }
+            p {
+                span {
+                    font-weight: $font-weight-medium;
+                    &.active-label{
+                        color: #1890ff;
+                    }
+                }
+            }
+        }
+
+        .status {
+            font-size: 13px;
+            color: #84919F;
+            padding-left: $p20;
+            
+            &:before {
+                position: absolute;
+                top: 50%;
+                left: 0;
+                transform: translateY(-50%);
+                content: 'cancel';
+                font-family: 'Material Icons';
+                font-size: 16px;
+                display: block;
+                visibility: visible;
+                color: #84919F;
+            }
+
+            &.completed {
+                color: #009514;
+
+                &:before {
+                    content: 'check_circle';
+                    color: #009514;
+                }             
+            }
+
+            &.pending {
+                color: #D8834B;
+
+                &:before {
+                    content: 'hourglass_top';
+                    color: #D8834B;
+                }
+            }
+
+            &.by-passed{
+                color: #1890ff;
+                &:before{
+                    font-family: 'Material Icons outlined';
+                    content: 'skip_next';
+                    color: #1890ff;
+                }
+            }
+
+            &.not-needed {
+                color: #5f6d89;
+
+                &:before {
+                    content: 'block';
+                    color: #5f6d89;
+                }
+            }
+
+            &.not-needed {
+                color: #5f6d89;
+
+                &:before {
+                    content: 'block';
+                    color: #5f6d89;
+                }
+            }
+            &.rejected {
+                color: #FF0000;
+
+                &:before {
+                    font-family: 'Material Icons outlined';
+                    content: 'cancel';
+                    color: #FF0000;
+                }
+            }
+
+            &.not-started {
+                color: #84919F;
+
+                &:before {
+                    content: 'lock';
+                    color: #84919F;
+                }
+            }
+        }
+
+        .show-hide-approver {
+            color: #0044C5;
+        }
+
+        &.active {
+            background-color: #FAFCFF;
+        }
+    }
+
+    .workflow-accordion-content {
+        table {
+            tbody {
+                tr {
+                    td {
+                        border: 1px solid $color-border-secondary;
+                        padding: 0;
+                        .workflow-user-detail{
+                            width: 160px;
+                            p{
+                                width: 100%;
+                                white-space: nowrap;
+                                text-overflow: ellipsis;
+                                overflow: hidden;
+
+                                &.inactive {
+                                    color: #84919F;
+                                }
+                            }
+                        }
+
+                        .disable-text { 
+                            *{ color: #84919F; }
+                        }
+
+                        .auto-width {
+                            width: auto !important;
+                        }
+
+                        &:nth-child(2) {
+                            position: relative;
+
+                            .drag-handle {
+                                width: 4px;
+                                height: 100%;
+                                cursor: w-resize;
+                                position: absolute;
+                                left: -1px;
+                                top: 0;
+                                z-index: 10;
+                                display: block;
+                            }
+                        }
+                    }
+                }
+            }
+
+            figure {
+                width: 22px;
+                height: 22px;
+                border-radius: $rounded-circle;
+                overflow: hidden;
+                min-width: 22px;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+                .initials {
+                    color: #ffffff;
+                    width: 22px;
+                    height: 22px;
+                    min-width: 22px;
+                    min-height: 22px;
+                }
+            }
+
+            .users {
+                padding: $p24;
+                align-items: center;
+            }
+
+            .approval-ui {
+                position: relative;
+                flex-basis: 70%;
+                padding: $p24;
+
+                .reason {
+                    border: 1px solid $color-border-secondary;
+                    padding: $p8;
+                    margin-top: $m8;
+                    word-break: break-all;
+                }
+            }
+
+            .replace-btn {
+                color: $color-assets-primary;
+                text-decoration: underline;
+            }
+
+            .approval {
+                position: relative;
+                font-weight: $font-weight-medium;
+                margin-right: $m4;
+                padding-left: $p24;
+
+                &:before {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    font-family: 'Material Icons';
+                    font-size: 18px;
+                    display: block;
+                    visibility: visible;
+                }
+
+                &.approved {
+                    color: #009514;
+    
+                    &:before {
+                        content: 'how_to_reg';
+                        color: #009514;
+                    }
+                }
+
+                &.rejected {
+                    color: #FF0000;
+    
+                    &:before {
+                        font-family: 'Material Icons outlined';
+                        content: 'person_off';
+                        color: #FF0000;
+                    }
+                }
+
+                &.not-started {
+                    color: #84919F;
+    
+                    &:before {
+                        content: 'lock';
+                        color: #84919F;
+                    }
+                }
+
+                &.cancelled {
+                    color: #84919F;
+    
+                    &:before {
+                        content: 'cancel';
+                        color: #84919F;
+                    }
+                }
+
+                &.pending {
+                    color: #BC5A1E;
+    
+                    &:before {
+                        content: 'hourglass_top';
+                        color: #BC5A1E;
+                    }
+                }
+
+                &.not-needed {
+                    color: #5f6d89;
+    
+                    &:before {
+                        content: 'block';
+                        color: #5f6d89;
+                    }
+                }
+            }
+        }
+
+        &.active {
+            display: block;
+        }
+
+        .replace-ui {
+            opacity: 0;
+            visibility: hidden;
+            background-color: $light;
+            top: 20px;
+            right: 0;
+            width: 396px;
+            transition: $transition;
+            border: 1px solid #AFB9C5;
+            z-index: 1;
+            max-height: 0;
+            overflow: hidden;
+            .replace-info {
+                background-color: #DDEAFF;
+                border-bottom: 1px solid #CFD8E1;
+            }
+            &.reassign-user {
+                left: 25px;
+            }
+        }
+
+        .replaced-icon {
+            &:hover {
+                &~ .replace-ui {
+                    opacity: 1;
+                    visibility: visible;
+                    max-height: 1000px;
+                }
+            }
+        }
+    }
+
+    .min-width-div {
+        min-width: 32%;
+    }
+}
+
+.no-workflow {
+    height: calc(100vh - 375px);
+}
+
+.previous-workflows-wrapper {
+    .workflow-page {
+        margin-top: $m12;
+
+        &:first-child {
+            margin-top: 0;
+        }
+
+        .workflow-accordion-title {
+            border-bottom: 1px solid transparent;
+
+            &.active {
+                border-bottom-color: $color-border-secondary;
+            }
+        }
+
+        .reviewed-ui {
+            .approval {
+                position: relative;
+                font-weight: $font-weight-medium;
+                margin-right: $m4;
+                padding-left: $p24;
+
+                &:before {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    font-family: 'Material Icons';
+                    font-size: 18px;
+                    display: block;
+                    visibility: visible;
+                }
+
+                &.approved {
+                    color: #009514;
+    
+                    &:before {
+                        content: 'how_to_reg';
+                        color: #009514;
+                    }
+                }
+
+                &.rejected {
+                    color: #FF0000;
+    
+                    &:before {
+                        font-family: 'Material Icons outlined';
+                        content: 'person_off';
+                        color: #FF0000;
+                    }
+                }
+
+                &.not-started {
+                    color: #84919F;
+    
+                    &:before {
+                        content: 'lock';
+                        color: #84919F;
+                    }
+                }
+
+                &.cancelled {
+                    color: #84919F;
+    
+                    &:before {
+                        content: 'cancel';
+                        color: #84919F;
+                    }
+                }
+
+                &.pending {
+                    color: #BC5A1E;
+    
+                    &:before {
+                        content: 'hourglass_top';
+                        color: #BC5A1E;
+                    }
+                }
+
+                &.not-needed {
+                    color: #5f6d89;
+    
+                    &:before {
+                        content: 'block';
+                        color: #5f6d89;
+                    }
+                }
+            }
+        }
+    }
+}

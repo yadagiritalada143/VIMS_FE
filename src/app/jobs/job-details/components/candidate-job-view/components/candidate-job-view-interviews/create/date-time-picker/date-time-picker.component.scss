@@ -1,0 +1,206 @@
+@import '../../../../../../../../../assets/sass/abstracts/variables';
+
+.modal-date-time {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -30%);
+    width: 90%;
+    max-width: 687px;
+    z-index: 100;
+    background-color: $light;
+    border-radius: 8px;
+    transition: $transition;
+    opacity: 0;
+    visibility: hidden;
+
+    header {
+        background-color: #FAFCFF;
+        border-bottom: 1px solid #E3E9F0;
+        padding: $p16 $p24;
+        border-top-right-radius: 8px;
+        border-top-left-radius: 8px;
+    }
+
+    .close-date-time-modal {
+        position: absolute;
+        top: 24px;
+        right: 24px;
+
+        ::ng-deep i {
+            font-size: 16px;
+            color: #001A43;
+        }
+    }
+
+    ::ng-deep .datepicker-main-wrapper {
+        position: static;
+    }
+
+    .modal-body {
+
+        .date-box {
+            margin-right: $m24;
+            flex: 1;
+        }
+
+        .time-box {
+            flex-basis: 45%;
+
+            .candidate-lists {
+                height: 200px;
+                overflow: auto;
+
+                .item-box {
+                    border: 1px solid #CFD8E1;
+                    padding: $p8;
+                    border-radius: $border-radius;
+
+                    p {
+                        &.status-busy {
+                            color: #FD1F1F;
+                        }
+
+                        &.status-free {
+                            color: green;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    footer {
+        border-top: 1px solid #E3E9F0;
+        padding: $p12 $p24;
+    }
+
+    &.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translate(-50%, -50%);
+    }
+
+    .time-input {
+        .form-control {
+            padding-right: 30px;
+        }
+
+        icon {
+            position: absolute;
+            top: 10px;
+            right: 6px;
+            z-index: 2;
+            pointer-events: none;
+
+            ::ng-deep i {
+                font-size: 21px;
+            }
+        }
+
+        .clear-wrapper {
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 22px;
+            width: 17px;
+            -webkit-user-select: none;
+            user-select: none;
+            color: #999999;
+
+            .clear {
+                display: inline-block;
+                font-size: 18px;
+                line-height: 1;
+                pointer-events: none;
+            }
+        }
+    }
+
+    .time-dropdown {
+        position: absolute;
+        left: 0;
+        right: 0;
+        z-index: 1;
+        background-color: $light;
+        border-radius: $border-radius;
+        border: 1px solid $color-border-secondary;
+        overflow: hidden;
+
+        .no-records {
+            color: #cccccc;
+            padding: 13px;
+            font-size: 13px;
+            white-space: pre-wrap !important;
+        }
+
+        ul {
+            list-style-type: none;
+            max-height: 240px;
+            overflow: auto;
+
+            li {
+                cursor: pointer;
+                line-height: 18px;
+                transition: 0.2s ease-in-out;
+                box-sizing: border-box;
+                display: block;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                background-color: #ffffff;
+                color: rgba(0, 0, 0, 0.87);
+                padding: 13px;
+                white-space: pre-wrap !important;
+
+                &:hover {
+                    background-color: #f9fafd;
+                }
+            }
+        }
+
+        &:hover {
+            border-color: #c6e0f5;
+        }
+
+        &:focus {
+            border-color: #d0eaff;
+            outline: 0px solid transparent;
+            box-shadow: 0px 2px 6px #0000000D;
+        }
+    }
+
+    .error-input {
+        border: 1px solid $error-color !important;
+    }
+
+    .error-message {
+        font-size: $font-primary;
+        color: $error-color;
+        font-weight: $font-weight-medium;
+
+        i {
+            color: $error-color;
+            font-size: 18px;
+            vertical-align: middle;
+        }
+    }
+}
+
+.overlay-date-time {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99;
+    background-color: #1F2031;
+    opacity: 0;
+    visibility: hidden;
+    transition: $transition;
+
+    &.active {
+        opacity: .85;
+        visibility: visible;
+    }
+}

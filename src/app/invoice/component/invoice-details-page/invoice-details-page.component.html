@@ -1,0 +1,403 @@
+<div class="detail-page-wrapper">
+    <section class="description-panel p-32 position-relative">
+        <a class="back-btn back-mobile" [routerLink]="['/invoice/individual-list']">
+            <icon class="d-inline-block" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon>
+            <span>{{ 'back_to_invoices' | i18next }}</span>
+        </a>
+        <div class="card bg-light mt-24 mt-m-0">
+            <header class="detail-page-header position-relative">
+                <div>
+                    <div *ngIf="dataLoader">
+                        <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                          width: '30%',
+                          height: '16px',
+                          'border-radius': '15px',
+                          'margin-bottom': '5px',
+                          'background-color': '#FCF8FF',
+                          'border-top': '0'
+                        }">
+                        </ngx-skeleton-loader>
+                    </div>
+                    <h3>
+                        Invoice
+                        <span class="status-ui ml-16 hide-on-mobile" [ngClass]="{'pending' : (invoiceDetails?.invoice_status?.toLowerCase() === 'pending'), 'active' : (invoiceDetails?.invoice_status?.toLowerCase() === 'consolidated')}">
+                            {{invoiceDetails?.invoice_status}}
+                        </span>
+                    </h3>
+                    <div *ngIf="dataLoader">
+                        <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                          width: '60%',
+                          height: '16px',
+                          'border-radius': '15px',
+                          'margin-bottom': '0',
+                          'background-color': '#FCF8FF',
+                          'border-top': '0'
+                        }">
+                        </ngx-skeleton-loader>
+                    </div>
+                    <p class="detail-meta hide-on-mobile">
+                        <icon class="meta-label" name="label" size="18px"></icon>
+                        {{invoiceDetails?.invoice_number}}
+                        <icon class="ml-32 updated" name="update" size="18px"></icon>
+                        Created On:
+                        <span>{{invoiceDetails?.created_at | localDateFormat}} {{invoiceDetails?.created_at | localDateFormat:'hh:mm:ss a z'}}</span>
+                    </p>
+                    <div class="hide-on-desktop">
+                        <div class="d-flex align-item-center d-block-m">
+                            <span class="status-ui mr-16 mb-m-8 pending">
+                                {{invoiceDetails?.invoice_status}}
+                            </span>
+                            <div class="job-id d-flex">
+                                <icon class="meta-label mr-4" color="#ffc409" name="label" size="18px"></icon>
+                                {{invoiceDetails?.invoice_number}}
+                            </div>
+                            <div class="job-id d-flex mt-8">
+                                <icon class="meta-label mr-4" color="#d6dae3" name="update" size="18px"></icon>
+                                <div class="text-truncate">
+                                    Created On :  {{invoiceDetails?.created_at | localDateFormat}} {{invoiceDetails?.created_at | localDateFormat:'hh:mm:ss a z'}}
+                                    <!-- 10/02/2021 12:41:47 UTC -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <nav class="detail-nav position-relative pl-24 pr-24 tab-mobile-view">
+                <ul class="tabs primary">
+                    <li>
+                        <a class="active">
+                            <icon class="mr-8" size="20px" name="info" theme="outlined" cuClass="icon-cu"></icon>
+                            {{ 'Invoice Details' | i18next }}
+                        </a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </nav>
+            <div class="description-card p-24 mb-24">
+                <section class="content-section mobile-re-order">
+                    <div class="content-part">
+                        <div class="detailed-page-section">
+                            <h5 class="section-title position-relative mb-24 mb-m-0"
+                                [ngClass]="{'active' : (detailedValue === 'basicDetails')}"
+                                (click)="detailCollapse('basicDetails')">
+                                <icon class="mr-8 icon-primary-bg hide-on-mobile" size="15px" name="info"
+                                    type="material" cuClass="icon-cu"></icon>
+                                <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px"
+                                    [name]="(detailedValue === 'basicDetails') ? 'remove' : 'add'" type="material"
+                                    cuClass="icon-cu"></icon>
+                                {{ 'basic_details' | i18next }}
+                            </h5>
+                            <div [ngClass]="(detailedValue === 'basicDetails') ? 'active' : 'inactive'">
+                                <div class="row" *ngIf="dataLoader">
+                                    <div class="mb-24 col-md-3">
+                                        <p class="small label">
+                                            <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                                [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                            </ngx-skeleton-loader>
+                                        </p>
+                                    </div>
+                                    <div class="mb-24 col-md-3">
+                                        <p class="small label">
+                                            <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                                [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                            </ngx-skeleton-loader>
+                                        </p>
+                                    </div>
+                                    <div class="mb-24 col-md-3">
+                                        <p class="small label">
+                                            <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                                [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                            </ngx-skeleton-loader>
+                                        </p>
+                                    </div>
+                                    <div class="mb-24 col-md-3">
+                                        <p class="small label">
+                                            <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                                [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                            </ngx-skeleton-loader>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div *ngIf="!dataLoader" class="row">
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">Worker Name</label>
+                                            <span class="value-content">{{invoiceDetails?.worker?.name ? invoiceDetails?.worker?.name : '--'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">Vendor Org Name</label>
+                                            <span class="value-content">{{invoiceDetails?.vendor?.name ? invoiceDetails?.vendor?.name : '--'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">Work Location</label>
+                                            <span class="value-content">{{invoiceDetails?.work_location?.name ? invoiceDetails?.work_location?.name :'--'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">Hierarchy</label>
+                                            <span class="value-content">{{invoiceDetails?.hierarchy?.name ? invoiceDetails?.hierarchy?.name : '--'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">Sourcing Model</label>
+                                            <span class="value-content">{{ invoiceDetails?.sourcing_model !== '' ?  invoiceDetails?.sourcing_model == 'sow'  ? invoiceDetails?.sourcing_model?.toUpperCase() : capitalizeWords(invoiceDetails?.sourcing_model)  : '--' | i18nextEager}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">Assignment Name(ID)</label>
+                                            <a class="value-content invoice-link" (click)="navigateToAssignmentId()">{{invoiceDetails?.assignment_title ? invoiceDetails?.assignment_title :'--'}}{{ invoiceDetails?.assignment_id ? "("+ invoiceDetails?.assignment_id +")" : ''}}</a>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">Duration</label>
+                                            <span class="value-content">{{getDate(invoiceDetails?.invoice_start_date, true)}} -
+                                                {{getDate(invoiceDetails?.invoice_end_date, true)}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">Invoice Type</label>
+                                            <span class="value-content">{{invoiceDetails?.invoice_type === "By milestone " ? 'Progress Update' : invoiceDetails?.invoice_type ?
+                                                capitalizeWords(invoiceDetails?.invoice_type) : '--' | i18nextEager}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">Invoice Type ID</label>
+                                            <a class="value-content invoice-link" (click)="naigateOnInvoiceTypeId()">{{invoiceDetails?.ts_es_code ? invoiceDetails?.ts_es_code : '--'}}</a>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">ERP External ID</label>
+                                            <span class="value-content">{{invoiceDetails?.erp_external_id ? invoiceDetails?.erp_external_id :'--'}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-32 detailed-page-section mt-m-0">
+                            <h5 class="section-title position-relative mb-24 mb-m-0"
+                                [ngClass]="{'active' : (detailedValue === 'financialDetails')}"
+                                (click)="detailCollapse('financialDetails')">
+                                <icon class="mr-8 icon-success-bg hide-on-mobile" size="15px" name="credit_score"
+                                    type="material" cuClass="icon-cu"></icon>
+                                <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px"
+                                    [name]="(detailedValue === 'financialDetails') ? 'remove' : 'add'" type="material"
+                                    cuClass="icon-cu"></icon>
+                                {{ 'financial_details' | i18nextEager }}
+                            </h5>
+                            <div [ngClass]="(detailedValue === 'financialDetails') ? 'active' : 'inactive'">
+                                <div class="row" *ngIf="dataLoader">
+                                    <div class="mb-24 col-md-3">
+                                        <p class="small label">
+                                            <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                                [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                            </ngx-skeleton-loader>
+                                        </p>
+                                    </div>
+                                    <div class="mb-24 col-md-3">
+                                        <p class="small label">
+                                            <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                                [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                            </ngx-skeleton-loader>
+                                        </p>
+                                    </div>
+                                    <div class="mb-24 col-md-3">
+                                        <p class="small label">
+                                            <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                                [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                            </ngx-skeleton-loader>
+                                        </p>
+                                    </div>
+                                    <div class="mb-24 col-md-3">
+                                        <p class="small label">
+                                            <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                                [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                            </ngx-skeleton-loader>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div *ngIf="!dataLoader" class="row">
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">Total Amount</label>
+                                            <span class="value-content">{{(invoiceDetails?.invoice_calculation?.amount_with_tax || invoiceDetails?.invoice_calculation?.vendor_total_amount) ? (userType !== 'VENDOR') ? (invoiceDetails?.invoice_calculation?.amount_with_tax |  accuracy : accuracyEnum.AMOUNT : { currencyCode: currency }) : (invoiceDetails?.invoice_calculation?.vendor_total_amount |  accuracy : accuracyEnum.AMOUNT : { currencyCode: currency }) : '--' }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">Total Billable Units</label>
+                                            <span class="value-content">{{invoiceDetails?.total_billable_hours ? (invoiceDetails?.total_billable_hours | accuracy : accuracyEnum.HOUR) : '--' }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">Client Amount</label>
+                                            <span class="value-content">{{ invoiceDetails?.invoice_calculation?.client_amount ? (invoiceDetails?.invoice_calculation?.client_amount |  accuracy : accuracyEnum.AMOUNT : { currencyCode: currency }) : '--'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">MSP Amount</label>
+                                            <span class="value-content">{{ invoiceDetails?.invoice_calculation?.msp_total_amount ? (invoiceDetails?.invoice_calculation?.msp_total_amount |  accuracy : accuracyEnum.AMOUNT : { currencyCode: currency }) : '--'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">Vendor Amount</label>
+                                            <span class="value-content">{{ invoiceDetails?.invoice_calculation?.vendor_total_amount ? (invoiceDetails?.invoice_calculation?.vendor_total_amount |  accuracy : accuracyEnum.AMOUNT : { currencyCode: currency }) : '--'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">Tax Amount</label>
+                                            <span class="value-content text-link">{{invoiceDetails?.invoice_calculation?.tax_amount ? (invoiceDetails?.invoice_calculation?.tax_amount |  accuracy : accuracyEnum.AMOUNT : { currencyCode: currency }) : '--'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">Adjustment Amount</label>
+                                             <span class="value-content">{{invoiceDetails?.invoice_calculation?.adjustment_total_amount ? (invoiceDetails?.invoice_calculation?.adjustment_total_amount |  accuracy : accuracyEnum.AMOUNT : { currencyCode: currency }) : '--'}}</span>  
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-32 detailed-page-section mt-m-0">
+                            <h5 class="section-title position-relative mb-24 mb-m-0"
+                                [ngClass]="{'active' : (detailedValue === 'advancedDetails')}"
+                                (click)="detailCollapse('advancedDetails')">
+                                <icon class="mr-8 icon-success-bg hide-on-mobile" size="15px" name="layers"
+                                    type="material" cuClass="icon-cu"></icon>
+                                <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px"
+                                    [name]="(detailedValue === 'advancedDetails') ? 'remove' : 'add'" type="material"
+                                    cuClass="icon-cu"></icon>
+                                {{ 'Advanced Details' | i18nextEager }}
+                            </h5>
+                            <div [ngClass]="(detailedValue === 'advancedDetails') ? 'active' : 'inactive'">
+                                <p class="font-weight-medium mb-24">{{ 'master_data' | i18next }}</p>
+                                <div class="row" *ngIf="dataLoader">
+                                    <div class="mb-24 col-md-3">
+                                        <p class="small label">
+                                            <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                                [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                            </ngx-skeleton-loader>
+                                        </p>
+                                    </div>
+                                    <div class="mb-24 col-md-3">
+                                        <p class="small label">
+                                            <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                                [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                            </ngx-skeleton-loader>
+                                        </p>
+                                    </div>
+                                    <div class="mb-24 col-md-3">
+                                        <p class="small label">
+                                            <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                                [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                            </ngx-skeleton-loader>
+                                        </p>
+                                    </div>
+                                    <div class="mb-24 col-md-3">
+                                        <p class="small label">
+                                            <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                                [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                            </ngx-skeleton-loader>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div *ngIf="!dataLoader" class="row">
+                                    <div class="col-md-3" *ngFor="let foundationalData of invoiceDetails?.invoice_foundational_data">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">{{foundationalData?.data_type_name}}</label>
+                                            <span class="value-content">{{foundationalData?.data_id_value ? foundationalData?.data_id_value : '--'}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-32 detailed-page-section mt-m-0">
+                            <h5 class="section-title position-relative mb-24 mb-m-0"
+                                [ngClass]="{'active' : (detailedValue === 'customFields')}"
+                                (click)="detailCollapse('customFields')">
+                                <icon class="mr-8 icon-info-bg hide-on-mobile" size="15px" name="extension"
+                                    type="material" cuClass="icon-cu"></icon>
+                                <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px"
+                                    [name]="(detailedValue === 'customFields') ? 'remove' : 'add'" type="material"
+                                    cuClass="icon-cu"></icon>
+                                {{ 'custom_fields' | i18next }}
+                            </h5>
+                            <div [ngClass]="(detailedValue === 'customFields') ? 'active' : 'inactive'">
+                                <div class="row" *ngIf="dataLoader">
+                                    <div class="mb-24 col-md-3">
+                                        <p class="small label">
+                                            <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                                [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                            </ngx-skeleton-loader>
+                                        </p>
+                                    </div>
+                                    <div class="mb-24 col-md-3">
+                                        <p class="small label">
+                                            <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                                [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                            </ngx-skeleton-loader>
+                                        </p>
+                                    </div>
+                                    <div class="mb-24 col-md-3">
+                                        <p class="small label">
+                                            <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                                [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                            </ngx-skeleton-loader>
+                                        </p>
+                                    </div>
+                                    <div class="mb-24 col-md-3">
+                                        <p class="small label">
+                                            <ngx-skeleton-loader count="3" animation="progress" appearance="line"
+                                                [theme]="{'width': '100%', height: '16px', 'border-radius':'15px', 'margin-bottom':'5px', 'background-color': '#FCF8FF', 'border-top': '0'}">
+                                            </ngx-skeleton-loader>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div *ngIf="!dataLoader" class="row">
+                                    <ng-container *ngFor="let customData of invoiceDetails?.invoice_custom_data">
+                                    <div class="col-md-3" *ngIf="customData?.entity_ref == 'invoices'">
+                                        <div class="value-group row-direction-m">
+                                            <label class="value-head">{{customData?.name}}</label>
+                                            <span class="value-content">{{customData?.value ? customData?.value : '--'}}</span>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                                    <div class="col-md-3">
+                                        <!-- <div class="value-group row-direction-m">
+                                            <label class="value-head">Field 3</label>
+                                            <span class="value-content">Value</span>
+                                        </div> -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <div class="revision-history card bg-light mt-24 p-16 mt-m-0">
+            <h4 class="font-weight-medium mb-12 px-m-16">
+                <icon class="mr-8" name="update" size="18px" type="material"></icon> {{ 'Invoice Revision History' | i18next
+                }}
+            </h4>
+            <vms-table [vmsTableConfig]="tableConfig" [vmsDataSource]="invoiceDetails?.all_invoices" [loading]="dataLoading"
+                [totalItem]="totalRecords" [itemsPerPage]="itemPerPage" (changePage)="onPaginationClick($event)"
+                [count]="countData" (onViewClick)="onClickView($event)" (onRowChecked)="onRowChecked($event)" >
+            </vms-table>
+        </div>
+    </section>
+</div>

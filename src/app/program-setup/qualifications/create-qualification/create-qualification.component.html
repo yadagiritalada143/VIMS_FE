@@ -1,0 +1,219 @@
+<svms-sidebar title="{{title | i18next}}" icon="" [message]="message" [btnOkText]="btnOkText" [btnCancelText]="btnCancelText"
+  [needConfirmation]="needConfirmation" [dataVisibility]="isCreateQualificationItem" (onClose)="sidebarClose($event)">
+  <svms-sidebar-body>
+    <form [formGroup]="addNewQualificationForm">
+      <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)">
+        <vms-tab label="{{ 'basic_info' | i18next }}">
+          <div class="form-group-row mt-8 mb-32 pb-8" *ngIf="!isViewMode">
+            <ul class="basic-info-source d-flex">
+              <li class="mr-16 position-relative">
+                <input type="radio" (change)="checkCheckBoxvalue($event)" name="basicinfosource" value="new" checked
+                  [(ngModel)]="qualificationSource" [ngModelOptions]="{standalone: true}">
+                <div class="pt-24">
+                  <icon class="mb-12 d-block" theme="outlined" name="collections_bookmark" size="24px" type="material"
+                    cuClass="item-icon"></icon>
+                  <span>{{ 'create_new' | i18next }}</span>
+                </div>
+              </li>
+              <li class="mr-16 position-relative">
+                <input type="radio" (change)="checkCheckBoxvalue($event)" name="basicinfosource" value="system"
+                  [(ngModel)]="qualificationSource" [ngModelOptions]="{standalone: true}">
+                <div class="pt-24">
+                  <icon class="mb-12 d-block" theme="outlined" name="table_rows" size="24px" type="material"
+                    cuClass="item-icon"></icon>
+                  <span>{{ 'select_from_system' | i18next }}</span>
+                </div>
+              </li>
+              <li class="mr-16 position-relative">
+                <input type="radio" (change)="checkCheckBoxvalue($event)" name="basicinfosource" value="bulk"
+                  [(ngModel)]="qualificationSource" [ngModelOptions]="{standalone: true}">
+                <div class="pt-24">
+                  <icon class="mb-12 d-block" theme="outlined" name="file_copy" size="24px" type="material"
+                    cuClass="item-icon"></icon>
+                  <span>{{ 'bulk_select' | i18next }}</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <!-- Create new tab content start here -->
+          <div class="create-new-tab" *ngIf="qualificationSource === 'new'">
+            <div class="form-group-row mb-16">
+              <div class="form-group">
+                <label>{{ 'title' | i18next }}<span class="require">*</span> </label>
+                <input type="text" class="form-control" maxlength="100"  placeholder="{{ 'cpr_cert' | i18next }} 2"
+                  formControlName="name" [readOnly]="isViewMode">
+                <p class="validation-msg"
+                  *ngIf="addNewQualificationForm.controls['name'].touched && addNewQualificationForm.controls['name'].invalid && addNewQualificationForm.controls['name'].errors?.required">
+                  <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                  {{ 'qualification_name_is_required' | i18next }}
+                </p>
+                <p class="validation-msg" *ngIf="addNewQualificationForm.controls.name.errors?.maxlength">
+                  {{ 'name_cannot_long' | i18next }}.
+                </p>
+              </div>
+              <div class="toggle-panel" [ngClass]="{'disable':isViewMode && !isUpdateReq}">
+                <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+                  <span class="status-text">{{toggle?.title | i18next}}</span>
+                  <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+                    (click)="onClickToggle()"></span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group-row mb-16">
+              <div class="form-group">
+                <label>{{ 'code' | i18next }}<span class="require">*</span> </label>
+                <input type="text" class="form-control" [readOnly]="isViewMode" placeholder="{{ 'enter_code_here' | i18next }}"
+                  maxlength="100" minlength="5" formControlName="code">
+                <p class="validation-msg"
+                  *ngIf="addNewQualificationForm.controls['code'].touched && addNewQualificationForm.controls['code'].invalid && addNewQualificationForm.controls['code'].errors?.required">
+                  <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                  {{ 'code_is_required' | i18next }}
+                </p>
+                <p class="validation-msg" *ngIf="addNewQualificationForm.controls.code.errors?.minlength">
+                  {{ 'code_must_be_at_least_5_characters_long' | i18next }}.
+                </p>
+                <p class="validation-msg" *ngIf="addNewQualificationForm.controls.code.errors?.maxlength">
+                  {{ 'code_cannot_long' | i18next }}.
+                </p>
+              </div>
+            </div>
+            <div class="form-group mb-32">
+              <label>{{ 'description' | i18next }} </label>
+              <textarea type="textarea" [readOnly]="isViewMode" rows="7" cols="12" maxlength="1000" class="form-control"
+                formControlName="description"
+                placeholder="{{ 'brief_description_of_what_a_credential_is_or_does_and_how_it_impacts_the_instance' | i18next }}"></textarea>
+            </div>
+          </div>
+          <!-- Create new tab content end here -->
+
+          <!-- select from system tab content start here -->
+          <div class="select-system-tab" *ngIf="qualificationSource === 'system'">
+            <div class="form-group-row mb-16">
+              <div class="form-group">
+                <label>{{ 'title' | i18next }}<span class="require">*</span> </label>
+                <ng-select bindLabel="name" (change)="getValues($event)" [items]="SelectFromSystem" bindvalue="item"
+                  [clearable]="false" placeholder="{{ 'select_qualification' | i18next }}">
+                </ng-select>
+
+              </div>
+
+              <div class="toggle-panel" [ngClass]="{'disable':isViewClicked}">
+                <div class="toggle-panel-inner toggle-background"
+                  [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+                  <span class="status-text">{{toggle?.title | i18next}}</span>
+                  <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+                    (click)="onClickToggle()"></span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group-row mb-16">
+              <div class="form-group">
+                <label>{{ 'code' | i18next }}<span class="require">*</span> </label>
+                <input type="text" class="form-control" readonly placeholder="{{ 'enter_code_here' | i18next }}" maxlength="100"
+                  minlength="5" formControlName="code">
+              </div>
+            </div>
+            <div class="form-group mb-32">
+              <label>{{ 'description' | i18next }} </label>
+              <textarea type="textarea" readonly rows="7" cols="12" maxlength="1000" class="form-control"
+                formControlName="description"
+                placeholder="{{ 'brief_description_of_what_a_credential_is_or_does_and_how_it_impacts_the_instance' | i18next }}"></textarea>
+            </div>
+          </div>
+          <!-- select from system tab content end here -->
+
+          <!-- bulk select tab content start here -->
+          <div class="bulk-select-tab" *ngIf="qualificationSource === 'bulk'">
+            <table class="table table-listing add-qualification-listing word-break">
+              <thead>
+                <tr>
+                  <th width="7%">
+                    <input type="checkbox" name="selectall" [(ngModel)]="checkedAll" (click)="CheckAllOptions()"
+                      [ngModelOptions]="{standalone: true}">
+                  </th>
+                  <th width="25%">
+                    {{ 'name' | i18next }}
+                  </th>
+                  <th width="50%">
+                    {{ 'description' | i18next }}
+                  </th>
+                  <th width="18%">
+                    {{ 'type' | i18next }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody *ngIf="SelectFromSystem.length > 0">
+                <tr *ngFor="let bulklistitem of SelectFromSystem">
+                  <td class="p-8">
+                    <input type="checkbox" name="{{bulklistitem.name}}" [(ngModel)]="bulklistitem.checked"
+                      [value]="bulklistitem.name" [ngModelOptions]="{standalone: true}"
+                      (change)="isAllSelected(bulklistitem.checked,bulklistitem.id)">
+                  </td>
+                  <td class="p-8">
+                    <a href="javascript:void(0)" class="text-underline">{{bulklistitem.name}}</a>
+                  </td>
+                  <td class="p-8">
+                    {{((selectQualificationId === bulklistitem?.id) && expandMore) ? bulklistitem.description : bulklistitem.description | slice: 0:30}}
+                    {{( (bulklistitem.description?.length > 30) ? ((selectQualificationId === bulklistitem?.id) && expandMore) ? '' : '...' : '')}}
+                    <a href="javascript:void(0)" (click)="onMoreLessClick(bulklistitem?.id, bulklistitem?.description)"
+                      class="text-underline link-color">
+                      {{( (bulklistitem.description?.length > 30)? ((selectQualificationId === bulklistitem?.id) && expandMore) ? 'less' : 'more' : '') | i18next}}</a>
+                  </td>
+                  <td class="p-8">
+                    {{bulklistitem.source}}
+                  </td>
+                </tr>
+              </tbody>
+              <!-- <tbody *ngIf="SelectFromSystem.length == 0"><span>This program already have all system generated Qualifications.</span></tbody> -->
+            </table>
+          </div>
+          <!-- bulk select tab content end here -->
+        </vms-tab>
+
+        <!-- <vms-tab label="Hierarchy" *ngIf="qualificationSource === 'new' || qualificationSource === 'system'"
+          [ngClass]="{'disable_checkbox': isViewMode && !isUpdateReq}">
+          <label>{{ 'hierarchy_level_name' | i18next }} <span class="require">*</span></label>
+          <div *ngIf="rendererData?.length === 0 || !rendererData"
+            class="content-area ui-content-wrapper no-content bg-light list-not-found">
+            <div class="no-data text-center">
+              <img src="./assets/images/no-data.png" alt="hierarchy-board" class="img-fluid">
+              <h2>{{ 'you_do_not_have_a_hierarchy_created_yet' | i18next }}.</h2>
+            </div>
+          </div>
+          <div *ngIf="rendererData?.length > 0">
+            <app-renderer *ngFor="let renderLevel of rendererData" [renderData]="renderLevel"
+              [selectedTreeArr]="selectedTreeArr" (selectHierarchyLevel)="selectHierarchy($event)"></app-renderer>
+          </div>
+        </vms-tab> -->
+
+      </vms-tab-group>
+    </form>
+  </svms-sidebar-body>
+
+  <svms-sidebar-footer *accessControl>
+    <!--show this in basic info tabs tabs -->
+    <!-- <button type="submit" [disabled]="(name.invalid ||code.invalid ||is_enabled.invalid)"
+      class="btn btn-primary float-right"
+      *ngIf="tabIndex === 0 && (qualificationSource === 'new' || qualificationSource === 'system') && (isCreate || isUpdateReq)"
+      (click)="goToNext()">
+      {{ 'continue' | i18next }} <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu">
+      </icon>
+    </button> -->
+    <!--show this in basic info tabs tabs -->
+    <button type="submit"
+      [disabled]="(name.invalid ||code.invalid ||is_enabled.invalid)"
+      class="btn btn-primary float-right"
+      *ngIf="tabIndex === 0 && (qualificationSource === 'new' || qualificationSource === 'system') && (isCreate || isUpdateReq)"
+      (click)="saveQualificationItem()">
+      {{ 'save' | i18next }} <icon size="20px" name="check_circle" type="material" class="icon--on-right" cuClass="icon-cu">
+      </icon>
+    </button>
+
+    <!--show this in hierarchy tabs -->
+    <button type="submit" [disabled]="bulkCreateList.length == 0" class="btn btn-primary float-right"
+      *ngIf="(tabIndex === 0 && qualificationSource === 'bulk')&& !isViewMode" (click)="saveBulkCreate()">
+      <icon size="20px" name="check_circle" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+      &nbsp;&nbsp;{{ 'save' | i18next }}
+    </button>
+  </svms-sidebar-footer>
+</svms-sidebar>

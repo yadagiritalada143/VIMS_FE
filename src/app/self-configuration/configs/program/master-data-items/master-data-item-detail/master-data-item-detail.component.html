@@ -1,0 +1,150 @@
+<div class="view-detail-page">
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <div class="page-title font-weight-semibold d-flex align-items-center">
+            <i (click)="backClicked()" class="material-icons back-arrow-icon mr-16 cursor-pointer" tooltip="{{'back' | i18next}}" placement="bottom">arrow_back</i>
+            <h3 class="font-weight-semibold mb-0">{{ pageTitle | i18next}}</h3>
+        </div>
+        <div>
+            <button class="c-btn c-btn-success-medium" (click)="onSave()">
+                {{(isEditMode?'update':'save')|i18next}}
+            </button>
+        </div>
+    </header>
+    <section class="section-body-content">
+        <div *ngIf="masterForm" class="p-24">
+            <div [formGroup]="masterForm">
+                <div class="c-form-group-row">
+                    <div class="c-form-group">
+                        <label>{{'name '|i18next}}<span class="require">*</span></label>
+                        <input type="text" class="c-form-control" formControlName="name" 
+                            [placeholder]="'enter_name'|i18next" minlength="2" maxlength="255"
+                            [mandatePattern]="inputTextPattern" (blur)="trimField('name')"
+                        />
+                        <ng-container *ngIf="masterForm?.controls?.name?.touched">
+                            <p class="validation-msg" *ngIf="masterForm?.controls?.name?.errors?.required">
+                                {{ "*_this_field_is_required" | i18next }}        
+                            </p>
+                            <p class="validation-msg" *ngIf="masterForm?.controls?.name?.errors?.minlength">
+                                {{ "*_atleast_2_characters_are_required" | i18next }}        
+                            </p>
+                        </ng-container>
+                    </div>
+                    <div class="c-form-group toggle-width toggle-panel pt-24">
+                        <div class="toggle-panel-inner" style="width: 100%"
+                            [ngClass]="status ? 'if-active' : 'if-inactive'">
+                            <span class="status-text">{{(status ? 'active' : 'inactive') |i18next}}</span>
+                            <span class="toggle-switch" [ngClass]="status ? 'toggle-on' : 'toggle-off'"
+                                (click)="(status = !status)"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="c-form-group-row">
+                    <div class="c-form-group">
+                        <label>{{'code '|i18next}}<span class="require">*</span></label>
+                        <input type="text" class="c-form-control" formControlName="code" 
+                            [placeholder]="'enter_code'|i18next" minlength="2" maxlength="255"
+                            [mandatePattern]="inputTextPattern" (blur)="trimField('code')"/>
+                        
+                        <ng-container *ngIf="masterForm?.controls?.code?.touched">
+                            <p class="validation-msg" *ngIf="masterForm?.controls?.code?.errors?.required">
+                                {{ "*_this_field_is_required" | i18next }}        
+                            </p>
+                            <p class="validation-msg" *ngIf="masterForm?.controls?.code?.errors?.minlength">
+                                {{ "*_atleast_2_characters_are_required" | i18next }}        
+                            </p>
+                        </ng-container>
+
+                    </div>
+
+                    <div *ngIf="showOwner" class="c-form-group">
+                        <label>
+                            {{ (masterName ?? 'master_data' | i18next) + ' Owner ' | i18next }}
+                            <span class="require" *ngIf="ownerMandatory">*</span>
+                        </label>
+
+                        <ng-select formControlName="owner"
+                            [required]="ownerMandatory" 
+                            [clearable]="false"
+                            [placeholder]="'choose_owner'|i18next"
+                            [loading]="ownerLoading"
+                            (search)="ownerSubject.next({ term: ($event?.term || ''), page: 1})"
+                            (open)="ownerSubject.next({ term: '', page: 1})"
+                            (scrollToEnd)="showMoreOwners()"
+                        >
+                            <ng-option [value]="data?.id" *ngFor="let data of (ownerList | uniqueKey:'id' | keysort:'full_name')">
+                                {{ data?.full_name | titlecase | i18next }}
+                            </ng-option>
+                        </ng-select>
+
+                        <ng-container *ngIf="ownerMandatory && masterForm?.controls?.owner?.touched">
+                            <p class="validation-msg" *ngIf="masterForm?.controls?.owner?.errors?.required">
+                                {{ "*_this_field_is_required" | i18next }}        
+                            </p>
+                        </ng-container>
+
+                    </div>
+
+                </div>
+
+                <div class="c-form-group-row">
+                    <div class="c-form-group">
+                        <label>{{'description '|i18next}}</label>
+                        <textarea class="c-form-control" formControlName="description" 
+                            [placeholder]="'enter_description'|i18next" 
+                            maxlength="2000" rows="4">
+                        </textarea>
+                    </div>
+                </div>
+
+                <div *ngIf="depended_fields?.length" class="py-16">
+                    <h4 class="font-weight-medium"> {{ 'depended_fields' | i18next }} </h4>
+                    <div class="py-8" *ngFor="let field of depended_fields;">
+                        <div class="d-flex align-items-center mb-12">
+                            <label class="mb-0"> {{ field?.name | i18next }} </label>
+                            <div class="d-flex align-items-center ml-16">
+                                <div class="d-flex align-items-center">
+                                    <toggle-button class="c-toggle-button-switch"
+                                        [disabled]="field.loading"
+                                        [checked]="field.restrict_values"
+                                        (changed)="(field.restrict_values = $event)"
+                                    ></toggle-button>
+                                </div>
+                                <p class="ml-8"> 
+                                    {{ "restrict_values" | i18next }} 
+                                </p>
+                                <div class="d-flex align-items-center cursor-pointer ml-4">
+                                    <icon name="help" size="14px" color="grey" type="material" cuClass="d-flex" tooltip='When enabled, the picklist values for this depended field of this particular Master Data record will be restricted to what is selected below. For example, if this Master Data record has another MDT called “Cost Center” as a “Depended Field” and 3 Cost Centers are selected below (out of 100 available Cost Centers) then when this Master Data record is selected only those 3 Cost Centers would be available for selection rather than the 100 which are available.' placement="right"></icon>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <svms-selector-modal
+                            [title]="'Select ' + (field?.name || 'Items')"
+                            [showDefault]="true"
+                            [showEditable]="true"
+                            [(options)]="field.fields"
+                            (scrollToEnd)="showMoreDependedFields(field)"
+                            (open)="searchDependedFields('', field)"
+                            (search)="searchDependedFields($event, field)"
+                            [loading]="field?.loading"
+                        ></svms-selector-modal>
+                        <!-- 
+                        <p *ngIf="noDefaultSelected(field.fields)" class="validation-msg pt-8"> {{ ('* Please select atleast one default value for ' + field?.name) | i18next }} </p>
+                        -->
+                    </div>
+                </div>
+
+                <app-custom-fields *ngIf="allowedMDTuserType"
+                    [queryParameters]="{ 'master_data_type': masterId }"
+                    (isCustomFieldsFormValid)="isCFValid = $event" 
+                    moduleName="MASTER_DATA_TYPE" showLabel="true" 
+                    [isCreate]="isCreateMode" 
+                    (customFieldUpdated)="updatedCFs = $event"
+                    [custom_fields]="recievedCFs"
+                ></app-custom-fields>
+
+            </div>
+        </div>
+    </section>
+</div>

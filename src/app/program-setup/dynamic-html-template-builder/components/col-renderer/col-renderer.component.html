@@ -1,0 +1,7 @@
+<ng-container *ngFor='let item of colObject?.items, let i=index'>
+    <app-item-renderer (clickDeleteCell) = 'onDeleteItem($event)' [item]="item" [itemIndex]="i"></app-item-renderer>
+    <!-- <icon title="Delete item" size="24px" name="close" type="material" cuClass="d-flex" (onClick)="onDeleteItem(i)"></icon> -->
+</ng-container>
+<span class="col-del-btn" *ngIf="colObject?.items && colObject?.items.length > 0 && isCellSelected" [tooltip]="'Delete column' | i18next">
+    <icon title="Delete item" size="20px" name="delete" theme="outlined" type="material" cuClass="d-flex" (onClick)="onDeleteCell()"></icon>
+</span>

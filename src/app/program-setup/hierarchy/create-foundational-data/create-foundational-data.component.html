@@ -1,0 +1,125 @@
+<svms-sidebar [title]="title" [clickOutside]="clickOutside" [icon]="icon" [dataVisibility]="foundationData" (onClose)="sidebarClose()">
+    <svms-sidebar-body>
+        <form [formGroup]="addFoundationDataForm">
+            <div class="foundation-data-form">
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label>{{currentDataType['name'] | i18next}} {{ 'name' | i18next }}<span class="require">*</span></label>
+                        <input type="text" class="form-control" maxlength="100" minlength="2" [readOnly]="isViewMode"
+                            placeholder="{{ 'eg' | i18next }}: {{ 'production' | i18next }}, {{ 'it_department_etc' | i18next }}." formControlName="name">
+                        <p class="validation-msg"
+                            *ngIf="addFoundationDataForm.controls.name.touched && addFoundationDataForm.controls['name'].invalid && addFoundationDataForm.controls['name'].errors?.required">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                            {{currentDataType['name'] | i18next}} {{ 'name_is_required' | i18next }}
+                        </p>
+                        <p class="validation-msg" *ngIf="addFoundationDataForm.controls.name.errors?.minlength">
+                            {{currentDataType['name'] | i18next}}{{ 'name_must_be_at_least' | i18next }} 2 {{ 'characters_long' | i18next }}.
+                        </p>
+                        <p class="validation-msg" *ngIf="addFoundationDataForm.controls.name.errors?.maxlength">
+                            {{currentDataType['name'] | i18next}} {{ 'name_cannot_be_more_than' | i18next }} 100 {{ 'characters_long' | i18next }}.
+                        </p>
+                    </div>
+                    <div class="toggle-panel" [ngClass]="{'disable':isViewMode}">
+                        <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+                            <span class="status-text">{{toggle?.title | i18next}}</span>
+                            <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+                                (click)="onClickToggle()"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label>{{currentDataType['name'] | i18next}} {{ 'code' | i18next }}<span class="require">*</span></label>
+                        <input type="text" class="form-control" [readOnly]="isViewMode" maxlength="100" minlength="2"
+                            placeholder="{{ 'eg' | i18next }}: {{ 'production' | i18next }}, {{ 'it_department_etc' | i18next }}." formControlName="code">
+                        <p class="validation-msg"
+                            *ngIf="addFoundationDataForm.controls.code.touched && addFoundationDataForm.controls['code'].invalid && addFoundationDataForm.controls['code'].errors?.required">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                            {{currentDataType['name'] | i18next}} {{ 'code_is_required' | i18next }}
+                        </p>
+                        <p class="validation-msg" *ngIf="addFoundationDataForm.controls.code.errors?.minlength">
+                            {{currentDataType['name'] | i18next}} {{ 'code_must_be_at_least' | i18next }} 2 {{ 'characters_long' | i18next }}.
+                        </p>
+                        <p class="validation-msg" *ngIf="addFoundationDataForm.controls.code.errors?.maxlength">
+                            {{currentDataType['name'] | i18next}} {{ 'code_cannot_be_more_than' | i18next }} 100 {{ 'characters_long' | i18next }}.
+                        </p>
+                    </div>
+                </div>
+                <div *ngIf="showOperatorField" class="form-group-row">
+                    <div class="form-group">
+                        <label>
+                            {{ (currentDataType['name'] ?? 'Master Data' | i18next) + ' Owner ' | i18next }}
+                            <span class="require" *ngIf="operatorFieldMandatory">*</span></label>
+                        <ng-select ngDefaultControl bindLabel="manager" formControlName="manager"
+                            [required]="operatorFieldMandatory" [multiple]="!!((currentDataType?.manager ?? [])?.length)"
+                            [readonly]="isViewMode" [clearable]="false"
+                            (search)='searchManagerList($event)' loadingText="{{'Loading...'| i18next}}"
+                            [loading]="managerLoading" [placeholder]="'Choose Owner'|i18next" >
+                                <ng-option [value]="data?.id ? data?.id : data?.user_id" *ngFor="let data of membersList">
+                                    <ng-container *ngIf='data?.middle_name; else noMiddleName'>
+                                        {{ data?.first_name ?? '' }} {{ data?.middle_name ?? '' }} {{ data?.last_name ?? '' }}
+                                    </ng-container>
+                                    <ng-template #noMiddleName>
+                                        {{ data?.first_name ?? '' }} {{ data?.last_name ?? '' }}
+                                    </ng-template>
+                                </ng-option>
+                        </ng-select>
+                        <p class="validation-msg"
+                            *ngIf="addFoundationDataForm.controls.manager.touched && addFoundationDataForm.controls['manager'].errors">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                            {{currentDataType['name'] | i18next}} {{ 'manager_is_required' | i18next }}
+                        </p>
+                    </div>
+                </div>
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label>{{ 'description' | i18next }}</label>
+                        <textarea placeholder="{{ 'enter_your_description' | i18next }}" [readOnly]="isViewMode" maxlength="2000"
+                            class="form-control" rows="4" formControlName="description"></textarea>
+                    </div>
+                </div>
+                <div *ngIf="associatedMasterDataTypes && associatedMasterDataTypes.length" class="row no-gutters">
+                    <div class="col-md-7">
+                        <div class="float-left subtitle-2 mb-16 font-weight-bold">{{ 'depended_fields' | i18next }}</div>
+                    </div>
+                </div>
+                <ng-container *ngFor="let type of associatedMasterDataTypes; index as it">
+                    <div class="form-group-row">
+                        <div *ngIf="type" class="form-group col-sm-12">
+                            <label> {{ type.name | i18next }} </label>
+                            <custom-ng-selector
+                              *ngIf="selectorMounted"
+                              [name]="type.name"
+                              [disabled]="isViewMode"
+                              [placeholder]="'Select '+type.name | i18next"
+                              [selected]="type.selected"
+                              [defaultAllow]="true"
+                              [editableAllow]="true"
+                              [editable]="type.editable"
+                              [defaultSelected]="type.default"
+                              [items]="type.items"
+                              [loading]="type.loading? true: false"
+                              (searchTerm)="onMasterItemSearch($event, it, type.id)"
+                              (onChanged)="selectMasterItems($event ,it)"
+                              (defaultChanged)="changeDefaultSelection($event, it)"
+                              (editableChanged)="changeEditableSelection($event,it)"
+                            ></custom-ng-selector>
+                        </div>
+                    </div>
+                    <div *ngIf="(type.selected && type.selected.length) && !type.default" class="error-text upward-8">
+                        * {{ 'please_select_atleast_one_default' | i18next }} {{ type.name || ('Master Data Item'|i18next) }}
+                    </div>
+                </ng-container>
+            </div>
+        </form>
+    </svms-sidebar-body>
+    <svms-sidebar-footer *accessControl>
+        <button type="submit" *ngIf="!isViewMode"
+            class="btn btn-primary float-right"
+            [disabled]="addFoundationDataForm.invalid"
+            (click)="saveFoundationalData()">
+                <icon size="20px" name="check_circle" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+                {{buttonLabel | i18next}}
+        </button>
+    </svms-sidebar-footer>
+</svms-sidebar>

@@ -1,0 +1,264 @@
+<div id="sidebar" class="sidebar float-left position-fixed">
+  <div class="sidebar-inner pt-16 pb-64">
+    <div class="logo mb-32 ml-16 d-flex align-items-center position-fixed">
+      <div *ngIf="client_logo" class="program-name-initials d-flex align-justify-center rounded-sm mr-8 subtitle-1 ">
+        {{client_logo | shortName: 'last'}}</div>
+      <div class="d-flex flex-column">
+        <span class="subtitle-2 font-weight-medium">{{client_name}}</span>
+        <span *ngIf="client_status" class="status d-flex align-justify-center rounded-sm"
+          [ngClass]="{'status-active':client_status}">
+          <icon size="8px" name="stop_circle" type="material" cuClass="circle d-flex mr-4">
+          </icon> {{ 'active' | i18next }}
+        </span>
+        <span *ngIf="!client_status" class="status d-flex align-justify-center rounded-sm"
+          [ngClass]="{'status-inactive':!client_status}">
+          <icon size="8px" name="stop_circle" type="material" cuClass="circle d-flex mr-4">
+          </icon> {{ 'inactive' | i18next }}
+        </span>
+      </div>
+    </div>
+    <div class="prog-nav-outer">
+      <ul class="main-nav p-0">
+        <li *ngFor="let sideBar of sideBarData" class="mt-4 mb-4 ml-0 mr-0">
+          <!--For no submenu-->
+          <a *authorize="sideBar?.permission" [hidden]="sideBar?.isSideMenu" [routerLink]="sideBar?.path"
+            class="pl-16 position-relative">
+            <icon [cuClass]="sideBar.class" theme="outlined" [name]="sideBar.icon" size="20px" type="material"
+              class="float-left mr-16"></icon>
+            <label I18n class="m-0">{{sideBar?.title | i18next}}</label>
+          </a>
+
+        </li>
+      </ul>
+      <p class="program-config-title x-small d-flex align-items-center pl-16">
+        {{ 'program_configuration' | i18next }}
+      </p>
+      <!--For submenu-->
+      <ul class="main-nav m-0 p-0">
+        <li *ngFor="let sideBar of sideBarData" class="mt-4 mb-4 ml-0 mr-0">
+          <!--For submenu-->
+          <a *authorize="sideBar?.permission" [hidden]="!sideBar?.isSideMenu" class="nav-item pl-16 position-relative"
+            (click)="openSideMenu(sideBar?.name, true)" [ngClass]="{'active': isActive === sideBar?.name}">
+            <icon [cuClass]="sideBar.class" theme="outlined" [name]="sideBar.icon" size="20px" type="material"
+              class="float-left mr-16"></icon>
+            <label I18n class="m-0">{{sideBar?.title | i18next}}</label>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="user-settings" [ngStyle]="{'z-index':addZindexClass? '2' : '5' }">
+  <a href="javascript:void(0)" (click)="openSideMenu('user', true)" [ngClass]="{'active': isToggled === 'user' }">
+    <figure class="rounded-circle mb-0 text-center position-relative mb-0 text-center initials__green">
+      <!-- <img src="../../../../assets/images/user-profile.png" alt="" class="rounded-circle"> -->
+      <!-- {{userAvatar |shortName: 'last'}} -->
+      {{user?.first_name |shortName: 'last'}}
+      <span class="availability rounded-circle online"></span>
+    </figure>
+    <div class="current-user-info float-right">
+      <span class="name d-block overflow-hidden">{{user?.first_name}}</span>
+      <p class="m-0 overflow-hidden">{{user?.role?.name || 'Member'}}</p>
+    </div>
+  </a>
+</div>
+
+<div class="sidenav position-fixed overflow-auto" [ngClass]="{'sidenav-active': isToggled === sideBar?.name}">
+  <div class="nav-title overflow-hidden pt-8 pr-16 pb-8 pl-24">
+    <h4 class="float-left m-0">{{sideBar?.closeSubMenu?.title}}</h4>
+    <a href="javascript:void(0)" class="closebtn float-right overflow-hidden mt-4"
+      (click)="openSideMenu(sideBar?.name)">
+      <icon [cuClass]="sideBar?.closeSubMenu?.class" [name]="sideBar?.closeSubMenu?.icon" size="20px" type="material">
+      </icon>
+    </a>
+  </div>
+  <div class="nav-search" *ngIf="sideBar?.isSearch">
+    <input type="text" name="search" placeholder="{{ 'search' | i18next }}" class="p-8">
+  </div>
+  <ul class="submenu  mt-16 mr-8 mb-0 ml-8 p-0" *ngFor="let subMenu of sideBar?.sideBarSubMenu">
+    <li *ngIf="subMenu?.title" class="seperationlabel mt-16 ml-16">{{subMenu?.title}}</li>
+    <li *ngFor="let sortSubMenu of subMenu?.subMenuItem; let i = index">
+      <a [routerLink]="sortSubMenu?.path" [queryParams]="sortSubMenu?.queryParams"
+      [ngClass]="{'active': selectedIndex === i}" (click)="reasonCode ? onModuleChange(sideBar?.name, sortSubMenu?.title, i) : closeSidebarMenu(sideBar?.name, sortSubMenu?.title)"
+        class="overflow-hidden d-block pt-0 pb-0 pl-16 pr-16 position-relative">
+        <icon *ngIf="sortSubMenu?.icon" class="float-left mr-16" [cuClass]="sortSubMenu?.class"
+          [name]="sortSubMenu?.icon" size="20px" type="material">
+        </icon>
+        {{sortSubMenu?.title}}
+        <span *ngIf="sideBar.name === 'Reason Code'" style="position: absolute; right: 25px">{{getReasonCodeCount(sortSubMenu?.title)}}</span>
+      </a>
+    </li>
+  </ul>
+</div>
+
+<!-- <div *ngIf="reasonCode" class="sidenav-reason position-fixed overflow-auto" style="box-shadow: 3px 6px 10px 3px #ccc;"
+  [ngClass]="{'sidenav-active': isToggled === sideBar?.name}">
+  <div class="nav-title overflow-hidden pt-8 pr-16 pb-8 pl-24">
+    <h4 class="float-left m-0">{{moduleName}}</h4>
+  </div>
+  <div class="reason-content">
+    <div class="add-code flex">
+      <input type="text" placeholder="Add New Reason Code" [(ngModel)]="newReasonCode">
+      <button (click)="addNewReasonCode()">Add</button>
+    </div>
+    <div style="margin-top:15px">REASON CODES</div>
+    <div *ngFor="let reasonCode of selectedModule; let i = index" [ngClass]="{'active': selectedIndex2 === i}" (click)="reasonCodesClick(i)" class="edit-view-content">
+      <div #target [attr.id]="'reasonCode' + i" (mouseover)="viewButton=true" (mouseout)="viewButton=false" class="edit-view flex"
+        [ngClass]="buttonOptions.themeType === 'red' ? 'active' : ''">
+        <input (focusout)="confirmSave(i, reasonCode.name, reasonCode.id)" [readonly]="!(readonly === 'reasonCode'+i)" type="text" value="{{reasonCode.name}}" />
+        <span *ngIf="(readonly === 'reasonCode'+i)" class="material-icons-outlined">
+          done
+        </span>
+        <span *ngIf="(readonly === 'reasonCode'+i)" (click)="closeClick(i, reasonCode.name)" class="material-icons-outlined">
+          close
+        </span>
+        <button *ngIf="!(readonly === 'reasonCode'+i)" (click)="showReasons(reasonCode.id)" class="btn-view">View Reasons</button>
+          <span *ngIf="!(readonly === 'reasonCode'+i)" (click)="editClick(i, reasonCode.name)" class="material-icons-outlined">
+            create
+          </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="reasons">
+    <div class="add-code">
+      <h2>Reasons</h2>
+      <button (click)="openSidebar()" class="add-new-reason">+ Add New Reason</button>
+    </div>
+    <div *ngFor="let reason of currentReasons; let i = index" class="edit-view-content">
+      <div class="reasons_">
+        {{reason["name"]}}
+        <p class="status" [ngClass]="reason['is_enabled'] ? 'active' : 'inactive'">{{reason["is_enabled"] ? "● Active" : "● Inactive"}}</p>
+        <button (click)="openSidebar('edit', reason['id'])" class="edit-reason">Edit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<svms-sidebar [title]="sidebarTitle" [size]="'large'" [icon]="'supervised_user_circle'" (onClose)="sidebarClose()" [dataVisibility]="sidebarOpen">
+  <svms-sidebar-body>
+    <div style="padding: 30px;">
+      <div class="form-group-row">
+        <div class="form-group">
+          <label class="gray">{{ 'reason_name' | i18next }}</label>
+          <div class="d-flex align-items-center">
+            <input type="text" placeholder="Enter Your Reason" class="form-control" [(ngModel)]="newReason">
+            <div class="toggle-panel" >
+              <div class="toggle-panel-inner toggle-background">
+                <span class="status-text">{{toggle?.title}}</span>
+                <span class="toggle-switch" [ngClass]="toggle.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle()"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="form-group-row">
+        <div class="form-group">
+          <label>{{ 'reason_type' | i18next }}</label>
+          <ng-select  [clearable]="false"
+            placeholder="Select Reason Type">
+          </ng-select>
+        </div>
+      </div>
+    </div>
+  </svms-sidebar-body>
+
+  <svms-sidebar-footer>
+    <button (click)="onSave()" type="submit" class="btn btn-primary float-right" >
+      {{buttonTitle|i18next}}
+    </button>
+  </svms-sidebar-footer>
+
+</svms-sidebar> -->
+
+<div class="sidenav position-fixed overflow-auto" [ngClass]="{'sidenav-active': isToggled === 'user' }">
+  <div class="user-title overflow-hidden mb-16">
+    <figure
+      class="text-center rounded-circle mb-0 float-left position-relative text-center overflow-hidden initials__green">
+      <!-- <img src="../../../../assets/images/user-profile.png" alt=""> -->
+      <!-- {{userAvatar |shortName: 'last'}} -->
+      {{user?.first_name |shortName: 'last'}}
+    </figure>
+    <h4 class="float-left ml-8 mb-0 overflow-hidden">
+      <!-- {{userName}} Workspace -->
+      {{user?.first_name}}
+    </h4>
+    <a href="javascript:void(0)" class="float-right p-0 closebtn" (click)="openSideMenu('user')">
+      <icon cuClass="sidebar-icon" name="close" size="20px" type="material"></icon>
+    </a>
+  </div>
+  <ul class="submenu mt-24 mr-8 mb-0 ml-8 p-0">
+    <!-- <li>
+      <a href="#" class="overflow-hidden d-block pt-0 pb-0 pl-16 pr-16 position-relative">
+        <icon class="float-left mr-16" cuClass="sidebar-icon-submenu" name="build_circle" size="20px" type="material">
+        </icon>
+        Account Settings
+      </a>
+    </li>
+    <li>
+      <a href="#" class="overflow-hidden d-block pt-0 pb-0 pl-16 pr-16 position-relative">
+        <icon class="float-left mr-16" cuClass="sidebar-icon-submenu" name="add_alert" size="20px" type="material">
+        </icon>
+        Notifications Settings
+      </a>
+    </li>
+    <li>
+      <a href="#" class="overflow-hidden d-block pt-0 pb-0 pl-16 pr-16 position-relative">
+        <icon class="float-left mr-16" cuClass="sidebar-icon-submenu" name="security" size="20px" type="material">
+        </icon>
+        Change Password
+      </a>
+    </li>
+    <li>
+      <a href="#" class="overflow-hidden d-block pt-0 pb-0 pl-16 pr-16 position-relative">
+        <icon class="float-left mr-16" cuClass="sidebar-icon-submenu" name="book" size="20px" type="material">
+        </icon>
+        Recent Activities
+      </a>
+    </li>
+    <li>
+      <a href="#" class="overflow-hidden d-block pt-0 pb-0 pl-16 pr-16 position-relative">
+        <icon class="float-left mr-16" cuClass="sidebar-icon-submenu" name="phonelink_setup" size="20px"
+          type="material">
+        </icon>
+        Mobile App Settings
+      </a>
+    </li> -->
+    <li>
+      <a href="javacript:void(0)" class="overflow-hidden d-block pt-0 pb-0 pl-16 pr-16 position-relative"
+        (click)="logout()">
+        <icon class="float-left mr-16" cuClass="sidebar-icon-submenu" name="login" size="20px" type="material">
+        </icon>
+        {{ 'logout' | i18next }}
+      </a>
+    </li>
+    <li class="seperationlabel mt-24 ml-16">{{ 'theme' | i18next }}</li>
+    <app-theme-switcher class="theme-switcher"></app-theme-switcher>
+    <!-- <li class="seperationlabel mt-24 ml-16">Support</li>
+    <li>
+      <a href="#" class="overflow-hidden d-block pt-0 pb-0 pl-16 pr-16 position-relative">
+        <icon class="float-left mr-16" cuClass="sidebar-icon-submenu" name="contact_support" size="20px"
+          type="material">
+        </icon>
+        Help
+      </a>
+    </li>
+    <li>
+      <a href="#" class="overflow-hidden d-block pt-0 pb-0 pl-16 pr-16 position-relative">
+        <icon class="float-left mr-16" cuClass="sidebar-icon-submenu" name="keyboard" size="20px" type="material">
+        </icon>
+        Hot Keys
+      </a>
+    </li>
+    <li>
+      <a href="#" class="overflow-hidden d-block pt-0 pb-0 pl-16 pr-16 position-relative">
+        <icon class="float-left mr-16" cuClass="sidebar-icon-submenu" name="play_circle_filled" size="20px"
+          type="material"></icon>
+        Video Tutorials
+      </a>
+    </li> -->
+  </ul>
+</div>

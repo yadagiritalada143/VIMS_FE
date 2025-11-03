@@ -1,0 +1,21 @@
+<div class="content-area ui-content-wrapper bg-light" [class.no-content]="isInsight">
+  <div class="first-program">
+    <img src="../../../assets/images/mask-group-1.svg" alt="landing-image" class="img-fluid">
+    <h2 class="mb-8">{{ 'welcome_to_your_new_program' | i18next }}</h2>
+    <div class="page-title mb-24">{{programObj?.name}} ({{programObj?.unique_id}})</div>
+    <a class="btn btn-secondary large mt-4 pr-16" href="" routerLink="/program-setup/program-detail">{{ 'lets_start_the_configuration' | i18next }}<icon size="20px"
+        name="keyboard_backspace" type="material" class="icon--on-right icon-reflect" cuClass="cu-icon"></icon></a>
+  </div>
+</div>
+
+<!--Alert info box -->
+<div class="alert alert-info d-flex align-items-center justify-content-between" *ngIf="dataVisibility">
+  <icon name="error" size="21px" type="material" class="d-flex mr-8"></icon>
+  <p>{{ 'now_you_are_in_program_mode' | i18next }},{{ 'in' | i18next }} <a>{{ 'program_mode' | i18next }}</a> {{ 'tab_you_can_t_access_any_other_sections_of' | i18next }} @{{ 'simplify_admin_until_you' | i18next }}
+    <a href="" (click)="exitProgramSetup()" class="cursor-pointer">{{ 'exit_program_mode' | i18next }}</a></p>
+  <span class=cursor-pointer (click)="alertInfoClose()">
+    <icon name="clear" size="21px" type="material" class="ml-8 d-flex" cuClass="cu-icon">
+    </icon>
+  </span>
+</div>
+<!--Alert info box -->

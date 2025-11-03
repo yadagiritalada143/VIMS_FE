@@ -1,0 +1,106 @@
+@import '../../../../../../assets/sass/abstracts/variables';
+
+.filter-panel {
+  top: 0;
+  right: 0;
+  width: 398px;
+  box-shadow: 0px 15px 21px #0000001D;
+  height: 100vh;
+  transition: $transition;
+  z-index: 101;
+
+  h4 {
+    line-height: 21px;
+    color: $color-assets-secondary;
+
+    icon {
+      vertical-align: top;
+    }
+  }
+
+  .filter-content {
+    height: calc(100vh - 122px);
+
+    .form-group {
+      ::ng-deep .datepicker-inline {
+        top: 52px;
+
+        .datepicker {
+          width: 100%;
+          box-sizing: border-box;
+
+          .datepicker--cell {
+            height: 48px;
+          }
+        }
+      }
+    }
+
+    .field-between {
+      width: 30%;
+      text-align: center;
+      margin-top: 37px;
+    }
+  }
+
+  .filter-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: $color-gray-5;
+    border: 1px solid $border-color;
+  }
+}
+
+::ng-deep app-grid-filter {
+  .filter-panel {
+    opacity: 0;
+    transform: translateX(398px);
+  }
+
+  &.active {
+    .filter-panel {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+}
+
+.filter-slider {
+  .range-value {
+      color: $color-blue;
+      font-weight: $font-weight-medium;
+  }
+
+  ::ng-deep .ng5-slider {
+    margin-top: 18px;
+
+    .ng5-slider-bar {
+      background-color: $color-gray-30;
+      height: 5px;
+    }
+
+    .ng5-slider-selection {
+      background: $color-blue;
+    }
+
+    .ng5-slider-pointer {
+      width: 15px;
+      height: 15px;
+      background: $light;
+      border: 1px solid $color-gray-30;
+      box-shadow: 0px 1px 4px #00000029;
+      top: -7px;
+      outline: none;
+
+      &:after {
+        display: none;
+      }
+    }
+
+    .ng5-slider-bubble {
+      display: none;
+    }
+  }
+}

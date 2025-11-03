@@ -1,0 +1,56 @@
+<svms-sidebar
+  title="{{title|i18next}}"
+  [dataVisibility]="timesheetAwaiting"
+  (onClose)="sidebarClose($event)"
+  class="timesheet-sidebar"
+>
+  <svms-sidebar-body>
+    <table class="mt-24">
+      <thead>
+        <tr>
+          <th class="pl-24">{{ 'timesheet_id' | i18nextEager }}</th>
+          <th>{{ 'start_date' | i18nextEager }}</th>
+          <th>{{ 'end_date' | i18nextEager }}</th>
+          <th>{{ 'rt_hours' | i18nextEager }}</th>
+          <th *ngIf="hasOTHours">{{ 'ot_hours' | i18nextEager }}</th>
+          <th *ngIf="hasDTHours">{{ 'dt_hours' | i18nextEager }}</th>
+          <th>{{ 'total_hours' | i18nextEager }}</th>
+          <th *ngIf="showTotalAmount">{{ 'total_amount' | i18nextEager }}</th>
+        </tr>
+      </thead>
+      <tbody *ngIf="timesheetData$ | async as timesheetData; else noData">
+        <tr *ngFor="let item of timesheetData;">
+          <td (click)="viewTimesheet(item)" class="pl-24 cursor-pointer text-primary">{{ item?.code ? item?.code : ' --'}}</td>
+          <td>{{ item?.start_date | localDateFormat: '': '':'' : true}}</td>
+          <td>{{ item?.end_date | localDateFormat: '': '':'' : true}}</td>
+          <td>
+            {{ item.hours_breakup?.regular ? item.hours_breakup?.regular : 0 | accuracy :  accuracyConfig.hour }}
+          </td>
+          <td *ngIf="hasOTHours">
+            {{
+              item.hours_breakup?.overtime ? item.hours_breakup?.overtime : 0 | accuracy :  accuracyConfig.hour
+            }}
+          </td>
+          <td *ngIf="hasDTHours">
+            {{
+              item.hours_breakup?.doubletime
+                ? item.hours_breakup?.doubletime : 0| accuracy :  accuracyConfig.hour
+            }}
+          </td>
+          <td>{{ +item.total_hours ? +item.total_hours : 0 | accuracy :  accuracyConfig.hour}}</td>
+          <td *ngIf="showTotalAmount" tooltip="{{showToolTip(item?.total_amount)}}" placement="top">
+            {{ (item?.total_amount && item?.total_amount !== 0 ? item?.total_amount : '0.00') | accuracy :  accuracyConfig.amount: { currencyCode: currency } }}
+          </td>
+        </tr>
+      </tbody>
+      <ng-template #noData>
+        <div class="d-flex justify-content-center align-items-center position-absolute full-height">
+          <div class="text-center">
+            <img src="../../../../assets/images/wallet-rafiki.svg" alt="">
+            <p class="mt-8 font-weight-medium">{{ 'no_timesheet_records' | i18nextEager }}</p>
+          </div>
+        </div>
+      </ng-template>
+    </table>
+  </svms-sidebar-body>
+</svms-sidebar>

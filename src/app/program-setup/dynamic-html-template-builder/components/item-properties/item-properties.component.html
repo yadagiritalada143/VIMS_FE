@@ -1,0 +1,237 @@
+<section class="element-properties" [ngClass]="{'active' : isOpen}">
+    <div class="property-header d-flex justify-content-between align-items-center px-24 py-12">
+        <p class="font-weight-medium;">{{propertyName}}</p>
+        <a href="javascript:void(0)" (click)="closeElemProperty()">
+            <icon name="close"></icon>
+        </a>
+    </div>
+    <div class="property-content">
+        <perfect-scrollbar>
+            <div class="pr-24 form-group position-relative"
+                *ngIf="templateKeys?.length && (propertyName === 'Header' || propertyName === 'Sub Header' || propertyName === 'Text' || propertyName === 'Custom Html')">
+                <label>{{ 'search_template_keys' | i18next }}</label>
+                <ng-select placeholder="{{ 'search_templates_keys_{eg._profile_name,_last_name}' | i18next }}"
+                    (change)="keySelected($event)" [searchable]="true"
+                    [searchFn] = 'customSearchFn'
+                    loadingText="{{ 'loading....' | i18next }}" notFoundText="{{ 'no_data_found' | i18next }}"
+                    class="custom-select-dropdown">
+                    <ng-option *ngFor="let templateKey of templateKeys || []" [value]="templateKey">
+                        <div class="bottom-border d-flex justify-content-between align-items-center w-100">
+                            <p class="font-weight-medium manage-title">
+                                {{templateKey?.field_name}}
+                            </p>
+                            <icon title = 'Copy' name="copy_all" size="18px" type="material" class="copy-icon"></icon>
+                        </div>
+                    </ng-option>
+                </ng-select>
+            </div>
+            <div class="pr-24" *ngIf="propertyName === 'Header'">
+                <div class="form-group">
+                    <p>{{ 'header' | i18next }}</p>
+                    <input type="text" class="form-control" placeholder="{{ 'header_text' | i18next }}" [(ngModel)] = 'selectedItem.customProperties.text'>
+                </div>
+            </div>
+            <div class="pr-24" *ngIf="propertyName === 'Custom Html'">
+              <div class="form-group">
+                  <p>{{ 'html' | i18next }}</p>
+                  <textarea type="text" class="html-editor" placeholder="{{ 'header_text' | i18next }}"
+                  [(ngModel)] = 'selectedItem.customProperties.innerHtml'></textarea>
+              </div>
+            </div>
+            <div class="pr-24" *ngIf="propertyName === 'Sub Header'">
+                <div class="form-group">
+                    <p>{{ 'sub_header' | i18next }}</p>
+                    <input type="text" class="form-control" placeholder="{{ 'sub_header_text' | i18next }}" [(ngModel)] = 'selectedItem.customProperties.text'>
+                </div>
+            </div>
+            <div class="pr-24" *ngIf="propertyName === 'Text'">
+                <div class="form-group">
+                    <p>{{ 'text' | i18next }}</p>
+                    <app-item-quill-editor [(ngModel)]="selectedItem.text"></app-item-quill-editor>
+                </div>
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <p class="mb-4">{{ 'font_family' | i18next }}</p>
+                        <ng-select placeholder="{{ 'select_target' | i18next }}" [(ngModel)] = 'selectedItem.customProperties.fontFamily' >
+                            <ng-option value="Arial, Helvetica, sans-serif">{{ 'arial,_helvetica,_sans-serif' | i18next }}</ng-option>
+                            <ng-option value="Courier New', Courier, monospace">{{ 'courier_new,_courier,_monospace' | i18next }}</ng-option>
+                            <ng-option value="Times New Roman', Times, serif">{{ 'times_new_roman,_times,_serif' | i18next }}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+                <!-- <div class="form-group-row">
+                    <div class="form-group">
+                        <p class="mb-4">Font size</p>
+                        <ng-select placeholder="Select Font Size">
+                            <ng-option value="8px">8px</ng-option>
+                            <ng-option value="10px">10px</ng-option>
+                            <ng-option value="12px">12px</ng-option>
+                            <ng-option value="16px">16px</ng-option>
+                            <ng-option value="18px">18px</ng-option>
+                            <ng-option value="20px">20px</ng-option>
+                        </ng-select>
+                    </div>
+                    <div class="form-group">
+                        <p class="mb-4">Font Weight</p>
+                        <ng-select placeholder="Select Font Weight">
+                            <ng-option value="megular">Regular</ng-option>
+                            <ng-option value="medium">Medium</ng-option>
+                            <ng-option value="Bold">Bold</ng-option>
+                        </ng-select>
+                    </div>
+                    <div class="form-group">
+                        <p class="mb-4">Font Style</p>
+                        <ng-select placeholder="Select Font Style">
+                            <ng-option value="Italic">Italic</ng-option>
+                            <ng-option value="Normal">Normal</ng-option>
+                        </ng-select>
+                    </div>
+                </div> -->
+                <div class="form-group-row">
+                    <!-- <div class="form-group">
+                        <p class="mb-4">Align</p>
+                        <div class="alignment d-flex mb-12">
+                            <a href="javascript:void(0)">
+                                <icon name="format_align_left" size="20px" cuClass="d-flex"></icon>
+                            </a>
+                            <a href="javascript:void(0)">
+                                <icon name="format_align_center" size="20px" cuClass="d-flex"></icon>
+                            </a>
+                            <a href="javascript:void(0)">
+                                <icon name="format_align_right" size="20px" cuClass="d-flex"></icon>
+                            </a>
+                            <a href="javascript:void(0)">
+                                <icon name="format_align_justify" size="20px" cuClass="d-flex"></icon>
+                            </a>
+                        </div>
+                    </div> -->
+                    <div class="form-group">
+                        <p class="mb-4">{{ 'color' | i18next }}</p>
+                        <input type="color" [(ngModel)] = 'selectedItem.customProperties.color' >
+                    </div>
+                    <div class="form-group">&nbsp;</div>
+                </div>
+            </div>
+            <div class="pr-24" *ngIf="propertyName === 'Image'">
+                <p class="mb-4">{{ 'upload' | i18next }}</p>
+                <div class="image-upload-box p-16 mb-12" (click)="fileInput.click()" appDragAndDrop (fileDropped)="onFileDropped($event)">
+                    <div class="d-flex">
+                        <div class="drop-zone d-flex align-items-center justify-content-center mr-16">
+                            <icon name="publish" size="20px" color="#ffffff"></icon>
+                        </div>
+                        <div class="browse-zone text-left">
+                            <p class="small text-black">{{ 'drag' | i18next }} &amp; {{ 'drop_file_or' | i18next }} <a href="javascript:void(0)">{{ 'browse' | i18next }}</a></p>
+                            <input hidden type="file" [accept]="exts" #fileInput (change)="uploadImage($event)">
+                            <p class="small file-format">{{ 'only' | i18next }} {{exts | uppercase}}
+                              {{ 'files_with_maximum_size_of' | i18next }} 10 {{ 'mb' | i18next }}</p>
+                          </div>
+                    </div>
+                </div>
+                <!-- <p class="mb-4">Align</p>
+                <div class="alignment d-flex mb-12">
+                    <a href="javascript:void(0)">
+                        <icon name="format_align_left" size="20px" cuClass="d-flex"></icon>
+                    </a>
+                    <a href="javascript:void(0)">
+                        <icon name="format_align_center" size="20px" cuClass="d-flex"></icon>
+                    </a>
+                    <a href="javascript:void(0)">
+                        <icon name="format_align_right" size="20px" cuClass="d-flex"></icon>
+                    </a>
+                    <a href="javascript:void(0)">
+                        <icon name="format_align_justify" size="20px" cuClass="d-flex"></icon>
+                    </a>
+                </div> -->
+                <div class="form-group">
+                    <p>{{ 'alternative_text' | i18next }}</p>
+                    <input type="text" placeholder="{{ 'put_alt_text_here' | i18next }}" class="form-control" [(ngModel)] = 'selectedItem.customProperties.altText'>
+                </div>
+                <h4>{{ 'action' | i18next }}</h4>
+                <div class="form-group">
+                    <p>{{ 'image_link' | i18next }}</p>
+                    <input type="text" class="form-control" placeholder="{{ 'enter_image_url' | i18next }}" [(ngModel)] = 'selectedItem.customProperties.imageLink'>
+                </div>
+                <!-- <div class="form-group">
+                    <p>Target</p>
+                    <ng-select placeholder="Select Target">
+                        <ng-option value="New Tab">New Tab</ng-option>
+                        <ng-option value="Self">Self</ng-option>
+                    </ng-select>
+                </div> -->
+            </div>
+            <div class="pr-24" *ngIf="propertyName === '2 column'">
+                {{ '2_column' | i18next }}
+            </div>
+            <div class="pr-24" *ngIf="propertyName === '3 column'">
+                {{ '3_column' | i18next }}
+            </div>
+            <div class="pr-24" *ngIf="propertyName === 'Button'">
+                <div class="form-group">
+                    <p>{{ 'button_label' | i18next }}</p>
+                    <input type="text" class="form-control" placeholder="{{ 'button_label' | i18next }}" [(ngModel)]="selectedItem.customProperties.label">
+                </div>
+                <div class="form-group">
+                    <p>{{ 'action' | i18next }}</p>
+                    <input type="text" class="form-control" placeholder="{{ 'button_action' | i18next }}">
+                </div>
+                <div class="form-group">
+                    <p>{{ 'target' | i18next }}</p>
+                    <ng-select placeholder="{{ 'button_target' | i18next }}">
+                        <ng-option value="New Tab">{{ 'new_tab' | i18next }}</ng-option>
+                        <ng-option value="Self">{{ 'self' | i18next }}</ng-option>
+                    </ng-select>
+                </div>
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <p class="mb-4">{{ 'color' | i18next }}</p>
+                        <input type="color" [(ngModel)]="selectedItem.customProperties.color">
+                    </div>
+                    <div class="form-group">
+                        <p class="mb-4">{{ 'background_color' | i18next }}</p>
+                        <input type="color" [(ngModel)]="selectedItem.customProperties.backgroundColor">
+                    </div>
+                </div>
+            </div>
+            <div class="pr-24" *ngIf="propertyName === 'Link'">
+                <div class="form-group">
+                    <p>{{ 'link_label' | i18next }}</p>
+                    <input type="text" class="form-control" placeholder="{{ 'link_label' | i18next }}" [(ngModel)]="selectedItem.customProperties.label">
+                </div>
+                <div class="form-group">
+                    <p>{{ 'link_url' | i18next }}</p>
+                    <input type="text" class="form-control" placeholder="{{ 'link_url' | i18next }}" [(ngModel)]="selectedItem.customProperties.link">
+                </div>
+                <div class="form-group">
+                    <p>{{ 'target' | i18next }}</p>
+                    <ng-select placeholder="{{ 'link_target' | i18next }}" [(ngModel)]="selectedItem.customProperties.target">
+                        <ng-option value="_blank">{{ 'new_tab' | i18next }}</ng-option>
+                        <ng-option value="_self">{{ 'self' | i18next }}</ng-option>
+                    </ng-select>
+                </div>
+            </div>
+
+            <!-- <div *ngIf="selectedItem?.type==='Text'">
+                <app-item-quill-editor [(ngModel)]="selectedItem.text"></app-item-quill-editor>
+            </div> -->
+            <div class="pr-24">
+                <app-key-value-pair-generator [title]="'Styles'" [items]="selectedItem?.styles"></app-key-value-pair-generator>
+                <app-key-value-pair-generator [title]="'Attributes'" [items]="selectedItem?.attributes"></app-key-value-pair-generator>
+                <div class="mt-8">
+                    <button class="btn btn-primary small" (click)="logStyles()">{{ 'save' | i18next }}</button>
+                </div>
+            </div>
+
+            <div class="pr-24 mt-24 top-item-border">
+                <h4 class="pt-8 font-weight-medium"> {{ 'selected_row_style' | i18next }} </h4>
+                <app-key-value-pair-generator [title]="'Styles'" [items]="dynamicHtmlTemplateBuilderService?.selectedRow?.styles"></app-key-value-pair-generator>
+                <app-key-value-pair-generator [title]="'Attributes'" [items]="dynamicHtmlTemplateBuilderService?.selectedRow?.attributes"></app-key-value-pair-generator>
+            </div>
+
+            <div class="pr-24  mt-24 top-item-border">
+                <h4 class="pt-8 font-weight-medium"> {{ 'selected_column_style' | i18next }} </h4>
+                <app-key-value-pair-generator [title]="'Styles'" [items]="dynamicHtmlTemplateBuilderService?.selecteCol?.styles"></app-key-value-pair-generator>
+                <app-key-value-pair-generator [title]="'Attributes'" [items]="dynamicHtmlTemplateBuilderService?.selecteCol?.attributes"></app-key-value-pair-generator>
+            </div>
+        </perfect-scrollbar>
+    </div>
+</section>

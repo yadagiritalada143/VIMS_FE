@@ -1,0 +1,470 @@
+@import 'src/assets/sass/abstracts/variables';
+
+.copy-btn {
+  background-color: #FF8600;
+  border-color: #FF8600;
+  font-size: 12px;
+  font-weight: $font-weight-regular;
+}
+
+.copy-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 868px;
+  transform: translate(-50%, -50%);
+  background-color: $light;
+  box-shadow: 0px 3px 6px #00000060;
+  z-index: 99991;
+  transition: $transition;
+  opacity: 0;
+  visibility: hidden;
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .week-head {
+    p {
+      margin-right: 1%;
+      font-size: 11px;
+      color: #ADB5BD;
+      flex-basis: 7.5%;
+      text-align: center;
+
+      &.first {
+        flex-basis: 2%;
+        margin-right: 2%;
+      }
+
+      &.last {
+        flex-basis: 36.5%;
+        text-align: left;
+        margin-right: 0;
+      }
+    }
+  }
+
+  .week-day-row {
+    margin-bottom: $m8;
+
+    .week-col {
+      flex-basis: 7.5%;
+      margin-right: 1%;
+      border: 1px dashed #C8CCE2;
+      padding: 12px 10px;
+      border-radius: $border-radius;
+      text-align: center;
+      min-height: 60px;
+
+      p {
+        color: #C8CCE2;
+        line-height: 16px;
+
+        &.daily-hour {
+          display: none;
+        }
+      }
+
+
+
+      &.week-name {
+        flex-basis: 2%;
+        position: relative;
+        margin-right: 2%;
+        border: 0;
+        padding: 0;
+
+        span {
+          position: absolute;
+          top: 20px;
+          left: -22px;
+          transform: rotate(270deg);
+          width: 60px;
+          font-size: 11px;
+          color: $color-gray-80;
+          text-align: center;
+          transform-origin: center center;
+        }
+      }
+
+      &.hide {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      &.last {
+        flex-basis: 268px;
+        padding: 0;
+        margin-right: 0;
+
+        p {
+          line-height: 17px;
+        }
+      }
+
+
+
+      &.weekend {
+        p {
+          color: #C2C6DB;
+        }
+
+        border: transparent;
+        background: repeating-linear-gradient(316deg,
+          #ffffff,
+          #ffffff 5px,
+          #F5F4FC 5px,
+          #F5F4FC 10px);
+      }
+    }
+
+    &.active {
+      .week-col {
+        border: 1px solid #DBCFFC;
+
+        p {
+          color: #91A2D9;
+
+          &.daily-hour {
+            font-weight: $font-weight-medium;
+            margin-top: 5px;
+            display: block;
+            color: #0E0C17;
+          }
+        }
+
+        &.week-name {
+          border: 0;
+        }
+
+        &.weekend {
+          border: transparent;
+
+          p {
+            color: #C2C6DB;
+          }
+        }
+      }
+    }
+
+    .leave-identification {
+      list-style-type: none;
+      text-align: center;
+
+      li {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        border-radius: $rounded-circle;
+        margin: 0 2px;
+
+        &.full-day {
+          background-color: #90049026;
+        }
+
+        &.leave-unpaid {
+          background-color: #ffc6c6;
+        }
+
+        &.weekly-off {
+          background-color: #80808040;
+        }
+
+        &.half-day {
+          background-color: #ffe7c0;
+        }
+
+        &.earned-leave {
+          background-color: #0000ff14;
+        }
+
+        &.compensated {
+          background-color: #0000ff14;
+        }
+
+        &.client-holiday {
+          background-color: #2dc12d5c;
+        }
+      }
+    }
+
+    .total-hr {
+      flex-basis: 36.5%;
+      margin-right: 0;
+      border: 0;
+      padding: 0;
+
+      .heading {
+        font-size: 11px;
+        line-height: 24px;
+        color: #ADB5BD;
+      }
+
+      p {
+        line-height: 17px;
+      }
+
+      .item {
+        background-color: #FBFAFF;
+        border: 1px solid #FBFAFF;
+        border-radius: $border-radius;
+        min-height: 60px;
+
+        .week-count {
+          flex-basis: 40%;
+        }
+
+        p {
+          color: #CED4DA;
+        }
+
+        button {
+          display: none;
+          height: 25px;
+          background-color: #5E71FE;
+          border: 1px solid #96A3FF;
+          color: #96A3FF;
+          border-radius: 5px;
+          font-size: 11px;
+          outline: none;
+          cursor: pointer;
+          padding: 0 $p8;
+          transition: $transition;
+
+          ::ng-deep i {
+            vertical-align: middle;
+            color: #96A3FF;
+            transition: $transition;
+          }
+        }
+
+        &.active {
+          background-color: #5E71FE;
+          border: 1px solid #5E71FE;
+          border-radius: $border-radius;
+
+          p {
+            font-weight: $font-weight-medium;
+            color: $light;
+          }
+
+          button {
+            display: inline-block;
+            background-color: #5E71FE;
+            border: 1px solid #96A3FF;
+            color: #96A3FF;
+
+            ::ng-deep i {
+              vertical-align: middle;
+              color: #96A3FF;
+              transition: $transition;
+            }
+
+            &:hover {
+              color: $light;
+              border-color: $light;
+
+              ::ng-deep i {
+                color: $light;
+              }
+            }
+
+            &.active {
+              color: $light;
+              border-color: #3749CC;
+              background-color: #3749CC;
+
+              ::ng-deep i {
+                color: $light;
+              }
+            }
+          }
+
+          .paste-btn {
+            &[disabled] {
+              background-color: #5E71FE;
+              border: 1px solid #96A3FF;
+              color: #96A3FF;
+              cursor: auto;
+
+              ::ng-deep i {
+                color: #96A3FF;
+              }
+            }
+          }
+        }
+
+        &.paste-active {
+          .paste-btn {
+            background-color: transparent;
+            border-color: #FF8600;
+            color: #FF8600;
+            display: inline-block;
+
+            ::ng-deep i {
+              color: #FF8600;
+            }
+
+            &[disabled] {
+              background-color: #5E71FE;
+              border: 1px solid #96A3FF;
+              color: #96A3FF;
+              cursor: auto;
+
+              ::ng-deep i {
+                color: #96A3FF;
+              }
+            }
+          }
+        }
+
+        &.pasted {
+          background-color: #FCEADB;
+          background: repeating-linear-gradient(316deg,
+              #FCEADB,
+              #FCEADB 3px,
+              #f5ddc8 3px,
+              #f5ddc8 5px);
+
+          p {
+            color: #54B72F;
+          }
+
+          .undo-btn {
+            background-color: transparent;
+            border-color: $color-gray-80;
+            color: $color-gray-80;
+            display: inline-block;
+
+            ::ng-deep i {
+              color: $color-gray-80;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.copy-modal-overlay {
+  opacity: 0;
+  visibility: hidden;
+  transition: $transition;
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.abbr {
+  list-style-type: none;
+  margin: $m24 0 0 $m8;
+
+  li {
+    display: inline-block;
+    margin-right: $m16;
+    font-size: 12px;
+    color: #3A4550;
+    position: relative;
+    padding-left: 18px;
+
+    &:before {
+      width: 10px;
+      height: 10px;
+      position: absolute;
+      top: 4px;
+      left: 0;
+      content: '.';
+      text-indent: -9999px;
+      overflow: hidden;
+      border-radius: $rounded-circle;
+      display: block;
+      visibility: visible;
+    }
+
+    &.full-day {
+      &:before {
+        background-color: #90049026;
+      }
+    }
+
+    &.leave-unpaid {
+      &:before {
+        background-color: #ffc6c6;
+      }
+    }
+
+    &.weekly-off {
+      &:before {
+        background-color: #80808040;
+      }
+    }
+
+    &.half-day {
+      &:before {
+        background-color: #ffe7c0;
+      }
+    }
+
+    &.lwp {
+      &:before {
+        background-color: #ffc6c6;
+      }
+    }
+
+    &.earned-leave {
+      &:before {
+        background-color: #0000ff14;
+      }
+    }
+
+    &.compensated {
+      &:before {
+        background-color: #0000ff14;
+      }
+    }
+
+    &.client-holiday {
+      &:before {
+        background-color: #2dc12d5c;
+      }
+    }
+  }
+}
+
+.copy-timesheet-footer {
+  border-top: 1px solid $color-border-primary;
+  padding: $p12 $p16;
+
+  p {
+    color: #F86F6FF2;
+    max-width: 50%;
+
+    icon {
+      ::ng-deep i {
+        vertical-align: middle;
+      }
+    }
+  }
+}
+
+.save-btn {
+  padding-left: $p12;
+  padding-right: $p32;
+
+  img {
+    margin-right: $m8;
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  &.save-active {
+    img {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+}

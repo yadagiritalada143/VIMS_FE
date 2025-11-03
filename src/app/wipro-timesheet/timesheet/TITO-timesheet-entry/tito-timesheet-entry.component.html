@@ -1,0 +1,533 @@
+<div class="timesheet-page tito-timesheet">
+  <div class="detail-page-wrapper">
+    <section class="description-panel p-32 position-relative">
+        <a class="back-btn back-mobile" (click)="navigateBackTo()">
+        <icon class="d-inline-block" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon><span><span *ngIf="!redirectSow">{{ 'back_to ' | i18next }}</span>{{redirectSow ? ('back_to_sow' | i18next) : (redirectTimesheetFlyout ? redirectTimesheetFlyout : 'Timesheets')|i18next }}</span>
+      </a>
+      <app-timesheet-actions-alerts  [timeSheet]="timeSheet" [isAssignmentClosed]="isAssignmentClosed" [isTimesheetEnabled]="isTimesheetEnabled"></app-timesheet-actions-alerts>
+      <app-timesheet-supporting-text [timesheetStatus]="timeSheet?.data?.status"></app-timesheet-supporting-text>
+     
+      <div class="create-wrapper mt-24 mt-m-0">
+        <div class="card bg-light mb-24 mb-m-0 mobile-header">
+          <app-timesheet-breadcrumb (onSave)="saveTITOTimeSheet($event);" [disableButton]="disableButton" [timeSheet]="timeSheet" [disableButton]="disableButton" [is_need_create]="timeSheet?.data?.is_need_create"
+           [isAssignmentClosed]="isAssignmentClosed" [isTimesheetEnabled]="isTimesheetEnabled">
+          </app-timesheet-breadcrumb>
+          <app-timesheet-header [sourcing_model]="sourcing_model" [currentTimesheetData]="currentTimesheetData">
+          </app-timesheet-header>
+        </div>
+        <app-master-data [currentTimesheetData] = "currentTimesheetData" ></app-master-data>
+        <div class="card bg-light mt-24 py-16 mt-m-0 p-m-0">
+          <app-timesheet-tab [isShowMultiApproval]="isShowMultiApproval" (activeTab)="showTimesheetTab($event)"></app-timesheet-tab> 
+          <div *ngIf="timesheetTab == 'timesheet'"  class=" mt-16 pb-16 d-flex justify-content-between px-16 tito-mobile-entry">
+            <h4 class="ts-data-wrap-head font-weight-medium mb-0">
+              <icon name="event" size="24px" type="material"></icon> <label class="hide-on-mobile">{{ getDateFromString(currentTimesheetData?.start_date) | localDateFormat:'MMMM y': "": "": true   }}</label>
+              <span class="date-range font-weight-normal">({{ getDateFromString(currentTimesheetData?.start_date) | localDateFormat :"": "": "": true   }} - {{ getDateFromString(currentTimesheetData?.end_date) |
+                localDateFormat:"": "": "": true }})</span>
+              <!-- <icon class="title-icon" name="event" size="24px" type="material"></icon> {{ currentTimesheetData?.start_date | localDateFormat:'MMMM y'  | i18next }}
+              <span class="date-range font-weight-normal ml-8">({{ currentTimesheetData?.start_date | localDateFormat   | i18next }} - {{ currentTimesheetData?.end_date | localDateFormat | i18next }})</span> -->
+            </h4>
+            <div class="d-flex position-relative action-buttons" (clickOutside)="dropdownToggle = false;">
+              <ng-template
+                  [ngIf]="isVisibleOptions()">
+                  <button class="btn btn-outine small copy-btn" *ngIf="showCopyButton" (click)="showCopywidget = true;" >
+                    <icon class="icon--on-left" name="content_copy" size="12px"></icon> {{ 'copy_previous' | i18next }}
+                  </button>
+
+                  <button *authorize="'create_timesheet'" class="btn btn-outine small more-btn-icon ml-12" (click)="dropdownToggle = true">
+                    <icon cuClass="d-flex" name="more_horiz" size="24px"></icon>
+                  </button>
+                </ng-template>
+              <div *authorize="'create_timesheet'" class="clear-data-dropdown" (mouseleave)="dropdownToggle= false;" [ngClass]="{'active' : dropdownToggle}">
+                <ng-template
+                  [ngIf]="!currentTimesheetData?.status || currentTimesheetData?.status == timesheetStatuses?.DRAFT">
+                  <button class="clear-btn" (click)="clearTimesheetLogs()"
+                    [disabled]="disableClearAllButton">
+                    <icon class="mr-8" name="remove_circle_outline" theme="outlined" size="22px" type="material"></icon>
+                    {{ 'clear_all' | i18next }}
+                  </button>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+
+<div class="responsive-timesheet-view seperation-border-m" *ngIf="timesheetTab == 'timesheet'">
+  <div class="timesheet-view-item" *ngFor="let coldata of formData?.data;index as i" (click)="showFullDayView(i)" [ngClass]=" { 'holiday': coldata?.isWeekend,  'weekend' : coldata?.holiday }">
+    <div class="d-flex justify-content-between align-items-center p-4">
+      <p class="day">
+        {{ coldata?.dayNumber }}
+        <span class="d-flex align-items-center">
+          <span class="mr-4">{{ coldata?.day }}</span>
+          <icon *ngIf="coldata.isWeekend" name="weekend" title="Weekend" cuClass="d-flex" class="holiday-icon"  type="material" color="#ED6161" size="18px"></icon>
+          <icon *ngIf="coldata.holiday" name="celebration" title="Holiday" cuClass="d-flex" class="holiday-icon"  type="material" color="#ED6161" size="18px"></icon>
+        </span>
+      </p>
+      <div class="d-flex justify-content-between">
+        <p>{{(coldata?.difference?.decimalValue || '0.00') | accuracy : accuracyConfig?.HOUR }}</p>
+        <i class="add-time material-icons cursor-pointer ml-24 mr-4" *ngIf="!isDataPresent(coldata?.difference?.decimalValue)">more_time</i>
+        <i class="add-time material-icons cursor-pointer ml-24 mr-4" *ngIf="isDataPresent(coldata?.difference?.decimalValue)">drive_file_rename_outline</i>
+      </div>
+    </div>
+    <div class="break-details d-flex align-items-center pt-4">
+      <p class="mr-8 small" *ngIf="coldata?.breaks?.meal?.breaks?.length">{{'meal_break'|i18nextEager }} :   {{coldata?.breaks?.meal?.breaks?.length || 0 }}</p>
+      <p class="small" *ngIf="coldata?.breaks?.rest?.breaks?.length">{{'rest_beak'|i18nextEager }} :   {{coldata?.breaks?.rest?.breaks?.length || 0 }}</p>
+    </div>
+  </div>
+</div>
+          <div *ngIf="timesheetTab == 'timesheet'" class="sheet-wrapper d-flex mb-16 tito-mobile-record column-direction">
+            <div class="headings">
+              <div class="col-item">
+                <p>{{ 'day' | i18next }} & {{ 'date' | i18next }}</p>
+              </div>
+              <div class="col-item">
+                <div class="time-label">
+                  <p><icon class="mr-8" name="watch_later"  size="18px" type="material"></icon> {{ 'time_in' | i18next }}</p>
+                  <p><icon class="mr-8" name="watch_later" size="18px" type="material"></icon> {{ 'time_out' | i18next }}</p>
+                </div>
+              </div>
+              <div class="col-item both-border"  [ngClass]="{'read-only' : (!isAuthorizedToCreate || isAssignmentClosed || !isTimesheetEnabled)}">
+                {{ 'total' | i18next }}
+              </div>
+              <ng-template [ngIf]="config?.break?.is_allow">
+                <div class="col-item break " *ngFor="let option of config.break?.options">
+                  {{option?.type | titlecase | i18next }}
+                </div>
+              </ng-template>
+              <ng-template [ngIf]="currentTimesheetData?.status && currentTimesheetData?.status !== timesheetStatuses?.MISSING">
+                <div class="col-item total-head total-billable-hour font-weight-medium">
+                  <a class="mt-0" (click)="showBillableBreakUp()">{{ 'total_billable_hours' | i18next }} <icon [name]="billableBreakup? 'expand_less' : 'expand_more'" size="18px" type="material"></icon></a>
+                </div>
+                <div class="col-item-wrapper" *ngIf="billableBreakup">
+                  <ng-container *ngFor="let hour_data of timeSheet?.data?.hour_data?.type | keyvalue: unsorted"  >
+                    <div class="col-item" *ngIf="hour_data?.key && hour_data?.key !== 'total_billable'" tooltip="{{ hour_data?.value  | i18next }}" placement="right" delay="500">
+                      {{ hour_data?.value }}
+                    </div>
+                  </ng-container>
+                  <!-- <div class="col-item">
+                    {{ 'standard_time_(st)' | i18next }}
+                  </div>
+                  <div class="col-item">
+                    {{ 'over_time_(ot)' | i18next }}
+                  </div>
+                  <div class="col-item">
+                    {{ 'double_time_(dt)' | i18next }}
+                  </div> -->
+                </div>
+              </ng-template>
+
+              <div class="col-item last" *ngIf="config?.notes?.option?.day_level?.is_allow">
+                <icon class="mr-8" name="text_snippet" theme="outlined" size="18px" type="material"></icon>
+                {{ 'daily_notes' | i18next }}
+              </div>
+            </div>
+            <div class="day-col  day-col-mobile" [id]="i" [ngClass]="{'holiday': (col?.isWeekend || col?.holiday), 'field-error' : (errors[col.day?.toLowerCase()]?.length > 0) }" *ngFor="let col of formData?.data; let i = index;">
+              <div class="error-message-box p-16">
+                <p>{{ 'error' | i18next }}</p>
+                <ul>
+                    <li *ngFor="let e of errors[col?.day?.toLowerCase()] ">{{ e   }}</li>
+                </ul>
+            </div>
+            <div class="col-item first bb-0">
+              <div class="d-flex-m justify-content-between-m">
+                  <p class="hide-on-desktop">Time Entry</p>
+                  <div class="d-flex-m align-items-center-m">
+                    <p class="font-weight-medium">{{col?.day }}
+                      <icon *ngIf="col.isWeekend" name="weekend" title="Weekend" class="holiday-icon"  type="material" color="#ED6161" size="18px"></icon>
+                      <icon *ngIf="col.holiday" name="celebration" title="Holiday" class="holiday-icon"  type="material" color="#ED6161" size="18px"></icon>
+                    </p> <span class="ml-m-8 day-number-m"> {{col?.dayNumber }} </span>
+                  </div>
+              </div>
+              <icon name="close" class="hide-on-desktop close-column" color="#ffffff" size="18px" (click)="hideDayCol(i)"></icon>
+              <span class="error-indicator" *ngIf=" errors[col?.day?.toLowerCase()]?.length > 0">
+                  <icon name="info" type="material" color="#EB445A" size="20px"
+                      class="error-icon"></icon>
+              </span>
+          </div>
+              <ng-container *ngIf="isAuthorizedToCreate && !isAssignmentClosed && isTimesheetEnabled; else showDisabledValues">
+                <div class="col-item in-time" data-title="Time in">
+                  <div class="position-relative" (mouseover)="col.show_check_in_time= true;">
+                    <input [disabled]="!col.active" [placeholder]="timePlaceHolder" type="text" class="form-control text-center" [(ngModel)]="col.check_in" (keypress)="checkTimePattern($event)"  (change)="checkTimeFormat(col, 'check_in')"
+                    (focus)="showTimePanel = (col?.dayNumber+'_check_in'); col.show_check_in_time= false;" (focusout)="setShowTimeValue(undefined)">
+                      <p *ngIf="col.show_check_in_time">
+                        <a class="prev-day" *ngIf="(col.check_in_date_number!= col?.dayNumber) && col.active && config?.overnight" (click)="updateInOutDate('check_in',false, col)">
+                          <icon name="chevron_left" size="18px"></icon>
+                        </a>
+                        {{ 'date' | i18next }}: {{col?.check_in_date_number }}
+                        <a class="next-day" *ngIf="(col.check_in_date_number == col?.dayNumber) && col.active && config?.overnight" (click)="updateInOutDate('check_in',true, col)">
+                          <icon name="chevron_right" size="18px"></icon>
+                        </a>
+                      </p>
+                    <!-- </ng-template> -->
+                  </div>
+
+                </div>
+                <div class="col-item out-time" data-title="Time out">
+                  <div class="position-relative" (mouseover)="col.show_check_out_time= true;">
+                    <input type="text" [disabled]="!col.active"  [placeholder]="timePlaceHolder" class="form-control text-center" [(ngModel)]="col.check_out" (keypress)="checkTimePattern($event)" (change)="checkTimeFormat(col, 'check_out')"
+                      (focus)="showTimePanel = (col?.dayNumber+'_check_out'); col.show_check_out_time= false;" (focusout)="setShowTimeValue(undefined)">
+                    <!-- <app-time-panel *ngIf="showTimePanel === (col?.dayNumber+'_check_out')" [searchTime]="col.check_out" [timeFormat]="config?.time_format"
+                      (selectedTime)="setSelectedTime($event, col, 'check_out')" class="text-center"></app-time-panel> -->
+                    <!-- <p *ngIf="col.check_out && col.show_check_out_time; else showTimeout">
+                      <a href="javascript:void(0)" class="prev-day">
+                        <icon name="chevron_left" size="18px"></icon>
+                      </a>
+                      {{col?.check_out_date | i18next }}
+                      <a href="javascript:void(0)" class="next-day">
+                        <icon name="chevron_right" size="18px"></icon>
+                      </a>
+                    </p>
+                    <ng-template #showTimeout> -->
+                      <p *ngIf="col.show_check_out_time">
+                        <a class="prev-day" *ngIf="(col.check_out_date_number!= col?.dayNumber) && col.active && config?.overnight" (click)="updateInOutDate('check_out',false, col)">
+                          <icon name="chevron_left" size="18px"></icon>
+                        </a>
+                        {{ 'date' | i18next }}: {{col?.check_out_date_number | i18next }}
+                        <a class="next-day" *ngIf="(col.check_out_date_number == col?.dayNumber) && col.active && config?.overnight" (click)="updateInOutDate('check_out',true, col)">
+                          <icon name="chevron_right" size="18px"></icon>
+                        </a>
+                      </p>
+                    <!-- </ng-template> -->
+                  </div>
+                </div>
+              </ng-container>
+              <ng-template #showDisabledValues>
+                <div class="col-item in-time read-only" data-title="Time In">
+                    {{col.check_in || '00:00' }}
+                </div>
+                <div class="col-item out-time read-only" data-title="Time Out">
+                  {{col.check_out || '00:00' }}
+              </div>
+            </ng-template>
+              <div class="col-item both-border" [ngClass]="{'negative':col?.difference?.symbol==='-'}" data-title="Total">
+                {{(col?.difference?.decimalValue || '0.00') | accuracy : accuracyConfig?.HOUR }}
+              </div>
+              <ng-template [ngIf]="config?.break?.is_allow">
+                <div class="mobile-break-ui">
+                <div class="col-item break both-border" *ngFor="let option of config.break?.options">
+                  <p class="break-title hide-on-desktop">{{option?.type | titlecase | i18next }}</p>
+                  <div [ngClass]="{'break-item-mobile d-flex-m' : col?.breaks[option?.type]?.breaks?.length > 0}">
+                    <ng-container *ngIf="col?.breaks[option?.type]?.breaks?.length > 0">
+                        <div class="break-item position-relative" *ngFor="let break of col?.breaks[option?.type]?.breaks | slice:0:2;let i = index; " >
+                          <div *ngIf="break?.break_out && break?.break_in; then breakDetails else showCompliantDetails"></div>
+                          <ng-template #showCompliantDetails>
+                            <p (click)="openBreakModal(col?.dayNumber+'_'+option?.type+'_'+i, option?.type, col, i)">{{break.compliant }} </p>
+                          </ng-template>
+                          <ng-template #breakDetails>
+                            <p (click)="openBreakModal(col?.dayNumber+'_'+option?.type+'_'+i, option?.type, col, i)">{{break?.break_out }}</p>
+                            <p (click)="openBreakModal(col?.dayNumber+'_'+option?.type+'_'+i, option?.type, col, i)">{{break?.break_in }}</p>
+                          </ng-template>
+                          <div class="break-modal" [ngClass]="{'active': breakModal === (col?.dayNumber+'_'+option?.type+'_'+i)}" >
+                            <div *ngIf="!col?.temp_compliant" class="form-group break-out-field position-relative" (mouseover)="col.show_break_out_time= true;">
+                              <label>{{ 'break_out' | i18next }}</label>
+                              <input [placeholder]="timePlaceHolder" type="text" class="form-control text-center" [(ngModel)]="col.temp_break_out" (keypress)="checkTimePattern($event)" (change)="checkTimeFormat(col, 'temp_break_out')"
+                                (focus)="showTimePanel = (col?.dayNumber+'_temp_break_out'); col.show_break_out_time= false; " (focusout)="setShowTimeValue(undefined)">
+                              <!-- <app-time-panel *ngIf="showTimePanel === (col?.dayNumber+'_temp_break_out')" [searchTime]="col.temp_break_out" [timeFormat]="config?.time_format"
+                                (selectedTime)="setSelectedTime($event, col, 'temp_break_out')" class="text-center"></app-time-panel> -->
+                              <p *ngIf="col.show_break_out_time">
+                                <a class="prev-day" *ngIf="(col.temp_break_out_date_number != col?.dayNumber) && col.active && config?.overnight" (click)="updateInOutDate('temp_break_out',false, col)">
+                                  <icon name="chevron_left" size="18px"></icon>
+                                </a>
+                                {{ 'date' | i18next }}: {{col.temp_break_out_date_number }}
+                                <a class="next-day" *ngIf="(col.temp_break_out_date_number == col?.dayNumber) && col.active && config?.overnight" (click)="updateInOutDate('temp_break_out',true, col)">
+                                  <icon name="chevron_right" size="18px"></icon>
+                                </a>
+                              </p>
+                            </div>
+                            <div *ngIf="!col?.temp_compliant" class="form-group break-in-field position-relative" (mouseover)="col.show_break_in_time= true;">
+                              <label>{{ 'break_in' | i18next }}</label>
+                              <input [placeholder]="timePlaceHolder" type="text" class="form-control text-center" [(ngModel)]="col.temp_break_in" (keypress)="checkTimePattern($event)" (change)="checkTimeFormat(col, 'temp_break_in')"
+                                (focus)="showTimePanel = (col?.dayNumber+'_temp_break_in');col.show_break_in_time= false; " (focusout)="setShowTimeValue(undefined)">
+                              <!-- <app-time-panel *ngIf="showTimePanel === (col?.dayNumber+'_temp_break_in')" [searchTime]="col.temp_break_in" [timeFormat]="config?.time_format"
+                                (selectedTime)="setSelectedTime($event, col, 'temp_break_in')" class="text-center"></app-time-panel> -->
+                              <p *ngIf="col.show_break_in_time">
+                                <a class="prev-day" *ngIf="(col.temp_break_in_date_number != col?.dayNumber) && col.active && config?.overnight" (click)="updateInOutDate('temp_break_in',false, col)">
+                                  <icon name="chevron_left" size="18px"></icon>
+                                </a>
+                                {{ 'date' | i18next }}: {{col.temp_break_in_date_number }}
+                                <a class="next-day" *ngIf="(col.temp_break_in_date_number == col?.dayNumber) && col.active && config?.overnight" (click)="updateInOutDate('temp_break_in',true, col)">
+                                  <icon name="chevron_right" size="18px"></icon>
+                                </a>
+                              </p>
+                            </div>
+                            <div class="form-group" *ngIf="(col?.breaks[option.type]?.showCompliantReasons) && (!col?.temp_break_out) && (!col?.temp_break_in)">
+                              <label>{{ 'compliant_reasons' | i18next }}</label>
+                              <ng-select [items]="compliantReasons"
+                          bindLabel="name"
+                          bindValue="id"
+                          placeholder="Select"
+                          [(ngModel)]="col.temp_compliant">
+                          </ng-select>
+                            </div>
+                            <div class="d-flex">
+                              <button class="btn btn-primary small" (click)="validateBreak(col, option.type)">{{ 'submit' | i18next }}</button>
+                              <button class="btn btn-light small ml-4" (click)="openBreakModal(undefined, option.type, col, undefined)"> {{ 'cancel' | i18next }}</button>
+                            </div>
+                          </div>
+                        </div>
+                      <div  *ngIf="col?.breaks[option?.type]?.breaks?.length > 2">
+                        <a class="more-item" (click)="openMoreItem(col?.breaks[option?.type])">+ {{col?.breaks[option?.type]?.breaks?.length - 2 }} {{ 'more' | i18next }}</a>
+                        <div class="more-item-hover" [ngClass]="{'active' : col?.breaks[option?.type]?.moreItemModal}">
+                          <a class="close-more-item" (click)="closeMoreItem(col?.breaks[option?.type])">
+                            <icon name="close" size="14px"></icon>
+                          </a>
+                          <div class="break-item position-relative mb-0" *ngFor="let break of col?.breaks[option?.type]?.breaks ;let i = index; " (click)="openBreakModal(col?.dayNumber+'_'+option?.type+'_'+i, option?.type, col, i)">
+                            <div *ngIf="break?.break_out && break?.break_in; then breakDetails else showCompliantDetails"></div>
+                            <ng-template #showCompliantDetails>
+                              <p (click)="$event.stopPropagation();openBreakModal(col?.dayNumber+'_'+option?.type+'_additional_'+i, option?.type, col, i)">{{break.compliant }}</p>
+                            </ng-template>
+                            <ng-template #breakDetails>
+                              <p (click)="$event.stopPropagation();openBreakModal(col?.dayNumber+'_'+option?.type+'_additional_'+i, option?.type, col, i)">{{break?.break_out }}</p>
+                              <p (click)="$event.stopPropagation();openBreakModal(col?.dayNumber+'_'+option?.type+'_additional_'+i, option?.type, col, i)">{{break?.break_in }}</p>
+                            </ng-template>
+                            <!-- Edit break modal on popup -->
+
+                            <div class="break-modal" [ngClass]="{'active': breakModal === (col?.dayNumber+'_'+option?.type+'_additional_'+i)}"  (click)="$event?.stopPropagation();">
+                              <div *ngIf="!col?.temp_compliant" class="form-group break-out-field position-relative" (mouseover)="col.show_break_out_time= true;">
+                                <label>{{ 'break_out' | i18next }}</label>
+                                <input [placeholder]="timePlaceHolder" type="text" class="form-control text-center" [(ngModel)]="col.temp_break_out" (keypress)="checkTimePattern($event)" (change)="checkTimeFormat(col, 'temp_break_out')"
+                                  (focus)="showTimePanel = (col?.dayNumber+'_temp_break_out'); col.show_break_out_time= false;" (focusout)="setShowTimeValue(undefined)">
+                                <!-- <app-time-panel *ngIf="showTimePanel === (col?.dayNumber+'_temp_break_out')" [searchTime]="col.temp_break_out" [timeFormat]="config?.time_format"
+                                  (selectedTime)="setSelectedTime($event, col, 'temp_break_out')" class="text-center"></app-time-panel> -->
+                                  <p *ngIf="col.show_break_out_time">
+                                    <a class="prev-day" *ngIf="(col.temp_break_out_date_number != col?.dayNumber) && col.active && config?.overnight" (click)="updateInOutDate('temp_break_out',false, col)">
+                                      <icon name="chevron_left" size="18px"></icon>
+                                    </a>
+                                    {{ 'date' | i18next }}: {{col.temp_break_out_date_number }}
+                                    <a class="next-day" *ngIf="(col.temp_break_out_date_number == col?.dayNumber) && col.active && config?.overnight" (click)="updateInOutDate('temp_break_out',true, col)">
+                                      <icon name="chevron_right" size="18px"></icon>
+                                    </a>
+                                  </p>
+                                </div>
+                              <div *ngIf="!col?.temp_compliant" class="form-group break-in-field position-relative" (mouseover)="col.show_break_in_time= true;">
+                                <label>{{ 'break_in' | i18next }}</label>
+                                <input [placeholder]="timePlaceHolder" type="text" class="form-control text-center" [(ngModel)]="col.temp_break_in" (keypress)="checkTimePattern($event)" (change)="checkTimeFormat(col, 'temp_break_in')"
+                                  (focus)="showTimePanel = (col?.dayNumber+'_temp_break_in'); col.show_break_in_time= false;" (focusout)="setShowTimeValue(undefined)">
+                                <!-- <app-time-panel *ngIf="showTimePanel === (col?.dayNumber+'_temp_break_in')" [searchTime]="col.temp_break_in" [timeFormat]="config?.time_format"
+                                  (selectedTime)="setSelectedTime($event, col, 'temp_break_in')" class="text-center"></app-time-panel> -->
+                                  <p *ngIf="col.show_break_in_time">
+                                    <a class="prev-day" *ngIf="(col.temp_break_in_date_number!= col?.dayNumber) && col.active && config?.overnight"  (click)="updateInOutDate('temp_break_in',false, col)">
+                                      <icon name="chevron_left" size="18px"></icon>
+                                    </a>
+                                    {{ 'date' | i18next }}: {{col.temp_break_in_date_number }}
+                                    <a class="next-day" *ngIf="(col.temp_break_in_date_number == col?.dayNumber) && col.active && config?.overnight"  (click)="updateInOutDate('temp_break_in',true, col)">
+                                      <icon name="chevron_right" size="18px"></icon>
+                                    </a>
+                                  </p>
+                                </div>
+                              <div class="form-group" *ngIf="(col?.breaks[option.type]?.showCompliantReasons) && (!col?.temp_break_out) && (!col?.temp_break_in)">
+                                <label>{{ 'compliant_reasons' | i18next }}</label>
+                                <ng-select [items]="compliantReasons"
+                          bindLabel="name"
+                          bindValue="id"
+                          [clearable]="true"
+                          placeholder="Select"
+                          [(ngModel)]="col.temp_compliant">
+                          </ng-select>
+                              </div>
+                              <div class="d-flex">
+                                <button class="btn btn-primary small" (click)="validateBreak(col, option.type)">{{ 'submit' | i18next }}</button>
+                                <button class="btn btn-light small ml-4" (click)="openBreakModal(undefined, option.type, col, undefined)"> {{ 'cancel' | i18next }}</button>
+                              </div>
+
+                            </div>
+                          <!-- Edit break modal on popup -->
+                          </div>
+                        </div>
+                      </div>
+
+                    </ng-container>
+
+                    <div class="mt-4 position-relative mt-m-0 position-static-m" *ngIf="(isAuthorizedToCreate && !isAssignmentClosed && isTimesheetEnabled); else showNoBreaks">
+                      <a [ngClass]="{'read-only':(col?.breaks[option?.type]?.disableBreak || col.breaks[option.type]?.allowedBreaks <= 0 || col.breaks[option.type]?.breaks?.length > col.breaks[option.type]?.allowedBreaks), 'd-none':(col.breaks[option.type]?.allowedBreaks >= 1 && col.breaks[option.type]?.breaks?.length >= col.breaks[option.type]?.allowedBreaks)}"
+                         (click)="openBreakModal(col?.dayNumber+'_'+option?.type, option?.type, col,  col.breaks[option.type]?.breaks?.length)" class="break-trigger" tooltip="Add Break"  placement="bottom" delay="500">
+                        <icon name="add" size="15px" type="material"></icon> <span class="hide-on-desktop">Add</span>
+                      </a>
+                      <!-- Edit break modal -->
+
+                      <div class="break-modal" [ngClass]="{'active': breakModal === (col?.dayNumber+'_'+option?.type)}">
+                        <div *ngIf="!col?.temp_compliant " class="form-group break-out-field position-relative" (mouseover)="col.show_break_out_time= true;">
+                          <label>{{ 'break_out' | i18next }}</label>
+                          <input [placeholder]="timePlaceHolder" type="text" class="form-control text-center" [(ngModel)]="col.temp_break_out" (keypress)="checkTimePattern($event)" (change)="checkTimeFormat(col, 'temp_break_out')"
+                            (focus)="showTimePanel = (col?.dayNumber+'_temp_break_out'); col.show_break_out_time= false;" (focusout)="setShowTimeValue(undefined)">
+                          <!-- <app-time-panel *ngIf="showTimePanel === (col?.dayNumber+'_temp_break_out')" [searchTime]="col.temp_break_out" [timeFormat]="config?.time_format"
+                            (selectedTime)="setSelectedTime($event, col, 'temp_break_out')" class="text-center"></app-time-panel> -->
+                            <p *ngIf="col.show_break_out_time">
+                              <a class="prev-day" *ngIf="(col.temp_break_out_date_number != col?.dayNumber) && col.active && config?.overnight" (click)="updateInOutDate('temp_break_out',false, col)">
+                                <icon name="chevron_left" size="18px"></icon>
+                              </a>
+                              {{ 'date' | i18next }}: {{col.temp_break_out_date_number }}
+                              <a class="next-day" *ngIf="(col.temp_break_out_date_number == col?.dayNumber) && col.active && config?.overnight" (click)="updateInOutDate('temp_break_out',true, col)">
+                                <icon name="chevron_right" size="18px"></icon>
+                              </a>
+                            </p>
+                          </div>
+                        <div *ngIf="!col?.temp_compliant" class="form-group break-in-field position-relative" (mouseover)="col.show_break_in_time= true;">
+                          <label>{{ 'break_in' | i18next }}</label>
+                          <input [placeholder]="timePlaceHolder" type="text" class="form-control text-center" [(ngModel)]="col.temp_break_in" (keypress)="checkTimePattern($event)" (change)="checkTimeFormat(col, 'temp_break_in')"
+                            (focus)="showTimePanel = (col?.dayNumber+'_temp_break_in'); col.show_break_in_time= false;" (focusout)="setShowTimeValue(undefined)">
+                          <!-- <app-time-panel *ngIf="showTimePanel === (col?.dayNumber+'_temp_break_in')" [searchTime]="col.temp_break_in" [timeFormat]="config?.time_format"
+                            (selectedTime)="setSelectedTime($event, col, 'temp_break_in')" class="text-center"></app-time-panel> -->
+                            <p *ngIf="col.show_break_in_time">
+                              <a class="prev-day" *ngIf="(col.temp_break_in_date_number!= col?.dayNumber) && col.active && config?.overnight"  (click)="updateInOutDate('temp_break_in',false, col)">
+                                <icon name="chevron_left" size="18px"></icon>
+                              </a>
+                              {{ 'date' | i18next }}: {{col.temp_break_in_date_number }}
+                              <a class="next-day" *ngIf="(col.temp_break_in_date_number == col?.dayNumber) && col.active && config?.overnight"  (click)="updateInOutDate('temp_break_in',true, col)">
+                                <icon name="chevron_right" size="18px"></icon>
+                              </a>
+                            </p>
+                          </div>
+                        <div class="form-group" *ngIf="(col?.breaks[option.type]?.showCompliantReasons) && (!col?.temp_break_out) && (!col?.temp_break_in)">
+                          <label>{{ 'compliant_reasons' | i18next }}</label>
+                          <ng-select [items]="compliantReasons"
+                          bindLabel="name"
+                          bindValue="id"
+                          [clearable]="true"
+                          placeholder="Select"
+                          [(ngModel)]="col.temp_compliant">
+                          </ng-select>
+                        </div>
+                        <div class="d-flex">
+                          <button class="btn btn-primary small" (click)="validateBreak(col, option.type)">{{ 'submit' | i18next }}</button>
+                          <button class="btn btn-light small ml-4" (click)="openBreakModal(undefined, option.type, col, undefined)"> {{ 'cancel' | i18next }}</button>
+                        </div>
+
+                      </div>
+                      <!-- Edit break modal -->
+                    </div>
+                    <ng-template #showNoBreaks>
+                      <div class="no-break" *ngIf="!col?.breaks[option?.type]?.breaks || col?.breaks[option?.type]?.breaks?.length == 0">
+                        <icon name="self_improvement" size="20px"></icon>
+                        <p>{{ 'no' | i18next }} {{option?.type | i18next }}</p>
+                      </div>
+                    </ng-template>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+              <ng-template [ngIf]="currentTimesheetData?.status && currentTimesheetData?.status !== timesheetStatuses?.MISSING">
+                <div class="col-item total-head font-weight-medium" data-title="Total Billable Hours">
+                  {{ col?.billing_data?.total_billable ? (col?.billing_data?.total_billable | accuracy : accuracyConfig?.HOUR ): defaultValue }}
+                </div>
+                <div class="col-item-wrapper" *ngIf="billableBreakup">
+                  <ng-container *ngFor="let hour_data of timeSheet?.data?.hour_data?.type | keyvalue: unsorted">
+                    <div class="col-item" *ngIf="hour_data?.key && hour_data?.key !== 'total_billable'">
+                      {{ col?.billing_data && col?.billing_data[hour_data.key] ? (col?.billing_data[hour_data.key] | accuracy : accuracyConfig?.HOUR) : defaultValue }}
+                    </div>
+                  </ng-container>
+                </div>
+              </ng-template>
+              <div class="col-item note-col position-relative" data-title="Daily Notes" *ngIf="config?.notes?.option?.day_level?.is_allow">
+                <!-- <a href="javascript:void(0)" class="add-note" tooltip="Add Note"  placement="bottom" delay="500">
+                  <icon name="add" size="16px" type="material"></icon>
+                </a>
+                <p class="small d-none">
+                  {{ 'lorem_ipsum' | i18next }}
+                </p>
+                <div class="add-note-box">
+                  <textarea placeholder="{{ 'enter_your_note' | i18next }}" rows="4"></textarea>
+                </div> -->
+                <a class="add-note" [ngClass]="{'read-only':!isAuthorizedToCreate || !isTimesheetEnabled || !col.active}" (click)="selectedIndex = i;"
+                      *ngIf="!col.notes" tooltip="{{ 'add_note' | i18next }}"  placement="bottom" delay="500">
+                      <icon name="add" size="16px" type="material"></icon>
+                    </a>
+                    <!-- show this paragraph when text enterered-->
+                    <ng-template [ngIf]="col.notes">
+                      <p class="small max-height-paragraph" (click)="selectedIndex = i;">
+                        {{col.notes | i18next }}
+                      </p>
+                    </ng-template>
+
+                    <div class="add-note-box" [class.active]="selectedIndex === i" (mouseout)="selectedIndex = null;">
+                      <textarea [focusMe]="selectedIndex === i" [attr.disabled]="(isAuthorizedToCreate && !isAssignmentClosed && isTimesheetEnabled)? null : true" placeholder="{{ 'enter_your_note' | i18next }}" rows="4" [(ngModel)]="col.notes"></textarea>
+                    </div>
+              </div>
+              <div class="responsive-view-buttons hide-on-desktop">
+                <div class="d-flex justify-content-center hide-on-desktop">
+                  <button class="hide-day-col-mobile btn btn-success" (click)="hideDayCol(i)">{{'done' | i18nextEager}}</button>
+              </div>
+              </div>
+            </div>
+            <div class="total-col total-col-mobile" [ngClass]="{'field-error': (errors['week']?.length > 0)}">
+              <div class="col-item first-item">
+                <div class="d-flex align-items-center">
+                <span *ngIf="errors['week']?.length > 0">
+                  <icon name="info" type="material" color="#EB445A" size="20px" class="error-icon"></icon>
+                </span>
+                <p class="font-weight-medium">{{ 'total' | i18next }}</p>
+                <div class="error-message-box p-16" *ngIf="errors['week']?.length > 0">
+                  <ul>
+                    <li *ngFor="let e of errors['week'] ">{{ e  }}</li>
+                  </ul>
+                </div>
+                </div>
+              </div>
+              <div class="col-item hide-on-mobile">
+                &nbsp;
+              </div>
+              <div class="col-item hide-on-mobile">
+                &nbsp;
+              </div>
+              <div class="col-item both-border hide-on-mobile" [ngClass]="{'read-only' : (!isAuthorizedToCreate || isAssignmentClosed || !isTimesheetEnabled)}">
+                {{(formData.total ? formData?.total : defaultValue) | accuracy : accuracyConfig?.HOUR }}
+              </div>
+              <!-- <div class="col-item break">
+                &nbsp;
+              </div> -->
+              <ng-template [ngIf]="config?.break?.is_allow">
+                <div class="col-item break hide-on-mobile" *ngFor="let option of config.break?.options">
+                  &nbsp;
+                </div>
+              </ng-template>
+              <ng-template [ngIf]="currentTimesheetData?.status && currentTimesheetData?.status !== timesheetStatuses?.MISSING">
+                <div class="col-item  total-head total-for-billable font-weight-medium" [ngClass]="{'breakup-active' : billableBreakup}">
+                  {{formData?.billing_data_total?.total_billable ? (formData?.billing_data_total?.total_billable | accuracy : accuracyConfig?.HOUR ): defaultValue }}
+                </div>
+
+                <div class="col-item-wrapper activewrap" *ngIf="billableBreakup">
+                  <ng-container *ngFor="let hour_data of timeSheet?.data?.hour_data?.type | keyvalue: unsorted">
+                    <div class="col-item" *ngIf="hour_data?.key && hour_data?.key !== 'total_billable'">
+                      {{ (formData.billing_data_total && formData.billing_data_total[hour_data?.key] )?(formData.billing_data_total[hour_data?.key] | accuracy : accuracyConfig?.HOUR) : defaultValue  }}
+                    </div>
+                  </ng-container>
+                </div>
+              </ng-template>
+            </div>
+          </div>
+          <ng-template [ngIf]="timesheetTab == 'timesheet' && currentTimesheetData?.status && currentTimesheetData?.status !== timesheetStatuses?.DRAFT && currentTimesheetData?.status !== timesheetStatuses?.MISSING && isShowTimesheetBilling()">
+            <app-timesheet-billing-details-new *ngIf="timeSheet?.data?.billable_info_by_api" [timesheetId]="currentTimesheetData?.timesheet_uuid"></app-timesheet-billing-details-new>
+            <app-timesheet-billing-details [billingData]="billing_data"></app-timesheet-billing-details>
+          </ng-template>
+          <div class="footer-note mt-16 p-16" *ngIf="timesheetTab == 'timesheet' && config?.notes?.option?.timesheet_level?.is_allow">
+            <p class="mb-4"> {{ 'timesheet_notes' | i18next }}</p>
+            <textarea [attr.disabled]="(isAuthorizedToCreate && !isAssignmentClosed && isTimesheetEnabled)? null : true" class="form-control" placeholder="{{ 'add_note' | i18next }}" rows="5"
+              [(ngModel)]="formData.timesheet_level_notes"></textarea>
+          </div>
+          <div [hidden]="timesheetTab !== 'workflows'" class="p-16">
+            <app-multi-workflow [moduleName]="'timesheets'" [moduleStatus]="currentTimesheetData?.status"
+                        [multiApprovals]="multiApprovals" [moduleId]="currentTimesheetData?.timesheet_uuid"></app-multi-workflow>
+          </div>
+        </div>
+        <app-timesheet-revision-history *ngIf="timesheetTab == 'timesheet' && currentTimesheetData?.timesheet_uuid" [timesheetId]="this.currentTimesheetData?.timesheet_uuid" (reloadPage)="initializeTimesheet()"></app-timesheet-revision-history>
+     
+      <!-- Custom Fields -->
+          <div *ngIf="timesheetTab == 'timesheet'" class="card timesheet-custom-field bg-light mb-24 mb-m-0 py-16 mt-m-0" [ngClass]="{'px-24 my-24': customFields?.length > 0}">
+             <app-dynamic-custom-fields *ngIf="assignmentDetails?.assignment?.hierarchy?.id" [dateFormat]="dateFormatEnum.FORMATYMD" (isCustomFieldsFormValid)="setCustomFieldsFormValid($event)"
+                 (customFieldUpdated)="customFieldUpdated($event);" [custom_fields]="selectedCustomData"
+                 [moduleName]="'TIMESHEETS'" [uploadS3RefName]="'timesheets'"  [columnInRow]="3" [hierarchyIds]="assignmentDetails?.assignment?.hierarchy?.id">
+             </app-dynamic-custom-fields>
+         </div>
+     <!-- end -->
+
+      </div>
+    </section>
+
+   
+  </div>
+</div>
+<app-copy-timesheet-widget [showCopywidget]="showCopywidget" [config]="config" (copiedTimesheet)="copyTimesheetInSelectedWeek($event)"></app-copy-timesheet-widget>
+<ng-template [ngIf]="timeSheet?.data?.actions_allow?.can_reject || hasOverrideApprovalPermission">
+  <app-timesheet-reject></app-timesheet-reject>
+</ng-template>
+<ng-template [ngIf]="timeSheet?.data?.actions_allow?.can_modify || timeSheet?.data?.actions_allow?.can_delete || timeSheet?.data?.actions_allow?.can_withdraw">
+  <app-timesheet-action-flyout></app-timesheet-action-flyout>
+</ng-template>

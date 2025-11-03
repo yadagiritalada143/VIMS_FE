@@ -1,0 +1,105 @@
+<section class="expense-wrapper p-24 pl-m-0 pr-m-0 pt-m-0">
+  <div class="inside-wrap" *ngIf="expenseDetail">
+    <a (click)="navigateBackToList()" class="back-link back-mobile">
+      <icon name="chevron_left" type="material" size="24px"></icon> <span>{{ 'back_to' | i18nextEager }} {{ (redirectToSow ? 'SOW'  : (redirectExpenseFlyout ? redirectExpenseFlyout : expenseType?.name)) | i18nextEager }}
+      {{ !redirectToSow && !redirectExpenseFlyout? 'List' : '' | i18nextEager  }} </span>
+    </a>
+    <app-logs [log]="logs"></app-logs>
+    <app-expense-header (expType)="getExType($event)" [data]="expenseDetail" [isDisabledBtn]="!expenseDetail.expenseDetail.length"></app-expense-header>
+    <div *ngIf="expenseTab == 'expense'" class="mt-24 mt-m-0">
+      <app-master-data [isExpenseConfig]="true" [currentTimesheetData] = "expenseDetail" ></app-master-data>
+    </div>
+    <div class="expense-content mt-16 seperation-border-m" *ngIf="expenseList">
+      <nav class="pages-sub-nav expense-sub-nav">
+        <ul>
+          <li class="cursor-pointer" [ngClass]="{'active' : (expenseTab == 'expense')}" (click)="showExpenseTab('expense')">
+            <div class="d-flex align-items-center">
+              <icon name="info" theme="outlined" class="mr-4" cuClass="d-flex"></icon> <span>{{'expense_details'|i18next }}</span>
+            </div>
+          </li>
+          <li *ngIf="isShowMultiApproval && currentUserType !== UsersType.VENDOR" class="cursor-pointer"  [ngClass]="{'active' : (expenseTab == 'workflows')}" (click)="showExpenseTab('workflows')">
+            <div class="d-flex align-items-center">
+              <icon name="task_alt" class="mr-4" cuClass="d-flex"></icon> <span>{{'Workflows'|i18nextEager }}</span>
+            </div>
+          </li>
+        </ul>
+       </nav>
+       <div *ngIf="expenseTab == 'expense'" class="py-16 px-24 px-m-16">
+        <app-no-expense *ngIf="!expenseDetail.expenseDetail.length"
+        [expenseType]="expenseType"
+        (openCreationSidebar)="onCreateClick($event)"
+        [isDataLoaded]="isDataLoaded"></app-no-expense>
+<app-simple-table class="expense-detail-table" *ngIf="expenseDetail.expenseDetail.length"
+          [vmsTableConfig]="expenseDetailsTableConfig"
+          [vmsDataSource]="expenseList.expense"
+          [totalAmount]="expenseList.totalAmount"
+          (onCreate)="onCreateClick($event)"
+          (search)="onSearch($event)"
+          (onViewClick)="onViewClick($event)"
+          (onSort)="onSortClick($event)"
+          (onDeleteClick)="deleteClicked($event)"
+          (onEditClick)="editClick($event)"
+          (onOpenPanel)="openPreviewModal($event)"></app-simple-table>
+       </div>
+      <div [hidden]="expenseTab !== 'workflows'" class="p-16">
+        <app-multi-workflow [moduleName]="getModuleName()" [moduleStatus]="expenseDetail.expense_status"
+          [multiApprovals]="multiApprovals" [moduleId]="expenseId"></app-multi-workflow>
+      </div>
+    </div>
+    <vms-table *ngIf="expenseTab == 'expense' && revisionVmsData && revisionVmsData?.length"
+               class="revision-table seperation-border-m"
+               [vmsTableConfig]="revisionTableConfig"
+               [vmsDataSource]="revisionVmsData"
+               [totalItem]="totalRecords"
+               [itemsPerPage]="limitRecords"
+               (changeRecords)="onChangeRecords($event)"
+               (search)="onHistorySearch($event)"
+               (changePage)="onPaginationClick($event)"
+               (onViewClick)="onClickView($event)">
+    </vms-table>
+  </div>
+</section>
+<app-expense-single-detail
+  *ngIf="isOpenDetails"
+  (closeSingleDetails)="toggleIsOpenDetails()"
+  [currency]="currency"
+  [expenseConfiguration]="expenseConfiguration"
+  [is_tax_hidden] = "is_tax_hidden"
+  [hierarchyIds]="hierarchyID"
+></app-expense-single-detail>
+<app-add-expense
+  *ngIf="isOpenCreating"
+  (closeCreateModal)="toggleIsOpenCreating()"
+  [assignment]="assignment"
+  [existingExpense]="expenseDetail?.expense_id"
+  [hierarchyId]="expenseDetail.hierarchy.id"
+  [is_tax_hidden] = "is_tax_hidden"
+></app-add-expense>
+<app-edit-expense
+  *ngIf="isOpenEditing"
+  (closeEditModal)="toggleIsOpenEditing()"
+  [currency]="currency"
+  [expenseConfiguration]="expenseConfiguration"
+  [is_tax_hidden] = "is_tax_hidden"
+  [hierarchyIds]="hierarchyID"
+></app-edit-expense>
+<div class="preview-popup" *ngIf="previewModalOpened" [ngClass]="{ active: previewModalOpened }">
+  <header class="preview-popup-header px-24 pt-24 pb-16">
+    <h4 class="float-left font-weight-medium color-black mb-0">
+      {{ 'attachment_preview' | i18nextEager }}
+    </h4>
+    <div class="float-right close-icon">
+      <icon name="close" theme="outlined" color="#000000" size="20px" (click)="previewModalOpened = false"></icon>
+    </div>
+    <div class="clearfix"></div>
+  </header>
+  <div class="p-24 d-flex justify-content-center">
+    <img src="{{ fileDetails.previewPath }}" alt="" class="attachment-picture" />
+  </div>
+  <footer class="preview-popup-footer py-12 px-16">
+    <button class="btn btn-primary float-left mr-12" (click)="downloadFile()">
+      <icon class="download-icon mr-8" name="file_download" size="20px"></icon> {{ 'download' | i18nextEager }}
+    </button>
+  </footer>
+</div>
+<div class="backdrop-Overlay" *ngIf="previewModalOpened"></div>

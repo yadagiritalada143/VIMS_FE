@@ -1,0 +1,41 @@
+<div class="dob-calendar"  (clickOutside)="isShowCalendar=false;validateDate($event)">
+    <div class="dob-datepicker d-flex">
+        <div class="position-relative dob-input-wrapper">
+            <input type="text" class="form-control dob-input" placeholder="MM/DD"
+                [ngClass]="{'error':isFormatValid || isNotValid}" [maxLength]="5" [(ngModel)]="selectedDate"
+                (keyup)="validateDate($event)" (change)="updateDob($event.target.value)" (blur)="writeValue(value)"
+                (click)="onCliclSelectdate();inputFocused()" (ngModelChange)="onDateChange($event)"  [value]="value" />
+            <p class="validation-msg" *ngIf="isFormatValid">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{
+                'invalid_date_format' | i18next }}.
+            </p>
+            <icon (click)="onClick()" size="16px" theme="outlined" name="calendar_today" type="material"
+                class="icon-bg d-flex calendar-icon">
+                <i class="icon-default material-icons-outlined" style="font-size: 20px;">home</i>
+            </icon>
+        </div>
+    </div>
+    <div  *ngIf="isShowCalendar" class="dob-picker">
+        <div class="dob-wrapper">
+            <div class="select-month">
+                <ng-select [clearable]="true" class="medium" placeholder="Month" [searchable]="false"
+                    [(ngModel)]="selectedMonth" (ngModelChange)="onMonthChange($event)">
+                    <ng-option *ngFor="let month of months; let i = index" [value]="i + 1">{{ month }}</ng-option>
+                </ng-select>
+            </div>
+            <table class="days-table">
+                <tbody>
+                    <tr *ngFor="let week of weeks">
+                        <ng-container *ngFor="let day of week">
+                            <td class="day-cell" *ngIf="day !== null">
+                                <span class="day" (click)="selectDay(day)"
+                                    [ngClass]="{ 'active': isSelectedDate(day) }">{{ day }}</span>
+                            </td>
+                            <td *ngIf="day === null"></td>
+                        </ng-container>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

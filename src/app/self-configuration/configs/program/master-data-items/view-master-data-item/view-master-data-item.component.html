@@ -1,0 +1,60 @@
+<div class="create-new-task view-detail-page">
+
+    <header class="section-header page-title-main p-24 d-flex align-items-center justify-content-between">
+        <div class="page-title font-weight-semibold d-flex align-items-center">
+            <a href="javascript:void(0)" (click)="backClicked()">
+                <i class="material-icons back-arrow-icon mr-16">arrow_back</i>
+            </a>
+            <div class="ml-16">
+                <h3 class="font-weight-semibold mb-0">{{ pageTitle | i18next}}</h3>
+                <p class="small">
+                    {{ commonViewService.getTimeStamp(masterDetails?.created_on, masterDetails?.modified_on) | i18next }}
+                </p>
+            </div>
+        </div>
+        <div>
+            <button *authorize="'master_data_manage'" class="c-btn c-btn-secondary-medium-left-icon" (click)="switchToEditMode()">
+                <i class="material-icons">drive_file_rename_outline</i>
+                {{'edit'|i18next}}
+            </button>
+        </div>
+    </header>
+
+    <section class="section-body-content">
+        <div class="p-32">
+            <app-common-view-rule-flow [details]="viewConfig">
+            </app-common-view-rule-flow>
+            <app-common-view-rule-flow [details]="dependedFields">
+            </app-common-view-rule-flow>
+            <app-common-view-rule-flow [details]="customFields">
+            </app-common-view-rule-flow>
+        </div>
+    </section>
+</div>
+
+<ng-template #masterDataHeader let-value let-name="name">
+    <p class="item-header"> {{ name | i18next }} </p>
+    <div class="d-flex align-items-center">
+        <icon cuClass="d-flex" size="14px" type="material"
+            [name]="value?'check_circle':'cancel'" 
+            [color]="value?'#009514':'#eb445a'"
+        ></icon>
+        <p class="pl-8"> {{ 'restrict_values' | i18next }} </p>
+    </div>
+</ng-template>
+
+<ng-template #depended let-value>
+    <div class="d-flex">
+        <div *ngFor="let data of value" class="box-item px-8 py-4 mr-8">
+            <div class="d-flex align-items-center">
+                <icon *ngIf="data?.is_default" name="bookmark" size="16px" color="#0044C5"></icon>
+            </div>
+            <p class="mx-4"> {{ data?.name | i18next }} </p> 
+            <div class="d-flex align-items-center">
+                <icon size="16px" color="#5B6874"
+                    [name]="data?.is_editable?'edit':'edit_off'"
+                ></icon>
+            </div>
+        </div>
+    </div>
+</ng-template>

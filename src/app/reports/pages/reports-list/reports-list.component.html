@@ -1,0 +1,107 @@
+<div class="job-reports d-flex column-direction" *ngIf="isLoaded">
+  <div class="job-reports__content">
+    <app-logs [log]="logs"></app-logs>
+    <div class="reports">
+      <img src="../assets/images/chart-header-arrow.svg" alt="" class="reports__arrow-icon">
+      <div class="search-reports d-flex flex-wrap  justify-content-between align-items-center column-direction">
+        <div class="d-flex align-items-center column-direction">
+          <h3 class="mb-0 mr-12 mr-m-0">{{ 'reports' | i18next }}</h3>
+          <div class="search position-relative">
+            <input type="text" class="form-control" [(ngModel)]="search" placeholder="{{ 'search_reports_by_name' | i18next }}" />
+            <span class="position-absolute search-icon">
+              <icon *ngIf="!search" class="d-flex green cursor-pointer" size="16px" name="search" type="material"
+                cuClass="d-flex"></icon>
+              <icon *ngIf="search" (click)="resetSearch()" class="d-flex green cursor-pointer" size="16px" name="close"
+                type="material" cuClass="d-flex"></icon>
+            </span>
+          </div>
+        </div>
+        <div class="reports-controls d-flex p-16 pr-0 pl-m-0">
+          <button class="btn btn-outline-primary small  mr-8" routerLink="/reports/saved">
+            <!-- <icon class="d-flex green cursor-pointer mr-8"  size="16px" name="save" type="material" cuClass="d-flex"></icon> -->
+            {{ 'view_all_saved_reports' | i18next }}
+          </button>
+          <button class="btn btn-outline-primary small" routerLink="/reports/scheduled">
+            <!-- <icon class="d-flex green cursor-pointer mr-8" size="16px" name="watch_later" type="material" cuClass="d-flex"></icon>  -->
+            {{ 'view_all_schedules' | i18next }}
+          </button>
+        </div>
+      </div>
+      <div class="header-reports d-flex align-items-center hide-on-mobile">
+        <span class="material-icons filter-list">filter_list</span>
+        <ng-container *ngFor="let tab of reportTabs">
+          <div class="title" (click)="changeTabReport(tab.filter)" [class.active]="selectedTab === tab.filter">
+            {{tab.name |i18next}}</div>
+        </ng-container>
+      </div>
+    </div>
+    <div class="mt-24 text-center no-content-reports" *ngIf="reports && reports?.length === 0">
+      <h3 class="mb-0 mr-12">{{ 'no_records_found' | i18next }}</h3>
+    </div>
+    <div class="content-reports mt-m-0">
+      <div class="container-reports">
+        <figure *ngFor="let report of reports">
+          <div *ngIf="isShowReport(report)" class="row-reports mb-8">
+            <h4 class="d-flex align-items-center mt-16 content-reports__report_title">
+              <span class="mr-8">
+                <icon *ngIf="report.key === reportTypes.ActivityReports.filter" class="d-flex green cursor-pointer"
+                  theme="outlined" size="16px" name="grain" type="material" cuClass="d-flex">
+                </icon>
+                <icon *ngIf="report.key === reportTypes.TrendReports.filter" class="d-flex green cursor-pointer"
+                  theme="outlined" size="16px" name="auto_awesome" type="material" cuClass="d-flex">
+                </icon>
+                <icon *ngIf="report.key === reportTypes.FinancialReports.filter" class="d-flex green cursor-pointer"
+                  theme="outlined" size="16px" name="payments" type="material" cuClass="d-flex">
+                </icon>
+                <icon *ngIf="report.key === reportTypes.CustomReports.filter" class="d-flex green cursor-pointer"
+                  theme="outlined" size="16px" name="extension" type="material" cuClass="d-flex">
+                </icon>
+                <icon *ngIf="report.key === reportTypes.PerformanceReports.filter" class="d-flex green cursor-pointer"
+                  theme="outlined" size="16px" name="auto_graph" type="material" cuClass="d-flex">
+                </icon>
+              </span> {{ report?.label |i18next }}
+            </h4>
+            <ul class="pl-0 ml-0" *ngFor="let item of report?.sub_items">
+              <li *ngIf="isShowSubReport(item)" class="d-flex align-items-center justify-content-between"
+                (click)="showReport(item?.key)">
+                <span class="d-flex align-items-center">
+                  {{ item?.label |i18next }}
+                </span>
+                <span class="action">
+                  <icon class="cursor-pointer save-icon" size="14px" name="save" type="material" cuClass="d-flex"
+                    tooltip="{{'Saved Reports' | i18next}}" placement="top" delay="500" (click)="showReportTyped($event, item, true)">
+                  </icon>
+                  <icon class="cursor-pointer schedule-send-icon" size="14px" name="schedule_send" type="material"
+                    cuClass="d-flex" tooltip="{{'Scheduled Reports' | i18next}}" placement="top" delay="500" (click)="showReportTyped($event, item, false)">
+                  </icon>
+                  <icon class="cursor-pointer open-in-new-icon" size="14px" name="open_in_new" type="material"
+                    cuClass="d-flex" tooltip="{{'Open in New Tab' | i18next}}" placement="top" delay="500"
+                    (click)="openNewTab($event, item?.key)">
+                  </icon>
+                  <icon *ngIf="!item.is_favorite" class="cursor-pointer favorite-icon" size="14px"
+                    name="favorite_border" type="material" cuClass="d-flex" tooltip="{{'Add to Favorite' | i18next}}" placement="top"
+                    delay="500" (click)="addToFavorite(item, $event)">
+                  </icon>
+                  <icon *ngIf="item.is_favorite" class="cursor-pointer favorite-active-icon" size="14px" name="favorite"
+                    type="material" cuClass="d-flex" tooltip="{{'UnFavorite' | i18next}}" placement="top" delay="500"
+                    (click)="removeFromFavorite(item, $event)">
+                  </icon>
+                </span>
+              </li>
+            </ul>
+          </div>
+        </figure>
+        <div *ngIf="isReportEmpty()" class="no-reports">
+          <div>
+            <img src="../../../../assets/images/no-reportsadded.svg" alt="no reports" width="220" class="img-fluid">
+          </div>
+          <div class="no-reports__text">{{ 'no_reports_found' | i18next }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="job-reports__right-sidebar">
+    <app-favorites-report [reports]="reportsFavorites"
+      (removeReportFromFavorite)="removeFromFavorite($event.item, $event.event)"></app-favorites-report>
+  </div>
+</div>

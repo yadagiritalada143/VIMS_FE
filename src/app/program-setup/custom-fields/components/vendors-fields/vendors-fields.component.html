@@ -1,0 +1,63 @@
+<form [formGroup]="vendorForm">
+  <div class="form-group">
+    <label class="text-lightgray">{{ 'can_view' | i18next }}<span class="require pl-8">*</span></label>
+    <ng-select
+      [multiple]="true"
+      formControlName="can_view"
+      placeholder="{{ 'select_roles' | i18next }}"
+      [items]="rolesAllowed | keysort: 'name'"
+      bindValue="id"
+      bindLabel="name"
+      (change)="viewRolesChange($event)"
+      [readonly]="!isEditMode"
+      [class]="!isEditMode ? 'disable rounded-multiple-select' : 'rounded-multiple-select'"
+    >
+    </ng-select>
+  </div>
+  <div class="form-group" *ngIf="getCanView().value?.includes('VENDOR')">
+    <label class="text-lightgray">{{ 'select_vendors' | i18next }}</label>
+    <ng-select
+      [multiple]="true"
+      formControlName="view_vendors"
+      placeholder="{{ 'select_vendors' | i18next }}"
+      [items]="vendors"
+      bindLabel="vendor.name"
+      [loading]="viewVendorsLoading"
+      loadingText = 'Loading....'
+      (change)="updateVendorsFields()"
+      [readonly]="!isEditMode"
+      [class]="!isEditMode ? 'disable rounded-multiple-select' : 'rounded-multiple-select'"
+      [typeahead]="input$"
+    >
+    </ng-select>
+  </div>
+  <div class="form-group">
+    <label class="text-lightgray">{{ 'can_edit' | i18next }}<span class="require pl-8">*</span></label>
+    <ng-select
+      [multiple]="true"
+      formControlName="can_edit"
+      placeholder="{{ 'select_roles' | i18next }}"
+      [items]="getCanView().value"
+      bindValue="id"
+      bindLabel="name"
+      (change)="updateVendorsFields()"
+      [readonly]="!isEditMode"
+      [class]="!isEditMode ? 'disable rounded-multiple-select' : 'rounded-multiple-select'"
+    >
+    </ng-select>
+  </div>
+  <div class="form-group" *ngIf="getCanEdit().value?.includes('VENDOR')">
+    <label class="text-lightgray">{{ 'select_vendors' | i18next }}</label>
+    <ng-select
+      [multiple]="true"
+      formControlName="edit_vendors"
+      placeholder="{{ 'select_vendors' | i18next }}"
+      [items]="editVendorItems"
+      bindLabel="vendor.name"
+      [readonly]="!isEditMode"
+      (change)="editVendorsChange()"
+      [class]="!isEditMode ? 'disable rounded-multiple-select' : 'rounded-multiple-select'"
+    >
+    </ng-select>
+  </div>
+</form>

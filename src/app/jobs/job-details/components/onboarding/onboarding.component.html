@@ -1,0 +1,16 @@
+<app-job-details>
+    <div class="on-boarding-listing">
+        <div class="description-card p-24">
+            <div class="dotloader" *ngIf="dataLoader"></div>
+            <div *ngIf="viewGrid" class="overflow-box">
+                <vms-table *ngIf="tableLoaded" [vmsTableConfig]="tableConfig" [vmsDataSource]="vmsData?.candidate" [loading]="dataLoading" [open]="isExpand" [totalItem]="totalRecords" [itemsPerPage]="itemsPerPage" (onViewClick)="onClickView($event)" (onExpandClick)="onExpandClick($event)"
+                    (onEditClick)="onEditClick($event)" (changePage)="onPaginationClick($event)" (onCreate)="onCreateClick($event)" (onDisableClicked)="disableClicked($event)" (onDeleteClick)="onDeleteClick($event)" (numberBadgeClicked)="columnClicked($event)"
+                    (search)="onSearch($event)" (onListFilter)="onListFilter($event)">
+                </vms-table>
+            </div>
+            <app-grid-view *ngIf="!viewGrid" [gridData]="gridVewJson" [gridContentType]="gridContentType"></app-grid-view>
+        </div>
+    </div>
+  
+
+</app-job-details>

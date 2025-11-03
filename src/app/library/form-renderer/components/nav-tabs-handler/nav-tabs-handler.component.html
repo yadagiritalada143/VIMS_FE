@@ -1,0 +1,26 @@
+<!-- <ul class="add-page-progress-bar mb-32 cursor-pointer">
+  <li [ngClass]="{'active': tab?.visited}" *ngFor="let tab of config, let i=index">
+    {{tab?.label}}</li>
+</ul> -->
+
+<div class="breadcrumb d-flex">
+  <div class="item pl-24 pr-24" *ngFor="let tab of config, let i=index"
+    [ngClass]="{'active': (i===tabIndex), 'finished': tab?.visited}">
+    <div *ngIf="tab?.is_visible">
+      <span class="mr-8">{{i+1}}</span>
+      <icon class="mr-8" size="20px" name="done_outline"></icon> {{tab?.label|i18next}}
+    </div>
+  </div>
+</div>
+
+
+<ng-content *ngIf="is_review_need && (tabIndex === (config.length -1))"></ng-content>
+<!-- <div *ngFor="let tab of config, let i=index"> -->
+<app-field-group-handler [assignmentId]="assignmentId" [candidateId]="candidateId"  [isSaveLoader]="isSaveLoader" (onClickContinue)="onContinue($event)"
+  (onBtnClick)="onClickBtn($event)" [groups]="activeTab?.field_groups" [tabName]="activeTab?.label"
+  [tabIndex]="tabIndex" [is_update]="is_update" [updateConfig]="updateConfig" [finalUpdateData]="finalUpdateData"
+  [updateValue]="updateValue" (onBackBtnClick)="onBackBtnClick($event)" (onFinalSubmitBtn)="onFinalSubmitBtn($event)"
+  [jsonData]="jsonData" [config]="config" (onClickCandidateView)="onCandidateView($event)"
+  (onClickVendorView)="onVendorClick($event)">
+</app-field-group-handler>
+<!-- </div> -->

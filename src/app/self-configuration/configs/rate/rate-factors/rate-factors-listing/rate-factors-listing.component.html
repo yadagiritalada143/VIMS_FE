@@ -1,0 +1,33 @@
+<ng-template #statusTemplate let-value="value">
+    <span class="c-status-ui active" *ngIf="value">
+      {{ 'active' | i18next }}
+    </span>
+    <span class="c-status-ui inactive" *ngIf="!value">
+      {{ 'inactive' | i18next }}
+    </span>
+</ng-template>
+
+<ng-template #showData let-value="value">
+    <span class="text-visibility">{{value | i18next}}</span>
+</ng-template>
+
+<app-svms-table [hidden]="!isListingMode"  [tableOptions]="tableOptions" [coloumnDefintions]="svmstableColomnDefn" [dataSource]="vmsData?.rate_factors"></app-svms-table>
+
+<app-rate-factors-detail
+    [hidden]="!(isViewMode || isEditMode || createMode)"
+    [title]="title"
+    [buttonTitle]="buttonTitle"
+    [createMode]="createMode"
+    [isEditMode]="isEditMode"
+    [isViewMode]="isViewMode"
+    [isListingMode]="isListingMode">
+</app-rate-factors-detail>
+
+<app-reorder-modal
+  *ngIf="showOrderChangeFlyout"
+  [dataSource]="rateFactors"
+  [modalTitle]="tableOptions.headerConfig.title"
+  [hideInputBox]="true"
+  (onClose)="onCloseReorderModel($event)"
+  (onSave)="onSaveReorderModal($event)"
+></app-reorder-modal>

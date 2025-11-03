@@ -1,0 +1,275 @@
+<svms-sidebar-ng [title]="(editExpenseForm?.value?.expense_type == 'General Expense' ? ('Edit General Expense' | i18nextEager): ('Edit Misc. Expense' | i18nextEager))" [dataVisibility]="sidebarVisibility" (onClose)="sidebarClose($event)">
+  <app-logs [log]="logs"></app-logs>
+  <svms-sidebar-body-ng [active]="true">
+    <form *ngIf="editExpenseForm" [formGroup]="editExpenseForm" class="p-24 expense-form">
+      <div class="form-group-row">
+        <div class="form-group">
+          <label for="expense_type">{{ 'expense_category' | i18nextEager }} <span class="require">*</span></label>
+          <input type="text"
+                 formControlName="expense_type"
+                 placeholder="{{ 'general_expense' | i18nextEager }}"
+                 class="form-control"
+                 id="expense_type"
+                 [readonly]="true" />
+        </div>
+        <div class="form-group position-relative expense-date">
+          <label>{{ 'date_incurred' | i18nextEager }}<span class="require">*</span></label>
+          <svms-datepicker [placeholder]="'DD/MM/YYYY'| i18nextEager"
+                           I18n [inputdateFormat]="dateFormat"
+                           [defaultStartDate]="editItem.item_start_date_updated"
+                           [defaultEndDate]="editItem.item_end_date_updated ? editItem.item_end_date_updated : editItem.item_start_date_updated"
+                           formControlName="expense_date"
+                           [options]="calendarOptions">
+          </svms-datepicker>
+          <p *ngIf="editExpenseForm.get('expense_date').touched && editExpenseForm.get('expense_date').errors" class="validation-msg">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'expense_date_is_required' | i18nextEager }}.
+          </p>
+        </div>
+      </div>
+      <div class="form-group-row">
+        <div class="form-group" [ngClass]="( !!unitBaseConfig ? '' : 'p-0 col-6')" *ngIf="isLoadedExpenseItems">
+          <label for="expense_item_id">{{ 'expense_type' | i18nextEager }} <span class="require">*</span></label>
+          <ng-select [clearable]="false"
+                     [placeholder]="'Select Expense Type'|i18next"
+                     formControlName="expense_item_id"
+                     id="expense_item_id"
+                     (change)="selectExpenseType($event)">
+            <ng-option *ngFor="let item of expenseItems" [value]="item.id">
+              <img [src]="item.icon" class="mr-8" height="16" />{{ item.name }}
+            </ng-option>
+          </ng-select>
+          <p *ngIf="editExpenseForm.get('expense_item_id').touched && editExpenseForm.get('expense_item_id').errors" class="validation-msg">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'expense_type_is_required' | i18nextEager }}.
+          </p>
+        </div>
+        <ng-container *ngIf="!!unitBaseConfig">
+          <div class="form-group">
+            <label for="unit">{{ 'enter' | i18nextEager }} {{ unitBaseConfig?.unit_label }} <span class="require">*</span></label>
+            <input type="text" formControlName="unit" placeholder="{{ 'enter' | i18nextEager }}" class="form-control" id="unit"
+                  onlyNumber (keyup)="unitBaseValueChanged($event)" (blur)="onBlurUnit()">
+            <p *ngIf="editExpenseForm.get('unit').touched && editExpenseForm.get('unit').errors"
+                class="validation-msg">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ unitBaseConfig?.unit_label + ' ' + ('is_required' | i18nextEager) }}.
+            </p>
+          </div>
+        </ng-container>
+      </div>
+      <div [ngClass]="( !!unitBaseConfig ? 'form-group-row' : 'form-group' )">
+        <div class="form-group">
+          <table class="table">
+            <thead>
+              <th class="table-header" colspan="2">
+                {{ 'amount_details' | i18next }}
+               </th>
+            </thead>
+            <tbody>
+                <ng-container>
+                    <tr>
+                        <td class="half-width">
+                            <span *ngIf="expenseType?.name?.toLowerCase() == 'general expense'">{{ 'general_expense_amount' |
+                              i18nextEager }} </span>
+                            <span *ngIf="expenseType?.name?.toLowerCase() == 'miscellaneous expense'">{{ 'misc._expense_amount' |
+                              i18nextEager }} </span>
+                            <span class="require">*</span>
+                        </td>
+                        <td>
+                          <div class="position-relative with-left-text" id="amount">
+                            <!-- Added due to V2M-29082 -->
+                            <div class="sign-select" *ngIf="isNegativeExpenseAllowed">
+                              <ng-select [items]= "transaction" formControlName="transaction" bindLabel="label" bindValue="value" clearable = "false" (change) = "onSelectionChange($event)"></ng-select>
+                            </div>
+                            <!-- End -->
+                            <span *ngIf=" currency != ''">{{ '' | accuracy: accuracyConfig?.AMOUNT: { currencyCode: currency ,
+                              display: currencyConfig.SYMBOL } }}</span>
+                            <span *ngIf=" currency == '' ">{{ '' | accuracy: accuracyConfig?.AMOUNT: { currencyCode:
+                              currencyConfig.DEFAULT_CURRENCY , display: currencyConfig.SYMBOL } }}</span>
+                            <input type="number" name="totalamount" placeholder="0.00" class="form-control" formControlName="amount"
+                              inputAccuracy="{{accuracyConfig?.AMOUNT}}" [readOnly]="!!unitBaseConfig" (blur)="onBlurAmount()">
+                          </div>
+                          <div colspan="2"  *ngIf="editExpenseForm?.get('amount')?.touched && editExpenseForm?.get('amount')?.errors && editExpenseForm?.get('amount')?.value !== 0">
+                            <p
+                            class="validation-msg">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                            {{ 'total_amount_is_required' | i18nextEager }}.
+                          </p>
+                        </div>
+                          <div colspan="2" *ngIf="editExpenseForm?.get('amount')?.value === 0">
+                            <p  class="validation-msg" style="color:#e2a81d;">
+                              <icon name="warning" size="14px" type="material" cuClass="validation-icon"></icon>
+                              {{ 'the_amount_is_zero' | i18nextEager }}.
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+                        <ng-container *ngIf="expenseConfiguration?.expense_config?.is_taxable && isTaxMandatory && showFeeTaxesRoleBased">
+                          <tr *ngFor="let tax of formTaxes.controls; index as i"
+                            [ngClass]="{ 'pr-8': !(i % 2), 'pl-8': i % 2, 'd-none': hideTaxControl(tax) }">
+                            <ng-container *ngIf="tax?.get('entity_type').value === 'tax'">
+                                <td>
+                                  {{ tax?.get('entity_name').value | uppercase }} 
+                                  {{'amount'| i18nextEager}}
+                                </td>
+                                <td class="total-left">
+                                  {{tax?.get('total_amount').value | accuracy: accuracyConfig?.AMOUNT : { currencyCode: currency } }}
+                                  ({{tax?.get('amount_value').value  | accuracy: accuracyConfig?.TAX_PERCENTAGE : { currencyCode: currency } }})
+                                </td>
+                                </ng-container>
+                              </tr>
+                        </ng-container>
+                </ng-container>
+            </tbody>
+            <tfoot class="table-footer" *ngIf="showAmountDetails && isTaxMandatory">
+              <td>
+                <span *ngIf="expenseType?.name?.toLowerCase() == 'general expense'">Total {{ 'general_expense_amount' |
+                  i18nextEager }} </span>
+                <span *ngIf="expenseType?.name?.toLowerCase() == 'miscellaneous expense'">Total {{ 'misc._expense_amount' |
+                  i18nextEager }} </span>
+              </td>
+                <td class="total-left">
+                <ng-container>
+                  {{editExpenseForm?.get('total_amount')?.value | accuracy: accuracyConfig?.AMOUNT : { currencyCode: currency } }}
+                </ng-container>
+              </td>
+            </tfoot>
+        </table>
+        </div>
+      </div>
+
+      <!-- <ng-container *ngIf="(expenseType?.name).toLowerCase() == 'miscellaneous expense'"> -->
+      <ng-container *ngIf= "(isTaxMandatory || isFeeMandatory) && showFeeTaxesRoleBased">
+        <div  class="d-flex flex-wrap row" formArrayName="taxes">
+          <!-- [hidden]="is_tax_hidden" -->
+          <div *ngFor="let tax of formTaxes?.controls; index as i"
+               class="half-width form-group col-6"
+               [ngClass]="{ 'pl-8': !(i % 2), 'pr-8': i % 2, 'd-none': hideTaxControl(tax) }">
+            <div [formGroup]="tax">
+              <ng-container *ngIf="tax?.get('entity_type').value === 'fee'">
+              <label [for]="tax?.get('slug')?.value" *ngIf="tax?.get('amount_type').value === 'percentage'|| tax?.get('amount_type').value === 'percent'">
+                {{ tax?.get('entity_name').value?.toLowerCase() === 'msp_partner' ? ('MSP Partner') : (tax?.get('entity_name').value | i18next | uppercase) }} {{ tax?.get('entity_type')?.value | titlecase }} (%)
+                <span class="require">*</span>
+              </label>
+              <label [for]="tax?.get('slug').value" *ngIf="tax?.get('amount_type').value === 'fixed_amount'|| tax?.get('amount_type').value === 'fixed'">
+                {{ tax?.get('entity_name').value?.toLowerCase() === 'msp_partner' ? ('MSP Partner') : (tax?.get('entity_name').value | i18next | uppercase) }}
+                {{ tax?.get('entity_type').value | titlecase }} (Fixed) <span class="require">*</span>
+              </label>
+              <input type="text"
+                onlyNumber
+                formControlName="amount_value"
+                class="form-control"
+                [id]="tax?.get('slug')?.value"
+                [readonly]="isWorker || isReadonlyTax(i)"
+                inputAccuracy="{{accuracyConfig?.TAX_PERCENTAGE}}"
+                (change)="taxAmountChange()"
+                (keyup)="taxAmountValueChange($event)"
+                (blur)="onBlurFormTaxes(tax?.get('entity_name').value)"
+                 #taxAmountValue />
+            <p *ngIf="taxAmountValue.value > 100" class="validation-msg">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'percentage_should_not_be_greater_than_100' | i18nextEager }}.
+            </p>
+          </ng-container>
+        </div>
+          </div>
+        </div>
+
+      </ng-container>
+
+      <ng-container *ngIf="(expenseType?.name).toLowerCase() == 'miscellaneous expense'">
+        <div class="form-group-row" >
+          <div class="form-group half-width pr-8" *ngIf="showClientBillable">
+            <label for="total_amount">{{ 'total_client_billable_amount' | i18nextEager }} <span class="require">*</span></label>
+            <div class="position-relative with-left-text">
+              <span>
+                <span *ngIf=" currency != ''">{{ '' | accuracy: accuracyConfig?.TAX: { currencyCode: currency , display: currencyConfig.SYMBOL }  }}</span>
+                <span *ngIf=" currency == '' ">{{ '' | accuracy: accuracyConfig?.TAX:  { currencyCode: currencyConfig.DEFAULT_CURRENCY , display: currencyConfig.SYMBOL } }}</span>
+              </span>
+              <input type="text" inputAccuracy="{{accuracyConfig?.TAX}}" formControlName="total_amount" class="form-control" [readonly]="true" id="total_amount" />
+            </div>
+          </div>
+          <div class="form-group half-width pr-8" *ngIf="showVendorBillable">
+            <label for="total_vendor_billable_amount">{{ 'total_vendor_billable_amount' | i18nextEager }} <span class="require">*</span></label>
+            <div class="position-relative with-left-text">
+              <span>
+                <span *ngIf=" currency != ''">{{ '' | accuracy: accuracyConfig?.TAX: { currencyCode: currency , display: currencyConfig.SYMBOL }  }}</span>
+                <span *ngIf=" currency == '' ">{{ '' | accuracy: accuracyConfig?.TAX:  { currencyCode: currencyConfig.DEFAULT_CURRENCY , display: currencyConfig.SYMBOL } }}</span>
+              </span>
+              <input type="text" inputAccuracy="{{accuracyConfig?.TAX}}" formControlName="total_vendor_billable_amount" class="form-control" [readonly]="true" id="total_vendor_billable_amount" />
+            </div>
+          </div>
+        </div>
+        <div class="form-group-row" >
+          <div class="form-group half-width pr-8" *ngIf="showMspBillable">
+            <label for="total_msp_billable_amount">{{ 'total_msp_billable_amount' | i18nextEager }} <span class="require">*</span></label>
+            <div class="position-relative with-left-text" id="total_msp_billable_amount">
+              <span *ngIf=" currency != ''">{{ '' | accuracy: accuracyConfig?.TAX: { currencyCode: currency , display: currencyConfig.SYMBOL }  }}</span>
+              <span *ngIf=" currency == '' ">{{ '' | accuracy: accuracyConfig?.TAX:  { currencyCode: currencyConfig.DEFAULT_CURRENCY , display: currencyConfig.SYMBOL } }}</span>
+              <input type="text" inputAccuracy="{{accuracyConfig?.TAX}}" formControlName="total_msp_billable_amount" class="form-control" [readonly]="true">
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <div class="d-flex flex-wrap" *ngIf="customFields.length > 0">
+        <div *ngFor="let customField of customFields; index as i" [ngClass]="{ 'pr-8': !(i % 2), 'pl-8': i % 2}" class="form-group half-width">
+          <label [for]="customField.slug">{{ customField.label| i18nextEager }} <span *ngIf="customField?.isMandatory" class="require">*</span></label>
+          <ng-select [clearable]="false" [placeholder]="('Select'| i18nextEager) + customField.label" [formControlName]="customField.slug" class="type-select">
+            <ng-option *ngFor="let item of customField.data" [value]="item.title">
+              {{ show_only_codes ? item?.account_code : item?.title }}
+            </ng-option>
+          </ng-select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="expense_item_notes">{{ 'notes' | i18nextEager }} <span *ngIf="isNotesMandatory" class="require">*</span></label>
+        <textarea name="notes"
+                  rows="4"
+                  [placeholder]="'Enter Additional Notes' | i18nextEager"
+                  class="form-control textarea-without-resize"
+                  id="expense_item_notes"
+                  formControlName="expense_item_notes"></textarea>
+        <p *ngIf="getExpenseNotes().touched && getExpenseNotes().errors" class="validation-msg">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'notes_are_required' | i18nextEager }}.
+        </p>
+      </div>
+       <!-- Custom Fields -->
+       <div class="card bg-light mb-24 mb-m-0" *ngIf="selectedModule()">
+        <app-dynamic-custom-fields *ngIf="hierarchyIds" (isCustomFieldsFormValid)="setCustomFieldsFormValid($event)"
+          (customFieldUpdated)="customFieldUpdated($event)" [custom_fields]="selectedCustomData"
+          [moduleName]="selectedModule() " [uploadS3RefName]="selectedModule() " [columnInRow]="2" [hierarchyIds]="hierarchyIds">
+        </app-dynamic-custom-fields>
+        </div>
+        <!-- end -->
+
+      <div *ngIf="expenseAttachment.length" class="form-group d-flex">
+        <ng-container *ngFor="let attachment of filteredAttachments(expenseAttachment)">
+          <app-attachment-item [attachment]="attachment" (removeEvent)="setAttachmentsToDelete($event)"></app-attachment-item>
+        </ng-container>
+      </div>
+
+      <div class="resume-uploader">
+        <app-attachment-upload (fileData)="uploadAttachmentFiles($event)" (fileRemoved)="removeFile($event)"></app-attachment-upload>
+      </div>
+      <p *ngIf="attachmentValidationError" class="validation-msg">
+        <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+        {{ attachmentValidationError| i18nextEager }}
+      </p>
+      <p *ngIf="formIsInvalid" class="validation-msg">
+        <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+        {{ 'form_is_invalid' | i18nextEager }}
+      </p>
+      <p *ngFor="let error of errorFromBE" class="validation-msg">
+        <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+        {{ error.message| i18nextEager }}
+      </p>
+    </form>
+  </svms-sidebar-body-ng>
+  <svms-sidebar-footer-ng>
+    <div class="d-flex justify-content-end">
+      <button *accessControl (click)="checkConfirmation()" class="btn btn-primary ml-16"  [disabled]="!editExpenseForm?.valid || isTaxValid">{{ 'update' | i18nextEager }} {{(editExpenseForm?.value?.expense_type == 'General Expense' ? 'General': 'Misc.') | i18nextEager}} {{ 'expense' | i18nextEager }}</button>
+    </div>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

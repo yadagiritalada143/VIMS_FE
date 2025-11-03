@@ -1,0 +1,675 @@
+@import '../../../../assets/sass/abstracts/variables';
+
+.sidebar {
+  width: 226px;
+  color: $navigation-text;
+  will-change: min-height;
+  transition: width 0.2s;
+  background: $navigation-bg;
+  margin-top: 51px;
+  box-shadow: 2px 2px 5px $navigation-sidebar-shadow;
+  height: calc(100vh - 51px);
+  z-index: 8;
+  border-right: 1px solid $navigation-border-color;
+
+  .switch-menu {
+    color: $text-black;
+    background: $navigation-switch-color;
+    line-height: 0;
+    z-index: 101;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 50px;
+    width: 64px;
+    transition: $transition;
+
+    &::after {
+      position: absolute;
+      top: 26px;
+      left: 20px;
+      font-family: Material Icons;
+      content: "menu_open";
+      font-size: 24px;
+      pointer-events: none;
+    }
+
+    &:hover {
+      background: #f9f7ff;
+    }
+  }
+
+  .sidebar-inner {
+    background: $navigation-bg;
+    z-index: 99;
+    width: 225px;
+    height: calc(100vh - 180px);
+    overflow: hidden;
+
+    ::ng-deep .ps-content {
+      min-height: auto;
+    }
+  }
+
+  .main-nav {
+    list-style-type: none;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    >li {
+      >a {
+        line-height: 40px;
+        color: $navigation-text;
+        display: block;
+        overflow: hidden;
+        transition: $transition;
+        cursor: pointer;
+
+        icon {
+          z-index: 2;
+          height: 38px;
+
+          ::ng-deep.sidebar-icon {
+            font-size: 20px;
+            line-height: 38px;
+            color: $navigation-icon;
+          }
+        }
+
+        label {
+          font-weight: $font-weight-medium;
+          color: $navigation-text;
+          cursor: pointer;
+        }
+
+        &.nav-item {
+          &:before {
+            content: "keyboard_arrow_right";
+            position: absolute;
+            top: 2px;
+            right: 10px;
+            background: transparent;
+            font-family: 'Material Icons';
+            height: auto;
+            width: auto;
+            border-radius: inherit;
+            text-indent: inherit;
+            font-size: 19px;
+            color: $color-gray-70;
+            opacity: .5;
+          }
+
+          &:hover,
+          &.active,
+          &.active-perent-menu {
+            &:before {
+              opacity: 1;
+            }
+          }
+        }
+
+        &:hover,
+        &.active,
+        &.active-perent-menu {
+          label {
+            color: $navigation-text-hover;
+          }
+
+          &:after {
+            visibility: visible;
+          }
+
+          icon {
+            ::ng-deep.sidebar-icon {
+              color: $navigation-text-hover;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  &:hover {
+    .switch-menu {
+      display: inline;
+    }
+  }
+}
+
+.current-program {
+  position: fixed;
+  bottom: 78px;
+  left: 0;
+  border-bottom: 1px solid transparent;
+  margin: 0;
+  width: 225px;
+  z-index: 8;
+  background: $navigation-bg;
+  text-align: center;
+
+  .mini-mode {
+    width: 34px;
+    line-height: 34px;
+    border-radius: $rounded-circle;
+    color: $light;
+    background-color: #48BB78;
+    display: none;
+    border: 4px solid $navigation-bg;
+    height: 34px;
+    box-sizing: content-box;
+    transition: $transition;
+
+    &.multiple {
+      position: relative;
+
+      &:before {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 7px;
+        width: 34px;
+        height: 34px;
+        content: '.';
+        text-indent: -9999px;
+        overflow: hidden;
+        display: block;
+        visibility: visible;
+        z-index: -1;
+        border-radius: $rounded-circle;
+        background: #00B0FF;
+        box-shadow: 0px 3px 6px #00000029;
+      }
+
+      &:after {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 13px;
+        width: 34px;
+        height: 34px;
+        content: '.';
+        text-indent: -9999px;
+        overflow: hidden;
+        display: block;
+        visibility: visible;
+        z-index: -2;
+        border-radius: $rounded-circle;
+        background: #848EFC;
+        box-shadow: 0px 3px 6px #00000029;
+      }
+    }
+
+    &:hover {
+      border: 4px solid #c8f2e3;
+    }
+
+    &.active {
+      border: 4px solid #c8f2e3;
+    }
+  }
+
+  .expanded-mode {
+    margin: 0 $m24;
+    background-color: $navigation-program-panel-bg;
+    border-radius: $border-radius;
+    padding: $p8 $p12;
+    position: relative;
+
+    .expanded-trigger {
+      cursor: pointer;
+    }
+
+    figure {
+      width: 34px;
+      line-height: 34px;
+      color: $light;
+      border-radius: $rounded-circle;
+      text-transform: uppercase;
+      text-align: center;
+      background-color: #48BB78;
+    }
+
+    .full-name {
+      text-align: left;
+      width: 70px;
+
+      p {
+        color: $light;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        line-height: 17px;
+      }
+
+      span {
+        color: $light;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        display: block;
+        line-height: 17px;
+      }
+    }
+
+    .view-list {
+      width: 29px;
+      border-radius: $rounded-circle;
+      line-height: 29px;
+      background-color: $navigation-bg;
+      margin-top: 2px;
+
+      icon {
+        line-height: 29px;
+        display: inline-block;
+
+        ::ng-deep i {
+          vertical-align: middle;
+          color: $navigation-program-panel-arrow;
+        }
+      }
+    }
+
+    &:after {
+      position: absolute;
+      top: 5px;
+      height: 100%;
+      left: 5px;
+      right: 5px;
+      border-radius: $border-radius;
+      background-color: $navigation-program-panel-shadow;
+      content: '.';
+      text-indent: -9999px;
+      overflow: hidden;
+      display: block;
+      visibility: visible;
+      z-index: -1;
+      opacity: .56;
+    }
+  }
+}
+
+.user-settings {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  border-bottom: 1px solid transparent;
+  margin: 0;
+  width: 225px;
+  z-index: 8;
+  background: $navigation-bg;
+
+  a {
+    padding: $p12 $p24;
+    overflow: hidden;
+    display: block;
+
+    figure {
+      float: left;
+      width: 34px;
+      line-height: 34px;
+      color: $light;
+      height: 34px;
+      text-transform: uppercase;
+      border: 4px solid $navigation-bg;
+      box-sizing: content-box;
+
+      img {
+        width: 100%;
+        height: 100%;
+        vertical-align: top;
+        object-fit: cover;
+      }
+
+      .availability {
+        position: absolute;
+        right: -4px;
+        bottom: 0;
+        width: 11px;
+        height: 11px;
+        border: 1px solid $light;
+
+        &.online {
+          background: $navigation-user-online;
+        }
+      }
+    }
+
+    .current-user-info {
+      width: 115px;
+
+      span {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        color: $navigation-settings-user-name;
+      }
+
+      p {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        color: $navigation-text;
+      }
+    }
+
+    &:after {
+      display: none;
+    }
+  }
+}
+
+.sidenav {
+  left: 226px;
+  height: calc(100vh - 50px);
+  top: 50px;
+  width: 305px;
+  transform: translateX(-50px);
+  transition: $transition;
+  visibility: hidden;
+  opacity: 0;
+  z-index: 3;
+  background-color: $light;
+  box-shadow: 8px 0px 11px #00000008;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-title {
+    width: 100%;
+
+    h4 {
+      line-height: 41px;
+      color: $navigation-submenu-text;
+    }
+
+    .closebtn {
+      color: $navigation-submenu-text;
+      line-height: 24px;
+      height: 24px;
+    }
+  }
+
+  .user-title {
+    background-color: #faf8ff;
+    border-bottom: 1px solid #EFEFEF;
+    position: relative;
+
+    .closebtn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      color: $color-assets-secondary-tint;
+
+      &:hover {
+        background: transparent;
+      }
+    }
+
+    figure {
+      width: 38px;
+      line-height: 38px;
+      height: 38px;
+      color: $light;
+      text-transform: uppercase;
+
+      img {
+        width: 100%;
+        height: 100%;
+        vertical-align: top;
+        object-fit: cover;
+      }
+    }
+
+    h4 {
+      width: 185px;
+      line-height: 20px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: $text-black;
+    }
+
+    p {
+      &.user-email {
+        font-size: 13px;
+        line-height: 17px;
+
+        icon {
+          vertical-align: top;
+        }
+
+        span {
+          width: 170px;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+
+    .other-user-info {
+      border-top: 1px solid #EFEFEF;
+      padding: 8px 20px;
+      p {
+        color: #3A4550;
+
+        icon {
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+
+  ul {
+    list-style-type: none;
+
+    ::ng-deepli {
+      a {
+        font-size: $font-primary;
+        line-height: 25px;
+        color: $navigation-submenu-text;
+        transition: $transition;
+
+        icon {
+          font-weight: $font-weight-regular;
+          font-size: 21px;
+          line-height: 25px;
+
+          ::ng-deep.sidebar-icon-submenu {
+            line-height: 25px;
+            color: $navigation-submenu-text;
+            vertical-align: middle;
+          }
+
+          &.toggle-off {
+            height: 45px;
+
+            ::ng-deep.sidebar-icon-submenu {
+              line-height: 45px;
+              color: $color-assets-secondary-tint;
+            }
+          }
+        }
+
+        &:hover {
+          text-decoration: none;
+          background: $navigation-submenu-hover;
+        }
+
+        &.create {
+          background: $color-assets-primary;
+          color: $light;
+          border-radius: $border-radius;
+          margin-bottom: 12px;
+
+          ::ng-deep.sidebar-icon-submenu {
+            color: $light;
+          }
+
+          &:hover {
+            background: $color-assets-primary-shade;
+          }
+        }
+
+        &.active {
+          &:not(.create) {
+            background-color: $color-gray-10;
+
+            ::ng-deep.sidebar-icon-submenu {
+              color: $color-assets-primary;
+            }
+          }
+        }
+      }
+
+      &.seperationlabel {
+        font-weight: $font-weight-medium;
+        font-size: 13px;
+        line-height: 35px;
+        color: $color-gray-70;
+        text-transform: uppercase;
+      }
+    }
+  }
+
+  &.sidenav-active {
+    transform: translateX(0);
+    visibility: visible;
+    opacity: 1;
+    z-index: 7;
+    left: 226px;
+  }
+
+  .nav-search {
+    margin: $p16 $p8 0 $p8;
+
+    input {
+      width: 100%;
+      background: $border-color;
+      border: 0;
+      outline: none;
+      border-radius: $border-radius;
+      font-weight: $font-weight-regular;
+      font-size: $font-primary;
+      line-height: 16px;
+      font-family: $font-family;
+      color: $color-assets-secondary-tint;
+    }
+  }
+
+  &.program-sidebar {
+    scrollbar-width: auto;
+
+    &::-webkit-scrollbar {
+      display: block;
+    }
+
+    ::ng-deep .ps-content {
+      min-height: 100%;
+    }
+  }
+
+  .sidebarmenu-scroller {
+    height: calc(100vh - 125px);
+  }
+
+  .settings-menu-scroller {
+    height: calc(100vh - 232px);
+  }
+
+  &.program-sidebar {
+    width: 407px;
+
+    .nav-title {
+
+      a {
+        color: #0044C5;
+        icon {
+          ::ng-deep i {
+            color: #0044C5;
+            vertical-align: middle;
+          }
+        }
+      }
+    }
+
+    &.sidenav-active {
+      left: 226px;
+    }
+  }
+}
+
+.default-color {
+  background: $color-gray-70;
+}
+.text-primar{
+color:$color-assets-secondary;
+}
+.text-capitalize{
+  text-transform: capitalize;
+}
+.text-uppercase{
+  text-transform: uppercase;
+}
+
+.program-list {
+  height: calc(100vh - 48px);
+  ::ng-deep h4 {
+    display: none;
+  }
+
+  ::ng-deep .close-notify {
+    display: none;
+  }
+
+  ::ng-deep ul {
+    margin-left: $m8;
+    margin-right: $m8;
+  }
+  &.worker-assignment-list{
+    height: calc(100vh - 114px);
+  }
+}
+.switch-account {
+  ::ng-deep  {
+    .ng-option-label {
+      font-size: 12px;
+    }
+    .ng-dropdown-panel.ng-select-bottom{
+      margin-left: 10px;
+    }
+    .ng-dropdown-panel .ng-dropdown-panel-items{
+      height: auto;
+      margin-right: 34px;
+      word-break: break-all;
+      max-height: 130px;
+    }
+  }
+}
+.switch-account-button {
+  padding: 12px;
+  text-align: center;
+  text-decoration: underline;
+  border-top: 1px solid #EFEFEF;
+  font-size: 13px;
+  color: #4C7FF0;
+}
+
+.sidebar-img {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  line-height: 22px;
+  float: none;
+}
+
+.sidebar-img:hover, .active-perent-menu .sidebar-img {
+  background-color: #4c7ff0;
+  img {
+    filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(25deg) brightness(200%) contrast(261%);
+  }
+}

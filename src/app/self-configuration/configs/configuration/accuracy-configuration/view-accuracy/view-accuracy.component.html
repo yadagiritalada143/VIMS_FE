@@ -1,0 +1,35 @@
+<div class="view-accuracy-configuration view-detail-page">
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <div class="d-flex">
+            <div class="ml-16">
+                <h3 class="font-weight-semibold mb-0">{{'Accuracy Configuration' | i18next}}</h3>
+                <p *ngIf="updated_by" class="small gray-7">
+                    <span>{{'last_updated_by' | i18next}}: {{ updated_by }} on {{ updated_on | localDateFormat }} {{
+                        updated_on | localDateFormat:'hh:mm:ss a z'}}</span>
+                </p>
+            </div>
+        </div>
+        <div *ngIf="isAccuracyAvailable">
+            <button *authorize="'work_location_manage'" class="c-btn c-btn-secondary-medium-left-icon"
+                (click)="editAccuracy()">
+                <i class="material-icons">drive_file_rename_outline </i> Edit
+            </button>
+        </div>
+    </header>
+    <section class="section-body-content">
+        <div class="px-32 py-24">
+            <div *ngIf="!accuracyData && isAccuracyAvailable"
+                class="accuracy-info-box mb-24 px-24 py-16 d-flex rounded-sm">
+                <i class="material-icons mr-16 info-icon">info</i>
+                <div>
+                    <p class="font-weight-medium d-flex align-items-center">{{ 'Information' | i18next }}</p>
+                    <p>{{'The “Accuracy Configuration” admin object has been enabled for this program. However, the ' +
+                        'settings below have yet to be configured.' + ' Therefore, the system will use 4 decimal places when creating/editing a record and 2 decimal'
+                        + ' places when viewing a record.' | i18next }}</p>
+                </div>
+            </div>
+            <app-try-out></app-try-out>
+            <app-common-view-rule-flow [details]="viewConfig"></app-common-view-rule-flow>
+        </div>
+    </section>
+</div>

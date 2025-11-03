@@ -1,0 +1,129 @@
+<svms-sidebar [dataVisibility]="newDocumentVisibility" title="{{label | i18next}}" (onClose)="onNewDocumentClose()">
+  <svms-sidebar-body class="sidebarBody">
+    <div [formGroup]="newDocumentForm" class="mx-24 mt-24">
+      <div class="form-group-row">
+        <div class="documentTitle form-group">
+            <label for="name">{{ 'document_title' | i18next }} <span class="require">*</span></label>
+            <input
+              type="text"
+              id="name"
+              class="form-control"
+              formControlName="name"
+              [readOnly]="viewMode"
+            >
+            <small *ngIf="newDocumentForm.get('name').invalid && newDocumentForm.get('name').touched" class="error-text mt-4">{{ 'this_field_is_required' | i18next }}</small>
+        </div>
+        <div class="titleActive form-group pt-24">
+          <div class="toggle-panel" [ngClass]="{'disableDiv': (viewMode === true)}">
+            <div class="toggle-panel-inner toggle-background">
+              <span>{{(newDocumentForm.get('is_enabled').value ? ' Active' : 'Inactive') | i18next}}</span>
+              <span id="is_enabled" [ngClass]="newDocumentForm.get('is_enabled').value ? 'toggle-on' : 'toggle-off'" (click)="onClickToggle($event)" class="toggle-switch ml-32"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group-row">
+        <div class="actTitle form-group">
+          <label for="act">{{ 'act' | i18next }}</label>
+          <input
+            type="text"
+            id="act"
+            class="form-control"
+            formControlName="act"
+            [readOnly]="viewMode"
+          >
+        </div>
+        <div class="actOnboarding form-group pt-24">
+          <div class="toggle-panel" [ngClass]="{'disableDiv': (viewMode === true)}">
+            <div class="toggle-panel-inner toggle-background">
+              <span>{{ 'onboarding' | i18next }}</span>
+              <span id="is_required_for_onboarding" [ngClass]="newDocumentForm.get('is_required_for_onboarding').value ? 'toggle-on' : 'toggle-off'" (click)="onClickToggle($event)" class="toggle-switch ml-32"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+          <label for="description">{{ 'document_details' | i18next }}</label>
+          <input
+            type="text"
+            id="description"
+            class="form-control"
+            formControlName="description"
+            [readOnly]="viewMode"
+          >
+      </div>
+      <div class="form-group">
+          <label for="frequency">{{ 'frequency' | i18next }} <span class="require">*</span></label>
+          <ng-select [readonly]="viewMode" formControlName="frequency" id="frequency">
+            <ng-option *ngFor="let frequency of frequencies" [value]="frequency.value">{{frequency.name}}</ng-option>
+          </ng-select>
+          <small *ngIf="newDocumentForm.get('frequency').invalid && newDocumentForm.get('frequency').touched" class="error-text mt-4">{{ 'this_field_is_required' | i18next }}</small>
+      </div>
+      <div class="documentNumber form-group">
+          <label for="document_number">{{ 'document_number' | i18next }} <span class="require">*</span></label>
+          <input
+            type="text"
+            id="document_number"
+            class="form-control"
+            formControlName="document_number"
+            placeholder="{{ 'enter' | i18next }}"
+            [readOnly]="viewMode"
+          >
+          <small *ngIf="newDocumentForm.get('document_number')?.errors?.required && newDocumentForm.get('document_number')?.touched" class="error-text mt-4">{{ 'this_field_is_required' | i18next }}</small>
+          <small *ngIf="newDocumentForm.get('document_number')?.errors?.minlength && newDocumentForm.get('document_number')?.touched" class="error-text mt-4">{{ 'this_field_must_be_at_least_3_characters_long' | i18next }}</small>
+      </div>
+      <div class="numberOfDaysToUpload form-group">
+          <label for="days_to_upload">{{ 'number_of_days_to_upload_document' | i18next }} <span class="require">*</span></label>
+          <input
+            type="number"
+            id="days_to_upload"
+            class="form-control"
+            formControlName="days_to_upload"
+            placeholder="{{ 'enter' | i18next }}"
+            [readOnly]="viewMode"
+          >
+          <small *ngIf="newDocumentForm.get('days_to_upload').invalid && newDocumentForm.get('days_to_upload').touched" class="error-text mt-4">{{ 'this_field_is_required' | i18next }}</small>
+      </div>
+      <div class="numberOfDaysToRegain form-group">
+          <label for="days_to_regain_compliance">{{ 'number_of_days_to_regain_compliance' | i18next }} <span class="require">*</span></label>
+          <input
+            type="number"
+            id="days_to_regain_compliance"
+            class="form-control"
+            formControlName="days_to_regain_compliance"
+            placeholder="{{ 'enter' | i18next }}"
+            [readOnly]="viewMode"
+          >
+          <small *ngIf="newDocumentForm.get('days_to_regain_compliance').invalid && newDocumentForm.get('days_to_regain_compliance').touched" class="error-text mt-4">{{ 'this_field_is_required' | i18next }}</small>
+      </div>
+      <div class="form-group-row">
+        <!-- <div class="form-group">
+          <label for="vendors">{{ 'vendors' | i18next }} </label>
+          <ng-select placeholder="{{ 'select_vendors' | i18next }}" [items]="vendors" [readonly]="viewMode" id="vendors" bindValue="vendor.id" [multiple]="true" bindLabel="vendor.name" formControlName="vendors" [closeOnSelect]="false"></ng-select>
+        </div> -->
+        <div class="form-group">
+          <label for="work_locations">{{ 'applicable_locations' | i18next }} <span class="require">*</span></label>
+          <ng-select [readonly]="viewMode" [multiple]="true" formControlName="work_locations" id="work_locations">
+            <ng-option *ngFor="let location of locations" [value]="location.id">{{location.name}}</ng-option>
+          </ng-select>
+          <small *ngIf="newDocumentForm.get('work_locations').invalid && newDocumentForm.get('work_locations').touched" class="error-text mt-4">{{ 'this_field_is_required' | i18next }}</small>
+        </div>
+      </div>
+      <div *ngIf="!viewMode" class="uploadFiles form-group">
+        <label>{{ 'upload_files' | i18next }}</label>
+        <app-upload-documents (uploadDataFiles)="uploadFiles($event)" [closePanel]="closePanel"></app-upload-documents>
+      </div>
+    </div>
+  </svms-sidebar-body>
+  <svms-sidebar-footer *accessControl>
+    <button *ngIf="!viewMode" (click)="onSave()" [disabled]="newDocumentForm.invalid" type="submit" class="btn btn-primary float-right">
+      <icon size="20px" name="check_circle" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+      &nbsp;&nbsp;{{ 'save' | i18next }}
+    </button>
+    <button *ngIf="viewMode" (click)="onNewDocumentClose()" type="submit" class="btn btn-primary float-right">
+      <icon size="20px" name="check_circle" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+      &nbsp;&nbsp;{{ 'close' | i18next }}
+    </button>
+  </svms-sidebar-footer>
+</svms-sidebar>

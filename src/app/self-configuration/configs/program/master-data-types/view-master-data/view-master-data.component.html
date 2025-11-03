@@ -1,0 +1,58 @@
+<div class="view-detail-page">
+
+    <header class="section-header page-title-main p-24 d-flex align-items-center justify-content-between">
+        <div class="page-title font-weight-semibold d-flex align-items-center">
+            <a href="javascript:void(0)" (click)="backClicked()">
+                <i class="material-icons back-arrow-icon mr-16">arrow_back</i>
+            </a>
+            <div class="ml-16">
+                <h3 class="font-weight-semibold mb-0">{{ pageTitle | i18next}}</h3>
+                <p class="small">
+                    {{ headerDescription | i18next }}
+                </p>
+            </div>
+        </div>
+        <div>
+            <button *authorize="'master_data_manage'" class="c-btn c-btn-secondary-medium-left-icon" (click)="switchToEditMode()">
+                <i class="material-icons">drive_file_rename_outline</i>
+                {{'edit'|i18next}}
+            </button>
+        </div>
+    </header>
+
+    <section class="section-body-content">
+        <div class="p-32">
+            <app-self-config-log
+                [title]="masterTitle"
+                [message]="masterMessage"
+                [btnTitle]="masterItemButtonTitle"
+                [btnClick]="openMasterItemListing"
+            ></app-self-config-log>
+            <app-common-view-rule-flow [details]="viewConfig">
+            </app-common-view-rule-flow>
+        </div>
+    </section>
+</div>
+
+<ng-template #toggle let-value>
+    <div [ngClass]="value?'blue-text':''" class="d-flex align-items-center">
+        <toggle-button
+            [disabled]="true"
+            [checked]="value"
+        >
+        </toggle-button>
+        <p class="ml-16"> {{ value?'Enabled':'Disabled' | i18next }} </p>
+    </div>
+</ng-template>
+
+<ng-template #module let-value>
+    <div class="d-flex align-items-center">
+        <p style="color: #001A43;" class="mr-16"> {{ value?.value | i18next }} </p>
+        <ng-container *ngIf="value?.multiple">
+            <icon name="check_circle" color="#009514" size="14px" 
+                type="material" cuClass="d-flex">
+            </icon>
+            <p class="ml-8"> {{ 'allow_multiple_values' | i18next }} </p>
+        </ng-container>
+    </div>
+</ng-template>

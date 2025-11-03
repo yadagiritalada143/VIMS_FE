@@ -1,0 +1,172 @@
+<div
+  class="widget-wrapper mb-16 full-size"
+  [ngClass]="{ 'edit-widget': editMode && !deleted }"
+>
+  <div class="widget-body full-size">
+    <div class="panel no-border full-size" #fullChartContainer>
+      <div *ngIf="editMode && !deleted" class="edit-text edit-text-marged">
+        {{ widget.label|i18next }} ({{ widget.dimension }})
+      </div>
+      <div
+        class="panel-head"
+        [ngClass]="{ 'edit-widget-opacity': editMode }"
+      >
+        <div
+          *ngIf="!deleted"
+          class="d-flex align-items-center justify-content-start chart-header"
+          (click)="closeChartTypeSettingsOpened()"
+        >
+          <icon
+            size="24px"
+            name="language"
+            type="material"
+            cuClass="d-flex"
+            class="d-flex pt-2 mr-8"
+            color="#5261FF"
+          >
+          </icon>
+          <span *ngIf="!editMode" class="text-blue-color font-weight-medium"
+            >{{ widget.label|i18next }} ({{ widget.dimension }})</span
+          >
+        </div>
+        <icon
+          *ngIf="!deleted"
+          class="dots pointer"
+          (click)="toggleChartTypeSettingsOpened()"
+          name="more_horiz" size="24px"
+        ></icon>
+      </div>
+      <div *ngIf="chartTypeSettingsOpened && !editMode" class="chart-type-settings">
+        <i
+          *ngFor="let chart of allowedChartTypes"
+          (click)="changeChartType(chart?.name)"
+          class="material-icons cursor-pointer chart-icon"
+          [ngClass]="{ 'chart-icon-selected': widget?.chartType === chart?.name}"
+        >{{ chart?.icon }}</i>
+      </div>
+      <div
+        *ngIf="!deleted"
+        class="panel-body"
+        [ngClass]="{ 'edit-widget-opacity': editMode }"
+        (click)="closeChartTypeSettingsOpened()"
+      >
+        <div class="panel-content">
+          <div class="text-center" #chartContainer>
+            <h4
+              class="m-32 p-32"
+              *ngIf="!chartData || chartData.length === 0; else chartByType"
+            >
+              {{ 'no_data_present' | i18next }}
+            </h4>
+            <ng-template #chartByType>
+              <ng-container *ngIf="chartContainer?.offsetWidth">
+                <ng-container [ngSwitch]="widget.chartType">
+                  <svms-line-chart
+                    *ngSwitchCase="ChartTypes.Line"
+                    [width]="fullChartContainer.offsetWidth"
+                    [height]="fullChartContainer.offsetHeight - 100"
+                    [chartData]="chartData"
+                  ></svms-line-chart>
+                  <svms-line-chart
+                    *ngSwitchCase="ChartTypes.LineDetailed"
+                    [width]="fullChartContainer.offsetWidth"
+                    [height]="fullChartContainer.offsetHeight - 100"
+                    [isBackgroundVisible] = "true"
+                    [chartData]="chartData"
+                  ></svms-line-chart>
+                  <svms-pie-chart
+                    *ngSwitchCase="ChartTypes.Pie"
+                    [width]="fullChartContainer.offsetWidth"
+                    [height]="fullChartContainer.offsetHeight - 150"
+                    [margin]="50"
+                    [chartData]="chartData"
+                  ></svms-pie-chart>
+                  <svms-horisontal-column-chart
+                    *ngSwitchCase="ChartTypes.Horizontal"
+                    [width]="fullChartContainer.offsetWidth"
+                    [height]="fullChartContainer.offsetHeight - 100"
+                    [chartData]="chartData"
+                  ></svms-horisontal-column-chart>
+                  <svms-column-chart
+                    *ngSwitchCase="ChartTypes.Vertical"
+                    [width]="fullChartContainer.offsetWidth"
+                    [height]="fullChartContainer.offsetHeight - 100"
+                    [chart]="chartData"
+                  ></svms-column-chart>
+                  <svms-column-chart
+                    *ngSwitchCase="ChartTypes.VerticalDouble"
+                    [width]="fullChartContainer.offsetWidth"
+                    [height]="fullChartContainer.offsetHeight - 100"
+                    xSecondLabel="headcountAdditional"
+                    [chart]="chartDoubleData"
+                  ></svms-column-chart>
+                  <svms-pie-chart
+                    *ngSwitchCase="ChartTypes.Donut"
+                    [isDoughnut]="true"
+                    [width]="fullChartContainer.offsetWidth"
+                    [height]="fullChartContainer.offsetHeight - 150"
+                    [margin]="50"
+                    [chartData]="chartData"
+                  ></svms-pie-chart>
+                  <svms-connected-scatterplot-chart
+                    *ngSwitchCase="ChartTypes.ConnectedLines"
+                    [width]="fullChartContainer.offsetWidth"
+                    [chartData]="chartData"
+                  ></svms-connected-scatterplot-chart>
+                  <!-- <svms-bubble-chart
+                    *ngSwitchCase="ChartTypes.Bubble"
+                    [width]="fullChartContainer.offsetWidth"
+                    [height]="fullChartContainer.offsetHeight - 150"
+                    [chartData]="chartData"
+                  ></svms-bubble-chart> -->
+                  <svms-liquid-fill-chart
+                    *ngSwitchCase="ChartTypes.Bubble"
+                    [percent]="51"
+                    [radius]="radiusSize / 2"
+                  ></svms-liquid-fill-chart>
+                  <svms-state-chart
+                    *ngSwitchCase="ChartTypes.Map"
+                    [width]="fullChartContainer.offsetWidth"
+                    [height]="fullChartContainer.offsetHeight"
+                    [chart]="chartStateData"
+                  ></svms-state-chart>
+                  <svms-spiral-chart
+                    *ngSwitchCase="ChartTypes.Spiral"
+                    [width]="fullChartContainer.offsetWidth"
+                    [chart]="chartData"
+                  ></svms-spiral-chart>
+                  <!-- <svms-doughnut-chart *ngSwitchCase="" [data]="chartData" value='headcount'></svms-doughnut-chart> -->
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- TOOLS HERE -->
+  <div
+    class="widget-hover"
+    *ngIf="editMode"
+    [ngClass]="{ 'display-deleted': deleted }"
+  >
+    <div class="widget-hover-wrapper">
+      <div *ngIf="!deleted" class="edit-tools">
+        <span class="material-icons blue-text" (click)="openEditWidgetModal()"
+          >build_circle</span
+        >
+        <span class="material-icons red-text" (click)="deleteWidget()"
+          >delete</span
+        >
+      </div>
+      <span *ngIf="!deleted" class="material-icons move-icon">fullscreen</span>
+      <div *ngIf="deleted" (click)="undoWidget()" class="undo">
+        <span class="material-icons undo-item">undo</span>
+        <span class="undo-text">{{ 'undo' | i18next }}</span>
+      </div>
+      <div *ngIf="!deleted" class="grade-triangle">
+        <span class="material-icons">{{ 'done_outline' | i18next }}</span>
+      </div>
+    </div>
+  </div>
+</div>

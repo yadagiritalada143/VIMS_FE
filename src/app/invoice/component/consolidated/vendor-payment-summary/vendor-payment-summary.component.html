@@ -1,0 +1,167 @@
+<div class="payment-summary">
+  <div class="header">
+    <div class="tab-menu">
+      <ul class="d-flex ">
+        <li>
+          <a class="d-flex align-items-center" [ngClass]='{"active" : !showPayment}'
+            (click)='showPayment = !showPayment'>
+            {{ 'payment_authorisation_details' | i18nextEager }}
+          </a>
+        </li>
+        <li>
+          <a class="d-flex align-items-center" [ngClass]='{"active" : showPayment}'
+            (click)='showPayment = !showPayment'>
+            {{ 'payment_summary' | i18nextEager }}
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="payment-sidebar">
+    <div class="authorisation-tab p-16" *ngIf='!showPayment'>
+      <p class="small mt-16">{{'payment_authorisation' | i18nextEager}} #</p>
+      <p class="lead text-active">{{'#' | i18nextEager}} {{ paymentDetails?.data?.payment_id}}</p>
+      <div class="panel panel-light mt-24">
+        <div class="row  p-16">
+          <div class="col-md-6">
+            <div class="d-flex align-items-center">
+              <div class="initials-green">
+                <icon name="account_balance" size="24px" color="inherit" class="d-flex" cuclass="d-flex"></icon>
+              </div>
+              <div class="d-flex flex-column ml-8">
+                <p class="small">{{'pa_amount' | i18nextEager}}</p>
+                <p class="text-black">{{paymentDetails?.data?.pa_amount | accuracy :accuracyEnum.AMOUNT : { currencyCode: paymentDetails?.data?.currency }
+                  }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex align-items-center">
+              <div class="initials-blue">
+                <icon name="receipt_long" size="24px" color="inherit" class="d-flex" cuclass="d-flex"></icon>
+              </div>
+              <div class="d-flex flex-column ml-8">
+                <p class="small">{{'invoice_amount' | i18nextEager}}</p>
+                <p class="text-black">{{consolidatedInvoiceDetails?.calculation?.total_amount | accuracy :accuracyEnum.AMOUNT : { currencyCode: consolidatedInvoiceDetails?.currency }  }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-footer p-16">
+          <svms-pie-mini-chart [isDoughnut]='true' [chartData]='chartData'></svms-pie-mini-chart>
+        </div>
+      </div>
+      <p class="font-weight-medium my-24">{{'summary'|i18next}}</p>
+      <div class="d-flex flex-column summary">
+        <div class="d-flex align-items-center justify-content-between mb-16">
+          <span class="text-lightgray">{{'payment_details'|i18next}}</span>
+          <span class="text-black d-flex align-items-center"><span
+              class="badge badge-lightblue rounded-sm mr-4 text-uppercase">{{
+              paymentDetails?.data?.check_type}}</span> {{ paymentDetails?.data?.check_number}}</span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-16">
+          <span class="text-lightgray">{{'currency'|i18next}}</span>
+          <span class="text-black"> {{ paymentDetails?.data?.currency }}</span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-16">
+          <span class="text-lightgray">{{'pa_amount'|i18next}}</span>
+          <span class="text-black d-flex align-items-center"><span
+              class="badge badge-green rounded-sm mr-4 text-capitalize">
+              {{ paymentDetails?.data?.full_or_partial | titlecase }}
+            </span>{{ paymentDetails?.data?.pa_amount | accuracy :accuracyEnum.AMOUNT : { currencyCode: paymentDetails?.data?.currency } }}</span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-16">
+          <span class="text-lightgray">{{'invoice_duration'|i18next}}</span>
+          <span class="text-black">{{ (consolidatedInvoiceDetails?.invoice_start_date) | localDateFormat :'':'':'':true }} -
+            {{ (consolidatedInvoiceDetails?.invoice_end_date) | localDateFormat :'':'':'':true }}</span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-16">
+          <span class="text-lightgray">{{'consolidated_invoice_number' | i18nextEager}}</span>
+          <span class="text-black cursor-pointer linkStyle" (click)="back();">{{ consolidatedInvoiceDetails?.invoice_number}}</span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-16">
+          <span class="text-lightgray">{{'batch_number'|i18next}}</span>
+          <span class="text-black">{{ consolidatedInvoiceDetails?.batch_number }}</span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-16">
+          <span class="text-lightgray">{{'received_date'|i18next}}</span>
+          <span class="text-black"> {{ (paymentDetails?.data?.received_date) | localDateFormat :'':'':'':true  }}</span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-16">
+          <span class="text-lightgray">{{'entered_date'|i18next}}</span>
+          <span class="text-black">{{ (paymentDetails?.data?.entered_date) | localDateFormat :'':'':'':true  }}</span>
+        </div>
+      </div>
+      <div class="mt-24 mb-24">
+        <label class="text-active d-flex align-items-center">
+          <icon name="sticky_note_2" theme="outlined" size="18px" class="d-flex mr-4" cuclass="d-flex" color="#85a0d6">
+          </icon>{{'notes'|i18next}}
+        </label>
+        <p>{{paymentDetails?.data?.notes}} </p>
+        <!-- <a href="#" class="text-active">&nbsp; More</a> -->
+      </div>
+    </div>
+    <div class="payement-tab p-16 we2" *ngIf='showPayment'>
+      <app-logs [log]="logs"></app-logs>
+       <div class="d-flex align-items-center row">
+         <div class="d-flex flex-column col-md-5">
+           <p class="small text-graylight">{{'vendor'|i18next}}</p>
+           <p class="text-active lead">{{ selectedVendor?.name }}</p>
+         </div>
+         <div class="d-flex flex-column col-md-5">
+           <p class="small text-graylight">{{'payment'|i18next}}</p>
+           <p class="text-black lead">{{ invoiceTotal | accuracy :accuracyEnum.AMOUNT : { currencyCode: paymentDetails?.data?.currency }  }}</p>
+         </div>
+         <div class=" col-md-2">
+           <!-- <icon name="edit" theme="outlined" class="d-flex" cuclass="d-flex" color="#4C7FF0"></icon> -->
+         </div>
+       </div>
+       <div *ngIf="selectedVendor?.name && invoiceTotal" class="bg-lightblue my-24 p-16">
+         <svms-pie-mini-chart *ngIf='paymentChartData' [isDoughnut]='true' [chartData]='paymentChartData'>
+         </svms-pie-mini-chart>
+       </div>
+   
+       <div class="d-flex flex-column summary">
+         <div class="d-flex align-items-center justify-content-between mb-16">
+           <span class="text-lightgray">{{'check'|i18next}}</span>
+           <span class="text-black d-flex align-items-center"><span
+               class="badge badge-lightblue rounded-sm mr-4 text-uppercase">{{
+             paymentDetails?.data?.check_type}}</span> {{ paymentDetails?.data?.check_number}}</span>
+         </div>
+   
+         <div class="d-flex align-items-center justify-content-between mb-16">
+           <span class="text-lightgray">{{'consolidated_invoice_number' | i18nextEager}}</span>
+           <span class="text-black cursor-pointer linkStyle" (click)="back();">{{ paymentDetails?.data?.consolidate_invoice?.invoice_number}}</span>
+         </div>
+         <div class="d-flex align-items-center justify-content-between mb-16">
+           <span class="text-lightgray">{{'voucher_number' | i18nextEager}}</span>
+           <span class="text-black">{{ voucherId }}</span>
+         </div>
+         <div class="d-flex align-items-center justify-content-between mb-16 position-relative">
+           <span class="text-lightgray">{{'voucher_date' | i18nextEager}}</span>
+           <span class="text-black">
+             <svms-datepicker [inputdateFormat]="dateFormat" [options]="options" id="date1" I18n
+               [(ngModel)]="paymentInfo.voucherDateTime">
+             </svms-datepicker>
+           </span>
+         </div>
+         <div class="d-flex align-items-center justify-content-between mb-16">
+           <span class="text-lightgray">{{'voucher_payment_amount' | i18nextEager}}</span>
+           <span class="text-black">{{ invoiceTotal | accuracy :accuracyEnum.AMOUNT : { currencyCode: paymentDetails?.data?.currency } }}</span>
+         </div>
+         <div class="d-flex align-items-center justify-content-between mb-16">
+           <span class="text-lightgray">{{'payment_reference_number' | i18nextEager}}</span>
+           <span class="text-black"><input type="text" class="form-control"
+               [(ngModel)]="paymentInfo.referenceNumber" /></span>
+         </div>
+       </div>
+       <div class="form-group" *ngIf="paymentDetails?.data">
+         <label>{{'notes'|i18next}}</label>
+         <textarea class="form-control" placeholder="{{'notes'|i18next}}" [(ngModel)]="paymentInfo.notes"></textarea>
+       </div>
+   
+       <button class="btn btn-primary w-100" type="button" (click)='payNowAction()'>{{'pay_now' | i18nextEager}}</button>
+     </div>
+  </div>
+</div>

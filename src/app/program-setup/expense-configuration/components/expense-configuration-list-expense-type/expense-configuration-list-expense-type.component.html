@@ -1,0 +1,20 @@
+<app-logs [log]="logs"></app-logs>
+<div class="expense-configuration-item-table-wrapper expense-configuration-tab">
+  <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)">
+    <vms-tab [label]="expenseConfigurationItemDetailsTabsModel.generalExpenses.name | i18next">
+      <vms-table class="expense-configuration-item-table"  *ngIf="vmsData" [vmsTableConfig]="expenseConfigurationItemDetailsTableConfig"  [vmsDataSource]="vmsData"  [loading]="isLoading"   (onEditClick)="onEditClick($event)" (onViewClick)="onViewClick($event)" (onDisableClicked)="onDisableOrEnableClick($event)" >
+      </vms-table>
+    </vms-tab>
+    <vms-tab [label]="expenseConfigurationItemDetailsTabsModel.miscellaneousExpenses.name | i18next">
+      <vms-table class="expense-configuration-item-table"  *ngIf="vmsData" [vmsTableConfig]="expenseConfigurationItemDetailsTableConfig"  [vmsDataSource]="vmsData"  [loading]="isLoading"   (onEditClick)="onEditClick($event)" (onViewClick)="onViewClick($event)" (onDisableClicked)="onDisableOrEnableClick($event)" >
+      </vms-table>
+    </vms-tab>
+    <vms-tab  [label]="expenseConfigurationItemDetailsTabsModel.history.name | i18next">
+      <app-timeline-history [data]="historyData" [loading]="isLoading" (changePage)="changePage($event)" (changePerPage)="changePerPage($event)"></app-timeline-history>
+    </vms-tab>
+  </vms-tab-group>
+</div>
+
+<app-add-expense-type *ngIf="isOpenEditExpenseType" (closeAddExpenseTypeModal)="toggleOpenEditExpenseType()"
+  [configId]="configId">
+</app-add-expense-type>

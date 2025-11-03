@@ -1,0 +1,65 @@
+<svms-sidebar [title]="title | i18next"  icon="school" [dataVisibility]="createQualificationType"
+  (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <form [formGroup]="addQualificationTypeForm">
+    <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)">
+      <vms-tab label="Basic Info">
+
+          <div class="form-group-row mb-16">
+            <div class="form-group">
+              <label>{{ 'qualifcation_type_label' | i18next }}<span class="require">*</span> </label>
+              <input type="text" class="form-control" maxlength="100" minlength="5" [readOnly]="isViewMode" placeholder="" formControlName="name">
+              <p class="validation-msg"
+              *ngIf="addQualificationTypeForm.controls.name.touched && addQualificationTypeForm.controls['name'].invalid && addQualificationTypeForm.controls['name'].errors?.required">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+               {{ 'qualification_type_name_is_required' | i18next }}
+              </p>
+            <p class="validation-msg" *ngIf="addQualificationTypeForm.controls.name.errors?.minlength">
+              {{ 'name_must_be_at_long.' | i18next }}
+            </p>
+            <p class="validation-msg" *ngIf="addQualificationTypeForm.controls.name.errors?.maxlength">
+              {{ 'name_cannot_long.' | i18next }}
+            </p>
+            </div>
+
+            <div class="toggle-panel mt-24" [ngClass]="{'disable':isViewMode}">
+              <div class="toggle-panel-inner toggle-background" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+                <span class="status-text">{{toggle?.title | i18next}}</span>
+                <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'" (click)="onClickToggle()"></span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group mb-32">
+            <label>{{ 'description' | i18next }}  </label>
+            <textarea type="textarea" rows="5" cols="12" maxlength="1000" [readOnly]="isViewMode"formControlName="description" class="form-control" placeholder=""></textarea>
+          </div>
+      </vms-tab>
+
+      <!-- <vms-tab label="Hierarchy">
+        <p class="level font-weight-medium mb-24">Hierarchy Level Name</p>
+          <app-renderer
+          *ngFor="let renderLevel of rendererData"
+          [renderData]="renderLevel"
+          [selectedTreeArr]="selectedTreeArr"></app-renderer>
+      </vms-tab> -->
+
+    </vms-tab-group>
+    </form>
+  </svms-sidebar-body>
+
+  <svms-sidebar-footer>
+
+    <button *ngIf="tabIndex !== 1 && !isViewMode" class="btn btn-outline float-left"> {{ 'add_custom_fields' | i18next }} </button>
+
+    <!--show this in basic info tabs tabs -->
+    <button type="submit" class="btn btn-primary float-right" *ngIf="tabIndex !== 1 && !isViewMode"  (click)="goToNext()">
+      {{ 'continue' | i18next }} <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+    </button>
+
+    <!--show this in permissons tabs -->
+    <!-- <button type="submit" class="btn btn-primary float-right" *ngIf="tabIndex === 1 && !isViewMode" >
+      <icon size="20px" name="check_circle" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+      &nbsp;&nbsp;Save
+    </button> -->
+  </svms-sidebar-footer>
+</svms-sidebar>

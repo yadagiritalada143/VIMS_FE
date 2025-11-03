@@ -1,0 +1,484 @@
+<div class="detail-page-wrapper">
+  <section class="description-panel p-32 position-relative">
+    <a class="back-btn back-mobile" [routerLink]="['/timesheet/list/all']">
+      <icon class="d-inline-block" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon>
+      <span>{{ 'back_to_timesheets' | i18next }}</span>
+    </a>
+    <div class="my-24">
+      <div *ngIf="timesheetInfoDetails?.actions_by?.rejected_by?.user"
+        class="alert_message alert_error">
+        <div class="d-flex align-items-center w-100">
+          <div class="d-flex align-items-center justify-content-start ">
+            <icon class="d-flex mr-8" size="24px" name="not_interested" type="material" cuClass="d-flex"></icon>
+          </div>
+          <div class="pl-8">
+            <div class="font-weight-bold mb-4 medium-font">Rejected By :
+              {{timesheetInfoDetails?.actions_by?.rejected_by?.user?.name | i18next }}
+              {{ getFormattedDate(timesheetInfoDetails?.actions_by?.rejected_by?.action_at) ?  'On ' + getFormattedDate(timesheetInfoDetails?.actions_by?.rejected_by?.action_at) : '' | i18next }}
+              {{ getFormattedTime(timesheetInfoDetails?.actions_by?.rejected_by?.action_at) ? ' at '+ getFormattedTime(timesheetInfoDetails?.actions_by?.rejected_by?.action_at) : '' | i18next }}
+            </div>
+            <div class="mb-4"> <span class="font-weight-bold">{{ 'reason_for_reject' | i18next }} :</span>
+              {{timesheetInfoDetails?.actions_by?.rejected_by?.action_reason || ' - ' | i18next }}</div>
+            <div> <span class="font-weight-bold">{{ 'notes' | i18next }} :</span>
+              {{ timesheetInfoDetails?.actions_by?.rejected_by?.action_note || 'N/A' | i18next }}</div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="timesheetInfoDetails?.actions_by?.approved_by?.user"
+        class="alert_message alert_success">
+        <div class="d-flex align-items-center w-100">
+          <div class="d-flex align-items-center justify-content-start ">
+            <icon class="d-flex mr-8" size="24px" name="check_circle" type="material" cuClass="d-flex"></icon>
+          </div>
+          <div class="pl-8">
+            <div class="font-weight-bold mb-0 medium-font">Approved By :
+              {{timesheetInfoDetails?.actions_by?.approved_by?.user?.name | i18next }}
+              {{getFormattedDate(timesheetInfoDetails?.actions_by?.approved_by?.action_at) ? 'On '+getFormattedDate(timesheetInfoDetails?.actions_by?.approved_by?.action_at) : '' | i18next }}
+              {{ getFormattedTime(timesheetInfoDetails?.actions_by?.approved_by?.action_at)?' at '+ getFormattedTime(timesheetInfoDetails?.actions_by?.approved_by?.action_at) : '' | i18next }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="timesheetInfoDetails?.actions_by?.modification_by?.user" class="alert_message alert_success">
+        <div class="d-flex align-items-center w-100">
+          <div class="d-flex align-items-center justify-content-start ">
+            <icon class="d-flex mr-8" size="24px" name="check_circle" type="material" cuClass="d-flex"></icon>
+          </div>
+          <div class="pl-8">
+            <div class="font-weight-bold mb-0 medium-font">Modified By :
+              {{timesheetInfoDetails?.actions_by?.modification_by?.user?.name | i18next }}
+              {{getFormattedDate(timesheetInfoDetails?.actions_by?.modification_by?.action_at) ? 'On
+              '+getFormattedDate(timesheetInfoDetails?.actions_by?.modification_by?.action_at) : '' | i18next }}
+              {{ getFormattedTime(timesheetInfoDetails?.actions_by?.modification_by?.action_at)?' at '+
+              getFormattedTime(timesheetInfoDetails?.actions_by?.modification_by?.action_at) : '' | i18next }}
+            </div>
+            <div class="mb-4"> <span class="font-weight-bold">{{ 'reason_for_modify' | i18next }} :</span>
+              {{timesheetInfoDetails?.actions_by?.modification_by?.action_reason || ' - ' | i18next }}</div>
+            <div> <span class="font-weight-bold">{{ 'notes' | i18next }} :</span>
+              {{ timesheetInfoDetails?.actions_by?.modification_by?.action_note || 'N/A' | i18next }}</div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="timesheetInfoDetails?.actions_by?.withdrawn_by?.user"
+        class="alert_message alert_pending">
+        <div class="d-flex align-items-center w-100">
+          <div class="d-flex align-items-center justify-content-start ">
+            <icon class="d-flex mr-8" size="24px" name="check_circle" type="material" cuClass="d-flex"></icon>
+          </div>
+          <div class="pl-8">
+            <div class="font-weight-bold mb-0 medium-font">Withdrawn By :
+              {{timesheetInfoDetails?.actions_by?.withdrawn_by?.user?.name | i18next }}
+              {{getFormattedDate(timesheetInfoDetails?.actions_by?.withdrawn_by?.action_at) ? 'On '+getFormattedDate(timesheetInfoDetails?.actions_by?.withdrawn_by?.action_at) : '' | i18next }}
+              {{getFormattedTime(timesheetInfoDetails?.actions_by?.withdrawn_by?.action_at) ? ' at '+ getFormattedTime(timesheetInfoDetails?.actions_by?.withdrawn_by?.action_at) :'' | i18next }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="isAssignmentClosed"
+        class="alert_message alert_warning">
+        <div class="d-flex align-items-center w-100">
+          <div class="d-flex align-items-center justify-content-start ">
+            <icon class="d-flex mr-8" size="24px" name="warning" type="material" cuClass="d-flex"></icon>
+          </div>
+          <div class="pl-8">
+            <div class="font-weight-bold mb-0 medium-font">Assignment is closed. Please contact Wipro Program Administrator.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="create-wrapper mt-24">
+      <div class="card bg-light mb-24">
+        <app-monthly-timesheet-breadcrumb [isSubmitSheet]="isAllSubmitted" [calendar]="calendar" (onSubmit)="onSubmit($event)"
+          [infoDetails]="timesheetInfoDetails"  [working_days]="getWorkingDays()"></app-monthly-timesheet-breadcrumb>
+        <app-monthly-timesheet-header [timesheetStatus]="timesheetStatus" [selectedWorkLocation]="selectedWorkLocation"
+          [locationData]="locationData" (earnLeaveCount)="getEarnLeaveCount($event)" (openAssignmentPanel)="openAssignmentDetailPanel($event)" (locationType)="getLocationType($event)" (onChange)="showHoliday($event)">
+        </app-monthly-timesheet-header>
+      </div>
+      <div class="card bg-light">
+        <div class="calendar-controls py-12 px-24">
+          <h3 class="float-left mb-0 mr-12">{{monthDate | localDateFormat: 'MMM yyyy':"":"":true | i18next }}</h3>
+          <ul class="view-mode float-left">
+            <li class="d-inline-block mr-8" [ngClass]="{'active': gridView}" (click)="showView('grid')">
+              <icon name="date_range" theme="outlined" size="16px"></icon>
+            </li>
+            <!-- (click)="showView('list')" -->
+            <li class="d-inline-block mr-8" [ngClass]="{'active': listView}">
+              <icon name="view_day" theme="outlined" size="16px"></icon>
+            </li>
+          </ul>
+          <div class="float-right"  *ngIf="!checkForStatus(timesheetStatuses?.APPROVED) && !checkForStatus(timesheetStatuses?.REJECTED) && !checkForStatus(timesheetStatuses?.PENDING); else showLocation">
+            <label class="d-inline-block mr-16 mt-8">{{ 'project_location_type' | i18next }}</label>
+            <ng-select class="d-inline-block" [clearable]="false" placeholder="Client Location"
+               (change)="showHoliday($event)" [(ngModel)]="selectedWorkLocation">
+               <ng-option *ngFor="let l of locationData" value="{{l?.label | i18next }}">
+                {{l?.label | i18next }}
+              </ng-option>
+            </ng-select>
+          </div>
+          <ng-template #showLocation>
+            <div class="float-right"  >
+              <label class="d-inline-block mr-16 mt-8">{{ 'project_location_type' | i18next }}</label>
+              <label class="d-inline-block font-weight-medium">
+                {{selectedWorkLocation | i18next }}
+              </label>
+            </div>
+          </ng-template>
+          <!-- <p class="float-right font-weight-medium">{{ 'total_days' | i18next }} <span class="font-weight-regular ml-16">20</span></p> -->
+          <div class="clearfix"></div>
+        </div>
+        <div class="controls-bottom px-24 pt-8 pb-8">
+          <ul class="leave-summary  float-left">
+            <li>{{ 'earned_leave_remaining' | i18next }} : <span>{{earnLeaveBalance || 0 }}</span></li>
+            <li class="ml-32">{{ 'earned_leave_applied' | i18next }} : <span>{{earned_leave || 0 }}</span></li>
+            <li class="ml-32">{{ 'leave_applied_(unpaid)' | i18next }} : <span>{{timesheetInfoDetails?.leave?.leave_details?.leave || 0 }}</span>
+            </li>
+          </ul>
+          <app-copy-timesheet-monthly (onClose)="cancelApplication($event)"></app-copy-timesheet-monthly>
+          <div class="clearfix"></div>
+        </div>
+        <div class="view-container grid-mode" *ngIf="gridView">
+          <div class="calendar-days d-flex">
+            <div class="week-day position-relative" [ngClass]="{'active': selectedIndex === i}" *ngFor="let day of days; let i = index">
+              {{day | i18next }}
+              <div *ngIf="isVendorWorker && !isAssignmentClosed && (!this.timesheetStatus || checkForStatus(timesheetStatuses?.DRAFT) || checkForStatus(timesheetStatuses?.WITHDRAWN) || checkForStatus(timesheetStatuses?.REJECTED))"
+                class="more-options">
+                <icon class="dots" name="more_horiz" size="24px" (click)="openMoreOption(day, i)"></icon>
+                <div class="more-option-dropdown"
+                  [ngClass]="{'active': selectedIndex === i}">
+                  <p class="font-weight-medium mb-12 px-12 pt-12">{{ 'select_days' | i18next }}</p>
+                  <a class="close-more-option" (click)="closeMoreOption(i)">
+                    <icon name="close" size="18px"></icon>
+                  </a>
+                  <ul>
+                    <li *ngFor="let data of weekData" [ngClass]="{'disabled': data?.disableDate}">
+                      <div class="checkbox-wrapper">
+                        <label class="checkbox-container">
+                          <input type="checkbox" name="weekoff" [disabled]="data?.disableDate" [(ngModel)]="data.selected">
+                          <span class="checkmark"></span>
+                          <span class="label">{{data?.displayDate | i18next }}</span>
+                        </label>
+                      </div>
+                    </li>
+
+                  </ul>
+                  <p *ngIf="weekData?.length == 0"> No dates available to select</p>
+                  <div class="text-center btn-wrapper">
+                    <button class="btn-mark"  [disabled]="weekData?.length == 0 || !showMarkWeekOffBtn" (click)="markWeekOff(day)">
+                      {{ 'apply_weekly_off' | i18next }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="week-day cursor-pointer" title="Total Working Hours">{{ 'total' | i18next }}</div>
+          </div>
+          <div class="dotloader" *ngIf="dataLoader"></div>
+          <div [hidden]="dataLoader" class="days d-flex" *ngFor="let row of calendar | chunk: 7; let i = index" [ngClass]="{'show-bottom' : (i == (calendar?.length/7 -2))}">
+            <div class="date position-relative" *ngFor="let c of row; let j = index"
+              [ngClass]="{'weekend':  c?.disableDate,'not-filled': timesheetArr && isSubmitted && isNotSubmit(c) && !c?.disableDate}">
+              <span class="leave-icon float-left"
+                *ngIf="!c?.timesheet?.notes && c?.timesheet?.breaks && c?.timesheet?.breaks.length === 0">
+              </span>
+
+              <span class="day-value float-right">{{c.date.getDate() | i18next }}</span>
+              <div class="holiday" *ngIf="isshowHoliday">
+                <span>
+                  <icon *ngIf="c?.holiday?.name" class="d-inline-block mr-4" name="wb_sunny" color="#E07A7A"
+                    size="16px">
+                  </icon> {{c?.holiday?.name | i18next }}
+                </span>
+              </div>
+              <div class="calendar-day-header" [ngClass]="{'weekend':  c.disableDate}"
+                (click)="openApplicationModal(!c?.disableDate, c?.date?.getTime(),j, c?.date, c?.timesheet)">
+                <!-- {{c.date | localDateFormat:'EEEE' | i18next }} -->
+                <span class="full-icon float-left">
+                  <icon *ngIf="c?.timesheet?.notes" class="d-inline-block mr-8" name="sticky_note_2" theme="outlined"
+                    color="#CED4DA" size="16px"></icon>
+                  <icon *ngIf="c?.timesheet?.breaks && c?.timesheet?.breaks.length>0" class="d-inline-block mr-8"
+                    name="local_cafe" theme="outlined" color="#CED4DA" size="16px"></icon>
+                  <icon *ngIf="c?.timesheet?.document?.filename" class="d-inline-block"
+                      name="attach_file" theme="outlined" color="#CED4DA" size="16px"></icon>
+                    <icon *ngIf="c?.timesheet?.overnight" class="d-inline-block"
+                    name="nightlight" color="#CED4DA" size="16px"></icon>
+                </span>
+                <div class="clearfix"></div>
+                <!-- full day -->
+                <span *ngIf="c?.timesheet?.check_in && c?.timesheet?.check_out && c?.timesheet?.leave_status == null">
+                   <p class="selcted-time small">&nbsp;
+                   <!-- {{c?.timesheet?.check_in | i18next }} - {{c?.timesheet?.check_out | i18next }}-->
+                  </p>
+                  <p *ngIf="timeStringToFloat(calculateHours(c?.timesheet)) < getValue(i, 'half_day_fixed_hour')"
+                    class="duration full small ">Unpaid ({{
+                      floatToTimeString(calculateHours(c?.timesheet)) | i18next }})</p>
+                  <p *ngIf="timeStringToFloat(calculateHours(c?.timesheet)) >=  getValue(i, 'half_day_fixed_hour') && timeStringToFloat(calculateHours(c?.timesheet)) < getValue(i, 'allowed_daily_hours')"
+                    class="duration halfday small">{{ 'half_day' | i18next }} ({{ floatToTimeString(calculateHours(c?.timesheet)) | i18next }})</p>
+                  <p *ngIf="timeStringToFloat(calculateHours(c?.timesheet)) >= getValue(i, 'allowed_daily_hours')"
+                    class="duration fullday small">Full Day
+                    ({{ floatToTimeString(calculateHours(c?.timesheet)) | i18next }})</p>
+                </span>
+                <!-- Half day -->
+                <span *ngIf="c?.timesheet?.leave_status === 'half_day' && c?.timesheet?.leave_type === 'earned_leave'">
+                  <p class="selcted-time small">
+                    &nbsp;
+                    <!-- {{c?.timesheet?.check_in | i18next }} - {{c?.timesheet?.check_out | i18next }} -->
+                  </p>
+
+                  <p class="duration half-leave small d-flex">
+                    <span *ngIf="timeStringToFloat(calculateHours(c?.timesheet)) < getValue(i, 'half_day_fixed_hour')" class="leave">
+                      <small>Unpaid</small></span>
+                    <span *ngIf="timeStringToFloat(calculateHours(c?.timesheet)) >= getValue(i, 'half_day_fixed_hour')" class="half">
+                      <small>{{ 'half_day' | i18next }}</small>
+
+                    </span>
+                    <span  [ngClass]="{'earnleave': c?.timesheet?.leave_type === 'earned_leave'}">
+                      <icon name="brightness_6" color="#7d7d9b" size="14px"></icon>
+                      EL
+                    </span>
+                  </p>
+
+                </span>
+                <!-- {{ 'leave' | i18next }} -->
+                <!-- {{ 'half_day' | i18next }} -->
+                <span *ngIf="c?.timesheet?.leave_status === 'half_day' && c?.timesheet?.leave_type === 'leave'">
+                 <p class="selcted-time small">&nbsp;
+                    <!--  {{c?.timesheet?.check_in | i18next }} - {{c?.timesheet?.check_out | i18next }}-->
+                  </p>
+                  <p class="duration half-leave small d-flex">
+                    <span class="half">{{ 'half_day' | i18next }}</span>
+                    <span class="half-wrap">
+                      <span [ngClass]="{'leave': c?.timesheet?.leave_type === 'leave'}" >
+                        <!-- {{c?.timesheet?.leave_type | i18next }} -->
+                        LWP
+                      </span>
+                    </span>
+                  </p>
+                </span>
+                <span *ngIf="c?.timesheet?.leave_status === 'half_day' && c?.timesheet?.leave_type == 'comp_off'">
+                   <p class="selcted-time small">&nbsp;
+                    <!--{{c?.timesheet?.check_in | i18next }} - {{c?.timesheet?.check_out | i18next }}-->
+                  </p>
+                  <p class="duration half-leave small d-flex">
+                    <span class="half">{{ 'half_day' | i18next }}</span>
+                    <span class="half-wrap">
+                      <span [ngClass]="{'leave': c?.timesheet?.leave_type === 'leave', 'earnleave': c?.timesheet?.leave_type === 'comp_off'}" >
+                        <!-- {{c?.timesheet?.leave_type | i18next }} -->
+                       Comp Off
+                      </span>
+                    </span>
+                  </p>
+                </span>
+                <!-- {{ 'leave' | i18next }} -->
+
+                <span *ngIf="c?.timesheet?.leave_status === 'full_day'">
+                   <p class="selcted-time small" *ngIf="c?.timesheet?.check_in && c?.timesheet?.check_out else showLeave">
+                    &nbsp;
+                   <!-- {{c?.timesheet?.check_in | i18next }} {{c?.timesheet?.check_out ? '-' : '' | i18next }} {{c?.timesheet?.check_out | i18next }}-->
+                  </p>
+                  <ng-template #showLeave>
+                    <p class="selcted-time small">{{ 'leave' | i18next }}</p>
+                  </ng-template>
+                  <p class="duration clientholiday small" *ngIf="c?.timesheet?.leave_type === 'client_holiday'"
+                    title="{{holidayName | i18next }}">{{holidayName | i18next }}</p>
+                  <p class="duration leave small" *ngIf="c?.timesheet?.leave_type === 'leave'" title="Leave">{{'Leave
+                    (Unpaid)'|i18next}}
+                  </p>
+                  <p class="duration small"  [ngClass]="{'earnleave': c?.timesheet?.leave_type === 'earned_leave'}" *ngIf="c?.timesheet?.leave_type === 'earned_leave'"
+                    title="Earned leave">
+                    {{ 'earned_leave' | i18next }}</p>
+                  <p class="duration small" [ngClass]="{'earnleave': c?.timesheet?.leave_type === 'comp_off'}" *ngIf="c?.timesheet?.leave_type === 'comp_off'"
+                    title="Compensated Time Off">Compensated Time Off</p>
+                  <p class="duration weeklyleave small" *ngIf="c?.timesheet?.leave_type === 'weekly_off'"
+                    title="Weekly Off">
+                   {{' Weekly
+                    Off'|i18next }}</p>
+                </span>
+                <!-- end -->
+               <a *ngIf="!c.disableDate && !editViewCheck(c?.timesheet)" class="hover-menu">
+                  <p class="mb-16">{{c.date.getDate() | i18next }}</p>
+                  <icon *ngIf="!editViewCheck(c?.timesheet) && isVendorWorker && !isAssignmentClosed && hideFutureDayEdit(c?.date) && timesheetInfoDetails?.is_need_create != false" name="more_time" color="#FF8600" size="24"></icon>
+                  <span>{{ calculateHours(c?.timesheet) | i18next }}</span>
+                </a>
+              </div>
+              <!-- model start -->
+              <div *ngIf="leaveApplicationModal === c?.date?.getTime() && selectedWeekIndex === j">
+                <app-monthly-timesheet-date-panel [selectedDate]="c.date" [leaveCount]="getEarnedLeaveCount()" [selectedWorkLocation]="selectedWorkLocation"
+                  [timesheetData]="timesheet" [timesheetStatus]="timesheetStatus" [calendar]="calendar" [currentIndex]="getCurrentIndex(i, j)"
+                  [selectedWeekIndex]="selectedWeekIndex" [assignmentDetails]='assignmentWorker' [selectedTimeSheet]="c"
+                  [configuration]="getConfiguratorData(i)" [working_days]="getWorkingDays()" [infoDetails]="timesheetInfoDetails" (onClose)="cancelApplication($event)">
+                </app-monthly-timesheet-date-panel>
+              </div>
+              <!-- end -->
+            </div>
+            <div class="date b_date" *ngFor="let b of billingData;let j = index;first as isFirst; last as isLast" [hidden]="i!=j">
+              <div *ngIf="workingWeekDays[i]" class="working-days-switcher " [ngClass]="{'disabled': (disableDropDown.first && isFirst) ||(disableDropDown.last && isLast) || !isVendorWorker || checkForStatus(timesheetStatuses?.APPROVED) || checkForStatus(timesheetStatuses?.PENDING) || !isAllowAction()}">
+                <label>{{ 'days/week' | i18next }}</label>
+                <div class="working-days-switch">
+                    <a   (click)="workingDaysPerWeekChanged(workingWeekDays[i], 5, i)"  [ngClass]="{'active': workingWeekDays[i]==5}">5</a>
+                    <a   (click)="workingDaysPerWeekChanged(workingWeekDays[i], 6, i)" [ngClass]="{'active': workingWeekDays[i]==6}">6</a>
+                </div>
+            </div>
+            <div *ngIf="isFirst && tooltipvisible" class="tooltip-div">
+              <div class="tooltip">
+                <p>Number of Days per Week </p>
+                <div>Please confirm number of days per week before start entering the time</div>
+              </div>
+            </div>
+            <div class="week-total-hours">
+                <label>{{ 'hours' | i18next }}</label>
+                <span>{{b?.billing_hours || '0.00' | i18next }} </span>
+            </div>
+            </div>
+          </div>
+        </div>
+        <div class="view-container px-24" *ngIf="listView">
+          <table>
+            <thead>
+              <tr>
+                <th>
+                  <icon class="d-inline-block mr-4" name="event" color="#000000" theme="outlined" size="16px"></icon>
+                  {{ 'date' | i18next }}
+                </th>
+                <th>
+                  <icon class="d-inline-block mr-4" name="query_builder" color="#000000" theme="outlined" size="16px">
+                  </icon> {{ 'time_in' | i18next }} -
+                  {{ 'time_out' | i18next }}
+                </th>
+                <th>
+                  <icon class="d-inline-block mr-4" name="local_cafe" color="#000000" theme="outlined" size="16px">
+                  </icon> {{ 'break_in' | i18next }} -
+                  {{ 'break_out' | i18next }}
+                </th>
+                <th>
+                  <icon class="d-inline-block mr-4" name="event" color="#000000" theme="outlined" size="16px"></icon>
+                  {{ 'total_hours' | i18next }}
+                </th>
+                <th>
+                  <icon class="d-inline-block mr-4" name="sticky_note_2" color="#000000" theme="outlined" size="16px">
+                  </icon> {{ 'notes' | i18next }}
+                </th>
+                <th>&nbsp;</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  01 {{'Monday'|i18next
+                </td>
+                <td>
+                  <input type="text" value="00:00 --" class="mr-8">
+                  <input type="text" value="00:00 --">
+                </td>
+                <td>
+                  <input type="text" value="00:00 --" class="mr-8">
+                  <input type="text" value="00:00 --">
+                </td>
+                <td>
+                  0 {{'hrs'|i18next
+                </td>
+                <td class="notes-col p-0">
+                  <div class="position-relative">
+                    <div class="notes-dropdown" [ngClass]="{'active' : noteDropdown}">
+                      <a (click)="openNotes()">
+                        <icon class="d-inline-block mr-4" name="sticky_note_2" color="#000000" size="16px"></icon>{{ 'add_note' | i18next }}
+                      </a>
+                      <textarea placeholder="Enter your note here"></textarea>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="hover-action">
+                    <button>{{ 'leave' | i18next }}</button><button>{{ 'weekly_off' | i18next }}</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  01 {{ 'monday' | i18next }}
+                </td>
+                <td>
+                  <input type="text" value="00:00 --" class="mr-8">
+                  <input type="text" value="00:00 --">
+                </td>
+                <td>
+                  <input type="text" value="00:00 --" class="mr-8">
+                  <input type="text" value="00:00 --">
+                </td>
+                <td>
+                  0 {{ 'hrs' | i18next }}
+                </td>
+                <td class="notes-col p-0">
+                  <div class="position-relative">
+                    <div class="notes-dropdown">
+                      <a>
+                        <icon class="d-inline-block mr-4" name="sticky_note_2" color="#000000" size="16px"></icon>{{ 'add_note' | i18next }}
+                      </a>
+                      <textarea placeholder="{{ 'enter_your_note_here' | i18next }}"></textarea>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="hover-action">
+                    <button>{{ 'leave' | i18next }}</button><button>{{ 'weekly_off' | i18next }}</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  01 {{'Monday'|i18next
+                </td>
+                <td>
+                  <input type="text" value="00:00 --" class="mr-8">
+                  <input type="text" value="00:00 --">
+                </td>
+                <td>
+                  <input type="text" value="00:00 --" class="mr-8">
+                  <input type="text" value="00:00 --">
+                </td>
+                <td>
+                  0 {{ 'hrs' | i18next }}
+                </td>
+                <td class="notes-col p-0">
+                  <div class="position-relative">
+                    <div class="notes-dropdown">
+                      <a>
+                        <icon class="d-inline-block mr-4" name="sticky_note_2" color="#000000" size="16px"></icon>{{ 'add_note' | i18next }}
+                      </a>
+                      <textarea placeholder="Enter your note here"></textarea>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="hover-action">
+                    <button>{{ 'leave' | i18next }}</button><button>{{ 'weekly_off' | i18next }}</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="timesheet-footer position-fixed bg-light p-12">
+            <h3 class="float-left mb-0">{{ 'total_hours' | i18next }} <span>0</span></h3>
+            <button class="btn btn-primary float-right">Save</button>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+     <!-- Custom Fields -->
+      <div class="card bg-light mb-24 mb-m-0 py-16" [ngClass]="{'px-24 my-24': customFields?.length > 0}">
+        <app-dynamic-custom-fields *ngIf="assignmentDetails?.assignment?.hierarchy?.id" [dateFormat]="dateFormatEnum.FORMATYMD" [isDisabled]="(!isAuthorizedToCreate || isAssignmentClosed || !isTimesheetEnabled)"
+          (isCustomFieldsFormValid)="setCustomFieldsFormValid($event)" (customFieldUpdated)="customFieldUpdated($event);"
+          [custom_fields]="selectedCustomData" [moduleName]="'TIMESHEETS'" [uploadS3RefName]="'timesheets'" [columnInRow]="3" [hierarchyIds]="assignmentDetails?.assignment?.hierarchy?.id">
+        </app-dynamic-custom-fields>
+      </div>
+    <!-- end -->
+  </section>
+</div>
+<ng-template [ngIf]="timesheetInfoDetails?.actions_allow?.can_reject">
+  <app-timesheet-reject></app-timesheet-reject>
+</ng-template>
+<app-assignment-details-flyout></app-assignment-details-flyout>
+<ng-template [ngIf]="timesheetInfoDetails?.actions_allow?.can_modify">
+  <app-timesheet-action-flyout></app-timesheet-action-flyout>
+</ng-template>

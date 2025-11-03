@@ -1,0 +1,9 @@
+<vms-table [vmsTableConfig]="tableConfig" [vmsDataSource]="vmsData"  [loading]="dataLoading" [open]="isExpand" [totalItem]="totalRecords"
+  [itemsPerPage]="itemsPerPage" (onViewClick)="onClickView($event)" (onExpandClick)="onExpandClick($event)" (onEditClick)="onEditClick($event)" (onListFilter)="onListFilter($event)"  (onEditClick)="onEditClick($event)" (removeDoNotRehireProgram)="removeDoNotRehire($event)"
+  (changePage)="onPaginationClick($event)" (columnClicked)="columnClick($event)" (onDisableClicked)="disableClicked($event)" (onCreate)="onCreateClick($event)" (search)="onSearch($event)">
+</vms-table>
+
+<!-- <app-create-users *ngIf="(viewData || editData)" [createManageUser]="isCreateUser" (onClose)="onCloseCreateUser($event)" [editData]="editData" [viewData]="viewData" [isEditClicked]="editClick" [isViewClicked]="viewclick"></app-create-users> -->
+<vms-add-user-to-program [list_or_create]="list_or_create" (onClose)="createUserToggle($event)" [createUser]="createUser"  type="program" [isEditClicked]="editClick" [editData]="editData" (onAddDone)="handleUpdate()"></vms-add-user-to-program>
+<app-create-role *ngIf="(!viewData || !editData)" [createRole]="createRole"></app-create-role>
+<app-remove-do-not-rehire-sidepanel [rehireData]="rehireData" [showRehire]="showremoveDoNotRehire" (rehireToggle)="rehireToggle($event)" (handleUpdate)="handleUpdate()"></app-remove-do-not-rehire-sidepanel>

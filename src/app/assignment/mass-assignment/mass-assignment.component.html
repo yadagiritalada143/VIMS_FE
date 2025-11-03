@@ -1,0 +1,512 @@
+<div class="mass-assignment position-relative">
+  <div class="create-wrapper p-24">
+    <div class="create-form pt-32">
+      <h3 class="font-weight-medium mb-16">{{ (this.action === 'bulk_close' ? 'assignment_bulk_close' : 'assignment_bulk_update') | i18nextEager }}</h3>
+      <div class="card bg-light">
+        <form [formGroup]="updateForm" >
+          <section class="mass-update-assignment">
+            <div class="breadcrumb d-flex align-items-center border-bottom mobile-comp">
+              <div (click)="goToUpdateDetails()" class="item pl-24 pr-24 border-left cursor-pointer" [ngClass]="{
+                  active: updateDetails,
+                  finished: summary
+                }">
+                <span class="mr-8 num rounded-circle text-center">1</span>
+                <icon class="mr-8" size="20px" name="done_outline"></icon>
+                <span class="title">{{ 'update_details' | i18nextEager }}</span>
+              </div>
+              <!-- (click)="goToSummary()" -->
+              <div  class="item pl-24 pr-24 border-left cursor-pointer"
+                [ngClass]="{ active: summary }">
+                <span class="mr-8 num rounded-circle text-cente">2</span>
+                <icon class="mr-8" size="20px" name="done_outline"></icon>
+                <span class="title">{{ 'summary' | i18nextEager }}</span>
+              </div>
+            </div>
+              <app-supporting-text *ngIf="showDialogBox && action !== 'bulk_close'" [support_data]="support_text" [showReadButton]="false" (closeDialog)="closeDialogBox()"></app-supporting-text>
+              <div [style.display]="updateDetails?'block': 'none'">
+                <div class="p-24 pt-12" >
+                  <label *ngIf="action !== 'bulk_close'" class="text-primary py-8">{{'select_the_fields' | i18nextEager }} & {{ 'values_for_the_update' | i18nextEager}}</label>
+                  <div *ngIf="action !== 'bulk_close'">
+                  <div   class="card card-info p-16 mb-16 position-relative" *ngFor="let field of fieldsArray?.controls; let i = index">
+                    <icon class="close-icon" name="cancel" size="14px" color="#FF0000" *ngIf = "i!==0" (click)="removeFields(i)"></icon>
+                    <div class="form-group-row" [formGroup]="field">
+                      <div class="form-group">
+                        <label>{{'select_field' | i18nextEager}} <span class="require">*</span> </label>
+                        <ng-select placeholder="{{'select'|i18next}}" formControlName="field_name" (clear)="removeLabel()"
+                        [items]="fieldOption || []" bindLabel="label"
+                         (change)="fieldSeclectionChanged($event , i);"
+                         loadingText = '{{"loading"|i18next}}....' notFoundText = "{{'no_data_found'|i18next}}"
+                        >
+                    </ng-select>
+                    <div *ngIf="field?.get('field_name')?.errors?.invalidName"
+                    class="text-red position-absolute">
+                    {{ 'field_name_can_not_be_same.' | i18nextEager }}
+                  </div>
+                      </div>
+
+                      <div class="form-group position-relative" >
+                        <label *ngIf="field?.get('field_name')?.value?.slug === getKeyName(field?.get('field_name')?.value)">{{ 'update_to' | i18nextEager }} <span class="require">*</span> </label>
+                        <ng-container >
+                          <!-- <app-field-handler  *ngIf="field?.get('field_name')?.value?.slug === getKeyName(field?.get('field_name')?.value)"
+                            [renderForm]="updateForm" [errorMassage]="errorCheckList" [updateConfig]="updateConfig"
+                            [field]="field?.get('field_name')?.value" [dateFieldDisable]="false"  [is_continue]="true" [is_update]="false"
+                            (onDataChange)="onFieldValueChange($event,i)">
+                          </app-field-handler> -->
+                          <app-mass-assignment-fields *ngIf="field?.get('field_name')?.value?.slug === getKeyName(field?.get('field_name')?.value)"
+                          [renderForm]="updateForm" [programID]="programId" [errorMessage]="errorCheckList"
+                          [field]="field?.get('field_name')?.value" (isFieldExist)="isFieldExist($event)" (onDataChange)="onFieldValueChange($event,i)" (valueReset)="updateFieldValue($event)">
+                        </app-mass-assignment-fields>
+                        </ng-container>
+                      </div>
+                    </div>
+
+                  </div>
+                  </div>
+                  <button class="btn btn-outine small mb-24" [disabled]="disableAddAction" [hidden]="hideAddNewButton || action === 'bulk_close'"  (click)="addNewFields()"><icon class="icon--on-left" color="inherit" size="20px" name="add" ></icon> {{'add_new_field' | i18nextEager}}</button>
+                  <div class="form-group-row"  *ngIf="checkEffetiveDate">
+                    <div class="form-group position-relative">
+                      <label>{{ (action !== 'bulk_close' ? 'effective_date' : 'effective_closing_date') | i18nextEager }} <span class="require">*</span></label>
+                      <svms-datepicker I18n formControlName="effective_date" [inputdateFormat]="dateFormat">
+                      </svms-datepicker>
+                    </div>
+                    <div class="form-group">
+                      &nbsp;
+                    </div>
+                    <div class="form-group">
+                      &nbsp;
+                    </div>
+                  </div>
+                  <div class="form-group-row mb-24">
+                    <div class="form-group mb-0 pb-0">
+                      <label>{{ (action !== 'bulk_close' ? 'reason_for_update' : 'reason_for_assignment_closing') | i18nextEager }} <span class="require">*</span></label>
+                      <ng-select formControlName="reason" placeholder="{{ 'select' | i18nextEager }}" [searchable]="false">
+                        <ng-option *ngFor="let item of reasonCodes" [value]="item?.id">{{item?.name}}</ng-option>
+                      </ng-select>
+                    </div>
+                    <!-- <div class="form-group">
+                      &nbsp;
+                    </div> -->
+                  </div>
+                  <div class="form-group">
+                    <label>{{ 'notes' | i18nextEager }}</label>
+                    <textarea formControlName="request_notes" placeholder="{{ 'enter_additional_notes' | i18nextEager }}" rows="4"
+                      class="form-control"></textarea>
+                  </div>
+                  <div *ngIf="action !== 'bulk_close'" class="form-group">
+                    <app-upload-document-s3 uploadLabel="{{ 'upload_document' | i18nextEager }}" [multiple]="false"  refName="assignments" [multiple]="false"
+                    (uploadDataFiles)="uploadFiles($event)"  [oldUploadedFiles]="massUpdateDetails?.uploadDocuments"
+                    [formatAllowed]="['pdf', 'doc', 'docx']">
+                  </app-upload-document-s3>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="summary">
+                <ng-container *ngIf="submitted">
+                  <app-logs [log]="logs"></app-logs>
+                  <div #target
+                    *ngIf="validationList?.length > 0">
+                    <div class="info-bar d-flex justify-content-between align-items-ceter p-24" *ngIf="inValidAssignmentCount > 0">
+                      <p class="d-flex">
+                        <icon class="mr-4" size="20px" name="report_problem" class="d-flex mr-8" cuclass="d-flex"></icon>
+                        {{inValidAssignmentCount}} {{ 'assignment(s)_cant_be_updated,_you_can_proceed_to_update_the_remaining' | i18nextEager }}
+                      </p>
+                      <a  (click)="getFailedAssignment()" >
+                        {{ 'view_failed_assignments' | i18nextEager }}
+                      </a>
+                    </div>
+                    <div *ngIf="action !== 'bulk_close'" class="assignment-details-info p-24">
+                      <div *ngIf="!(formValue?.fields?.length === 1 && isFieldNamePresent('END_DATE'))" class="assignment-details-info-item pt-24">
+                        <p class="mb-8">{{ 'effective_date' | i18nextEager }}</p>
+                        <span>{{(updateForm?.get('effective_date')?.value || '--')}}</span>
+                      </div>
+                      <div class="assignment-details-info-item pt-24">
+                        <p class="mb-8">{{ 'reasons_for_update' | i18nextEager }}</p>
+                        <span>{{getReason()?.name}}</span>
+                      </div>
+                      <div class="assignment-details-info-item notes pt-24">
+                        <p class="mb-8">{{ 'notes' | i18nextEager }}</p>
+                        <p *ngIf="hasDataToShow();else noData">
+                          <span [ngClass]="{'full-text': textVisibility}">
+                            {{
+                              textVisibility
+                                ? (updateForm?.get('request_notes')?.value || '--')
+                                : (updateForm?.get('request_notes')?.value || '--').slice(0, 100) 
+                            }}
+                            <span *ngIf="updateForm?.get('request_notes')?.value.length >= 100"> ... </span>
+                          </span>
+                          <a *ngIf="showViewMoreLess()" href="javascript:void(0)" (click)="showHideFullText()">
+                            {{ textVisibility ? 'View Less' : 'View More' }}
+                          </a>
+                        </p>
+                        <ng-template #noData>{{'--'}}</ng-template>
+                      </div>  
+                    </div>
+                  </div>
+                  <div class="p-24">
+                    <div class="card bg-light no-shadow p-4 mb-16" *ngFor="let assignmentObj of validationList">
+                      <div class="panel panel-light p-16" [ngClass]="{'danger': !assignmentObj?.can_update  }">
+                        <div class="row d-flex align-items-center">
+                          <div class="col-md-11">
+                            <div class="row d-flex">
+                              <div class="col-md-4 d-flex">
+                                <div class="mr-16">
+                                  <div class="checkbox-wrapper d-inline-block" [ngClass]="{'disableDiv': !assignmentObj?.can_update }">
+                                    <label class="checkbox-container mb-0">
+                                      <input type="checkbox"  (change) ="updateValidAssignment(assignmentObj)" [(ngModel)]="assignmentObj.is_allowed_update" [ngModelOptions]="{standalone: true}">
+                                      <span class="checkmark"></span>
+                                    </label>
+                                  </div>
+                                </div>
+                                <div>
+                                  <p class="text-dark">{{assignmentObj?.assignment_title?.title | titlecase}}</p>
+                                  <div class="d-flex align-items-center">
+                                    <span
+                                      class="status-ui {{(assignmentObj?.status || '') | lowercase}}">{{assignmentObj?.status | titlecase | i18nextEager}}</span>
+                                    <icon name="label" size="24px" color="#FFC409" class="d-flex ml-12 mr-8" cuclass="d-flex"></icon>
+                                    <p class="small">{{(assignmentObj?.code)}}</p>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="col-md-2">
+                                <div class="d-flex align-items-center">
+                                  <div class="initials initials-profile align-justify-center">
+                                    <img [src]="assignmentObj?.worker?.avatar?.avatar" class="img-fluid"
+                                      *ngIf="assignmentObj?.worker?.avatar?.avatar">
+                                    <ng-container *ngIf="!assignmentObj?.worker?.avatar?.avatar">
+                                      {{ assignmentObj?.worker?.name | shortName: "last" }}
+                                    </ng-container>
+                                  </div>
+                                  <div class="d-flex flex-column ml-12 right-content word-break">
+                                    <span class="text-primary">{{assignmentObj?.worker?.name}}</span>
+                                    <p class="small mt-4">{{ 'worker' | i18nextEager }}</p>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="col-md-2">
+                                <div class="d-flex align-items-center">
+                                  <div class="initials initials-icon align-justify-center">
+                                    <icon name="watch_later" class="d-flex" size="18px" cuclass="d-flex" color="inherit"></icon>
+                                  </div>
+                                  <div class="d-flex flex-column ml-12 right-content word-break cursor-pointer"
+                                  (click)="openImpactedTimesheetExpense(assignmentObj , 'timesheet')">
+                                    <span class="text-primary">{{assignmentObj?.impacted_timesheet?.count || 0}}</span>
+                                    <p class="small mt-4">{{'impacted_timesheets'|i18next}}</p>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="col-md-2">
+                                <div class="d-flex align-items-center">
+                                <div class="initials initials-icon align-justify-center">
+                                  <icon name="watch_later" class="d-flex" size="18px" cuclass="d-flex" color="inherit"></icon>
+                                </div>
+                                <div class="d-flex flex-column ml-12 right-content word-break cursor-pointer"
+                                (click)="openImpactedTimesheetExpense(assignmentObj , 'expense')">
+                                  <span class="text-primary">{{assignmentObj?.impacted_expense?.count || 0}}</span>
+                                  <p class="small mt-4">{{'impacted_expenses'|i18next}}</p>
+                                </div>
+                              </div>
+                            </div>
+                              <div class="col-md-2" *ngIf="assignmentObj?.can_update">
+                                <div class="d-flex align-items-center">
+                                  <div class="initials initials-icon align-justify-center">
+                                    <icon name="payments" class="d-flex" size="18px" cuclass="d-flex" color="inherit"></icon>
+                                  </div>
+                                  <div class="d-flex flex-column ml-12 right-content word-break cursor-pointer" (click)="getAssignmentDetail(assignmentObj)">
+                                    <span class="text-primary">{{'view_impacted' | i18nextEager}}</span>
+                                    <p class="small mt-4">{{'billing_details'|i18next}}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="d-flex align-items-center mt-12 ml-32 pl-24" *ngIf="!assignmentObj?.can_update">
+                              <icon name="warning" size="16px" color="#D8834B" class="align-middle mr-4" cuclass="d-flex"></icon>
+                              <p class="warning-color">{{assignmentObj?.failure_reason}}</p>
+                            </div>
+                          </div>
+                          <div class="col-md-1 d-flex justify-content-end">
+                            <div class="collapse-arrow align-justify-center cursor-pointer">
+                              <icon (click)="assignmentObj.visible = !assignmentObj.visible"
+                                [name]="assignmentObj.visible ? 'keyboard_arrow_up' : 'keyboard_arrow_down'" class="d-flex"
+                                cuclass="d-flex" size="24px" color="#8DC0F2"></icon>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="p-12 mass-data" *ngIf="assignmentObj?.visible">
+                        <div class="row">
+                          <div class="col-md-4">
+                            <label class="text-uppercase mb-12">{{ 'updated_fields' | i18nextEager }}</label>
+                          </div>
+                          <div class="col-md-4">
+                            <label class="text-uppercase mb-12">{{ 'old_value' | i18nextEager }}</label>
+                          </div>
+                          <div class="col-md-4">
+                            <label class="text-uppercase mb-12">{{ 'new_value' | i18nextEager }}</label>
+                          </div>
+                        </div>
+                        <div class="row mb-24" *ngFor="let field of fieldsArray?.controls; let i = index">
+                          <div class="col-md-4">
+                            <p class="small">{{field?.get('field_label')?.value |titlecase}}</p>
+                          </div>
+                          <div class="col-md-4">
+                            <p class="small text-danger"><del>{{getOldValue(assignmentObj, field?.get('field_name')?.value?.slug ,field?.get('field_name')?.value?.selectionType )  || '--'}}</del></p>
+                          </div>
+                          <div class="col-md-4">
+                            <p class="small text-success">{{getSelectedValue(field?.get('field_name')?.value?.slug)}}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+                <vms-paginator *ngIf="allValidationList && allValidationList?.assignment?.length > 0" [maxPages]="maxPages" [itemsPerPage]="itemsPerPage"  [recordsPerPageSetting]="recordsPerPageSetting" [currentPage]="currentPage" (changeRecords)="onClickRecords($event)"
+                  (changePage)="onPaginationClick($event)" >
+
+               </vms-paginator>
+              </div>
+              <!-- <div class="form-group-row">
+                <div class="form-group">
+                  <label>{{ 'select_update_module' | i18nextEager }} <span class="require">*</span> </label>
+                  <ng-select formControlName="module" placeholder="{{ 'assignment_module' | i18nextEager }}" [searchable]="false">
+                    <ng-option [value]="'1'">{{ 'update_assignment' | i18nextEager }}</ng-option>
+                  </ng-select>
+                </div>
+              </div> -->
+            <div class="form-footer d-flex justify-content-between p-24">
+              <button class="btn btn-outine" (click)="cancle()">{{ 'cancel' | i18nextEager }}</button>
+              <div [style.display]="updateDetails?'block': 'none'">
+                <button [disabled]="disableAddAction || updateForm?.get('effective_date')?.errors?.required ||  updateForm?.get('reason')?.errors?.required || submitted" type="submit" (click)="submitForm()" class="btn btn-primary">
+                  {{'continue'|i18next}} </button>
+              </div>
+              <div class="d-flex align-items-center justify-content-between" *ngIf="validationList?.length > 0 && summary ">
+                <div class="checkbox-wrapper d-inline-block">
+                  <label class="checkbox-container mb-0">
+                    <input type="checkbox" [(ngModel)]="reviewAcceptence" [ngModelOptions]="{standalone: true}">
+                    <span class="checkmark"></span>
+                    <p class="text-black">{{ 'i_have_reviewed_the_assignments_and_confirm_to_proceed' | i18nextEager }}</p>
+                  </label>
+                </div>
+                <button [disabled]="!reviewAcceptence || !hasValidAssignmentCount" class="btn btn-primary ml-24" type="button" (click)="submit()">
+                  {{ 'update_assignment' | i18nextEager }}
+                </button>
+              </div>
+            </div>
+          </section>
+        </form>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+
+<svms-sidebar-ng icon="" title="{{(selectedModule === 'timesheet' ? 'impacted_timesheets' : 'impacted_expenses') | i18nextEager}}" [dataVisibility]="showModule"
+  (onClose)="showModule = 'hidden'">
+  <svms-sidebar-body>
+    <!-- <app-logs [log]="logs"></app-logs> -->
+    <table class="impacted-sheet" *ngIf="!noImpactedData">
+      <thead>
+        <tr>
+          <th class="font-weight-medium text-left">
+            {{ 'module' | i18nextEager }}
+          </th>
+          <th class="font-weight-medium text-left">
+            {{ 'id' | i18nextEager }}
+          </th>
+          <th class="font-weight-medium text-left">
+            {{ 'status' | i18nextEager }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let timesheet of impactedModule">
+          <td>
+            <span class="text-primary"> {{ (selectedModule === 'timesheet' ? 'timesheet' : 'expense') |i18next}}</span>
+          </td>
+          <td>
+            <span>
+              {{(selectedModule === 'timesheet' ? timesheet?.code : timesheet?.es_code) }}
+            </span>
+          </td>
+          <td cl *ngIf="selectedModule === 'timesheet'">
+            <span class="status-ui"
+              [ngClass]="{'draft':(timesheet?.status?.toLowerCase() ==='draft' || timesheet?.status?.toLowerCase() ==='missing'), 'pending-approval':(timesheet?.status?.toLowerCase() ==='pending'), 'rejected': (timesheet?.status?.toLowerCase() ==='rejected'),'approved':(timesheet?.status?.toLowerCase() ==='approved'), 'withdrawn':(timesheet?.status?.toLowerCase() ==='withdrawn'),'deferred': (timesheet?.status?.toLowerCase() ==='deferred')}">
+              {{timesheet?.status|i18next}}</span>
+          </td>
+          <td cl *ngIf="selectedModule === 'expense'">
+            <span class="status-ui"
+              [ngClass]="{'draft':(timesheet?.expense_status?.toLowerCase() ==='draft' || timesheet?.expense_status?.toLowerCase() === 'missing'),'submitted':(timesheet?.expense_status?.toLowerCase() ==='submitted'), 'pending-approval':(timesheet?.expense_status?.toLowerCase() ==='pending' || timesheet?.expense_status?.toLowerCase() ==='pending approval'), 'rejected': (timesheet?.expense_status?.toLowerCase() ==='rejected'),'approved':(timesheet?.expense_status?.toLowerCase() ==='approved'), 'withdrawn':(timesheet?.expense_status?.toLowerCase() === 'withdrawn'),'deferred': (timesheet?.expense_status?.toLowerCase() === 'deferred')}">
+              {{timesheet?.expense_status|i18next}}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="noImpactedData" class="not-found">{{'no_record_found' | i18nextEager}}</div>
+  </svms-sidebar-body>
+
+</svms-sidebar-ng>
+
+<svms-sidebar-ng title="{{ 'impacted_billing_details' | i18nextEager }}" [dataVisibility]="showImpactedBilling"
+  (onClose)="showImpactedBilling = 'hidden'">
+  <svms-sidebar-body>
+    <div class="p-24">
+      <div class="impacted-detail-box d-flex justify-content-between" *ngIf="assignmentData?.finance?.is_billable">
+        <div *ngIf="formatted_working_days || assignmentData?.finance?.total_working_days">
+          <p class="small mb-8">
+            {{ 'total_working_days' | i18nextEager }}
+          </p>
+          <div class="d-flex align-items-center justify-content-between">
+            <p class="font-weight-medium">{{assignmentData?.finance?.total_working_days}}</p>
+            <icon name="east" size="16px" cuClass="align-middle" color="#000000"></icon>
+            <p class="text-success font-weight-medium">{{formatted_working_days}}</p>
+          </div>
+        </div>
+        <div>
+          <p class="small mb-8">
+            {{ 'timesheet_budget_amount' | i18nextEager }}
+          </p>
+          <div class="d-flex align-items-center justify-content-between">
+            <p class="font-weight-medium" tooltip="{{(assignmentData?.finance?.timesheet_budget || 0) | accuracy : accuracyConfig?.amount : { currencyCode: assignmentData?.finance?.currency, display: currencyConfig.SYMBOL} }}" placement="top">
+              {{(assignmentData?.finance?.timesheet_budget || 0) | accuracy : accuracyConfig?.amount : { currencyCode: assignmentData?.finance?.currency, display: currencyConfig.SYMBOL} }}
+            </p>
+            <icon name="east" size="16px" cuClass="align-middle" color="#000000"></icon>
+            <p class="text-success font-weight-medium" tooltip="{{(newResourseBudget?.initial_budget || 0) | accuracy : accuracyConfig?.amount : { currencyCode: assignmentData?.finance?.currency, display: currencyConfig.SYMBOL} }}" placement="top">{{(newResourseBudget?.initial_budget || 0) | accuracy : accuracyConfig?.amount : { currencyCode: assignmentData?.finance?.currency, display: currencyConfig.SYMBOL} }}</p>
+          </div>
+        </div>
+        <div>
+          <p class="small mb-8">
+            {{ 'total_est._budget_w/o_tax' | i18nextEager }}
+          </p>
+          <div class="d-flex align-items-center justify-content-between">
+            <p class="font-weight-medium" tooltip="{{(assignmentData?.finance?.gross_allocated_budget || 0) | accuracy : accuracyConfig?.amount : { currencyCode: assignmentData?.finance?.currency, display: currencyConfig.SYMBOL} }}" placement="top">
+              {{(assignmentData?.finance?.gross_allocated_budget || 0) | accuracy : accuracyConfig?.amount : { currencyCode: assignmentData?.finance?.currency, display: currencyConfig.SYMBOL} }}</p>
+            <icon name="east" size="16px" cuClass="align-middle" color="#000000"></icon>
+            <p class="text-success font-weight-medium" tooltip="{{(newResourseBudget?.gross_budget || 0) | accuracy : accuracyConfig?.amount : { currencyCode: assignmentData?.finance?.currency, display: currencyConfig.SYMBOL} }}" placement="top">
+              {{(newResourseBudget?.gross_budget || 0) | accuracy : accuracyConfig?.amount : { currencyCode: assignmentData?.finance?.currency, display: currencyConfig.SYMBOL} }}
+            </p>
+          </div>
+        </div>
+        <div class="position-relative">
+          <icon class="info-trigger" *ngIf="assignmentData?.finance?.additional_budget" name="info" size="18px" color="#5B6874" tooltip="{{ 'additional_budget_amount' | i18nextEager }} - {{(assignmentData?.finance?.additional_budget || 0) | accuracy : accuracyConfig?.amount : { currencyCode: assignmentData?.finance?.currency, display: currencyConfig.SYMBOL} }}" placement="left"></icon>
+          <p class="small mb-8">
+            {{ 'total_est._budget' | i18nextEager }}
+          </p>
+          <div class="d-flex align-items-center justify-content-between">
+            <p class="font-weight-medium" tooltip="{{(assignmentData?.finance?.net_allocated_budget || 0) | accuracy : accuracyConfig?.amount : { currencyCode: assignmentData?.finance?.currency, display: currencyConfig.SYMBOL} }}" placement="top">
+              {{(assignmentData?.finance?.net_allocated_budget || 0) | accuracy : accuracyConfig?.amount : { currencyCode: assignmentData?.finance?.currency, display: currencyConfig.SYMBOL} }}
+            </p>
+            <icon name="east" size="16px" cuClass="align-middle" color="#000000"></icon>
+            <p class="text-success font-weight-medium" tooltip="{{(newResourseBudget?.net_budget || 0) | accuracy : accuracyConfig?.amount : { currencyCode: assignmentData?.finance?.currency, display: currencyConfig.SYMBOL} }}" placement="top">
+              {{(newResourseBudget?.net_budget || 0) | accuracy : accuracyConfig?.amount : { currencyCode: assignmentData?.finance?.currency, display: currencyConfig.SYMBOL} }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="mt-24" *ngIf="massUpdateDetails?.compared_finance_values?.length">
+        <table class="impacted-sheet bordered-line">
+          <thead>
+            <tr>
+              <th class="font-weight-medium text-left">
+                {{ 'updated_fields' | i18nextEager }}
+              </th>
+              <th class="font-weight-medium text-left">
+                {{ 'current_value' | i18nextEager }}
+              </th>
+              <th class="font-weight-medium text-left">
+                {{ 'new_value' | i18nextEager }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let finance of massUpdateDetails?.compared_finance_values">
+              <td>
+               {{ finance?.label}}
+              </td>
+              <td>
+                <span class="text-danger">
+                  {{finance?.old_value}}
+                </span>
+              </td>
+              <td>
+                <span class="text-success">
+                  {{finance?.new_value}}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </svms-sidebar-body>
+
+</svms-sidebar-ng>
+<svms-sidebar-ng icon="" title="{{ 'failed_assignments' | i18nextEager }}" [dataVisibility]="showFailedAssignments"
+  (onClose)="showFailedAssignments = 'hidden'">
+  <svms-sidebar-body>
+    <!-- <app-logs [log]="logs"></app-logs> -->
+    <table class="impacted-sheet" >
+      <thead>
+        <tr>
+          <th class="font-weight-medium text-left">
+            {{ 'assignment_title' | i18nextEager }}
+          </th>
+          <th class="font-weight-medium text-left">
+            {{ 'id' | i18nextEager }}
+          </th>
+          <th class="font-weight-medium text-left">
+            {{ 'status' | i18nextEager }}
+          </th>
+        </tr>
+      </thead>
+      <tbody *ngFor="let assignment of massUpdateDetails?.failedAssignment">
+        <tr>
+          <td>
+            <span> {{assignment?.assignment_title?.title|i18next}}</span>
+          </td>
+          <td>
+            <span>
+              <a class="text-link text-underline" (click)="assignmentRedirect(assignment?.assignment_uuid)">{{assignment?.code}}</a>
+            </span>
+          </td>
+          <td cl>
+            <span class="status-ui"
+            [ngClass]="{'open': (assignment?.status | lowercase) === 'open','pending': (assignment?.status | lowercase) === 'pending', 'closed': ((assignment?.status | lowercase) === 'assignment closed' || (assignment?.status | lowercase) === 'closed') }">{{assignment?.status
+            | titlecase | i18nextEager}}
+          </span>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <div class="failed-warning-message d-flex pb-8" [ngClass]="{'border-bottom' : !getFailureReasonDetails(assignment?.assignment_uuid)?.length}">
+              <icon name="warning" class="mr-4" size="18px" color="#CF6625"></icon>
+              <p class="warning-color">{{getFailureReason(assignment?.assignment_uuid) || '--'}}{{getFailureReasonDetails(assignment?.assignment_uuid)?.length ? ' The following assignment(s) overlap with the timeframe of this assignment:' : '' | i18nextEager}}</p>
+            </div>
+            <app-svms-modal-body>
+              <div class="my-8" *ngIf="getFailureReasonDetails(assignment?.assignment_uuid)?.length">
+                  <table class="warning-table">
+                      <thead>
+                          <tr>
+                              <th>{{'Assignment ID' | i18next}}</th>
+                              <th>{{'Dates' | i18next}}</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr *ngFor="let row of getFailureReasonDetails(assignment?.assignment_uuid)">
+                              <td>{{ row?.code }}</td>
+                              <td>{{ row?.start_date | localDateFormat : '': '':'' : true}} {{'to'}} {{ row?.end_date | localDateFormat : '': '':'' : true}}</td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+          </app-svms-modal-body>
+          <div *ngIf="getFailureReasonDetails(assignment?.assignment_uuid)?.length" class="failed-warning-message d-flex border-bottom pb-8">
+            <p class="warning-color">{{'In order to proceed, please make the necessary updates to avoid overlapping assignments.' | i18nextEager}}</p>
+          </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="noImpactedData" class="not-found">{{'no_record_found' | i18nextEager}}</div>
+  </svms-sidebar-body>
+
+</svms-sidebar-ng>

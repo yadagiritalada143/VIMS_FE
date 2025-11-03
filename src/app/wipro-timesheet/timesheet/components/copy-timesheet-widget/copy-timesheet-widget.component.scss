@@ -1,0 +1,115 @@
+@import "../../../../../assets/sass/abstracts/variables";
+
+.copy-widget-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 623px;
+    max-width: 90%;
+    background-color: $light;
+    border-radius: $border-radius;
+    z-index: 1000;
+    max-height: 90%;
+  
+    .available-week-wrap {
+  
+      .available-week {
+        border: 1px solid #EFEAFF;
+        border-radius: $border-radius;
+        transition: $transition;
+        cursor: pointer;
+  
+        .radio-wrapper {
+          margin-top: 4px;
+          width: 18px;
+          height: 18px;
+          border: 2px solid $color-black;
+          border-radius: $rounded-circle;
+          position: relative;
+          transition: $transition;
+          box-sizing: content-box;
+          pointer-events: none;
+  
+          .checkmark {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 10px;
+            height: 10px;
+            background-color: $light;
+            transition: $transition;
+            border-radius: $rounded-circle;
+          }
+        }
+  
+        p {
+          color: #3A4550;
+  
+          span {
+            color: $color-gray-80;
+          }
+        }
+      }
+  
+      input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+  
+        &:checked {
+          ~  .available-week {
+            border-color: #7283FE4B;
+            background-color: #FBFAFF;
+  
+            .radio-wrapper {
+              border-color: #7283FE;
+  
+              .checkmark {
+                background-color: #7283FE;
+              }
+            }
+          }
+        }
+      }
+    }
+  
+    .copy-widget-modal-footer {
+      background-color: #FBFAFF;
+      border-top: 1px solid #F0EFF7;
+      padding: $p12;
+      overflow: hidden;
+    }
+  
+    overflow: auto;
+    opacity: 0;
+    visibility: hidden;
+    transition: $transition;
+  
+    &.active {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  .copy-widget-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999;
+    background-color: #1F2031;
+    transition: $transition;
+    opacity: 0;
+    visibility: hidden;
+  
+    &.active {
+      opacity: .85;
+      visibility: visible;
+    }
+  }

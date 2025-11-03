@@ -1,0 +1,54 @@
+<svms-sidebar title="Remove Do Not Rehire" [dataVisibility]="showRehire" (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <div class="p-24">
+<span class="mb-16 text-dark font-weight-medium">{{ 'do_not_re-hire_details_of' | i18next }}</span>
+<span class="mb-16 ml-4 text-dark font-weight-semibold">{{rehireData?.full_name | titlecase}}</span>
+<table *ngIf="assignmentDetails.length > 0; else noData" class="table-rehire">
+  <thead class="bg-gray">
+    <tr>
+      <th class="text-left">{{ 'assignment_title' | i18next }}</th>
+      <th class="text-left">{{ 'assignment_id' | i18next }}</th>
+      <th class="text-left">{{ 'reason_for_do_not_hire' | i18next }}</th>
+    </tr>
+  </thead>
+  <tbody *ngFor="let assignment of assignmentDetails">
+    <tr>
+      <td>{{assignment?.assignment_title?.title}}</td>
+      <td>{{assignment?.code}}</td>
+      <td>{{assignment?.do_not_re_hire?.do_not_re_hire_reason?.name}}</td>
+    </tr>
+  </tbody>
+</table>
+<ng-template #noData>
+  <p class="my-24 text-dark font-weight-semibold">{{ 'no_records_found' | i18next }}</p>
+</ng-template>
+
+<p class="my-24 text-dark font-weight-medium">{{ 'removing_worker_from_do_not_re-hire_list' | i18next }}</p>
+<div class="checkbox-wrapper"  >
+  <label class="checkbox-container" >
+    <input type="checkbox" name="checkbox" [(ngModel)]="isChecked" (change)="changeChecked()">
+    <span class="checkmark"></span>
+    <p>{{ 'do_you_want_to_remove' | i18next }} {{ 'the_worker_from_the_do_not_re-hire_list' | i18next }}?</p>
+  </label>
+</div>
+<div class="form-group mt-16">
+  <label>
+    {{ 'reason_for_removing_from_the' | i18next }} "{{ 'do_not_re-hire' | i18next }}" {{ 'list' | i18next }}
+  </label>
+  <ng-select [disabled]="!isChecked" [(ngModel)]="selectedReason" [clearable]="true" [searchable]="true">
+    <ng-option *ngFor="let reason of hireReasons" [value]="reason.id">
+      {{reason.name}}
+    </ng-option>
+  </ng-select>
+</div>
+    </div>
+
+  </svms-sidebar-body>
+
+  <svms-sidebar-footer>
+    <div class="d-flex justify-content-end">
+      <button type="button" class="btn btn-primary" [disabled]="selectedReason === null" (click)="onSave()">{{ 'submit' | i18next }}</button>
+    </div>
+  </svms-sidebar-footer>
+
+</svms-sidebar>

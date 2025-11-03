@@ -1,0 +1,109 @@
+<svms-sidebar-ng class="candidate-progress" [dataVisibility]="isSidebarVisible" [showHeader]="false" (onClose)="sidebarClose()">
+  <header class="cand-profile-header p-24 d-flex justify-content-between flyoutHeader">
+    <div class="cand-profile-details profile-info">
+      <div class="d-flex align-items-center mb-32">
+        <figure *ngIf="candidateInfo?.candidate_image" class="d-flex justify-content-center mr-12">
+          <img [src]="candidateInfo?.candidate_image">
+        </figure>
+        <div *ngIf="!candidateInfo?.candidate_image" class="d-flex justify-content-center mr-12">
+          <div class="initials initials-profile initials__purple initials_blue d-flex mr-8 p-16">
+          {{ candidateInfo?.candidate_name_initials }}</div>
+        </div>
+        <div class="cand-profile-text">
+          <p class="font-weight-medium candidate-name-title mr-12 mb-0">{{candidateInfo?.cand_full_name}}</p>
+          <span class="d-flex align-items-center"><icon class="meta-label mr-8" name="label" size="16px"></icon>{{'CAN-' + candidateInfo?.candidate_ref_id}}</span>
+        </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <figure class="d-flex justify-content-center align-items-center mr-12">
+          <icon name="work"size="16px" color="#5E71FE" width="100%"></icon>
+        </figure>
+        <div class="cand-profile-text">
+          <p class="font-weight-medium candidate-name-title mr-12 mb-0">{{jobInfo?.template_name}}</p>
+          <span class="d-flex align-items-center"><icon class="meta-label mr-8" name="label" size="16px"></icon>{{jobInfo?.job_id}}</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <style type="text/css">
+        @property --progress-value {
+          syntax: '<integer>';
+          inherits: false;
+          initial-value: 0;
+        }
+        
+        @keyframes html-progress {
+          to { --progress-value: var(--progress-val, 0); }
+        }
+        
+        .circular-progress-bar {
+          background: 
+          radial-gradient(closest-side, white 79%, transparent 80% 100%),
+          conic-gradient(#84919F calc(var(--progress-value) * 1%), #E9ECEF 0);
+          animation: html-progress 2s 1 forwards;
+          &:before {
+            counter-reset: percentage var(--progress-value);
+            content: counter(percentage) '%';
+            animation: html-progress 2s 1 forwards;
+          }
+        
+          &.moderate {
+            background:
+            radial-gradient(closest-side, white 79%, transparent 80% 100%),
+            conic-gradient(#D8834B calc(var(--progress-value) * 1%), #E9ECEF 0);
+          } 
+    
+          &.good {
+            background:
+            radial-gradient(closest-side, white 79%, transparent 80% 100%),
+            conic-gradient(#0089FF calc(var(--progress-value) * 1%), #E9ECEF 0);
+          } 
+    
+          &.excellent {
+            background:
+            radial-gradient(closest-side, white 79%, transparent 80% 100%),
+            conic-gradient(#01CA17 calc(var(--progress-value) * 1%), #E9ECEF 0);
+          } 
+        }
+      </style>
+      <div class="circular-progress-wrapper">
+        <div [ngClass]="{'moderate':progressVal>=26 &&  progressVal<=50 ,'good':progressVal>=51 &&  progressVal<=75 ,'excellent':progressVal>=76 }" class="circular-progress-bar mx-auto excellent"></div>
+        <p class="mt-8">Matching Score</p>
+      </div>
+    </div>
+  </header>
+  <section class="cand-body-content p-24">
+    <h4 class="font-weight-medium mb-16">Matching Breakdown</h4>
+    <div *ngFor="let data of scoringData; let i = index" class="breakdown-accordion mb-16">
+      <div class="breakdown-accordion-header p-16 d-flex align-items-center justify-content-between">
+        <div class="breakdown-accordion-head d-flex align-items-center">
+          <p class="font-weight-medium">{{data?.key | snakeToTitleCase }}</p>
+          <span class="d-flex"><icon class="ml-16 mr-2" name="balance" size="14px" color="#5B6874"></icon>
+          {{ (data?.value?.factor) + '%' }}</span>
+        </div>
+        <div class="right-content d-flex align-items-center">
+          <div class="linear-progress-bar d-flex align-items-center">
+            <div class="linear-rail ml-8 mr-12">
+              <!-- use class name as follows: 
+                moderate : 35 to 50%
+                good: 51 to 75%
+                excellent: 76 and above
+              -->
+              <span [ngClass]="{'moderate':data?.value?.score>=26 &&  data?.value?.score<=50 ,'good':data?.value?.score>=51 &&  data?.value?.score<=75 ,'excellent':data?.value?.score>=76 }" [style]="{'width':data?.value?.score+'%'}"></span>
+            </div>
+            <p class="small">{{(data?.value?.score) + '%'}}</p>
+          </div>
+          <icon *ngIf="data?.value?.data?.length > 0" class="ml-24 cursor-pointer" [name]="(activeAccordian == i) ? 'keyboard_arrow_up' : 'keyboard_arrow_down'" size="20px" (click)="candidateAccordion(i)"></icon>
+          <span *ngIf="data?.value?.data?.length == 0" class="mr-46 empty-space"></span>
+        </div>
+      </div>
+      <div *ngIf="data?.value?.data?.length > 0" class="breakdown-accordion-content p-16" [ngClass]="(activeAccordian === i) ? 'active' : 'inactive'">
+        <ul>
+          <li *ngFor="let factors of data?.value?.data">
+            {{ factors | snakeToTitleCase }}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</svms-sidebar-ng>

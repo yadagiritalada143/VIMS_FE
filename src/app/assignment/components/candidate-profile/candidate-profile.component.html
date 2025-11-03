@@ -1,0 +1,447 @@
+<div class="candidate" *ngIf="candidateData">
+  <app-supporting-text *ngIf="ssoIdDetails['is_ssoId_exist']" (closeDialog)="closeSupportText($event)" [support_data]="support_text"></app-supporting-text>
+  <header class="profile-header py-32 px-24">
+    <div class="profile-information" *ngIf="candidateData">
+      <div class="d-flex justify-content-between ">
+        <div>
+          <div class="d-flex">
+            <h4 class="d-inline-block mb-0 mr-16 font-weight-medium">
+              {{candidateFullname | i18nextEager}}
+            </h4>
+            <div *ngFor="let socialIcon of socialIcons" class="bg-black">
+              <a class="mr-16" href="{{socialIcon?.link}}" target="_blank">
+                <img [src]="socialprofile_icons[socialIcon?.type]" alt="" width="19" />
+
+              </a>
+            </div>
+
+          </div>
+          <p class="mb-16">{{candidateData?.title}}</p>
+
+        </div>
+        <div>
+          <button  *ngIf="!isdaas" class="btn btn-outine small font-weight-regular rounded-pill" (click)="editProfileButton()">
+            {{ 'edit_profile' | i18nextEager }}</button>
+        </div>
+      </div>
+      <p class="contact-info  mr-16" *ngIf="candidateData?.unique_id && hideEyeIcon">
+        <icon class="mr-8" size="16px" name="label"  type="material" cuClass="icon-cu" color="#ffc409">
+        </icon> {{candidateData?.unique_id}}
+      </p>
+      <p class="contact-info " *ngIf="address?.length > 0">
+        <icon size="16px" class="mr-8" name="home" theme="outlined" type="material" cuClass="icon-cu"> </icon>
+        {{address?.street_1}}{{address?.street_2}}
+        {{address?.city}}{{address?.country}}
+        {{address?.state}}
+        {{address?.zipcode}} <icon color="#4BC725" size="12px" class="mr-8" name="verified" type="material"
+          cuClass="icon-cu" *ngIf="address?.length !== null"></icon>
+      </p>
+      <div class="d-flex">
+        <p class="contact-info  mr-16" *ngIf="candidateData?.phone">
+          <icon class="mr-8" size="16px" name="call" theme="outlined" type="material" cuClass="icon-cu">
+          </icon>
+          <span *ngIf="candidateData?.phone_isdcode?.indexOf('+')==-1">+</span>{{candidateData?.phone_isdcode}}
+          {{candidateData?.phone}} <icon color="#4BC725" size="12px" class="mr-8" name="verified" type="material"
+            cuClass="icon-cu"></icon>
+        </p>
+        <p class="contact-info" *ngIf="workerData?.user?.phone && !showSkelton">
+          <icon class="mr-8" size="16px" name="call" theme="outlined" type="material" cuClass="icon-cu">
+          </icon>
+          {{workerData?.user?.phone}}
+        </p>
+      </div>
+
+      <div class="d-flex flex-column">
+        <div class="d-flex align-items-center grid-data-wrap" style="margin-top : 2px">
+          <icon class="mr-8" size="18px" name="cake" theme="outlined" color="#495057" type="material"
+              cuClass="d-flex"></icon>
+          <div class="grid-data">
+              <div class="d-flex sensitive-data">
+                  <label *ngIf="!showDOB" class="hidden-value">{{ 'sensitive_data' | i18nextEager }}</label>
+                  <label class="dot-show" *ngIf="showDOB">{{ (changeDate(candidateData?.dob)) ||
+                      '--'}}</label>
+                  <ng-container *ngIf="hideEyeIcon">
+                    <icon size="16px" *ngIf="!showDOB" name="visibility" (click)="showDOB = !showDOB" color="#495057"
+                        type="material" cuClass="d-flex" class="cursor-pointer"> </icon>
+                    <icon size="16px" *ngIf="showDOB" name="visibility_off" (click)="showDOB = !showDOB" color="#495057"
+                        type="material" cuClass="d-flex" class="cursor-pointer ml-16"></icon>
+                    </ng-container>
+              </div>
+          </div>
+      </div>
+        <p class="contact-info mb-16 d-flex align-items-center" *ngIf="candidateData?.email">
+          <icon class="mr-8" size="16px" name="mail_outline" type="material" cuClass="icon-cu d-flex"></icon> <a
+             class=" text-break">{{candidateData?.email}}</a>
+        </p>
+      </div>
+      <div class="clearfix"></div>
+    </div>
+    <button class="btn btn-outine small" *ngIf="candidateData?.resume_url"
+      (click)="downloadAttachment(candidateData?.resume_url)">{{ 'download_resume' | i18nextEager }}</button>
+
+  </header>
+
+  <div class="p-24" *ngIf="isAccountActivated === false && assignmentDetails?.worker?.user?.id; else showResetPasswordButton">
+    <div class="d-flex justify-content-between align-items-center account_unreg p-16" >
+      <div class="d-flex ">
+        <icon class="mr-12" size="18px" theme="outlined" name="person_off" type="material" cuClass="icon-cu">
+        </icon>
+        {{ 'account_unregistered' | i18nextEager }}
+      </div>
+      <button class="btn btn-white send_email_btn px-24" [disabled]="hideEmailButton" (click)="sendWelcomeEmail()"> {{'send_welcome_email' | i18nextEager}}</button>
+    </div>
+  </div>
+  <ng-template #showResetPasswordButton>
+    <!-- hiding this section temprary till reset password functionality is not implemented -->
+    <!-- <div class="p-24">
+      <div class="d-flex justify-content-between align-items-center account_reg p-16">
+        <div class="d-flex ">
+          <icon class="mr-12" size="18px" theme="outlined" name="check_circle" type="material" cuClass="icon-cu">
+          </icon>
+          {{ 'account_registered' | i18nextEager }}
+        </div>
+        <button class="btn btn-white reset_btn">{{ 'reset_password' | i18nextEager }}</button>
+      </div>
+    </div> -->
+  </ng-template>
+  <div class="edit-worker-detail d-flex justify-content-between align-items-center p-24 mb-64">
+    <form [formGroup]="workerDetailsForm" (ngSubmit)="onSubmit()">
+      <app-logs [log]="logs"></app-logs>
+      <div class="no-gutters row align-items-center my-8" *ngIf="workerData">
+        <ng-template [ngIf]="!isEditDetails">
+          <div class="col-md-6 mb-24">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="label" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{ 'worker_id' | i18nextEager }}</label></p>
+                <p class="text-dark"><span>{{workerData?.official_worker_id}}</span></p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6  mb-24">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="person" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{ 'worker_name' | i18nextEager }}</label></p>
+                <p class="text-dark"><span>{{workerData?.user?.name ? (workerData?.user?.name | titlecase)  : '-'}}</span></p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6  mb-24">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="person" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{ 'user_name' | i18nextEager }}</label></p>
+                <p class="text-dark"><span>{{workerData?.user?.username ||'-'}}</span></p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6  mb-24">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="location_on" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{ 'worker_source_type' | i18nextEager }}</label></p>
+                <p class="text-dark"><span> {{snakeCaseToTitle(workerData?.source_type)}}</span></p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-24" *ngIf="workerData?.source_type === 'migrated_worker_data'">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="public" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{ 'source_id' | i18nextEager }}
+                  </label>
+                </p>
+                <p class="text-dark"><span>{{workerData?.source_id}} </span></p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-24">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="public" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center">
+                  <label>
+                    {{ 'worker_original/tenure_start_date' | i18nextEager }}
+                  </label>
+                </p>
+                <p class="text-dark"><span>{{workerData?.original_start_date }} </span></p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-24">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="mail" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{ 'worker_email_address' | i18nextEager }}</label></p>
+                <p class="text-dark text-break"> {{workerData?.official_email}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-24" *ngIf="ssoIdDetails['show_ssoId']">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="public" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{ 'sso_id' | i18nextEager }}</label></p>
+                <p class="text-dark">{{workerData?.sso_id || '-'}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-24">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="label" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{ 'worker_classification' | i18nextEager }}</label></p>
+                <p class="text-dark">{{workerClassificationObj[workerData?.classification?.toLowerCase()] || '-'}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-24">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="public" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{ 'erp_external_id' | i18nextEager }}</label></p>
+                <p class="text-dark">{{workerData?.erp_external_id || '-'}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-24">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="date_range" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{ 'total_allocated_worker_tenure' | i18nextEager }}</label></p>
+                <p class="text-dark">{{workerData?.total_allocated_worker_tenure || '-'}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-24">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="event" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{ 'current_allocated_worker_tenure_start_date' | i18nextEager }}</label></p>
+                <p class="text-dark">{{workerData?.current_allocated_worker_tenure_start_date || '-'}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-12 mb-4" *ngIf="customFields?.length">
+            <h4 class="font-weight-medium">{{ 'custom_fields' | i18nextEager }}</h4>
+          </div>
+          <div class="col-md-6 mb-24" *ngFor="let customField of customFields">
+            <div class="d-flex align-items-center">
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{customField?.label|i18next}}</label></p>
+                <p class="text-dark">{{customField?.value || '-'}}</p>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+        <!-- Edit worker details goes here -->
+        <ng-template [ngIf]="isEditDetails && workerData">
+          <!-- <div *ngIf="workerData"> -->
+
+          <div class="col-md-6 mb-24">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="label" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{ 'worker_id' | i18nextEager }}</label></p>
+                <p class="text-dark">{{workerData?.official_worker_id}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-24" *ngIf="workerData?.user">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="person" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center">
+                  <label>
+                    {{ 'worker_first_name' | i18nextEager }} <span class="require">*</span>
+                  </label>
+                </p>
+                <input type="text" class="form-control pr-32" [(ngModel)]="workerData?.user.first_name"
+                  formControlName="member_first_name" [ngClass]="{'error':submitted && workerDetailsFormControl?.member_first_name?.errors}">
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-24" *ngIf="workerData?.user">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="person" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center">
+                  <label>
+                    {{ 'worker_last_name' | i18nextEager }} <span class="require">*</span>
+                  </label>
+                </p>
+                <input type="text" class="form-control pr-32" [(ngModel)]="workerData?.user.last_name" formControlName="member_last_name"
+                  [ngClass]="{'error':submitted && workerDetailsFormControl?.member_last_name?.errors}">
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6  mb-24" *ngIf="workerData?.user?.username">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="person" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{ 'user_name' | i18nextEager }}</label></p>
+                <!-- <p class="text-dark"><span>{{candidateData?.user?.username}}</span></p> -->
+                <input type="text" [(ngModel)]="workerData.user.username" class="form-control" readonly
+                       formControlName="username">
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-24">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="location_on" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center">
+                  <label>
+                    {{ 'worker_source_type' | i18nextEager }} <span class="require">*</span>
+                  </label>
+                </p>
+                <ng-select [ngClass]="{'error':submitted && workerDetailsFormControl?.source_type?.errors}"
+                           placeholder="{{ 'select_worker_source_type' | i18nextEager }}" (change)="workerSourceTypeChanged($event)"
+                           [(ngModel)]="workerData.source_type" formControlName="source_type">
+                  <ng-option [value]="'new_worker'">
+                    {{ 'new_worker' | i18nextEager }}
+                  </ng-option>
+                  <ng-option [value]="'migrated_worker_data'">
+                    {{ 'migrated_worker_data' | i18nextEager }}
+                  </ng-option>
+                </ng-select>
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="col-md-6 mb-24" *ngIf="workerDetailsFormControl?.source_type?.value === 'migrated_worker_data'">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="public" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center">
+                  <label>
+                    {{ 'source_id' | i18nextEager }} <span class="require">*</span>
+                  </label>
+                </p>
+                <input type="text" class="form-control pr-32" [(ngModel)]="workerData.source_id"
+                       placeholder="{{ 'enter_source_id' | i18nextEager }}" formControlName="source_id"
+                       [ngClass]="{'error':submitted && workerDetailsFormControl?.source_id?.errors}">
+              </div>
+
+            </div>
+
+          </div>
+          <div class="col-md-6 mb-24 ">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="public" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="form-group  position-relative">
+                <p class="small d-flex align-items-center">
+                  <label>
+                    {{ 'worker_original/tenure_start_date' | i18nextEager }}
+                    <span class="require">*</span>
+                  </label>
+                </p>
+                <svms-datepicker [(ngModel)]="workerData.original_start_date"
+                                 [ngClass]="{'error':submitted && workerDetailsFormControl.original_start_date.errors}"
+                                 [inputdateFormat]="dateFormat" [placeholder]="'Select Date'|i18next"
+                                 formControlName="original_start_date" #original_start_date>
+                </svms-datepicker>
+                <div *ngIf="submitted && workerDetailsFormControl.original_start_date.errors" class="invalid-feedback">
+                  <div *ngIf="workerDetailsFormControl.original_start_date.errors.required">
+                    {{ 'start_date_is_required' | i18nextEager }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="col-md-6 mb-24">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="mail" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center">
+                  <label>
+                    {{ 'worker_email_address' | i18nextEager }} <span class="require">*</span>
+                  </label>
+                </p>
+                <input type="email" class="form-control pr-32" [(ngModel)]="workerData.official_email"
+                       placeholder="{{ 'enter_worker_email_address' | i18nextEager }}" formControlName="official_email"
+                       [ngClass]="{'error':submitted && workerDetailsFormControl?.official_email?.errors}">
+                <div *ngIf="submitted && workerDetailsFormControl?.official_email?.errors" class="invalid-feedback">
+                  <div *ngIf="workerDetailsFormControl?.official_email.errors?.required">
+                    {{ 'email_is_required' | i18nextEager }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="col-md-6 mb-24">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="public" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{ 'sso_id' | i18nextEager }}</label></p>
+                <input type="text" class="form-control pr-32" [(ngModel)]="workerData.sso_id"
+                       placeholder="{{ 'enter_sso_id' | i18nextEager }}" formControlName="sso_id" (change)="checkSsoIdValid($event)">
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-24">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="public" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{ 'worker_classification' | i18nextEager }}</label></p>
+                <ng-select placeholder="{{ 'select_worker_classification' | i18nextEager }}" formControlName="classification" [(ngModel)]="workerData.classification"
+                           [items]="worker_classification_options || []" bindLabel="label" bindValue="value"></ng-select>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-24">
+            <div class="d-flex align-items-center">
+              <icon class="mr-12" size="18px" theme="outlined" name="public" type="material" cuClass="icon-cu">
+              </icon>
+              <div class="">
+                <p class="small d-flex align-items-center"><label>{{ 'erp_external_id' | i18nextEager }}</label></p>
+                <input type="text" class="form-control pr-32" [(ngModel)]="workerData.erp_external_id"
+                       placeholder="{{ 'erp_external_id' | i18nextEager }}" formControlName="erp_external_id">
+              </div>
+            </div>
+          </div>
+          <!-- </div> -->
+          <svms-sidebar-footer-ng *ngIf=isEditDetails>
+
+            <div>
+              <button type="submit" [disabled]="workerDetailsForm?.invalid" class="btn btn-primary float-right m-8" *accessControl>
+                {{ 'save' | i18nextEager }}
+              </button>
+              <button type="submit" class="btn btn-danger float-right  m-8" (click)="cancelWorkerDetails()">
+                {{ 'cancel' | i18nextEager }}
+              </button>
+            </div>
+          </svms-sidebar-footer-ng>
+        </ng-template>
+
+      </div>
+    </form>
+  </div>
+</div>

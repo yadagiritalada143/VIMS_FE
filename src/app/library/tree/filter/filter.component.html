@@ -1,0 +1,42 @@
+<div class="filter-panel position-fixed bg-light">
+      <a href="javascript:void(0)" class="filter-close" (click)="closeFilter()">
+        <icon name="close" size="24px"></icon>
+      </a>
+      <h4 class="pt-16 pl-24 pr-24 font-weight-normal">
+        <icon size="19px" name="filter_alt" type="material" cuClass="d-flex" class="float-left mr-4"></icon> {{ 'filters' | i18next }}
+      </h4>
+    <div>      
+      <form [formGroup]="hierarchyFilter">
+        <div class="filter-content p-24">
+          <div  class="form-group mb-8 pb-0 position-relative">
+            <label>{{ 'hierarchy_level_name' | i18next }}</label>
+            <ng-select  [clearable]="false" [items]="flattednedHierarchy" [multiple]="true"
+              bindLabel="name" bindValue="name" formControlName="hierarchyName" >
+            </ng-select>
+          </div>
+          <!-- <div class="form-group mb-8 pb-0 position-relative">
+             <span class="total-count position-absolute" *ngIf="managers.length > 0">{{managers.length}}</span>
+            <label>{{ 'managers' | i18next }}</label>
+            <ng-select [clearable]="false" [multiple]="true" placeholder="Manager" bindLabel="first_name"
+              [hideSelected]="true" formControlName="managers" >
+              <ng-option [value]="managers.id" *ngFor="let managers of membersList">{{managers.first_name}} {{managers.last_name}}</ng-option>
+            </ng-select>
+          </div> -->
+          <div  class="form-group mb-8 pb-0 position-relative">
+            <label>{{ 'status' | i18next }}</label>
+            <ng-select  [clearable]="false" [items]="status"
+            bindLabel="name" bindValue="value" formControlName="status" >
+          </ng-select>
+          </div>
+        </div>
+        <div class="filter-footer pt-16 pb-16 pl-24 pr-24">
+          <button class="btn btn-outine float-left" (click)="ClearFilter()">
+            <icon size="20px" name="highlight_off" type="material" cuClass="d-flex" class="icon--on-left d-flex"></icon> {{ 'clear_all_filter' | i18next }}
+          </button>
+          <button class="btn btn-primary float-right" (click)="filterHierarchy()">
+            <icon size="20px" name="check_circle" type="material" cuClass="d-flex" class="icon--on-left d-flex"></icon> {{ 'apply' | i18next }}
+          </button>
+        </div>
+      </form>
+    </div>
+</div>

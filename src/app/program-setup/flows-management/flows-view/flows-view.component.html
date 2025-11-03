@@ -1,0 +1,66 @@
+<div class="detail-page-wrapper">
+    <div class="description-panel p-32 position-relative">
+        <div class="card bg-light">
+            <header class="d-flex justify-content-between border-bottom p-24">
+                <div class="d-flex align-items-center">
+                    <icon name="arrow_back" class="flow-back" size="24px" (click)="backtoList()"></icon>
+                    <div class="ml-24">
+                        <h3 class="font-weight-medium">{{flowData?.name|i18next}}</h3>
+                        <p class="small">{{ 'created_on' | i18next }} {{flowData?.created_on}}</p>
+                    </div>
+                </div>
+                <a *accessControl href="javascript:void(0)" class="edit-link" (click)="editFlow()">
+                    <icon name="drive_file_rename_outline" size="18px"></icon> {{ 'edit' | i18next }}
+                </a>
+            </header>
+            <div class="p-24">
+                <h4 class="font-weight-medium mb-16">{{'workflow_details'|i18next}}</h4>
+                <div class="flow-items d-flex mb-16">
+                    <p>{{ 'id' | i18next }}</p>
+                    <p class="font-weight-medium">{{flowData?.code}}</p>
+                </div>
+                <div class="flow-items d-flex mb-16">
+                    <p>{{ 'status' | i18next }}</p>
+                    <p class="font-weight-medium"><span class="status-ui" [ngClass]="flowData?.is_enabled ? 'active' : 'inactive' ">{{flowData?.is_enabled ? 'active' : 'inactive'}}</span></p>
+                </div>
+                <div class="flow-items d-flex mb-16">
+                    <p>{{ 'module' | i18next }}</p>
+                    <p class="font-weight-medium">{{flowData?.module?.name}}</p>
+                </div>
+                <div class="flow-items d-flex mb-16">
+                    <p>{{ 'event' | i18next }}</p>
+                    <p class="font-weight-medium">{{flowData?.event?.name}}</p>
+                </div>
+                <div class="flow-items d-flex mb-32">
+                    <p>{{ 'method' | i18next }}</p>
+                    <p class="font-weight-medium">{{flowData?.flow_type}}</p>
+                </div>
+                <h4 class="font-weight-medium mb-16">{{ 'hierarchy' | i18next }}</h4>
+                <ul class="hierarchy-list mb-32">
+                    <li *ngFor="let hierarchy of flowData?.hierarchies">{{hierarchy?.name}}</li>
+                </ul>
+                <div class="info-box" *ngIf="flowData?.default_conditions.length>0">
+                    <p class="info-header">
+                        {{ 'condition' | i18next }}
+                    </p>
+                    <div class="p-12">
+                       <div [innerHtml]="flowData?.default_conditions">
+                       </div>
+                    </div>
+                </div>
+                <h4 class="font-weight-medium mb-16 mt-24">{{ 'levels' | i18next }}</h4>
+                <div class="info-box" *ngFor="let level of flowData?.each_level; let i = index;">
+                    <p class="info-header">
+                        {{ 'level_' | i18next }}{{i+1}}
+                    </p>
+                    <div class="p-12">
+                       <div [innerHTML]="level?.conditions">
+                       </div>
+                       <p class="font-weight-medium mt-12 mb-8 text-uppercase">{{ 'recipients' | i18next }}</p>
+                       <div [innerHTML]="level?.recipients"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

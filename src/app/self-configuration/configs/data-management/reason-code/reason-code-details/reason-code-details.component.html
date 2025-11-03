@@ -1,0 +1,120 @@
+<div class="view-detail-page assignment-rate-change">
+  <header class="section-header p-24 d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center">
+          <i (click)="backClicked()" class="material-icons back-arrow-icon mr-16 cursor-pointer" tooltip="{{'Back' | i18next}}" placement="bottom">arrow_back</i>
+          <div>
+            <h3 class="font-weight-semibold mb-10">{{ name | i18next }}</h3>
+            <div class="item-label">
+              {{ commonViewService.getTimeStamp(1, lastUpdated) | i18next }}
+            </div>
+
+          </div>
+      </div>
+      <div *authorize="'reason_code_manage'">
+          <button *accessControl class="c-btn c-btn-secondary-medium-left-icon" (click)="onEditReason()" ><i class="material-icons">drive_file_rename_outline</i>{{'edit_reasons' | i18next}}</button>
+      </div>
+  </header>
+  <section class="section-body-content">
+      <div class="p-24">
+            <app-self-config-log *ngIf="isAutoClosedAssignment"
+                [showButton]="false"
+                title="Information"
+                message="This Reason Code will be used for Auto Closed Assignments. Any Changes will be applied only on future Auto Closed Assignments."
+            ></app-self-config-log>
+          <h4 class="font-weight-medium mb-16">{{ 'reason_code_details' | i18next }}</h4>
+          <div class="detail-item d-flex align-items-center mb-16">
+              <div class="item-label">{{ 'event' | i18next }}</div>
+              <div class="item-value font-weight-medium">{{name | i18next }}</div>
+          </div>
+          <div class="detail-item d-flex align-items-center mb-32">
+              <div class="item-label">{{ 'module' | i18next }}</div>
+              <div class="item-value font-weight-medium">{{module | i18next }}</div>
+          </div>
+          <h4 class="font-weight-medium mb-0">{{ 'reasons' | i18next }}</h4>
+          <table class="detail-page-table">
+              <thead>
+                  <tr>
+                      <th>{{ 'reason_name' | i18next }}
+                          <div class="sorting">
+                              <span class="asc">
+                                  <i class="material-icons">arrow_drop_up</i>
+                              </span>
+                              <span class="dec">
+                                  <i class="material-icons">arrow_drop_down</i>
+                              </span>
+                          </div>
+                      </th>
+                      <th>{{ 'status' | i18next }}
+                          <div class="sorting">
+                              <span class="asc">
+                                  <i class="material-icons">arrow_drop_up</i>
+                              </span>
+                              <span class="dec">
+                                  <i class="material-icons">arrow_drop_down</i>
+                              </span>
+                          </div>
+                      </th>
+                      <th>{{ 'reason_rating' | i18next }}
+                          <div class="sorting">
+                              <span class="asc">
+                                  <i class="material-icons">arrow_drop_up</i>
+                              </span>
+                              <span class="dec">
+                                  <i class="material-icons">arrow_drop_down</i>
+                              </span>
+                          </div>
+                      </th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr *ngFor="let reason of currentReasons" >
+                      <td>
+                          {{reason.name | i18next }}
+                      </td>
+                      <td>
+                        <span class="c-status-ui active" *ngIf="reason.is_enabled">
+                          {{ 'active' | i18next }}
+                        </span>
+                        <span class="c-status-ui inactive" *ngIf="!reason.is_enabled">
+                          {{ 'inactive' | i18next }}
+                        </span>
+                      </td>
+                      <td>{{(reason?.category ? getCategoryLabel(reason?.category) : 'Neutral') | i18next }}</td>
+                  </tr>
+                <ng-container *ngIf="currentReasons.length == 0">
+                    <tr *ngIf="!reasonCodesLoading">
+                        <td colspan="3">
+                            <div class="d-flex align-items-center justify-content-center py-32 flex-column text-center">
+                                <div>
+                                    <img src="../../../assets/images/no-records.svg" alt="empty-icon" />
+                                </div>
+                                <div class="mt-8">
+                                    <h4 class="font-weight-medium">{{ 'no_records_found' | i18next }}</h4>
+                                </div>
+                                <div>
+                                    <p>
+                                        {{ 'No Code for "' + (name | titlecase) + '" added yet, let\'s create your first Reason for "' + (name | titlecase) + '" Reason Code' }}
+                                    </p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr *ngIf="reasonCodesLoading">
+                        <td colspan="3">
+                            <div class="d-flex align-items-center justify-content-center py-32 flex-column text-center"
+                                *ngIf="currentReasons.length == 0">
+                                <div>
+                                    <img src="../../../assets/images/no-records.svg" alt="empty-icon" />
+                                </div>
+                                <div class="mt-8">
+                                    <h4 class="font-weight-medium">{{ 'loading_records' | i18next }}...</h4>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-container>
+              </tbody>
+          </table>
+      </div>
+  </section>
+</div>

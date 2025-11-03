@@ -1,0 +1,73 @@
+<section class="rule-logic mt-16">
+  <div class="px-24 py-16" *ngIf="input_condition.length > 0">
+    <div class="d-flex align-items-center mb-12">
+      <icon name="clear_all" color="#00722E" size="18px"></icon>
+      <p class="color-green ml-12">{{ 'rule_logic' | i18next }} <span class="require">*</span></p>
+    </div>
+    <p class="small pb-8">{{ 'please_select_the_fields_that_you_would_like_to_use_in_the_conditions' | i18next }}</p>
+    <div class="rule-panel d-flex align-items-center mt-8" *ngFor="let condition of input_condition;let i = index">
+      <div class="mr-16">
+        <ng-select
+          (change)="getUpdatedRuleLogicData(condition, 'inputField', i)"
+          placeholder="{{ 'field' | i18next }}"
+          [(ngModel)]="condition.selectedField"
+          name="{{'selectedField'+i}}"
+        >
+          <ng-option *ngFor="let fieldList of condition.field" [value]="fieldList.id">
+            <span class="text-capitalize">
+              {{fieldList?.name}}
+            </span>
+          </ng-option>
+        </ng-select>
+      </div>
+      <div class="mr-16">
+        <ng-select
+          [disabled]="!condition.selectedField"
+          (change)="getUpdatedRuleLogicData($event)"
+          placeholder="{{ 'operator' | i18next }}"
+          [(ngModel)]="condition.selectedOperator"
+          name="{{'selectedOperator'+i}}"
+        >
+        <ng-option *ngFor="let operatorList of condition.operator" [value]="operatorList.id"
+            [disabled]="getDisabledData(condition.selectedField,operatorList.id)">
+            <span class="text-capitalize">
+              {{operatorList?.sign}}
+            </span>
+          </ng-option>
+        </ng-select>
+      </div>
+      <div>
+        <icon name="add_circle" class="cursor-pointer mr-12" *ngIf="i == input_condition?.length - 1" (click)="addInput(conditionGroup?.ruleFieldInputConfigs)" size="18px" color="#0044C5"></icon>
+      </div>
+      <div>
+        <icon name="highlight_off" class="cursor-pointer" *ngIf="input_condition?.length > 1"  (click)="removeInput(i)" size="18px" color="#A3B0C0"></icon>
+      </div>
+    </div>
+  </div>
+  <div class="conditional-box px-24 py-16">
+    <p>{{ 'please_select_the_fields_that_you_would_like_to_calculate_based_on_the_conditions' | i18next }}</p>
+      <div class="condition-panel d-flex align-items-center mt-8"  *ngFor="let calculate of output_condition;let i = index">
+        <div class="mr-16">
+          <ng-select
+          (change)="getUpdatedRuleLogicData($event)"
+          placeholder="{{ 'field' | i18next }}"
+          [(ngModel)]="calculate.selectedField"
+          name="{{'selectedField'+i}}"
+          >
+          <ng-option *ngFor="let fieldList of calculate.field" [value]="fieldList.id"
+            [disabled]="mappedValues(output_condition,'selectedField')?.includes(fieldList.id)">
+            <span class="text-capitalize">
+              {{fieldList?.name}}
+            </span>
+          </ng-option>
+          </ng-select>
+        </div>
+        <div>
+          <icon name="add_circle" class="cursor-pointer mr-12"  *ngIf="i == output_condition?.length - 1" (click)="addOutput(conditionGroup.ruleFieldOutputConfigs)" size="18px" color="#0044C5"></icon>
+        </div>
+        <div>
+          <icon name="highlight_off" class="cursor-pointer" *ngIf="output_condition?.length > 1"  (click)="removeOutput(i)"  size="18px" color="#A3B0C0"></icon>
+        </div>
+      </div>
+  </div>
+</section>

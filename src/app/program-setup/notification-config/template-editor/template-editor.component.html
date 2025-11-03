@@ -1,0 +1,144 @@
+<section class="notification-editor-wrapper column-direction">
+    <div class="preview-zone">
+      <div class="preview-tabs d-flex justify-content-between align-items-center px-24">
+        <div class="d-flex align-items-center">
+           <button class="btn btn-light mr-16" (click)="goBack()">
+                <icon name="chevron_left"></icon>
+           </button>
+           <div>
+            <p class="font-weight-medium">
+                {{ 'template_editor' | i18next }}
+            </p>
+            <p class="small">
+               {{event?.name | i18next}}
+            </p>
+           </div>
+        </div>
+        <ul>
+          <li>
+            <a href="javascript:void(0)" [ngClass]="{'active': previewMode == 'email'}" (click)="changePreviewMode('email')">
+                <icon name="drafts" theme="outlined"></icon>
+                {{ 'email_template' | i18next }}
+            </a>
+        </li>
+          <!-- <li>
+            <a href="javascript:void(0)" [ngClass]="{'active': previewMode == 'push-notification'}" (click)="changePreviewMode('push-notification')">
+                <icon name="ad_units" theme="outlined"></icon>
+                Push notification
+            </a>
+          </li> -->
+            <!-- <li>
+                <a href="javascript:void(0)" [ngClass]="{'active': previewMode == 'sms'}" (click)="changePreviewMode('sms')">
+                    <icon name="textsms" theme="outlined"></icon>
+                    SMS Template
+                </a>
+            </li>
+            <li>
+                <a href="javascript:void(0)" [ngClass]="{'active': previewMode == 'notification'}" (click)="changePreviewMode('notification')">
+                    <icon name="notifications_active" theme="outlined"></icon>
+                    Push notification
+                </a>
+            </li> -->
+        </ul>
+      </div>
+      <div  *ngIf="previewMode ==='push-notification'" class="p-32">
+        <div class="dropdown-selectors">
+          <ng-template *ngTemplateOutlet="topSectionRole"></ng-template>
+        </div>
+        <div class="email-preview-container">
+          <app-push-notification-template [templateDetails]="templateDetails" (templateSaveClicked)="templateSaveClicked($event)" [pushNotificationFields]="pushNotificationFields"></app-push-notification-template>
+        </div>
+      </div>
+      <div class="preview-body">
+        <!--Actors ::
+
+         <div class="preview-tabs d-flex justify-content-between align-items-center px-24">
+        <ul>
+          <li *ngFor = 'let template of templates'>
+              <a href="javascript:void(0)" [ngClass]="{'active': template.id === seletedTemplate?.id}" (click)="templateSeleted(template)">
+                  {{template.role}}
+              </a>
+          </li>
+          <li>
+            <div class="d-flex">
+              <input [(ngModel)]="newRoleName" class="form-control"
+             type="text" >
+            <i href="javascript:void(0)" (click)="addTemplate()">
+                Add new
+            </i>
+            </div>
+        </li>
+      </ul>
+      </div> -->
+        <perfect-scrollbar [config]="{ suppressScrollX: true, suppressScrollY: false }" *ngIf="previewMode === 'email'">
+            <div class="template-outer p-32 position-relative">
+              <div class="dropdown-selectors">
+                <ng-template *ngTemplateOutlet="topSectionRole"></ng-template>
+              </div>
+              <div class="email-preview-container">
+
+                <!-- <app-design-panel></app-design-panel> -->
+                <app-template-render *ngIf="templateDetails.notificationConfig.include_header" (headerData) ="onLoadData($event, 'header')" [id]='"header"' [config]="templateDetails.notificationConfig.emailConfig.header"></app-template-render>
+                <app-template-render *ngIf="templateDetails.notificationConfig.emailConfig.body" [id]='"body"' [config]="templateDetails.notificationConfig.emailConfig.body"></app-template-render>
+                <div class="not-content d-flex justify-content-start align-items-center" *ngIf="!templateDetails.notificationConfig.emailConfig.body">
+                  <icon name="info" size="18px" class="mr-8"></icon> <p>{{ 'body_content_for_this_template_is_currently_not_available' | i18next }}</p>
+                </div>
+                <app-template-render *ngIf="templateDetails.notificationConfig.include_footer" (footerData) ="onLoadData($event, 'footer')" [id]='"footer"' [config]="templateDetails.notificationConfig.emailConfig.footer"></app-template-render>
+              </div>
+            </div>
+        </perfect-scrollbar>
+
+      </div>
+    </div>
+
+    <div class="editor-zone" *ngIf="(editorType == 'header' || editorType == 'content' || editorType == 'footer') && previewMode ==='email'">
+          <app-editor [isRootLevelTemplete]="isRootLevelTemplete" [editorType]="editorType" (checked)="onChecked($event)" [hasEmailTemplate]="hasEmailTemplate" [notificationData]="notificationData"
+        [templateDetails]="templateDetails" (templateSaveClicked) = "templateSaveClicked($event)" (onedit)="onEditTemplate($event)" (markeAsRootTemplate)="markTemplateAsRoot($event)" (deleteTemplate)="deleteTemplate($event)"></app-editor>
+    </div>
+<app-template-designer  *ngIf="templateDesignerConfig" [templateDesignerConfig]="templateDesignerConfig" (desingerClosed)="templateDesignerClosed($event)"></app-template-designer>
+<ng-template #topSectionRole let-roles>
+  <div class="form-group-row">
+    <div class="form-group">
+      <label  class="font-weight-medium">{{ 'select_role' | i18next }}</label>
+      <ng-select placeholder="Select Actor" [(ngModel)]="dropdownOptions.actor" (change)="onChange($event)">
+          <ng-option *ngFor="let actor of dropdownOptions['actors']" value="{{actor.value}}">
+            {{ actor.name }}
+          </ng-option>
+      </ng-select>
+    </div>
+    <div class="form-group">
+      <label class="font-weight-medium">{{ 'select_recipient' | i18next }}</label>
+        <ng-select placeholder="Select Recipient" [(ngModel)]="dropdownOptions.roleRecipient" (change)="onChange($event)">
+          <ng-option *ngFor="let actor of dropdownOptions['actors']" value="{{actor.value}}">
+            {{ actor.name }}
+          </ng-option>
+      </ng-select>
+    </div>
+    <div class="form-group">
+      <label class="font-weight-medium">{{ 'select_language' | i18next }}</label>
+      <ng-select placeholder="Select Language" [(ngModel)]="dropdownOptions.language" (change)="onChange($event)">
+        <ng-option value="en">
+          <div class="d-flex align-items-center">
+            <icon size="16px" name="language" class="mr-4" cuClass="d-flex"></icon> <span>{{ 'english_us' | i18next }}</span>
+          </div>
+         </ng-option>
+      </ng-select>
+    </div>
+    <div class="form-group">
+      <ng-container *ngIf="!hasEmailTemplate || dropdownOptions.cloneTemplateId">
+        <label class="font-weight-medium">{{ 'select_clone_from' | i18next }}</label>
+        <ng-select placeholder="Clone from" [(ngModel)]="dropdownOptions.cloneTemplateId" (change)="onTemplateChange($event)">
+          <ng-option value="{{item.id}}" *ngFor="let item of dropdownOptions['allTemplates']">
+            <ng-container *ngIf="item?.role && item?.language else other_content">
+              {{ item?.role }} {{item?.roleRecipient ? '-' + item?.roleRecipient : '' }} ({{ item?.language }})
+            </ng-container>
+            <ng-template #other_content>
+              {{ item.parent_template }}
+            </ng-template>
+          </ng-option>
+        </ng-select>
+      </ng-container>
+    </div>
+  </div>
+</ng-template>
+</section>

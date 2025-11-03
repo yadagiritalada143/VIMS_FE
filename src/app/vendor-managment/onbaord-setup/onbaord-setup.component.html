@@ -1,0 +1,657 @@
+<div class="create-wrapper p-24">
+  <h4 *ngIf="termsAndConditionAccepted" class="py-12 font-weight-semibold vendor-details-head"> {{ 'vendor_details' | i18next }} </h4>
+  <app-vendor-onboard (onSubmit)="termsAndConditionAccepted=true" [programDetail]="programDetail" *ngIf="!termsAndConditionAccepted">
+  </app-vendor-onboard>
+  <div class="create-form" *ngIf="termsAndConditionAccepted">
+    <div class="card bg-light" [ngSwitch]="visiblePanel">
+      <div class="breadcrumb d-flex">
+        <div (click)="visiblePanel='basicInfo'" class="item pl-24 pr-24"
+          [ngClass]="{active : visiblePanel=='basicInfo','finished': finishedClass('basicInfo')}">
+          <span class="mr-8">1</span>
+          <icon class="mr-8" size="20px" name="done_outline"></icon> {{ 'basic_info' | i18next }}
+        </div>
+        <!-- finished -->
+        <div (click)="visiblePanel='financialDetail'" class="item pl-24 pr-24"
+          [ngClass]="{active : visiblePanel=='financialDetail','finished': finishedClass('financialDetail')}"><span
+            class="mr-8">2</span>
+          <icon class="mr-8" size="20px" name="done_outline"></icon> {{ 'financial_details_&_documents' | i18next }}
+        </div>
+        <div (click)="visiblePanel='jobDetails'" class="item pl-24 pr-24"
+          [ngClass]="{active : visiblePanel=='jobDetails','finished': finishedClass('jobDetails')}"><span
+            class="mr-4">{{'3'}}</span>
+          <icon class="mr-8" size="20px" name="done_outline"></icon> {{ 'diversity_details' | i18next }}
+        </div>
+
+        <!-- <div (click)="visiblePanel='references'" class="item pl-24 pr-24"
+          [ngClass]="{active : visiblePanel=='references'}">
+          <span class="mr-4">{{ '4' | i18next }}</span>
+          <icon class="mr-8" size="20px" name="done_outline"></icon> {{ 'references' | i18next }}
+        </div> -->
+      </div>
+
+
+      <form [formGroup]="basicInforForm" class="p-32" *ngSwitchCase="'basicInfo'">
+        <div class="p-8">
+          <div class="form-group-row">
+            <div class="form-group">
+              <label> {{ 'vendor_name' | i18next }} <span class="require">*</span> </label>
+              <input type="text" formControlName="name" [readOnly]="isView ? true : false" class="form-control highlight-form" placeholder="{{ 'vendor_abc' | i18next }}">
+            </div>
+
+            <div class="">
+              <label>&nbsp;</label>
+              <div class="d-flex">
+                <!-- <input type="text" class="form-control highlight-form" placeholder="VEN-VN-001"> -->
+                <!-- <div class="pl-0 create-client w-100">
+                  <div class="form-group">
+                    <ng-select placeholder="VEN-VN-001">
+                      <ng-option>001</ng-option>
+                      <ng-option>002</ng-option>
+                    </ng-select>
+
+                  </div>
+                </div> -->
+                <div class="ml-16">
+                  <div class="toggle-panel" [ngClass]="{'disableDiv': isView  ? true : false}">
+                    <div class="toggle-panel-inner"
+                      [ngClass]="basicControl?.is_enable.value ? 'if-active' : 'if-inactive'">
+                      <span class="status-text">{{(basicControl?.is_enable.value ? 'Active' : 'Inactive') | i18next}}</span>
+                      <span class="toggle-switch" [ngClass]="basicControl?.is_enable.value ? 'toggle-on' : 'toggle-off'"
+                        (click)="onClickToggle()"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- company description -->
+          <div class="form-group">
+            <label> {{ 'company_description' | i18next }} </label>
+            <textarea formControlName="description" type="textarea" [readOnly]="isView ? true : false" rows="7" cols="12" maxlength="1000"
+              class="form-control" placeholder="{{ 'enter_company_description' | i18next }}"></textarea>
+
+          </div>
+
+          <div class="form-group-row">
+            <div class="form-group">
+              <label> {{ 'company_website' | i18next }}
+                <icon class="field-info-icon" theme="outlined" name="help_outline" type="material" size="13.5px" tooltip="Provide the url in the format https://www.name-of-website-with-domain-name. E.g., https://www.simplifyvms.com" placement="right" delay="100"></icon>
+              </label>
+              <input pattern="^(http|https)://.*$" formControlName="website" type="text" hyperlink [readOnly]="isView ? true : false" class="form-control" placeholder="{{ 'enter_company_website' | i18next }}"
+              [ngClass]="{'error': basicInforForm.controls['website'].invalid && (basicInforForm.controls['website'].dirty || basicInforForm.controls['website'].touched)
+              }">
+              <p *ngIf="
+            basicInforForm.get('website').touched && basicInforForm.get('website').value &&
+                (basicInforForm.get('website').errors?.pattern || basicInforForm.get('website').invalid)
+              " class="validation-msg">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'website_link_is_not_valid' | i18next }}.
+          </p>
+            </div>
+            <div class="form-group">
+              <label> {{ 'business_ownership' | i18next }} </label>
+              <ng-select formControlName="business_ownership" [readonly] ="isView ? true : false"  placeholder="{{ 'select_business_ownership' | i18next }}"
+                [items]="businessOwnershipList">
+              </ng-select>
+            </div>
+          </div>
+
+          <div class="form-group-row">
+            <div class="form-group">
+              <label> {{ 'year_established' | i18next }} </label>
+              <input formControlName="year_of_establishment" [readOnly]="isView ? true : false" type="text" class="form-control" placeholder="{{ 'enter_year_established' | i18next }}">
+            </div>
+            <div class="form-group">
+              <label> {{ 'size_of_business' | i18next }}</label>
+              <ng-select formControlName="size_of_business" [readonly] ="isView ? true : false" placeholder="{{ 'select_size_of_business' | i18next }}" [items]="businessSize">
+              </ng-select>
+            </div>
+          </div>
+
+          <h4 class="d-flex pb-8">
+            <icon class="d-flex mr-8" size="24px" name="connect_without_contact" type="material" cuClass="d-flex">
+            </icon>
+            {{ 'social_media_profile' | i18next }}({{ 's' | i18next }})
+            <icon class="field-info-icon" theme="outlined" name="help_outline" type="material" size="13.5px" tooltip="Provide the url in the format https://www.name-of-website-with-domain-name. E.g., https://www.simplifyvms.com" placement="right" delay="100"></icon>
+          </h4>
+          <form class="form-group-row" [formGroup]="socialForm"
+            *ngFor="let socialForm of basicInforForm.get('social_profiles')?.controls; let i = index">
+            <div class="form-group mr-0 social-application">
+              <!-- <label>Application</label> -->
+              <ng-select [searchable]="false" formControlName="type" [clearable]="false"  [readonly] ="isView ? true : false"
+                placeholder="{{ 'choose_application' | i18next }}" ngDefaultControl class="no-right-border">
+                <ng-option [disabled]="isSocialMediaSelected('linkedin')" [value]="'linkedin'">
+                  <img src="/assets/images/linkedin.svg" class="mr-12">
+                  <span>{{ 'linked_in' | i18next }}</span>
+                </ng-option>
+                <ng-option [disabled]="isSocialMediaSelected('facebook')" [value]="'facebook'">
+                  <img src="/assets/images/facebook.svg" class="mr-12 pr-4">
+                  <span>{{ 'facebook' | i18next }}</span>
+                </ng-option>
+                <ng-option [disabled]="isSocialMediaSelected('git')" [value]="'git'">
+                  <img src="/assets/images/github.svg" class="mr-12">
+                  <span>{{ 'github' | i18next }}</span>
+                </ng-option>
+                <ng-option [disabled]="isSocialMediaSelected('skype')" [value]="'skype'">
+                  <img src="/assets/images/skype.svg" class="mr-12">
+                  <span>{{ 'skype' | i18next }}</span>
+                </ng-option>
+                <ng-option [disabled]="isSocialMediaSelected('instagram')" [value]="'instagram'">
+                  <img src="/assets/images/instagram.svg" class="mr-12">
+                  <span>{{ 'instagram' | i18next }}</span>
+                </ng-option>
+              </ng-select>
+            </div>
+            <div class="form-group">
+              <!-- <label>Enter Profile Link</label> -->
+              <input type="text" formControlName="link" hyperlink [readOnly]="isView ? true : false" class="form-control no-left-border"
+                placeholder="{{ 'enter_your_profile_url' | i18next }}" pattern="^(http|https)://.*$"
+                [ngClass]="{'error': socialForm.controls['link'].invalid && (socialForm.controls['link'].dirty || socialForm.controls['link'].touched)
+              }">
+              <p *ngIf="
+            socialForm.get('link').touched &&
+                (socialForm.get('link').errors?.pattern || socialForm.get('link').errors?.required || socialForm.get('link').invalid)
+              " class="validation-msg">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'social_link_is_not_valid' | i18next }}.
+          </p>
+            </div>
+            <div class="form-group add-remove d-flex align-items-center" [ngClass]="{'disableDiv': isView  ? true : false}" >
+              <a class="add-link cursor-pointer" [ngClass]="{'disableTag': socialForm.get('link').errors?.pattern || socialForm.get('link').value == undefined || socialForm.get('link').value == '' || socialForm.get('type').value == undefined || socialForm.get('type').value == '' || socialForm.get('link').invalid}" (click)="addNewSocial()">
+                <icon class="remove-icon" size="24px" name="add_circle" type="material" cuClass="d-flex">
+                </icon>
+              </a>
+              <a class="add-link ml-12 cursor-pointer" *ngIf="i != 0" (click)="removeSocial(i)">
+                <icon class="remove-icon" color="red" size="24px" name="remove_circle" type="material" cuClass="d-flex">
+                </icon>
+              </a>
+
+            </div>
+          </form>
+
+
+          <div class="form-group">
+            <label>{{ 'labor_category' | i18next }} <span class="require">*</span></label>
+            <ng-select formControlName="labor_categories" [readonly] ="isView ? true : false" placeholder="{{ 'select_labor_category' | i18next }}" bindLabel="name"  bindValue="id" [multiple]="true" [searchable]="true" required="true"
+              [items]="labor_categories">
+            </ng-select>
+          </div>
+
+          <div class="form-group">
+            <label>{{ 'work_location' | i18next }} </label>
+            <ng-select formControlName="work_locations" [readonly] ="isView ? true : false" placeholder="{{ 'select_location' | i18next }}" bindLabel="name" bindValue="id" [items]="workLocations" [multiple]="true"
+              [searchable]="true">
+            </ng-select>
+          </div>
+
+          <div class="form-group col-md-6 pl-0">
+            <label>
+              {{ 'supplier_reference_id' | i18next }}
+            </label>
+            <input formControlName="supplier_reference" placeholder="{{ 'enter_supplier_reference' | i18next }}" [readOnly]="isView ? true : false" type="text" class="form-control"
+            [ngClass]="{'error': basicInforForm.controls['supplier_reference'].invalid && (basicInforForm.controls['supplier_reference'].dirty || basicInforForm.controls['supplier_reference'].touched)
+            }">
+            <p *ngIf="basicInforForm.get('supplier_reference').touched &&
+                (basicInforForm.get('supplier_reference').errors?.pattern || basicInforForm.get('supplier_reference').errors?.required || basicInforForm.get('supplier_reference').invalid)
+              " class="validation-msg">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'supplier_reference_number_is_not_valid' | i18next }}.
+            </p>
+          </div>
+
+
+          <div class="form-group col-md-6 pl-0">
+            <label>
+              {{ 'supplier_connection_id' | i18next }}
+            </label>
+            <input formControlName="supplier_connection_id" placeholder="{{ 'enter_supplier_connection_id' | i18next }}" [readOnly]="isView ? true : false" type="text" class="form-control"
+            [ngClass]="{'error': basicInforForm.controls['supplier_connection_id'].invalid && (basicInforForm.controls['supplier_connection_id'].dirty)
+            }">
+            <p *ngIf="basicInforForm.get('supplier_connection_id').touched &&
+                (basicInforForm.get('supplier_connection_id').errors?.pattern || basicInforForm.get('supplier_connection_id').invalid)
+              " class="validation-msg">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                {{ 'supplier_connection_id_is_not_valid' | i18next }}.
+            </p>
+          </div>
+
+          <h4 class="font-weight-medium pb-8">{{ 'address' | i18next }} <span class="require">*</span></h4>
+
+          <!-- <div class="panel panel-info mb-24">
+            <div class="text-center m-32">
+              <p class="text-primary"> + Add Address </p>
+            </div>
+          </div> -->
+
+          <div class="row" [ngClass]="{'disableDiv': isView  ? true : false}">
+            <form class="col-md-4" *ngFor="let addressForm of finalAddressList; let i=index">
+              <div class="panel panel-light mb-24 p-24 h-150">
+                <div class="d-flex align-items-center justify-content-between">
+                  <h5>{{addressForm?.country}}</h5>
+                  <button class="btn btn-light small doted_more d-inline-block border-none" (click)="showAddressDropdown(i)">
+                    <icon size="20px" name="more_horiz" type="material" cuClass="icon-cu"></icon>
+                  </button>
+                  <nav class="option-dropdown position-absolute active" [class.active]="i==showAddressAction">
+                    <ul>
+                      <li>
+                        <a href="javascript:void(0)" (click)="clickToEditAddress(addressForm , i)">
+                          <icon size="19px" name="create" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+                          </icon>
+                          {{ 'edit' | i18next }}
+                        </a>
+                      </li>
+                      <li>
+                        <a href="javascript:void(0)" (click)="clickTodeleteAddress(i)">
+                          <icon size="20px" name="delete" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+                          </icon>
+                          {{ 'delete' | i18next }}
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+                <p [class]="addressForm?.city !== '' && addressForm?.state !== '' ? 'small mt-24' : 'dnone'" *ngIf="addressForm?.city !== '' && addressForm?.state !== ''">
+                  {{addressForm?.street_1}}
+                  <span *ngIf="addressForm?.street_1">,</span>{{addressForm?.street_2}}
+                  <span *ngIf="addressForm?.street_2 || addressForm?.street_1">,</span>{{addressForm?.city}}
+                  <span *ngIf="addressForm?.street_2 || addressForm?.street_1 || addressForm?.city">,</span>{{addressForm?.state}}
+                  {{addressForm?.zipcode}}
+                  <span *ngIf="addressForm?.street_2 || addressForm?.street_1 || addressForm?.city || addressForm?.state || addressForm?.zipcode">,</span>{{addressForm?.country}}
+                </p>
+
+                <p class="small mt-24" *ngIf="addressForm?.street_2 == '' && addressForm?.city == '' && addressForm?.state == '' && addressForm?.zipcode == ''">
+                  {{addressForm?.street_1}}
+                </p>
+
+                  <p class="text-left mb-8 mt-16" *ngIf="addressForm?.billing">
+                    <span class="initials  mr-8">
+                      <icon class="d-flex text-success" size="18px" name="verified" type="material" cuClass="d-flex">
+                      </icon>
+                    </span>
+                    <a *ngIf="addressForm?.billing" class="d-flex small">{{ 'billing_address' | i18next }}</a>
+                  </p>
+              </div>
+            </form>
+            <!-- <div class="col">
+              <div class="panel panel-light mb-24 p-24 h-150">
+                <div class="d-flex align-items-center justify-content-between">
+                  <h5>Louisiana</h5>
+                  <button class="btn btn-light small doted_more d-inline-block border-none">
+                    <icon size="20px" name="more_horiz" type="material" cuClass="icon-cu"></icon>
+                  </button>
+                </div>
+                <p class="small mt-24">
+                  Park Avenue, Tower,
+                  4th floor Royal Springs,
+                  Trivandrum</p>
+
+              </div>
+            </div> -->
+            <div class="col-md-4" (click)="showAddAddress()" *ngIf="finalAddressList?.length < 2">
+              <div class="panel panel-light mb-24 h-150">
+                <div class="text-center">
+                  <button class="btn add-button m-32 mb-16">
+                    <icon size="24px" name="add" type="material" cuClass="d-flex"></icon>
+                  </button>
+                  <h4 class="text-primary">{{ 'add_address' | i18next }}</h4>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+
+          <div class="my-16" [ngClass]="{'disableDiv': isView  ? true : false}">
+            <!-- <div class="panel panel-info mb-24">
+              <div class="text-center m-32">
+                <p class="text-primary"> + Add Contact </p>
+              </div>
+            </div> -->
+            <h4 class="font-weight-medium pb-8">{{ 'contact' | i18next }} <span class="require">*</span></h4>
+            <div class="row">
+              <div class="col-md-4" *ngFor="let contactForm of finalContactList; let i=index">
+                <div class="panel panel-light mb-24 p-24 h-150">
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                      <div class="initials initials-profile initials__pink d-flex align-justify-center mr-8 text-uppercase">{{ contactForm?.first_name.substring(0,1) + contactForm?.last_name.substring(0,1)  | i18next }}</div>
+                      <div class="d-flex flex-column">
+                        <span class="font-weight-medium">{{contactForm?.contact_name}}</span>
+                        <span class="small">{{contactForm?.title}}</span>
+                      </div>
+                    </div>
+                    <button class="btn btn-light small doted_more d-inline-block border-none" (click)="showContactDropdown(i)">
+                      <icon size="20px" name="more_horiz" type="material" cuClass="icon-cu"></icon>
+                    </button>
+                    <nav class="option-dropdown position-absolute active" [class.active]="i==showContactAction">
+                      <ul>
+                        <li>
+                          <a href="javascript:void(0)" (click)="clickToEditContact(contactForm , i)">
+                            <icon size="19px" name="create" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+                            </icon>
+                            {{ 'edit' | i18next }}
+                          </a>
+                        </li>
+                        <li>
+                          <a href="javascript:void(0)" (click)="clickTodeleteContact(i)">
+                            <icon size="20px" name="delete" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+                            </icon>
+                            {{ 'delete' | i18next }}
+                          </a>
+                        </li>
+                      </ul>
+                    </nav>
+                  </div>
+                  <p class="text-left mb-4 mt-16"><span class="initials initials__purple mr-8"
+                      *ngIf="contactForm?.contact_phone">
+                      <icon class="d-flex blue" size="11px" name="call" theme="outlined" type="material"
+                        cuClass="d-flex">
+                      </icon>
+                    </span><a href="javascript:void(0)" class="d-flex small">
+                      {{contactForm?.contact_phone}} </a></p>
+
+                  <p class="text-left mb-8 mt-16"><span class="initials initials__purple mr-8"
+                      *ngIf="contactForm?.contact_email">
+                      <icon class="d-flex blue" size="11px" name="mail" theme="outlined" type="material"
+                        cuClass="d-flex">
+                      </icon>
+                    </span><a href="javascript:void(0)"
+                      class="d-flex small">{{contactForm?.contact_email}}</a></p>
+                    <p class="text-left mb-8 mt-16" *ngIf="contactForm?.phone_numbers[0].label == 'PRIMARY'">
+                      <span class="initials  mr-8">
+                        <icon class="d-flex text-success" size="18px" name="verified" type="material" cuClass="d-flex">
+                        </icon>
+                      </span>
+                      <a *ngIf="contactForm?.phone_numbers[0].label == 'PRIMARY'" class="d-flex small">{{ 'primary_contact' | i18next }}</a>
+                    </p>
+                </div>
+              </div>
+              <!-- <div class="col">
+                <div class="panel panel-light mb-24 p-24 h-150">
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                      <div class="initials initials-profile initials__green d-flex align-justify-center mr-8">JM</div>
+                      <div class="d-flex flex-column">
+                        <span class="font-weight-medium">Jason Main</span>
+                        <span class="small">Senior Marketing</span>
+                      </div>
+                    </div>
+
+                    <button class="btn btn-light small doted_more d-inline-block border-none">
+                      <icon size="20px" name="more_horiz" type="material" cuClass="icon-cu"></icon>
+                    </button>
+                  </div>
+                  <p class="text-left mb-4 mt-16"><span class="initials initials__purple mr-8">
+                      <icon class="d-flex blue" size="11px" name="call" theme="outlined" type="material"
+                        cuClass="d-flex">
+                      </icon>
+                    </span><a href="javascript:void(0)" class="d-flex small"> +91 8082957212 </a></p>
+
+                  <p class="text-left mb-8 mt-16"><span class="initials initials__green mr-8">
+                      <icon class="d-flex blue" size="11px" name="mail" theme="outlined" type="material"
+                        cuClass="d-flex">
+                      </icon>
+                    </span><a href="javascript:void(0)" class="d-flex small">tejal-personal@gmail.com</a></p>
+                </div>
+
+              </div> -->
+              <div class="col-md-4" *ngIf="finalContactList?.length < 2">
+                <div class="panel panel-light mb-24 h-150">
+                  <div class="text-center">
+                    <button (click)="showContactSidebar()" class="btn add-button m-32 mb-16">
+                      <icon size="24px" name="add" type="material" cuClass="d-flex"></icon>
+                    </button>
+                    <h4 class="text-primary">{{ 'add_contact' | i18next }}</h4>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="my-16" [ngClass]="{'disableDiv': isView  ? true : false}">
+            <app-custom-fields
+              (isCustomFieldsFormValid)="isCFValid = $event"
+              moduleName="VENDORS" showLabel="true"
+              [isCreate]="!isView"
+              (customFieldUpdated)="updatedCFs = $event"
+              [custom_fields]="recievedCFs"
+            ></app-custom-fields>
+          </div>
+        </div>
+      </form>
+
+      <form [formGroup]="financialForm" class="p-32" novalidate autocomplete="off" *ngSwitchCase="'financialDetail'">
+        <div class="p-8">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>
+                  {{ 'tax_id_type' | i18next }}
+                </label>
+                <ng-select  formControlName="tax_type" [readonly] ="isView ? true : false" placeholder="{{ 'tax_id_type' | i18next }}" [items]="taxIdType" bindValue="name"
+                  bindLabel="name">
+                </ng-select>
+              </div>
+
+
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>
+                  {{ 'tax_id_number' | i18next }}
+                  <span class="require">*</span>
+                </label>
+                <input formControlName="tax_number" [readOnly]="isView ? true : false" placeholder="{{ 'enter_tax_id_number' | i18next }}" type="text" class="form-control" required
+                [ngClass]="{'error': financialForm.controls['tax_number'].invalid && (financialForm.controls['tax_number'].dirty && financialForm.controls['tax_number'].touched)
+              }"/>
+              <p *ngIf="
+              financialForm.get('tax_number').touched &&
+                    (financialForm.get('tax_number').errors?.pattern || financialForm.get('tax_number').errors?.required || financialForm.get('tax_number').invalid)
+                  " class="validation-msg">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                {{ 'tax_id_number_is_not_valid' | i18next }}.
+              </p>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>{{ 'bank_name' | i18next }}</label>
+                <input formControlName="bank_name" placeholder="{{ 'enter_bank_name' | i18next }}" [readOnly]="isView ? true : false" type="text" class="form-control" />
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>
+                  {{((financeControl?.tax_type?.value === 'GSTIN') ? 'IFSC Number' : 'Bank Routing Number') | i18next}}
+                </label>
+                <input formControlName="bank_routing_number" placeholder="{{((financeControl?.tax_type?.value === 'GSTIN') ? 'Enter IFSC Number' : 'Enter Bank Routing Number') | i18next}}" [readOnly]="isView ? true : false"   type="text" class="form-control"
+                  [ngClass]="{'error': financialForm.controls['bank_routing_number'].invalid && (financialForm.controls['bank_routing_number'].dirty)
+                }">
+              </div>
+              <p *ngIf="
+              financialForm.get('bank_routing_number').touched &&
+                    (financialForm.get('bank_routing_number').errors?.pattern || financialForm.get('bank_routing_number').invalid)
+                  " class="validation-msg">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                {{((financeControl?.tax_type?.value === 'GSTIN') ? 'IFSC Number is not valid' : 'Bank Routing Number is not valid')|i18next}}.
+              </p>
+            </div>
+          </div>
+          <div class="row">
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>
+                  {{ 'bank_account_number' | i18next }}
+                </label>
+                <input formControlName="bank_account_number" autocomplete="off" [readOnly]="isView ? true : false" placeholder="{{ 'enter_bank_account_number' | i18next }}" type="text" class="form-control"
+                  [ngClass]="{'error': financialForm.controls['bank_account_number'].invalid && (financialForm.controls['bank_account_number'].dirty)
+                }">
+              </div>
+              <p *ngIf="
+              financialForm.get('bank_account_number').touched &&
+                (financialForm.get('bank_account_number').errors?.pattern || financialForm.get('bank_account_number').invalid)
+              " class="validation-msg">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'bank_account_number_is_not_valid' | i18next }}.
+          </p>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>
+                  {{ 'confirm_bank_account_number' | i18next }}
+                </label>
+                <input [(ngModel)]="confirmAccountNumber" autocomplete="off" placeholder="{{ 'confirm_bank_account_number' | i18next }}" [readOnly]="isView ? true : false" [ngModelOptions]="{standalone: true}" type="text"
+                  class="form-control">
+              </div>
+            </div>
+          </div>
+          <div class="document-tab mt-24" [ngClass]="{'disableDiv': isView  ? true : false}">
+            <table>
+              <tr *ngIf="requiredDocList?.length">
+                <td>{{ 'document_title' | i18next }}</td>
+                <td>
+                  {{ 'document' | i18next }}
+                </td>
+                <td>
+                  {{ 'actions' | i18next }}
+                </td>
+              </tr>
+              <tr *ngFor="let docs of requiredDocList; let i = index">
+                <td>{{docs?.name}}</td>
+                <td><a class="text-blue text-underline">{{docs?.uploaded_document?.file_name}}</a></td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <a class="d-flex align-items-center text-blue mr-12 cursor-pointer" (click)="allowDropBox(i)">
+                      <icon size="16px" name="cloud_upload" type="material" cuClass="d-flex"></icon><span
+                        class="text-underline ml-4">{{ 'upload' | i18next }}</span>
+                    </a>
+
+                    <a [attr.href]="docs?.uploaded_document?.url" *ngIf="docs?.uploaded_document?.url" target="_blank"
+                      class="d-flex align-items-center text-blue">
+                      <icon size="16px" name="save_alt" type="material" cuClass="d-flex"></icon><span
+                        class="text-underline ml-4">{{ 'download' | i18next }}</span>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+
+            </table>
+          </div>
+        </div>
+      </form>
+
+      <div class="p-32" *ngSwitchCase="'jobDetails'">
+        <div class="p-8">
+          <div class="mb-24 d-flex justify-content-end align-items-center" [ngClass]="{'disableDiv': isView  ? true : false}">
+            <div class="toggle-panel2">
+              <div class="toggle-panel-inner">
+                <span class="status-text">{{ 'diversity_vendor' | i18next }}</span>
+                <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="_onClickToggle()"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- <div class="panel panel-info mb-24">
+            <div class="text-center m-32">
+              <p class="text-primary"> + Add Diversity </p>
+            </div>
+          </div> -->
+
+          <div class="row" *ngIf="toggle?.value" [ngClass]="{'disableDiv': isView  ? true : false}">
+            <div class="col-md-4" *ngFor="let diversitiesForm of finalDiversityList; let i=index">
+              <div class="panel panel-light mb-24 p-24 h-150">
+                <div class="d-flex align-items-center justify-content-between">
+                  <h5>{{diversitiesForm?.country}}</h5>
+                  <button class="btn btn-light small doted_more d-inline-block border-none">
+                    <icon size="20px" name="more_horiz" type="material" cuClass="icon-cu" (click)="showDiversityDropdown(i)"></icon>
+                  </button>
+                  <nav class="option-dropdown position-absolute active" [class.active]="i==showDiversityAction">
+                    <ul>
+                      <li>
+                        <a href="javascript:void(0)" (click)="clickToEditDiversity(diversitiesForm , i)">
+                          <icon size="19px" name="create" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+                          </icon>
+                          {{ 'edit' | i18next }}
+                        </a>
+                      </li>
+                      <li>
+                        <a href="javascript:void(0)" (click)="clickTodeleteDiversity(i)">
+                          <icon size="20px" name="delete" type="material" class="d-flex" cuClass="icon--on-left d-flex">
+                          </icon>
+                          {{ 'delete' | i18next }}
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+                <p class="small mt-24">
+                  {{diversitiesForm?.category?.value}}</p>
+                <p class="text-left mb-8 mt-16"><span class="initials  mr-8"
+                    *ngIf="diversitiesForm?.certification">
+                    <icon class="d-flex text-success" size="18px" name="verified" type="material" cuClass="d-flex">
+                    </icon>
+                  </span> <a href="javascript:void(0)"
+                    class="d-flex small">{{diversitiesForm?.certification.name}}</a></p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="panel panel-light mb-24 h-150">
+                <div class="text-center">
+                  <button (click)="showdDiversitySidebar()" class="btn add-button m-32 mb-16">
+                    <icon size="24px" name="add" type="material" cuClass="d-flex"></icon>
+                  </button>
+                  <h4 class="text-primary">{{ 'add_diversity' | i18next }}</h4>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+
+      <div class="form-footer d-flex p-24 align-items-center justify-content-end">
+        <button (click)="next()"
+[disabled]="!isCFValid
+|| disableSubmit
+|| (visiblePanel ==='basicInfo' && (!this.basicInforForm.get('labor_categories').value || this.basicInforForm.get('labor_categories').value.length <= 0) )
+|| (visiblePanel ==='basicInfo' && basicInforForm.get('website').touched && basicInforForm.get('website').value && (basicInforForm.get('website').errors?.pattern || basicInforForm.get('website').invalid))
+|| (visiblePanel ==='financialDetail' &&  !financeControl?.tax_number?.value)
+|| (visiblePanel ==='financialDetail' &&  !financeControl?.tax_number?.value)
+|| (visiblePanel ==='jobDetails' && !financeControl?.tax_number?.value)"
+type="button" class="btn btn-primary">
+{{ (visiblePanel !== 'jobDetails' ? 'Continue' : 'Submit') |i18next}}
+</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- add active class in both suceess-modal or modal-overlay div to make it visible  -->
+<section class="success-modal py-64" [ngClass]="{'active': showDragDropWindow}">
+  <span class="close" (click)="closePopup()">x</span>
+  <div class="resume-wrapper" appDragAndDrop (fileDropped)="onFileDropped($event)">
+    <div class="drop-zone mb-16 cursor-pointer">
+      <icon size="24px" name="publish" type="material" cuClass="d-flex"></icon>
+    </div>
+    <h4 class="pt-4 mb-4">{{ 'drag' | i18next }} &amp; {{ 'drop_file_or' | i18next }} <a (click)="fileUpload.click()">{{ 'browse' | i18next }}</a></h4>
+    <input hidden (change)="handleUpload($event)" type="file" multiple="false" accept=".doc,.pdf,.docx" #fileUpload>
+    <p class="file-format mb-32">{{ 'only_.pdf,_.doc_files_with_maximum_size_of_10_mb' | i18next }}
+      </p>
+  </div>
+</section>
+<div class="modal-overlay" [ngClass]="{'active': showDragDropWindow}"></div>
+
+<app-add-address *ngIf="allCountryList.length > 0" [isBillingLength]="billingAddressLength" [visiblity]="addAddressVisibility" [allCountryList]="allCountryList" [isEditAddress]="isEditAddress" [dataToEditAddressList]="dataToEditAddressList" (onSubmit)="addItemAddress($event);addressClosed()"
+  (onClose)="addressClosed()">
+</app-add-address>
+
+<app-add-contact (onSubmit)="addContact($event)" [isPrimaryContactLength]="isPrimaryContactLength" *ngIf="allCountryList.length > 0" [isEditContact]="isEditContact" [dataToEditContactList]="dataToEditContactList ? dataToEditContactList : []" [allCountryList]="allCountryList" [visiblity]="addContactVisibility" (onClose)="contactClosed()">
+</app-add-contact>
+<app-add-diversity (onSubmit)="addDiversiry($event)" [allCountryList]="allCountryList" [isEditDiversity]="isEditDiversity" [dataToEditDiversityList]="dataToEditDiversityList" [visiblity]="addDiversityVisibility" (onClose)="diversityClosed()">
+</app-add-diversity>

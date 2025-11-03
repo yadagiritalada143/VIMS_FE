@@ -1,0 +1,46 @@
+<!--*ngIf="programDetails?.config?.is_custom_tax_on_assignment"-->
+<ng-container *ngIf="taxAllowed && viewTax">
+  <div>
+    <div class="pt-8" *ngIf="taxData && taxData?.length> 0">
+      <div class="row">
+        <div class="col-12 mb-16">
+          <h4 class="font-weight-medium mt-24 d-flex align-items-center">
+            <icon name="account_balance" size="24px" color="black" cuclass="d-flex" class="d-flex mr-4"></icon>
+            {{ 'tax_information' | i18next }}
+          </h4>
+        </div>
+        <div class="col-md-6 mb-12" *ngFor="let tax of taxData">
+          <div class="panel panel-light p-16">
+            <div class="d-flex align-items-center justify-content-between">
+              <p>{{tax?.name}}</p>
+              <p>{{tax?.value | accuracy : 'tax_percentage'}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+
+<ng-container *ngIf="adjustmentAllowed && viewAdjustment">
+  <div class="pt-8" *ngIf="adjustmentData && adjustmentData?.length> 0">
+    <div class="row">
+      <div class="col-12 mb-16">
+        <h4 class="font-weight-medium mt-24 d-flex align-items-center">
+          <icon name="account_balance" size="24px" color="black" cuclass="d-flex" class="d-flex mr-4"></icon>
+          {{ 'Adjustment Information' | i18next }}
+        </h4>
+      </div>
+      <div class="col-md-6 mb-12" *ngFor="let fee of adjustmentData">
+        <div class="panel panel-light p-16">
+          <div class="d-flex align-items-center justify-content-between">
+            <p>{{fee?.entity_name}} Fee</p>
+            <p>{{fee?.amount_value | accuracy : 'adjustment' : {currencyCode: currency} }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</ng-container>

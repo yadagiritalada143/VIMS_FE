@@ -1,0 +1,36 @@
+<header class="c-header-panel pt-12 pb-12">
+    <div class="d-flex align-items-center justify-content-between">
+        <ul class="breadcrumb">
+            <li>
+                <a [routerLink]="'/control-panel'">{{ 'control_panel' | i18next }}</a>
+            </li>
+            <li *ngIf="currentPageName">
+                <i class="material-icons">arrow_right</i>
+            </li>
+            <li>
+                {{ currentPageName | i18nextEager }}
+            </li>
+        </ul>
+        <div class="d-flex align-items-center">
+            <div class="position-relative" #userLink>
+                <figure *ngIf="userAvatar; else shorthand" class="user-avatar">
+                    <img [src]="userAvatar" class="cursor-pointer" alt="">
+                </figure>
+                <ng-template #shorthand>
+                    <figure class="rounded-circle position-relative mb-0 text-center default-color">
+                        <span>
+                            {{ userName | shortName }}
+                        </span>
+                    </figure>
+                </ng-template>
+                <ul class="dropdown-menu right-align" [ngClass]="{'active' : userDropdown}" #userDropdownMenu>
+                    <li>
+                        <a href="javascript:void(0)" (click)="userLogout()">
+                            {{ 'log_out' | i18next }}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</header>

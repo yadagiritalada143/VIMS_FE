@@ -1,0 +1,20 @@
+<div class="supporting-text d-flex justify-content-between py-12">
+    <div class="d-flex">
+        <div class="p-12">
+            <icon size="20px" [name]="icon" [color]="icon_color"></icon>
+        </div>
+        <div>
+            <label>{{label | i18next}}</label>
+            <div [id]="id" class="support-text">{{support_text | i18nextEager}} </div>
+            <span *ngIf="showReadLink && showReadButton" class="read-link" (click)="toggle()">{{ (readMore ? 'Read More' : 'Read Less') | i18next }}</span>
+        </div>
+    </div>
+    <div *ngIf="button_text && link" class="px-12 py-8">
+        <button class="btn small btn-primary" (click)="onclick(link)">{{button_text | i18nextEager}}</button>
+    </div>
+    <div class="px-12 py-8" *ngIf="close_icon">
+        <div class="p-12 cursor-pointer" (click)="close()">
+            <icon size="20px" name="close"></icon>
+        </div>
+    </div>
+</div>

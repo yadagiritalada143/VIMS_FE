@@ -1,0 +1,168 @@
+<svms-sidebar [title]="title |i18next" [dataVisibility]="createTasklists"
+              (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <form [formGroup]="taskForm" class="taskForm">
+      <div class="form-group-row">
+        <div class="form-group">
+          <label>{{ 'task_name' | i18next }} <span class="require">*</span></label>
+          <input type="text" formControlName="task_name" class="form-control" name="checklistname"
+            placeholder="{{ 'cpr_cert' | i18next }} 2" [readonly]="isViewMode">
+        </div>
+        <div class="toggle-panel mt-24">
+          <div class="toggle-panel-inner">
+            <span class="status-text">{{ (taskForm.get('is_enabled')?.value?'Active':'Inactive') | i18next }}</span>
+            <toggle-button [disabled]="isViewMode" [checked]="taskForm.get('is_enabled')?.value"
+              (changed)="changeStatus($event)">
+            </toggle-button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{ 'task_type' | i18next }} <span class="require">*</span></label>
+        <ng-select placeholder="{{ 'task_type' | i18next }}" formControlName="task_type" [readonly]="isViewMode">
+          <ng-option [value]="'UPLOAD_CREDENTIAL'">{{ 'upload_credentials' | i18next }}</ng-option>
+          <ng-option [value]="'ATTACH_DOCUMENT'">{{ 'attach_document' | i18next }}</ng-option>
+          <ng-option [value]="'SIGN_DOCUMENT'">{{ 'sign_document' | i18next }}</ng-option>
+          <ng-option [value]="'ACKNOWLEDGEMENT'">{{ 'acknowledge' | i18next }}</ng-option>
+          <ng-option [value]="'BACKGROUND_CHECK'">{{ 'background_check' | i18next }}</ng-option>
+        </ng-select>
+      </div>
+      <div class="form-group">
+        <label>{{ 'task_description' | i18next }}</label>
+        <textarea formControlName="description" class="form-control" rows="6"
+                  placeholder="{{ 'enter_description' | i18next }}..." [readonly]="isViewMode">
+        </textarea>
+      </div>
+      <div class="form-group" formGroupName="start_date">
+        <label>{{ 'start_date' | i18next }} <span class="require">*</span></label>
+        <div class="start_date">
+          <input type="text" class="form-control start_date_days" formControlName="start" (change)="setStartDate()" [readonly]="isViewMode">
+          <span class="start_date_days_text">{{ 'days' | i18next }}</span>
+          <ng-select bindLabel="name" class="start_date_before" bindValue="id" formControlName="start_before"
+                     (change)="setStartDate()" [readonly]="isViewMode">
+            <ng-option value="BEFORE">{{ 'before' | i18next }}</ng-option>
+            <ng-option value="AFTER">{{ 'after' | i18next }}</ng-option>
+          </ng-select>
+          <ng-select  class="start_date_assignment"
+          formControlName="start_assignment" [readonly]="isViewMode">
+            <ng-option *ngFor="let assig of assignments | keyvalue" [value]="assig.key">{{ assig.value }}</ng-option>
+          </ng-select>
+          <span class="start_date_show_date">{{startDate | localDateFormat }}</span>
+        </div>
+      </div>
+      <div class="form-group" formGroupName="due_date">
+        <label>{{ 'due_date' | i18next }} <span class="require">*</span></label>
+        <div class="start_date">
+          <input type="text" class="form-control start_date_days" formControlName="due" (change)="setDueDate()"
+                 [readonly]="isViewMode">
+          <span class="start_date_days_text">{{ 'days' | i18next }}</span>
+          <ng-select bindLabel="name" class="start_date_before" bindValue="id" formControlName="due_before"
+                     (change)="setDueDate()" [readonly]="isViewMode">
+            <ng-option value="BEFORE">{{ 'before' | i18next }}</ng-option>
+            <ng-option value="AFTER">{{ 'after' | i18next }}</ng-option>
+          </ng-select>
+          <ng-select
+          class="start_date_assignment"
+          formControlName="due_assignment" (change)="setDueDate()" [readonly]="isViewMode">
+            <ng-option *ngFor="let bassig of dueDateAssignments | keyvalue" [value]="bassig.key">{{ bassig.value }}</ng-option>
+          </ng-select>
+          <span class="start_date_show_date">{{dueDate | localDateFormat }}</span>
+        </div>
+        <span *ngIf="due_date_error" class="require"><i>{{ 'due_date' | i18next }}</i> {{ 'must_be_greater_than' | i18next }} <i>{{ 'start_date' | i18next }}</i>.</span>
+      </div>
+      <div class="form-group">
+        <label>{{ 'actor' | i18next }} <span class="require">*</span></label>
+        <div class="actor">
+          <ng-container *ngFor="let role of roles; let j = index">
+            <label class="radio-container actor">
+              <span class="radio-container_description">{{role.name | i18next}}</span>
+              <input type="radio" [value]="role.name" [disabled]="isViewMode" name="role" (click)="selectRole(role.name)"
+                [checked]="roleSelected(role.name)">
+              <span class="checkmark"></span>
+            </label>
+            <ng-select *ngIf="
+                      selectedRole === role.name"
+                      [items]="role.roles" bindLabel="name"
+                      bindValue="id"
+                      formControlName="actor"
+                      [multiple]="role.query === 'VENDOR'"
+                      placeholder="{{ 'select_the_role' | i18next }}"
+                      [readonly]="isViewMode" class="mt-8">
+            </ng-select>
+          </ng-container>
+        </div>
+      </div>
+
+      <!--
+      <div class="form-group checklist">
+        <label>{{ 'add_to_checklist' | i18next }}</label>
+        <ng-select #selectDropdown bindLabel="name" bindValue="id" [items]="checklists" [clearable]="!isViewMode"
+                   placeholder="{{ 'checklist_name' | i18next }}" multiple="true" formControlName="checklist" [readonly]="isViewMode"
+                   [searchable]="true"
+                   (keyup)="searchChecklists($event)">
+        </ng-select>
+      </div>
+      <div class="d-flex align-items-center flex-wrap">
+
+        <ng-container *ngFor="let checklist of checklists">
+          <div *ngIf="formValue?.checklist?.value?.includes(checklist['id'])"
+               class="badge badge-light mr-8 mb-8 rounded-sm d-flex align-i">
+            <span> {{checklist['name']}}</span>
+            <span class="ml-8">
+              <icon name="close" size="14px" type="material" cuClass="d-flex" class="d-flex cursor-pointer" (click)="handleClearClick(checklist['id'])"></icon>
+            </span>
+          </div>
+        </ng-container>
+      </div>
+      -->
+
+      <div class="form-group attachment">
+        <label>{{ 'attachments' | i18next }}</label>
+        <div *ngIf="!(isViewMode)" class="panel panel-light mb-24">
+          <div class="resume-wrapper p-24" appDragAndDrop (fileDropped)="onFileDropped($event)">
+            <div *ngIf="progressBar"></div>
+            <div class="drop-zone mb-16">
+              <icon size="24px" name="publish" type="material" cuClass="d-flex"></icon>
+            </div>
+
+            <h4 class="pt-4 mb-4">
+              <span *ngIf="!canUpload()" class="error-text">{{ 'select_task_type_and' | i18next }}</span>{{canUpload() ? 'Drag &amp; Drop file or' : ''}}
+              <a (click)="canUpload() ? fileInput.click() : false">{{ 'browse' | i18next }}</a></h4>
+            <input hidden type="file" accept=".pdf, .doc, .docx" #fileInput
+            (change)="uploadResume($event,'parsing')" [disabled]="isViewMode">
+            <p class="file-format mb-32">{{ 'only.pdf,_.doc,' | i18next }} {{ '.docx_files_with_maximum_size_of' | i18next }}10 {{ 'mb' | i18next }}</p>
+          </div>
+        </div>
+      </div>
+      <!-- TODO change to dynamic data -->
+      <div class="uploaded_file" *ngIf="resumeFile['name']">
+        <div class="uploaded_file_description">
+          <img src="../../../../assets/images/word.svg" class="uploaded_file_logo" alt="">
+          <div class="uploaded_file_info">
+            <p class="uploaded_file_info_name">
+              {{resumeFile['name']}}
+              <span class="uploaded_file_info_icon">
+                <icon size="13px" name="check_circle" type="material" class="success-icon" cuClass="success"></icon>
+              </span>
+            </p>
+            <span *ngIf="!(isViewMode || isEditMode)" class="uploaded_file_info_other">{{resumeFileSize}}{{ 'kb' | i18next }}</span>
+          </div>
+        </div>
+        <div class="uploaded_file_deletion" *ngIf="!(isViewMode)">
+          <a (click)="deleteResume()" class="uploaded_file_deletion_icon">
+            <icon class="d-flex" size="20px" name="delete_forever" type="material" cuClass="d-flex">
+            </icon>
+          </a>
+        </div>
+      </div>
+    </form>
+
+  </svms-sidebar-body>
+  <svms-sidebar-footer>
+    <button type="submit" class="btn btn-primary float-right" (click)="onSave()"
+            [disabled]="!this.taskForm.invalid && isViewMode " *accessControl>
+      {{ 'save' | i18next }} & {{ 'add' | i18next }}
+      <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+    </button>
+  </svms-sidebar-footer>
+</svms-sidebar>

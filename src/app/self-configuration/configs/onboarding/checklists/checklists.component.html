@@ -1,0 +1,21 @@
+<app-svms-table
+    [tableOptions]="tableOptions"
+    [dataSource]="vmsData"
+    [coloumnDefintions]="tableColumnConfig"
+></app-svms-table>
+
+<ng-template #status let-value="value">
+    <span class="c-status-ui active" *ngIf="value">
+        {{ 'active' | i18next }}
+      </span>
+    <span class="c-status-ui inactive" *ngIf="!value">
+        {{ 'inactive' | i18next }}
+    </span>
+</ng-template>
+
+<div class="checklist-sidebar-wrapper">
+    <app-create-checklist (onSaveChecklist)="listChecklist(true)"></app-create-checklist>
+    <app-edit-checklist (onSaveChecklist)="listChecklist(false)"></app-edit-checklist>
+</div>
+
+<app-view-checklist></app-view-checklist>

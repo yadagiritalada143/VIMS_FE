@@ -1,0 +1,405 @@
+<div class="manage-template-config" I18n [formGroup]="emailHeaderForm">
+  <div class="panel panel-light col-6 pt-12 manage-template-config__panel">
+    <div class="form-group header">
+      <div class="title">
+        <span>{{ 'header' | i18next }}</span>
+      </div>
+      <div class="toggle-panel">
+        <div class="toggle-panel-inner trans-bg">
+          <span [ngClass]="toggles.header.value ? 'toggle-on' : 'toggle-off'" (click)="onClickToggle('header')"
+                class="toggle-switch"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group lang">
+      <label for="language">{{ 'language' | i18next }}</label>
+      <ng-select id="language" formControlName="language" [items]="languages" bindValue="id" bindLabel="name"
+                 placeholder="{{ 'english_-_us' | i18next }}"></ng-select>
+    </div>
+
+    <hr class="divider">
+    <div class="header-layout form-group">
+      <div class="header-layout__label" (click)="showLayoutContent = !showLayoutContent" #defaultCheck>
+        <i class="material-icons" *ngIf="showLayoutContent, else chevronRight">expand_more</i>
+        <ng-template #chevronRight>
+          <i class="material-icons">chevron_right</i>
+        </ng-template>
+        <span>{{ 'choose_header_layout' | i18next }}</span>
+      </div>
+
+      <div class="header-layout__content" *ngIf="showLayoutContent">
+        <div class="row mb-12">
+          <div class="panel panel-light header-layout__content__item mr-12 position-relative"
+               (click)="changeLayout('social_media_links')">
+            <div class="media-links-layout float-left">
+              <img src="https://d1sbrrldholyx7.cloudfront.net/assets/email-templates/treva.png" alt="" class="logo ml-16">
+
+              <div class="social-media-links float-right">
+                <img src="../../../../assets/images/social-icons/fb-icon.svg" alt="" class="mr-12">
+                <img src="../../../../assets/images/social-icons/linkedin-icon.png" alt="" class="mr-12">
+                <img src="../../../../assets/images/social-icons/twitter-icon.png" alt="" class="mr-16">
+              </div>
+            </div>
+            <div class="checkbox" [ngClass]="formValue?.layout?.value === 'social_media_links' ? 'showCheck' : ''">
+              <i class="material-icons">check</i>
+            </div>
+          </div>
+          <div class="panel panel-light header-layout__content__item position-relative"
+               (click)="changeLayout('download_links')">
+            <div class="download-links-layout float-left">
+              <img src="https://d1sbrrldholyx7.cloudfront.net/assets/email-templates/treva.png" alt="" class="logo ml-16">
+
+              <div class="download-media-links float-right">
+                <img src="../../../../assets/images/aivalable-on-the-app-store-2.svg" alt="" class="mr-12">
+                <img src="../../../../assets/images/google-2.svg" alt="" class="mr-12">
+              </div>
+            </div>
+            <div class="checkbox" [ngClass]="formValue?.layout?.value === 'download_links' ? 'showCheck' : ''">
+              <i class="material-icons">check</i>
+            </div>
+          </div>
+        </div>
+        <div class="row mb-12">
+          <div class="panel panel-light header-layout__content__item mr-12 position-relative"
+               (click)="changeLayout('without_links')">
+            <div class="onlyLogo">
+              <img src="https://d1sbrrldholyx7.cloudfront.net/assets/email-templates/treva.png" alt="" class="logo ml-16">
+            </div>
+            <div class="checkbox" [ngClass]="formValue?.layout?.value === 'without_links' ? 'showCheck' : ''">
+              <i class="material-icons">check</i>
+            </div>
+          </div>
+          <div class="panel panel-light header-layout__content__item position-relative"
+               (click)="changeLayout('hyper_links')">
+            <div class="hyper-links-layout float-left">
+              <img src="https://d1sbrrldholyx7.cloudfront.net/assets/email-templates/treva.png" alt="" class="logo ml-16">
+
+              <div class="float-right" (click)="$event.preventDefault();false">
+                <a href="#">#{{ 'link' | i18next }}1</a>
+                <a href="#">#{{ 'link' | i18next }}2</a>
+              </div>
+            </div>
+            <div class="checkbox" [ngClass]="formValue?.layout?.value === 'hyper_links' ? 'showCheck' : ''">
+              <i class="material-icons">check</i>
+            </div>
+          </div>
+        </div>
+        <div class="row mb-12">
+          <div id="default_check" class="panel panel-light header-layout__content__item mr-12 position-relative"
+               (click)="changeLayout('blank')">
+            <p class="blank-header text-center pt-16">{{ 'blank_header' | i18next }}</p>
+            <div class="checkbox" [ngClass]="formValue?.layout?.value === 'blank' ? 'showCheck' : ''">
+              <i class="material-icons">check</i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="header-logo form-group" *ngIf="formValue.layout.value !== 'blank'">
+      <div class="header-logo__label" (click)="showLogoContent = !showLogoContent">
+        <i class="material-icons" *ngIf="showLogoContent, else chevronRight">expand_more</i>
+        <ng-template #chevronRight>
+          <i class="material-icons">chevron_right</i>
+        </ng-template>
+        <span>{{ 'header_logo' | i18next }}</span>
+      </div>
+
+      <div class="header-logo__content" *ngIf="showLogoContent">
+        <div class="Upload_box_wrapper ">
+          <svms-upload-avatar (hideError)="getCropImage($event)" [image]="formValue?.logo?.value"></svms-upload-avatar>
+          <div class="upload-panel-body">
+            <h5 *ngIf="!logoComponent?.logoUrl || !logo">{{ 'upload_logo' | i18next }}</h5>
+            <div *ngIf="(!logoComponent?.logoUrl || !logo)" class="error-text">{{ 'only' | i18next }} .{{ 'png' | i18next }}, {{ '.jpg_formats_with_maximum_file_size_of_' | i18next }}3 MB
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="header-caption form-group" *ngIf="formValue.layout.value && formValue.layout.value !== 'blank'">
+      <div class="header-caption__label">
+        <div (click)="toggles.caption.open = !toggles.caption.open" class="d-flex align-items-center">
+          <i class="material-icons" *ngIf="toggles.caption.open, else chevronRight">expand_more</i>
+          <ng-template #chevronRight>
+            <i class="material-icons">chevron_right</i>
+          </ng-template>
+          <span>{{ 'enable_caption' | i18next }}</span>
+        </div>
+
+
+        <div class="toggle-panel">
+          <div class="toggle-panel-inner">
+            <span [ngClass]="toggles.caption.value ? 'toggle-on' : 'toggle-off'" (click)="onClickToggle('caption')"
+                  class="toggle-switch"></span>
+          </div>
+        </div>
+      </div>
+      <div class="header-caption__content" *ngIf="toggles.caption.open">
+        <label for="caption-input">{{ 'enable_caption_line_below_logo' | i18next }}</label>
+        <input type="text" class="form-control" placeholder="{{ 'enter_the_text' | i18next }}" id="caption-input"
+               formControlName="caption" [readonly]="!toggles.caption.value">
+      </div>
+      <small class="error-text"
+             *ngIf="emailHeaderForm.get('caption').invalid && emailHeaderForm.get('caption').touched">{{ 'maximum_length_can_be_100_characters' | i18next }}</small>
+    </div>
+    <hr class="divider">
+    <div class="header-social_media form-group" *ngIf="formValue.layout.value === 'social_media_links'"
+         formGroupName="social_media_links">
+      <div class="header-social_media__label">
+        <div (click)="toggles.social_media_links.open = !toggles.social_media_links.open"
+             class="d-flex align-items-center">
+          <i class="material-icons" *ngIf="toggles.social_media_links.open, else chevronRight">expand_more</i>
+          <ng-template #chevronRight>
+            <i class="material-icons">chevron_right</i>
+          </ng-template>
+          <span>{{ 'social_media_links' | i18next }}</span>
+        </div>
+
+
+        <div class="toggle-panel">
+          <div class="toggle-panel-inner">
+            <span [ngClass]="toggles.social_media_links.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle('social_media_links')" class="toggle-switch"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-social_media__content" *ngIf="toggles.social_media_links.open">
+        <div class="row d-flex mb-12">
+          <div class="choose-url">
+            <ng-select class="prepend" bindLabel="prepend"
+                       [readonly]="!toggles.social_media_links.value"
+                       [clearable]="true"
+                       (change)="changeMediaLink($event, 'firstSelected')" (clear)="clearSelectedMedia('firstSelected')"
+                       placeholder="{{ 'choose_application' | i18next }}"
+                       formControlName="firstSelected">
+              <ng-container *ngFor="let link of mediaLinks">
+                <ng-option *ngIf="!link.selected" [value]="link" [disabled]="link.selected">{{link.prepend}}</ng-option>
+              </ng-container>
+            </ng-select>
+            <input type="text" class="form-control" placeholder="{{ 'web_address' | i18next }} ({{ 'url' | i18next }})"
+                   [readonly]="!toggles.social_media_links.value || !formValue.social_media_links.value.firstSelected"
+                   formControlName="first"
+                   (keyup)="isValidUrl(formValue.social_media_links.value.firstSelected.control, 'mediaLinks', $event)"
+                   (focus)="isValidUrl(formValue.social_media_links.value.firstSelected.control, 'mediaLinks', $event)"
+                   (blur)="isValidUrl(formValue.social_media_links.value.firstSelected.control, 'mediaLinks', $event)">
+          </div>
+          <small *ngIf="getLinkError('firstSelected')" class="error-text mt-4">{{ 'please_enter_the_valid_url' | i18next }}</small>
+        </div>
+        <div class="row d-flex mb-12">
+          <div class="choose-url">
+            <ng-select class="prepend" bindLabel="prepend"
+                       [readonly]="!toggles.social_media_links.value"
+                       [clearable]="true" (clear)="clearSelectedMedia('secondSelected')"
+                       (change)="changeMediaLink($event, 'secondSelected')" placeholder="{{ 'choose_application' | i18next }}"
+                       formControlName="secondSelected">
+              <ng-container *ngFor="let link of mediaLinks">
+                <ng-option *ngIf="!link.selected" [value]="link" [disabled]="link.selected">{{link.prepend}}</ng-option>
+              </ng-container>
+            </ng-select>
+            <input type="text" class="form-control" placeholder="{{ 'web_address' | i18next }} (URL)"
+                   [readonly]="!toggles.social_media_links.value || !formValue.social_media_links.value.secondSelected"
+                   formControlName="second"
+                   (keyup)="isValidUrl(formValue.social_media_links.value.secondSelected.control, 'mediaLinks', $event)"
+                   (focus)="isValidUrl(formValue.social_media_links.value.secondSelected.control, 'mediaLinks', $event)"
+                   (blur)="isValidUrl(formValue.social_media_links.value.secondSelected.control, 'mediaLinks', $event)">
+          </div>
+          <small *ngIf="getLinkError('secondSelected')" class="error-text mt-4">{{ 'please_enter_the_valid_url' | i18next }}</small>
+        </div>
+        <div class="row d-flex mb-12">
+          <div class="choose-url">
+            <ng-select class="prepend" bindLabel="prepend"
+                       [readonly]="!toggles.social_media_links.value"
+                       [clearable]="true" (clear)="clearSelectedMedia('thirdSelected')"
+                       (change)="changeMediaLink($event, 'thirdSelected')" placeholder="{{ 'choose_application' | i18next }}"
+                       formControlName="thirdSelected">
+              <ng-container *ngFor="let link of mediaLinks">
+                <ng-option *ngIf="!link.selected" [value]="link" [disabled]="link.selected">{{link.prepend}}</ng-option>
+              </ng-container>
+            </ng-select>
+            <input type="text" class="form-control" placeholder="{{ 'web_address' | i18next }} ({{ 'url' | i18next }})"
+                   [readonly]="!toggles.social_media_links.value || !formValue.social_media_links.value.thirdSelected"
+                   formControlName="third"
+                   (keyup)="isValidUrl(formValue.social_media_links.value.thirdSelected.control, 'mediaLinks', $event)"
+                   (focus)="isValidUrl(formValue.social_media_links.value.thirdSelected.control, 'mediaLinks', $event)"
+                   (blur)="isValidUrl(formValue.social_media_links.value.thirdSelected.control, 'mediaLinks', $event)">
+          </div>
+          <small *ngIf="getLinkError('thirdSelected')" class="error-text mt-4">{{ 'please_enter_the_valid_url' | i18next }}</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-download-links form-group" *ngIf="formValue.layout.value === 'download_links'"
+         formGroupName="download_links">
+      <div class="header-download-links__label">
+        <div (click)="toggles.download_links.open = !toggles.download_links.open" class="d-flex align-items-center">
+          <i class="material-icons" *ngIf="toggles.download_links.open, else chevronRight">expand_more</i>
+          <ng-template #chevronRight>
+            <i class="material-icons">chevron_right</i>
+          </ng-template>
+          <span>{{ 'application_download_links' | i18next }}</span>
+        </div>
+
+
+        <div class="toggle-panel">
+          <div class="toggle-panel-inner">
+            <span [ngClass]="toggles.download_links.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle('download_links')" class="toggle-switch"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-download-links__content" *ngIf="toggles.download_links.open">
+        <div class="row d-flex mb-12" *ngFor="let link of downloadLinks">
+          <div class="choose-url">
+            <span class="prepend">{{ link.prepend }}</span>
+            <input type="text" class="form-control" placeholder="{{ 'web_address' | i18next }} ({{ 'url' | i18next }})"
+                   [readonly]="!toggles.download_links.value" [formControlName]="link.control"
+                   (keyup)="isValidUrl(link.control, 'downloadLinks', $event)"
+                   (focus)="isValidUrl(link.control, 'downloadLinks', $event)"
+                   (blur)="isValidUrl(link.control, 'downloadLinks', $event)">
+          </div>
+          <small *ngIf="link.error" class="error-text mt-4">{{ 'please_enter_the_valid_url' | i18next }}</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-hyper-links form-group" *ngIf="formValue.layout.value === 'hyper_links'">
+      <div class="header-hyper-links__label">
+        <div (click)="toggles.hyper_links.open = !toggles.hyper_links.open" class="d-flex align-items-center">
+          <i class="material-icons" *ngIf="toggles.hyper_links.open, else chevronRight">expand_more</i>
+          <ng-template #chevronRight>
+            <i class="material-icons">chevron_right</i>
+          </ng-template>
+          <span>{{ 'hyper_links' | i18next }}</span>
+        </div>
+
+
+        <div class="toggle-panel">
+          <div class="toggle-panel-inner">
+            <span [ngClass]="toggles.hyper_links.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle('hyper_links')" class="toggle-switch"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-hyper-links__content" *ngIf="toggles.hyper_links.open" formGroupName="hyper_links">
+        <div class="row d-flex mb-12" *ngFor="let link of hyperLinks">
+          <div class="choose-url d-flex flex-wrap">
+            <div class="btn-name">
+              <input type="text" class="form-control" placeholder="{{ 'enter_label_name' | i18next }}"
+                     [formControlName]="link.btn_control" [readonly]="!toggles.hyper_links.value">
+            </div>
+            <input type="text" class="form-control url" placeholder="{{ 'web_address' | i18next }} ({{ 'url' | i18next }})"
+                   [readonly]="!toggles.hyper_links.value" [formControlName]="link.control"
+                   (keyup)="isValidUrl(link.control, 'hyperLinks', $event)"
+                   (focus)="isValidUrl(link.control, 'hyperLinks', $event)"
+                   (blur)="isValidUrl(link.control, 'hyperLinks', $event)">
+          </div>
+          <small *ngIf="link.error" class="error-text mt-4">{{ 'please_enter_the_valid_url' | i18next }}</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="blank-header form-group p-8" *ngIf="formValue.layout.value === 'blank' && toggles.header.value">
+      <label for="blank-header-text"></label>
+      <textarea name="" id="blank-header-text" cols="30" rows="2" placeholder="{{ 'enter_the_text' | i18next }}" class="form-control"
+                formControlName="blank_text"></textarea>
+      <small class="error-text"
+             *ngIf="emailHeaderForm.get('blank_text').invalid && emailHeaderForm.get('blank_text').touched">{{ 'maximum_length_can_be_4000_characters' | i18next }}</small>
+    </div>
+
+    <div class="panel panel-light actions">
+      <button type="submit" class="btn float-left" (click)="onCancel()">
+        {{ 'cancel' | i18next }}
+      </button>
+      <button *accessControl type="submit" class="btn btn-primary float-right" (click)="onSave()">
+        <icon size="20px" name="check_circle" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+          {{ 'save' | i18next }}
+      </button>
+    </div>
+  </div>
+  <div class="panel panel-light manage-template-config__preview">
+    <div id="layout">
+      <div class="layout d-flex space-between" [ngClass]="formValue.layout.value === 'without_links' ? 'onlyLogo' : ''" *ngIf="toggles.header.value">
+        <div *ngIf="formValue?.layout?.value !== 'blank' && formValue?.layout?.value !== 'default'">
+          <div *ngIf="logo,else defaultLogo">
+            <div>
+              <div class="logo d-flex justify-content-center">
+                <img class="img-after-upload justify-content-center" [src]="logo" [style.z-index]="logo ? '1' : '-1'"/>
+              </div>
+              <div *ngIf="toggles.caption.value" id="caption">
+                <p class="caption">{{ formValue.caption.value ? formValue.caption.value : '' }}</p>
+              </div>
+            </div>
+          </div>
+          <ng-template #defaultLogo>
+            <div [class.w-100]="formValue.layout.value === 'without_links'">
+              <div class="layout-logo" [class.justify-content-center]="formValue.layout.value === 'without_links'">
+                <div class="default_logo">
+                  <img src="https://d1sbrrldholyx7.cloudfront.net/assets/email-templates/treva.png" alt="">
+                  <div *ngIf="toggles.caption.value" id="caption">
+                    <p class="caption">{{ formValue.caption.value ? formValue.caption.value : '' }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+
+        <div id='blank' class="onlyLogo" *ngIf="formValue?.layout?.value === 'blank'">
+          <div class="blank-text">
+            <span>{{formValue.blank_text.value}}</span>
+          </div>
+        </div>
+
+        <div *ngIf="formValue.layout.value === 'social_media_links'" id="social_media_links">
+          <div class='social_media_links'>
+            <a *ngIf="formValue.social_media_links.value.firstSelected"
+               [href]="formValue.social_media_links.value.first" target="_blank"><img class='social-logo'
+              [src]='formValue.social_media_links.value.firstSelected.image' alt=''></a>
+            <a *ngIf="formValue.social_media_links.value.secondSelected"
+               [href]="formValue.social_media_links.value.second" target="_blank"><img class='social-logo'
+              [src]='formValue.social_media_links.value.secondSelected.image' alt=''></a>
+            <a *ngIf="formValue.social_media_links.value.thirdSelected"
+               [href]="formValue.social_media_links.value.third" target="_blank"><img class='social-logo'
+              [src]='formValue.social_media_links.value.thirdSelected.image' alt=''></a>
+          </div>
+        </div>
+
+        <div id="download_links" *ngIf="formValue.layout.value === 'download_links'">
+          <div class="download_links">
+            <a [href]="emailHeaderForm.get('download_links').get('app_store').value" target="_blank"><img
+              src="https://d1sbrrldholyx7.cloudfront.net/assets/email-templates/app_store.png" alt=""></a>
+            <a [href]="emailHeaderForm.get('download_links').get('play_store').value" target="_blank"><img
+              src="https://d1sbrrldholyx7.cloudfront.net/assets/email-templates/google_play.png" alt=""></a>
+          </div>
+        </div>
+
+        <div id="hyper_links" *ngIf="formValue.layout.value === 'hyper_links'" (click)="$event.preventDefault();false">
+          <div class="hyper_links d-flex">
+            <div *ngIf="this.emailHeaderForm.get('hyper_links').get('first_btn_name'),else firstDefault">
+              <a
+                [href]="emailHeaderForm.get('hyper_links').get('first_link').value">{{this.emailHeaderForm.get('hyper_links').value.first_btn_name}}</a>
+            </div>
+            <ng-template #firstDefault>
+              <div>
+                <a [href]="emailHeaderForm.get('hyper_links').get('first_link').value">{{ 'hyper_link' | i18next }}1</a>
+              </div>
+            </ng-template>
+            <div *ngIf="this.emailHeaderForm.get('hyper_links').get('second_btn_name'),else secondDefault">
+              <a
+                [href]="emailHeaderForm.get('hyper_links').get('second_link').value">{{this.emailHeaderForm.get('hyper_links').value.second_btn_name}}</a>
+            </div>
+            <ng-template #secondDefault>
+              <a [href]="emailHeaderForm.get('hyper_links').get('first_link').value">{{ 'hyper_link' | i18next }} 2</a>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

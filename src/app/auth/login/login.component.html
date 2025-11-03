@@ -1,0 +1,495 @@
+<div *ngIf="!switchState" class=" login-wrapper position-relative">
+
+  <!--language switcher-->
+   <div class="lang-switcher-panel position-absolute">
+    <app-lang-switcher></app-lang-switcher>
+  </div>
+ <!--language switcher end-->
+
+  <!--Left panel-->
+  <div class="left-panel overflow-hidden">
+    <div *ngIf="loginConfig?.backgroundImage" [ngClass]="{'left-pannel-bgimage': loginConfig?.backgroundImage, 'image-overlay': loginConfig?.isOverlay}" [ngStyle]="{ 'background-image': 'url(' + loginConfig?.backgroundImage + ')' }"></div>
+    <div class="left-panel-content align-justify-center flex-column text-center mx-auto" *ngIf="!loginConfig?.hideText">
+      <figure>
+        <img src="assets/images/white_blue_logo.png" alt="" height="75" />
+      </figure>
+      <ul>
+        <!-- Updated for V2M-27456 -->
+        <li i18n>{{ 'next_generation_vendor_management' | i18next }}</li>
+        <li i18n>{{ 'direct_sourcing' | i18next }} &nbsp;</li>
+        <li i18n>{{ 'statement_of_work' | i18next }}</li>
+        <li i18n>{{ 'gig_economy' | i18next }}</li>
+        <li i18n>{{ 'task_boards' | i18next }}</li>
+        <li i18n>{{ 'talent_indexes' | i18next }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <!--Left panel end-->
+
+  <!--right panel start-->
+  <div class="right-panel-wrapper position-relative">
+    <div class="right-panel position-absolute" [ngSwitch]="condCheckerObj['formtype']">
+
+      <!--default login page-->
+      <div *ngSwitchCase="'defaultpage'">
+        <figure class="mobile-logo">
+          <img src="../../assets/images/black_blue_logo.png" alt="" height="75" />
+        </figure>
+        <div [class]="loginConfig?.class">
+          <img *ngIf="loginConfig?.logo" [src]="loginConfig?.logo" alt="" width="350" class="mb-16">
+          <h2 i18n class="font-weight-bold">{{'welcome_to' | i18next}}  {{loginConfig?.name || 'SimplifyVMS' |i18next}}</h2>
+          <p *ngIf="loginConfig?.logo" class="mb-32 pb-16"></p>
+          <p [ngClass]="{'mb-32': !loginConfig?.logo, 'mb-4': loginConfig?.logo }" class="font-weight-normal" i18n>{{'login_to_your' | i18next}} {{loginConfig?.supportText}} {{'account_to_continue'|i18next}} </p>
+        </div>
+        <form [formGroup]='loginForm' (ngSubmit)="login(loginForm.value)">
+          <!-- START: SSO Section at the top -->
+          <ng-container *ngIf="showSSOUrl && ssoPos === 'top'">
+            <div *ngIf="customError"
+              class="{{'mb-12 error-text font-weight-medium custom-error-lh text-' + loginConfig.ssoButton?.customError?.alignment}}"
+              [innerHTML]="loginConfig.ssoButton?.customError?.message">
+            </div>
+            <a type="button" i18n class="btn sso-login font-weight-normal btn-secondary large" href="{{ssoUrl}}">
+              {{ 'sign_in_with_single_sign_on_(sso)' | i18next }}.
+            </a>
+            <div class="other-login-option position-relative my-32">
+              <span class="position-absolute bg-light">{{ 'or' | i18next }}</span>
+            </div>
+          </ng-container>
+          <!-- END: SSO Section at the top -->
+          <div class="validation-alert  alert-error overflow-hidden mb-8"
+            *ngIf="condCheckerObj['invalidUserCredentials'] == '401' || condCheckerObj['invalidUserCredentials'] == '400'">
+            <icon name="error_outline" size="24px" type="material" class="float-left mr-16 pt-8"></icon>
+            <p class="small">
+              <span i18n>{{ 'invalid_username_or_password' | i18next }}. {{ 'you_have' | i18next }} {{wrongCredentials}} {{ 'attempts_remaining' | i18next }}.{{ 'to_reset_the_password' | i18next }}
+                {{ 'use' | i18next }} </span>
+              <a i18n class="cursor-pointer" (click)="condCheckerObj['formtype'] = 'forgetPassword'"> {{ 'forgot_password_link' | i18next }}. </a>
+            </p>
+          </div>
+          <div class="validation-alert p-8 alert-error overflow-hidden mb-8"
+            *ngIf="condCheckerObj['invalidResponse'] && condCheckerObj['invalidUserCredentials'] === '500'">
+            <icon name="error_outline" size="24px" type="material" class="pt-0 float-left mr-16"></icon>
+            <p i18n class="small"> {{ 'sorry' | i18next }}, {{ 'internal_server_issue' | i18next }}, {{ 'please_try_after_some_time' | i18next }}. </p>
+          </div>
+          <div class="input-group position-relative mt-16 mb-16 login-email">
+            <span class="input-group-text" id="email">
+              <icon name="email" cuClass="login-form-icon" size="19px" type="material"></icon>
+            </span>
+            <input type="email" autocomplete="new-password" class="form-control medium" name="email" i18n-placeholder
+              placeholder="{{ 'enter_your_email_address_or_username' | i18next }}" aria-label="Email" aria-describedby="email"
+              formControlName='email' required autofocus required [ngClass]="{'error':
+              loginForm.controls['email'].invalid}" />
+
+            <!-- Success icon goes here -->
+            <div class="validation-status position-absolute success"
+              *ngIf="loginForm.get('email').errors == null && loginForm.get('email').value?.length > 1 && (condCheckerObj['invalidUserCredentials'] !== '401')">
+              <icon name="check_circle" cuClass="valid-field-icon-green" size="19px" type="material"></icon>
+            </div>
+            <!-- Gray icon goes here -->
+            <div class="validation-status position-absolute gray"
+              *ngIf="loginForm.get('email').errors !== null || loginForm.get('email').value?.length == 1">
+              <icon name="check_circle" cuClass="valid-field-icon-gray" size="19px" type="material"></icon>
+            </div>
+            <!-- Invalid icon goes here -->
+            <div class="validation-status position-absolute invalid" *ngIf="
+              loginForm.get('email').touched &&
+                (loginForm.get('email').errors?.pattern || loginForm.get('email').errors?.required || loginForm.get('email').invalid) || (condCheckerObj['invalidUserCredentials'] == '401' || condCheckerObj['invalidUserCredentials'] == '403')
+              ">
+              <icon name="info" cuClass="invalid-field-icon" size="19px" type="material"></icon>
+            </div>
+
+          </div>
+          <div class="validation-status invalid msg-input-bottom" *ngIf="
+              loginForm.get('email').touched &&
+                (loginForm.get('email').errors?.pattern || loginForm.get('email').errors?.required || loginForm.get('email').invalid)
+              ">
+            <p class="validation-msg">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'please_enter_a_valid_email_address_or_username' | i18next }}.
+            </p>
+          </div>
+          <div class="input-group position-relative mb-16">
+            <span class="input-group-text" id="password">
+              <icon name="vpn_key" cuClass="login-form-icon" size="19px" type="material"></icon>
+            </span>
+            <input autocomplete="new-password" type="password" class="form-control medium password-field" name="password" i18n-placeholder
+              placeholder="{{ 'enter_your_password' | i18next }}" aria-label="Password" aria-describedby="password"
+              formControlName="password" required appPasswordToggle />
+          </div>
+
+          <p> {{ 'by_clicking_sign_in,_you_agree_to_our' | i18next }} <a class='blue-text underline' target="blank" href='https://simplifyvms.com/PRIVACY-POLICY'>{{ 'privacy_policy' | i18next }}</a></p>
+
+          <div class="mb-32 overflow-hidden d-flex justify-content-between align-items-center">
+            <!-- <a i18n (click)="condCheckerObj['formtype'] = 'forgetPassword'" class="forgot-links cursor-pointer">Forgot
+              your password ?</a> -->
+            <span class="">{{ 'forgot' | i18next }} <a i18n (click)="condCheckerObj['formtype'] = 'forgotUsername';forgetemail = ''"
+                class="forgot-links cursor-pointer"> {{ 'username' | i18next }}</a> {{ 'or' | i18next }} <a i18n
+                (click)="condCheckerObj['formtype'] = 'forgetPassword'" class="forgot-links cursor-pointer">
+                {{ 'password' | i18next }}?</a> </span>
+            <button type="submit" i18n class="btn login-btn btn-primary font-weight-normal position-relative"
+              [disabled]="loginForm.status == 'INVALID' || wrongCredentials == 0 || showLoader">
+                {{ 'sign_in' | i18next }}
+              <ng-template [ngIf]="showLoader">
+                <img src="../../../assets/images/loader.gif" alt="" class="ml-8">
+              </ng-template>
+            </button>
+          </div>
+
+          <!-- SSO Section at the bottom -->
+          <ng-container *ngIf="showSSOUrl && ssoPos === 'bottom'">
+            <div class="other-login-option position-relative mb-32">
+              <span class="position-absolute bg-light">{{ 'or' | i18next }}</span>
+            </div>
+            <a type="button" i18n class="btn sso-login font-weight-normal btn-secondary large" href="{{ssoUrl}}">
+              {{ 'sign_in_with_single_sign_on_(sso)' | i18next }}.
+            </a>
+            <div *ngIf="customError"
+              class="{{'my-12 error-text font-weight-medium custom-error-lh text-' + loginConfig.ssoButton?.customError?.alignment}}"
+              [innerHTML]="loginConfig.ssoButton?.customError?.message">
+            </div>
+          </ng-container>
+        </form>
+
+        <div *ngIf="loginConfig?.isPoweredBy" class="d-flex align-items-center my-8">
+          <span class="mr-8">Powered by</span> <img class="" src="assets/images/logo-control-panel.svg" alt="" width="90">
+         </div>
+      </div>
+      <!--default login page end-->
+
+      <!-- this part for forget Username -->
+      <div *ngSwitchCase="'getUserName'">
+
+        <div class="d-block ml--7">
+          <span class="initials initials__green mb-16">{{ condCheckerObj["userid"] |shortName: 'last'}}</span>
+        </div>
+        <div class="clearfix"></div>
+
+        <h2>
+          <span i18n> {{ 'welcome_back' | i18next }}, </span> <span aria-disabled="true">{{ condCheckerObj["userid"].slice(0, 8)}}</span>
+        </h2>
+        <div class="validation-alert p-8 alert-error overflow-hidden mb-8"
+          *ngIf="condCheckerObj['invalidUserCredentials'] == '401'">
+          <icon name="error_outline" size="19px" type="material" class="pt-0 float-left mr-16"></icon>
+          <p class="text12">{{ 'invalid_email_address_and/or_password' | i18next }}. {{ 'you_have' | i18next }} {{wrongCredentials}} {{ 'attempts_remaining' | i18next }}. {{ 'to_reset_the_password' | i18next }} </p>
+        </div>
+        <div class="validation-alert p-8 alert-error overflow-hidden mb-8"
+          *ngIf="condCheckerObj['invalidResponse'] && condCheckerObj['invalidUserCredentials'] != '401'">
+          <icon name="error_outline" size="19px" type="material" class="pt-0 float-left mr-16"></icon>
+          <p i18n class="small">
+            {{ 'sorry' | i18next }}, {{ 'something_went_wrong' | i18next }}.{{ 'please_try_after_some_time' | i18next }}
+          </p>
+        </div>
+        <p i18n class="mb-32">{{ 'enter_your_password_to_continue' | i18next }}</p>
+        <form>
+          <div class="input-group position-relative mb-16">
+            <span class="input-group-text" id="password">
+              <icon name="vpn_key" cuClass="login-form-icon" size="19px" type="material"></icon>
+            </span>
+            <input type="password" appPasswordToggle class="form-control medium password-field" name="password"
+              i18n-placeholder placeholder="{{ 'enter_your_password' | i18next }}" aria-label="Password" aria-describedby="password"
+              [(ngModel)]="reEnterPassword" [disabled]="wrongCredentials == 0" autofocus />
+          </div>
+          <div class="d-flex align-items-center justify-content-between mb-16">
+            <p class="mb-0 font-weight-normal">
+              <span i18n>{{ 'forgot_your_password' | i18next }}?
+
+
+              </span> <a i18n (click)="condCheckerObj['formtype'] = 'forgetPassword'"
+                class="links cursor-pointer font-weight-semibold">{{ 'click_here' | i18next }}</a>
+            </p>
+            <button type="submit" i18n class="btn loginbtn userbtn btn-primary large position-relative"
+              (click)="reLogin()" [disabled]="!reEnterPassword || wrongCredentials == 0">
+              {{ 'sign_in' | i18next }} <icon name="keyboard_arrow_right" cuClass="signin-icon" size="19px" type="material"
+                class="position-absolute"></icon>
+            </button>
+          </div>
+        </form>
+        <div>
+        </div>
+        <div class="line-shadow mt-32 mb-32"></div>
+        <p class="text-center">
+          <a i18n (click)="getBack()" class="link2 cursor-pointer font-weight-medium" i18n> {{ 'sign_in_with_a_different_account' | i18next }}?</a>
+        </p>
+      </div>
+      <!--  forget Username end here  -->
+
+      <!-- this part for forget password -->
+      <div *ngSwitchCase="'forgetPassword'">
+        <figure class="ml--7 pb-16">
+          <icon size='45px' color='black' name='lock_open'></icon>
+        </figure>
+        <div>
+          <h2 i18n>{{ 'forgot_your_password' | i18next }}?</h2>
+          <p class="mb-32 font-weight-medium" i18n> {{ 'enter_your_registered_email_address_to_send_the_security_code' | i18next }} {{ 'to_receive_your_password' | i18next }}. </p>
+          <div class="validation-alert  alert-error overflow-hidden mb-8" *ngIf="userNotFound">
+            <p class="small">
+              <span i18n>{{userNotFound}} </span>
+            </p>
+          </div>
+        </div>
+        <form #f="ngForm">
+          <div class="input-group position-relative  mb-16 login-email">
+            <span class="input-group-text" id="email">
+              <icon name="email" cuClass="login-form-icon" size="18px" type="material"></icon>
+            </span>
+            <input type="email" class="form-control medium" name="email" i18n-placeholder
+              placeholder="{{ 'enter_your_email_address' | i18next }}" aria-label="Email" aria-describedby="email"
+              [(ngModel)]="forgetemail" #test="ngModel" (keyup)="validateEmail($event)" required
+              [pattern]="emailvalidation" [ngClass]="{'error':
+              test.invalid && (test.dirty || test.touched)
+                }">
+            <div class="validation-status position-absolute success" *ngIf="test.dirty && test.errors == null">
+              <icon name="check_circle" cuClass="valid-field-icon" size="19px" type="material"></icon>
+            </div>
+            <!-- Invalid icon goes here -->
+            <div class="validation-status position-absolute invalid" *ngIf="
+                (test.dirty && test.errors?.pattern )
+              ">
+              <icon name="info" cuClass="invalid-field-icon" size="19px" type="material"></icon>
+            </div>
+          </div>
+          <div class="validation-status invalid msg-input-bottom" *ngIf="test.invalid && (test.dirty || test.touched)">
+            <p class="validation-msg">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'please_enter_a_valid_email_address' | i18next }}.
+            </p>
+          </div>
+
+          <div class="d-flex overflow-hidden mb-32">
+            <button i18n type="submit" class="btn loginbtn btn-primary large cursor-pointer full-width"
+              (click)="sendResetPasswordMail()" [disabled]="!f.valid || userNotFound || isSaveLoader">
+              {{ 'request_security_code' | i18next }} <span *ngIf="isSaveLoader" class="loader ml-12"> </span>
+            </button>
+          </div>
+          <div>
+            <p class="text-left font-weight-normal">
+              <span i18n> {{ 'did_you_remember_your_password' | i18next }}? </span> <a i18n (click)="getBack()"
+                class="links cursor-pointer font-weight-semibold"> {{ 'try_logging_in' | i18next }}</a>
+            </p>
+          </div>
+        </form>
+      </div>
+
+      <!-- forget password end here -->
+
+      <!-- reset password screen with password strength -->
+      <div *ngIf="condCheckerObj['formtype'] == 'resetPasswordComp'">
+        <figure class="ml--7 pb-16">
+          <icon size='45px' name='fingerprint'></icon>
+        </figure>
+        <h2 class="mb-16" i18n>{{ 'reset_your_password' | i18next }}?</h2>
+        <div class="validation-alert p-8 alert-error overflow-hidden mb-16" *ngIf="invalidEmail">
+          <p class="small" i18n>{{invalidEmail}} </p>
+        </div>
+        <form [formGroup]="resetPasswordForm">
+          <div class="input-group position-relative mb-0">
+            <span class="input-group-text" id="password">
+              <icon name="vpn_key" cuClass="login-form-icon" size="19px" type="material"></icon>
+            </span>
+            <input type="password" class="form-control password-field no-radius" name="password" i18n-placeholder
+              placeholder="{{ 'enter_your_password' | i18next }}" aria-label="Password" aria-describedby="password"
+              formControlName="password" required appPasswordToggle (keyup)="resetMessage()" />
+          </div>
+
+        </form>
+
+        <!--password strength component -->
+        <form [formGroup]="resetPasswordForm">
+          <vms-password-strength [passwordToCheck]="password" (passwordStrengthChanged)="getPasswordStrength($event)">
+          </vms-password-strength>
+
+          <!--password strength component -->
+
+          <div class="input-group position-relative mb-16">
+            <span class="input-group-text" id="password">
+              <icon name="vpn_key" cuClass="login-form-icon" size="19px" type="material"></icon>
+            </span>
+            <input type="password" class="form-control password-field" name="password" i18n-placeholder
+              placeholder="{{ 'confirm_your_password' | i18next }}" aria-label="Password" aria-describedby="password"
+              formControlName='confirmpassword' required appPasswordToggle (keyup)="resetMessage()" />
+          </div>
+          <div class="validation-alert p-8 alert-error overflow-hidden mb-16"
+            *ngIf="resetPasswordForm.get('confirmpassword').dirty && resetPasswordForm.get('password').value != resetPasswordForm.get('confirmpassword').value">
+            <p class="small" i18n>{{ 'password_not_matched' | i18next }} </p>
+          </div>
+          <div class="validation-alert p-8 alert-error overflow-hidden mb-16" *ngIf="errorMessage">
+            <p class="small" i18n>{{errorMessage}} </p>
+          </div>
+          <div class="mb-32 d-flex justify-content-end">
+            <button type="submit" i18n class="btn  loginbtn btn-primary large cursor-pointer" (click)="resetPassword()">
+              {{ 'change_your_password' | i18next }}
+            </button>
+          </div>
+        </form>
+      </div>
+      <!-- reset password screen with password strength end here-->
+
+
+      <!-- forgot password step-2Forgot your Username ? -->
+      <!--*ngSwitchCase="'defaultsecurityCode'"-->
+      <div class="text-center p-32" *ngSwitchCase="'defaultsecurityCode'">
+        <img src="./assets/images/handsome.svg" alt="handsome" width="150">
+        <p class="pt-16 font-weight-normal"><span i18n>{{ 'we_have_sent_an_security_code_to_your_registered' | i18next }} </span>
+          <span> {{ 'email_address' | i18next }} <a class="links"> {{forgetemail}} </a></span>
+        </p>
+        <p i18n>{{ 'please_check_your_inbox_to_continue' | i18next }}</p>
+        <div class="mb-32 d-flex overflow-hidden">
+          <button type="submit" i18n class="btn loginbtn btn-primary large full-width cursor-pointer"
+            (click)="securityCode()">
+            {{ 'click_here_to_enter_security_code' | i18next }}
+          </button>
+        </div>
+        <p class="font-weight-normal text-center pb-24 "><span i18n> {{ 'didn_t_receive_the_email' | i18next }}?
+
+        </span> <a i18n
+            (click)="sendResetPasswordMail()" class="links cursor-pointer font-weight-semibold"> {{ 'resend' | i18next }} </a></p>
+        <div class="d-flex justify-content-center"><button type="button" i18n class="btn btn-light"
+            (click)="condCheckerObj['formtype'] = 'defaultpage'"> {{ 'back_to_login' | i18next }} </button></div>
+      </div>
+      <!-- forgot password step-2-->
+
+      <!-- security Code Verification-->
+      <div *ngSwitchCase="'securityCodeVerification'">
+        <div class="text-center p-8">
+          <h2 class="mb-16" i18n> {{ 'security_code_verification' | i18next }} </h2>
+          <p *ngIf="!forMfa || (forMfa && invalidOTP>=0 && invalidOTP < 3 )"> <span i18n>{{ 'enter_the_security_code_sent_to' | i18next }}</span> <a class="links cursor-pointer" i18n>
+              {{forgetemail}}.</a> </p>
+          <p  *ngIf="!forMfa || (forMfa && invalidOTP>=0 && invalidOTP < 3 )"  class="text-primary small" i18n> {{ 'security_code_is_valid_for' | i18next }} 15 {{ 'minutes' | i18next }} </p>
+          <p class="text-primary small" *ngIf="!forMfa && passwordstrengthForm !='';else showMFAMessage"> {{passwordstrengthForm}} <span
+              *ngIf="(invalidOTP>=1 && expireOTP=='')"> {{ 'you_have' | i18next }}{{invalidOtp_cnt}} {{ 'attempts_remaining' | i18next }}. {{ 'please_click' | i18next }} <a
+                i18n (click)="sendResetPasswordMail()" class="links cursor-pointer font-weight-semibold"> {{ 'resend' | i18next }} </a> {{ 'security_code_to_registered_email' | i18next }}</span><span *ngIf="expireOTP=='406'">{{ 'please_click' | i18next }}
+              <a i18n (click)="sendResetPasswordMail()" class="links cursor-pointer font-weight-semibold"> {{ 'resend' | i18next }} </a>
+              {{ 'to_get_a_new_security_code_to_your' | i18next }} {{ 'registered_email_address' | i18next }}
+
+            </span></p>
+              <ng-template #showMFAMessage>
+                                <span *ngIf="(invalidOTP>=1 && invalidOTP < 3 && expireOTP=='')"> {{ 'you_have' | i18next }} {{invalidOtp_cnt}} {{ 'attempts_remaining' | i18next }}.</span>
+                                <div class="validation-alert alert-error msg-input-bottom text-left" *ngIf="(invalidOTP == 3 && expireOTP=='')">
+                                  <icon name="error_outline" class="float-left mr-16 pt-8" size="24px" type="material" cuClass="validation-icon"></icon>
+                                  <p  class="small">
+                                     {{ 'you_have_exceeded_the_maximum_allowed_attempts' | i18next }}.
+                                  </p>
+                               </div>
+                              </ng-template>
+              <div class="mt-8">
+            <form [formGroup]="OTPForm">
+              <div class="form-group-row">
+
+                <div *ngFor="let input of formInput;  index as i" class="form-group">
+                  <input type="text" #formRow formControlName="{{input}}" class="form-control" maxlength="1" max="1"
+                    (keyup)="keyUpEvent($event, i,input)"
+                    class="form-control rounded-sm border-left align-justify-center text-center p-4">
+                </div>
+
+              </div>
+            </form>
+          </div>
+          <div class="mb-32 mt-8 d-flex justify-content-center">
+            <button i18n type="submit" class="btn loginbtn btn-primary large cursor-pointer" (click)="validateOTP();"
+              [disabled]="invalidOTP == 3">
+              {{ 'verify' | i18next }} & {{ 'proceed' | i18next }}
+            </button>
+          </div>
+          <p *ngIf="!forMfa;else resendSection" class="text-center font-weight-normal"> <span i18n> {{ 'didn_t_receive_the_email' | i18next }}? </span> <a i18n
+              (click)="sendResetPasswordMail()" class="links cursor-pointer font-weight-semibold"> {{ 'resend' | i18next }} </a></p>
+
+                  <ng-template #resendSection>
+                          <p class="text-center font-weight-normal"> <span i18n> {{ 'didn_t_receive_the_email' | i18next }}? </span>
+                            <span i18n *ngIf="!showMFAResendButton && counter"> {{ 'resend_email_in' | i18next }}  (<span class="error-text"> {{counter}} </span>)</span>
+                            <a i18n
+                            (click)="sendMFAResetPasswordEmail()" class="links cursor-pointer font-weight-semibold" *ngIf="showMFAResendButton"> {{ 'resend' | i18next }} </a></p>
+                       </ng-template>
+            </div>
+        <!-- security CodeVerification-->
+      </div>
+
+      <!-- this part for forget Username -->
+      <div *ngSwitchCase="'forgotUsername'">
+        <figure class="ml--7 pb-16">
+          <icon size='45px' color='black' name='perm_identity'></icon>
+        </figure>
+        <div>
+          <h2 i18n> {{ 'forgot_your_username' | i18next }}?
+
+          </h2>
+          <p class="mb-32 font-weight-medium" i18n>{{ 'enter_your_registered_email' | i18next }} {{ 'to_receive_your_username' | i18next }}
+            {{ 'if_you_dont_have_an_email_address_in_the_system' | i18next }}, {{ 'contact_a_system_administrator_for_assistance' | i18next }} </p>
+          <div class="validation-alert  alert-error overflow-hidden mb-8" *ngIf="userNotFound">
+            <p class="small d-flex align-items-center mb-0">
+              <icon name="error_outline" size="24px" type="material" class="pt-0 d-flex mr-8"></icon> <span
+                i18n>{{userNotFound}} </span>
+            </p>
+          </div>
+        </div>
+        <form #f="ngForm">
+          <div class="input-group position-relative  mb-16 login-email">
+            <span class="input-group-text" id="email">
+              <icon name="email" cuClass="login-form-icon" size="18px" type="material"></icon>
+            </span>
+            <input type="email" class="form-control medium" name="email" i18n-placeholder
+              placeholder="{{ 'enter_your_email_address' | i18next }}" aria-label="Email" aria-describedby="email"
+              [(ngModel)]="forgetemail" #test="ngModel" (keyup)="resetMessage()" required [pattern]="emailvalidation"
+              [ngClass]="{'error':
+              test.invalid && (test.dirty || test.touched)
+                }">
+            <div class="validation-status position-absolute success" *ngIf="test.dirty && test.errors == null">
+              <icon name="check_circle" cuClass="valid-field-icon-green" size="19px" type="material"></icon>
+            </div>
+            <!-- Invalid icon goes here -->
+            <div class="validation-status position-absolute invalid" *ngIf="
+                (test.dirty && test.errors?.pattern )
+              ">
+              <icon name="info" cuClass="invalid-field-icon" size="19px" type="material"></icon>
+            </div>
+          </div>
+          <div class="validation-status invalid msg-input-bottom" *ngIf="test.invalid && (test.dirty || test.touched)">
+            <p class="validation-msg">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'please_enter_a_valid_email_address' | i18next }}.
+            </p>
+          </div>
+
+          <div class="d-flex overflow-hidden mb-32">
+            <button i18n type="submit" class="btn loginbtn btn-primary large cursor-pointer full-width"
+              (click)="sendForgetUsernameMail()" [disabled]="!f.valid">
+              {{ 'submit' | i18next }}
+            </button>
+          </div>
+          <div>
+            <p class="text-left font-weight-normal">
+              <span i18n> {{ 'did_you_remember_your_password' | i18next }}? </span> <a i18n (click)="getBack()"
+                class="links cursor-pointer font-weight-semibold"> {{ 'try_logging_in' | i18next }}</a>
+            </p>
+          </div>
+        </form>
+      </div>
+
+      <!-- forget username end here -->
+
+      <div class="text-center p-32" *ngSwitchCase="'EmailVerification'">
+        <icon name="mark_email_read" cuClass="login-form-icon" size="46px" type="material" class="blue-text"></icon>
+        <p class="pt-16 font-weight-normal"><span i18n> {{ 'we_send_username_to_your_registered_email' | i18next }}</span>
+          <a i18n class="links"> {{forgetemail}}</a>
+        </p>
+        <p i18n>{{ 'please_check_your_inbox_to_continue' | i18next }}</p>
+        <p class="font-weight-normal text-center pb-24 "><span i18n> {{ 'didn_t_receive_the_email' | i18next }}? </span> <a i18n
+            (click)="sendForgetUsernameMail()" class="links cursor-pointer font-weight-semibold"> {{ 'resend' | i18next }} </a></p>
+        <div class="d-flex justify-content-center"><button type="button" i18n class="btn btn-light"
+            (click)="condCheckerObj['formtype'] = 'defaultpage'"> {{ 'back_to_login' | i18next }} </button></div>
+      </div>
+
+    </div>
+
+    <!-- <div class="my-24">
+      <div class="alert_message alert_error" style="padding: 11px 10px 10px 10px;font-size: 12px;text-align: left;color: #ff0021;margin-top: -24px;margin-bottom: 70px;background: #f5dfe2;line-height: 1.6;border-left: 5px solid red;">
+      <div class="d-flex align-items-center w-100">
+        <div class="d-flex align-items-center justify-content-start">
+          <icon size="24px" name="not_interested" type="material" cuclass="d-flex" class="d-flex mr-8" color="red" >
+            <i class="d-flex material-icons" style="font-size: 24px;color:red;">not_interested</i>
+            </icon>
+          </div>
+            <div class="pl-8"><div  class="font-weight-bold mb-4 medium-font">Due to an upcoming release/system upgrade, SimplifyVMS will be unavailable starting Friday, January 21 11:00pm ET through Tuesday, January 25 8:00am ET.  Please complete any priority actions prior to the start of the maintenance window. We apologize for any inconvenience this may cause.</div></div>
+
+  </div></div>
+  </div>  -->
+  <!--main wrapper end here  -->
+  </div>
+</div>
+

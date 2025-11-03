@@ -1,0 +1,120 @@
+<svms-dialog id="impersonate-dialog" width="480px" [height]="dialogHeight + 'px'" [visibility]="visibility">
+    <svms-dialog-header (close)="toggleVisibility($event)">
+        <div class="d-flex">
+            <div class="impersonate-icon">
+                <icon class="material-outlined" name="theater_comedy" color="#4C7FF0">
+                </icon>
+            </div>
+            <div class="dialog-header">
+                <h4 class="mb-4"> {{ 'impersonate' | i18next }} </h4>
+                <p> {{ 'please_select_users_below_to_impersonate' | i18next }} </p>
+            </div>
+        </div>
+    </svms-dialog-header>
+
+    <svms-dialog-body class="h-100">
+
+        <div class="user-search mt-16">
+            <div class="form-control d-flex">
+                <icon size="16px" class="material-outlined" name="search"></icon>
+                <input [(ngModel)]="searchInput" type="text" class="custom-form-control ml-8" (keyup)="searchMember($event)"
+                    placeholder="{{ 'search_by_first/last_name_or_email_id' | i18next }}" />
+            </div>
+        </div>
+
+        <div *ngIf="!userList?.length && !userListLoading;" class="no-record-panel">
+            <p>
+                {{ 'no_records_found' | i18next }}
+            </p>
+        </div>
+
+        <div class="result-panel mt-24">
+            <perfect-scrollbar *ngIf="(userList?.length || userListLoading)" #impersonate [ngStyle]="{'height': (scrollHeight + 'px')}"
+                (psYReachEnd)="showMore($event)" [config]="{
+                    suppressScrollX: true,
+                    suppressScrollY: false,
+                    maxScrollbarLength: 120,
+                    minScrollbarLength: 60
+                }" >
+
+                <ng-container *ngIf="!isTermSearch">
+                <div *ngFor="let entry of userList; index as it" class="d-flex user-entry"
+                    [ngClass]="(it === selectedIndex)?'selected-user':''" (click)="selectedIndex = it">
+                    <div class="circle">
+                        <ng-container *ngIf="!entry?.avatar">
+                            <div class="avatar-icon">
+                                <h4 class="mb-0"> {{ shortHand(getUserName(entry)) | shortName | i18next }}
+                                </h4>
+                            </div>
+                        </ng-container>
+                    </div>
+                    <div class="user-details d-flex flex-grow text-left ml-16">
+                        <div class="user-metadata flex-grow">
+                            <h4 class="mb-0"> {{ getUserName(entry) | i18next }} </h4>
+                            <p> {{ (entry?.role?.name || 'Undefined') | i18next }} </p>
+                        </div>
+                        <div class="user-type mr-16 centered">
+                            <p class=" blue-text">
+                                {{ (entry?.role?.organization_category || 'Undefined') | snakeToTitleCase |i18next }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                </ng-container>
+
+                <ng-container *ngIf="userListLoading">
+                    <ng-container *ngFor="let entry of [1, 2, 3, 4]">
+                        <div class="pl-8 m-8 d-flex">
+                            <div class="circle">
+                                <ngx-skeleton-loader count="1" animation="progress" appearance="circle" [theme]="{
+                                            width: '32px',
+                                            height: '32px',
+                                            float: 'left',
+                                            'margin-bottom': '0px',
+                                            'margin-right': '10px',
+                                            'background-color': '#ECEDFF',
+                                            'border-top': '0'
+                                          }">
+                                </ngx-skeleton-loader>
+                            </div>
+                            <div class="lines">
+                                <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                                            width: '50%',
+                                            height: '14px',
+                                            float: 'left',
+                                            'margin-top': '5px',
+                                            'border-radius': '0',
+                                            'margin-bottom': '4px',
+                                            'background-color': '#ECEDFF',
+                                            'border-top': '0'
+                                          }">
+                                </ngx-skeleton-loader>
+                                <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                                            width: '60%',
+                                            height: '14px',
+                                            float: 'left',
+                                            'border-radius': '0',
+                                            'margin-bottom': '0px',
+                                            'background-color': '#ECEDFF',
+                                            'border-top': '0'
+                                          }">
+                                </ngx-skeleton-loader>
+                            </div>
+                        </div>
+                        <br />
+                    </ng-container>
+                </ng-container>
+            </perfect-scrollbar>
+        </div>
+
+    </svms-dialog-body>
+
+    <svms-dialog-footer>
+        <button *accessControl class="btn btn-primary w-100"
+            [disabled]="(selectedIndex === -1)"
+            (click)="impersonateUser()"
+        >
+            {{ 'impersonate' | i18next }}
+        </button>
+    </svms-dialog-footer>
+</svms-dialog>

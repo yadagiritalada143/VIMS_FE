@@ -1,0 +1,238 @@
+<svms-sidebar (onClose)="sidebarClose()" [dataVisibility]="viewEventVisibility" [title]="formTitle">
+
+  <svms-sidebar-body class="sidebarBody">
+    <form [formGroup]="messageForm" class="form-group sidebarContent">
+      <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)">
+        <vms-tab label="Message">
+          <div class="notifications-view-form pt-12 mt-12 mb-12">
+            <div class="form-group-row">
+              <div class="form-group">
+                <label> {{ 'language' | i18next }} </label>
+                <ng-select [readonly]="isViewMode" formControlName="language" ngModel required>
+                  <ng-option *ngFor="let lang of languages" [value]="lang.id">{{lang.name}}</ng-option>
+                </ng-select>
+                <p class="validation-msg"
+                   *ngIf="messageForm.controls.language.touched && messageForm.controls['language'].invalid && messageForm.controls['language'].errors?.required">
+                  <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                  {{ 'language_is_required' | i18next }}
+                </p>
+              </div>
+              <div class="toggle-panel mt-24" [ngClass]="{'disable':isViewClicked}">
+                <div class="toggle-panel-inner toggle-background">
+                  <span class="status-text">{{toggle?.title|i18next}}</span>
+                  <span class="toggle-switch" [ngClass]="toggle.value ? 'toggle-on' : 'toggle-off'"
+                        (click)="isViewMode ? null : onClickToggle()"></span>
+                </div>
+              </div>
+            </div>
+
+            <label for="subject">{{ 'subject' | i18next }}</label>
+            <input maxLength="100" type="text" id="subject" placeholder="{{ 'subject' | i18next }}" [readonly]="isViewMode"
+                   class="messageInput form-control" formControlName="subject" ngModel required>
+            <p class="validation-msg"
+               *ngIf="messageForm.controls.subject.touched && messageForm.controls['subject'].invalid && messageForm.controls['subject'].errors?.required">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'subject_is_required' | i18next }}
+            </p>
+          </div>
+          <quill-editor [readOnly]="isViewMode" [modules]="modules" [styles]="{height: '200px'}" format="html"
+                        [formControl]="formValue?.content"></quill-editor>
+        </vms-tab>
+
+        <vms-tab label="Recipients">
+          <div>
+            <vms-table [vmsTableConfig]="tableConfig" [vmsDataSource]="roles"
+                       (columnClicked)="isViewMode ? null : changeRoleStatus($event)" [itemsPerPage]="5" style="height: initial; margin-bottom: 1rem">
+            </vms-table>
+          </div>
+
+          <div>
+            <div class="members position-relative">
+              <button *accessControl class="btn small btn-danger ml-auto mb-24" (click)="showSelectMembers = true">
+                <icon size="20px" name="add" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+                {{ 'add_recipients' | i18next }}
+              </button>
+
+              <div *ngIf="showSelectMembers">
+                <ng-select placeholder="{{ 'select_user_as_recipient' | i18next }}" [readonly]="isViewMode"
+                           [multiple]="true"
+                           [clearable]="true" formControlName="members" dropdownPosition="top">
+                  <ng-option *ngFor="let member of members" [value]="member.id">{{member.full_name}}</ng-option>
+                </ng-select>
+
+                <ul class="member-list mt-8">
+                  <ng-container *ngFor="let member of members; let i = index">
+                    <li *ngIf="formValue?.members?.value?.includes(member['id'])">
+                      <div class="checkbox-wrapper cursor-pointer" style="cursor: pointer">
+                        <label class="checkbox-container">
+                    <span class="member-name">
+                      <span class="text">{{member.full_name}} ({{member.email}})</span>
+                    </span>
+                          <span class="checkmark checked"></span>
+                        </label>
+                      </div>
+                    </li>
+                  </ng-container>
+                </ul>
+              </div>
+            </div>
+            <div class="user-roles">
+              <button *accessControl class="btn small btn-danger ml-auto mb-24" (click)="showSelectUserRoles = true">
+                <icon size="20px" name="add" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+                {{ 'add_user_roles' | i18next }}
+              </button>
+
+              <div *ngIf="showSelectUserRoles">
+                <ng-select placeholder="{{ 'select_user_roles' | i18next }}" [readonly]="isViewMode"
+                           style="z-index: 2000" [multiple]="true"
+                           [clearable]="true" formControlName="user_roles" dropdownPosition="bottom">
+                  <ng-option *ngFor="let role of userRoles" [value]="role.id">{{role.name}}</ng-option>
+                </ng-select>
+
+                <ul class="role-list mt-8">
+                  <ng-container *ngFor="let role of userRoles; let i = index">
+                    <li *ngIf="formValue?.user_roles?.value?.includes(role['id'])">
+                      <div class="checkbox-wrapper cursor-pointer" style="cursor: pointer">
+                        <label class="checkbox-container">
+                    <span class="member-name">
+                      <span class="text">{{role.name}}</span>
+                    </span>
+                          <span class="checkmark checked"></span>
+                        </label>
+                      </div>
+                    </li>
+                  </ng-container>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </vms-tab>
+
+        <vms-tab label="Reminder settings">
+          <div class="toggle-reminder" [ngClass]="{'disable':isViewClicked}">
+            <div class="toggle-panel-inner toggle-background">
+              <span class="enableReminders-text">{{toggleReminder?.title|i18next}}</span>
+              <span class="toggle-switch" [ngClass]="toggle.value ? 'toggle-on' : 'toggle-off'"
+                    (click)="onClickToggle()"></span>
+            </div>
+          </div>
+
+          <div class="bordered mt-12">
+            <div class="form-group-row mt-12">
+              <div class="col">
+                <div class="form-group">
+                  <ng-select class="start_date_before">
+                    <ng-option value="before">{{ 'before' | i18next }}</ng-option>
+                    <ng-option value="after">{{ 'after' | i18next }}</ng-option>
+                  </ng-select>
+                </div>
+              </div>
+
+              <div class="col">
+                <div class="form-group">
+                  <input class="daysInput" placeholder="7">
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-group">
+                  <ng-select class="start_date_before">
+                    <ng-option value="before">{{ 'days' | i18next }}</ng-option>
+                  </ng-select>
+                </div>
+              </div>
+
+              <div class="col">
+                <div class="form-group">
+                  <ng-select bindLabel="name" class="start_date_before" bindValue="id">
+                    <ng-option value="before">{{ 'job_final_approval_date' | i18next }}</ng-option>
+                  </ng-select>
+                </div>
+              </div>
+
+              <div class="col d-flex">
+                <input class="form-control" type="text" placeholder="{{ 'this_is_the_gentle_reminder' | i18next }}">
+              </div>
+            </div>
+
+            <div>
+              <div class="form-group-row mt-12">
+                <div class="col">
+                  <div class="form-group">
+                    <ng-select bindLabel="name" class="start_date_before" bindValue="id" formControlName="start_before"
+                               placeholder="{{ 'choose_condition' | i18next }}">
+                      <ng-option value="before">{{ 'choose_condition' | i18next }}</ng-option>
+                    </ng-select>
+                  </div>
+                </div>
+
+                <div class="col">
+                  <div class="form-group">
+                    <input class="daysInput" placeholder="0">
+                  </div>
+                </div>
+
+                <div class="col">
+                  <div class="form-group">
+                    <ng-select bindLabel="name" class="start_date_before" id="newID" bindValue="id"
+                               formControlName="start_before">
+                      >
+                      <ng-option value="before">{{ 'days' | i18next }}</ng-option>
+                    </ng-select>
+                  </div>
+                </div>
+
+                <div class="col">
+                  <div class="form-group">
+                    <ng-select bindLabel="name" class="start_date_before" bindValue="id">
+                      <ng-option value="before">{{ 'select_date_variable' | i18next }}</ng-option>
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <label class="prefixLabel">{{ 'prefix_to_add_in_subject' | i18next }}</label>
+            <div class="form-group-row">
+              <div class="col">
+                <div class="form-group">
+                  <ng-select>
+                    <ng-option *ngFor="let lang of languages" [value]="lang.id">{{lang.short_name}}</ng-option>
+                  </ng-select>
+                </div>
+              </div>
+
+              <div class="col">
+                <div class="form-group">
+                  <input class="inputField" type="text" placeholder="{{ 'enter_prefix' | i18next }}">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="icon-row mt-24">
+            <div class="icon-round">
+              <p id="addRow">+</p>
+            </div>
+          </div>
+
+        </vms-tab>
+      </vms-tab-group>
+    </form>
+
+  </svms-sidebar-body>
+  <svms-sidebar-footer *ngIf="isViewMode">
+    <button *accessControl type="submit" class="btn btn-primary float-right" style="background:#8B0000"
+            (click)="onEditClick($event)">{{ 'edit' | i18next }}</button>
+  </svms-sidebar-footer>
+  <ng-container *accessControl>
+    <svms-sidebar-footer *ngIf="!isViewMode">
+      <button *ngIf="canRestore" class="btn btn-info float-left" (click)="restore()">
+        {{ 'restore_default' | i18next }}
+      </button>
+      <button *accessControl [disabled]="!messageForm.valid" type="submit" class="btn btn-primary float-right" (click)="update()">
+        <icon size="20px" name="check_circle" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+        {{ 'update' | i18next }}
+      </button>
+    </svms-sidebar-footer>
+  </ng-container>
+</svms-sidebar>

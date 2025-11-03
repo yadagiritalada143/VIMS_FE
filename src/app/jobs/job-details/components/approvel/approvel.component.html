@@ -1,0 +1,30 @@
+<app-job-details>
+  <div class="description-card p-24 mb-24">
+    <div class="dotloader" *ngIf="!approvalList?.approverlist"></div>
+    <section class="content-section" *ngIf="approvalList?.approverlist">
+      <div class="approval mt-12" *ngFor="let approvals of approvalList?.approverlist; let i = index">
+        <div class="approval-list d-flex p-12">
+          <figure class="avatar d-inline-block rounded-circle mr-8">
+            {{approvals?.approver?.first_name | slice: 0:1}}
+          </figure>
+          <p class="user">
+            {{approvals?.approver?.first_name}} {{approvals?.approver?.last_name}}
+            <span>{{approvals?.approver?.role}}</span>
+          </p>
+          <p *ngIf="approvals?.status == 'approved'" class="date mr-32 mt-8">
+            <icon size="14px" class="mr-4" name="check_circle" type="material" cuClass="icon-cu"></icon>
+            {{ 'approved_on' | i18next }} :
+            {{approvals?.modified_on |  date:"MMM dd, yyyy"}}
+          </p>
+          <p *ngIf="approvals?.status == 'rejected'" class="date mr-32 mt-8">
+            {{ 'rejected_on' | i18next }}:
+            {{approvals?.modified_on |  date:"MMM dd, yyyy"}}
+          </p>
+
+          <p [ngClass]="{'yellow': (approvals?.status == 'pending'),'red': (approvals?.status == 'rejected'),'green': (approvals?.status == 'approved')}"
+            class="status pl-8 mt-8 position-relative text-capitalize"> {{approvals?.status | titlecase | i18next}}</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</app-job-details>

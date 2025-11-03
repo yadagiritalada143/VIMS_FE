@@ -1,0 +1,241 @@
+<perfect-scrollbar [config]="{ suppressScrollX: true, suppressScrollY: false }">
+<div (clickOutside)="closeSidebar()">
+  <h4 class="pl-16">{{ 'your_programs' | i18next }}</h4>
+  <a href="javascript:void(0)" class="close-notify" (click)="closeSidebar()">
+    <icon name="clear" size="20px" type="material"></icon>
+  </a>
+  <div class="clearfix"></div>
+  <div class="program-search" *ngIf="programs.length >= 1 || preferenceList?.length >= 1 " >
+    <input type="text" placeholder="{{ 'your_programs' | i18next }}"  [(ngModel)]="searchValue" (keyup.enter)="searchProgram()" (keyup)="searchProgram()">
+    <icon class="search-icon" name="search" size="18px"></icon>
+    <icon class="clear-search cursor-pointer" *ngIf="searchValue?.length > 0 " name="close" size="18px" (click)="clearSearch();$event.stopPropagation()" ></icon>
+  </div>
+
+  <div class="p-24 pb-0 pr-m-0" *ngIf="!isSearchOpen" >
+    <p class="small font-weight-medium mb-16">{{ 'you_are_in' | i18next }}</p>
+    <div class="program-items active-program d-flex align-items-center justify-content-between" >
+      <div class="d-flex">
+            <figure class="mr-16">
+              {{currentProgram?.name | shortName:'first'}}
+            </figure>
+            <div>
+              <p class="font-weight-medium">{{currentProgram?.name}}</p>
+              <p class="small">{{currentProgram?.entity_name || currentProgram?.client?.name }}</p>
+            </div>
+          </div>
+    </div>
+    <ng-container *ngIf="preferenceList?.length > 0 && programs.length >= 1">
+    <p class="small font-weight-medium mb-16 mt-32">{{ 'recently_opened' | i18next }}</p>
+    <div class="recently-opened">
+      <div *ngFor="let program of preferenceList; let i = index" (click)="selectProgram(program)" [ngClass]="{'loading' : dataLoader}"
+      class="mb-16">
+      <div class="program-items d-flex align-items-center justify-content-between mb-16" >
+        <div class="d-flex">
+          <figure class="mr-16">
+            {{program?.entity_name | shortName:'first'}}
+          </figure>
+          <div>
+            <p class="font-weight-medium">{{program?.name}}</p>
+            <p class="small">{{program?.client?.name || program?.entity_name  }}</p>
+          </div>
+        </div>
+        <icon *ngIf="(defaultProgramId == program?.id) && !isSVMSUser" name="star" size="20px" color="#FFD000" z-index = "10"
+        class="material-icons cursor-pointer mr-24"
+        (click)="removeDefault(program);$event.stopPropagation()"></icon>
+    <icon *ngIf="(defaultProgramId != program?.id) && !isSVMSUser" name="star_border" size="20px" color="#E8E4E4" z-index="10"
+        class="material-icons cursor-pointer mr-24"
+        (click)="makeDefault(program)"></icon>
+
+      </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="programs.length >= 1">
+    <p class="small font-weight-medium mb-16 mt-16">{{ 'all_programs' | i18next }}</p>
+    <div class="all-program-list">
+      <div *ngFor="let p of programs;let i = index" (click)="selectProgram(p)" [ngClass]="{'loading' : dataLoader}"
+        class="mb-16">
+        <div class="program-items d-flex align-items-center justify-content-between" *ngIf="!dataLoader">
+          <div class="d-flex">
+            <figure class="mr-16">
+              {{p?.name | shortName:'first'}}
+            </figure>
+            <div>
+              <p class="font-weight-medium">{{p?.name}}</p>
+              <p class="small">{{p?.client?.name || p?.entity_name }}</p>
+            </div>
+          </div>
+          <icon *ngIf="(defaultProgramId == p?.id) && !isSVMSUser" name="star" size="20px" color="#FFD000" style="z-index:100 ;" z-index = "100"
+          class="material-icons cursor-pointer mr-24"
+          (click)="removeDefault(p);$event.stopPropagation()"></icon>
+      <icon *ngIf="(defaultProgramId != p?.id)  && !isSVMSUser" name="star_border" size="20px" color="#E8E4E4" z-index="100"
+          class="material-icons cursor-pointer mr-24"
+          (click)="makeDefault(p)"></icon>
+        </div>
+        <div *ngIf="dataLoader">
+          <ngx-skeleton-loader count="1" animation="progress" appearance="circle" [theme]="{
+            width: '36px',
+            height: '36px',
+            float: 'left',
+            'margin-bottom': '0px',
+            'margin-right': '10px',
+            'background-color': '#ECEDFF',
+            'border-top': '0'
+          }">
+          </ngx-skeleton-loader>
+          <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+          width: '80%',
+          height: '14px',
+          float: 'left',
+          'margin-top': '5px',
+          'border-radius': '0',
+          'margin-bottom': '4px',
+          'background-color': '#ECEDFF',
+          'border-top': '0'
+        }">
+          </ngx-skeleton-loader>
+          <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+          width: '80%',
+          height: '14px',
+          float: 'left',
+          'border-radius': '0',
+          'margin-bottom': '0px',
+          'background-color': '#ECEDFF',
+          'border-top': '0'
+        }">
+          </ngx-skeleton-loader>
+          <div class="clearfix"></div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+  </div>
+
+  <div  class="p-24 pb-0" *ngIf="isSearchOpen" >
+    <ng-container >
+      <p class="small font-weight-medium mb-16 mt-16">{{ 'searched_results' | i18next }}</p>
+      <div class="all-program-list">
+
+        <div *ngFor="let p of programs;let i = index" (click)="selectProgram(p)" [ngClass]="{'loading' : dataLoader}"
+          class="mb-16">
+          <div class="program-items d-flex align-items-center justify-content-between" *ngIf="!dataLoader">
+            <div class="d-flex">
+              <figure class="mr-16">
+                {{p?.name | shortName:'first'}}
+              </figure>
+              <div>
+                <p class="font-weight-medium">{{p?.name}}</p>
+                <p class="small">{{p?.client?.name}}</p>
+              </div>
+            </div>
+            <icon *ngIf="(defaultProgramId == p?.id) && !isSVMSUser" name="star" size="20px" color="#FFD000" style="z-index:100 ;" z-index = "100"
+            class="material-icons cursor-pointer mr-24"
+            (click)="removeDefault(p);$event.stopPropagation()"></icon>
+        <icon *ngIf="(defaultProgramId != p?.id) && !isSVMSUser" name="star_border" size="20px" color="#E8E4E4" z-index="100"
+            class="material-icons cursor-pointer mr-24"
+            (click)="makeDefault(p)"></icon>
+          </div>
+          <div *ngIf="dataLoader">
+            <ngx-skeleton-loader count="1" animation="progress" appearance="circle" [theme]="{
+              width: '36px',
+              height: '36px',
+              float: 'left',
+              'margin-bottom': '0px',
+              'margin-right': '10px',
+              'background-color': '#ECEDFF',
+              'border-top': '0'
+            }">
+            </ngx-skeleton-loader>
+            <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+            width: '80%',
+            height: '14px',
+            float: 'left',
+            'margin-top': '5px',
+            'border-radius': '0',
+            'margin-bottom': '4px',
+            'background-color': '#ECEDFF',
+            'border-top': '0'
+          }">
+            </ngx-skeleton-loader>
+            <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+            width: '80%',
+            height: '14px',
+            float: 'left',
+            'border-radius': '0',
+            'margin-bottom': '0px',
+            'background-color': '#ECEDFF',
+            'border-top': '0'
+          }">
+            </ngx-skeleton-loader>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+      </div>
+      <div class="all-program-list" *ngIf="programs.length == 0">
+      <div [ngClass]="{'loading' : dataLoader}"
+      class="mb-16">
+      <div class="program-items d-flex align-items-center justify-content-between" *ngIf="!dataLoader">
+        <div class="d-flex">
+
+          <p class="small" >{{ 'no_program_found' | i18next }}</p>
+          </div>
+          </div>
+          </div>
+    </div>
+    </ng-container>
+  </div>
+
+  <!-- <ul class="notify-listing p-16 pt-0 mt-30">
+    <li *ngFor="let p of programs;let i = index" (click)="selectProgram(p)"
+      [ngClass]="{'active' : selectedProgram === p?.id, 'loading' : dataLoader}">
+      <div *ngIf="!dataLoader">
+        <figure class="short-name">{{p?.name | shortName:'first'}}</figure>
+        <div class="notification-message">
+          <p class="title highlight">{{p?.name}}</p>
+          <p class="small client" tooltip="{{p?.client?.name}}" placement="right" delay="500">{{p?.client?.name}}</p>
+          <div class="overflow-hidden">
+            <p class="service-type float-left">{{p?.service_type.toLowerCase().replace('-', ' ')}}</p>
+            <div class="time float-right">{{p?.start_date | date: 'dd/MM/yyyy'}}</div>
+          </div>
+        </div>
+        <icon class="tick" [ngClass]="{'tick-disp' : selectedProgram === p?.id}" cuClass="notify-list-icon-tick"
+          name="check_box" size="18px" type="material"></icon>
+      </div>
+     <div *ngIf="dataLoader">
+      <ngx-skeleton-loader count="1" animation="progress" appearance="circle" [theme]="{
+        width: '32px',
+        height: '32px',
+        float: 'left',
+        'margin-bottom': '0px',
+        'margin-right': '10px',
+        'background-color': '#ECEDFF',
+        'border-top': '0'
+      }">
+    </ngx-skeleton-loader>
+    <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+      width: '50%',
+      height: '14px',
+      float: 'left',
+      'margin-top': '5px',
+      'border-radius': '0',
+      'margin-bottom': '4px',
+      'background-color': '#ECEDFF',
+      'border-top': '0'
+    }">
+  </ngx-skeleton-loader>
+    <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+      width: '60%',
+      height: '14px',
+      float: 'left',
+      'border-radius': '0',
+      'margin-bottom': '0px',
+      'background-color': '#ECEDFF',
+      'border-top': '0'
+    }">
+  </ngx-skeleton-loader>
+     </div>
+    </li>
+  </ul> -->
+</div>
+</perfect-scrollbar>

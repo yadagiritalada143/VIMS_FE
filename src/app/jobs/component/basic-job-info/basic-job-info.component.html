@@ -1,0 +1,214 @@
+<form [formGroup]="basicJobForm">
+  <div class="panel panel-light p-0">
+    <div class="panel-content p-0">
+
+      <div class="d-flex">
+        <div class="d-flex justify-content-between align-items-center p-16 w-100 border-bottom ">
+          <div class="hierarchy-logo d-flex align-items-center">
+            <div class="logo d-flex align-justify-center rounded-sm mr-8">
+              <img src="../../../assets/images/job-block.svg" alt="" />
+            </div>
+            <div class="">
+              <p class="small d-flex align-items-center">
+                {{ 'job_template' | i18next }}
+                <span class="star d-flex align-items-center justify-content-center ml-4">
+                  <icon size="8px" name="star" type="material" class="d-flex" cuClass="d-flex">
+                  </icon>
+                </span>
+              </p>
+              <p class="text-dark">
+                {{selectedTemplate?.title?.title}} ({{ 'level' | i18next }} {{selectedTemplate?.level}})
+              </p>
+            </div>
+          </div>
+          <div class="hierarchy-logo d-flex align-items-center">
+            <div class="logo d-flex align-justify-center rounded-sm mr-8">
+              <img src="../../../assets/images/job-icon.svg" alt="" />
+            </div>
+            <div class="">
+              <p class="small d-flex align-items-center">
+                {{ 'hierarchy' | i18next }}
+                <span class="star d-flex align-items-center justify-content-center ml-4">
+                  <icon size="8px" name="star" type="material" class="d-flex" cuClass="d-flex">
+                  </icon>
+                </span>
+              </p>
+              <p class="text-dark">
+                {{hierarchyData?.name}}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="border-left drop-arrow" [ngClass]="{'active': !show}">
+          <icon size="30px" name="keyboard_arrow_down" *ngIf="show" (click)="showjobDtls()" type="material"
+            class="d-flex" cuClass="d-flex">
+          </icon>
+          <icon size="30px" name="keyboard_arrow_up" *ngIf="!show" (click)="showjobDtls()" type="material"
+            class="d-flex" cuClass="d-flex">
+          </icon>
+        </div>
+      </div>
+      <div class="change-field" *ngIf="!show">
+        <div class="row no-gutters">
+          <div class="col-6 px-16 py-24 border-right">
+            <div class="h-150">
+              <div class="d-flex align-items-center mb-12">
+                <p class="small w-25">
+                  {{ 'job_title' | i18next }}
+                </p>
+                <p class="text-dark">
+                  {{selectedTemplate?.title?.title}}
+                </p>
+              </div>
+              <div class="d-flex align-items-start mb-12">
+                <p class="small">
+                  {{ 'category' | i18next }}
+                </p>
+                <p>
+                  {{selectedTemplate?.category?.category_name}}
+                </p>
+              </div>
+              <div class="d-flex align-items-start mb-12">
+                <p class="small">
+                  {{ 'job_level' | i18next }}
+                </p>
+                <p>
+                  {{selectedTemplate?.level}}
+                </p>
+              </div>
+            </div>
+            <button type="button" class="btn btn-white small mt-16" (click)="changeTemplate()">{{ 'change_template' | i18next }}</button>
+          </div>
+          <div class="col-6 px-16 py-24">
+            <div class="h-150">
+              <div class="d-flex align-items-center mb-12">
+                <p class="small">
+                  {{ 'managers' | i18next }}
+                </p>
+                <span *ngFor="let manager of hierarchyData?.managers ">
+                  <p class="profiles-img">
+                    <span class="initials initials__purple">{{ 'sg' | i18next }}</span>
+                    <span class="initials initials__img">
+                      <img src="../../../../assets/images/user-profile.png" alt="" />
+                    </span>
+                  </p>
+                </span>
+
+
+              </div>
+              <div class="d-flex align-items-start mb-12">
+                <p class="small">
+                  {{ 'address' | i18next }}
+                </p>
+                <p
+                  *ngIf="hierarchyData && hierarchyData.addresses && hierarchyData.addresses?.length > 0 && hierarchyData.addresses[0]?.address_type === 'PRIMARY'">
+                  {{hierarchyData.addresses[0]?.address_line1}}
+                </p>
+                <p
+                  *ngIf="hierarchyData && hierarchyData.addresses && hierarchyData.addresses?.length > 0 && hierarchyData.addresses[1]?.address_type === 'PRIMARY'">
+                  {{hierarchyData.addresses[1]?.address_line1}}
+                </p>
+              </div>
+              <div class="d-flex align-items-center mb-12">
+                <p class="small">
+                  {{ 'default_currency' | i18next }}
+                </p>
+                <p>
+                  {{hierarchyData?.preferred_currency}}
+                </p>
+              </div>
+            </div>
+            <button type="button" class="btn btn-white small mt-16" (click)="changeHierarchy()">Change
+              {{ 'hierarchy' | i18next }}</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-16 py-24">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>{{ 'estimated_start_date' | i18next }} <span class="require">*</span></label>
+              <svms-datepicker [inputdateFormat]="'MM/DD/YY'" ngDefaultControl I18n formControlName="start_date"
+                #start_date>
+              </svms-datepicker>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>{{ 'estimated_end_date' | i18next }} <span class="require">*</span></label>
+              <svms-datepicker [inputdateFormat]="'MM/DD/YY'" ngDefaultControl I18n formControlName="end_date"
+                #end_date  [(ngModel)]="date2" (ngModelChange)="changeDate()">
+              </svms-datepicker>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12 py-8">
+            <h4 I18n class="d-flex">
+              <icon size="24px" name="payment" theme="outlined" type="material" class="d-flex mr-8" cuClass="d-flex">
+              </icon>
+              <span>{{ 'rate_card_details' | i18next }}</span>
+            </h4>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label> {{ 'location' | i18next }}</label>
+              <ng-select placeholder="{{ 'select_location' | i18next }}" formControlName="location" #location
+                (change)="getRateCard(false)">
+                <ng-option [value]="loc.name" *ngFor="let loc of basicFormData.locations">
+                  {{loc.name}}</ng-option>
+              </ng-select>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label> {{ 'currency' | i18next }}</label>
+              <ng-select placeholder="{{ 'select_currency' | i18next }}" formControlName="currency" #currency
+                (change)="getRateCard(false)">
+                <ng-option value="{{currency?.name}}" *ngFor="let currency of basicFormData.currencies ; let i= index">
+                  {{currency?.name}}</ng-option>
+              </ng-select>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group mb-8">
+              <label> {{ 'minimum_bill_rate' | i18next }}</label>
+              <input type="number" class="form-control" formControlName="min_bill_rate" #min_bill_rate
+                placeholder="{{ 'enter_minimum_bill_rate' | i18next }}" />
+            </div>
+            <div class="checkbox">
+              <div class="checkbox-box">
+                <div class="checkbox-wrapper">
+                  <label class="checkbox-container pb-8">
+                    <input type="checkbox" name="" formControlName="vendor_rate_exceed">
+                    <span class="checkmark"></span>
+                    <p>{{ 'max_rate_on_job' | i18next }}</p>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group mb-8">
+              <label>{{ 'maximum_bill_rate' | i18next }}</label>
+              <input type="number" class="form-control" formControlName="max_bill_rate" #max_bill_rate
+                placeholder="{{ 'enter_maximum_bill_rate' | i18next }}" />
+            </div>
+           
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 mt-24 mb-16 d-flex justify-content-end">
+      <button type="button" class="btn btn-primary" (click)="addBasicInfo()">{{ 'save' | i18next }} & {{ 'continue' | i18next }}
+        <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu">
+        </icon>
+      </button>
+    </div>
+  </div>
+</form>

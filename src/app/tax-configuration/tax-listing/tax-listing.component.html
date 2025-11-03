@@ -1,0 +1,260 @@
+<app-logs [log]="logs"></app-logs>
+<section class="tax-config-list px-24">
+    <div class="d-flex mb-24">
+        <h3 class="mr-24 font-weight-medium"> {{ 'tax_configuration' | i18next }} </h3>
+        <div *authorize="'create_tax_configuration'" class="create-icon" (click)="createTaxConfig()" tooltip="Add Tax Configuration" placement="right">
+            <icon size="20px" name="add" color="white" type="material" cuClass="d-flex">
+            </icon>
+        </div>
+    </div>
+    <div class="tabs">
+        <ul>
+            <li>
+                <a href="javascript:void(0)" [ngClass]="{'active' : tabitem === 'client'}" (click)="showtab('client')">{{ 'client' | i18next }}</a>
+            </li>
+            <li>
+                <a href="javascript:void(0)" [ngClass]="{'active' : tabitem === 'vendor'}" (click)="showtab('vendor')">{{ 'vendor' | i18next }}</a>
+            </li>
+            <!-- <li >
+                <a href="javascript:void(0)" [ngClass]="{'active' : tabitem === 'history'}" (click)="showHistory('history')">{{ 'history' | i18next }}</a>
+            </li> -->
+        </ul>
+    </div>
+    <!-- client tab start here -->
+    <div class="tab-content" *ngIf="tabitem === 'client' || tabitem === 'vendor'">
+        <div class="item mb-16" *ngFor="let taxconfig of taxConfigList; let i = index">
+            <div class="tax-basid-info panel bg-light p-24">
+                <div class="d-flex align-items-center justify-content-between">
+                    <p class="font-weight-medium text-primary cursor-pointer" [routerLink]="['/tax-configuration/view',taxconfig.id]">{{taxconfig.name}}</p>
+                    <div class="d-flex align-items-center">
+                        <div class="position-relative mr-24">
+                            <icon *authorize="'edit_tax_configuration'" name="more_horiz" size="24px" class="option-trigger cursor-pointer" (click)="showDropdown(i)"></icon>
+                            <div class="option-dropdown" [ngClass]="{'active': dropdownMenu === i}" (mouseleave)="hideDropdown(i)">
+                                <ul>
+                                    <li>
+                                        <a [routerLink]="['/tax-configuration/edit',taxconfig.id]">{{ 'edit' | i18next }}</a>
+                                    </li>
+                                    <li *accessControl>
+                                        <a (click)="cloneTaxConfig(taxconfig.id,taxconfig.name)">{{ 'clone' | i18next }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mr-24" *accessControl>
+                            <toggle-button
+                              [checked]="taxconfig.is_enabled"
+                              [disabled]="!editTaxConfigurationAllowed"
+                              (changed)="taxconfig.is_enabled = !taxconfig.is_enabled;enableDisableTaxConfig(taxconfig.id,taxconfig.is_enabled)"
+                            ></toggle-button>
+                        </div>
+                        <a href="javascript:void(0)" (click)="showFewerInfo(i)">
+                            <icon [name]="fewerDetail === i ? 'keyboard_arrow_up' :  'keyboard_arrow_down'" size="24px"></icon>
+                        </a>
+                    </div>
+                </div>
+                <div class="tax-detail mt-24 d-flex justify-content-between cursor-pointer" *ngIf="fewerDetail === i" (click)="moreDetail(i)">
+                    <div>
+                        <p class="item-label small">{{ 'hierarchy' | i18next }}</p>
+                        <p class="item-value" *ngIf="taxconfig.hierarchies[0] == 'All' ; else showHierarchies" >{{taxconfig.hierarchies[0]}}</p>
+                        <ng-template #showHierarchies >
+                          <p class="item-value" *ngFor="let item of taxconfig.hierarchies" >{{item.name}}</p>
+                        </ng-template>
+                    </div>
+                    <div>
+                        <p class="item-label small">{{ 'sourcing_model' | i18next }}</p>
+                        <p class="item-value">{{taxconfig?.sourcing_model}}</p>
+                    </div>
+                    <div>
+                        <p class="item-label small">{{ 'tax_applicable' | i18next }}</p>
+                        <p class="item-value">{{taxconfig?.applicable_on}}</p>
+                    </div>
+                    <div>
+                        <p class="item-label small">{{ 'tax_allocation_based_on' | i18next }}</p>
+                        <p class="item-value">{{taxconfig?.tax_allocation_base == ('COUNTRY'|i18next)?('Region / Country'|i18next):('Work location'|i18next)}}</p>
+                    </div>
+                    <div>
+
+                      <ng-container *ngIf="taxconfig?.work_locations != null">
+                        <p class="item-label small">{{ 'work_location' | i18next }}</p>
+                        <p class="item-value" *ngIf="taxconfig?.work_locations[0] == 'All' ; else showWork_locations" >{{taxconfig.work_locations[0]}}</p>
+                        <ng-template #showWork_locations >
+                          <p class="item-value" *ngFor="let item of taxconfig.work_locations" >{{item.name}}</p>
+                        </ng-template>
+                      </ng-container>
+
+                      <ng-container *ngIf="taxconfig?.countries != null">
+                        <p class="item-label small">{{ 'country' | i18next }}</p>
+                        <p class="item-value" *ngIf="taxconfig?.countries[0] == 'All' ; else showcountries" >{{taxconfig.countries[0]}}</p>
+                        <ng-template #showcountries >
+                          <p class="item-value" *ngFor="let item of taxconfig.countries" >{{item.name}}</p>
+                        </ng-template>
+                      </ng-container>
+
+
+
+                    </div>
+                    <div>
+                        <p class="item-label small">{{ 'manage_tax' | i18next }}</p>
+                        <p class="item-value">{{taxconfig?.manage_tax?('Configured By System|i18next'):('Self Driven'|i18next)}}</p>
+
+                    </div>
+                    <div>
+                        <p class="item-label small">{{ 'modules' | i18next }}</p>
+                        <p class="item-value" *ngIf="taxconfig?.modules[0] == 'All' ; else showModules" >{{taxconfig.modules[0]}}</p>
+                        <ng-template #showModules >
+                          <p class="item-value" *ngFor="let item of taxconfig.modules" >{{item.name}}</p>
+                        </ng-template>
+
+                    </div>
+                </div>
+            </div>
+            <div class="tax-by-country" *ngIf="fewerDetail === i && taxconfig.manage_tax == true">
+                <div class="country-item p-24" *ngFor="let tax of taxconfig.tax_details" >
+                    <p class="font-weight-medium text-primary mb-16">{{tax.name}}</p>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p>{{tax?.tax_type}}</p>
+                            <p class="small">{{ 'tax_type' | i18next }}</p>
+                        </div>
+                        <div>
+                            <p>{{tax?.applicable_range.max}} - {{tax?.applicable_range.min}}</p>
+                            <p class="small">{{ 'applicable_range_(min&max)' | i18next }}</p>
+                        </div>
+                        <div>
+                            <p>{{tax.start_date*1000 | localDateFormat }} - {{tax.end_date*1000 | localDateFormat }}</p>
+                            <p class="small">{{ 'start_date_&_end_date' | i18next }}</p>
+                        </div>
+                        <div class="d-flex">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<!-- No taxConfig found -->
+        <div class="no-tax-config panel bg-light p-24" *ngIf="taxConfigList.length == 0">
+            <div class="no-tax-config-inner d-flex">
+                <div class="no-tax-config-icon">
+                    <icon name="info" size="25px"></icon>
+                </div>
+                <div class="no-tax-config-text">
+                    <p class="no-tax-config-text-title">{{ 'no_tax_configuration_found' | i18next }}</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- vendor tab start here -->
+
+    <!-- History tab start here -->
+    <div class="tab-content" *ngIf="tabitem === 'history'">
+        <div class="panel bg-light p-24 pb-8">
+            <div class="tax-history-list">
+                <div class="row">
+                  <div>
+                    <div class="fs-13 font-weight-medium main-text-color pb-4">08/22/2021</div>
+                    <div class="fs-12 font-weight-regular sub-text-color">08:00:00 AM</div>
+                    <div class="fs-12 font-weight-regular sub-text-color">{{ 'revision' | i18next }} : 2</div>
+                  </div>
+                  <div class="divider divider-w-border">
+                    <div class="circle"></div>
+                  </div>
+                  <div class="col history-detail">
+                    <div class="d-flex justify-content-between">
+                      <div>
+                        <div class="fs-16 font-weight-medium main-text-color pb-16">
+                            {{ 'tax_configuration_created_-_updated' | i18next }}
+                        </div>
+                        <div class="pb-4">
+                          <span class="fs-13 font-weight-regular main-text-color">{{ 'status' | i18next }} : </span>
+                          <span class="fs-13 font-weight-regular sub-text-color status-ui inactive">{{ 'inactive' | i18next }}</span>
+                        </div>
+                        <div class="pb-4">
+                          <span class="fs-13 font-weight-regular main-text-color">{{ 'updated_by' | i18next }} : </span>
+                          <span
+                            class="fs-13 font-weight-regular sub-text-color">{{ 'pravallika' | i18next }} </span>
+                        </div>
+                      </div>
+                      <button type="button" class="my-auto btn primary-outline text-primary small"
+                      (click)="shoDetailHistory($event)">
+                        <icon size="16px" name="visibility" type="material" class="icon--on-left" cuClass="icon-cu">
+                        </icon>
+                        {{ 'view' | i18next }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                    <div>
+                      <div class="fs-13 font-weight-medium main-text-color pb-4">08/22/2021</div>
+                      <div class="fs-12 font-weight-regular sub-text-color">08:45:00 PM</div>
+                      <div class="fs-12 font-weight-regular sub-text-color">{{ 'revision' | i18next }} : 1</div>
+                    </div>
+                    <div class="divider divider-w-border">
+                      <div class="circle"></div>
+                    </div>
+                    <div class="col history-detail">
+                      <div class="d-flex justify-content-between">
+                        <div>
+                          <div class="fs-16 font-weight-medium main-text-color pb-16">
+                              {{ 'tax_configuration_created_-_updated' | i18next }}
+                          </div>
+                          <div class="pb-4">
+                            <span class="fs-13 font-weight-regular main-text-color">{{ 'status' | i18next }} : </span>
+                            <span class="fs-13 font-weight-regular sub-text-color status-ui active">{{ 'active' | i18next }}</span>
+                          </div>
+                          <div class="pb-4">
+                            <span class="fs-13 font-weight-regular main-text-color">{{ 'updated_by' | i18next }} : </span>
+                            <span
+                              class="fs-13 font-weight-regular sub-text-color">{{ 'tejal' | i18next }} </span>
+                          </div>
+                        </div>
+                        <button type="button" class="my-auto btn primary-outline text-primary small"
+                        (click)="shoDetailHistory($event)">
+                          <icon size="16px" name="visibility" type="material" class="icon--on-left" cuClass="icon-cu">
+                          </icon>
+                          {{ 'view' | i18next }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div>
+                      <div class="fs-13 font-weight-medium main-text-color pb-4">04/22/2021</div>
+                      <div class="fs-12 font-weight-regular sub-text-color">12:30:00 PM</div>
+                      <div class="fs-12 font-weight-regular sub-text-color">{{ 'revision' | i18next }} : 0</div>
+                    </div>
+                    <div class="divider">
+                      <div class="circle"></div>
+                    </div>
+                    <div class="col history-detail">
+                      <div class="d-flex justify-content-between">
+                        <div>
+                          <div class="fs-16 font-weight-medium main-text-color pb-16">
+                              {{ 'tax_configuration_created' | i18next }}
+                          </div>
+                          <div class="pb-4">
+                            <span class="fs-13 font-weight-regular main-text-color">{{ 'status' | i18next }} : </span>
+                            <span class="fs-13 font-weight-regular sub-text-color status-ui active">{{ 'active' | i18next }}</span>
+                          </div>
+                          <div class="pb-4">
+                            <span class="fs-13 font-weight-regular main-text-color">{{ 'created_by' | i18next }} : </span>
+                            <span
+                              class="fs-13 font-weight-regular sub-text-color">{{ 'tejal' | i18next }} </span>
+                          </div>
+                        </div>
+                        <button type="button" class="my-auto btn primary-outline text-primary small"
+                        (click)="shoDetailHistory($event)">
+                          <icon size="16px" name="visibility" type="material" class="icon--on-left" cuClass="icon-cu">
+                          </icon>
+                          {{ 'view' | i18next }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+              </div>
+        </div>
+    </div>
+</section>
+<app-tax-history></app-tax-history>

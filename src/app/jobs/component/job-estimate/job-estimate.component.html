@@ -1,0 +1,324 @@
+<svms-sidebar-ng [title]="'Budget Details'" size="big" [dataVisibility]="isCreateEstimate"
+  (onClose)="sidebarClose(false)">
+  <svms-sidebar-body>
+    <app-logs [log]="logs"></app-logs>
+    <form [formGroup]="jobEstimateForm">
+      <div class="p-24 job-estimate">
+        <div class="row">
+          <div class="col">
+            <div class="rate-range d-flex align-items-center">
+              <div class="range-icon mr-16 d-flex align-items-center justify-content-center blue">
+                <i class="icon-default material-icons">south_west</i>
+              </div>
+              <div class="rate-text">
+                <h4 class="m-0">{{(rateModel === 'BILL_RATE' ? jobEstimateForm.get('min_bill_rate').value :
+                  jobEstimateForm.get('estminrate').value) | accuracy : 'rate' : { currencyCode: currency } }}</h4>
+                <p>{{'min_bill_rate' | i18next}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col" *ngIf="!isMaxBudgetCalculation">
+            <div class="rate-range d-flex align-items-center">
+              <div class="range-icon mr-16 d-flex align-items-center justify-content-center orange">
+                <i class="icon-default material-icons">multiple_stop</i>
+              </div>
+              <div class="rate-text">
+                <h4 class="m-0">{{ getAverageRate() }}</h4>
+                <p>{{'average_bill_rate' | i18next}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="rate-range d-flex align-items-center">
+              <div class="range-icon mr-16 d-flex align-items-center justify-content-center yellow">
+                <i class="icon-default material-icons">south_west</i>
+              </div>
+              <div class="rate-text">
+                <h4 class="m-0">{{(rateModel === 'BILL_RATE' ? jobEstimateForm.get('max_bill_rate').value :
+                  jobEstimateForm.get('estmaxrate').value) | accuracy : 'rate' : { currencyCode: currency } }}</h4>
+                <p>{{'max_bill_rate' | i18next}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="work-duration-box d-flex align-items-center my-16 column-direction">
+          <div class="number-dropdown">
+            <div class="row">
+              <div class="col-3">
+                <div class="form-group m-0">
+                  <label>{{ 'no._of_positions' | i18next }}</label>
+                  <input type="number" formControlName="num_resources" class="form-control"
+                    (input)="getWorkingHoursEstimate()" onkeydown="return ( event.ctrlKey || event.altKey
+                || (47<event.keyCode && event.keyCode<58 && event.shiftKey==false)
+                || (95<event.keyCode && event.keyCode<106)
+                || (event.keyCode==8) || (event.keyCode==9)
+                || (event.keyCode>34 && event.keyCode<40)
+                || (event.keyCode==46) )" [readonly]="disableEditableFields">
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group m-0">
+                  <label>{{ 'est._hours' | i18next }} / {{ 'day' | i18next }}</label>
+                  <input type="number" formControlName="hours_per_day" class="form-control"
+                    (input)="getWorkingHoursEstimate()" onkeydown="return ( event.ctrlKey || event.altKey
+                || (47<event.keyCode && event.keyCode<58 && event.shiftKey==false)
+                || (95<event.keyCode && event.keyCode<106)
+                || (event.keyCode==8) || (event.keyCode==9)
+                || (event.keyCode>34 && event.keyCode<40)
+                || (event.keyCode==46) )" [readonly]="disableEditableFields">
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group m-0">
+                  <label>{{'unit_of_measure'|i18next}}</label>
+                  <ng-select class="rate-type-selector" [clearable]="false" bindLabel="unit_of_measure"
+                    placeholder="Select Rate Type" formControlName="unit_of_measure" (change)="onRateTypeChange($event)"
+                    [readonly]="disableEditableFields">
+                    <ng-option *ngFor="let c of jobEstimateForm.get('RateCardDetails')?.value" [value]="c">
+                      <span width="20px" class="mr-4" *ngIf="c?.unit_of_measure">{{
+                        c?.unit_of_measure
+                        }}</span>
+                    </ng-option>
+                  </ng-select>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group m-0">
+                  <label>{{ 'work_days' | i18next }} / {{ 'week' | i18next }}</label>
+                  <input type="number" formControlName="week_working_days" class="form-control"
+                    (input)="getWorkingHoursEstimate()" onkeydown="return ( event.ctrlKey || event.altKey
+                  || (47<event.keyCode && event.keyCode<58 && event.shiftKey==false)
+                  || (95<event.keyCode && event.keyCode<106)
+                  || (event.keyCode==8) || (event.keyCode==9)
+                  || (event.keyCode>34 && event.keyCode<40)
+                  || (event.keyCode==46) )" [readonly]="disableEditableFields">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="work-duration">
+            <label>{{ 'work_duration' | i18next }}</label>
+            <p>{{jobEstimateForm.get('formatted_working_days').value}}</p>
+          </div>
+        </div>
+
+        <div class="detailed-estimation">
+          <div class="row py-16">
+            <div class="col-12">
+              <h5 class="d-flex">
+                <i class="icon-default material-icons mr-8">calculate</i>
+                {{ 'detailed_estimate' | i18next }} / {{ 'position' | i18next }}
+              </h5>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-7 py-16">
+              <label class="spc">{{'total_working_units' | i18next}}</label>
+            </div>
+            <div class="col-5 pt-16">
+              <div *ngIf="!dataLoading" class="spc d-flex justify-content-end">
+                {{ getWorkingUnits() }}
+              </div>
+              <div *ngIf="dataLoading">
+                <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                  [theme]="{'width': '100%', height: '16px', 'border-radius':'4px', 'background-color': '#ebeef3'}">
+                </ngx-skeleton-loader>
+              </div>
+            </div>
+          </div>
+          <div class="row" *ngIf="!isMaxBudgetCalculation">
+            <div class="col-7 py-16">
+              <label class="spc">
+                {{'average' |i18next }} {{'amount'|i18next}} </label>
+            </div>
+            <div class="col-5 pt-16">
+              <div *ngIf="!dataLoading" class="spc d-flex justify-content-end">
+                {{jobEstimateForm.get('single_initial_budget').value | accuracy : 'amount' : { currencyCode: currency }
+                }}
+              </div>
+              <div *ngIf="dataLoading">
+                <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                  [theme]="{'width': '100%', height: '16px', 'border-radius':'4px', 'background-color': '#ebeef3'}">
+                </ngx-skeleton-loader>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-7 py-16">
+              <label class="spc">{{'amount'|i18next}} <span class="label" *ngIf="!isMaxBudgetCalculation">{{'range' |
+                i18nextEager}}</span></label>
+            </div>
+            <div class="col-5">
+              <div *ngIf="!dataLoading" class="spc d-flex justify-content-end">
+                <div class="amount-range d-flex justify-content-between py-16 px-8" *ngIf="!isMaxBudgetCalculation">
+                  <label>{{'min' | i18next}}.</label>
+                  <span class="text-nowrap ml-8">{{jobEstimateForm.get('min_single_initial_budget').value | accuracy :
+                    'amount' : { currencyCode: currency } }}</span>
+                </div>
+                <div class="amount-range d-flex justify-content-between py-16 pl-8">
+                  <label>{{'max' | i18next}}.</label>
+                  <span class="text-nowrap ml-8">{{jobEstimateForm.get('max_single_initial_budget').value | accuracy :
+                    'amount' : { currencyCode: currency } }}</span>
+                </div>
+              </div>
+              <div *ngIf="dataLoading" class="pt-16">
+                <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                  [theme]="{'width': '100%', height: '16px', 'border-radius':'4px', 'background-color': '#ebeef3'}">
+                </ngx-skeleton-loader>
+              </div>
+            </div>
+          </div>
+          <div class="row align-items-center column-direction">
+            <div class="col-7 py-16">
+              <div class="d-flex align-items-center">
+                <label class="spc">{{'additional_amount' | i18next}}</label>
+                <div class="add-amount-toggle d-flex ml-24">
+                  <input type="radio" id="radio-one" value="fixed" formControlName="adjustment_type"
+                    (change)="onAdjustmentTypeChange('fixed')" [readonly]="disableEditableFields" />
+                  <label for="radio-one">{{'fixed' | i18next}}</label>
+                  <input type="radio" id="radio-two" formControlName="adjustment_type" value="percentage"
+                    (change)="onAdjustmentTypeChange('percentage')" [readonly]="disableEditableFields" />
+                  <label for="radio-two">{{'percentage' | i18next}}</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-5 py-16">
+              <div class="spc d-flex justify-content-end">
+                <div class="add-range d-flex">
+                  <div class="input-with-fixed-value position-relative">
+                    <div class="additional-amount d-flex align-items-center justify-content-end">
+                      <div class="form-group position-relative p-0 m-0">
+                        <span
+                          class="percentage-section d-flex align-items-center justify-content-center">{{place_data}}</span>
+                        <input class="form-control pl-64" type="number" formControlName="adjustment_value"
+                          [inputAccuracy]="adjustment_type=='percentage' ? 'amount_percentage' : 'amount'"
+                          [readonly]="disableEditableFields" (change)="addAccuracy()">
+                      </div>
+                      <div *ngIf="!dataLoading">
+                        <div class="estimated text-nowrap ml-16 float-right"
+                          *ngIf="jobEstimateForm.get('adjustment_amount')?.value >0 || +jobEstimateForm.get('adjustment_value')?.value >0">
+                          {{ (jobEstimateForm.get('adjustment_amount')?.value ||
+                          jobEstimateForm.get('additional_amount')?.value) | accuracy : 'amount' : { currencyCode:
+                          currency } }}
+                        </div>
+                      </div>
+                      <div *ngIf="dataLoading" class="col-3 p-0 ml-16 mt-12">
+                        <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                          [theme]="{'width': '100%', height: '16px', 'border-radius':'4px', 'background-color': '#ebeef3'}">
+                        </ngx-skeleton-loader>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row" *ngIf="!isMaxBudgetCalculation">
+            <div class="col-7 py-16">
+              <label class="spc">{{'estimate_average_budget' | i18next }}</label>
+            </div>
+            <div class="col-5 pt-16">
+              <div *ngIf="!dataLoading" class="spc d-flex justify-content-end">
+                {{jobEstimateForm.get('single_net_budget')?.value | accuracy : 'amount' : { currencyCode: currency } }}
+              </div>
+              <div *ngIf="dataLoading">
+                <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                  [theme]="{'width': '100%', height: '16px', 'border-radius':'4px', 'background-color': '#ebeef3'}">
+                </ngx-skeleton-loader>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-7 py-16">
+              <label class="spc">{{'estimated_budget'|i18next}}<span class="label"
+                  *ngIf="!isMaxBudgetCalculation"> {{'range' | i18next}}</span></label>
+            </div>
+            <div class="col-5">
+              <div *ngIf="!dataLoading" class="spc d-flex justify-content-end flex-wrap">
+                <div class="amount-range d-flex justify-content-between py-16 px-8" *ngIf="!isMaxBudgetCalculation">
+                  <label>{{'min' | i18next}}.</label>
+                  <span class="text-nowrap ml-8">{{jobEstimateForm.get('min_single_net_budget').value | accuracy :
+                    'amount' : { currencyCode: currency } }}</span>
+                </div>
+                <div class="amount-range d-flex justify-content-between py-16 pl-8">
+                  <label>{{'max' | i18next}}.</label>
+                  <span class="text-nowrap ml-8">{{jobEstimateForm.get('max_single_net_budget').value | accuracy :
+                    'amount' : { currencyCode: currency } }}</span>
+                </div>
+              </div>
+              <div *ngIf="dataLoading" class="pt-16">
+                <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                  [theme]="{'width': '100%', height: '16px', 'border-radius':'4px', 'background-color': '#ebeef3'}">
+                </ngx-skeleton-loader>
+              </div>
+            </div>
+          </div>
+          <div class="row py-16">
+            <div class="col-12">
+              <h5 class="colorBold d-flex">
+                <i class="icon-default material-icons mr-8">calculate</i>
+                {{'total_estimates' | i18next}}
+              </h5>
+            </div>
+          </div>
+          <div class="row" *ngIf="!isMaxBudgetCalculation">
+            <div class="col-7 py-16">
+              <label class="spc"><b>{{'total_estimated_average_budget' | i18next}}</b></label>
+            </div>
+            <div class="col-5 pt-16">
+              <div *ngIf="!dataLoading" class="spc d-flex justify-content-end">
+                <b>{{jobEstimateForm.get('net_budget')?.value | accuracy :
+                  'amount' : { currencyCode: currency } }}</b>
+              </div>
+              <div *ngIf="dataLoading">
+                <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                  [theme]="{'width': '100%', height: '16px', 'border-radius':'4px', 'background-color': '#ebeef3'}">
+                </ngx-skeleton-loader>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-7 py-16">
+              <label class="spc"><b>{{'total_estimated_budget' | i18next}}<span style="color: #000"
+                    *ngIf="!isMaxBudgetCalculation"> {{'range' | i18next}}</span></b></label>
+            </div>
+            <div class="col-5">
+              <div *ngIf="!dataLoading" class="spc d-flex justify-content-end flex-wrap">
+                <div class="amount-range d-flex justify-content-between py-16 px-8" *ngIf="!isMaxBudgetCalculation">
+                  <label>{{'min' | i18next}}.</label>
+                  <span class="text-nowrap ml-8"><b>{{jobEstimateForm.get('min_net_budget')?.value | accuracy : 'amount'
+                      : { currencyCode: currency } }}</b></span>
+                </div>
+                <div class="amount-range d-flex justify-content-between py-16 pl-8">
+                  <label>{{'max' | i18next}}.</label>
+                  <span class="text-nowrap ml-8"><b>{{jobEstimateForm.get('max_net_budget')?.value | accuracy : 'amount'
+                      : { currencyCode: currency } }}</b></span>
+                </div>
+              </div>
+              <div *ngIf="dataLoading" class="pt-16">
+                <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+                  [theme]="{'width': '100%', height: '16px', 'border-radius':'4px', 'background-color': '#ebeef3'}">
+                </ngx-skeleton-loader>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </svms-sidebar-body>
+  <svms-sidebar-footer>
+    <div class="row no-gutters">
+      <div class="col-12 d-flex align-items-center justify-content-between">
+        <button type="submit" class="btn btn-outline-secondary mr-8" (click)="sidebarClose(false)">
+          {{ 'cancel' | i18next }}
+        </button>
+        <button type="submit" class="btn btn-primary border-0"
+          [disabled]="!estimateFormValid || !isValid || disableEditableFields || isJobEstBtnDisable"
+          (click)="sidebarClose(true)">
+          <icon size="24px" name="check_circle" type="material" class="d-flex mr-8" cuClass="icon-cu">
+          </icon> {{ 'update' | i18next }}
+        </button>
+      </div>
+    </div>
+  </svms-sidebar-footer>
+</svms-sidebar-ng>

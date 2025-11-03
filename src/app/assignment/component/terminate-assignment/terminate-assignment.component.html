@@ -1,0 +1,163 @@
+<svms-sidebar [title]="'Close Assignment'|i18next" [dataVisibility]="isTerminate" (onClose)="sidebarClose()">
+  <app-logs [log]="logs"></app-logs>
+  <form [formGroup]="terminationForm">
+    <svms-sidebar-body>
+      <div class="p-24">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label I18nS>
+                {{ 'end_date' | i18nextEager }}
+                <span class="require">*</span>
+              </label>
+              <svms-datepicker [inputdateFormat]="dateFormat" ngDefaultControl [options]="options"
+                formControlName="termDate" id="date1" I18n #dateFiled [ngClass]="{'disableDiv': assignmentData?.assignments?.assignment?.status?.toLowerCase() === 'pending'}">
+              </svms-datepicker>
+              <p class="text-red"
+                *ngIf="terminationForm.get('termDate').invalid && terminationForm.get('termDate')?.errors?.approved_ts_exist_for_selected_end_date">
+                {{ 'approved_timesheet_exists_for_selected_end_date.!' | i18nextEager }}
+              </p>
+            </div>
+            <div class="form-group">
+              <label I18nS>
+                {{ 'reason_for_assignment_closing' | i18nextEager }}
+                <span class="require">*</span>
+              </label>
+              <ng-select [items]="reason" [clearable]="false" autocomplete="off" formControlName="termReason"
+                bindLabel="name" bindValue="id" placeholder="{{ 'select_reason' | i18nextEager }}" (change)="updateToggle($event)">
+              </ng-select>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label>{{ 'assignment_duration' | i18nextEager }}</label>
+            <div class="duration-panel">
+              <div class="from-to-date">
+                <div class="date">
+                  <div>
+                    <p class="d-flex align-items-center small">
+                      <icon class="d-flex mr-8" size="14px" name="event" type="material" cuClass="d-flex"></icon>
+                      {{ 'from' | i18nextEager }}
+                    </p>
+                    <p>{{getDateFromString(assignmentData?.assignments?.assignment?.start_date) | localDateFormat: '': '':'' : true}}</p>
+                  </div>
+                </div>
+                <div class="date">
+                  <div>
+                    <p class="d-flex align-items-center small">
+                      <icon class="d-flex mr-8" size="14px" name="event" type="material" cuClass="d-flex"></icon>
+                      {{ 'to' | i18nextEager }}
+                    </p>
+                    <p>{{getDateFromString(assignmentData?.assignments?.assignment?.end_date) | localDateFormat: '': '':'' : true}}</p>
+                  </div>
+                </div>
+              </div>
+              <p class="x-small day-remain py-12">
+                {{DaysBetween}} {{ 'days_remaining_to_end_the_assignment' | i18nextEager }}
+              </p>
+              <p *ngIf="terminateHistory?.orginal_end_date" class="x-small day-remain">{{ 'original_end_date' | i18nextEager }}
+                :
+                {{getDateFromString(terminateHistory?.orginal_end_date) | localDateFormat: '': '':'' : true}}</p>
+              <p *ngIf="terminateHistory?.reasons" class="x-small day-remain">{{ 'reason' | i18nextEager }} :
+                {{terminateHistory?.reasons[0]?.reason}}</p>
+            </div>
+          </div>
+
+        </div>
+        <div class="row">
+          <!-- <div class="col-12">
+            <h4 class="d-flex align-items-center pb-16">
+              <icon class="d-flex mr-8" size="19px" name="add_task" type="material" cuClass="d-flex"></icon>
+              List of Approvers
+            </h4>
+          </div> -->
+          <div class="col-12">
+            <!-- <label>
+              Approvers
+            </label>
+            <div class="panel-info mb-8 p-16">
+              <div class="no-gutters row">
+                <div class="col-8">
+                  <div class="d-flex align-items-center">
+                    <div class="initials initials-profile initials__green d-flex mr-8 ">SG</div>
+                    <div class="d-flex flex-column">
+                      <span class="subtitle-2 font-weight-medium">Suresh Gupta</span>
+                      <span class="x-small">Hiring Manager</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="justify-content-end">
+                    <div class="toggle-disable">
+                      <div class="toggle-panel-inner">
+                        <span class="toggle-switch" [ngClass]="true ? 'toggle-on' : 'toggle-off'"></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="panel-info mb-8 p-16">
+              <div class="no-gutters row">
+                <div class="col-8">
+                  <div class="d-flex align-items-center">
+                    <div class="initials initials-profile initials__green d-flex mr-8 ">SG</div>
+                    <div class="d-flex flex-column">
+                      <span class="subtitle-2 font-weight-medium">Suresh Gupta</span>
+                      <span class="x-small">Hiring Manager</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="justify-content-end">
+                    <div class="toggle-disable">
+                      <div class="toggle-panel-inner">
+                        <span class="toggle-switch" [ngClass]="true ? 'toggle-on' : 'toggle-off'"></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div> -->
+            <app-impacted-timesheet-table *ngIf="isTerminate === 'visible'"></app-impacted-timesheet-table>
+            <div class="form-group mb-24 mt-32">
+              <label>{{ 'note' | i18nextEager }}</label>
+              <textarea type="textarea" rows="7" cols="12" maxlength="1000" class="form-control" formControlName="notes"
+                placeholder="{{ 'add_note' | i18nextEager }}"></textarea>
+            </div>
+            <div class="re-hire" [ngClass]="{'active' : isRehire}" *ngIf="assignmentConfig && assignmentConfig?.do_not_rehire?.is_allow">
+              <div class="toggle-header position-relative">
+                <h4 class="mb-0 d-flex align-items-center">
+                  <icon name="no_accounts" class="mr-4" size="24px"></icon>
+                  <span>{{ 'do_not_re-hire' | i18nextEager }}</span>
+                </h4>
+                <toggle-button class="position-absolute" [checked]="isRehire" (changed)="toggleReHire($event)"></toggle-button>
+              </div>
+              <div class="re-hire-form" *ngIf="isRehire">
+                <div class="form-group mt-24">
+                  <label>{{ 'reason_for_not_re-hire' | i18nextEager }} <span class="require">*</span></label>
+                  <ng-select [items]="hireReasons" [clearable]="false" autocomplete="off" formControlName="hireReason"
+                  bindLabel="name" bindValue="id" placeholder="{{ 'select_reason' | i18nextEager }}">
+                </ng-select>
+                </div>
+                <div class="form-group mb-0">
+                  <label>{{ 'note' | i18nextEager }}</label>
+                  <textarea placeholder="{{ 'add_note' | i18nextEager }}" formControlName="hireNotes" class="form-control mb-0" rows="4"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+      <div class="float-right">
+        <button type="submit" class="btn btn-primary" [disabled]="(termDate.invalid || termReason.invalid || hireReason.invalid )"
+          (click)="showPopup()" *accessControl>
+          <icon size="20px" name="check_circle" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+          {{ 'submit' | i18nextEager }}
+        </button>
+      </div>
+    </svms-sidebar-footer>
+  </form>
+</svms-sidebar>

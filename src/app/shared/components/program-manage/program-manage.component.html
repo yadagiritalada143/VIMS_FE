@@ -1,0 +1,109 @@
+<label  >{{ 'select_user_and_position' | i18next }} <span class="require">*</span> </label>
+<form [formGroup]="programMemForm">
+<div class="program-manager-tab column-direction">
+  <div class="choose-role">
+    <ng-select placeholder="{{ 'choose_position' | i18next }}" formControlName= "UserRole" (change)="changeRoleValue()" [readonly]="!edit">
+      <ng-option value="{{roles?.id}}" *ngFor="let roles of userRoles">{{roles?.name}}</ng-option>
+    </ng-select>
+  </div>
+  <div class="form-group select-tab position-relative">
+    <input type="text" class="form-control add-user" placeholder="{{ 'add_user_by_their_name_or_email_address' | i18next }}" formControlName="name" (click)="edit?showUserDropdwon=true:showUserDropdwon=false" [readonly]="!edit" #userDropdown/>
+    <input type="hidden" class="form-control add-user" placeholder="{{ 'add_user_by_their_name_or_email_address' | i18next }}" formControlName="userId" (click)="showUserDropdwon=true"/>
+    <span class="invite-btn d-flex" *ngIf="inviteUser">
+      <button type="submit" class="btn small btn-secondary pl-8" (click)="invitenewUser()">
+        <icon size="15px" name="mail" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+        {{ 'invite_user' | i18next }}
+      </button>
+    </span>
+    <!-- <p class="validation-msg" *ngIf="duplicateEmail">{{duplicateEmail}}</p> -->
+    <div class="dropdown-user position-absolute py-8 rounded-sm d-flex flex-column" *ngIf="showUserDropdwon && Users?.length>0">
+      <div class="py-8 px-12 cursor-pointer dropdwon-list" *ngFor="let user of Users" (click)="selectUser(user)"><span class="initials initials__green">{{user?.first_name[0].toUpperCase()}}</span>{{user?.first_name}} {{user?.middle_name}} {{user?.last_name}}</div>
+      <!-- <div class="mb-12 cursor-pointer"><span class="initials initials__img"><img
+            src="../../../../assets/images/user-profile.png" class="img-fluid" /></span>M Shanu</div>
+      <div class="mb-12 cursor-pointer"><span class="initials initials__purple">S</span>Suresh Gupta</div> -->
+    </div>
+  </div>
+  <div class="ml-8">
+    <button type="button" class="btn btn-primary" [disabled]="!edit" (click)="onCreateUser()">
+      <icon size="20px" name="person_add" type="material" class="d-flex" cuClass="icon-cu"></icon>
+    </button>
+  </div>
+
+</div>
+
+<div class="if-noUser d-flex" *ngIf="(programManagersObj | json) == '[]'">
+  <div class="if-noUser-icon">
+    <icon name="people_alt" type="material" class="d-flex" cuClass="icon-cu"></icon>
+  </div>
+  <div>
+    <strong>{{ 'no_members_added_for_this_program' | i18next }}</strong><br />
+    {{ 'search_user_by_name_or_invite_user_by_email_address' | i18next }}
+  </div>
+</div>
+<div class="scroll-wrapper">
+  <table class="w-100 table program-manager-table" *ngIf="(programManagersObj | json) != '[]'">
+    <thead>
+      <tr>
+        <th>
+          {{ 'name_or_email_address' | i18next }}
+        </th>
+        <th>
+          {{ 'position' | i18next }}
+        </th>
+        <th>
+          {{ 'status' | i18next }}
+        </th>
+        <th>
+
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let managers of programMemidObj; let i = index">
+        <td *ngIf="managers?.user_id"> <span class="initials initials__green">{{managers?.user_id[0]?.toUpperCase()}}</span>{{managers?.user_id}}</td>
+         <td *ngIf="managers?.email"><span class="initials initials__green">{{managers?.email[0]?.toUpperCase()}}</span>{{managers?.email}}</td>
+        <td>{{managers?.role_id}}</td>
+        <td class="pl-16" *ngIf="managers?.user_id">
+          <div class="status-dropdown position-relative" (click)="onClickDropdwon(managers)" >
+            <div class="status d-flex align-justify-center rounded-sm cursor-pointer px-8" (click)="changeStatus(i)" [ngClass]="{'status-active':managers?.is_enabled,'status-inactive':!managers?.is_enabled}">
+              <icon size="8px" class="d-flex" name="stop_circle" type="material" cuClass="circle d-flex mr-4 ">
+              </icon> <span I18n *ngIf="managers?.is_enabled">{{ 'active' | i18next }}</span>
+              <span I18n *ngIf="!managers?.is_enabled">{{ 'inactive' | i18next }}</span>
+              <icon size="16px" class="d-flex" name="expand_more" type="material" cuClass="circle d-flex ml-12" *ngIf="formType !=='CreateProgram'">
+              </icon>
+            </div>
+            <div class="dropdown" *ngIf="showDropdwon && dropdownIndex == i && formType !=='CreateProgram' && edit">
+              <ul class="pl-0 ml-0">
+                <li class="pb-16 cursor-pointer" I18n (click)="setValue(true)">
+                  {{ 'active' | i18next }}
+                </li>
+                <li class="cursor-pointer" I18n (click)="setValue(false)">{{ 'inactive' | i18next }}</li>
+              </ul>
+            </div>
+  
+          </div>
+        </td>
+  
+        <td class="pl-16" *ngIf="managers?.email">
+          <div class="status-dropdown position-relative">
+            <div class="status d-flex align-items-center status-pending rounded-sm cursor-pointer ">
+              <icon size="8px" class="d-flex" name="stop_circle" type="material" cuClass="circle d-flex mr-4 ">
+              </icon> <span I18n>{{ 'pending' | i18next }}</span>
+            </div>
+  
+          </div>
+        </td>
+        <td *ngIf="formType =='CreateProgram'">
+          <icon size="18px" name="cancel" type="material" cuClass="icon-close" class="icon-close"
+            (click)="removeMember(managers.id)"></icon>
+        </td>
+      </tr>
+     <!-- <tr>
+         <td> <span class="initials initials__img"><img src="../../../../assets/images/user-profile.png" class="img-fluid"
+              alt=""></span>Suresh Gupta</td>
+        <td I18n>Project Owner</td>
+      </tr>-->
+    </tbody>
+  </table>
+</div>
+</form>

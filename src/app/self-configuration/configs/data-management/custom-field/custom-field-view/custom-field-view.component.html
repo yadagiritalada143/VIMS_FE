@@ -1,0 +1,156 @@
+<div class="view-detail-page">
+  <header class="section-header p-24 d-flex align-items-center justify-content-between">
+    <div class="d-flex">
+      <i tooltip="{{'back' | i18next}}" placement="bottom" class="material-icons back-arrow-icon cursor-pointer" (click)="backtoList()">arrow_back</i>
+      <div class="ml-16">
+        <h3 class="font-weight-semibold mb-0">{{customField?.name}} Custom Field</h3>
+        <p class="small">
+          {{ commonViewService.getTimeStamp(created_at, customField?.modified_on) | i18nextEager}}
+        </p>
+      </div>
+    </div>
+    <div>
+      <button *accessControl class="c-btn c-btn-secondary-medium-left-icon" (click)="editCustomField()">
+        <i class="material-icons">drive_file_rename_outline</i> {{'edit'|i18next}}
+      </button>
+      <button *accessControl class="c-btn c-btn-3-dot-actions ml-8" #actionTrigger>
+        <i class="material-icons">more_horiz</i>
+      </button>
+      <section *ngIf="showDropdown" id="c-action-dropdown" class="c-action-dropdown position-fixed" #actionDropdown>
+        <ul>
+          <li (click)="deleteCustomField()">
+            <a href="javascript:void(0)"> Delete </a>
+          </li>
+        </ul>
+      </section>
+    </div>
+  </header>
+  <section class="section-body-content">
+    <div class="px-32 py-16">
+
+      <app-common-view-rule-flow [details]="details" *ngIf="details.length > 0"></app-common-view-rule-flow>
+
+      <!-- Put Dropdown Values as per mockup -->
+
+      <div class="table-view mb-24 mt-24" *ngIf="customField?.type == 'DROPDOWN' || customField?.type == 'RADIO' || customField?.type == 'CHECKBOX'">
+        <div class="p-16 d-flex align-items-center justify-content-between">
+          <p class="blue-color font-weight-medium">{{ customField.type + ' Values' | i18next }} <span class="require">*</span></p>
+        </div>
+        <ul class="value-list border-top bg-light">
+          <li class="px-16 py-12" *ngFor="let option of customField?.meta_data?.datasource?.options | keysort:'ref_order'">
+            <div class="d-flex justify-content-between align-items-start" style="pointer-events: none;">
+              <div>
+                <label class="mb-0 c-input-radio">
+                  <input type="radio" name="dropdownValue" [checked]="option?.selected == 'ON' ? true : false" class="mr-8">
+                  <span class="cb-ui"></span>
+                  <span class="cb-label">{{option?.label}}</span>
+                </label>
+              </div>
+              <div class="d-flex align-items-center" *ngIf="!hideDependentInModules.includes(selectedModuleCode)">
+                <i class="tick-icon material-icons" *ngIf="option?.dependentFields?.length > 0">check_circle</i>
+                <i class="cross-icon material-icons" *ngIf="!option?.dependentFields || !option?.dependentFields?.length">cancel</i>
+                <p class="font-weight-medium ml-12">Dependent Custom Fields</p>
+              </div>
+            </div>
+            <div class="pb-12" *ngIf="!hideDependentInModules.includes(selectedModuleCode)">
+              <p class="mt-12">{{ 'if_value_selected_“yes”_display_these_resulting_fields' | i18next }}</p>
+              <div class="d-flex flex-wrap">
+                <div class="resulting-field mt-8 d-flex" *ngFor="let dependent of option?.dependentFields">
+                  <p class="selected-value mr-12">{{ dependent.label | i18next }}</p>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <app-common-view-rule-flow [details]="supportingDetails" *ngIf="supportingDetails.length > 0"></app-common-view-rule-flow>
+      <h4 class="font-weight-medium mb-24">{{'permissions'|i18next}}</h4>
+      <app-common-view-rule-flow [details]="permissions_details" *ngIf="permissions_details.length > 0"></app-common-view-rule-flow>
+
+      <h4 class="font-weight-medium mb-24">{{'field_settings'|i18next}}</h4>
+      <app-common-view-rule-flow [details]="field_settings_details" *ngIf="field_settings_details.length > 0"></app-common-view-rule-flow>
+
+      <!-- Add linked table here. -->
+      <div class="detail-item table-view mb-24 overflow-inherit" *ngIf="moduleList.length > 0 && linkedModuleList?.length > 0 && getIsLinked(linkedModuleList?.length > 0 ? linkedModuleList : []) && !hideLinkedPartInModules?.includes(selectedModuleCode)">
+        <div class="p-16">
+          <p class="blue-color font-weight-medium">{{ 'linked' | i18next }}</p>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>{{ 'link_yes/no?' | i18next }}</th>
+              <th>{{ 'module' | i18next }} <span class="require">*</span></th>
+              <th>{{ 'can_view' | i18next }} <span class="require">*</span></th>
+              <th>{{ 'can_edit' | i18next }} <span class="require">*</span></th>
+              <th>{{ 'read_only' | i18next }}</th>
+            </tr>
+          </thead>
+          <tbody *ngIf="linkedModuleList?.length > 0">
+            <tr *ngFor="let linkedModule of linkedModuleList">
+              <td>
+                <ng-template 
+                  [ngTemplateOutlet]="status"
+                  [ngTemplateOutletContext]="{ $implicit: linkedModule?.linked }"
+                ></ng-template>
+              </td>
+              <td>
+                {{linkedModule?.name}}
+              </td>
+              <td>
+                <div class="item-value">
+                  <ul>
+                    <li *ngFor="let entity_ref of linkedModule?.can_view" class="mb-8">{{entity_ref?.organization_category}}</li>
+                  </ul>
+                </div>
+                <div class="permission-edit mt-8 d-flex align-items-center" *ngIf="linkedModule?.can_view_vendors?.length > 0">
+                  <p class="small mr-4">{{ 'vendors_who_can_view' | i18next }}:</p>
+                  <div class="item-value" *ngFor="let canViewVendor of linkedModule?.can_view_vendors">
+                    <ul>
+                      <li class="mb-0">{{canViewVendor?.name}}</li>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+              <td >
+                <div class="item-value">
+                  <ul>
+                    <li class="mb-8" *ngFor="let entity_ref of linkedModule.can_edit">{{entity_ref.organization_category}}</li>
+                  </ul>
+                </div>
+                <div class="permission-edit mt-8 d-flex align-items-center" *ngIf="linkedModule?.can_edit_vendors?.length > 0">
+                  <p class="small mr-4">{{ 'vendors_who_can_edit' | i18next }}:</p>
+                  <div class="item-value">
+                    <ul>
+                      <li *ngFor="let canEditVendor of linkedModule?.can_edit_vendors" class="mb-8">{{canEditVendor?.name}}</li>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <ng-template 
+                  [ngTemplateOutlet]="status"
+                  [ngTemplateOutletContext]="{ $implicit: linkedModule?.is_readonly }"
+                ></ng-template>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-container *ngIf="associationDetails?.length > 0">
+        <h4 class="font-weight-medium mb-24">{{'associations'|i18next}}</h4>
+        <app-common-view-rule-flow [details]="associationDetails"></app-common-view-rule-flow>  
+      </ng-container>
+
+    </div>
+  </section>
+</div>
+
+<ng-template #status let-value>
+  <div class="d-flex" style="align-items: center;">
+    <toggle-button [disabled]="true" [checked]="value"></toggle-button>
+    <p class="ml-8" [ngStyle]="{ 'color': value?'#5e71fe':'#5f6d89'}">
+      {{ value ? 'Enabled' : 'Disabled' }}
+    </p>
+  </div>
+</ng-template>

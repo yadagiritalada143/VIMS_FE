@@ -1,0 +1,245 @@
+<svms-sidebar-ng [showHeader]="showHeader" [dataVisibility]="scheduleInterviews" dataProfilePanel="profilepanel"
+  (onClose)="sidebarClose()">
+  <svms-sidebar-nav class="scheduled-navbar" [profileVisibility]="profilevisible" [helpVisible]="helpVisible"
+    helpTitle="{{ 'interview_creation' | i18next }}" helpText="{{ 'step_1:_here_you_can_enter_the_basic_details_of_interview' | i18next }}"
+    [avatar]="candidateObject?.avatar" userName="{{ candidateObject?.first_name }} {{ candidateObject?.last_name }}"
+    [jobData]="jobObject" [userPosition]="candidateObject?.title">
+  </svms-sidebar-nav>
+
+  <div *ngIf="!detailsLoaded" class="schedule-wrapper" style="padding-left: 20px;">
+    <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+      [theme]="{'width': '50%', height: '24px', 'border-radius':'0px', 'margin-bottom':'10px', 'margin-top': '10px', 'background-color': '#e9e6ef', 'border-top': '0'}">
+    </ngx-skeleton-loader>
+
+    <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+      [theme]="{'width': '80%', height: '24px', 'border-radius':'0px', 'margin-bottom':'50px', 'background-color': '#e9e6ef', 'border-top': '0'}">
+    </ngx-skeleton-loader>
+
+
+    <ngx-skeleton-loader style="margin-top: 100px;" count="1" animation="progress" appearance="line"
+      [theme]="{'width': '50%', height: '24px', 'border-radius':'0px', 'margin-bottom':'10px', 'background-color': '#e9e6ef', 'border-top': '0'}">
+    </ngx-skeleton-loader>
+
+    <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+      [theme]="{'width': '80%', height: '24px', 'border-radius':'0px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+    </ngx-skeleton-loader>
+  </div>
+
+  <form *ngIf='form' [formGroup]='form'>
+
+    <div *ngIf="detailsLoaded" class="schedule-wrapper">
+      <h4 class="pl-32 font-weight-medium mb-0">{{ 'schedule_interview' | i18next }}</h4>
+      <div class="p-32">
+        <div class="form-group">
+          <label>
+            {{ 'interview_title' | i18next }} <span class="require">*</span>
+          </label>
+          <input type="text" name="interviewtitle" class="form-control" formControlName='name'
+            placeholder="{{ 'eg' | i18next }}: {{ 'initial_interview' | i18next }},{{ 'technical_interview' | i18next }}">
+          <p class="validation-msg" *ngIf="
+                    (form.controls.name.touched || submitted) && form.controls['name'].errors">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'title_is_required' | i18next }}
+          </p>
+        </div>
+        <div class="form-group-row">
+          <div class="form-group">
+            <label>
+              {{ 'interviewer' | i18next }} <span class="require">*</span>
+            </label>
+            <ng-select (change)='interviewerSelected($event)' [multiple]='true' [typeahead]="input$" clearable="false"
+              placeholder="{{ 'select_interviewer' | i18next }}" formControlName='interviewer' [loading]="interviewerLoading">
+              <ng-option *ngFor='let interviewer of interviewers' [value]="interviewer.id">{{ interviewer?.first_name +' '+interviewer?.last_name }}
+              </ng-option>
+            </ng-select>
+            <p class="validation-msg" *ngIf="
+                    (form.controls.interviewer.touched || submitted) && form.controls['interviewer'].errors">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'interviewer_is_required' | i18next }}
+            </p>
+          </div>
+          <div class="form-group">
+            <label>
+              {{ 'additional_attendees' | i18next }}
+            </label>
+
+            <ng-select clearable="true" formControlName='additionalAttendees' placeholder="{{ 'select' | i18next }}" [addTag]="addTagFn"
+            [selectOnTab]="true" [multiple]='true'>
+            </ng-select>
+          </div>
+        </div>
+        <div class="form-group-row interview-type">
+          <div class="form-group type mr-0">
+            <label>
+              {{ 'interview_type' | i18next }} <span class="require">*</span>
+            </label>
+            <ng-select placeholder="{{ 'select' | i18next }}" formControlName='interviewType' (change) = 'interviewTypeChanged($event)'>
+              <ng-option *ngFor='let type of interviewTypes' [value]="type.code">
+                <icon class="mr-8" name="{{type.icon}}" size="18px" type="material"></icon> {{ type.name | i18next}}
+              </ng-option>
+            </ng-select>
+            <p class="validation-msg" *ngIf="
+                    (form.controls.interviewType.touched || submitted) && form.controls['interviewType'].errors">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'interview_type_is_required' | i18next }}
+            </p>
+          </div>
+          <div class="form-group">
+            <label>
+              {{locationmap[form?.controls['interviewType']?.value]}} <span *ngIf="form?.controls['interviewType']?.value !== 'PHONE'" class="require">*</span>
+            </label>
+            <div *ngIf="form?.controls['interviewType']?.value !== 'F2F'"
+              class="d-flex align-items-center country-searchable position-relative">
+              <ng-select *ngIf="form?.controls['interviewType']?.value === 'PHONE'" formControlName="location_refcode"
+                class="select-bg" [clearable]="false" [searchable]="false">
+                <ng-option [value]="'+1'">
+                  <img src="../../../../../../../../assets/images/flag/us.png" width="20px"
+                    class="mr-4" />
+                  <span>+1</span>
+                </ng-option>
+                <ng-option [value]="'+1'">
+                  <img src="../../../../../../../../assets/images/flag/English (Canada).png" width="20px" class="mr-4" />
+                  <span>+1</span>
+                </ng-option>
+
+                <ng-option [value]="'+91'">
+                  <img src="../../../../../../../../assets/images/flag/हिन्दी.png" width="20px" class="mr-4" />
+                  <span>+91</span>
+                </ng-option>
+
+              </ng-select>
+              <input type="text" class="form-control" [disabled]='!!!form.controls["interviewType"].value'
+                formControlName='location'>
+            </div>
+            <search-address *ngIf="form?.controls['interviewType']?.value === 'F2F'" [adressType]="'geocode'"
+              (setAddress)="getAddress($event)" [country]="'all'" formControlName="location" id="addressField"
+              #location>
+            </search-address>
+            <!-- <input *ngIf="form?.controls['interviewType']?.value !== 'F2F'" type="text" class="form-control"
+              [disabled] = '!!!form.controls["interviewType"].value'
+              formControlName='location'> -->
+            <p class="validation-msg" *ngIf="form?.controls['interviewType']?.value === 'F2F' &&
+              (form.controls.location.touched || submitted) && form.controls['location'].errors">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'interview_location_is_required' | i18next }}
+            </p>
+            <p class="validation-msg" *ngIf="form?.controls['interviewType']?.value === 'VIRTUAL' &&
+              (form.controls.location.touched || submitted) && form.controls['location'].errors">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'interview_link_is_required' | i18next }}
+            </p>
+      <!--      <p class="validation-msg" *ngIf="form?.controls['interviewType']?.value === 'PHONE' &&
+              (form.controls.location.touched || submitted) && form.controls['location'].errors">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'interview_phone_number_is_required' | i18next }}
+            </p> -->
+            <p class="validation-msg" *ngIf="
+            (form.controls.location.touched || submitted) && form.controls['location'].errors?.pattern">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'invalid_phone_number' | i18next }}
+            </p>
+          </div>
+        </div>
+        <div class="form-group-row">
+          <div class="form-group">
+            <label>
+              {{ 'interview_timezone' | i18next }} <span class="require">*</span>
+            </label>
+            <ng-select formControlName='interviewTimezone' clearable="false" placeholder="{{ 'select_timezone' | i18next }}">
+              <ng-option *ngFor='let timezone of timeZones' [value]="timezone.code">{{ timezone.name}}</ng-option>
+            </ng-select>
+            <p class="validation-msg" *ngIf="
+              (form.controls.interviewTimezone.touched || submitted) && form.controls['interviewTimezone'].errors">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'interview_timezone_is_required' | i18next }}
+            </p>
+          </div>
+          <div class="form-group">
+            <label>
+              {{ 'select_interview_duration' | i18next }} <span class="require">*</span>
+            </label>
+            <ng-select formControlName='interviewDuration' clearable="false" placeholder="{{ 'select' | i18next }}">
+              <ng-option *ngFor='let duration of durations' [value]="duration.code">{{duration.name}}</ng-option>
+            </ng-select>
+            <p class="validation-msg" *ngIf="
+            (form.controls.interviewDuration.touched || submitted) && form.controls['interviewDuration'].errors">
+              <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+              {{ 'interview_duration_is_required' | i18next }}
+            </p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>
+            {{ 'interview_instructions' | i18next }}
+          </label>
+          <textarea formControlName="instructions" rows="4" class="form-control"
+            placeholder="{{ 'enter_instructions_for_the_interview' | i18next }}"></textarea>
+        </div>
+        <p class="font-weight-medium text-dark mb-24">{{ 'recommended_dates' | i18next }}</p>
+        <div class="dates-header mb-12 d-flex">
+          <p class="small first">{{ 'date' | i18next }}</p>
+          <p class="small second">{{ 'time_slots(s)' | i18next }}</p>
+        </div>
+        <div class="dates-bodywrapper">
+          <div class="dates-loop" *ngFor="let date of recommendedDates, let i = index">
+            <div class="form-group-row">
+              <div class="form-group mb-0 pb-0 position-relative">
+                <svms-datepicker [inputdateFormat]="'yy-mm-dd'" [placeholder]="'Choose Date'|i18next" ngDefaultControl
+                  (onDateChange)='onDateChange($event, i)' [ngModel]="date.day | localDateFormat:'yyyy-MM-dd'"
+                  [options]="dateOptions" [ngModelOptions]="{standalone: true}"
+                  [disabled]='!!!form.controls["interviewer"].value' I18n></svms-datepicker>
+              </div>
+              <div class="form-group mb-0 pb-0">
+
+
+              <ng-select clearable="false" [items]="date.slotOptions"  clearable="false"   [multiple]='true'  bindLabel="label"  bindValue="slots" [ngModelOptions]="{standalone: true}"
+              [loading]="date.isLoading"
+              [closeOnSelect]="false"
+
+                [disabled]='!!!date.day' [(ngModel)]="date.slots" placeholder="{{ 'time_slots' | i18next }}">
+
+                <ng-template  ng-option-tmp  let-item="item"
+                let-item$="item$"
+                let-index="index">
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                      {{item.label}}
+                    </div>
+                    <div class="profile-interview" tooltip="These users are not available On this time slot"  *ngIf="!item?.slots?.is_available && item?.slots?.members " placement="top"  >
+                      <span class="initials error">
+                        <icon name="warning" size="10px" color="inherit" class="d-flex" cuclass="d-flex"></icon>
+                      </span>
+                      <span class="initials" *ngFor=" let mem of item?.slots?.members" >
+                        <!-- <img *ngIf="mem.thumb" [src]="mem.thumb">    *ngIf="!mem.thumb" -->
+                        <span class="initials initials__green">
+                          {{ mem?.first_name+' '+mem?.last_name  | shortName }}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+
+                </ng-template>
+
+              </ng-select>
+              </div>
+              <div>
+                <a class="addslot" (click)="addSlot()">
+                  <icon name="add_circle" color="#5E71FE" size="24px" type="material"></icon>
+                </a>
+                <a class="deleteslot" (click)="deleteSlot(i)">
+                  <icon name="remove_circle" color="#FF6565" size="24px" type="material"></icon>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+  <svms-sidebar-footer-ng>
+    <button (click)='scheduleInterView()' class="btn btn-primary large float-right" [disabled]='!(detailsLoaded)'>
+      {{ 'schedule' | i18next }}
+      <span *ngIf="isLoader" class="loader ml-12"> </span>
+    </button>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

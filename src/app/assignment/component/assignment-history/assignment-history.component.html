@@ -1,0 +1,394 @@
+<svms-sidebar [title]="'Assignment History'|i18next" [dataVisibility]="ViewHistoryPanel" (onClose)="closehistoryView()">
+  <app-logs [log]="logs"></app-logs>
+  <div>
+    <svms-sidebar-body>
+      <div class="p-24">
+        <h4 class="font-weight-medium">
+          <!-- Assignment Update -->
+          {{revision?.request_title | titlecase}}
+        </h4>
+        <div class="d-flex align-items-center justify-content-between mt-24 info mb-24 column-direction worker-update-history">
+          <div class="d-flex align-items-center">
+            <div class="initials initials-light">
+              <icon class="d-flex" size="14px" name="mail" type="material" theme="outlined" cuClass="d-flex"></icon>
+            </div>
+            <div class="d-flex justify-items-center flex-column ml-4">
+              <p class="mb-0 small">{{ 'updated_on' | i18nextEager }}</p>
+              <span>{{updationDetails?.updatedOn | localDateFormat}} {{updationDetails?.updatedOn | localDateFormat:'hh:mm:ss a z'}} </span>
+            </div>
+          </div>
+          <div class="d-flex align-items-center">
+            <div class="initials initials-green">
+              {{updationDetails?.updatedByInitial}}
+            </div>
+            <div class="d-flex justify-items-center flex-column ml-4">
+              <p class="mb-0 small">{{ 'updated_by' | i18nextEager }}</p>
+              <span>{{updationDetails?.updatedBy}}</span>
+              <div class="impersonated-wrapper position-relative" *ngIf="updationDetails?.impersonated_by?.name">
+                <div class="impersonated-data  mt-8" (mouseover)="showDetailTooltip()" (mouseleave)="hideDetailTooltip()">
+                  <span>(Impersonated By: {{updationDetails?.impersonated_by?.name}} <span *ngIf="updationDetails?.impersonated_by?.role?.name"> - {{updationDetails?.impersonated_by?.role?.name}}</span> <span *ngIf="updationDetails?.impersonated_by?.role?.organization_category">({{updationDetails?.impersonated_by?.role?.organization_category}})</span>)</span>
+                </div>
+                <div class="meta-tooltip position-absolute"  [ngClass]="{'active' : metaTooltip}">
+                  <div class="p-12">
+                    <p class="mb-8">
+                      <strong>
+                        {{ 'impersonated_by' | i18nextEager }}:
+                      </strong><br>
+                        {{updationDetails?.impersonated_by?.name}} <span *ngIf="updationDetails?.impersonated_by?.role?.name"> - {{updationDetails?.impersonated_by?.role?.name}}</span> <span *ngIf="updationDetails?.impersonated_by?.role?.organization_category">({{updationDetails?.impersonated_by?.role?.organization_category}})</span>
+
+                      </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex align-items-center">
+            <div class="initials initials-green">
+              <icon class="d-flex" size="18px" name="label" type="material" theme="outlined" cuClass="d-flex"></icon>
+            </div>
+            <div class="d-flex justify-items-center flex-column ml-4">
+              <p class="mb-0 small">{{ 'reason' | i18nextEager }}</p>
+              <span>{{updationDetails?.updateReason?.name || '-'}}</span>
+            </div>
+          </div>
+        </div>
+
+        <div  class="mt-12">
+          <label class="mt-5">{{ 'effective_from' | i18nextEager }} : {{getDateFromString(Assignmentdata?.effective_date) | localDateFormat : '': '':'' : true}}</label>
+          <ng-container *ngIf="Assignmentdata?.update_info && Assignmentdata?.update_info?.assignment_uuid">
+            <span class="light-blue-bg-block px-12 py-8 mt-24 d-flex align-items-center"><i class="material-icons mr-12">info</i>
+              {{ 'below_information_got_changed_for_worker_on_assignment_' | i18nextEager }} - <a
+                class="font-weight-medium ml-4" (click)="goToAssignmentPage(Assignmentdata?.update_info?.assignment_uuid)">
+                #{{Assignmentdata?.update_info?.code}}</a></span>
+          </ng-container>
+          <!-- <h4 class="font-weight-medium d-flex align-items-center mt-24" *ngIf="updationDetails?.updateNotes"> -->
+          <h4 class="font-weight-medium d-flex align-items-center mt-24">
+            <icon class="d-flex green cursor-pointer mr-16" size="20px" name="note" type="material" cuClass="d-flex">
+            </icon>
+            {{ 'notes' | i18nextEager }}
+          </h4>
+          <p class="mt-10">{{updationDetails?.updateNotes ? updationDetails?.updateNotes : 'N/A'|i18next}}</p>
+         </div>
+         <div class="mt-12" *ngIf="updationDetails?.documents">
+          <h4 class="font-weight-medium d-flex align-items-center mt-24">
+            <!-- <icon class="d-flex green cursor-pointer mr-16" size="20px" name="download" type="material" cuClass="d-flex">
+            </icon> -->
+            {{ 'documents' | i18nextEager }}
+          </h4>
+            <a
+                (click)="downloadAttachment(updationDetails?.documents)"
+                class="download-btn font-weight-medium">
+                <icon class="d-inline-block mr-8" size="18px" name="save_alt" type="material" theme="outlined"
+                  cuClass="d-flex"></icon>{{updationDetails?.documents?.filename}}
+           </a>
+          </div>
+
+          <div class="mt-12" *ngIf="updationDetails?.do_not_re_hire?.do_not_re_hire">
+            <div class="toggle-header position-relative border-bottom py-16">
+              <h4 class="mb-0 d-flex align-items-center">
+                <icon name="no_accounts" class="mr-4" size="24px"></icon>
+                <span>{{ 'do_not_re-hire' | i18nextEager }}</span>
+              </h4>
+              <toggle-button class="position-absolute mt-16" [checked]="true" [disabled]="true"></toggle-button>
+            </div>
+
+            <div class="border-bottom d-flex align-items-center justify-content-between py-16 summary" *ngIf="updationDetails?.do_not_re_hire?.do_not_re_hire_reason?.name">
+              <div class="w-50">
+              <h4 class="mb-0 d-flex align-items-center">
+                <span>{{ 'reason' | i18nextEager }}</span>
+              </h4>
+              </div>
+              <div class="w-50 text-right">
+                <span class="d-block">
+                  {{updationDetails?.do_not_re_hire?.do_not_re_hire_reason?.name}}
+                </span>
+              </div>
+            </div>
+
+            <div class="border-bottom d-flex align-items-center justify-content-between py-16 summary" *ngIf="updationDetails?.do_not_re_hire?.do_not_re_hire_reason_notes">
+              <div class="w-50">
+              <h4 class="mb-0 d-flex align-items-center">
+                <span>{{ 'notes' | i18nextEager }}</span>
+              </h4>
+              </div>
+              <div class="w-50 text-right">
+                <span class="d-block">
+                  {{updationDetails?.do_not_re_hire?.do_not_re_hire_reason_notes}}
+                </span>
+              </div>
+            </div>
+          </div>
+
+        <h4 class="font-weight-medium d-flex align-items-center mt-24">
+          <icon class="d-flex green cursor-pointer mr-16" size="20px" name="sort" type="material" cuClass="d-flex">
+          </icon>
+          {{ 'summary' | i18nextEager }}
+        </h4>
+
+
+
+        <div class="mt-12">
+          <div class="border-bottom align-items-center justify-content-between py-16 summary" [ngClass]="data?.hidden ? 'hidden' : 'd-flex' " *ngFor="let data of revisionHistory" [hidden]="data?.hidden">
+            <div class="w-50">
+              <p *ngIf="!data?.fieldStrike">{{data?.label | snakeToTitleCase | titlecase}}</p>
+              <del class="d-block text-red" *ngIf="data?.fieldStrike">{{data?.label | snakeToTitleCase | titlecase}}</del>
+              <div  *ngIf="data?.rate_factor_detail && data?.rate_factor_detail[0]?.showModifiedRate" class="d-flex align-items-center">
+                <span class="rate-factor-modify mr-4">{{ 'rate_factor_modified' | i18nextEager }}</span>
+                <div class="modified-rate d-flex align-items-center">
+                  ( <span class="text-red mx-4">{{data?.rate_factor_detail[0]?.old_rate_value |accuracy :  accuracyConfig.amount_percentage}}</span>
+                  <icon size="13px" class="mx-8" name="east" type="material" cuClass="d-flex"></icon>
+                  <span class="text-green font-weight-medium mx-4">{{data?.rate_factor_detail[0]?.new_rate_value |accuracy :  accuracyConfig.amount_percentage}}</span> ) </div>
+                </div>
+            </div>
+
+
+            <div class="w-50 text-right">
+              <!-- <div class="d-flex mb-16 justify-content-end popover-wrapper position-relative" (mouseleave)="hidePopOver(data?.rate_factor,data?.rate_type)">
+                <div class="pop-over" [ngClass]="{'active' : active(data?.rate_factor,data?.rate_type)}">
+                  <p class="small font-weight-bold text-left">{{data?.rate_factor?.toUpperCase()}} Factor</p>
+                  <p class="small font-weight-medium text-left">{{displayRateType(data?.rate_type)}}</p>
+                  <div class="d-flex pop-item-wrap mt-16 justify-content-between">
+                    <div class="pop-item text-red">
+                     <del> {{getRateFactorVal(data?.rate_factor,data?.rate_type,'old',0)}}</del> <span><del>{{getRateName(data?.rate_factor,data?.rate_type,'old',0)}}</del></span>
+                    </div>
+                    <div class="mx-8" *ngIf="getRateName(data?.rate_factor,data?.rate_type,'old',1) != ''">
+                      <icon name="add_circle" size="20px" color="#FFC77B"></icon>
+                    </div>
+                    <div class="pop-item text-red" *ngIf="getRateName(data?.rate_factor,data?.rate_type,'old',1) != ''">
+                      <del>{{getRateFactorVal(data?.rate_factor,data?.rate_type,'old',1)}}</del> <span>{{getRateName(data?.rate_factor,data?.rate_type,'old',1)}}</span>
+                    </div>
+                  </div>
+                  <div class="d-flex pop-item-wrap mt-16 justify-content-between">
+                    <div class="pop-item text-green">
+                      {{getRateFactorVal(data?.rate_factor,data?.rate_type,'new',0)}} <span>{{getRateName(data?.rate_factor,data?.rate_type,'new',0)}}</span>
+                    </div>
+                    <div class="mx-8" *ngIf="getRateName(data?.rate_factor,data?.rate_type,'new',1) != ''">
+                      <icon name="add_circle" size="20px" color="#FFC77B"></icon>
+                    </div>
+                    <div class="pop-item text-green" *ngIf="getRateName(data?.rate_factor,data?.rate_type,'new',1) != ''">
+                      {{getRateFactorVal(data?.rate_factor,data?.rate_type,'new',1)}}
+                      <span>{{getRateName(data?.rate_factor,data?.rate_type,'new',1)}}</span>
+                    </div>
+                  </div>
+                </div>
+              </div> -->
+              <span class="d-block text-red" *ngIf="(data?.old_value || data?.old_value == '0') && !data?.hideOldValue">
+                <del tooltip="{{data?.isCurrency ? showToolTip(data?.old_value, checkAccuracyConfigType(data?.type)) : data?.old_value}}" placement="top">
+                  {{data?.isCurrency ? (data?.old_value | accuracy :  checkAccuracyConfigType(data?.type) : { currencyCode: currency }  ): (data?.old_value + (data?.isPercentage ? '%': ''))}}
+                </del>
+              </span>
+
+              <span class="d-block text-green" *ngIf="data?.new_value || data?.new_value == '0'"  >
+                <span tooltip="{{data?.isCurrency ? showToolTip(data?.new_value, checkAccuracyConfigType(data?.type)) : data?.new_value}}" placement="top">
+                  {{data?.isCurrency ? (data?.new_value | accuracy :  checkAccuracyConfigType(data?.type) : { currencyCode: currency }  ): (data?.new_value + (data?.isPercentage ? '%': ''))}}
+                </span>
+              </span>
+            </div>
+            </div>
+            </div>
+            <div class="col-md-6" [hidden]="!hasBudgetHistory">
+              <label>{{ 'add/reduce_budget_(+/-)' | i18nextEager }}</label>
+              <div class="form-group-row budget-add-reduce">
+                <div class="form-group mr-0 select-budget-option">
+                  <ng-select placeholder="{{ 'select' | i18nextEager }}" [clearable]="false" readonly="true"
+                    [ngModel]="budgetData?.transaction_type | titlecase">
+                  </ng-select>
+                </div>
+                <div class="form-group">
+                  <input inputAccuracy="{{accuracyConfig?.amount}}" [value]="(budgetData?.requested_additional_budget ? budgetData?.requested_additional_budget : 0.00) | accuracy :  accuracyConfig.amount : { currencyCode: assignmentCurrency } " class="form-control"
+                    readonly />
+                </div>
+              </div>
+            </div>
+            <div [hidden]="!hasBudgetHistory">
+              <h4 class="font-weight-medium mb-24">
+                <icon size="18px" name="payments" type="material" class="mr-8" color="#000000" theme="outlined"> </icon>
+                {{ 'budgets_detail' | i18nextEager }}
+              </h4>
+              <div class="d-flex align-items-center justify-content-start column-direction total-budget"
+                style="padding-bottom: 15px">
+                <div class="d-flex align-items-center mr-64 mr-m-0">
+                  <icon name="credit_score" class="circle-icon d-flex mr-8" cuclass="d-flex" color="#5B6874" size="18px"></icon>
+                  <div class="d-flex flex-column">
+                    <h4 class="text-black mt-4 font-weight-medium mb-0"
+                      tooltip="{{showToolTip(budgetData?.total_allocated_budget, accuracyConfig?.amount)}}" placement="top">{{
+                      (budgetData?.total_allocated_budget &&
+                      budgetData?.total_allocated_budget !== 0
+                      ? budgetData?.total_allocated_budget
+                      : "0.00"
+                      ) | accuracy :  accuracyConfig.amount : { currencyCode: assignmentCurrency } 
+                      }}</h4>
+                    <p class="small text-gray text-wrap">{{ 'total_current_approved_budget' | i18nextEager }}</p>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center">
+                  <icon name="account_balance_wallet" theme="outlined" class="circle-icon green d-flex mr-8" cuclass="d-flex"
+                    color="#009514" size="18px"></icon>
+                  <div class="d-flex flex-column">
+                    <h4 class="text-green mt-4 font-weight-medium mb-0" tooltip="{{showToolTip(budgetData?.new_allocated_budget, accuracyConfig?.amount)}}"
+                      placement="top">{{ (budgetData?.new_allocated_budget && budgetData?.new_allocated_budget !==0 ?
+                      budgetData?.new_allocated_budget : '0.00') | accuracy :  accuracyConfig.amount : { currencyCode: assignmentCurrency  }  }}</h4>
+                    <p class="small text-gray">{{'new_total_approved_budget' | i18nextEager}}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="panel p-24 pb-0 d-flex">
+                <div class="position-relative pl-16">
+                  <svms-pie-chart [isDoughnut]="true" [chartData]="detailsChartData" [height]="160" [width]="130" [margin]="11.47"
+                    [chartRadius]="60" [hideLabels]="true" [smallChart]="true" [colorsScheme]="detailsChartColorScheme"
+                    [currency]="Assignmentdata?.old_meta_data?.assignments?.finance?.currency" dimension="" chartId="budget-details" class="details-chart">
+                  </svms-pie-chart>
+                </div>
+                <div>
+                  <div class="buget-description d-flex mb-32">
+                    <h4 class="font-weight-medium mr-12">
+                      <span style="color: rgb(108, 101, 201);" tooltip="{{showToolTip(budgetData?.left_budget && budgetData?.left_budget !== 0 ? budgetData?.left_budget : '0.00', accuracyConfig?.amount)}}"
+                      placement="top">
+                        {{
+                        (budgetData?.left_budget && budgetData?.left_budget !== 0 ? budgetData?.left_budget : '0.00')
+                        | accuracy :  accuracyConfig.amount : { currencyCode: assignmentCurrency  }
+                        }}</span>
+                      <span class="d-block">{{ 'remaining_budget' | i18nextEager }}</span>
+                    </h4>
+                    <icon [name]="budgetData?.transaction_type?.toLowerCase() === 'add' ? 'add' : 'remove'" class="d-flex mt-4" cuclass="d-flex" size="16px">
+                    </icon>
+                    <h4 class="font-weight-medium ml-12"><span
+                      style="color: rgb(108, 101, 201);" tooltip="{{showToolTip(budgetData?.requested_additional_budget &&
+                        budgetData?.requested_additional_budget !==0 ? budgetData?.requested_additional_budget : '0.00', accuracyConfig?.amount)}}"
+                        placement="top">{{(budgetData?.requested_additional_budget &&
+                        budgetData?.requested_additional_budget !==0 ? budgetData?.requested_additional_budget : '0.00')
+                        | accuracy :  accuracyConfig.amount : { currencyCode: assignmentCurrency  }
+                        }}</span>
+                      <span class="d-block">
+                        {{ 'Add' + '/' + 'Reduce Budget Amount' | i18nextEager }}
+                      </span>
+                    </h4>
+                  </div>
+                  <div class="d-flex flex-column">
+                    <div class="d-flex align-items-center">
+                      <icon name="circle" size="12px" color="green" cuclass="d-flex" class="d-flex mr-4"></icon>
+                      <p class="small" tooltip="{{showToolTip(budgetData?.total_spend && budgetData?.total_spend !== 0 ? budgetData?.total_spend : '0.00', accuracyConfig?.amount)}}"
+                      placement="top">
+                        {{ BudgetLabels?.SpendApproved }} -
+                        {{
+                        (budgetData?.total_spend && budgetData?.total_spend !== 0 ? budgetData?.total_spend : '0.00')
+                        | accuracy :  accuracyConfig.amount : { currencyCode: assignmentCurrency  }
+                        }}
+                      </p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                      <icon name="circle" size="12px" color="red" cuclass="d-flex" class="d-flex mr-4"></icon>
+                      <p class="small" tooltip="{{showToolTip(budgetData?.total_pending_approval && budgetData?.total_pending_approval !== 0 ?
+                        budgetData?.total_pending_approval : '0.00', accuracyConfig?.amount)}}"
+                      placement="top">
+                        {{ BudgetLabels?.AwaitingApproval }} -
+                        {{
+                        (budgetData?.total_pending_approval && budgetData?.total_pending_approval !== 0 ?
+                        budgetData?.total_pending_approval : '0.00')
+                        | accuracy :  accuracyConfig.amount : { currencyCode: assignmentCurrency  }
+                        }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+          </div>
+        </div>
+        <ng-container *ngIf="approvalList?.approvals && (isClient || isMsp || isSelfManagedClientAdmin) && !approvalList?.is_disabled">
+          <div class="scroll-wrapper mb-0" *ngIf="approvalList?.approvals?.length > 0">
+            <h4 class="font-weight-medium mb-24 pt-12">
+              <icon size="18px" name="task_alt" type="material" class="mr-8" color="#000000" theme="outlined"> </icon>
+              {{ 'approval-list' | i18nextEager }}
+            </h4>
+            <div class="assignment-history-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th class="text-left"> {{ 'approver_name' | i18nextEager }}</th>
+                  <th class="text-left"> {{ 'approved/rejected_by' | i18nextEager }}</th>
+                  <th class="text-left">{{ 'date_&_time' | i18nextEager }}</th>
+                  <th class="text-left">{{ 'action' | i18nextEager }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let approverData of approvalList?.approvals" [hidden]="approverData?.is_disabled">
+                  <td class="first-field">
+                    <span *ngIf="approverData?.user?.id !== approverData?.approved_by?.id && approverData?.status?.toLowerCase() !== ApprovalStatus.pending">
+                      <span class="small text-danger"><del>{{approverData?.user?.first_name +' '+approverData?.user?.last_name}} {{'(' + approverData?.user?.role?.name + ')'}}</del></span>
+                    </span>
+                    <span *ngIf="approverData?.status?.toLowerCase() === ApprovalStatus.pending">
+                      {{approverData?.user?.first_name +' '+approverData?.user?.last_name}} {{'(' + approverData?.user?.role?.name + ')'}}
+                    </span>
+                    <span *ngIf="approverData?.user?.id === approverData?.approved_by?.id">
+                      {{approverData?.approved_by?.first_name +' '+approverData?.approved_by?.last_name}} {{'(' + approverData?.approved_by?.role?.name + ')'}}
+                    </span>
+                  </td>
+                  <td>
+                    <span *ngIf="approverData?.user?.id !== approverData?.approved_by?.id && approverData?.status?.toLowerCase() !== ApprovalStatus.pending && approverData?.approved_by?.id">
+                      <span class="text-success">{{approverData?.approved_by?.first_name +' '+approverData?.approved_by?.last_name}} {{'(' + approverData?.approved_by?.role?.name + ')'}}</span>
+                    </span>
+                    <span *ngIf="approverData?.status?.toLowerCase() === ApprovalStatus.pending || !approverData?.approved_by?.id">
+                      {{'-'}}
+                    </span>
+                    <span *ngIf="approverData?.user?.id === approverData?.approved_by?.id">
+                      {{approverData?.approved_by?.first_name +' '+approverData?.approved_by?.last_name}} {{'(' + approverData?.approved_by?.role?.name + ')'}}
+                    </span>
+                    &nbsp;<span class="text-success" *ngIf="approverData?.impersonated_by?.name">({{ 'impersonated_by' | i18nextEager }}: {{approverData?.impersonated_by?.name | i18nextEager}} <span *ngIf="approverData?.impersonated_by?.role?.name"> - {{approverData?.impersonated_by?.role?.name | i18nextEager}}</span> <span *ngIf="approverData?.impersonated_by?.role?.organization_category">({{approverData?.impersonated_by?.role?.organization_category | i18nextEager}})</span>)</span>
+                  </td>
+                  <td>
+                    <span *ngIf="approverData?.approved_on">
+                      {{ approverData?.approved_at_formatted | localDateFormat }} {{ approverData?.approved_at_formatted | localDateFormat : 'hh:mm:ss a z' }}
+                    </span>
+                    <span *ngIf="!approverData?.approved_on">
+                      {{'-'}}
+                    </span>
+                  </td>
+                  <td>
+                    {{approverData?.status === 'N/A' ? ('N/A'|i18next) : (approverData?.status | titlecase) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="activityHistory?.length > 0">
+          <div class="scroll-wrapper mb-0">
+            <h4 class="font-weight-medium mb-24">
+              <icon size="18px" name="task_alt" type="material" class="mr-8" color="#000000" theme="outlined"> </icon>
+              {{ 'billing_details' | i18nextEager }}
+            </h4>
+            <div class="assignment-history-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th class="text-left"> {{ 'rate_type' | i18nextEager }}</th>
+                  <th class="text-left" *ngIf="showClientBillRate"> {{ 'client_bill_rate' | i18nextEager }}</th>
+                  <th class="text-left" *ngIf="showVendorBillRate">{{ 'vendor_bill_rate' | i18nextEager }}</th>
+                  <th class="text-left" *ngIf="showPayrate">{{ 'pay_rate' | i18nextEager }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let rateInfo of activityHistory">
+                  <td class="first-field">
+                    {{rateInfo?.rate_type ? rateInfo?.rate_type : "Straight Time" | i18nextEager}}
+                  </td>
+                  <td *ngIf="showClientBillRate" tooltip="{{showToolTip(rateInfo?.client_rate, accuracyConfig?.rate)}}" placement="top">
+                    {{rateInfo?.client_rate | accuracy :  accuracyConfig.rate : { currencyCode: assignmentCurrency } }}
+                  </td>
+                  <td *ngIf="showVendorBillRate" tooltip="{{showToolTip(rateInfo?.vendor_rate, accuracyConfig?.rate)}}" placement="top">
+                    {{rateInfo?.vendor_rate | accuracy :  accuracyConfig.rate : { currencyCode: assignmentCurrency  } }}
+                  </td>
+                  <td *ngIf="showPayrate" tooltip="{{showToolTip(rateInfo?.pay_rate, accuracyConfig?.rate)}}" placement="top">
+                    {{rateInfo?.pay_rate | accuracy :  accuracyConfig.rate : { currencyCode: assignmentCurrency  } }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          </div>
+        </ng-container>
+      </div>
+    </svms-sidebar-body>
+
+  </div>
+</svms-sidebar>

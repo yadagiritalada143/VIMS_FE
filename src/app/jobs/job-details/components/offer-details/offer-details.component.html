@@ -1,0 +1,449 @@
+<ng-container *ngIf="!loading">
+  <ng-container *ngIf="!noOffer && offerData; else noOffersection">
+    <div class="p-32 pt-24 sidebar-view-wrapper interview-detail-view">
+      <div class="sp-head-module-info">
+        <div class="row">
+          <div class="col-md-7">
+            <h4>{{'offer_details' | i18next}}</h4>
+          </div>
+          <div class="col-md-5">
+            <span class="status-ui open float-right">{{ getStatus(offerData?.status) | titlecase | i18next }}</span>
+          </div>
+        </div>
+        <div class="sp-sub-head-info">
+          <label class="mdid float-left d-flex">
+            <icon size="20px" class="mr-4" name="label" color="#FFC409" type="material" cuClass="d-flex"></icon>
+            <span>{{ offerData?.unique_id }}</span>
+          </label>
+          <label class="publish-date-time float-left">
+            <icon size="18px" name="update" color="#536476" type="material" cuClass="d-flex"></icon>
+            <span>{{'created_on' | i18next}} :
+              {{ offerData?.modified_on | localDateFormat }} {{ offerData?.modified_on | localDateFormat: 'hh:mm:ss a z'
+              }}
+              <span *ngIf="!(isVendorNeutral && (userRole == 'vendor') && (offerData?.status.toLowerCase() == 'released' || offerData?.status.toLowerCase() == 'countered' || offerData?.status.toLowerCase() == 'withdrawn'))"> by {{ offerData?.created_by?.full_name }}</span>
+            </span>
+          </label>
+        </div>
+      </div>
+      <div class="clearfix"></div>
+
+      <div class="alert_message alert_error border-none mt-12" *ngIf="isAlertError">
+        <div class="d-flex align-items-center w-100">
+          <div class="d-flex align-items-center justify-content-start">
+            <icon name="error" size="24px" type="material" cuClass="validation-icon"></icon>
+          </div>
+          <div class="pl-8">
+            <div class="font-weight-bold mb-0 medium-font" *ngIf="this.candidateStatusReason">
+              {{'rejection_reason' | i18next}}: {{this.candidateStatusReason}}
+            </div>
+            <div class="font-weight-bold mb-0 medium-font" *ngIf="this.candidateStatusNote">
+              {{'notes' | i18next}}: {{this.candidateStatusNote}}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex  justify-content-between interview-info">
+        <div class="d-flex align-items-center grid-data-wrap">
+          <icon class="mr-8" size="18px" name="today" theme="outlined" color="#495057" type="material" cuClass="d-flex">
+          </icon>
+          <div class="grid-data">
+            <span class="small">{{'start_date'|i18next}}</span>
+            <label>{{ offerData?.stages[0]?.start_date | localDateFormat :'':'':'':true}}</label>
+            <label class="strike-through"
+              *ngIf="offerData?.stages.length > 1 && (offerData?.stages[0]?.start_date !== offerData?.stages[1]?.start_date)">{{
+              offerData?.stages[1]?.start_date | localDateFormat :'':'':'':true }}---</label>
+          </div>
+        </div>
+        <div class="d-flex align-items-center grid-data-wrap">
+          <icon class="mr-8" size="18px" name="event" theme="outlined" color="#495057" type="material" cuClass="d-flex">
+          </icon>
+          <div class="grid-data">
+            <span class="small">{{'end_date'|i18next}}</span>
+            <label>{{ offerData?.stages[0]?.end_date | localDateFormat :'':'':'':true}}</label>
+            <label class="strike-through"
+              *ngIf="offerData?.stages.length > 1  && (offerData?.stages[0]?.end_date !== offerData?.stages[1]?.end_date)">{{
+              offerData?.stages[1]?.end_date | localDateFormat :'':'':'':true}}</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex  justify-content-between offer-info">
+        <div class="d-flex align-items-center grid-data-wrap">
+          <div class="grid-data">
+            <span class="small">{{'job_manager' | i18next}}</span>
+            <label class="d-flex align-items-center">
+              <ng-container *ngIf="isVendorNeutral && userType.toLowerCase() === 'vendor';else noVendorNeutral">
+                {{'--'}}
+              </ng-container>
+              <ng-template #noVendorNeutral>
+               <small class="initials initials__purple">{{offerJobManager?.initials}}</small> {{offerJobManager?.full_name }}
+              </ng-template>
+            </label>
+          </div>
+        </div>
+        <div class="d-flex align-items-center grid-data-wrap">
+
+          <!-- <span *ngIf="!!offerData?.stages[0]?.timesheet_manager?.full_name"
+                        class="initials initials__purple">
+                        {{ offerData?.stages[0]?.timesheet_manager?.initials | uppercase }}
+                    </span>
+                        <label>{{ offerData?.stages[0]?.timesheet_manager?.full_name || "-" }}</label>
+
+                    </div> -->
+          <div class="grid-data">
+            <span class="small">{{'timesheet_manager'|i18next}}</span>
+            <div *ngIf="!(isVendorNeutral && userType === 'VENDOR')" class="int-list position-relative">
+              <ul>
+                <li *ngFor="let i of displayFirstTimesheetManager">
+                  <span class="initials initials__purple">{{ i?.initials}}</span>
+                </li>
+                <li *ngIf="remainingTimesheetManagers?.length > 0" (click)="showPopoverInt()">
+                  <span class="initials count">{{ '+' }}{{ remainingTimesheetManagers.length }}</span>
+                </li>
+              </ul>
+              <label class="fixed-width">{{ displayFirstTimesheetManagerName || "--" }}
+                <a (click)="showPopoverInt()" *ngIf="remainingTimesheetManagers?.length > 0">
+                  +{{remainingTimesheetManagers.length}}
+                </a>
+              </label>
+              <div class="clearfix"></div>
+              <div class="pop-over" [ngClass]="{'active' : showTimesheetManagers}" (mouseleave)="hidePopOverInt()">
+                <ul>
+                  <li *ngFor="let i of remainingTimesheetManagers" class="mt-8">
+                    <div class="d-flex align-items-center">
+                      <div class="mr-8">
+                        <span class="initials initials__purple">{{ i?.initials}}</span>
+                      </div>
+                      <div>{{ i.full_name }}</div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <label
+              *ngIf="!!(isVendorNeutral && (userRole == 'vendor'))">{{"--"}}</label>
+
+          </div>
+
+        </div>
+      </div>
+
+
+      <div class="d-flex  justify-content-between offer-info">
+        <div class="d-flex align-items-center grid-data-wrap">
+          <icon class="mr-8" size="18px" name="pending_actions" theme="outlined" color="#495057" type="material"
+            cuClass="d-flex"></icon>
+          <div class="grid-data">
+            <span class="small">{{'timesheet_type' | i18next}}</span>
+            <label class="text-capitalize">{{ offerData?.stages[0]?.timesheet_type?.label || '--' }}</label>
+          </div>
+        </div>
+        <!-- <div class="d-flex align-items-center grid-data-wrap">
+                    <icon class="mr-8" size="18px" name="event_busy" theme="outlined" color="#495057" type="material"
+                        cuClass="d-flex"></icon>
+                    <div class="grid-data">
+                        <span class="small">{{ 'holiday_calendar' | i18next }}</span>
+                        <label>{{ holidayCalender || '-' }}</label>
+                        <label class="strike-through"
+                            *ngIf="offerData?.stages.length > 1 && (holidayCalender !== prevholidayCalender )">{{
+                            prevholidayCalender }}</label>
+                    </div>
+                </div> -->
+        <div class="d-flex align-items-center grid-data-wrap">
+          <ng-container *ngIf="job?.is_expense_allowed_display">
+            <icon class="mr-8" size="18px" name="payments" theme="outlined" color="#495057" type="material"
+              cuClass="d-flex"></icon>
+            <div class="grid-data">
+              <span class="small">{{'expense_allowed'|i18next}}</span>
+              <label>{{offerData?.stages[0]?.is_expense_allowed ? 'Yes' : 'No' || '--' }}</label>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between offer-info">
+        <div class="d-flex align-items-center grid-data-wrap" *ngIf="job?.is_expense_allowed_display && offerData?.stages[0]?.is_expense_allowed">
+          <span
+          *ngIf="!!offerData?.stages[0]?.expense_managers?.full_name && offerData?.stages[0]?.expense_managers?.initials && userRole != 'vendor' && (isVendorNeutral && (offerData?.status.toLowerCase() == 'released' || offerData?.status.toLowerCase() == 'countered'))"
+            class="initials initials__purple">{{
+            offerData?.stages[0]?.expense_managers?.initials
+            | uppercase
+            }}</span>
+          <div class="grid-data">
+            <span class="small">{{'expense_manager'|i18next}}</span>
+            <div *ngIf="!(isVendorNeutral && userType === 'VENDOR')" class="int-list position-relative">
+              <ul>
+                  <li *ngFor="let i of displayFirstExpenseManager">
+                      <span class="initials initials__purple">{{ i?.initials}}</span>
+                  </li>
+                  <li *ngIf="remainingExpenseManagers?.length > 0" (click)="showExpenceManagers()">
+                      <span class="initials count">{{ '+' }}{{ remainingExpenseManagers.length }}</span>
+                  </li>
+              </ul>
+              <label class="fixed-width">{{ displayFirstExpenseManagerName || "--" }}
+                <a (click)="showExpenceManagers()" *ngIf="remainingExpenseManagers?.length > 0">
+                  +{{remainingExpenseManagers.length}}
+                </a>
+              </label>
+              <div class="clearfix"></div>
+              <div class="pop-over" [ngClass]="{'active' : showExpenseManagers}" (mouseleave)="hideExpenceManagers()">
+                  <ul>
+                      <li *ngFor="let i of remainingExpenseManagers" class="mt-8">
+                          <div class="d-flex align-items-center">
+                              <div class="mr-8">
+                                  <span class="initials initials__purple">{{ i?.initials}}</span>
+                              </div>
+                              <div>{{ i.full_name }}</div>
+                          </div>
+                      </li>
+                  </ul>
+              </div>
+          </div>
+            <label *ngIf="!!(isVendorNeutral && (userRole == 'vendor'))">{{"--"}}</label>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center grid-data-wrap" *ngIf="showRemoteWorker">
+          <img src="../../../../../../../assets/images/remote-worker.svg" alt="" width="18" height="18" class="mr-24">
+          <div class="grid-data">
+            <span class="small">{{'remote_worker'|i18next}}</span>
+            <label class="d-flex align-items-center" [ngClass]="offerData?.remote_worker ? 'enabled' : 'disabled' ">{{offerData?.remote_worker ? 'Yes' : 'No'}}</label>
+          </div>
+        </div>
+
+        </div>
+        <div class="d-flex justify-content-between offer-info">
+
+          <div class="d-flex align-items-center grid-data-wrap">
+            <icon class="mr-8" size="18px" name="hourglass_top" theme="outlined" color="#776DE0" type="material"
+                    cuClass="d-flex "></icon>
+            <div class="grid-data">
+              <span class="small">{{'ot_exempt'|i18next}}</span>
+              <label class="d-flex align-items-center" [ngClass]="offerData?.stages[0]?.ot_exempt ? 'enabled' : 'disabled' ">{{offerData?.stages[0]?.ot_exempt ? 'Yes' : 'No'}}</label>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center grid-data-wrap" *authorize="'manage_onboarding_offer'">
+            <icon class="mr-8" size="18px" name="check_circle" theme="outlined" color="#776DE0" type="material"
+                    cuClass="d-flex "></icon>
+            <div class="grid-data">
+              <span class="small">{{ 'Onboarding Checklist' | i18next }} </span>
+              <label class="d-flex align-items-center">
+                {{offerData?.onboarding_checklist?.name || '--'}}
+              </label>
+            </div>
+          </div>
+
+      </div>
+
+
+
+      <div class="mt-24">
+        <app-remote-worker-details-view [remoteWorkerDetails]="offerData?.remote_worker_details" *ngIf="showRemoteWorker && offerData?.remote_worker"></app-remote-worker-details-view>
+      </div>
+      <div class="row rate-info-table mt-24" *ngIf="programRateModel">
+        <div class="col-12">
+          <h4>{{'rate_information' | i18next}}</h4>
+        </div>
+        <div class="row no-gutters panel panel-light full-page-width ">
+          <div class="col-12">
+            <div class="p-16">
+              <div class="row no-gutters info">
+                <div class="col-md-3">
+                  <div class="d-flex align-items-center">
+                    <div class="initials initials-green">
+                      <icon class="d-flex" size="14px" name="mail" type="material" theme="outlined" cuClass="d-flex">
+                      </icon>
+                    </div>
+                    <div class="d-flex justify-items-center flex-column ml-4">
+                      <p class="text-dark">{{ offerData?.rate_type }}</p>
+                      <p class="small text-muted">{{'unit_of_measure'|i18next}}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3" *ngIf="!hideRateAuthority">
+                  <div class="d-flex align-items-center">
+                    <div class="initials initials-blue">
+                      <icon class="d-flex" size="14px" name="mail" type="material" theme="outlined" cuClass="d-flex">
+                      </icon>
+                    </div>
+                    <div class="d-flex justify-items-center flex-column ml-4">
+                      <p class="text-dark"> {{ (minRate | accuracy : 'rate' : {currencyCode: jobCurrency}) || '--'}}</p>
+                      <p class="small text-muted">{{'min'|i18next}}. {{ (programRateModel === 'PAY_RATE' ? 'Pay Rate'
+                        : (userType.toLowerCase() === 'vendor' && !clientBillRateEnabled) ? 'Vendor Bill Rate' : 'Bill
+                        Rate') |
+                        i18nextEager}}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3" *ngIf="!hideRateAuthority">
+                  <div class="d-flex align-items-center">
+                    <div class="initials initials-orange">
+                      <icon class="d-flex" size="14px" name="mail" type="material" theme="outlined" cuClass="d-flex">
+                      </icon>
+                    </div>
+                    <div class="d-flex justify-items-center flex-column ml-4">
+                      <p class="text-dark"> {{ (maxRate | accuracy : 'rate' : {currencyCode: jobCurrency}) || '--'}}</p>
+                      <p class="small text-muted">{{'max'|i18next}}.
+                        {{ (programRateModel === 'PAY_RATE' ? 'Pay Rate' : (userType.toLowerCase() === 'vendor' && !clientBillRateEnabled) ? 'Vendor Bill Rate' : 'Bill Rate') | i18nextEager}}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3 px-8 mb-12" [hidden]="markupByRateTypeEnabled"
+                  *ngIf="programRateModel === 'PAY_RATE' || programRateModel === 'MARKUP'">
+                  <div class="d-flex align-items-center" *ngIf="user_type.toLowerCase() !== 'client'">
+                    <div class="initials initials-pink">
+                      <icon class="d-flex" size="14px" name="mail" type="material" theme="outlined" cuClass="d-flex">
+                      </icon>
+                    </div>
+                    <div class="d-flex justify-items-center flex-column ml-4">
+                      <p class="text-dark">
+                        <span>{{ +offerData?.stages[0].rate_markup | accuracy : 'markup_percentage' || "--"}}</span>
+                        <label class="strike-through inline-item"
+                          *ngIf="offerData?.stages.length > 1 && offerData?.stages[1].rate_markup !== offerData?.stages[0].rate_markup">
+                          {{
+                          +offerData?.stages[1].rate_markup | accuracy : 'markup_percentage' || "--" }}</label>
+                      </p>
+                      <p class="small text-muted">{{'Mark-Up'|i18next}}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="scroll-wrapper rate-table-wrapper">
+              <table class="table-rate">
+                <thead class="border-top">
+                  <th class="text-left">{{'rate_type'|i18next}} </th>
+                  <th class="text-left" [hidden]="programRateModel === 'BILL_RATE'"
+                    *ngIf="userRole != 'client' || programRateModel === 'PAY_RATE'">{{'pay_rate'|i18next | titlecase}}</th>
+                  <th class="text-left" *ngIf="checkConfig()">{{'client_bill_rate'|i18next}}</th>
+                  <th class="text-left" *ngIf="userRole != 'client'">{{'Vendor Bill Rate'|i18next}}</th>
+                  <th class="text-left" *ngIf="markupByRateTypeEnabled && (programRateModel == 'PAY_RATE' || programRateModel == 'MARKUP')">{{'mark-up'|i18next}}</th>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let rate of offerData?.stages[0]?.rates; let i= index;">
+
+                    <ng-container *ngIf="offerData?.stages[0]?.is_hybrid;else nonHybrid">
+                      <ng-container *ngIf="rate?.applicable">
+                        <td data-value="Rate Type">{{ rate?.name | i18next}}
+                        </td>
+                        <td [hidden]="programRateModel === 'BILL_RATE'"
+                        *ngIf="userRole != 'client' || programRateModel === 'PAY_RATE' " data-value="Pay Rate">
+
+                        <label
+                          [ngClass]="{'green-color': (offerData?.status?.toLowerCase() == 'countered' || offerEdited) && (rate?.pay_rate !== getPastData(rate?.rate_factor)?.pay_rate) }">{{
+                          rate?.pay_rate | accuracy : 'rate' : {currencyCode: jobCurrency} }}</label>
+                        <label class="strike-through"
+                          *ngIf="(offerData?.status?.toLowerCase() == 'countered' || offerEdited) && (rate?.pay_rate !== getPastData(rate?.rate_factor)?.pay_rate)">{{
+                          getPastData(rate?.rate_factor)?.pay_rate | accuracy : 'rate' : {currencyCode: jobCurrency}
+                          }}</label>
+                      </td>
+                        <td *ngIf="checkConfig()" data-value="Client Bill Rate">
+                          <label
+                            [ngClass]="{'green-color': (offerData?.status?.toLowerCase() == 'countered' || offerEdited) && (rate?.bill_rate !== getPastData(rate?.rate_factor)?.bill_rate) }">{{
+                            rate?.bill_rate | accuracy : 'rate' : {currencyCode: jobCurrency} }}</label>
+                          <label class="strike-through"
+                            *ngIf="(offerData?.status?.toLowerCase() == 'countered' || offerEdited) && (rate?.bill_rate !== getPastData(rate?.rate_factor)?.bill_rate)">{{
+                            getPastData(rate?.rate_factor)?.bill_rate | accuracy : 'rate' : {currencyCode: jobCurrency}
+                            }}</label>
+                        </td>
+                        <td *ngIf="userRole != 'client'" data-value="Vendor Bill Rate">
+                          <label
+                            [ngClass]="{'green-color': (offerData?.status?.toLowerCase() == 'countered' || offerEdited) && (rate?.bill_rate !== getPastData(rate?.rate_factor)?.bill_rate) }">{{
+                            rate?.vendor_bill_rate | accuracy : 'rate' : {currencyCode: jobCurrency} }}</label>
+                          <label class="strike-through"
+                            *ngIf="(offerData?.status?.toLowerCase() == 'countered' || offerEdited) && (rate?.bill_rate !== getPastData(rate?.rate_factor)?.bill_rate)">{{
+                            getPastData(rate?.rate_factor)?.bill_rate | accuracy : 'rate' : {currencyCode: jobCurrency}
+                            }}</label>
+                        </td>
+                        <td data-value="Markup" class="text-left has-border" *ngIf="markupByRateTypeEnabled && (programRateModel == 'PAY_RATE' || programRateModel == 'MARKUP')">
+                          {{rate?.markup | accuracy : 'markup_percentage'}}
+                        </td>
+
+                      </ng-container>
+
+                    </ng-container>
+
+                    <ng-template #nonHybrid>
+                      <ng-container *ngIf="rate?.billable">
+                        <td data-value="Rate Type">{{ rate?.name | i18next}}
+                        </td>
+                        <td [hidden]="programRateModel === 'BILL_RATE'"
+                          *ngIf="userRole != 'client' || programRateModel === 'PAY_RATE' " data-value="Pay Rate">
+
+                          <label
+                            [ngClass]="{'green-color': (offerData?.status?.toLowerCase() == 'countered' || offerEdited) && (rate?.pay_rate !== getPastData(rate?.rate_factor)?.pay_rate) }">{{
+                            rate?.pay_rate | accuracy : 'rate' : {currencyCode: jobCurrency} }}</label>
+                          <label class="strike-through"
+                            *ngIf="(offerData?.status?.toLowerCase() == 'countered' || offerEdited) && (rate?.pay_rate !== getPastData(rate?.rate_factor)?.pay_rate)">{{
+                            getPastData(rate?.rate_factor)?.pay_rate | accuracy : 'rate' : {currencyCode: jobCurrency}
+                            }}</label>
+                        </td>
+                        <td *ngIf="checkConfig()" data-value="Client Bill Rate">
+                          <label
+                            [ngClass]="{'green-color': (offerData?.status?.toLowerCase() == 'countered' || offerEdited) && (rate?.bill_rate !== getPastData(rate?.rate_factor)?.bill_rate) }">{{
+                            rate?.bill_rate | accuracy : 'rate' : {currencyCode: jobCurrency} }}</label>
+                          <label class="strike-through"
+                            *ngIf="(offerData?.status?.toLowerCase() == 'countered' || offerEdited) && (rate?.bill_rate !== getPastData(rate?.rate_factor)?.bill_rate)">{{
+                            getPastData(rate?.rate_factor)?.bill_rate | accuracy : 'rate' : {currencyCode: jobCurrency}
+                            }}</label>
+                        </td>
+                        <td *ngIf="userRole != 'client'" data-value="Vendor Bill Rate">
+                          <label
+                            [ngClass]="{'green-color': (offerData?.status?.toLowerCase() == 'countered' || offerEdited) && (rate?.bill_rate !== getPastData(rate?.rate_factor)?.bill_rate) }">{{
+                            rate?.vendor_bill_rate | accuracy : 'rate' : {currencyCode: jobCurrency} }}</label>
+                          <label class="strike-through"
+                            *ngIf="(offerData?.status?.toLowerCase() == 'countered' || offerEdited) && (rate?.bill_rate !== getPastData(rate?.rate_factor)?.bill_rate)">{{
+                            getPastData(rate?.rate_factor)?.bill_rate | accuracy : 'rate' : {currencyCode: jobCurrency}
+                            }}</label>
+                        </td>
+                        <td data-value="Markup" class="text-left has-border" *ngIf="markupByRateTypeEnabled && (programRateModel == 'PAY_RATE' || programRateModel == 'MARKUP')">
+                          {{rate?.markup | accuracy : 'markup_percentage'}}
+                        </td>
+
+                      </ng-container>
+                    </ng-template>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h4 class="mt-24">{{'other_informations'|i18next}}</h4>
+
+      <div class="row">
+        <div class="col-md-4 px-8 mb-12">
+          <div class="grid-panel p-12 d-flex align-items-center justify-content-center flex-column h-70">
+            <p class="text-dark">{{ offerData?.stages[0].notes }}</p>
+            <p class="small text-muted">{{'comments'|i18next}}</p>
+          </div>
+        </div>
+        <div class="col-md-4 px-8 mb-12">
+          <div class="grid-panel p-12 d-flex align-items-center justify-content-center flex-column h-70">
+            <p class="text-dark">{{ offerData?.stages.length }}</p>
+            <p class="small text-muted">{{'history' | i18next}}/{{'revisions'|i18next}}</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+</ng-container>
+<ng-template #noOffersection>
+  <div class="d-flex justify-content-center align-items-center p-24 height-vh">
+    <div class="text-center">
+      <img alt="no data" width="100" class="img-fluid" src="./assets/images/freepik--Envelope--inject-10.svg" />
+      <h5 _ngcontent-hhf-c159="" class="pt-16">{{'no_offer_for_this_candidate' | i18next}}</h5>
+    </div>
+  </div>
+</ng-template>
+
+<div *ngIf="loading" class="d-flex justify-content-center loader-height align-items-center">
+  <div class="dotloader"></div>
+</div>

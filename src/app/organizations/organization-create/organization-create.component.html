@@ -1,0 +1,89 @@
+<svms-sidebar title="{{label | i18next}}" [clickOutside]="clickOutside" [icon]="orgIcon" [dataVisibility]="createOrganizationType" (onClose)="sidebarClose()">
+  <svms-sidebar-body [ngClass]="{'disabled':isSaveLoader}">
+
+    <!--for msp-->
+    <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)"
+      *ngIf="orgType == 'TYPE_MSP'">
+      <vms-tab label="{{ 'msp_basic_info' | i18next }}">
+
+        <app-msp-basic-info [editdata]="clientBasicEditInfo" [isViewClicked]="isViewClicked">
+        </app-msp-basic-info>
+      </vms-tab>
+
+      <vms-tab label="{{ 'address_&_contact' | i18next }}">
+        <address-and-contact-details *ngIf="allCountryList.length > 0" [orgType] = "orgType" [countryList]="allCountryList" [editAddress]="clientBasicAddEditInfo" [isViewClicked]="isViewClicked"
+          (isSecondaryAddressRemoved)="isSecondaryAddressRemoved($event)" [isCreate]="isCreate"></address-and-contact-details>
+      </vms-tab>
+
+      <vms-tab label="{{'sso_settings' | i18next}}" *ngIf="!isCreate">
+        <app-sso-setting-info [organisationId]="existOrgId" *ngIf="allCountryList.length > 0 && existOrgId"></app-sso-setting-info>
+      </vms-tab>
+
+    </vms-tab-group>
+    <!--for msp-->
+
+    <!--for client-->
+    <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)"
+      *ngIf="orgType == 'TYPE_CLIENT'">
+      <vms-tab label="{{ 'client_basic_info' | i18next }}">
+        <app-client-basic-info [editdata]="clientBasicEditInfo" [isViewClicked]="isViewClicked">
+        </app-client-basic-info>
+      </vms-tab>
+
+      <vms-tab label="{{ 'address_&_contact' | i18next }}">
+        <address-and-contact-details *ngIf="allCountryList.length > 0" [orgType] = "orgType"  [countryList]="allCountryList"  [editAddress]="clientBasicAddEditInfo" [isViewClicked]="isViewClicked"
+          (isSecondaryAddressRemoved)="isSecondaryAddressRemoved($event)" (isSecondaryContectRemoved)="isSecondaryContectRemoved($event)"
+          [isCreate]="isCreate"></address-and-contact-details>
+      </vms-tab>
+
+      <vms-tab label="{{'sso_settings' | i18next}}" *ngIf="!isCreate" >
+        <app-sso-setting-info [organisationId]="existOrgId"  *ngIf="allCountryList.length > 0 && existOrgId"></app-sso-setting-info>
+      </vms-tab>
+    </vms-tab-group>
+    <!--for client-->
+
+    <!--for vendor-->
+    <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)"
+      *ngIf="orgType == 'TYPE_VENDOR'">
+      <vms-tab label="{{ 'vendor_basic_info' | i18next }}">
+        <app-vendor-basic-info [editdata]="clientBasicEditInfo" [isViewClicked]="isViewClicked">
+        </app-vendor-basic-info>
+
+      </vms-tab>
+
+      <vms-tab label="{{ 'address_&_contact' | i18next }}">
+        <address-and-contact-details *ngIf="allCountryList.length > 0" [orgType] = "orgType"  [countryList]="allCountryList" [editAddress]="clientBasicAddEditInfo" [isViewClicked]="isViewClicked"
+          (isSecondaryAddressRemoved)="isSecondaryAddressRemoved($event)" (isSecondaryContectRemoved)="isSecondaryContectRemoved($event)" [isCreate]="isCreate"></address-and-contact-details>
+      </vms-tab>
+
+      <vms-tab label="{{'sso_settings' | i18next}}" *ngIf="!isCreate">
+        <app-sso-setting-info [organisationId]="existOrgId"  *ngIf="allCountryList.length > 0 && existOrgId"></app-sso-setting-info>
+      </vms-tab>
+
+    </vms-tab-group>
+    <!--for vendor-->
+
+  </svms-sidebar-body>
+
+  <svms-sidebar-footer>
+
+    <button type="submit" class="btn btn-primary float-right" (click)="onContinue()"
+      [disabled]="validForm == 'INVALID' || !nameIsValid" *ngIf="tabIndex == 0 && !isViewClicked">
+      {{ 'continue' | i18next }} <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+    </button> 
+    <button type="submit" class="btn btn-primary float-right" (click)="onContinue()"
+      *ngIf="tabIndex == 1 && !isViewClicked && orgType?.toLowerCase() == 'type_vendor'"
+      [disabled]="isVendorStepValid">
+      {{ (!isCreate && !isViewClicked ? 'Update' : 'Save') |i18next}} <icon *ngIf="!isSaveLoader" size="20px" name="check_circle" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+      <span *ngIf="isSaveLoader" class="ml-8"><button-loader></button-loader></span>
+    </button>
+    <button  type="submit" class="btn btn-primary float-right" (click)="onContinue()"
+      *ngIf="tabIndex == 1 && !isViewClicked && (orgType?.toLowerCase() == 'type_msp' || orgType?.toLowerCase() == 'type_client')"
+      [disabled]="validForm == 'INVALID'">
+      {{ (!isCreate && !isViewClicked ? 'Update' : 'Save') |i18next}} <icon *ngIf="!isSaveLoader" size="20px" name="check_circle" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+      <span *ngIf="isSaveLoader" class="ml-8"><button-loader></button-loader></span>
+    </button>
+
+  </svms-sidebar-footer>
+
+</svms-sidebar>

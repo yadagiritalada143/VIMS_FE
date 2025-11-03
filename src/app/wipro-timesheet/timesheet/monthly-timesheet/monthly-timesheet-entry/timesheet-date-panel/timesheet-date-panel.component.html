@@ -1,0 +1,304 @@
+<div class="calendar-popup" [ngClass]="{'fix-right': selectedWeekIndex === 6}"
+  *ngIf="!editTimesheetModal && isVendorWorker">
+  <header class="calendar-popup-header px-24 pt-24 pb-16">
+    <h4 class="float-left font-weight-medium mb-0">
+      <icon class="mr-12" name="more_time" color="#5E71FE" size="22px"></icon> {{selectedDate | localDateFormat: 'mediumDate':"":"":true | i18next }}
+    </h4>
+    <div class="mark float-right d-flex mt-0">
+      <input type="checkbox" id="markleave" [checked]="markAsLeave" name="mark"
+        (click)="markAsLeave = !markAsLeave;markLeave()">
+      <label class="cursor-pointer mb-0" for="markleave"> {{ 'mark_as_leave' | i18next }}</label>
+      <!-- <input type="checkbox" id="markleave" [checked]="markAsLeave" name="mark" (click)="markLeave()">Mark as Leave -->
+    </div>
+    <div class="clearfix"></div>
+  </header>
+  <div class="p-24" [formGroup]="timesheetForm">
+    <ng-template [ngIf]="markAsLeave">
+      <div class="form-group select-with-icon">
+        <ng-select placeholder="{{ 'select_leave_type' | i18next }}" [searchable]="false"
+          [ngClass]="{ 'error': (submitted && timesheet.leaveType?.status == 'INVALID') }" formControlName="leaveType"
+          (change)="durationUpdate($event)">
+          <ng-option value="earned_leave" [disabled]="leaveCount <=0">
+            {{ 'earned_leave_(el)' | i18next }}
+          </ng-option>
+          <ng-option value="leave">
+            {{ 'leave_(unpaid)' | i18next }}
+          </ng-option>
+          <ng-option value="comp_off">
+            {{ 'compensated_time_off' | i18next }}
+          </ng-option>
+          <ng-option value="client_holiday">
+            {{holidayName | i18next }}
+          </ng-option>
+          <ng-option value="weekly_off" [disabled]="disableWeekOff">
+            {{ 'weekly_off' | i18next }}
+          </ng-option>
+        </ng-select>
+      </div>
+      <div class="alert_message alert_error" *ngIf="submitted && timesheet?.leaveType?.status == 'INVALID'">
+        <div class="d-flex align-item-center justify-content-start ">
+          <icon class="d-flex mr-8" size="17px" name="info" type="material" cuClass="d-flex"></icon>
+          {{ 'please_select_leave_type' | i18next }}
+        </div>
+      </div>
+
+      <div class="form-group radio-group text-left"
+        *ngIf="timesheet.leaveType.value === 'leave' || timesheet.leaveType.value === 'earned_leave' || timesheet.leaveType.value === 'comp_off'">
+        <label class="d-inline-block mr-24"><input class="mr-4" type="radio" name="leaveStatus"
+            (change)="validateType()" formControlName="leaveStatus" value="full_day">
+          {{ 'full_day' | i18next }}</label>
+        <label class="d-inline-block">
+          <input class="mr-4" type="radio" name="leaveStatus" formControlName="leaveStatus" value="half_day"
+            (change)="validateType()">
+          {{ 'half_day' | i18next }}</label>
+      </div>
+    </ng-template>
+    <div class="form-group-row">
+      <div class="form-group with-icon date">
+        <div class="d-flex justify-content-between">
+          <label class="small">{{ 'time_in' | i18next }}</label>
+          <div class="date-pickers position-relative dir-left">
+            <svms-datepicker [options]="checkInDatePickerOptions" ngDefaultControl formControlName="check_in_date" id="check_in_date" [disabled]="disabledField"
+            [inputdateFormat]="'yy-mm-dd'"I18n ></svms-datepicker >
+          </div>
+        </div>
+        <icon name="schedule" size="14px"></icon>
+        <input type="text" (focus)="showTime = 'check_in'" (focusout)="setShowTimeValue(undefined)"
+          [attr.disabled]="disabledField ? '' : null" class="form-control"
+          [ngClass]="{ 'error': submitted && timesheet.check_in.errors }" formControlName="check_in"
+          (keypress)="checkTimePattern($event)" (change)="checkTimeFormat('check_in')" placeholder="{{ 'time_in' | i18next }}"
+          maxlength="8">
+        <app-time-panel *ngIf="showTime === 'check_in'" [searchTime]="timesheet?.check_in?.value"
+          (selectedTime)="setSelectedTime($event, 'check_in')" class="text-center"></app-time-panel>
+      </div>
+      <div class="form-group with-icon date">
+        <div class="d-flex justify-content-between">
+            <label class="small">{{ 'time_out' | i18next }}</label>
+            <div class="date-pickers position-relative dir-left">
+              <svms-datepicker ngDefaultControl [options]="checkOutDatePickerOptions" formControlName="check_out_date" id="check_out_date" [disabled]="disabledField"
+                [inputdateFormat]="'yy-mm-dd'" I18n ></svms-datepicker >
+            </div>
+          </div>
+        <icon name="schedule" size="14px"></icon>
+        <input type="text" (focus)="showTime = 'check_out'" (focusout)="setShowTimeValue(undefined)" maxlength="8"
+          [attr.disabled]="disabledField ? '' : null" class="form-control"
+          [ngClass]="{ 'error': submitted && timesheet.check_out.errors }" formControlName="check_out"
+          (keypress)="checkTimePattern($event)" (change)="checkTimeFormat('check_out')" placeholder="{{ 'time_out' | i18next }}">
+        <app-time-panel *ngIf="showTime === 'check_out'" [searchTime]="timesheet?.check_out?.value"
+          (selectedTime)="setSelectedTime($event, 'check_out')" class="text-center"></app-time-panel>
+      </div>
+    </div>
+    <div class="alert_message alert_error"
+      *ngIf="submitted && timeInOutTimeError && (timesheet.check_out?.errors || timesheet.check_in?.errors); else warningSection">
+      <div class="d-flex align-item-center justify-content-start ">
+        <icon class="d-flex mr-8" size="17px" name="info" type="material" cuClass="d-flex"></icon>
+        {{getTimeInOutError() | i18next }}
+      </div>
+    </div>
+
+    <ng-template #warningSection>
+      <div class="alert_message warn" *ngIf="warningMessage">
+        <div class="d-flex align-item-center justify-content-start ">
+          <icon class="d-flex mr-8" size="17px" name="report_problem" type="material" cuClass="d-flex"></icon>
+          {{warningMessage | i18next }}
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- <p class="small text-left mb-12" *ngIf="warningMessage">{{warningMessage | i18next }}</p> -->
+    <div class="form-group-row" *ngIf="isbreakEnabled">
+      <div class="form-group with-icon date">
+        <div class="d-flex justify-content-between">
+            <label class="small">{{ 'break_out' | i18next }}</label>
+            <div class="date-pickers position-relative dir-left">
+              <svms-datepicker ngDefaultControl [options]="breakInDatePickerOptions" formControlName="break_in_date" id="break_in_date" [disabled]="disabledField"
+            [inputdateFormat]="'yy-mm-dd'"I18n ></svms-datepicker >
+          </div>
+          </div>
+        <icon name="local_cafe" theme="outlined" size="14px"></icon>
+        <input (focus)="showTime = 'breakIn'" (keypress)="checkTimePattern($event)"
+          (focusout)="setShowTimeValue(undefined)" type="text"
+          [ngClass]="{ 'error': !disabledField && submitted && timesheet.breakIn.errors}"
+          (change)="checkTimeFormat('breakIn')" [attr.disabled]="disabledField ? '' : null" class="form-control"
+          formControlName="breakIn" placeholder="{{ 'break_time_out' | i18next }}">
+        <app-time-panel *ngIf="showTime === 'breakIn'" [searchTime]="timesheet?.breakIn?.value"
+          (selectedTime)="setSelectedTime($event, 'breakIn')" class="text-center"></app-time-panel>
+
+      </div>
+      <div class="form-group with-icon date">
+        <div class="d-flex justify-content-between">
+            <label class="small">{{ 'break_in' | i18next }}</label>
+            <div class="date-pickers position-relative dir-left">
+              <svms-datepicker ngDefaultControl [options]="breakOutDatePickerOptions" formControlName="break_out_date" id="break_out_date" [disabled]="disabledField"
+            [inputdateFormat]="'yy-mm-dd'"I18n ></svms-datepicker >
+          </div>
+          </div>
+        <icon name="local_cafe" theme="outlined" size="14px"></icon>
+        <input (focus)="showTime = 'breakOut'" (keypress)="checkTimePattern($event)"
+          (focusout)="setShowTimeValue(undefined)" type="text"
+          [ngClass]="{ 'error': !disabledField && submitted && timesheet.breakOut.errors}"
+          (change)="checkTimeFormat('breakOut')" [attr.disabled]="disabledField ? '' : null" class="form-control"
+          formControlName="breakOut" placeholder="Break Time In">
+        <app-time-panel *ngIf="showTime === 'breakOut'" [searchTime]="timesheet?.breakOut?.value"
+          (selectedTime)="setSelectedTime($event, 'breakOut')" class="text-center"></app-time-panel>
+
+      </div>
+
+    </div>
+    <div class="alert_message alert_error"
+      *ngIf="submitted && breakInOutTimeError && (timesheet.breakOut?.errors || timesheet.breakIn?.errors); else breakLimitSection">
+      <div class="d-flex align-item-center justify-content-start ">
+        <icon class="d-flex mr-8" size="17px" name="info" type="material" cuClass="d-flex"></icon>
+        {{getBreakInOutError() | i18next }}
+      </div>
+    </div>
+
+    <ng-template #breakLimitSection>
+      <div class="alert_message warn" *ngIf="breakLimit">
+        <div class="d-flex align-item-center justify-content-start ">
+          <icon class="d-flex mr-8" size="17px" name="perm_scan_wifi" type="material" cuClass="d-flex"></icon>
+          {{ 'exceeding_break_limits' | i18next }}
+        </div>
+      </div>
+    </ng-template>
+    <!-- <p class="small text-left mb-12" *ngIf="breakLimit">{{breakLimit | i18next }}</p> -->
+    <div class="form-group">
+        <label class="small">{{ 'notes' | i18next }}</label>
+      <textarea class="form-control" rows="4" formControlName="notes"></textarea>
+    </div>
+    <input hidden type="file" accept="image/jpeg,image/gif,image/png,application/pdf,application/msg" #fileInput
+      (change)="fileChangeEvent($event)">
+    <button class="upload-btn" *ngIf="markAsLeave" (click)="fileInput.click()">
+      <icon name="cloud_upload" size="24px" color="#000000"></icon>
+      <span *ngIf="!document?.filename"> {{ 'upload_document' | i18next }}</span>
+      <span *ngIf="document?.filename"> {{document?.filename | i18next }}</span>
+      <icon class="close-opt float-right" *ngIf="document?.filename" name="close" size="24px" color="#000000"
+        (click)="document = {}"></icon>
+    </button>
+
+  </div>
+  <footer class="calendar-popup-footer py-12 px-16">
+    <button class="cancel float-left" (click)="cancelDayTimesheet(undefined)">Cancel</button>
+    <ng-container *accessControl>
+    <button class="save-btn float-right" [ngClass]="{'show-loader' : isSubmitted}" (click)="saveDayTimesheet()">
+      <div class="mini-loader"></div> {{ 'save' | i18next }}
+    </button>
+    </ng-container>
+  </footer>
+</div>
+
+
+<div class="calendar-popup" *ngIf="editTimesheetModal"
+  [ngClass]="{'active' : editTimesheetModal, 'fix-right': selectedWeekIndex === 6}">
+  <header class="calendar-popup-header px-24 pt-24 pb-16">
+    <h4 class="float-left font-weight-medium color-black mb-0">
+      <icon class="mr-12" name="access_time_filled" color="#5E71FE" size="22px"></icon>
+      {{selectedDate | localDateFormat: 'mediumDate':"":"":true | i18next }}
+    </h4>
+    <div class="float-right timesheet-tool">
+      <icon name="close" theme="outlined" color="#000000" size="20px" (click)="cancelDayTimesheet(undefined)"></icon>
+    </div>
+    <div class="clearfix"></div>
+  </header>
+  <div class="p-24">
+    <div class="timesheet-detail text-left">
+      <p class="font-weight-medium mb-24">
+        <icon class="mr-12" name="work_outline" theme="outlined" color="#6C757D" size="14px"></icon>
+        {{currentTimesheetData?.assignment_title  | i18next }}
+      </p>
+      <div class="d-flex justify-content-between" *ngIf="selectedTimeSheet?.timesheet?.leave_type">
+        <div class="mb-24 d-flex item-width">
+          <icon class="mr-12 mt-4" name="event_busy" theme="outlined" color="#6C757D" size="14px"></icon>
+          <p>
+            <span>{{ 'leave_type' | i18next }}</span>
+            {{showLeaveType(selectedTimeSheet?.timesheet?.leave_type) | i18next }}
+          </p>
+        </div>
+        <div class="mb-24  d-flex item-width">
+          <icon class="mr-12 mt-4" name="label" theme="outlined" color="#6C757D" size="14px"></icon>
+          <p>
+            <span>{{ 'leave_duration' | i18next }}</span>
+            {{selectedTimeSheet?.timesheet?.leave_status == 'half_day' ? 'Half Day' :'Full Day' | i18next }}
+          </p>
+          <!-- 9:00 AM - 6:00PM -->
+        </div>
+      </div>
+      <div class="d-flex justify-content-between">
+        <div class="mb-24 d-flex item-width">
+          <icon class="mr-12 mt-4" name="schedule" theme="outlined" color="#6C757D" size="14px"></icon>
+          <p>
+            <span>{{ 'time_in' | i18next }} {{convertdatetoMediumDate(selectedTimeSheet?.timesheet?.check_in_date || selectedTimeSheet?.timesheet?.date) | i18next }}</span>
+            {{selectedTimeSheet?.timesheet?.check_in | i18next }}
+          </p>
+
+          <!-- 9:00 AM - 6:00PM -->
+        </div>
+        <div class="mb-24  d-flex item-width">
+          <icon class="mr-12 mt-4" name="schedule" theme="outlined" color="#6C757D" size="14px"></icon>
+          <p>
+            <span>{{ 'time_out' | i18next }} {{convertdatetoMediumDate(selectedTimeSheet?.timesheet?.check_out_date || selectedTimeSheet?.timesheet?.date) | i18next }}</span>
+            {{selectedTimeSheet?.timesheet?.check_out | i18next }}
+          </p>
+          <!-- 9:00 AM - 6:00PM -->
+        </div>
+      </div>
+      <div class="d-flex justify-content-between" *ngIf="selectedTimeSheet?.timesheet?.breaks[0]?.break_out">
+        <div class="mb-24 d-flex item-width">
+          <icon class="mr-12 mt-4" name="local_cafe" theme="outlined" color="#6C757D" size="14px"></icon>
+          <p>
+            <span>{{ 'break_out' | i18next }} {{convertdatetoMediumDate(selectedTimeSheet?.timesheet?.breaks[0]?.break_out_date || selectedTimeSheet?.timesheet?.date) | i18next }}</span>
+            {{selectedTimeSheet?.timesheet?.breaks[0]?.break_out | i18next }}
+          </p>
+
+          <!-- 9:00 AM - 6:00PM -->
+        </div>
+        <div class="mb-24  d-flex item-width">
+          <icon class="mr-12 mt-4" name="local_cafe" theme="outlined" color="#6C757D" size="14px"></icon>
+          <p>
+            <span>{{ 'break_in' | i18next }} {{convertdatetoMediumDate(selectedTimeSheet?.timesheet?.breaks[0]?.break_in_date || selectedTimeSheet?.timesheet?.date) | i18next }}</span>
+            {{selectedTimeSheet?.timesheet?.breaks[0]?.break_in | i18next }}
+          </p>
+          <!-- 9:00 AM - 6:00PM -->
+        </div>
+      </div>
+
+      <p class="mb-24 leave-description">
+        <icon class="mr-12 mt-4 float-left" name="sticky_note_2" theme="outlined" color="#6C757D" size="14px"></icon>
+        <span class="float-left">
+          {{selectedTimeSheet?.timesheet?.notes || ' N/A ' | i18next }}
+          <!-- I am taking additional 30 min for Lunch Break -->
+        </span>
+      </p>
+      <p class="mb-24 leave-description attachment" *ngIf="document?.filename">
+        <icon class="mr-12 float-left" name="attach_file" theme="outlined" color="#6C757D" size="14px"></icon>
+        <span class="float-left">
+          <a (click)="downloadAttachment(document)">{{document?.filename | i18next }}</a>
+        </span>
+      </p>
+    </div>
+  </div>
+  <footer class="confirmation-box d-flex justify-content-between py-12 px-16" *ngIf="confirmBox">
+    <p>
+        {{ 'are_you_sure_you_want_to_delete_the_time_for_the_day' | i18next }}?
+    </p>
+    <button class="mr-8" (click)="confirmDelete(selectedTimeSheet?.timesheet)">{{ 'yes' | i18next }}</button>
+    <button class="no" (click)="cancelDelete()">{{ 'no' | i18next }}</button>
+  </footer>
+  <footer class="calendar-popup-footer py-12 px-16" *ngIf="!confirmBox">
+    <ng-container *accessControl>
+    <button class="footer-btn float-left mr-12" *ngIf="(checkForStatus(timesheetStatuses?.DRAFT) || isAllowAction()) && isVendorWorker"
+      (click)="deleteTimesheet(selectedTimeSheet?.timesheet)">
+      <icon class="mr-8" name="delete_sweep" size="20px"></icon> {{ 'delete' | i18next }}
+    </button>
+    <button class="footer-btn edit float-left" *ngIf="(checkForStatus(timesheetStatuses?.DRAFT) || isAllowAction()) && isVendorWorker"
+      (click)="editTimesheet(selectedTimeSheet?.timesheet)">
+      <icon name="create" class="mr-8" size="18px"></icon> {{ 'edit' | i18next }}
+    </button>
+    </ng-container>
+    <h4 class="total-value float-right mb-0" *ngIf="selectedTimeSheet?.timesheet?.check_in && selectedTimeSheet?.timesheet?.check_out">{{ 'total_hours' | i18next }}:
+      {{floatToTimeString(calculateHours(selectedTimeSheet?.timesheet)) | i18next }}</h4>
+    <div class="clearfix"></div>
+  </footer>
+</div>
+
+<div class="backdrop-Overlay"></div>

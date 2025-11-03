@@ -1,0 +1,182 @@
+<form [formGroup]="qualificationForm" (ngSubmit)="saveQualification()">
+  <div class="panel panel-light p-0">
+    <div class="panel-content px-16 py-24">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <div class="Quali-logo d-flex align-justify-center mr-12">
+            <icon size="20px" name="how_to_reg" type="material" class="d-flex" cuClass="d-flex">
+            </icon>
+          </div>
+          <div class="candidate-select">
+            <p>
+              {{ 'do_you_have_a_pre-identified_candidate' | i18next }}?
+            </p>
+            <p class="x-small">
+              {{ 'here_you_can_add_the_candidate_directly' | i18next }}, {{ 'proper_content_for_area_alert' | i18next }}
+            </p>
+          </div>
+        </div>
+        <div class="toggle">
+          <div class="toggle-panel">
+            <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+              <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+                (click)="onClickToggle()"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="addCandidate" class="row mt-16 ml-32 mr-16">
+        <div class="p-8 col-6" *ngFor="let c of candidates; let i = index">
+          <div class="remove_candidate" (click)="removeCandidate(i)">&times;</div>
+          <div class="border rounded-sm p-16  h-150">
+            <div class="d-flex align-items-center ">
+              <div class="Quali-logo d-flex  mr-8">
+                {{c?.candidateName | slice: 0:1}}
+              </div>
+              <div class="candidate-select ">
+                <p class="">
+                  {{c?.candidateName}}
+                </p>
+                <p class="x-small">
+                  {{c?.email}}
+                </p>
+              </div>
+            </div>
+            <div class="contacts d-flex align-items-center mt-16">
+              <icon size="15px" name="local_phone" type="material" class="d-flex" cuClass="d-flex">
+              </icon>
+              <span class="ml-8">
+                {{c?.phone_number}}
+              </span>
+            </div>
+            <div class="contacts d-flex align-items-center mt-16">
+              <icon size="15px" name="corporate_fare" type="material" class="d-flex" cuClass="d-flex">
+              </icon>
+              <span class="ml-8"> {{c?.vendorName}}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="p-8 col-6">
+          <div (click)="openCreateCandidate()"
+            class="add-cadidate cursor-pointer border rounded-sm  d-flex align-justify-center p-16 h-150">
+            + {{ 'add_candidates' | i18next }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Description start here... -->
+  <div class="panel panel-light p-0 mt-24">
+    <div class="panel-content px-16 py-24">
+      <div class="row">
+        <div class="col-12 py-8 d-flex align-items-center justify-content-between">
+          <h4 I18n class="d-flex">
+            <icon size="24px" name="description" theme="outlined" type="material" class="d-flex mr-8" cuClass="d-flex">
+            </icon>
+            <span>{{ 'job_description' | i18next }}</span>
+          </h4>
+          <!-- <span>
+                        <icon size="24px" name="fullscreen" theme="outlined" type="material" class="d-flex mr-8"
+                            cuClass="d-flex">
+                        </icon>
+                    </span> -->
+        </div>
+        <div class="col-12">
+          <!-- <textarea class="form-control" placeholder="{{ 'job_description' | i18next }}"></textarea> -->
+          <quill-editor [(ngModel)]="selectedTemplate.description" formControlName="description" [modules]="modules"
+            [styles]="{height: '200px'}"></quill-editor>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Description End here... -->
+
+  <!-- Credentials and skilss array -->
+  <div class="panel panel-light p-0 mt-24" *ngIf="qualificationForm.get('qualifications')?.controls">
+    <div class="panel-content px-16 py-24">
+      <div class="row">
+        <div class="col-12 py-8 ">
+          <h4 I18n class="d-flex">
+            <icon size="24px" name="description" theme="outlined" type="material" class="d-flex mr-8" cuClass="d-flex">
+            </icon>
+            <span>{{ 'qualifications' | i18next }}</span>
+          </h4>
+        </div>
+        <div class="col-12" [formGroup]="item"
+          *ngFor="let item of qualificationForm.get('qualifications')?.controls;let i = index">
+          <div class="form-group">
+            <label>{{snakeCaseToTitle(item.get('qualification_type')?.value)}}
+            </label>
+            <div class="position-relative" *ngIf="credentialsData">
+              <ng-select [clearable]="false" formControlName="values" [multiple]="true"
+                (change)="selectCredential($event)" placeholder="{{ 'search_available_credentials' | i18next }}" [searchable]="true">
+                <ng-option [value]="c" *ngFor="let c of selectedTemplate?.qualifications[i]?.values">
+                  {{c?.name}}
+                </ng-option>
+              </ng-select>
+              <span class="cursor-pointer search">
+                <icon size="20px" name="search" type="material" class="d-flex" cuClass="d-flex">
+                </icon>
+              </span>
+
+            </div>
+          </div>
+
+          <div class="tabs d-flex flex-wrap">
+            <div class="tabs-panel p-8 mr-8" *ngFor="let c of item.get('values')?.value; let i = index">
+              <div class="d-flex justify-content-between align-items-center">
+                <p>
+                  {{c.name}}
+                </p>
+                <span class="cursor-pointer">
+                  <icon (click)="removeFromValue(i)" size="13px" name="close" type="material" class="d-flex"
+                    cuClass="d-flex">
+                  </icon>
+                </span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center"
+                *ngIf="item.get('qualification_type')?.value == 'skills'">
+                <div class="strength w-100">
+                  <div class="pt-4 strength-bar">
+                    <ul>
+                      <li *ngFor="let r of [1,2,3];let index = index" (click)="clickOnRatings(c,r)"
+                        [ngClass]="{'active': c.level >= r}">
+                      </li>
+                    </ul>
+                  </div>
+                  <p class="x-small ight">
+                    <span>
+                      <span *ngIf="c.level == 1">{{ 'beginner' | i18next }}</span>
+                      <span *ngIf="c.level == 2">{{ 'intermediated' | i18next }}</span>
+                      <span *ngIf="c.level == 3">{{ 'expert' | i18next }}</span>
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Credentials and skilss array ends -->
+
+  <div class="row no-gutters mt-24 mb-16">
+    <div class="col-12 d-flex align-items-center justify-content-between">
+      <button type="button" class="btn btn-outline" (click)="backToBasicInfo()">
+        <icon size="24px" name="keyboard_backspace" theme="outlined" type="material" class="d-flex" cuClass="d-flex">
+        </icon>
+      </button>
+      <button type="submit" class="btn btn-primary">{{ 'save' | i18next }} & {{ 'continue' | i18next }}
+        <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu">
+        </icon>
+      </button>
+    </div>
+  </div>
+
+</form>
+
+<app-create-pre-identified-candidate [isCreateCandidate]="isCreateCandidate" (createdCandidate)="candidate($event)"
+  (onCreateClose)="onCreateClose()"></app-create-pre-identified-candidate>

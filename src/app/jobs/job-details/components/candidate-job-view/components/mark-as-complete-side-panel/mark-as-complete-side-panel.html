@@ -1,0 +1,38 @@
+<svms-sidebar title="rate_interview" [formGroup]="markAsComplete" [dataVisibility]="visiblity"
+  (onClose)="sidebarClose()">
+  <div>
+    <svms-sidebar-body>
+      <div class="px-24 py-16">
+        <div class="form-group">
+          <label>{{ 'interview_outcome' | i18next }} <span class="require">*</span></label>
+          <div class="d-flex flex-column">
+            <ng-select formControlName="reason" [clearable]="false" [(ngModel)]="reason.reason"
+              placeholder="Select Reason" [searchable]="false" [items]="reasonList" bindValue="name" bindLabel="name">
+            </ng-select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{{ 'interview_rating' | i18next }} <span class="require">*</span></label>
+          <div class="stars rating-stars">
+            <ngx-star-rating class="rating" formControlName="rating1" [(ngModel)]="reason.rating" [id]="'rating'">
+            </ngx-star-rating>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{{ 'notes' | i18next }}</label>
+          <textarea formControlName="notes" placeholder="Notes" class="form-control"
+            [(ngModel)]="reason.notes"></textarea>
+        </div>
+      </div>
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+      <div class="d-flex justify-content-end" *accessControl>
+        <button [disabled]="!markAsComplete.valid" type="button" class="btn btn-success mx-16" (click)="submit()">
+          <icon size="20px" name="check_circle_outline" type="material" class="icon--on-left" cuClass="icon-cu">
+          </icon>
+          {{ 'submit' | i18next }}
+        </button>
+      </div>
+    </svms-sidebar-footer>
+  </div>
+</svms-sidebar>

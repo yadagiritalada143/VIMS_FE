@@ -1,0 +1,206 @@
+<svms-sidebar [title]="title | i18next" [icon]="icon" [dataVisibility]="visibility" (onClose)="sidebarClose()">
+    <svms-sidebar-body>
+        <form [formGroup]="addFoundationDataTypeForm">
+            <div class="foundation-data-form">
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label>{{ 'data_type_name' | i18next }}<span class="require">*</span></label>
+                        <input type="text" class="form-control" maxlength="100" minlength="3" placeholder="{{ 'eg' | i18next }}: {{ 'cost_center' | i18next }}" [readOnly]="isViewMode" formControlName="name">
+                        <p class="validation-msg"
+                        *ngIf="addFoundationDataTypeForm.controls.name.touched && addFoundationDataTypeForm.controls['name'].invalid && addFoundationDataTypeForm.controls['name'].errors?.required">
+                        <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'data_type_name_is_required' | i18next }}
+                      </p>
+
+                      <p class="validation-msg" *ngIf="addFoundationDataTypeForm.controls.name.errors?.minlength">
+                        {{ 'name_must_be_at_least' | i18next }} 3 {{ 'characters_long' | i18next }}.
+                      </p>
+                      <p class="validation-msg" *ngIf="addFoundationDataTypeForm.controls.name.errors?.maxlength">
+                        {{ 'name_cannot_be_more_than' | i18next }} 100 {{ 'characters_long' | i18next }}.
+                      </p>
+                    </div>
+                    <div class='mt-24' [ngClass]="{'disable':isViewMode}">
+                        <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+                            <span class="status-text pr-8">{{toggle?.title | i18next}}</span>
+                            <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'" (click)="onClickToggle()"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label>{{ 'description' | i18next }}</label>
+                        <textarea placeholder="{{ 'enter_your_description' | i18next }}" [readOnly]="isViewMode" maxlength="2000" class="form-control" rows="4" formControlName="description"></textarea>
+                    </div>
+                </div>
+                <div class="form-group-row row mb-16">
+                    <div class="col-sm-6">
+                        <div class="toggle-panel p-16 w-100">
+                          <p class="d-flex align-items-center">{{ 'allow_multiple_values' | i18next }} 
+                            <icon class="ml-8 cursor-pointer" name="help" size="16px" cuClass="d-flex" color="#808080" tooltip="When this setting is enabled, the system will allow for multiple values to be selected for this Master Data Type." placement="top"></icon></p>
+                          <toggle-button class="c-toggle-button-switch" [disabled]="isViewMode" [checked]="allowMultipleDefaults" (changed)="reflectToggle('allowMultipleDefaults')"></toggle-button>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="toggle-panel p-16 w-100">
+                          <p class="d-flex align-items-center">{{ 'view_only' | i18next }} 
+                            <icon class="ml-8 cursor-pointer" name="help" size="16px" cuClass="d-flex" color="#808080" tooltip="When this setting is enabled, the system will set this Master Data Type to be read only.  In other words, the user can NOT change what has been set as default.  If a default value does NOT exist, the system will allow a Master Data Type value to be selected." placement="top"></icon></p>
+                          <toggle-button class="c-toggle-button-switch" [disabled]="isViewMode" [checked]="viewOnlyMode" (changed)="reflectToggle('viewOnlyMode')"></toggle-button>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 mt-16">
+                        <div class="toggle-panel p-16 w-100">
+                          <p class="d-flex align-items-center">{{ 'exclude_from_user_association' | i18next }} 
+                            <icon class="ml-8 cursor-pointer" name="help" size="16px" cuClass="d-flex" color="#808080" tooltip="When this setting is enabled, the system will exclude this Master Data Type field from displaying on the “Default Master Data” section on the user record." placement="top"></icon></p>
+                          <toggle-button class="c-toggle-button-switch" [disabled]="isViewMode" [checked]="excludeUserAssociation" (changed)="reflectToggle('excludeUserAssociation')"></toggle-button>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 mt-16">
+                        <div class="toggle-panel p-16 w-100">
+                            <p class="d-flex align-items-center">{{ 'track_owner' | i18next }} 
+                                <icon class="ml-8 cursor-pointer" name="help" size="16px" cuClass="d-flex" color="#808080" tooltip="When enabled, the system will allow the user to define Master Data Owner on each Master Data Record." placement="top"></icon></p>
+                            <toggle-button class="c-toggle-button-switch" [disabled]="isViewMode" [checked]="trackOwner" (changed)="reflectToggle('trackOwner')"></toggle-button>
+                        </div>
+                      </div>
+                    <div *ngIf="trackOwner" class="col-sm-6 mt-16">
+                      <div class="toggle-panel p-16 w-100">
+                          <p class="d-flex align-items-center">{{ 'require_owner' | i18next }} 
+                            <icon class="ml-8 cursor-pointer" name="help" size="16px" cuClass="d-flex" color="#808080" tooltip="When enabled, the system will require that an Owner be selected on each Master Data record.  The Master Data Owner can then be used on approval workflows and in reporting." placement="top"></icon></p>
+                          <toggle-button class="c-toggle-button-switch" [disabled]="isViewMode" [checked]="requireOwner" (changed)="reflectToggle('requireOwner')"></toggle-button>
+                      </div>
+                    </div>
+                    <div class="col-sm-6 mt-16">
+                        <div class="toggle-panel p-16 w-100">
+                            <p class="d-flex align-items-center">
+                                {{ 'financial_master_data_type' | i18next }} 
+                                <icon class="ml-8 cursor-pointer" name="help" size="16px"  
+                                    tooltip="This flag identifies whether or not this Master Data Type is considered financial in nature. MDTs identified as financial will then be taken into account during assignment updates for timesheet automated reprocessing." 
+                                    placement="top" cuClass="d-flex" color="#808080">
+                                </icon>
+                            </p>
+                            <toggle-button class="c-toggle-button-switch" 
+                                [disabled]="isViewMode" [checked]="financialMDT" 
+                                (changed)="reflectToggle('financialMDT')"
+                            ></toggle-button>
+                        </div>
+                      </div>
+                </div>
+                <div class="row no-gutters">
+                    <div class="col-md-6">
+                        <div class="float-left subtitle-2 mb-16 mt-16 font-weight-bold">{{ 'module_grouping' | i18next }}</div>
+                    </div>
+                </div>
+                <div class="row no-gutters">
+                    <div class="col-md-7"> &nbsp; </div>
+                    <div class="col-md-2 no-border text-center checkbox-box">
+                        {{ 'Off' | i18next }}
+                    </div>
+                    <div class="col-md-2 no-border text-center checkbox-box">
+                        {{ 'optional' | i18next }}
+                    </div>
+                    <div class="col-md-1 no-border text-center checkbox-box">
+                        {{ 'required' | i18next }}
+                    </div>
+                </div>
+                <div class="row  no-gutters checkbox-row" [ngClass]="{'disable_checkbox': isViewMode }">
+                    <div class="col-md-7">
+                        <label>{{ 'contingent' | i18next }}</label>
+                    </div>
+                    <div class="col-md-2  text-center checkbox-box">
+                        <div class="checkbox-wrapper">
+                            <label class="checkbox-container">
+                              <input type="radio" name="job_mngmt" formControlName="job_mngmt" value="OFF" (click)="setCheckboxValue($event)">
+                              <span class="checkmark" ></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-2  text-center checkbox-box">
+                        <div class="checkbox-wrapper">
+                            <label class="checkbox-container">
+                              <input type="radio" name="job_mngmt"  formControlName="job_mngmt" value="OPTIONAL" (click)="setCheckboxValue($event)">
+                              <span class="checkmark" ></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-1 text-center checkbox-box">
+                        <div class="checkbox-wrapper">
+                            <label class="checkbox-container">
+                              <input type="radio" name="job_mngmt"  formControlName="job_mngmt" value="REQUIRED" (click)="setCheckboxValue($event)">
+                              <span class="checkmark" ></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row no-gutters checkbox-row last" [ngClass]="{'disable_checkbox': isViewMode }">
+                    <div class="col-md-7">
+                        <label>{{ 'services_procurement' | i18next }}</label>
+                    </div>
+                    <div class="col-md-2  text-center checkbox-box">
+                        <div class="checkbox-wrapper">
+                            <label class="checkbox-container">
+                              <input type="radio" name="sow"  formControlName="sow" value="OFF" (click)="setCheckboxValue($event)">
+                              <span class="checkmark" ></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center checkbox-box">
+                        <div class="checkbox-wrapper">
+                            <label class="checkbox-container">
+                              <input type="radio" name="sow" formControlName="sow" value="OPTIONAL" (click)="setCheckboxValue($event)">
+                              <span class="checkmark" ></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-1 text-center checkbox-box">
+                        <div class="checkbox-wrapper">
+                            <label class="checkbox-container">
+                              <input type="radio" name="sow" formControlName="sow" value="REQUIRED" (click)="setCheckboxValue($event)">
+                              <span class="checkmark" ></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row no-gutters">
+                    <div class="col-md-6">
+                        <div class="float-left subtitle-2 mb-16 mt-16 font-weight-bold">{{ 'associate_with_program_data' | i18next }}</div>
+                    </div>
+                </div>
+                <div class="row no-gutters">
+                    <div class="form-group-row col-sm-12">
+                        <div class="form-group">
+                            <label> {{ 'master_data_type' | i18next }} </label>
+                            <custom-ng-selector
+                              name="master_data_type"
+                              [loading]="masterDataTypeLoading || false"
+                              [items]="allowedMasterDataTypes"
+                              [disabled]="isViewMode"
+                              [selected]="addFoundationDataTypeForm.get('master_data_type').value"
+                              placeholder="{{ 'select_master_data_type' | i18next }}"
+                              (onChanged)="selectedValues('master_data_type', $event)"
+                              (searchTerm)="searchTerm('master_data_type', $event)"
+                              (scrollToEnd)="scrolledToEnd('master_data_type', $event)"
+                            ></custom-ng-selector>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </svms-sidebar-body>
+    <svms-sidebar-footer *accessControl>
+        <!-- <button class="btn btn-outline float-left" (click)="onClickCreateCustomFields($event)">
+            {{ 'add_custom_fields' | i18next }}
+        </button> -->
+        <button type="submit" *ngIf="!isViewMode" [disabled]="!addFoundationDataTypeForm.valid"  class="btn btn-primary float-right" (click)="saveFoundationalDataType()" >
+            <icon size="20px" name="check_circle" type="material" class="icon--on-left" cuClass="icon-cu"></icon>{{buttonLabel | i18next}}
+        </button>
+      </svms-sidebar-footer>
+</svms-sidebar>
+
+<!-- <app-create-custom-fields
+  *ngIf="isCreateCustomFields === 'visible'"
+  [createCustomFields]="isCreateCustomFields"
+  [isEditMode]="editClicked"
+  [customFieldsId]="selectedFieldsId"
+  [moduleName]="moduleName"
+  [allowedFields]="allowedFields"
+  (onClose)="onCloseCreateCustomFields($event)"
+>
+</app-create-custom-fields> -->

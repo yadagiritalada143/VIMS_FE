@@ -1,0 +1,105 @@
+<svms-sidebar-ng title="{{ 'enter_expense' | i18nextEager }}" [dataVisibility]="addNewExpense" (onClose)="sidebarClose()">
+  <app-logs [log]="logs"></app-logs>
+    <svms-sidebar-body-ng [active]="true">
+        <form *ngIf="assignmentForm" [formGroup]="assignmentForm" class="p-24">
+            <div *ngIf="!isWorker" class="form-group-row">
+                <div class="form-group">
+                    <label for="worker">{{ 'select_worker' | i18nextEager }} <span class="require">*</span></label>
+                    <div class="mr-8 position-relative search-cand-icon search-candidate">
+                    <ng-select [placeholder]="'Search Worker' | i18nextEager" formControlName="worker"
+                    [loading]="workersLoading" loadingText="{{ 'loading...' | i18nextEager }}"
+                    [readonly]="!canSearchWorkers" (scrollToEnd)="loadMoreWorkerData(workerName?.searchTerm)"
+                        (change)="selectWorker($event)" (search)="searchWorker($event)" #workerName>
+                            <ng-option *ngFor="let worker of workers" [value]="worker.worker_id">
+                                {{ worker?.user ? worker?.user?.name + (worker?.user?.email ? ' (' + worker?.user?.email + ')' : '')  : worker?.candidate?.name + (worker?.candidate?.email ? ' (' + worker?.candidate?.email + ')' : '') }}
+                            </ng-option>
+                            <ng-option *ngIf="workersLoading">
+                                <span >{{'Loading more results...'}}</span>
+                                  </ng-option>
+                    </ng-select>
+                    <div class="position-absolute search-cand">
+                        <icon name="search" size="20px" type="material"
+                        class="d-flex" cuClass="d-flex"></icon>
+                    </div>
+                </div>
+                    <p *ngIf="assignmentForm.get('worker').touched && assignmentForm.get('worker').errors"
+                        class="validation-msg">
+                        <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                        {{ 'select_worker_is_required' | i18nextEager }}.
+                    </p>
+                </div>
+            </div>
+            <div *ngIf="isWorker; else vendorAssignment" class="form-group-row">
+                <div [hidden]="noDataFound" class="form-group">
+                    <label for="assignment_select">{{ 'select_assignment' | i18nextEager }} <span class="require">*</span></label>
+                    <div class="mr-8 position-relative ng-select-style search-cand-icon" [ngClass]="{'search-candidate': assignments && assignments?.length <= 1}">
+                    <ng-select [clearable]="false" [placeholder]="'Search Assignment' | i18nextEager" (change)="selectAssignment($event)" [searchable]="true"
+                    [loading]="assignmentsLoading" loadingText="{{ 'loading...' | i18nextEager }}"
+                        formControlName="assignment_select">
+                        <ng-option *ngFor="let assignment of assignments" [value]="assignment">
+                            {{ assignment?.assignment_title?.title| i18nextEager }} ( {{ assignment?.code }} )
+                            {{ assignment?.status.toLowerCase() === AssignmentClosedStatus ? ('In-Active' | i18nextEager) : ('Active' | i18nextEager) }}
+                        </ng-option>
+                    </ng-select>
+                    <div class="position-absolute search-cand">
+                        <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+                    </div>
+                </div>
+                    <p *ngIf="assignmentForm.get('assignment_select').touched && assignmentForm.get('assignment_select').errors"
+                        class="validation-msg">
+                        <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                        {{ 'select_assignment_is_required' | i18nextEager }}.
+                    </p>
+                </div>
+                <p class="mt-2" *ngIf="noDataFound" >{{ 'no_active_assignment_is_available' | i18nextEager }}.</p>
+
+            </div>
+            <ng-template #vendorAssignment>
+                <div class="form-group-row">
+                    <div [hidden]="noDataFound" class="form-group">
+                        <label for="assignment_select">{{ 'select_assignment' | i18nextEager }} <span class="require">*</span></label>
+                        <div class="mr-8 position-relative ng-select-style search-cand-icon" [ngClass]="{'search-candidate':!showDownArrow}">
+                            <ng-select [clearable]="false" [placeholder]="'Select Assignment' | i18nextEager"
+                               [loading]="assignmentsLoading" loadingText="{{ 'loading...' | i18nextEager }}" (change)="selectAssignment($event)" formControlName="assignment_select">
+                                <ng-option *ngFor="let assignment of workerAssignments$ | async" [value]="assignment">{{
+                                    assignment.assignment_title.title  }} ( {{ assignment.code   }} ) {{ assignment.status  }}
+                                </ng-option>
+                            </ng-select>
+                            <div class="position-absolute search-cand">
+                                <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+                            </div>
+                            </div>
+                        <p *ngIf="assignmentForm.get('assignment_select').touched && assignmentForm.get('assignment_select').errors"
+                            class="validation-msg">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                            {{ 'select_assignment_is_required' | i18nextEager }}.
+                        </p>
+                    </div>
+                    <p class="mt-2" *ngIf="noDataFound">{{ 'no_active_assignment_is_available_to_enter_expense' | i18nextEager }}.</p>
+
+                </div>
+            </ng-template>
+            <div class="form-group-row">
+                <div *ngIf="assignmentId && isExpenseEnabled != undefined && !isExpenseEnabled" class="alert_message alert_warning">
+                    <div class="d-flex align-items-center w-100">
+                    <div class="d-flex align-items-center justify-content-start ">
+                        <icon class="d-flex mr-8" size="24px" name="warning" type="material" cuClass="d-flex"></icon>
+                    </div>
+                    <div class="pl-8">
+                        <div class="font-weight-bold mb-0 medium-font">{{ expenseName + ' expense is not enabled for this assignment'|i18next}}. {{ 'please_contact_program_administrator' | i18nextEager }}.
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+    </form>
+  </svms-sidebar-body-ng>
+  <svms-sidebar-footer-ng>
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-primary ml-16" (click)="continue()"
+              [disabled]="!assignmentForm.get('assignment_select').valid || (isExpenseEnabled != undefined && !isExpenseEnabled)">
+        {{ 'continue' | i18nextEager }}
+      </button>
+    </div>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

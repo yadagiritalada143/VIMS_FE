@@ -1,0 +1,13 @@
+<app-tree *ngIf="vmsData?.length || flattednedHierarchy" [vmsTreeDataSource]="vmsData" [flattednedHierarchy]="flattednedHierarchy" [treeConfig]="treeConfig" (onDisableClicked)="onDisableClicked($event)" (onDeleteClicked)="onDeleteClicked($event)" (onSearch)="onSearch($event)" (onListFilter)="onListFilter($event)"></app-tree>
+<div *ngIf="!vmsData?.length && !flattednedHierarchy" class="content-area ui-content-wrapper no-content bg-light list-not-found">
+    <div class="page-title px-24 pt-24"> {{ 'hierarchy_configuration' | i18next }}</div>
+    <div class="no-data text-center">
+        <img src="./assets/images/no-data.png" alt="organization-board" class="img-fluid">
+        <h2>{{ 'you_do_not_have_a_parent_hierarchy_created_yet' | i18next }}.</h2>
+        <p class="font-weight-medium mb-24">{{ 'if_you_would_like_to_create' | i18next }}</p>
+        <button class="btn btn-secondary large mx-auto" (click)="onCreateClick()">
+            <icon size="20px" name="add" type="material" class="icon--on-left" cuClass="cu-icon"></icon>{{ 'add_your_first_hierarchy' | i18next }}
+        </button>
+    </div>
+</div>
+<app-create-hierarchy></app-create-hierarchy>

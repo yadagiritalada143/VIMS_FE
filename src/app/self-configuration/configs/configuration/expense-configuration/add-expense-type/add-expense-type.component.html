@@ -1,0 +1,180 @@
+<svms-sidebar [title]="sidebarTitle" [dataVisibility]="sidebarVisibility" (onClose)="sidebarClose($event)"
+              [needConfirmation]="needConfirmation" message="{{'Are you sure you want to leave this page?' | i18next}}">
+  <svms-sidebar-body *ngIf="isLoaded">
+    <app-logs [log]="logs"></app-logs>
+    <form class="p-32" [formGroup]="addExpenseTypeForm">
+      <div class="form-group">
+        <label for="expense_category">
+          {{ 'expense_category' | i18next }}
+          <span class="require ml-4">*</span>
+        </label>
+        <ng-select [clearable]="false" formControlName="expense_type" id="expense_category" [readonly]="formMode === 'view'">
+          <ng-option *ngFor="let category of expenseType" [value]="category.value">{{ category.label }}</ng-option>
+        </ng-select>
+        <p *ngIf="addExpenseTypeForm.get('expense_type').touched && addExpenseTypeForm.get('expense_type').errors"
+           class="validation-msg">
+          <i class="material-icons">error</i>
+          {{ 'expense_category_is_required' | i18next }}.
+        </p>
+      </div>
+      <div class="form-group-row">
+        <div class="form-group">
+          <label for="expense_code">
+            {{ 'expense_code' | i18next }}
+            <span class="require ml-4">*</span>
+          </label>
+          <div class="d-flex">
+            <input class="form-control no-pointer mr-16" style="width: 100px;" type="text" [value]="categoryCode" readonly />
+            <input class="form-control" type="text" id="expense_code" name="expense_code" formControlName="expense_code" [readonly]="formMode === 'view'" />
+          </div>
+          <p *ngIf="addExpenseTypeForm.get('expense_code').touched && addExpenseTypeForm.get('expense_code').errors"
+             class="validation-msg">
+             <i class="material-icons">error</i>
+            {{ 'expense_code_is_required' | i18next }}.
+          </p>
+          <app-server-error [data]="validationsServerErrorArray" [fieldName]="'expense_code'"></app-server-error>
+        </div>
+      </div>
+      <div class="form-group-row">
+        <div class="form-group">
+          <label for="expense_name">
+            {{ 'expense_name/type' | i18next }}
+            <span class="require ml-4">*</span>
+          </label>
+          <input class="form-control" type="text" id="expense_name" name="expense_name" formControlName="expense_name" [readonly]="formMode === 'view'" />
+          <p *ngIf="addExpenseTypeForm.get('expense_name').touched && addExpenseTypeForm.get('expense_name').errors"
+             class="validation-msg">
+             <i class="material-icons">error</i>
+            {{ 'expense_name_is_required' | i18next }}.
+          </p>
+          <app-server-error [data]="validationsServerErrorArray" [fieldName]="'expense_name'"></app-server-error>
+
+        </div>
+        <div class="form-group icon-box">
+          <label for="expense_icon">{{ 'expense_icon' | i18next }}</label>
+          <ng-select [clearable]="false" formControlName="expense_icon" id="expense_icon" [readonly]="formMode === 'view'">
+            <ng-option [value]="''">
+              {{ 'no_icon' | i18next }}
+            </ng-option>
+            <ng-option *ngFor="let icon of iconItems" [value]="icon.url">
+              <img [src]="icon.url" class="mr-8" height="16" />{{ icon.title }}
+            </ng-option>
+          </ng-select>
+          <p *ngIf="addExpenseTypeForm.get('expense_icon').touched && addExpenseTypeForm.get('expense_icon').errors"
+             class="validation-msg">
+             <i class="material-icons">error</i>
+            {{ 'expense_icon_is_required' | i18next }}.
+          </p>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="radio-group">
+          <label class="mb-24">
+            {{ 'attachment' | i18next }}
+            <span class="require ml-4">*</span>
+          </label>
+          <div class="radio-button-container d-flex">
+            <div *ngFor="let radioItem of radioOptionItems;" [ngClass]="{ 'disable': formMode === 'view' }">
+              <input class="radio-custom-input" [id]="'attachment_' + radioItem.label" type="radio" [value]="radioItem.value"
+                     name="attachment_mandatory" formControlName="attachment_mandatory" [readonly]="formMode === 'view'">
+              <label class="radio-custom-label mr-12" [for]="'attachment_' + radioItem.label">{{ radioItem.label | i18next }}</label>
+            </div>
+          </div>
+        </div>
+        <p *ngIf="addExpenseTypeForm.get('attachment_mandatory').touched && addExpenseTypeForm.get('attachment_mandatory').errors"
+           class="validation-msg">
+           <i class="material-icons">error</i>
+          {{ 'attachment_is_required' | i18next }}.
+        </p>
+      </div>
+      <div class="form-group">
+        <div class="radio-group">
+          <label class="mb-24">
+            {{ 'notes' | i18next }}
+            <span class="require ml-4">*</span>
+          </label>
+          <div class="radio-button-container d-flex">
+            <div *ngFor="let radioItem of radioOptionItems;" [ngClass]="{ 'disable': formMode === 'view' }">
+              <input class="radio-custom-input" [id]="'notes_' + radioItem.label" type="radio" [value]="radioItem.value"
+                     name="notes_mandatory" formControlName="notes_mandatory" [readonly]="formMode === 'view'">
+              <label class="radio-custom-label mr-12" [for]="'notes_' + radioItem.label">{{ radioItem.label | i18next }}</label>
+            </div>
+          </div>
+        </div>
+        <p *ngIf="addExpenseTypeForm.get('notes_mandatory').touched && addExpenseTypeForm.get('notes_mandatory').errors"
+           class="validation-msg">
+           <i class="material-icons">error</i>
+          {{ 'notes_is_required' | i18next }}.
+        </p>
+      </div>
+      <div class="form-group">
+        <div class="toggle-group">
+          <ng-container *ngFor="let toggleOption of toggleOptionItems;">
+            <div class="toggle-panel-inner" *ngIf="!(toggleOption.id === 'allow_negative_expense' && addExpenseTypeForm.value.expense_type === 'expense')" [ngClass]="{ 'if-active': toggleOption.value, 'if-inactive': !toggleOption.value, 'disable': formMode === 'view' }">
+              <span>{{ toggleOption.label | i18next }}</span>
+              <span class="toggle-switch" [id]="toggleOption.id" [ngClass]="toggleOption.value ? 'toggle-on' : 'toggle-off'"
+                    (click)="onClickToggle(toggleOption)">
+              </span>
+            </div>
+          </ng-container>
+          <div class="toggle-panel-inner" [ngClass]="{ 'if-active': unitBaseConfig?.get('unit_base')?.value, 'if-inactive': !unitBaseConfig?.get('unit_base')?.value, 'disable': formMode === 'view' }">
+            <span>{{ 'unit_based' | i18next }}</span>
+            <span class="toggle-switch" [ngClass]="unitBaseConfig?.get('unit_base')?.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="toggleUnitBaseConfig()">
+            </span>
+          </div>
+        </div>
+      </div>
+      <ng-container *ngIf="unitBaseConfig?.get('unit_base')?.value === true">
+        <div formGroupName="unit_base_config">
+          <h4 class="font-weight-medium">{{ 'unit_based_logic' | i18next }}</h4>
+          <div class="form-group-row">
+            <div class="form-group">
+              <label for="unit_label">
+                {{ 'unit_label' | i18next }}
+                <span class="require">*</span>
+                <i
+                  placement="right"
+                  class="tooltip-icon material-icons"
+                  tooltip="{{'Defines the field label that will be shown to the end user when entering the number of units. Examples include “Total Miles”, “Total Number of Kilometers”, etc.' | i18next}}"
+                >help</i>
+              </label>
+              <input class="form-control" type="text" id="unit_label" name="unit_label" placeholder="{{ 'enter' | i18next }}" formControlName="unit_label" [readonly]="formMode === 'view'" />
+              <p *ngIf="unitBaseConfig?.get('unit_label')?.touched && unitBaseConfig?.get('unit_label')?.errors"
+                class="validation-msg">
+                <i class="material-icons">error</i>
+                {{ 'unit_label_is_required' | i18next }}.
+              </p>
+              <app-server-error [data]="validationsServerErrorArray" [fieldName]="'unit_label'"></app-server-error>
+            </div>
+            <div class="form-group">
+              <label for="amount_per_unit">
+                  {{ 'amount_per_unit' | i18next }}
+                  <span class="require">*</span>
+              </label>
+              <div class="currency-field position-relative">
+                <span>
+                  {{ '' | accuracy: accuracyConfig?.amount : { currencyCode: currency, display: currencyConfig.SYMBOL } }}
+                </span>
+                <input type="text" (keydown.arrowup)="(false)" (keydown.arrowdown)="(false)" [readonly]="formMode === 'view'"
+                  formControlName="amount_per_unit" class="form-control" onlyNumber inputAccuracy="{{accuracyConfig?.amount}}"
+                />
+              </div>
+              <p *ngIf="unitBaseConfig?.get('amount_per_unit')?.touched && unitBaseConfig?.get('amount_per_unit')?.errors"
+                class="validation-msg">
+                <i class="material-icons">error</i>
+                {{ 'amount_per_unit_is_required' | i18next }}.
+              </p>
+              <app-server-error [data]="validationsServerErrorArray" [fieldName]="'amount_per_unit'"></app-server-error>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </form>
+  </svms-sidebar-body>
+  <svms-sidebar-footer *ngIf="formMode !== 'view'">
+    <div class="d-flex justify-content-end">
+      <button *accessControl class="btn btn-primary" (click)="submitAddExpenseType()">{{ 'save' | i18next }}</button>
+    </div>
+  </svms-sidebar-footer>
+</svms-sidebar>

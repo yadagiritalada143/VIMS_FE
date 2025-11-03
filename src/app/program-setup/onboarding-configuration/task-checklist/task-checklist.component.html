@@ -1,0 +1,34 @@
+<vms-table *ngIf="tableLoaded" [vmsTableConfig]="tableConfig" [vmsDataSource]="vmsData?.checklists"  [totalItem]="totalRecords"
+  [itemsPerPage]="itemsPerPage" (onViewClick)="onClickView($event)"  (onEditClick)="onEditClick($event)"
+  (changePage)="onPaginationClick($event)" (onDisableClicked)="disableClicked($event)" (onCreate)="onCreateClick($event)" (search)="onSearch($event)" (onDeleteClick)="onDeleteClick($event)"
+  (onListFilter)="onListFilter($event)">
+</vms-table>
+<app-create-checklist (onSaveChecklist)="listChecklist()"></app-create-checklist>
+<app-edit-checklist (onSaveChecklist)="listChecklist()"></app-edit-checklist>
+<app-view-checklist></app-view-checklist>
+
+<!-- Warning modal html goes here -->
+<div *ngIf="showWarningModal"
+ class="warning-modal position-fixed bg-light rounded-sm pt-32">
+  <a href="javascript:void(0)" class="close-warning-modal" (click)="closeWarningModal()">
+    <icon size="18px" name="close" type="material" cuClass="warning-close"></icon>
+  </a>
+  <div class="warning-modal-body text-center">
+    <h3 class="mt-8">
+      {{ 'warning' | i18next }}
+    </h3>
+    <p class="warning-modal-body-content">
+      {{ 'you_are_deleting_or_disabling_a_task_on_which_other_tasks_are_dependent' | i18next }}
+    </p>
+    <p class="warning-modal-body-content-footer">
+      {{ 'would_you_like_to_continue' | i18next }} ?
+    </p>
+    <div class="d-flex justify-content-center warning-modal-body-button">
+      <button class="btn btn-primary" (click)="deleteChecklist()">
+        {{ 'continue' | i18next }}
+        <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop position-fixed" [ngClass]="{'active' : showWarningModal}"></div>

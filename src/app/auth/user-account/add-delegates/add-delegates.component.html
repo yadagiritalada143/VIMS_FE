@@ -1,0 +1,98 @@
+<svms-sidebar title="{{title | i18nextEager}}"  [dataVisibility]="addDelegates" [needConfirmation]="true"
+  (onClose)="sidebarClose()" [btnOkText]="'Yes'" [message]="'Are you sure you want to exit without saving?'"
+  [btnCancelText]="'No'">
+  <svms-sidebar-body>
+    <div class="mt-32 pt-12 px-24 pb-24 add-deligate-form">
+  <app-logs [log]="logs"></app-logs>
+  <app-supporting-text  *ngIf="supportData?.support_text" (closeDialog)="supportData={}" [support_data]="supportData"></app-supporting-text>
+      <form [formGroup]="createDelegateForm">
+        <div class="form-group-row">
+          <div class="form-group position-relative">
+            <label>
+              {{ 'delegate_from' | i18nextEager }}<span class="require"> *</span>
+            </label>
+            <ng-select [readonly]="!checkAuthorization('create_delegate_for_others') || title=='Edit Delegate'" formControlName="delegated_from" [loading]="delegateFromLoading" loadingText="Loading..."
+            [clearable]="false" (search)="this.delegateFrom.next($event)" [searchable]="true" [multiple]="false" [items]="userListDataFrom" (change)="supportTextCheck()"
+            bindLabel="bindLable" bindValue="id" placeholder="{{ 'select_users' | i18nextEager }}" ngDefaultControl
+            >
+          </ng-select>
+          </div>
+          <div class="form-group position-relative">
+            <label>
+              {{ 'delegate_to' | i18nextEager }}<span class="require"> *</span>
+            </label>
+            <ng-select *ngIf="isMultiple" formControlName="delegated_to" [loading]="delegateToLoading" loadingText="Loading..." (change)="supportTextCheck()"
+            [clearable]="false" (search)="this.delegateTo.next($event)" [searchable]="true" [multiple]="true" [items]="userListDataTo"
+            bindLabel="bindLable" bindValue="id" placeholder="{{ 'select_users' | i18nextEager }}" ngDefaultControl
+            >
+          </ng-select>
+
+          <ng-select *ngIf="!isMultiple" formControlName="delegated_to_single" [loading]="delegateToLoading" loadingText="Loading..." (change)="supportTextCheck()"
+            [clearable]="false" (search)="this.delegateTo.next($event)" [searchable]="true" [items]="userListDataTo"
+            bindLabel="bindLable" bindValue="id" placeholder="{{ 'select_users' | i18nextEager }}" ngDefaultControl
+            >
+          </ng-select>
+          </div>
+        </div>
+        <!-- <div class="form-group">
+          <label>
+            {{ 'select_delegate' | i18nextEager }}<span class="require"> *</span>
+          </label>
+          <ng-select formControlName="delegated_to" [loading]="delegateFromLoading" loadingText="Loading..."
+          [clearable]="false" (search)="this.delegateFrom.next($event)" [searchable]="true" [multiple]="false" [items]="userListData"
+          bindLabel="bindLable" bindValue="id" placeholder="{{ 'select_delegate' | i18nextEager }}" ngDefaultControl
+          >
+        </ng-select>
+        </div> -->
+        <div class="form-group-row">
+          <div class="form-group position-relative">
+            <label>{{ 'delegate_start' | i18nextEager }}<span class="require"> *</span></label>
+            <svms-datepicker
+              [ngClass]="(editDelegateData?.id && isType != 'pending')?'fade-background':''"
+              [disabled]="editDelegateData?.id && isType != 'pending'"
+              [readonly]="editDelegateData?.id && isType != 'pending'"
+              (onDateChange)="dateChanged($event)"
+              [options]="options1" formControlName="start_date" [inputdateFormat]="dateFormat" [placeholder]="'Select Date'" I18n>
+            </svms-datepicker>
+            <p *ngIf="(createDelegateForm?.invalid && createDelegateForm?.errors?.workerOrignalDateErr)" class="text-red">
+              {{createDelegateForm?.errors?.workerOrignalDateErr | i18nextEager}}
+            </p>
+          </div>
+          <div class="form-group position-relative">
+            <label>{{ 'delegate_end' | i18nextEager }}<span class="require"> *</span></label>
+            <svms-datepicker
+              [disabled]="!createDelegateForm?.value.start_date"
+              [readonly]="!createDelegateForm?.value.start_date"
+              (onDateChange)="dateChanged($event)"
+              [options]="options2" formControlName="end_date" [inputdateFormat]="dateFormat" [placeholder]="'Select Date'" I18n>
+            </svms-datepicker>
+            <p *ngIf="(createDelegateForm?.invalid && createDelegateForm?.errors?.workerDurationDateErr)" class="text-red">
+              {{createDelegateForm?.errors?.workerDurationDateErr | i18nextEager}}
+            </p>
+          </div>
+        </div>
+        <h4 class="font-weight-medium pt-12">{{ 'delegated_modules' | i18nextEager }}<span class="require"> *</span></h4>
+        <ul class="module-list">
+          <li *ngFor="let dm of delegateModule" class="w-100 mt-0">
+            <div class="toggle-panel w-100 border-bottom">
+              <div class="toggle-panel-inner w-100" [ngClass]="dm?.is_enabled ? 'if-active' : 'if-inactive'">
+                <span class="status-text mr-12">{{dm?.display_name | i18nextEager}}</span>
+                <span class="toggle-switch" [ngClass]="dm?.is_enabled ? 'toggle-on' : 'toggle-off'"
+                 (click)="onClickToggleModule(dm)" ></span>
+              </div>
+            </div>
+          </li>
+
+        </ul>
+        <p class="require" *ngIf="createDelegateForm?.invalid && createDelegateForm.get('module_groups').errors?.required">
+          {{ 'please_select_at_least_one_module' | i18nextEager }}
+        </p>
+      </form>
+    </div>
+  </svms-sidebar-body>
+  <svms-sidebar-footer>
+    <button [disabled]="createDelegateForm.invalid || isDisabled || isMultiple && createDelegateForm?.value?.delegated_to?.length < 1 || !isMultiple && !createDelegateForm?.value?.delegated_to_single || delegateFromLoading || delegateToLoading || isDuplicate" type="button" class="btn btn-primary float-right add-delegate-btn" (click)="createDelegate()">
+     {{btnName | i18nextEager}}
+    </button>
+  </svms-sidebar-footer>
+</svms-sidebar>

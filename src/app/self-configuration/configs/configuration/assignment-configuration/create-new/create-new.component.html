@@ -1,0 +1,385 @@
+<!-- <p>create-new works!</p> -->
+<header class="section-header page-title-main p-24 d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+        <h3 class="font-weight-semibold mb-0">{{ 'create_new' | i18next }} {{ 'assignment_configuration' | i18next }}</h3>
+    </div>
+    <div>
+        <button class="c-btn c-btn-success-medium d-none">{{'action' | i18next}}</button>
+        <button *authorize="'assignment_configuration_manage'" class="c-btn c-btn-success-medium" (click)="saveConfiguration()">{{'save' | i18next}}</button>
+    </div>
+</header>
+<section class="section-body-content">
+    <div class="row no-gutters program-details-mobile">
+        <div class="col-12">
+            <div class="invoice-config p-24">
+                <form>
+                    <div class="c-form-group-row invoice-form justify-content-between d-none">
+                        <div class="c-form-group invoice-c-input">
+                            <label>{{ 'configuration_name' | i18next }}<span class="require">*</span></label>
+                            <input type="text" class="c-form-control" placeholder="{{'Enter Title' | i18next}}"
+                            name="config_name" [(ngModel)]="config.name">
+                        </div>
+
+                        <div class="toggle-panel active-inactive-toggle mt-24 d-flex justify-content-between">
+                            <div class="toggle-panel-inner">
+                                <span>
+                                    <!-- {{request?.is_active === 1 ? 'Active' :'Inactive'}} -->
+                                </span>
+
+                                <span class="toggle-switch"></span>
+                                <!-- [ngClass]="request?.is_active === 1  ? 'toggle-on' : 'toggle-off'" -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="c-form-group-row invoice-form justify-content-between d-none">
+                        <div class="c-form-group">
+                            <label>{{ 'hierarchy' | i18next }}<span class="require">*</span></label>
+                            <ng-select placeholder="{{'Select' | i18next}}" [(ngModel)]="config.hierarchies" name="hierarchy">
+                                <ng-option [value]="hierarchy.value" *ngFor="let hierarchy of config.hierarchies">
+                                    {{ hierarchy?.name }}
+                                </ng-option>
+                            </ng-select>
+                        </div>
+                    </div>
+                    <div class="c-form-group-row invoice-form justify-content-between">
+                        <div class="c-form-group m-0">
+                            <label>{{ 'assignment_active_upon' | i18next }}
+                                <a href="javascript:void(0)" class="select-unselect" (click)="selectAllCheckbox()" *ngIf="assignmentActiveUpon == 'Select all'">( {{assignmentActiveUpon}} )</a>
+                                <a href="javascript:void(0)" class="select-unselect" (click)="unSelectAllCheckbox()" *ngIf="assignmentActiveUpon == 'Unselect all'">( {{assignmentActiveUpon}} )</a>
+                            </label>
+                            <p class="mb-16">{{'identifies_the_parameters_for_when_an_assignment_will_move_to_an_open_status' | i18next}}</p>
+                            <div class="d-flex">
+                                <div class="mr-24" *ngFor="let data of options?.activeOnData; let i=index">
+                                    <label class="c-input-checkbox">
+                                        <input type="checkbox" class="mr-8" [value]="data?.value" name="active-{{i}}"
+                                        [(ngModel)]="data.isEnabled">
+                                        <span class="cb-ui"></span>
+                                        <span  class="cb-label">{{data.label | i18next}}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="invoice-config-inner">
+                <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                    <p class="font-weight-medium">{{'quick_assignment' | i18next}}</p>
+                </div>
+
+
+                <app-config-common-listing mainIcon="calculate" itemLevel="parent" subtitle="Quick Assignment Title Driven by"
+                    [disabled]="config?.config?.assignment_title?.is_allow"
+                    description="Selected option(s) will be available to fetch assignment title while creating assignment." multipleOption="true"
+                    [options]="assignment_title_arr" [updatedSelectBoxValue]="assignmentDropDownValues" multiple="true"
+                    (onValueChange)="getAssignmentTitleValues($event)">
+                </app-config-common-listing>
+                <app-config-common-listing itemLevel="child" subtitle="Include Filled Jobs on Quick Assignment"
+                        *ngIf="config?.config?.assignment_title?.search_by_job"
+                        description="When enabled, an option will be presented to the end user while creating a Quick Assignment to indicate if the list of existing jobs should include jobs in a 'Filled' status." toggleSwitch="true"
+                        [updatedToggleValue]="config?.config?.assignment_title?.allow_filled_job_selection" (onValueChange)="onToggleChanged('assignment_title')">
+                </app-config-common-listing>
+
+                <!-- <app-config-common-listing mainIcon="calculate" itemLevel="parent"
+                    subtitle="Quick Assignment Budget Calculated From"
+                    description="This layout we can use for the configuration with toggle on/off button"
+                    selectBox="true" [options]="options.budgetOptions"
+                    [updatedSelectBoxValue]="config?.config?.budget?.value" (onValueChange)="getBudgetCalculatedFrom($event)"></app-config-common-listing> -->
+            </div>
+
+            <div class="invoice-config-inner">
+                <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                    <p class="font-weight-medium">{{ 'update_assignment' | i18next }}</p>
+                </div>
+                <!-- Done -->
+                <app-config-common-listing mainIcon="percent" itemLevel="parent" subtitle="Quick Rate Change"
+                    description='Ability to change rates quickly without updating the assignment.  Note that permission “Update Assignment - Quick Rate Change” must be enabled for a user role in order to perform this action on assignment.'
+                    [updatedToggleValue]="config?.config?.quick_rate_change?.is_allow" (onValueChange)="onToggleChanged('quick_rate_change')"
+                    toggleSwitch="true"></app-config-common-listing>
+                <app-config-common-listing mainIcon="percent" itemLevel="parent" subtitle="Quick Extension"
+                    description='Ability to allow or revoke extensions and/or rate change on assignments without updating the assignment. Note that permission “Update Assignment - Quick Extension” must be enabled for a user role in order to perform this action on assignment.'
+                    [updatedToggleValue]="config?.config?.quick_extension?.is_allow" (onValueChange)="onToggleChanged('quick_extension')"
+                    toggleSwitch="true"></app-config-common-listing>
+                <app-config-common-listing [directoryIcon]="true" itemLevel="child" *ngIf="config?.config?.quick_extension?.is_allow"
+                    subtitle="Allow Rate Change along with Extension"
+                    description='When enabled, the system will allow Extension and Rate Change as actions on an assignment.'
+                    [updatedToggleValue]="config?.config?.quick_extension?.options?.with_rate" (onValueChange)="config.config['quick_extension'].options.with_rate = !config?.config['quick_extension']?.options?.with_rate"
+                    toggleSwitch="true"></app-config-common-listing>
+                <app-config-common-listing mainIcon="door_front" itemLevel="parent"
+                    subtitle="Update Assignment After Closed"
+                    [updatedToggleValue]="config?.config?.re_open?.is_allow" (onValueChange)="onToggleChanged('re_open')"
+                    description="Ability to allow or revoke updating the assignment after it is closed. To use this setting assignment has to be extended." toggleSwitch="true">
+                </app-config-common-listing>
+                <app-config-common-listing mainIcon="percent" itemLevel="parent"
+                    subtitle="Update Assignment Start Date"
+                    description='Grant users with "Update Assignment" permission in their User Role the ability to modify the Start Date using the "Update Assignment" function.'
+                    (onValueChange)="onToggleChanged('update_start_date')"
+                    toggleSwitch="true" [updatedToggleValue]="config?.config?.update_start_date?.is_allow"></app-config-common-listing>
+
+                    <!-- Done -->
+                    <app-config-common-listing [updatedSelectBoxValue]="config?.config?.update_start_date?.type"
+                        itemLevel="child" subtitle="Threshold for Assignment Start Date Update" *ngIf="config?.config?.update_start_date?.is_allow"
+                        description="Set the threshold period for updating an assignment's start date based on its current start date. For instance, if the current start date is 1/1/23 and the threshold is set at 10 days, the start date can be modified only within 1/1/23 and 1/10/23." [disabled]="!config.config.update_start_date?.is_allow"
+                        [value]="config?.config?.update_start_date?.period" (onValueChange)="getNumberInputValue($event, 'update_start_date')"
+                        [selectedValue]="config?.config?.update_start_date?.type" (onOptionValueChange)="getCalendarValue($event, 'update_start_date')"
+                        numberSelectOption="true" [options]="options?.updateStartDate">
+                    </app-config-common-listing>
+
+                    <app-config-common-listing mainIcon="door_front" itemLevel="parent" subtitle="Assignment Bulk Update"
+                        description='Provides users who have the "Bulk Update Assignment" permission on their User Role to be able to perform bulk updates on assignments via the assignment list view.' toggleSwitch="true"
+                        [updatedToggleValue]="config?.config?.mass_update?.is_allow" (onValueChange)="onToggleChanged('mass_update')">
+                    </app-config-common-listing>
+                    <app-config-common-listing [directoryIcon]="true" itemLevel="child" subtitle="Field Type" 
+                        [required]="true"
+                        *ngIf="config?.config?.mass_update?.is_allow"
+                        [disabled]="config?.config?.mass_update?.is_allow" description="Select the type of field to be included in bulk update."
+                        [options]="options?.fieldMassUpdateOptions" multiSelectBox="true"
+                        [updatedMultiSelectDropdown]="config?.config?.mass_update?.options"
+                        (onValueMultiSelectChange)="getMultiSelectValues($event)">
+                    </app-config-common-listing>
+                    <app-config-common-listing [directoryIcon]="true" itemLevel="child" subtitle="Allowed Fields"
+                        [required]="true"
+                        *ngIf="config?.config?.mass_update?.is_allow"
+                        [disabled]="config?.config?.mass_update?.is_allow" description="Select the assignment fields that can be updated during a bulk update."
+                        [options]="options?.massUpdateOptions" multiSelectBox="true"
+                        [updatedMultiSelectDropdown]="config?.config?.mass_update?.selectedValues"
+                        (onValueMultiSelectChange)="getMultiSelectValuesOptions($event)">
+                    </app-config-common-listing>
+
+                    <app-config-common-listing itemLevel="parent" mainIcon="door_front"
+                    subtitle="Reprocessing of Timesheets With Assignment Financial Updates"
+                    [options]="options?.updateImpactApprovedTS"
+                    [updatedSelectBoxValue]="config?.config?.update_impact_approved_ts?.options[0]?.is_enabled"
+                    (onValueChange)="getUpdateImpactApprovedTSValue($event)"
+                    description="Define how timesheets should be impacted when assignment updates include financial changes to already approved and/or invoiced timesheets." selectBox="true"></app-config-common-listing>
+            </div>
+
+            <div class="invoice-config-inner">
+                <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                    <p class="font-weight-medium">{{ 'budget_management' | i18next }}</p>
+                </div>
+                <!-- Done -->
+                <!-- <app-config-common-listing mainIcon="door_front" itemLevel="parent" subtitle="Add/Reduce Budget"
+                    description="This layout we can use for the configuration with toggle on/off button"
+                    (onValueChange)="onToggleChanged('additional_budget')"
+                    toggleSwitch="true" [updatedToggleValue]="config?.config?.additional_budget?.is_allow"></app-config-common-listing> -->
+
+                <!-- Done -->
+                <app-config-common-listing mainIcon="door_front" itemLevel="parent" subtitle="Add/Reduce Budget Adjustment Period"
+                    description='Define the number of days for which users who have the "Add/Reduce Budget" permission on their User Role can add/reduce budget after the assignment end date.' numberSelectOption="true"
+                    [options]="options?.additionalBudgetAddTypeOptions"
+                    [value]="config?.config?.additional_budget?.options[0]?.options?.period" (onValueChange)="getNumberInputValue($event, 'allow_add')"
+                    [selectedValue]="config?.config?.additional_budget?.options[0]?.options?.type" (onOptionValueChange)="getCalendarValue($event, 'allow_add')">
+                </app-config-common-listing>
+
+                <!-- Done -->
+                <app-config-common-listing mainIcon="door_front" itemLevel="parent"
+                    subtitle="Restrict the Timesheet & Expense Approval if Assignment Budget is Insufficient"
+                    description='By toggling on, timesheets and/or expenses for which the total billable amount exceeds the remaining budget of the assignment will not be able to be approved until the budget is increased.'
+                    [updatedToggleValue]="config?.config?.additional_budget?.options[2]?.is_enabled"
+                    (onValueChange)="onToggleChangesForIsEnabled('additional_budget', 2)"
+                    toggleSwitch="true"></app-config-common-listing>
+            </div>
+
+            <!-- This section is not integrated in old assignment config -->
+            <!-- <div class="invoice-config-inner">
+                <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                    <p class="font-weight-medium">{{'Impact of Financial Update on Assignment for Approved & Invoiced Status Timesheet(s)' | i18next}}</p>
+                </div>
+                <div class="form-check px-24 py-8">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" [(ngModel)]="config.config.update_impact_approved_ts.options[0].is_enabled" [value]="false">
+                    <label class="form-check-label" for="flexRadioDefault1">
+                        {{ 'approver_approves_impacted_timesheet_(default)' | i18next }}
+                    </label>
+                  </div>
+                  <div class="form-check px-24 py-8">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" [(ngModel)]="config.config.update_impact_approved_ts.options[0].is_enabled" [value]="true">
+                    <label class="form-check-label" for="flexRadioDefault2">
+                        {{ 'system_auto-approves_impacted_timesheet(s)' | i18next }}
+                    </label>
+                  </div>
+            </div> -->
+
+            <div class="invoice-config-inner">
+                <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                    <p class="font-weight-medium">{{ 'other_settings' | i18next }}</p>
+                </div>
+
+                <!-- Done -->
+                    <app-config-common-listing mainIcon="gamepad" itemLevel="parent"
+                        subtitle="Display all Managers During Create/Update Assignment" [disabled]="config?.config?.show_manager?.is_allow"
+                        description='If selected, then all managers will be displayed in the “Assignment Manager”, “Timesheet Manager”, and  “Expense Manager” dropdown while creating and/or updating assignment.  Otherwise, ONLY the manager who is creating/updating the assignment will be displayed in the dropdown for those 3 fields.'
+                        multipleOption="true" [options]="showManagerOptions" [updatedSelectBoxValue]="managerOptionValue" multiple="true"
+                        (onValueChange)="getShowManagersValues($event)">
+                    </app-config-common-listing>
+
+                <!-- Done -->
+                <!-- <app-config-common-listing mainIcon="gamepad" itemLevel="parent"
+                    subtitle="Onboarding Document Update after Assignment End"
+                    description="This layout we can use for the configuration with toggle on/off button"
+                    [updatedToggleValue]="config?.config?.onboarding?.is_allow"
+                    (onValueChange)="onToggleChanged('onboarding')"
+                    toggleSwitch="true"></app-config-common-listing> -->
+
+                <!-- Done -->
+                <app-config-common-listing mainIcon="gamepad" itemLevel="parent" subtitle="Evaluation"
+                    description='This setting determines whether or not the Program allows for evaluations on assignments. Note that users will ALSO need to have the "Evaluate Assignment" permission on their User Role to be able to complete an evaluation on the assignment.'
+                    [updatedToggleValue]="config?.config?.evaluate?.is_allow"
+                    (onValueChange)="onToggleChanged('evaluate')"
+                    toggleSwitch="true"></app-config-common-listing>
+
+                <!-- Done -->
+                <app-config-common-listing mainIcon="gamepad" itemLevel="parent"
+                    subtitle="Activity Based Pricing"
+                    description='Activity Based Pricing allows for time to be allocated to various activities on a timesheet.  This setting, when enabled, will allow end users to define the activities on each assignment that will carry over to timesheets.'
+                    [updatedToggleValue]="config?.config?.project_based?.is_allow"
+                    (onValueChange)="onToggleChanged('project_based')"
+                    toggleSwitch="true"></app-config-common-listing>
+
+                <app-config-common-listing itemLevel="child"
+                  *ngIf="config?.config?.project_based?.is_allow"
+                  subtitle="Rename Activity"
+                  description='When enabled, provides the ability to update the name of the activity from what has been defaulted by the system.  The renaming of the activity name can either be done during the initial assignment creation or when an assignment is updated.'
+                  [updatedToggleValue]="config?.config?.project_based?.create?.activity_rename"
+                  (onValueChange)="onToggleChanged('activity_rename')"
+                  toggleSwitch="true"></app-config-common-listing>
+
+                <!-- Done -->
+                <app-config-common-listing mainIcon="gamepad" itemLevel="parent" subtitle="Do Not Rehire"
+                    description='When enabled, the system will provide the option to identify a worker as "Do Not Rehire" when an assignment is manually closed.'
+                    [updatedToggleValue]="config?.config?.do_not_rehire?.is_allow"
+                    (onValueChange)="onToggleChanged('do_not_rehire')"
+                    toggleSwitch="true"></app-config-common-listing>
+
+                <app-config-common-listing itemLevel="parent" mainIcon="gamepad" subtitle="Allow Assignment Creation"
+                    description="Enter MSP partner timesheet fee" toggleSwitch="true"></app-config-common-listing>
+
+                    <app-config-common-listing mainIcon="gamepad" itemLevel="parent" subtitle="Allow Overlapping Assignments"
+                        description='When enabled, the system will allow for assignments to be created for the same worker with overlapping start and/or end dates.  If disabled, the system will prevent offers, assignments, and extensions from happening if the dates overlap any other assignments for the same worker.'
+                        [updatedToggleValue]="config?.config?.overlapping_assignments?.is_allow" (onValueChange)="onToggleChanged('overlapping_assignments')"
+                        toggleSwitch="true"></app-config-common-listing>
+
+                <app-config-common-listing mainIcon="gamepad" itemLevel="parent"
+                    subtitle="Secondary/Additional Assignment(S)"
+                    description="This layout we can use for the configuration with toggle on/off button"
+                    [updatedToggleValue]="config?.config?.secondary_assignment?.is_allow"
+                    (onValueChange)="onToggleChanged('secondary_assignment')"
+                    toggleSwitch="true"></app-config-common-listing>
+
+                <app-config-common-listing itemLevel="child"
+                    *ngIf="config?.config?.secondary_assignment?.is_allow"
+                    subtitle="Select an Assignment Status on which Secondary/Additional Assignment can be Created"
+                    [options]="options?.secondaryAssignmentOptions"
+                    [updatedSelectBoxValue]="config?.config?.secondary_assignment?.value"
+                    (onValueChange)="getSecondaryAssignmentValue($event)"
+                    description="Enter MSP partner timesheet fee" selectBox="true"></app-config-common-listing>
+
+                <app-config-common-listing mainIcon="gamepad" itemLevel="parent"
+                    subtitle="Special Access is provided to Submit Archived/Restricted/Blocked Timesheet(S) "
+                    description="This layout we can use for the configuration with toggle on/off button"
+                    [updatedToggleValue]="config?.config?.temp_access_data?.timesheet?.past_period_allow"
+                    (onValueChange)="updatePastPeriod()"
+                    toggleSwitch="true"></app-config-common-listing>
+
+                <app-config-common-listing itemLevel="child" subtitle="Access for"
+                    description="Enter MSP partner timesheet fee"
+                    *ngIf="config?.config?.temp_access_data?.timesheet?.past_period_allow"
+                    numberSelectOption="true" [disabled]="!config?.config?.temp_access_data?.timesheet?.past_period_allow"
+                    [value]="config?.config?.temp_access_data?.timesheet?.past_period?.period" (onValueChange)="getNumberInputValue($event, 'past_period')"
+                    [selectedValue]="config?.config?.temp_access_data?.timesheet?.past_period?.type" (onOptionValueChange)="getCalendarValue($event, 'past_period')"
+                    [options]="options?.temporaryAccessTypeOptions"></app-config-common-listing>
+
+                    <app-config-common-listing mainIcon="percent" itemLevel="parent" subtitle="Edit Rate Factor"
+                        description="Enable the option to modify/update the rate factor during quick assignment creation."
+                        [updatedToggleValue]="config?.config?.rate_factors_editable?.is_allow"
+                        (onValueChange)="onToggleChanged('rate_factors_editable')" toggleSwitch="true"></app-config-common-listing>
+            </div>
+
+            <div class="invoice-config-inner">
+
+                <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                    <div class="list-left-head">
+                        <p class="font-weight-medium">{{ 'additional_special_temporary_access_to_the_vendor' | i18next }}</p>
+                        <p class="list-subHeading">{{ 'pmo_to_provide_special_temporary_access_to_the_vendor_as_an_exception' | i18next }}
+                            {{ 'after_the_initial_access_is_revoked' | i18next }}</p>
+                    </div>
+                    <div class="tab-right-content d-flex justify-content-end">
+                        <toggle-button class="c-toggle-button-switch" (changed)="onToggleChanged('temp_access_data')" [checked]="config?.config?.temp_access_data?.is_allow"></toggle-button>
+                    </div>
+                </div>
+                <!-- Timesheet access -->
+                <app-config-common-listing mainIcon="gamepad" itemLevel="parent"
+                    *ngIf="config?.config?.temp_access_data?.is_allow"
+                    subtitle="Special access to Submit Timesheet"
+                    description="This layout we can use for the configuration with toggle on/off button"
+                    [updatedToggleValue]="config?.config?.temp_access_data?.timesheet?.submit?.is_allow"
+                    (onValueChange)="onTimesheetToggleChanged($event, 'timesheet')"
+                    toggleSwitch="true"></app-config-common-listing>
+
+                    <app-config-common-listing itemLevel="child"
+                    *ngIf="config?.config?.temp_access_data?.timesheet?.submit?.is_allow && config?.config?.temp_access_data?.is_allow"
+                    subtitle="Select Duration After Initial Extended Vendor Access is Revoked"
+                    description="Enter MSP partner timesheet fee"
+                    numberSelectOption="true" [disabled]="!config?.config?.temp_access_data?.is_allow"
+                    [value]="config?.config?.temp_access_data?.timesheet?.submit?.period" (onValueChange)="getNumberInputValue($event, 'timesheet')"
+                    [selectedValue]="config?.config?.temp_access_data?.timesheet?.submit?.type" (onOptionValueChange)="getCalendarValue($event, 'timesheet')"
+                    [options]="options?.temporaryAccessTypeOptions"></app-config-common-listing>
+
+                    <!-- Timesheet modification -->
+                    <app-config-common-listing mainIcon="gamepad" itemLevel="parent"
+                    *ngIf="config?.config?.temp_access_data?.is_allow"
+                    subtitle="Special access to Submit Modification"
+                    description="This layout we can use for the configuration with toggle on/off button"
+                    [updatedToggleValue]="config?.config?.temp_access_data?.timesheet?.modify?.is_allow"
+                    (onValueChange)="onTimesheetToggleChanged($event, 'timesheet_modification')"
+                    toggleSwitch="true"></app-config-common-listing>
+
+                    <app-config-common-listing itemLevel="child"
+                    *ngIf="config?.config?.temp_access_data?.timesheet?.modify?.is_allow && config?.config?.temp_access_data?.is_allow"
+                    subtitle="Select Duration After Initial Extended Vendor Access is Revoked"
+                    description="Enter MSP partner timesheet fee"
+                    numberSelectOption="true" [disabled]="!config?.config?.temp_access_data?.is_allow"
+                    [value]="config?.config?.temp_access_data?.timesheet?.modify?.period" (onValueChange)="getNumberInputValue($event, 'timesheet_modification')"
+                    [selectedValue]="config?.config?.temp_access_data?.timesheet?.modify?.type" (onOptionValueChange)="getCalendarValue($event, 'timesheet_modification')"
+                    [options]="options?.temporaryAccessTypeOptions"></app-config-common-listing>
+
+                    <!-- Expense access -->
+                    <app-config-common-listing mainIcon="gamepad" itemLevel="parent"
+                    *ngIf="config?.config?.temp_access_data?.is_allow"
+                    subtitle="Special access to Submit Modification"
+                    description="This layout we can use for the configuration with toggle on/off button"
+                    [updatedToggleValue]="config?.config?.temp_access_data?.expense?.submit?.is_allow"
+                    (onValueChange)="onTimesheetToggleChanged($event, 'expense')"
+                    toggleSwitch="true"></app-config-common-listing>
+
+                    <app-config-common-listing itemLevel="child"
+                    *ngIf="config?.config?.temp_access_data?.expense?.submit?.is_allow && config?.config?.temp_access_data?.is_allow"
+                    subtitle="Select Duration After Initial Extended Vendor Access is Revoked"
+                    description="Enter MSP partner Expense fee"
+                    numberSelectOption="true" [disabled]="!config?.config?.temp_access_data?.is_allow"
+                    [value]="config?.config?.temp_access_data?.expense?.submit?.period" (onValueChange)="getNumberInputValue($event, 'expense')"
+                    [selectedValue]="config?.config?.temp_access_data?.expense?.submit?.type" (onOptionValueChange)="getCalendarValue($event, 'expense')"
+                    [options]="options?.temporaryAccessTypeOptions"></app-config-common-listing>
+
+                    <!-- Expense Modification -->
+                    <app-config-common-listing mainIcon="gamepad" itemLevel="parent"
+                    *ngIf="config?.config?.temp_access_data?.is_allow"
+                    subtitle="Special access to Submit Modification"
+                    description="This layout we can use for the configuration with toggle on/off button"
+                    [updatedToggleValue]="config?.config?.temp_access_data?.expense?.modify?.is_allow"
+                    (onValueChange)="onTimesheetToggleChanged($event, 'expense_modification')"
+                    toggleSwitch="true"></app-config-common-listing>
+
+                    <app-config-common-listing itemLevel="child"
+                    *ngIf="config?.config?.temp_access_data?.expense?.modify?.is_allow && config?.config?.temp_access_data?.is_allow"
+                    subtitle="Select Duration After Initial Extended Vendor Access is Revoked"
+                    description="Enter MSP partner Expense fee"
+                    numberSelectOption="true" [disabled]="!config?.config?.temp_access_data?.is_allow"
+                    [value]="config?.config?.temp_access_data?.expense?.modify?.period" (onValueChange)="getNumberInputValue($event, 'expense_modification')"
+                    [selectedValue]="config?.config?.temp_access_data?.expense?.modify?.type" (onOptionValueChange)="getCalendarValue($event, 'expense_modification')"
+                    [options]="options?.temporaryAccessTypeOptions"></app-config-common-listing>
+            </div>
+        </div>
+    </div>
+</section>

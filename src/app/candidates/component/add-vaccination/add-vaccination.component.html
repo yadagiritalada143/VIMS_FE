@@ -1,0 +1,77 @@
+<svms-sidebar-ng [title]="panelHeading |i18next" [dataVisibility]="addVaccinations" (onClose)="sidebarClose()">
+  <div class="sidebar-wrapper">
+    <app-logs [log]="logs"></app-logs>
+    <form [formGroup]="addVaccinationsForm">
+      <div class="p-24">
+        <div class="form-group">
+          <label>{{ 'select_vaccination' | i18nextEager }} <span class="require">*</span></label>
+          <ng-select [loading] = 'vaccinationListLoading' loadingText = 'Loading....'  [clearable]="false" placeholder="{{ 'select' | i18nextEager }}" [typeahead]="input$" formControlName="vaccinationType">
+            <ng-option [value]="type.id" *ngFor="let type of vaccinationList">{{type.name}}</ng-option>
+          </ng-select>
+          <p class="validation-msg"
+            *ngIf="(addVaccinationsForm.controls.vaccinationType.touched && addVaccinationsForm.controls['vaccinationType'].errors)">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'vaccination_is_required' | i18nextEager }}
+          </p>
+        </div>
+        <div class="form-group">
+          <label>{{ 'vaccination_provider' | i18nextEager }} <span class="require">*</span></label>
+          <input type="text" class="form-control" placeholder="{{ 'enter_details' | i18nextEager }}" formControlName="vaccinationProvider">
+          <p class="validation-msg"
+            *ngIf="(addVaccinationsForm.controls.vaccinationProvider.touched && addVaccinationsForm.controls['vaccinationProvider'].errors)">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'vaccination_provider_is_required' | i18nextEager }}
+          </p>
+        </div>
+        <div class="form-group-row">
+          <div class="form-group position-relative date-field">
+            <label>{{'vaccination_date' | i18nextEager}}<span class="require">*</span></label>
+            <svms-datepicker [inputdateFormat]="defaultDateFormat" [placeholder]="'select_date'|i18next" ngDefaultControl
+              formControlName="vaccinationDate" id="date1"  I18n #initialDate>
+            </svms-datepicker>
+            <!-- <p class="validation-msg"
+                    *ngIf="(addVaccinationsForm.controls.vaccinationDate.touched && addVaccinationsForm.controls['vaccinationDate'].errors)">
+                    <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> Vaccination Date
+                    is Required
+                </p> -->
+          </div>
+          <div class="form-group position-relative date-field">
+            <label>{{'vaccination_expiration_date' | i18nextEager}}<span class="require">*</span></label>
+            <svms-datepicker [inputdateFormat]="defaultDateFormat" [placeholder]="'select_date'|i18next" ngDefaultControl
+              formControlName="vaccinationExpiryDate" [options]="vaccination_expiration_options" id="date1" I18n #expiryDate>
+            </svms-datepicker>
+            <!-- <p class="validation-msg"
+                    *ngIf="(addVaccinationsForm.controls.vaccinationExpiryDate.touched && addVaccinationsForm.controls['vaccinationExpiryDate'].errors)">
+                    <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> Vaccination Expiry Date
+                    is Required
+                </p> -->
+          </div>
+          <div class="form-group position-relative date-field"></div>
+        </div>
+        <div class="form-group">
+          <label>{{ 'vaccination_number' | i18nextEager }}<span class="require">*</span></label>
+          <input type="text" placeholder="{{ 'enter_details' | i18nextEager }}" class="form-control" formControlName="vaccinationNumbr">
+          <p class="validation-msg"
+            *ngIf="(addVaccinationsForm.controls.vaccinationNumbr.touched && addVaccinationsForm.controls['vaccinationNumbr'].errors)">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'vaccination_number_is_required' | i18nextEager }}
+          </p>
+        </div>
+        <div class="form-group">
+          <label>{{ 'notes' | i18nextEager }}</label>
+          <textarea class="form-control notes" rows="4" placeholder="{{ 'enter_notes' | i18nextEager }}" formControlName="notes"></textarea>
+        </div>
+        <app-upload-documents uploadLabel="Upload Vaccination Document" [oldUploadfileArr]="oldUploadfileArr"  (oldUploadDataFiles)= "updateoldFiles($event)"  (uploadDataFiles)="uploadFiles($event)"  [newUploadfileArr]="newUploadfileArr"
+          [closePanel]="closePanel"></app-upload-documents>
+      </div>
+    </form>
+  </div>
+  <svms-sidebar-footer-ng>
+    <button type="submit" class="btn btn-primary float-right" (click)="saveVaccination('save')">
+      {{btnText |i18next}}
+    </button>
+    <button type="submit" class="btn btn-outine float-right mr-16" (click)="saveVaccination('saveThenAdd')">
+      {{ 'add_new' | i18nextEager }}
+    </button>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

@@ -1,0 +1,156 @@
+<div class="print">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column">
+      <div class="d-flex align-items-center mb-8">
+        <h2 class="mr-4 text-black mb-0 font-weight-bold">
+          {{ 'timesheet' | i18next }}
+        </h2>
+        <p class="small font-weight-medium">
+          <span class="date-range font-weight-normal ml-8">({{ getDateFromString(timeSheet?.start_date) |
+            localDateFormat  | i18next }} - {{ getDateFromString(timeSheet?.end_date) |
+            localDateFormat | i18next }})</span>
+        </p>
+      </div>
+      <p>{{ 'id' | i18next }}:
+        {{timeSheet?.code | i18next }}
+      </p>
+    </div>
+    <p class="d-inline-block ml-16" *ngIf="timeSheet?.actions_by?.submitted_by">
+      {{ 'submitted_by' | i18next }} : {{timeSheet?.actions_by?.submitted_by?.user?.name | i18next }}{{ 'on' | i18next }}
+      {{getFormattedDate(timeSheet?.actions_by?.submitted_by?.action_at) | i18next }} {{' at '+
+      getFormattedTime(timeSheet?.actions_by?.submitted_by?.action_at) | i18next }}
+    </p>
+  </div>
+  <hr />
+  <table class="mt-4">
+    <tr>
+      <td>
+        <div class="value-group">
+          <label class="value-head text-dark font-weight-medium">
+            {{basicDetails?.worker?.name || '' | removePrefixSuffix | i18next }}
+          </label>
+          <div class="value-content">
+            {{ 'candidate' | i18next }}
+          </div>
+        </div>
+      </td>
+      <td>
+        <div class="value-group">
+          <label class="value-head text-dark font-weight-medium">
+            {{assignmentName | i18next }}
+          </label>
+          <div class="value-content">
+            {{ 'assignment_title(id)' | i18next }}
+          </div>
+        </div>
+      </td>
+      <td>
+        <div class="value-group">
+          <label class="value-head text-dark font-weight-medium">
+            {{(basicDetails?.manager?.name || "-") | removePrefixSuffix | i18next }}
+          </label>
+          <div class="value-content">
+            {{ 'timesheet_manager' | i18next }}
+          </div>
+        </div>
+      </td>
+      <td>
+        <div class="value-group">
+          <label class="value-head text-dark font-weight-medium">
+            {{basicDetails?.vendor?.name | i18next }}
+          </label>
+          <div class="value-content">
+            {{ 'vendor' | i18next }}
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <hr class="mt-0" />
+  <div class="mt-4 pb-8 border-bottom" *ngFor="let week of _weekDates">
+    <ng-container *ngFor="let a of _formData?.rowData;index as i;first as first;last as last">
+      <h4 class="mb-8 text-black font-weight-medium" *ngIf="first">
+        {{ week?.day  | i18next }} {{ week?.dayNumber | i18next }} {{_formData?.totals[week?.day] | i18next }} {{timesheetType() | i18next }}
+      </h4>
+      <div class="d-flex align-items-center mb-8" *ngIf="first">
+        <p class="w-50" *ngFor="let a of _formData?.rowData;">{{a?.projectCode || a?.project_title | i18next }} - {{a[week?.day] | i18next }}
+          {{timesheetType() |i18next }}</p>
+      </div>
+      <p class="d-flex align-items-center" *ngIf="last">
+        <span class="ml-4">{{_formData?.notes[week?.day] | i18next }}</span>
+      </p>
+    </ng-container>
+  </div>
+  <ng-container *ngIf="billing_data?.length > 0">
+    <table class="print-table border rounded-sm" *ngFor="let bill of billing_data">
+      <tbody>
+        <tr>
+          <th colspan="6" class="font-weight-medium mt-16 text-black py-16 text-capitalize text-left border-bottom">
+            {{ 'total_amount' | i18next }}</th>
+        </tr>
+        <tr>
+          <th>
+            <span>{{ 'total_billable_hours' | i18next }}</span>
+          </th>
+          <td colspan="5" *ngIf="bill?.hours >= 0">{{bill.hours | i18next }}</td>
+
+        </tr>
+        <tr>
+          <th>
+            <span>{{ 'client_amount' | i18next }}</span>
+          </th>
+          <td *ngIf="bill?.client_amount >= 0">
+            {{bill.client_amount| accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}{{bill?.client_per_hour_rate ? '(' +
+            (bill?.client_per_hour_rate| accuracy : accuracyConfig?.HOUR) + '/HR)' : ''  | i18next }}</td>
+          <th>
+            <span>{{ 'msp_amount' | i18next }}</span>
+          </th>
+          <td *ngIf="bill?.msp_amount >= 0">{{bill.msp_amount| accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}
+             | i18next }}{{bill?.msp_per_hour_rate ?
+            '(' + (bill?.msp_per_hour_rate | accuracy : accuracyConfig?.HOUR)+ '/HR)' : ''  | i18next }}</td>
+          <th>
+            <span>{{ 'vendor_amount' | i18next }}</span>
+          </th>
+          <td *ngIf="bill?.vendor_amount >= 0">{{bill.vendor_amount | accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}{{bill?.vendor_per_hour_rate ? '(' + (bill?.vendor_per_hour_rate | accuracy : accuracyConfig?.HOUR) +
+            '/HR)' : ''  | i18next }}</td>
+        </tr>
+        <tr>
+          <th>
+            <span>{{ 'total_tax' | i18next }}</span>
+          </th>
+          <td *ngIf="bill?.client_tax_amount >= 0">{{bill.client_tax_amount| accuracy : accuracyConfig?.TAX : {currencyCode:currency}  | i18next }}</td>
+          <th>
+            <span>{{ 'msp_tax' | i18next }}</span>
+          </th>
+          <td *ngIf="bill?.msp_tax_amount >= 0">{{bill.msp_tax_amount | accuracy : accuracyConfig?.TAX : {currencyCode:currency}  | i18next }}{{bill?.type_taxes
+            === 'percentage' ? '(' + bill?.rate_taxes + '%)' : ''  | i18next }}</td>
+          <th>
+            <span>{{ 'vendor_tax_amount' | i18next }}</span>
+          </th>
+          <td *ngIf="bill?.vendor_tax_amount >= 0">
+            {{bill.vendor_tax_amount | accuracy : accuracyConfig?.TAX : {currencyCode:currency}  | i18next }} {{bill?.type_taxes === 'percentage' ? '(' +
+            bill?.rate_taxes + '%)' : ''  | i18next }}</td>
+        </tr>
+
+        <tr>
+          <th>
+            <span>{{ 'total_client_billable_amount' | i18next }}</span>
+          </th>
+          <td *ngIf="bill?.client_total_amount >= 0">{{bill.client_total_amount | accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}</td>
+          <th>
+            <span>{{ 'total_msp_amount' | i18next }}</span>
+          </th>
+          <td *ngIf="bill?.msp_total_amount >= 0">{{bill.msp_total_amount | accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}</td>
+          <th>
+            <span>{{ 'total_vendor_bill' | i18next }}</span>
+          </th>
+          <td *ngIf="bill?.vendor_total_amount >= 0">
+            {{bill.vendor_total_amount | accuracy : accuracyConfig?.AMOUNT : {currencyCode:currency}  | i18next }}</td>
+        </tr>
+
+      </tbody>
+
+    </table>
+  </ng-container>
+
+</div>

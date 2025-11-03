@@ -1,0 +1,99 @@
+<header class="preference-header mt-16">
+  <div class="header-img position-relative">
+    <!-- <a class="change-image rounded-sm position-absolute px-8">Change Image</a> -->
+    <input hidden type="file" #fileInput (change)="fileChangeEvent($event)">
+    <figure class="user-avatar mr-32 position-absolute float-left">
+      <div>
+        <img [src]="profileUser?.avatar" alt="" *ngIf="profileUser?.avatar">
+        <span class="initials" *ngIf="!profileUser?.avatar">{{ profileUser?.full_name | shortName: 'last'}}</span>
+        <a href="javascript:void(0)" class="delete-image cursor-pointer" *ngIf="profileUser?.avatar">
+          <icon class="d-inline-flex"(click)="deleteProfile()" cuclass="d-inline-flex" name="delete" color="#545454" theme="outlined"  size="24px" type="material"></icon>
+        </a>
+      </div>
+
+
+      <!-- Edit profile image link-->
+      <a *ngIf="accountDetails?.id" href="javascript:void(0)" class="avatar-control" (click)="fileInput.click()">
+        <icon class="d-inline-block" name="create" size="14px" type="material"></icon>
+      </a>
+      <!-- add profile image link-->
+      <a href="javascript:void(0)" class="avatar-control d-none">
+        <icon class="d-inline-block" name="add_photo_alternate" theme="outlined" size="20px" type="material"></icon>
+      </a>
+    </figure>
+    <h3 class="float-left font-weight-medium mr-16">
+      {{(profileUser?.name_prefix ? profileUser?.name_prefix : '') +" "+(profileUser?.first_name | titlecase) + " " +(profileUser?.middle_name ? (profileUser?.middle_name | titlecase) : '') +" "+(profileUser?.last_name ? (profileUser?.last_name | titlecase) : '')+" "+(profileUser?.name_suffix ? profileUser?.name_suffix : '')}}</h3>
+    <!-- <span class="status-ui active float-left">{{ profileUser?.is_activated ? 'Active' : 'Inactive'}}</span> -->
+    <div class="clearfix"></div>
+  </div>
+  <nav>
+    <ul>
+      <li>
+        <a routerLink="/auth/user-account/account-settings" routerLinkActive="active" title="Profile">{{ 'profile' | i18nextEager }}</a>
+      </li>
+      <li *ngIf="!login.impersonationSession">
+        <a routerLink="/auth/user-account/security" routerLinkActive="active" title="Security">{{ 'security' | i18nextEager }}</a>
+      </li>
+      <li *ngIf="(user_type === 'client' || user_type === 'msp')&& accountDetails?.role?.organization_category?.toLowerCase() != 'candidate' && accountDetails?.role?.organization_category?.toLowerCase() != 'super_org'">
+        <a routerLink="/auth/user-account/delegates" routerLinkActive="active" title="Delegates">{{ 'delegates' | i18nextEager }}</a>
+      </li>
+      <!-- <li>
+        <a routerLink="/auth/user-account/security" routerLinkActive="active" title="Security">Security</a>
+      </li>
+      <li>
+        <a routerLink="/auth/user-account/delegates" routerLinkActive="active" title="Delegates">Delegates</a>
+      </li> -->
+
+      <li *ngIf="accountDetails?.id && accountDetails?.role?.organization_category?.toLowerCase() !== 'candidate' && !config?.notifications?.hide_old_notification_tab">
+        <a routerLink="/auth/user-account/notification-settings" routerLinkActive="active" title="Notification Settings">{{ 'notification_settings' | i18nextEager }}</a>
+      </li>
+
+      <!--
+      <li>
+        <a href="javascript:void(0)" title="Mobile App Settings">Mobile App Settings</a>
+      </li>
+      <li class="more-link">
+        <a href="javascript:void(0)">
+          <icon class="d-inline-block" name="more_horiz" size="24px" type="material"></icon>
+        </a>
+      </li> -->
+    </ul>
+    <!-- <a href="javascript:void(0)" class="edit-theme">
+      <icon class="d-inline-block" name="format_color_fill" size="22px" type="material"></icon>
+    </a> -->
+  </nav>
+</header>
+
+<div class="cropping-avtar align-items-center justify-content-center d-none" *ngIf="imageLoad">
+  <div class="cropping-avtar-image rounded-sm position-relative">
+    <div class="close_img_croper" (click)="cancelUpload()">
+      <icon cuClass="d-flex justify-content-end" name="close" size="30px" type="material"></icon>
+    </div>
+    <div class="image">
+      <image-cropper [imageChangedEvent]="imageChangedEvent" [maintainAspectRatio]="true"
+        [containWithinAspectRatio]="containWithinAspectRatio" [aspectRatio]="1/ 1" [onlyScaleDown]="true"
+        [roundCropper]="false" [canvasRotation]="canvasRotation" [transform]="transform" [alignImage]="'center'"
+        [style.display]="showCropper ? null : 'none'" format="png" (imageCropped)="imageCropped($event)"
+        (imageLoaded)="imageLoaded()" (cropperReady)="cropperReady($event)" (loadImageFailed)="loadImageFailed()">
+      </image-cropper>
+    </div>
+    <div class="mt-16 d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-light" (click)="zoomIn()">
+          <icon cuClass="d-flex" name="zoom_in" size="24px" type="material"></icon>
+        </button>
+        <button type="button" class="btn btn-light" (click)="zoomOut()">
+          <icon cuClass="d-flex" theme="outlined" name="zoom_out" size="24px" type="material"></icon>
+        </button>
+      </div>
+      <div class="d-flex align-items-center justify-content-end">
+        <button type="reset" class="btn btn-outline-danger mr-16" (click)="cancelUpload()">
+          {{ 'cancel' | i18nextEager }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="crop()">
+         {{ 'crop' | i18nextEager }} & {{ 'save' | i18nextEager }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

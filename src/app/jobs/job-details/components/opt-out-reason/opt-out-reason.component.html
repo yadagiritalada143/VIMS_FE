@@ -1,0 +1,22 @@
+<svms-sidebar-ng title="Opt-Out Reason" [dataVisibility]="optOutreason" (onClose)="sidebarClose()">
+  <app-logs [log]="logs"></app-logs>
+  <div class="p-32" [formGroup]="optOutForm">
+    <div class="form-group">
+      <label>{{ 'reason_for_opt-out' | i18next }} <span class="require">*</span></label>
+      <ng-select placeholder="{{ 'select_reason' | i18next }}" [clearable]="false" [searchable]="false" formControlName="reason">
+        <ng-option *ngFor="let item of optOutReasonList" [value]="item?.name">{{item?.name}}</ng-option>
+      </ng-select>
+    </div>
+    <div class="form-group">
+      <label>
+        {{ 'notes' | i18next }}
+      </label>
+      <textarea placeholder="{{ 'enter_notes' | i18next }}" formControlName="notes" rows="7" class="form-control"></textarea>
+    </div>
+  </div>
+  <svms-sidebar-footer-ng>
+    <button type="submit" [disabled]="!optOutForm.valid" (click)="optOutPickList()" class="btn btn-primary float-right">
+      {{ 'opt-out' | i18next }}
+    </button>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

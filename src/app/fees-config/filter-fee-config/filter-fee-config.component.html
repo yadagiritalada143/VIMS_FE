@@ -1,0 +1,94 @@
+<svms-sidebar-ng [title]="'Filter Fee' | i18nextEager" [dataVisibility]="feeFilter" [size]="'small'" (onClose)="sidebarClose()">
+  <svms-sidebar-body-ng [active]="true">
+    <div class="p-24 fee-filter sidebar-wrapper">
+      <div class="form-group mb-8 pb-0">
+        <label>{{ 'hierarchy' | i18nextEager }}</label>
+        <ng-select bindLabel="name"
+                   placeholder="{{ 'select_hierarchy' | i18nextEager }}"
+                   multiple="true"
+                   [(ngModel)]="dbHierarchiesSelected">
+          <ng-option *ngFor="let hierarchy of dbHierarchies" [value]="hierarchy.id">
+              {{hierarchy.name}}
+          </ng-option>
+        </ng-select>
+      </div>
+      <div class="form-group">
+        <label>{{ 'source_model' | i18nextEager }}</label>
+        <ng-select
+                  placeholder="{{ 'select_source_mode' | i18nextEager }}"
+                  multiple="true"
+                  [(ngModel)]="sourceModeSelected">
+          <ng-option value="SOW">{{ 'sow' | i18nextEager }}</ng-option>
+          <ng-option value="CONTINGENT">{{ 'contingent' | i18nextEager }}</ng-option>
+          <ng-option value="DIRECT_SOURCING">{{ 'direct_sourcing' | i18nextEager }}</ng-option>
+        </ng-select>
+      </div>
+      <div class="form-group">
+        <label>{{ 'labor_category' | i18nextEager }}</label>
+        <ng-select bindLabel="name"
+                  placeholder="{{ 'select_labor_category' | i18nextEager }}"
+                  multiple="true"
+                  [(ngModel)]="SelectedLaborCategory">
+          <ng-option *ngFor="let laborCategory of labor_category" [value]="laborCategory?.id">{{laborCategory?.name}}</ng-option>
+        </ng-select>
+      </div>
+      <div class="form-group">
+        <label>{{ 'vendor' | i18nextEager }}</label>
+        <ng-select bindLabel="name"
+                  placeholder="{{ 'select_vendors' | i18nextEager }}"
+                  multiple="true"
+                  [(ngModel)]="vendorsSelected"
+                  (search)="searchVendor($event)" [loading]="vendorLoading" loadingText = 'Loading....'>
+          <ng-option *ngFor="let vendor of vendors" [value]="vendor.id">{{vendor.name}}</ng-option>
+        </ng-select>
+      </div>
+
+      <div class="form-group">
+        <label>{{ 'category' | i18nextEager }}</label>
+        <ng-select placeholder="{{ 'select_category' | i18nextEager }}"
+                  multiple="true"
+                  [(ngModel)]="categorySelected">
+          <ng-option value="MSP_PARTNER">{{ 'msp_partner_fee' | i18nextEager }}</ng-option>
+          <ng-option value="MSP_PENALTY">{{ 'msp_penalty_fee' | i18nextEager }}</ng-option>
+          <ng-option value="VMS">{{ 'vms_fee' | i18nextEager }}</ng-option>
+        </ng-select>
+      </div>
+
+      <div class="form-group">
+        <label>{{ 'module' | i18nextEager }}</label>
+        <ng-select placeholder="{{ 'select_module' | i18nextEager }}"
+                  multiple="true"
+                  [(ngModel)]="moduleSelected">
+          <ng-option value="TIMESHEETS">{{ 'timesheet' | i18nextEager }}</ng-option>
+          <ng-option value="EXPENSES">{{ 'expense' | i18nextEager }}</ng-option>
+          <ng-option value="MISC_EXPENSES">{{ 'misc._expense' | i18nextEager }}</ng-option>
+          <ng-option value="SOW_PROJECT">{{ 'sow_project' | i18nextEager }}</ng-option>
+        </ng-select>
+      </div>
+
+
+      <!-- These fields are commented because needed to be checked so that these fields can be implemented for filter in future or not-->
+      <!--
+      <div class="form-group">
+        <label>MSP Partner Fee</label>
+        <input type="text" class="form-control mb-8" placeholder="Enter MSP Partner Fee" [(ngModel)]="mspPartnerFee">
+      </div>
+      <div class="form-group">
+        <label>VMS Fee</label>
+        <input type="text" class="form-control mb-8" placeholder="Enter VMS Fee" [(ngModel)]="vmsFee">
+      </div>
+      <div class="form-group">
+        <label>MSP/Program Fee</label>
+        <input type="text" class="form-control mb-8" placeholder="Enter MSP/Program Fee" [(ngModel)]="mspProgramFee">
+      </div>
+      <div class="form-group">
+        <label>Penalty Fee</label>
+        <input type="text" class="form-control mb-8" placeholder="Enter Penalty Fee" [(ngModel)]="penaltyFee">
+      </div> -->
+    </div>
+  </svms-sidebar-body-ng>
+  <svms-sidebar-footer-ng>
+    <button type="button" class="btn btn-outline-primary float-left" (click)="clearAllFilters()">{{ 'clear_all_filter' | i18nextEager }}r</button>
+    <button type="button" class="btn btn-primary float-right" (click)="applyFilters()">{{ 'apply_filter' | i18nextEager }}</button>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

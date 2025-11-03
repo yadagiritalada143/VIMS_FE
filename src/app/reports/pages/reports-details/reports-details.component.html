@@ -1,0 +1,233 @@
+<div class="px-32 reports-bg">
+    <div class="header pt-16 pb-16  d-flex align-items-center justify-content-between">
+        <a routerLink="/reports" (click)="resetDimension()" class="d-flex align-items-center text-primary back-btn back-mobile">
+            <icon size="24px" name="keyboard_arrow_left" type="material" cuClass="d-flex mr-3"></icon>
+            <span>{{ 'back_to_reports' | i18next }}</span>
+        </a>
+        <div *ngIf="!isFilterInfo" class="d-flex align-items-center report-details-top-actions">
+            <!-- <ng-select class="m-width" [clearable]="false" placeholder="Select Type" (change)="downloadReport($event)">
+                <ng-option [value]="'excel'">Excel</ng-option>
+                <ng-option [value]="'csv'">CSV</ng-option>
+                <ng-option [value]="'pdf'">PDF</ng-option>
+            </ng-select> -->
+
+            <div class="btn-group position-relative" *ngIf="reportConfigData?.has_download_option"  (click)="openDownloadReportModal()">
+                <button type="button" class="btn btn-primary d-flex align-items-center">
+                  <icon size="18px" name="file_download" type="material" theme="outlined" cuClass="d-flex mr-8"></icon>
+                  <span class="btn-label">{{ 'download_data' | i18next }}</span>
+                </button>
+            </div>
+            <button type="button" *ngIf="reportConfigData?.has_scorecard_config && !is_reportStatus" class="btn btn-outline-primary ml-8" (click)="onOpenScoreSidebar()">
+                <icon size="18px" name="inventory" type="material" cuClass="d-flex mr-8"></icon>
+                <span class="btn-label">{{ 'score_configuration' | i18next }}</span>
+            </button>
+            <button type="button" class="btn btn-outline-primary ml-8" (click)="onOpenFilterSidebar()" *ngIf="!is_reportStatus" >
+                <icon size="18px" name="filter_alt" type="material" cuClass="d-flex mr-8"></icon>
+                <span class="btn-label">{{ 'filter_&_fields' | i18next }}</span>
+            </button>
+            <div class="btn-group position-relative" *ngIf="reportConfigData?.has_schedule_option && !is_reportStatus ">
+                <button type="button" class="btn btn-outline-primary ml-8" (click)="onScheduleClick()" (clickOutside)="onClickOutside('schedule')">
+                    <icon size="18px" name="watch_later" type="material" cuClass="d-flex mr-8"></icon>
+                    <span class="btn-label">{{ 'schedules' | i18next }}</span>
+                    <icon size="24px" name="keyboard_arrow_down" type="material" cuClass="d-flex ml-4"></icon>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right-corner" *ngIf="isScheduleMenu">
+                    <a (click)="scheduleVisibility = 'visible'">
+                        <li class="dropdown-item cursor-pointer">{{ 'create_new_schedule' | i18next }}</li>
+                    </a>
+                    <a (click)="onViewSchedules()">
+                        <li class="dropdown-item cursor-pointer">{{ 'view_schedules' | i18next }}</li>
+                    </a>
+                </ul>
+            </div>
+
+            <div class="btn-group position-relative" *ngIf="!is_reportStatus" >
+                <button type="button" class="btn btn-outline-primary ml-8 pl-8 pr-8" (click)="onOptionsClick()" (clickOutside)="onClickOutside('options')">
+                    <icon class="dots" name="more_horiz" size="24px" cuClass="d-flex align-items-center"></icon>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right-corner" *ngIf="isOptionsMenu">
+                    <a routerLink="../../saved">
+                        <li class="dropdown-item cursor-pointer">{{ 'view_saved_reports' | i18next }}</li>
+                    </a>
+                </ul>
+            </div>
+        </div>
+        <div *ngIf="isFilterInfo" class="d-flex align-items-center justify-content-center">
+            <button type="button" class="btn btn-clear small ml-12 white-space-nowrap" (click)="onClearAllFilters()">
+                <span class="mr-8">{{ 'clear_filters' | i18next }}</span>
+                <icon size="15px" name="close" type="material" class="close-icon" cuClass="d-flex"></icon>
+            </button>
+        </div>
+    </div>
+
+    <div *ngIf="isFilterInfo"
+        class="d-flex align-items-center justify-content-between p-12 mb-12 filter-info rounded-sm" [ngClass]="isBaseReport ? 'filter-info-base' : 'filter-info-custom'">
+        <div class="d-flex align-items-center">
+            <div class="icon-background d-flex align-items-center justify-content-center mr-16">
+                <svg id="iconfinder_6646410_add_essentials_filter_ui_icon" xmlns="http://www.w3.org/2000/svg" width="27.313" height="24.669" viewBox="0 0 27.313 24.669">
+                    <path id="Subtraction_14" data-name="Subtraction 14" d="M7.047,14.1A7.04,7.04,0,0,1,2.07,2.07a7.039,7.039,0,1,1,9.955,9.955A7,7,0,0,1,7.047,14.1ZM4.785,6.827a.7.7,0,0,0-.5,1.194l1.33,1.33a.7.7,0,0,0,.99,0L9.978,5.989a.7.7,0,0,0-.5-1.194A.678.678,0,0,0,8.991,5L6.118,7.872l-.842-.838A.688.688,0,0,0,4.785,6.827Z" transform="translate(13.217 10.572)" fill="#ff9d00"/>
+                    <path id="Path_39943" data-name="Path 39943" d="M11.454,19.621a8.836,8.836,0,0,1,8.81-8.81,9.234,9.234,0,0,1,3.172.617l.881-.881a.952.952,0,0,0,.264-.617V5.965C24.669,3.233,18.238,2,12.335,2S0,3.233,0,5.965V9.929a.686.686,0,0,0,.264.617l9.427,8.546v6.7a1.051,1.051,0,0,0,.441.793.66.66,0,0,0,.441.088c.176,0,.264,0,.352-.088L13.48,25.26A8.808,8.808,0,0,1,11.454,19.621ZM1.762,5.965c.088-.617,3.524-2.2,10.573-2.2s10.484,1.586,10.573,2.2c-.088.617-3.524,2.2-10.573,2.2S1.85,6.581,1.762,5.965Z" transform="translate(0 -2)" fill="#ff9d00"/>
+                </svg>
+            </div>
+            <div class="d-flex flex-column">
+                <span class="font-16">{{ 'custom_filters_applied' | i18next }}</span>
+                <span class="font-13">{{ 'custom_filters_to_report' | i18next }}</span>
+            </div>
+        </div>
+        <div class="d-flex">
+            <button type="button" class="btn btn-primary d-flex align-items-center white-space-nowrap" (click)="openDownloadReportModal()">
+                <icon size="18px" name="file_download" type="material" theme="outlined" cuClass="d-flex mr-8"></icon>
+                {{ 'download_data' | i18next }}
+            </button>
+            <button type="button" class="btn btn-outline-primary ml-12 white-space-nowrap" (click)="onViewActiveFilters()">
+                <icon size="18px" name="filter_alt" type="material" cuClass="d-flex mr-4"></icon>
+                <span>{{ 'view_filters' | i18next }}</span>
+            </button>
+            <button type="button" [ngClass]="isBaseReport ? 'btn-success' : 'btn-green'" class="btn ml-12 white-space-nowrap" (click)="onSaveMode()"
+                (clickOutside)="onSaveClickOutside($event)">
+                <icon size="18px" name="save" type="material" cuClass="d-flex mr-8"></icon>
+                <span>{{ 'save_as_a_new_report' | i18next }}</span>
+            </button>
+            <div id="report-save-container" *ngIf="isSaveFilterMode" class="save-dropdown p-8 border rounded-sm" [ngClass]="isBaseReport ? 'save-dropdown-base' : 'save-dropdown-custom'">
+                <input id="report-save-input" type="text" class="form-control mb-8" placeholder="{{ 'enter_report_name' | i18next }}"
+                    [(ngModel)]="reportName" autofocus>
+                <button id="report-save-button" type="button" class="btn btn-green width-100 "
+                    (click)="onSaveClick()">{{ 'save' | i18next }}</button>
+            </div>
+            <button *ngIf="!isBaseReport" type="button" class="btn btn-green ml-12 white-space-nowrap" (click)="onUpdateReport()">
+                <icon size="18px" name="save" type="material" cuClass="d-flex mr-8"></icon>
+                <span>{{ 'update_current_report' | i18next }}</span>
+            </button>
+        </div>
+    </div>
+
+    <div *ngIf="isConfirmed"  class="d-flex align-items-center justify-content-between confirmation-info p-12 mb-12 rounded-sm">
+        <div class="d-flex align-items-center">
+            <div class="icon-background d-flex align-items-center justify-content-center mr-16">
+                <div class="green-circle d-flex align-items-center justify-content-center">
+                    <icon size="18px" name="check" type="material" cuClass="d-flex"></icon>
+                </div>
+            </div>
+            <div class="d-flex flex-column">
+                <span class="font-16">{{confirmationMainMessage|i18next}}</span>
+                <span class="font-13">{{confirmationSubMessage|i18next}}</span>
+            </div>
+        </div>
+        <div class="d-flex align-items-center">
+            <button *ngIf="isConfirmationType('save')" type="button" class="btn btn-success mr-16" (click)="scheduleVisibility = 'visible'">
+                <icon size="18px" name="watch_later" type="material" cuClass="d-flex mr-8"></icon>
+                <span>{{ 'schedule_report' | i18next }}</span>
+            </button>
+            <div class="grey-circle d-flex align-items-center justify-content-center" (click)="onHideConfirmation()">
+                <icon size="18px" name="close" type="material" cuClass="d-flex"></icon>
+            </div>
+        </div>
+    </div>
+    <app-logs [log]="logs"></app-logs>
+    <!-- DO NOT REMOVE IT. NOT IN SCOPE FOR WIRPO -->
+
+    <div *ngIf="reportConfigData?.has_chart" class="panel panel-light mb-24 p-12">
+        <div class="panel-header pb-24 border-bottom">
+            <div class="d-flex align-items-center justify-content-between column-direction">
+                <div class="d-flex align-items-center">
+                    <h4 class="font-weight-medium mr-16 mb-0">
+                        {{ tableConfig?.title | i18next }}
+                    </h4>
+                    <div class="position-relative">
+                        <div class="d-flex align-items-center status px-8 py-4 rounded-sm cursor-pointer" (click)="showDropdown()" (clickOutside)="onClickedOutsideDropdown($event)">
+                            <span>{{selectedDimension?.label | i18next}}</span>
+                            <icon size="18px" name="keyboard_arrow_down" type="material" cuClass="d-flex ml-24"></icon>
+                        </div>
+                        <div class="status-drop" *ngIf="showDrop">
+                            <span class="py-12" *ngFor="let dimension of dimensionData" (click)="onSelectDimention(dimension)">{{
+                dimension.label | i18next }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex aign-items-center chart-filter cursor-pointer">
+
+                    <a *ngIf="isChartVisible('StackedVertical')" [class.active]="isChartSelected('StackedVertical') || isChartSelected('bar')" [class.disabled]='!isDimensionSelected()' (click)="setActiveChart('StackedVertical')">
+                        <icon size="16px" name="bar_chart" type="material" cuClass="d-flex"></icon>
+                    </a>
+                    <!-- <a *ngIf="isChartVisible('StackedHorizontal')" class="flip cursor-pointer" [class.active]="isChartSelected('StackedHorizontal')" [class.disabled]='!isDimensionSelected()' (click)="setActiveChart('StackedHorizontal')">
+                        <icon size="16px" name="bar_chart" type="material" cuClass="d-flex"></icon>
+                    </a> -->
+
+
+                    <a *ngIf="isChartVisible('vertical')" [class.active]="isChartSelected('vertical') || isChartSelected('bar')" [class.disabled]='!isDimensionSelected()' (click)="setActiveChart('vertical')">
+                        <icon size="16px" name="bar_chart" type="material" cuClass="d-flex"></icon>
+                    </a>
+                    <a *ngIf="isChartVisible('horizontal')" class="flip cursor-pointer" [class.active]="isChartSelected('horizontal')" [class.disabled]='!isDimensionSelected()' (click)="setActiveChart('horizontal')">
+                        <icon size="16px" name="bar_chart" type="material" cuClass="d-flex"></icon>
+                    </a>
+                    <a *ngIf="isChartVisible('pie')" class="cursor-pointer" [class.active]="isChartSelected('pie')" [class.disabled]='!isDimensionSelected()' (click)="setActiveChart('pie')">
+                        <icon size="16px" name="pie_chart" type="material" cuClass="d-flex"></icon>
+                    </a>
+                    <a *ngIf="isChartVisible('donut')" class="cursor-pointer" [class.active]="isChartSelected('donut')" [class.disabled]='!isDimensionSelected()' (click)="setActiveChart('donut')">
+                        <icon size="16px" name="donut_large" type="material" cuClass="d-flex"></icon>
+                    </a>
+                    <a *ngIf="isChartVisible('line')" class="cursor-pointer" [class.active]="isChartSelected('line')" [class.disabled]='!isDimensionSelected()' (click)="setActiveChart('line')">
+                        <icon size="16px" name="show_chart" type="material" cuClass="d-flex"></icon>
+                    </a>
+                    <a *ngIf="isChartVisible('bubble')" class="cursor-pointer" [class.active]="isChartSelected('bubble')" [class.disabled]='!isDimensionSelected()' (click)="setActiveChart('bubble')">
+                        <icon size="16px" name="bubble_chart" type="material" cuClass="d-flex"></icon>
+                    </a>
+                    <a *ngIf="isChartVisible('area')" class="cursor-pointer" [class.active]="isChartSelected('area')" [class.disabled]='!isDimensionSelected()' (click)="setActiveChart('area')">
+                        <icon size="16px" name="area_chart" type="material" cuClass="d-flex"></icon>
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+    <div class="d-flex aign-items-center mt-16 charts-wrapper" #chartsWrapper>
+
+        <svms-bar-chart *ngIf="isChartSelected('vertical')  || isChartSelected('bar')" class="chart_center" [chartData]="chartData"
+        [xLabel]="selectedDimension?.x_axis_label" [yLabel]="selectedDimension?.y_axis_label" reportKey="{{reportKey + '_' + selectedDimension?.dimension_id}}" [width]="chartsWrapper.offsetWidth" [height]="385">
+        </svms-bar-chart>
+
+        <svms-stacked-bar-chart *ngIf="isChartSelected('StackedVertical')  || isChartSelected('bar')" class="chart_center" [chartData]="chartData"
+        [xLabel]="reportDimension" [width]="chartsWrapper.offsetWidth" [height]="385">
+        </svms-stacked-bar-chart>
+
+      <svms-horisontal-column-chart *ngIf="isChartSelected('horizontal')" class="chart_center" [chartData]="chartData"
+        [dimension]="reportDimension" [width]="chartsWrapper.offsetWidth" [height]="385">
+      </svms-horisontal-column-chart>
+
+      <svms-line-chart *ngIf="isChartSelected('line')" class="chart_center" [chartData]="chartData"
+        [dimension]="reportDimension" [width]="chartsWrapper.offsetWidth" [height]="385">
+      </svms-line-chart>
+
+      <svms-pie-chart *ngIf="isChartSelected('pie')" class="chart_center" [chartData]="chartData"
+        [width]="chartsWrapper.offsetWidth" [height]="385" [margin]="50">
+      </svms-pie-chart>
+
+      <svms-pie-chart *ngIf="isChartSelected('donut')" class="chart_center" [chartData]="chartData"
+        [width]="chartsWrapper.offsetWidth" [height]="385" [isDoughnut]="true" [margin]="50">
+      </svms-pie-chart>
+
+      <svms-bubble-chart *ngIf="isChartSelected('bubble')" class="chart_center" [chartData]="chartData"
+        [width]="chartsWrapper.offsetWidth - 30" [height]="385"></svms-bubble-chart>
+
+      <svms-area-chart *ngIf="isChartSelected('area')" class="chart_center" [chartData]="chartData"
+        [width]="chartsWrapper.offsetWidth - 30" [height]="385"></svms-area-chart>
+ <svms-area-chart *ngIf="isChartSelected('area')" class="chart_center" [chartData]="chartData" [width]="chartsWrapper.offsetWidth - 30" [height]="400"></svms-area-chart>
+
+        </div>
+    </div>
+
+    <vms-table *ngIf="isTableLoaded" [loading]="isDataLoading" [vmsTableConfig]="tableConfig" [vmsDataSource]="tableData" [totalItem]="totalRecords" [itemsPerPage]="itemsPerPage" (changePage)="onPaginationClick($event)" (onViewClick)="onClickView()" (changeRecords)="onChangeRecords($event)"
+        (onCreate)="onCreateClick()" (onSort)="onSortClick($event)" (search)="onSearch($event)">
+    </vms-table>
+
+    <app-filter-fields-sidepanel *ngIf="isFilterSidebarActive"  [reportKey]="reportKey" [saveReport]="false" [viewMode]="filterViewMode" (onClose)="onCloseFilterSidebar($event)" (onApply)="onApplyReportFilter($event)" (onSave)="onSaveReport($event)">
+    </app-filter-fields-sidepanel>
+
+    <app-reports-score-configuration *ngIf="isScoreSidebarActive" (onSaveConfigration)="onSaveScoreConfiguration()"  (onClose)="onCloseScoreSidebar()" ></app-reports-score-configuration>
+    <svms-sidebar-ng [title]=" (tableConfig?.title) ?  'Report Schedule - ' + tableConfig?.title : 'Report Schedule' " [dataVisibility]="scheduleVisibility" (onClose)="closeScheduleView()">
+
+
+        <svms-schedule-panel (closeView)="closeScheduleView()" [reportKey]="reportKeyParam" [reportName]="tableConfig?.title"></svms-schedule-panel>
+    </svms-sidebar-ng>
+</div>

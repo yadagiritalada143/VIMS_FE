@@ -1,0 +1,2308 @@
+{
+    "config": {
+        "nav_tabs": [
+            {
+                "label": "Assignment Info",
+                "field_groups": [
+                    {
+                        "label": "Assignment Information",
+                        "icon": "work",
+                        "is_toggle": {
+                            "is_needed": false,
+                            "slug": "assignment_information",
+                            "value": false
+                        },
+                        "fields": [
+                            {
+                                "id": "assignment_title",
+                                "source": "SYSTEM",
+                                "type": "DROPDOWN",
+                                "label": "Assignment Title (Job Template)",
+                                "slug": "assignment_title",
+                                "placeholder": "Search for Assignment Title",
+                                "bind_label": "title.title",
+                                "bind_value": "uid",
+                                "datasource": {
+                                    "on_land": true,
+                                    "url": "/job-manager/${programId}/job_template?page=1&limit=10&title=",
+                                    "options": [],
+                                    "getBy": [
+                                        "data"
+                                    ],
+                                    "type": "url"
+                                },
+                                "meta_data": {
+                                    "rules": [
+                                        {
+                                            "slug": "hierarchy_id",
+                                            "condition": "reset"
+                                        }
+                                    ]
+                                },
+                                "is_required": true,
+                                "is_readonly": true
+                            },
+                            {
+                                "id": "experience_level",
+                                "source": "SYSTEM",
+                                "type": "DROPDOWN",
+                                "label": "Experience/Job Level",
+                                "slug": "experience_level",
+                                "placeholder": "Select",
+                                "bind_label": "name",
+                                "bind_value": "id",
+                                "datasource": {
+                                    "url": "",
+                                    "options": [],
+                                    "getBy": [],
+                                    "type": "url"
+                                },
+                                "meta_data": {
+                                    "rules": [
+                                        {
+                                            "slug": "hierarchy_id",
+                                            "condition": "reset"
+                                        }
+                                    ],
+                                    "max_length": 100,
+                                    "min_length": 5,
+                                    "pattern": false,
+                                    "style": {
+                                        "background": "#fff"
+                                    }
+                                },
+                                "is_required": false,
+                                "is_readonly": false
+                            },
+                            {
+                                "group_type": "ARRAY",
+                                "fields": [
+                                    {
+                                        "id": "work_location",
+                                        "source": "SYSTEM",
+                                        "type": "DROPDOWN",
+                                        "label": "Work Location",
+                                        "slug": "work_location",
+                                        "placeholder": "Enter Work location",
+                                        "bind_label": "name",
+                                        "bind_value": "id",
+                                        "datasource": {
+                                            "on_land": true,
+                                            "url": "/configurator/programs/${programId}/work-locations?k=",
+                                            "options": [],
+                                            "getBy": [
+                                                "work_locations"
+                                            ],
+                                            "type": "url"
+                                        },
+                                        "meta_data": {
+                                            "rules": [
+                                                {
+                                                    "slug": "hierarchy_id",
+                                                    "condition": "reset"
+                                                }
+                                            ]
+                                        },
+                                        "is_required": true,
+                                        "is_readonly": false
+                                    },
+                                    {
+                                        "id": "work_location_type",
+                                        "source": "CUSTOM",
+                                        "type": "DROPDOWN",
+                                        "label": "Work Location Type",
+                                        "slug": "work_location_type",
+                                        "placeholder": "Select Work location",
+                                        "bind_label": "label",
+                                        "bind_value": "label",
+                                        "datasource": {
+                                            "on_land": true,
+                                            "url": "/configurator/programs/${programId}/picklists/8758f2a5-e3b3-4f89-9050-4b06d987075d/items",
+                                            "options": [],
+                                            "getBy": [
+                                                "picklist_items"
+                                            ],
+                                            "type": "url"
+                                        },
+                                        "meta_data": {
+                                            "rules": [
+                                                {
+                                                    "slug": "hierarchy_id",
+                                                    "condition": "reset"
+                                                }
+                                            ]
+                                        },
+                                        "is_required": true
+                                    },
+                                    {
+                                        "id": "assignment_manager",
+                                        "source": "SYSTEM",
+                                        "type": "DROPDOWN",
+                                        "label": "Assignment Manager",
+                                        "slug": "assignment_manager",
+                                        "placeholder": "Select Assignment Manager",
+                                        "bind_label": "first_name",
+                                        "bind_value": "id",
+                                        "datasource": {
+                                            "url": "/configurator/programs/${programId}/members?org_category=CLIENT",
+                                            "options": [],
+                                            "getBy": [
+                                                "members"
+                                            ],
+                                            "type": "url",
+                                            "params": [
+                                                {
+                                                    "name": "job_id",
+                                                    "required": true
+                                                }
+                                            ]
+                                        },
+                                        "meta_data": {
+                                            "rules": [
+                                                {
+                                                    "slug": "hierarchy_id",
+                                                    "condition": "reset"
+                                                }
+                                            ]
+                                        },
+                                        "is_required": true,
+                                        "is_readonly": false
+                                    }
+                                ]
+                            },
+                            {
+                                "group_type": "ARRAY",
+                                "fields": [
+                                    {
+                                        "id": "start_date",
+                                        "source": "SYSTEM",
+                                        "type": "DATE",
+                                        "label": "Start Date",
+                                        "slug": "start_date",
+                                        "placeholder": "Choose Date",
+                                        "is_required": true,
+                                        "is_readonly": false,
+                                        "meta_data": {
+                                            "rules": [
+                                                {
+                                                    "slug": "worker_start_date",
+                                                    "condition": "ltr",
+                                                    "message": "Assignment start date should equal or future then Worker Start Date."
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "id": "end_date",
+                                        "source": "SYSTEM",
+                                        "type": "DATE",
+                                        "label": "End Date",
+                                        "slug": "end_date",
+                                        "placeholder": "Choose Date",
+                                        "is_required": true,
+                                        "is_readonly": false,
+                                        "meta_data": {
+                                            "rules": [
+                                                {
+                                                    "slug": "start_date",
+                                                    "condition": "ltr_equal",
+                                                    "message": "Assignment end date should greater then Assignment start date"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "id": "worker_start_date",
+                                        "source": "SYSTEM",
+                                        "type": "DATE",
+                                        "label": "Worker Original Start Date",
+                                        "slug": "worker_start_date",
+                                        "placeholder": "Choose Date",
+                                        "is_required": true,
+                                        "is_readonly": false,
+                                        "meta_data": {
+                                            "rules": [
+                                                {
+                                                    "slug": "start_date",
+                                                    "condition": "gtr",
+                                                    "message": "Worker Original Start Date should equal or previous then Assignment start date"
+                                                },
+                                                {
+                                                    "slug": "end_date",
+                                                    "condition": "gtr",
+                                                    "message": "Worker Original Start Date should less then Assignment end date"
+                                                },
+                                                {
+                                                    "slug": "original_start_date",
+                                                    "condition": "equal_data"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "group_type": "ARRAY",
+                                "fields": [
+                                    {
+                                        "id": "shift_timing",
+                                        "source": "SYSTEM",
+                                        "type": "DROPDOWN",
+                                        "label": "Shift Timings",
+                                        "slug": "shift_timing",
+                                        "placeholder": "Select",
+                                        "bind_label": "label",
+                                        "bind_value": "label",
+                                        "datasource": {
+                                            "on_land": true,
+                                            "getBy": [
+                                                "picklist_items"
+                                            ],
+                                            "url": "/configurator/programs/${programId}/picklists/a7e64c0c-352b-470e-9574-67bc60ee4492/items",
+                                            "options": [],
+                                            "type": "url"
+                                        },
+                                        "meta_data": {
+                                            "max_length": 100,
+                                            "min_length": 5,
+                                            "pattern": false,
+                                            "style": {
+                                                "background": "#fff"
+                                            }
+                                        },
+                                        "is_required": false,
+                                        "is_readonly": false
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "foundation_details",
+                        "label": "Foundation Details & Custom Fields",
+                        "icon": "category",
+                        "is_toggle": {
+                            "is_needed": false,
+                            "slug": "foundation_details",
+                            "value": false
+                        },
+                        "fields": [
+                            {
+                                "group_type": "ARRAY",
+                                "fields": [
+                                    {
+                                        "id": "cost_center",
+                                        "source": "SYSTEM",
+                                        "type": "DROPDOWN",
+                                        "label": "Cost Center",
+                                        "slug": "cost_center",
+                                        "placeholder": "Select",
+                                        "bind_label": "name",
+                                        "bind_value": "id",
+                                        "datasource": {
+                                            "on_land": true,
+                                            "url": "/configurator/programs/${programId}/foundational-data-types?name=Cost Center&k=",
+                                            "options": [],
+                                            "getBy": [
+                                                "foundational_data_types"
+                                            ],
+                                            "type": "url"
+                                        },
+                                        "meta_data": {
+                                            "max_length": 100,
+                                            "min_length": 5,
+                                            "pattern": false,
+                                            "style": {
+                                                "background": "#fff"
+                                            }
+                                        },
+                                        "is_required": true,
+                                        "is_readonly": false
+                                    },
+                                    {
+                                        "id": "gl_code",
+                                        "source": "SYSTEM",
+                                        "type": "DROPDOWN",
+                                        "label": "GL Code",
+                                        "slug": "gl_code",
+                                        "placeholder": "Select",
+                                        "bind_label": "name",
+                                        "bind_value": "id",
+                                        "datasource": {
+                                            "on_land": true,
+                                            "url": "/configurator/programs/${programId}/foundational-data-types?name=GL Code&k=",
+                                            "options": [],
+                                            "getBy": [
+                                                "foundational_data_types"
+                                            ],
+                                            "type": "url"
+                                        },
+                                        "meta_data": {
+                                            "max_length": 100,
+                                            "min_length": 5,
+                                            "pattern": false,
+                                            "style": {
+                                                "background": "#fff"
+                                            }
+                                        },
+                                        "is_required": true,
+                                        "is_readonly": false
+                                    }
+                                ]
+                            },
+                            {
+                                "group_type": "ARRAY",
+                                "fields": [
+                                    {
+                                        "id": "business_unit",
+                                        "source": "SYSTEM",
+                                        "type": "DROPDOWN",
+                                        "label": "Business Unit",
+                                        "slug": "business_unit",
+                                        "placeholder": "Select",
+                                        "bind_label": "name",
+                                        "bind_value": "id",
+                                        "datasource": {
+                                            "on_land": true,
+                                            "url": "/configurator/programs/f4f61ad3f4914ac0b5ab0e2e7f6d6e72/foundational-data-types?name=Business&k=",
+                                            "options": [],
+                                            "getBy": [
+                                                "foundational_data_types"
+                                            ],
+                                            "type": "url"
+                                        },
+                                        "meta_data": {
+                                            "max_length": 100,
+                                            "min_length": 5,
+                                            "pattern": false,
+                                            "style": {
+                                                "background": "#fff"
+                                            }
+                                        },
+                                        "is_required": true,
+                                        "is_readonly": false
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "label": "Financial Info",
+                "field_groups": [
+                    {
+                        "label": "Timesheet",
+                        "icon": "pending_actions",
+                        "is_toggle": {
+                            "is_needed": true,
+                            "slug": "is_timesheet_enabled",
+                            "value": true
+                        },
+                        "fields": [
+                            {
+                                "group_type": "ARRAY",
+                                "fields": [
+                                    {
+                                        "id": "timesheet_manager",
+                                        "source": "SYSTEM",
+                                        "type": "DROPDOWN",
+                                        "label": "Timesheet Manager",
+                                        "slug": "timesheet_manager",
+                                        "placeholder": "Select",
+                                        "bind_label": "first_name",
+                                        "bind_value": "id",
+                                        "datasource": {
+                                            "url": "/configurator/programs/${programId}/members?org_category=CLIENT",
+                                            "options": [],
+                                            "getBy": [
+                                                "members"
+                                            ],
+                                            "type": "url",
+                                            "params": [
+                                                {
+                                                    "name": "job_id",
+                                                    "required": true
+                                                }
+                                            ]
+                                        },
+                                        "is_required": true,
+                                        "is_readonly": false
+                                    },
+                                    {
+                                        "id": "timesheet_type",
+                                        "source": "SYSTEM",
+                                        "type": "DROPDOWN",
+                                        "label": "Timesheet Type",
+                                        "slug": "timesheet_type",
+                                        "placeholder": "Select Timesheet Type",
+                                        "bind_label": "label",
+                                        "bind_value": "label",
+                                        "datasource": {
+                                            "on_land": true,
+                                            "getBy": [
+                                                "picklist_items"
+                                            ],
+                                            "url": "/configurator/programs/${programId}/picklists/d8152601-f678-4ce7-8a14-ff4b10cb4e6a/items",
+                                            "type": "url"
+                                        },
+                                        "is_required": true,
+                                        "is_readonly": false
+                                    }
+                                ]
+                            },
+                            {
+                                "group_type": "ARRAY",
+                                "fields": [
+                                    {
+                                        "id": "st_hours",
+                                        "source": "SYSTEM",
+                                        "type": "DROPDOWN",
+                                        "label": "No of ST Hours/D",
+                                        "slug": "st_hours",
+                                        "placeholder": "Select",
+                                        "bind_label": "label",
+                                        "bind_value": "label",
+                                        "datasource": {
+                                            "getBy": [
+                                                "picklist_items"
+                                            ],
+                                            "on_land": true,
+                                            "url": "/configurator/programs/${programId}/picklists/0efeb80b-99a1-4779-84ab-dc344c420ece/items",
+                                            "type": "url"
+                                        },
+                                        "is_required": true,
+                                        "is_readonly": false
+                                    },
+                                    {
+                                        "id": "st_days",
+                                        "source": "SYSTEM",
+                                        "type": "DROPDOWN",
+                                        "label": "No of Days/Week",
+                                        "slug": "st_days",
+                                        "placeholder": "Select",
+                                        "bind_label": "label",
+                                        "bind_value": "label",
+                                        "datasource": {
+                                            "getBy": [
+                                                "picklist_items"
+                                            ],
+                                            "on_land": true,
+                                            "url": "/configurator/programs/${programId}/picklists/68fa525a-4437-49be-8b20-4191b8ebc465/items",
+                                            "type": "url"
+                                        },
+                                        "is_required": true,
+                                        "is_readonly": false
+                                    },
+                                    {
+                                        "id": "ot_exempt_position",
+                                        "source": "SYSTEM",
+                                        "type": "TOGGLE",
+                                        "label": "OT Exempt",
+                                        "slug": "ot_exempt_position",
+                                        "default": true,
+                                        "is_required": false,
+                                        "is_readonly": false
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Expense",
+                        "icon": "account_balance_wallet",
+                        "is_toggle": {
+                            "is_needed": true,
+                            "slug": "is_expense_enabled",
+                            "value": true
+                        },
+                        "fields": [
+                            {
+                                "id": "expense_manager",
+                                "source": "SYSTEM",
+                                "type": "DROPDOWN",
+                                "label": "Expense Manager",
+                                "slug": "expense_manager",
+                                "placeholder": "Select",
+                                "bind_label": "first_name",
+                                "bind_value": "id",
+                                "datasource": {
+                                    "on_land": true,
+                                    "url": "/configurator/programs/${programId}/members?org_category=CLIENT",
+                                    "options": [],
+                                    "getBy": [
+                                        "members"
+                                    ],
+                                    "type": "url"
+                                },
+                                "is_required": true,
+                                "is_readonly": false
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Billable",
+                        "icon": "event_note",
+                        "is_toggle": {
+                            "is_needed": true,
+                            "slug": "is_billable",
+                            "value": true
+                        },
+                        "fields": [
+                            {
+                                "group_type": "ARRAY",
+                                "fields": [
+                                    {
+                                        "id": "rate_model",
+                                        "source": "SYSTEM",
+                                        "type": "DROPDOWN",
+                                        "label": "Rate model",
+                                        "slug": "rate_model",
+                                        "placeholder": "Select",
+                                        "bind_label": "label",
+                                        "bind_value": "slug",
+                                        "datasource": {
+                                            "options": [
+                                                {
+                                                    "id": "dd84f65a-6a28-42f3-85cd-9991a01049f1",
+                                                    "label": "Bill Rate",
+                                                    "slug": "billrate"
+                                                },
+                                                {
+                                                    "id": "ee21ce38-2c1a-4056-9254-837fd1ba99c2",
+                                                    "label": "Pay Rate",
+                                                    "slug": "payrate"
+                                                },
+                                                {
+                                                    "id": "ee21ce38-2c1a-4056-9254-837fd1ba99c3",
+                                                    "label": "Markup",
+                                                    "slug": "markup"
+                                                }
+                                            ]
+                                        },
+                                        "meta_data": {
+                                            "rules": [
+                                                {
+                                                    "slug": "is_timesheet_enabled",
+                                                    "condition": "match",
+                                                    "value": true,
+                                                    "message": "Timesheet should be enable to set Rate model."
+                                                },
+                                                {
+                                                    "slug": "is_expense_enabled",
+                                                    "condition": "match",
+                                                    "value": true,
+                                                    "message": "Expense should be enable to set Rate model."
+                                                }
+                                            ]
+                                        },
+                                        "is_required": true,
+                                        "is_readonly": true
+                                    },
+                                    {
+                                        "id": "rate_type",
+                                        "source": "SYSTEM",
+                                        "type": "DROPDOWN",
+                                        "label": "Rate Type",
+                                        "slug": "rate_type",
+                                        "placeholder": "Select",
+                                        "bind_label": "label",
+                                        "bind_value": "slug",
+                                        "datasource": {
+                                            "options": [
+                                                {
+                                                    "id": "dd84f65a-6a28-42f3-85cd-9991a01049g1",
+                                                    "label": "Per Hour",
+                                                    "slug": "per_hour"
+                                                },
+                                                {
+                                                    "id": "dd84f65a-6a28-42f3-85cd-9991a01049g2",
+                                                    "label": "Per Day",
+                                                    "slug": "per_day"
+                                                },
+                                                {
+                                                    "id": "dd84f65a-6a28-42f3-85cd-9991a01049g2",
+                                                    "label": "Per Month",
+                                                    "slug": "per_month"
+                                                }
+                                            ]
+                                        },
+                                        "is_required": true,
+                                        "is_readonly": true
+                                    },
+                                    {
+                                        "id": "currency",
+                                        "source": "SYSTEM",
+                                        "type": "DROPDOWN",
+                                        "label": "Currency",
+                                        "slug": "currency",
+                                        "placeholder": "Select",
+                                        "bind_label": "label",
+                                        "bind_value": "slug",
+                                        "datasource": {
+                                            "options": [
+                                                {
+                                                    "id": "dd84f65a-6a28-42f3-85cd-9991a01049a1",
+                                                    "label": "USD",
+                                                    "slug": "usd"
+                                                },
+                                                {
+                                                    "id": "ee21ce38-2c1a-4056-9254-837fd1ba99b2",
+                                                    "label": "INR",
+                                                    "slug": "inr"
+                                                },
+                                                {
+                                                    "id": "ee21ce38-2c1a-4056-9254-837fd1ba99k3",
+                                                    "label": "EURO",
+                                                    "slug": "euro"
+                                                }
+                                            ]
+                                        },
+                                        "is_required": true,
+                                        "is_readonly": true
+                                    }
+                                ]
+                            },
+                            {
+                                "group_type": "ARRAY",
+                                "fields": [
+                                    {
+                                        "id": "adjusted_markup",
+                                        "source": "SYSTEM",
+                                        "type": "NUMBER",
+                                        "label": "Adjusted Markup (%)",
+                                        "slug": "adjusted_markup",
+                                        "placeholder": "Adjusted markup",
+                                        "is_required": true,
+                                        "is_readonly": false,
+                                        "has_default": true,
+                                        "default_value": 0,
+                                        "meta_data": {
+                                            "rules": [
+                                                {
+                                                    "slug": "rate_model",
+                                                    "condition": "hidden",
+                                                    "value": [
+                                                        "",
+                                                        "billrate",
+                                                        "payrate"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "id": "vendor_markup",
+                                        "source": "SYSTEM",
+                                        "type": "NUMBER",
+                                        "label": "Vendor Markup (%)",
+                                        "slug": "vendor_markup",
+                                        "placeholder": "Vendor markup",
+                                        "is_required": true,
+                                        "is_readonly": true,
+                                        "has_default": true,
+                                        "default_value": 0,
+                                        "meta_data": {
+                                            "rules": [
+                                                {
+                                                    "slug": "rate_model",
+                                                    "condition": "hidden",
+                                                    "value": [
+                                                        "",
+                                                        "billrate",
+                                                        "payrate"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Fee(s)",
+                        "icon": "payment",
+                        "is_toggle": {
+                            "is_needed": false,
+                            "slug": "is_billable",
+                            "value": true
+                        },
+                        "fields": [
+                            {
+                                "group_type": "TABLE",
+                                "row": [
+                                    {
+                                        "label": "VMS Fee",
+                                        "slug": "vms_fee_enabled",
+                                        "is_show_hide": true,
+                                        "value": true
+                                    }
+                                ],
+                                "fields": [
+                                    [
+                                        {
+                                            "id": "vms_fee_types",
+                                            "source": "SYSTEM",
+                                            "type": "DROPDOWN",
+                                            "label": "Types",
+                                            "slug": "vms_fee_types",
+                                            "placeholder": "Percentage (%)",
+                                            "bind_label": "label",
+                                            "bind_value": "slug",
+                                            "datasource": {
+                                                "options": [
+                                                    {
+                                                        "id": "dd84f65a-6a28-42f3-85cd-9991y01049a1",
+                                                        "label": "Percentage",
+                                                        "slug": "percent"
+                                                    },
+                                                    {
+                                                        "id": "ee21ce38-2c1a-4056-9254-837fd1bv99b2",
+                                                        "label": "Fixed Amount",
+                                                        "slug": "fixed_amount"
+                                                    }
+                                                ],
+                                                "type": "picklist"
+                                            },
+                                            "meta_data": {
+                                                "rules": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "condition": "reset"
+                                                    }
+                                                ]
+                                            },
+                                            "is_required": true
+                                        },
+                                        {
+                                            "id": "vms_fee_value",
+                                            "source": "SYSTEM",
+                                            "type": "NUMBER",
+                                            "label": "Fee",
+                                            "slug": "vms_fee_value",
+                                            "placeholder": "Fee in percent",
+                                            "is_required": true,
+                                            "is_readonly": false,
+                                            "meta_data": {
+                                                "rules": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "condition": "reset"
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        {
+                                            "id": "vms_applicable_on",
+                                            "source": "SYSTEM",
+                                            "type": "DROPDOWN",
+                                            "label": "Applicable On",
+                                            "slug": "vms_applicable_on",
+                                            "placeholder": "Client Bill Rate",
+                                            "bind_label": "label",
+                                            "bind_value": "slug",
+                                            "datasource": {
+                                                "options": [
+                                                    {
+                                                        "id": "dd84f65a-6a28-42f3-85cd-9991y01049a1",
+                                                        "label": "Client Bill Rate",
+                                                        "slug": "client_bill_rate"
+                                                    }
+                                                ],
+                                                "type": "picklist"
+                                            },
+                                            "meta_data": {
+                                                "rules": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "condition": "reset"
+                                                    }
+                                                ]
+                                            },
+                                            "is_required": true
+                                        }
+                                    ]
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "billing_details",
+                        "label": "Billing Details",
+                        "icon": "receipt_long",
+                        "is_toggle": {
+                            "is_needed": false,
+                            "slug": "is_billable",
+                            "value": true
+                        },
+                        "fields": [
+                            {
+                                "group_type": "TABLE",
+                                "row": [
+                                    {
+                                        "label": "Straight Time Rate",
+                                        "slug": "is_straight_time_rate",
+                                        "is_show_hide": false
+                                    },
+                                    {
+                                        "label": "Over Time Rate",
+                                        "slug": "is_over_time_rate",
+                                        "is_show_hide": false
+                                    },
+                                    {
+                                        "label": "Double Time R",
+                                        "slug": "is_double_time",
+                                        "is_show_hide": false
+                                    }
+                                ],
+                                "fields": [
+                                    [
+                                        {
+                                            "id": "regular_billrate",
+                                            "source": "SYSTEM",
+                                            "type": "NUMBER",
+                                            "label": "Client Bill Rate",
+                                            "slug": "regular_billrate",
+                                            "placeholder": "$100.0",
+                                            "is_required": true,
+                                            "is_readonly": false,
+                                            "datasource": {
+                                                "getBy": [
+                                                    "data",
+                                                    "rate",
+                                                    "regular",
+                                                    "billrate"
+                                                ],
+                                                "url": "/rate-estimate/programs/${programId}/rate-model",
+                                                "type": "url",
+                                                "params": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "rate_model",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "adjusted_markup",
+                                                        "required": true,
+                                                        "value": 20
+                                                    },
+                                                    {
+                                                        "name": "vendor_markup",
+                                                        "required": true,
+                                                        "value": 30
+                                                    },
+                                                    {
+                                                        "name": "max_bill_rate",
+                                                        "required": true,
+                                                        "value": 50000
+                                                    },
+                                                    {
+                                                        "name": "min_bill_rate",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "name": "msp_fee_value",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "regular_billrate",
+                                                        "name": "client_bill_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "slug": "regular_payrate",
+                                                        "name": "candidate_pay_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "slug": "ot_exempt_position",
+                                                        "name": "ot_exempt",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "over_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    },
+                                                    {
+                                                        "name": "double_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    }
+                                                ]
+                                            },
+                                            "meta_data": {
+                                                "rules": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "condition": "reset"
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "condition": "readonly",
+                                                        "value": "payrate"
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_billrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "markup"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_payrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "payrate"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        {
+                                            "id": "regular_vendor_rate",
+                                            "source": "SYSTEM",
+                                            "type": "NUMBER",
+                                            "label": "Vendor Bill Rate",
+                                            "slug": "regular_vendor_rate",
+                                            "placeholder": "$97.0",
+                                            "is_required": true,
+                                            "is_readonly": true,
+                                            "datasource": {
+                                                "getBy": [
+                                                    "data",
+                                                    "rate",
+                                                    "regular",
+                                                    "vendor_rate"
+                                                ],
+                                                "url": "/rate-estimate/programs/${programId}/rate-model",
+                                                "type": "url",
+                                                "params": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "rate_model",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "adjusted_markup",
+                                                        "required": true,
+                                                        "value": 20
+                                                    },
+                                                    {
+                                                        "name": "vendor_markup",
+                                                        "required": true,
+                                                        "value": 30
+                                                    },
+                                                    {
+                                                        "name": "max_bill_rate",
+                                                        "required": true,
+                                                        "value": 50000
+                                                    },
+                                                    {
+                                                        "name": "min_bill_rate",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "regular_billrate",
+                                                        "name": "client_bill_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "slug": "regular_payrate",
+                                                        "name": "candidate_pay_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "name": "msp_fee_value",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "ot_exempt_position",
+                                                        "name": "ot_exempt",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "over_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    },
+                                                    {
+                                                        "name": "double_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    }
+                                                ]
+                                            },
+                                            "meta_data": {
+                                                "rules": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "condition": "reset"
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_billrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "markup"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_payrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "payrate"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        {
+                                            "id": "regular_payrate",
+                                            "source": "SYSTEM",
+                                            "type": "NUMBER",
+                                            "label": "Pay Rate",
+                                            "slug": "regular_payrate",
+                                            "placeholder": "$50",
+                                            "is_required": true,
+                                            "is_readonly": false,
+                                            "datasource": {
+                                                "getBy": [
+                                                    "data",
+                                                    "rate",
+                                                    "regular",
+                                                    "payrate"
+                                                ],
+                                                "url": "/rate-estimate/programs/${programId}/rate-model",
+                                                "type": "url",
+                                                "params": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "rate_model",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "adjusted_markup",
+                                                        "required": true,
+                                                        "value": 20
+                                                    },
+                                                    {
+                                                        "name": "vendor_markup",
+                                                        "required": true,
+                                                        "value": 30
+                                                    },
+                                                    {
+                                                        "name": "max_bill_rate",
+                                                        "required": true,
+                                                        "value": 50000
+                                                    },
+                                                    {
+                                                        "name": "min_bill_rate",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "regular_billrate",
+                                                        "name": "client_bill_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "slug": "regular_payrate",
+                                                        "name": "candidate_pay_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "name": "msp_fee_value",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "ot_exempt_position",
+                                                        "name": "ot_exempt",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "over_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    },
+                                                    {
+                                                        "name": "double_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    }
+                                                ]
+                                            },
+                                            "meta_data": {
+                                                "rules": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "condition": "reset"
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "condition": "readonly",
+                                                        "value": "markup"
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_billrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "markup"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_payrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "payrate"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ],
+                                    [
+                                        {
+                                            "id": "overtime_billrate",
+                                            "source": "SYSTEM",
+                                            "type": "NUMBER",
+                                            "label": "Client Bill Rate",
+                                            "slug": "overtime_billrate",
+                                            "placeholder": "$xx.00",
+                                            "is_required": true,
+                                            "is_readonly": true,
+                                            "datasource": {
+                                                "getBy": [
+                                                    "data",
+                                                    "rate",
+                                                    "overtime",
+                                                    "billrate"
+                                                ],
+                                                "url": "/rate-estimate/programs/${programId}/rate-model",
+                                                "type": "url",
+                                                "params": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "rate_model",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "adjusted_markup",
+                                                        "required": true,
+                                                        "value": 20
+                                                    },
+                                                    {
+                                                        "name": "vendor_markup",
+                                                        "required": true,
+                                                        "value": 30
+                                                    },
+                                                    {
+                                                        "name": "max_bill_rate",
+                                                        "required": true,
+                                                        "value": 50000
+                                                    },
+                                                    {
+                                                        "name": "min_bill_rate",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "regular_billrate",
+                                                        "name": "client_bill_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "slug": "regular_payrate",
+                                                        "name": "candidate_pay_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "name": "msp_fee_value",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "ot_exempt_position",
+                                                        "name": "ot_exempt",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "over_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    },
+                                                    {
+                                                        "name": "double_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    }
+                                                ]
+                                            },
+                                            "meta_data": {
+                                                "rules": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "condition": "reset"
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_billrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "markup"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_payrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "payrate"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        {
+                                            "id": "overtime_vendor_rate",
+                                            "source": "SYSTEM",
+                                            "type": "NUMBER",
+                                            "label": "Vendor Bill Rate",
+                                            "slug": "overtime_vendor_rate",
+                                            "placeholder": "$xx.00",
+                                            "is_required": true,
+                                            "is_readonly": true,
+                                            "datasource": {
+                                                "getBy": [
+                                                    "data",
+                                                    "rate",
+                                                    "overtime",
+                                                    "vendor_rate"
+                                                ],
+                                                "url": "/rate-estimate/programs/${programId}/rate-model",
+                                                "type": "url",
+                                                "params": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "rate_model",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "adjusted_markup",
+                                                        "required": true,
+                                                        "value": 20
+                                                    },
+                                                    {
+                                                        "name": "vendor_markup",
+                                                        "required": true,
+                                                        "value": 30
+                                                    },
+                                                    {
+                                                        "name": "max_bill_rate",
+                                                        "required": true,
+                                                        "value": 50000
+                                                    },
+                                                    {
+                                                        "name": "min_bill_rate",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "regular_billrate",
+                                                        "name": "client_bill_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "slug": "regular_payrate",
+                                                        "name": "candidate_pay_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "name": "msp_fee_value",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "ot_exempt_position",
+                                                        "name": "ot_exempt",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "over_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    },
+                                                    {
+                                                        "name": "double_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    }
+                                                ]
+                                            },
+                                            "meta_data": {
+                                                "rules": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "condition": "reset"
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_billrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "markup"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_payrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "payrate"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        {
+                                            "id": "overtime_payrate",
+                                            "source": "SYSTEM",
+                                            "type": "NUMBER",
+                                            "label": "Pay Rate",
+                                            "slug": "overtime_payrate",
+                                            "placeholder": "$xx.00",
+                                            "is_required": true,
+                                            "is_readonly": true,
+                                            "datasource": {
+                                                "getBy": [
+                                                    "data",
+                                                    "rate",
+                                                    "overtime",
+                                                    "payrate"
+                                                ],
+                                                "url": "/rate-estimate/programs/${programId}/rate-model",
+                                                "type": "url",
+                                                "params": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "rate_model",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "adjusted_markup",
+                                                        "required": true,
+                                                        "value": 20
+                                                    },
+                                                    {
+                                                        "name": "vendor_markup",
+                                                        "required": true,
+                                                        "value": 30
+                                                    },
+                                                    {
+                                                        "name": "max_bill_rate",
+                                                        "required": true,
+                                                        "value": 50000
+                                                    },
+                                                    {
+                                                        "name": "min_bill_rate",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "regular_billrate",
+                                                        "name": "client_bill_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "slug": "regular_payrate",
+                                                        "name": "candidate_pay_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "name": "msp_fee_value",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "ot_exempt_position",
+                                                        "name": "ot_exempt",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "over_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    },
+                                                    {
+                                                        "name": "double_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    }
+                                                ]
+                                            },
+                                            "meta_data": {
+                                                "rules": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "condition": "reset"
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_billrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "markup"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_payrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "payrate"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ],
+                                    [
+                                        {
+                                            "id": "doubletime_billrate",
+                                            "source": "SYSTEM",
+                                            "type": "NUMBER",
+                                            "label": "Client Bill Rate",
+                                            "slug": "doubletime_billrate",
+                                            "placeholder": "$xx.00",
+                                            "is_required": true,
+                                            "is_readonly": true,
+                                            "datasource": {
+                                                "getBy": [
+                                                    "data",
+                                                    "rate",
+                                                    "doubletime",
+                                                    "billrate"
+                                                ],
+                                                "url": "/rate-estimate/programs/${programId}/rate-model",
+                                                "type": "url",
+                                                "params": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "rate_model",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "adjusted_markup",
+                                                        "required": true,
+                                                        "value": 20
+                                                    },
+                                                    {
+                                                        "name": "vendor_markup",
+                                                        "required": true,
+                                                        "value": 30
+                                                    },
+                                                    {
+                                                        "name": "max_bill_rate",
+                                                        "required": true,
+                                                        "value": 50000
+                                                    },
+                                                    {
+                                                        "name": "min_bill_rate",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "regular_billrate",
+                                                        "name": "client_bill_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "slug": "regular_payrate",
+                                                        "name": "candidate_pay_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "name": "msp_fee_value",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "ot_exempt_position",
+                                                        "name": "ot_exempt",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "over_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    },
+                                                    {
+                                                        "name": "double_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    }
+                                                ]
+                                            },
+                                            "meta_data": {
+                                                "rules": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "condition": "reset"
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_billrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "markup"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_payrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "payrate"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        {
+                                            "id": "doubletime_vendor_rate",
+                                            "source": "SYSTEM",
+                                            "type": "NUMBER",
+                                            "label": "Vendor Bill Rate",
+                                            "slug": "doubletime_vendor_rate",
+                                            "placeholder": "$xx.00",
+                                            "is_required": true,
+                                            "is_readonly": true,
+                                            "datasource": {
+                                                "getBy": [
+                                                    "data",
+                                                    "rate",
+                                                    "doubletime",
+                                                    "vendor_rate"
+                                                ],
+                                                "url": "/rate-estimate/programs/${programId}/rate-model",
+                                                "type": "url",
+                                                "params": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "rate_model",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "adjusted_markup",
+                                                        "required": true,
+                                                        "value": 20
+                                                    },
+                                                    {
+                                                        "name": "vendor_markup",
+                                                        "required": true,
+                                                        "value": 30
+                                                    },
+                                                    {
+                                                        "name": "max_bill_rate",
+                                                        "required": true,
+                                                        "value": 50000
+                                                    },
+                                                    {
+                                                        "name": "min_bill_rate",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "regular_billrate",
+                                                        "name": "client_bill_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "slug": "regular_payrate",
+                                                        "name": "candidate_pay_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "name": "msp_fee_value",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "ot_exempt_position",
+                                                        "name": "ot_exempt",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "over_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    },
+                                                    {
+                                                        "name": "double_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    }
+                                                ]
+                                            },
+                                            "meta_data": {
+                                                "rules": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "condition": "reset"
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_billrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "markup"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_payrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "payrate"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        {
+                                            "id": "doubletime_payrate",
+                                            "source": "SYSTEM",
+                                            "type": "NUMBER",
+                                            "label": "Pay Rate",
+                                            "slug": "doubletime_payrate",
+                                            "placeholder": "$xx.00",
+                                            "is_required": true,
+                                            "is_readonly": true,
+                                            "datasource": {
+                                                "getBy": [
+                                                    "data",
+                                                    "rate",
+                                                    "doubletime",
+                                                    "payrate"
+                                                ],
+                                                "url": "/rate-estimate/programs/${programId}/rate-model",
+                                                "type": "url",
+                                                "params": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "rate_model",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "adjusted_markup",
+                                                        "required": true,
+                                                        "value": 20
+                                                    },
+                                                    {
+                                                        "name": "vendor_markup",
+                                                        "required": true,
+                                                        "value": 30
+                                                    },
+                                                    {
+                                                        "name": "max_bill_rate",
+                                                        "required": true,
+                                                        "value": 50000
+                                                    },
+                                                    {
+                                                        "name": "min_bill_rate",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "regular_billrate",
+                                                        "name": "client_bill_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "slug": "regular_payrate",
+                                                        "name": "candidate_pay_rate",
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "name": "msp_fee_value",
+                                                        "required": true,
+                                                        "value": 0
+                                                    },
+                                                    {
+                                                        "slug": "ot_exempt_position",
+                                                        "name": "ot_exempt",
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "name": "over_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    },
+                                                    {
+                                                        "name": "double_time",
+                                                        "required": true,
+                                                        "value": true
+                                                    }
+                                                ]
+                                            },
+                                            "meta_data": {
+                                                "rules": [
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "condition": "reset"
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_billrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "markup"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "slug": "rate_model",
+                                                        "name": "regular_payrate",
+                                                        "condition": "required",
+                                                        "value": [
+                                                            "billrate",
+                                                            "payrate"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "taxes",
+                        "label": "Taxes",
+                        "icon": "account_balance",
+                        "is_toggle": {
+                            "is_needed": false,
+                            "slug": "is_billable",
+                            "value": true
+                        },
+                        "fields": [
+                            {
+                                "group_type": "TABLE",
+                                "row": [
+                                    {
+                                        "label": "GST",
+                                        "slug": "gst_enabled",
+                                        "is_show_hide": true,
+                                        "value": true
+                                    }
+                                ],
+                                "fields": [
+                                    [
+                                        {
+                                            "id": "gst_types",
+                                            "source": "SYSTEM",
+                                            "type": "DROPDOWN",
+                                            "label": "Types",
+                                            "slug": "gst_types",
+                                            "placeholder": "Fixed Amount",
+                                            "bind_label": "label",
+                                            "bind_value": "slug",
+                                            "datasource": {
+                                                "options": [
+                                                    {
+                                                        "id": "dd84f65a-6a28-42f3-85cd-9991y01049a1",
+                                                        "label": "Percentage",
+                                                        "slug": "percent"
+                                                    },
+                                                    {
+                                                        "id": "ee21ce38-2c1a-4056-9254-837fd1bv99b2",
+                                                        "label": "Fixed Amount",
+                                                        "slug": "fixed_amount"
+                                                    }
+                                                ],
+                                                "type": "picklist"
+                                            },
+                                            "is_required": true
+                                        },
+                                        {
+                                            "id": "gst_value",
+                                            "source": "SYSTEM",
+                                            "type": "NUMBER",
+                                            "label": "Fee",
+                                            "slug": "gst_value",
+                                            "placeholder": "$ 100.00",
+                                            "is_required": true,
+                                            "is_readonly": false
+                                        },
+                                        {
+                                            "id": "gst_applicable_on",
+                                            "source": "SYSTEM",
+                                            "type": "DROPDOWN",
+                                            "label": "Applicable On",
+                                            "slug": "gst_applicable_on",
+                                            "placeholder": "Client Bill Rate",
+                                            "bind_label": "label",
+                                            "bind_value": "slug",
+                                            "datasource": {
+                                                "options": [
+                                                    {
+                                                        "id": "dd84f65a-6a28-42f3-85cd-9991y01049a1",
+                                                        "label": "Client Bill Rate",
+                                                        "slug": "client_bill_rate"
+                                                    }
+                                                ],
+                                                "type": "piclist"
+                                            },
+                                            "is_required": true
+                                        }
+                                    ]
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Budget Estimate",
+                        "icon": "event_note",
+                        "is_toggle": {
+                            "is_needed": false,
+                            "slug": "is_billable",
+                            "value": true
+                        },
+                        "fields": [
+                            {
+                                "id": "total_working_days",
+                                "source": "SYSTEM",
+                                "type": "EXTENDED_NUMBER",
+                                "label": "Total Working Days",
+                                "slug": "total_working_days",
+                                "placeholder": "0",
+                                "is_required": false,
+                                "is_readonly": true,
+                                "datasource": {
+                                    "getBy": [
+                                        "data",
+                                        "working_days"
+                                    ],
+                                    "url": "/rate-estimate/programs/${programId}/working-hours-estimate",
+                                    "type": "url",
+                                    "params": [
+                                        {
+                                            "slug": "start_date",
+                                            "name": "start_date",
+                                            "required": true
+                                        },
+                                        {
+                                            "slug": "end_date",
+                                            "name": "end_date",
+                                            "required": true
+                                        },
+                                        {
+                                            "slug": "st_hours",
+                                            "name": "hours_per_day",
+                                            "required": true
+                                        },
+                                        {
+                                            "slug": "st_days",
+                                            "name": "week_working_days",
+                                            "required": true
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "id": "timesheet_budget",
+                                "source": "SYSTEM",
+                                "type": "EXTENDED_NUMBER",
+                                "label": "Timesheet Budget Amount",
+                                "slug": "timesheet_budget",
+                                "placeholder": "0",
+                                "is_required": false,
+                                "is_readonly": true,
+                                "datasource": {
+                                    "getBy": [
+                                        "data",
+                                        "initial_budget"
+                                    ],
+                                    "url": "/rate-estimate/programs/${programId}/resource-budget",
+                                    "type": "url",
+                                    "params": [
+                                        {
+                                            "slug": "regular_billrate",
+                                            "name": "rate",
+                                            "required": true
+                                        },
+                                        {
+                                            "slug": "rate_type",
+                                            "name": "rate_type",
+                                            "required": true
+                                        },
+                                        {
+                                            "name": "num_resources",
+                                            "required": true,
+                                            "value": 1
+                                        },
+                                        {
+                                            "slug": "total_working_days",
+                                            "name": "total_hours",
+                                            "required": true
+                                        },
+                                        {
+                                            "slug": "start_date",
+                                            "name": "start_date",
+                                            "required": true
+                                        },
+                                        {
+                                            "slug": "end_date",
+                                            "name": "end_date",
+                                            "required": true
+                                        },
+                                        {
+                                            "slug": "st_hours",
+                                            "name": "hours_per_day",
+                                            "required": true
+                                        },
+                                        {
+                                            "slug": "st_days",
+                                            "name": "week_working_days",
+                                            "required": true
+                                        },
+                                        {
+                                            "slug": "gst_types",
+                                            "name": "adjustment_type",
+                                            "required": true
+                                        },
+                                        {
+                                            "slug": "gst_value",
+                                            "name": "adjustment_value",
+                                            "required": true
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "id": "overtime_budget",
+                                "source": "SYSTEM",
+                                "type": "EXTENDED_NUMBER",
+                                "label": "Overtime Budget Amount",
+                                "slug": "overtime_budget",
+                                "placeholder": "0",
+                                "is_required": false,
+                                "is_readonly": false,
+                                "has_default": true,
+                                "default_value": null
+                            },
+                            {
+                                "id": "expense_budget",
+                                "source": "SYSTEM",
+                                "type": "EXTENDED_NUMBER",
+                                "label": "Expense Budget Amount",
+                                "slug": "expense_budget",
+                                "placeholder": "0",
+                                "is_required": false,
+                                "is_readonly": false,
+                                "has_default": true,
+                                "default_value": null
+                            },
+                            {
+                                "group_type": "FOOTER_ARRAY",
+                                "fields": [
+                                    {
+                                        "id": "gross_allocated_budget",
+                                        "source": "SYSTEM",
+                                        "type": "NUMBER",
+                                        "label": "Total Estimated Budget w/o Tax",
+                                        "slug": "gross_allocated_budget",
+                                        "placeholder": "0",
+                                        "is_required": false,
+                                        "is_readonly": true,
+                                        "datasource": {
+                                            "getBy": [
+                                                "data",
+                                                "gross_budget"
+                                            ],
+                                            "url": "/rate-estimate/programs/${programId}/resource-budget",
+                                            "type": "url",
+                                            "params": [
+                                                {
+                                                    "slug": "regular_billrate",
+                                                    "name": "rate",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "rate_type",
+                                                    "name": "rate_type",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "name": "num_resources",
+                                                    "required": true,
+                                                    "value": 1
+                                                },
+                                                {
+                                                    "slug": "total_working_days",
+                                                    "name": "total_hours",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "start_date",
+                                                    "name": "start_date",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "end_date",
+                                                    "name": "end_date",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "st_hours",
+                                                    "name": "hours_per_day",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "st_days",
+                                                    "name": "week_working_days",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "gst_types",
+                                                    "name": "adjustment_type",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "gst_value",
+                                                    "name": "adjustment_value",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "overtime_budget",
+                                                    "name": "additional_amount",
+                                                    "required": false,
+                                                    "type": "array"
+                                                },
+                                                {
+                                                    "slug": "expense_budget",
+                                                    "name": "additional_amount",
+                                                    "required": false,
+                                                    "type": "array"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "id": "estimated_tax",
+                                        "source": "SYSTEM",
+                                        "type": "EXTENDED_NUMBER",
+                                        "label": "Estimated Tax",
+                                        "slug": "estimated_tax",
+                                        "placeholder": "0",
+                                        "is_required": false,
+                                        "is_readonly": true,
+                                        "datasource": {
+                                            "function": "function differ(e){return null==e.net_budget?0:e.net_budget-e.gross_budget}",
+                                            "function_name": "differ",
+                                            "type": "url_function",
+                                            "url": "/rate-estimate/programs/${programId}/resource-budget",
+                                            "argu": [
+                                                {
+                                                    "slug": "gross_allocated_budget",
+                                                    "name": "gross_allocated_budget",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "net_allocated_budget",
+                                                    "name": "net_allocated_budget",
+                                                    "required": false
+                                                }
+                                            ],
+                                            "params": [
+                                                {
+                                                    "slug": "regular_billrate",
+                                                    "name": "rate",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "rate_type",
+                                                    "name": "rate_type",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "name": "num_resources",
+                                                    "required": true,
+                                                    "value": 1
+                                                },
+                                                {
+                                                    "slug": "total_working_days",
+                                                    "name": "total_hours",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "start_date",
+                                                    "name": "start_date",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "end_date",
+                                                    "name": "end_date",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "st_hours",
+                                                    "name": "hours_per_day",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "st_days",
+                                                    "name": "week_working_days",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "gst_types",
+                                                    "name": "adjustment_type",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "gst_value",
+                                                    "name": "adjustment_value",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "overtime_budget",
+                                                    "name": "additional_amount",
+                                                    "required": false,
+                                                    "type": "array"
+                                                },
+                                                {
+                                                    "slug": "expense_budget",
+                                                    "name": "additional_amount",
+                                                    "required": false,
+                                                    "type": "array"
+                                                }
+                                            ],
+                                            "getBy": [
+                                                "data"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "id": "net_allocated_budget",
+                                        "source": "SYSTEM",
+                                        "type": "EXTENDED_NUMBER",
+                                        "label": "Total Estimated Budget",
+                                        "slug": "net_allocated_budget",
+                                        "placeholder": "0",
+                                        "is_required": false,
+                                        "is_readonly": true,
+                                        "datasource": {
+                                            "getBy": [
+                                                "data",
+                                                "net_budget"
+                                            ],
+                                            "url": "/rate-estimate/programs/${programId}/resource-budget",
+                                            "type": "url",
+                                            "params": [
+                                                {
+                                                    "slug": "regular_billrate",
+                                                    "name": "rate",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "rate_type",
+                                                    "name": "rate_type",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "name": "num_resources",
+                                                    "required": true,
+                                                    "value": 1
+                                                },
+                                                {
+                                                    "slug": "total_working_days",
+                                                    "name": "total_hours",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "start_date",
+                                                    "name": "start_date",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "end_date",
+                                                    "name": "end_date",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "st_hours",
+                                                    "name": "hours_per_day",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "st_days",
+                                                    "name": "week_working_days",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "gst_types",
+                                                    "name": "adjustment_type",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "gst_value",
+                                                    "name": "adjustment_value",
+                                                    "required": true
+                                                },
+                                                {
+                                                    "slug": "overtime_budget",
+                                                    "name": "additional_amount",
+                                                    "required": false,
+                                                    "type": "array"
+                                                },
+                                                {
+                                                    "slug": "expense_budget",
+                                                    "name": "additional_amount",
+                                                    "required": false,
+                                                    "type": "array"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "title": "Create Quick Assignment",
+    "metadata": {
+        "backButton": true
+    }
+}

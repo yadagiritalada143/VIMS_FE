@@ -1,0 +1,670 @@
+@import "../../../../assets/sass/abstracts/variables";
+@import "../../../../assets/sass/abstracts/mixins";
+
+input {
+    font-size: 12px;
+    color: $color-gray-60;
+    border-radius: 4px;
+    &::placeholder {
+        font-size: 12px;
+        color: $color-gray-60;
+    }
+}
+
+.input {
+    width: 100%;
+}
+
+.schedule-fields {
+    &__name {
+        width: 486px;
+    }
+    &__status {
+        width: 182px;
+    }
+}
+
+.right-sidebar {
+    font: normal normal Inter;
+    &__header {
+        color: $color-black;
+        font-size: 20px;
+    }
+    &__checmark-title {
+        font-size: 15px;
+        color: $color-gray-60;
+    }
+    &__swicher-title {
+        margin-right: 15px;
+        font-size: 14px;
+    }
+    &__content {
+        @include display-flex(column, unset);
+    }
+}
+
+.report-field {
+    box-shadow: 0px 3px 6px $color-black-20;
+    padding: 20px !important;
+    @include display-flex(row, space-between);
+    flex-wrap: wrap;
+    &__title {
+        color: $color-gray-40;
+        margin-bottom: 21px;
+    }
+    &__textarea {
+        width: 100%;
+        min-height: 100px;
+        height: auto;
+    }
+    &__wrapper {
+        padding: 8px 0 24px;
+        border: none;
+    }
+    &__input {
+        width: 100%;
+        height: 40px;
+        padding: 0 10px;
+        border-radius: $border-radius;
+        outline: none;
+    }
+    &__label {
+        margin-left: 1px;
+    }
+}
+
+.status-switcher {
+    width: 100%;
+    height: 40px;
+    padding: 13px 16px;
+    @include display-flex(row, space-between);
+    &__title {
+        font-size: 12px;
+        letter-spacing: 0px;
+        color: $color-gray-60;
+    }
+    &__switch {
+        position: relative;
+        display: inline-block;
+        width: 24px;
+        height: 14px;
+    }
+    input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+
+        &:checked + .slider {
+            background-color: #2196f3;
+        }
+
+        &:focus + .slider {
+            box-shadow: 0 0 1xpx #2196f3;
+        }
+
+        &:checked + .slider:before {
+            -webkit-transform: translateX(10px);
+            -ms-transform: translateX(10px);
+            transform: translateX(10px);
+        }
+    }
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+    &:before {
+        position: absolute;
+        content: "";
+        height: 10px;
+        width: 10px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        -webkit-transition: 0.4s;
+        transition: 0.4s;
+    }
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.field {
+    @include display-flex(row, space-between);
+    box-shadow: 0px 3px 6px $color-black-20;
+    padding: 20px !important;
+    flex-wrap: wrap;
+
+    &__header {
+        width: 100%;
+        margin-bottom: 18px;
+        font: normal normal 500 14px/24px Inter;
+    }
+
+    &__title {
+        .field__title::after {
+            content: "*";
+        }
+    }
+
+    &__input {
+        text-transform: uppercase;
+        font-size: 12px;
+        height: 40px;
+        border-radius: 4px;
+    }
+
+    &__select {
+        margin-top: 10px;
+    }
+
+    &__selector {
+        width: 100%;
+        @include display-flex(row, unset);
+        flex-wrap: wrap;
+        margin-top: 10px;
+        border: none;
+    }
+    &__small-selector {
+        width: auto;
+        height: 40px;
+        @include display-flex(row, space-between);
+        flex-wrap: wrap;
+        margin-top: 10px;
+        padding: 2px 5px;
+        border: 1px solid $color-border-secondary;
+        border-radius: 4px;
+    }
+    &__run-time {
+        width: 100%;
+    }
+}
+
+.end-selector {
+    &__small-input {
+        width: 30px;
+        height: 20px;
+        margin: 0 5px;
+    }
+    &__text {
+        margin: 7px 7px 0 0;
+        color: $color-black;
+    }
+}
+
+.half {
+    width: 49%;
+}
+.third {
+    width: 33%;
+}
+
+.picker {
+    &__radio {
+        display: none;
+
+        &:checked + .picker__label {
+            background-color: $color-light-blue;
+            color: $color-white;
+        }
+    }
+    &__label {
+        width: 95px;
+        padding: 5px 0;
+        border-radius: 5px;
+        margin-top: 4px;
+        text-align: center;
+    }
+}
+
+.schedule_freq_form{
+    width: 100%;
+}
+
+.simple-picker {
+    &__radio {
+        color: $color-black;
+        margin: 5px;
+        margin-left: 0;
+        padding: 5px;
+        width: 18px;
+        height: 18px;
+
+        &:checked {
+            & + .simple-picker__label {
+                color: $color-gray-60;
+            }
+            &:after {
+                width: 10px;
+                height: 10px;
+                border-radius: 15px;
+                top: 1px;
+                left: 4px;
+                position: relative;
+                background-color: $color-light-blue;
+                content: "";
+                display: inline-block;
+                visibility: visible;
+            }
+        }
+    }
+    &__label {
+        margin: 7px 20px 0 3px;
+        color: $color-gray-13;
+    }
+}
+
+.default-input {
+    padding: 5px;
+    margin-top: 10px;
+    border: 1px solid $color-border-secondary;
+    outline: none;
+}
+
+.checkbox {
+    display: block;
+    position: relative;
+    padding-left: 20px;
+    margin: 10px 0;
+    cursor: pointer;
+    font-size: 14px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    &__input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+
+        &:checked ~ .checkbox__checkmark {
+            border-color:  #0044C5;
+            background-color: $color-light-blue;
+        }
+
+        &:checked ~ .checkbox__checkmark:after {
+            display: block;
+        }
+
+        &:checked ~ .checkbox__label {
+            color: #0044C5;
+        }
+    }
+
+    &__label {
+        color: $color-dark;
+    }
+
+    &__checkmark {
+        position: absolute;
+        top: 2px;
+        left: -1px;
+        height: 15px;
+        width: 15px;
+        border: 1px solid #5B6874;
+        border-radius: 3px;
+
+        &:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 4px;
+            top: 1px;
+            width: 3px;
+            height: 6px;
+            border: solid $color-white;
+            border-width: 0 2px 2px 0;
+            -webkit-transform: rotate(45deg);
+            -ms-transform: rotate(45deg);
+            transform: rotate(45deg);
+        }
+    }
+
+    &:hover {
+        .checkbox__label {
+            color: #0044C5;
+        } 
+
+        .checkbox__checkmark {
+            border-color:  #0044C5;
+        }
+    }
+}
+
+.small-selector {
+    width: 25%;
+    margin: 0 5px;
+}
+
+.required-field {
+    &::after {
+        content: "*";
+        color: $color-red-100;
+        margin-left: 4px;
+    }
+}
+.custom-checkmark {
+    width: 14px;
+    height: 14px;
+    border-radius: unset;
+    border: 1px solid $color-black;
+    margin-top: 3px;
+
+    &:after {
+        left: -1px;
+        top: -1px;
+        width: 3px;
+        height: 6px;
+    }
+}
+
+.specific-day {
+    &__wrapper {
+        @include display-flex(column, flex-start);
+        width: 100%;
+        position: relative;
+    }
+    &__date-picker {
+        @include display-flex(row, flex-start);
+        width: 145px;
+        border: 1px solid var(--color-border-secondary);
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    &__value {
+        position: absolute;
+        left: 16px;
+        top: 58px;
+        cursor: pointer;
+    }
+    &__title {
+        width: 100%;
+        margin: 20px 0;
+    }
+    &__header {
+        margin: 20px 0 8px;
+    }
+    &__input {
+        width: 180px;
+    }
+    &__select {
+        margin: 0 10px 0 -3px;
+    }
+}
+
+.checkbox-container {
+    padding-left: 20px;
+}
+
+.toggle-panel-inner {
+    @include display-flex(row, space-between);
+}
+
+.email-input {
+    width: 100%;
+    height: 40px;
+    margin: 12px 2px 0;
+    padding: 0 10px;
+    border-radius: $border-radius;
+    outline: none;
+}
+
+.email-warning {
+    width: 100%;
+    background-color: $color-red-50;
+    color: $color-white;
+    font-weight: 300;
+    padding: 5px 10px;
+}
+
+.email-box {
+    width: 100%;
+    height: auto;
+    font-weight: 0;
+    @include display-flex(row, flex-start);
+    flex-wrap: wrap;
+
+    &__data {
+        margin: 4px;
+        background-color: $color-gray-1;
+        @include display-flex(row-reverse, space-between);
+    }
+    &__text {
+        font-size: 12px;
+        margin: 0 8px;
+        color: $color-black;
+    }
+    &__icon {
+        font-size: 10px;
+        padding: 8px 9px 6px 0;
+        cursor: pointer;
+    }
+}
+
+.badge {
+    &__data {
+        font-size: 12px;
+        box-shadow: none;
+        font-weight: normal;
+    }
+}
+
+.multiple-select {
+    padding-top: 8px;
+}
+
+.button-footer {
+    &__button {
+        min-width: 125px;
+    }
+}
+
+:host ::ng-deep {
+    ng-select {
+        input {
+            font-size: 12px;
+            color: $color-gray-60;
+            &::placeholder {
+                color: $color-gray-60;
+            }
+        }
+
+        .ng-value-label {
+            font-size: 12px;
+            font-weight: 400;
+            text-transform: capitalize;
+        }
+
+        .ng-dropdown-panel {
+            text-transform: capitalize;
+        }
+    }
+}
+
+:host ::ng-deep {
+    .multiple-select {
+        ng-select {
+            .ng-select-container {
+                overflow: visible;
+                border: none;
+                .ng-value-container {
+                    overflow: visible;
+                    margin-top: 40px;
+                    background-color: $color-white;
+                    .ng-value {
+                        margin-left: -5px;
+                        margin-right: 10px;
+                        font-weight: normal;
+                        background-color: $color-gray-1;
+                        border: none !important;
+                        @include display-flex(row-reverse, space-around);
+
+                        .ng-value-label {
+                            padding: 5px 4px 5px 8px !important;
+                            background-color: $color-gray-1;
+                            border: none;
+                        }
+                        .ng-value-icon {
+                            padding: 5px 9px 5px 4px;
+                        }
+                        span &-icon {
+                        }
+                        :hover {
+                            background: transparent !important;
+                        }
+                    }
+                    .ng-placeholder {
+                        width: 100%;
+                        height: 40px;
+                        border: 1px solid var(--color-border-secondary);
+                        border-radius: 4px;
+                        top: -40px;
+                        margin: 40px 0 0 -5px;
+                        padding: 10px;
+                        color: $color-gray-60;
+                        border-radius: $border-radius;
+                        font-size: 12px;
+                    }
+                    .ng-input {
+                        color: $color-gray-60;
+                        width: 100%;
+                        position: absolute;
+                        top: 10px;
+                        left: -5px;
+                        padding: 0 15px;
+                        input {
+                            font-size: 12px;
+                            color: $color-gray-60;
+                            &:focus {
+                                background-color: $color-white;
+                            }
+                            &:placeholder {
+                                color: $color-gray-60;
+                            }
+                        }
+                    }
+                }
+                .ng-value-label {
+                    font-size: 12px;
+                }
+                .ng-arrow-wrapper {
+                    position: absolute;
+                    right: 0;
+                    top: 5px;
+                }
+            }
+        }
+        .ng-spinner-loader {
+            top: -2px;
+            right: 24px;
+        }
+
+        .ng-dropdown-panel {
+            // margin-top: -7px;
+            left: 2px;
+        }
+    }
+}
+
+:host ::ng-deep {
+    .single-select {
+        ng-select {
+            .ng-select-container {
+                .ng-value-container {
+                    .ng-placeholder {
+                        color: $color-gray-60;
+                        font-size: 12px;
+                    }
+                    .ng-input {
+                        color: $color-gray-60;
+                        width: 100%;
+                        font-size: 12px;
+                    }
+                }
+            }
+        }
+    }
+}
+:host ::ng-deep {
+    .fs-14 {
+        input {
+            font-size: 14px;
+        }
+    }
+}
+
+:host ::ng-deep {
+    .ng-select {
+        &.ng-select-disabled {
+            >.ng-select-container {
+              background-color: $color-gray-5;
+            }
+          }
+    }
+    .ng-dropdown-panel {
+        border-top-color: $select-border;
+    }
+}
+
+:host ::ng-deep {
+    .multiple-select {
+        .ng-has-value {
+            .ng-placeholder {
+                display: block;
+                margin-top: 10px;
+            }
+        }
+    }
+}
+
+// :host ::ng-deep {
+//     .datepicker--nav,
+//     .datepicker--days-names {
+//         display: none;
+//     }
+//     .datepicker-inline {
+//         top: 40px;
+//     }
+//     .datepicker--imgdate.position-relative {
+//         input {
+//             // opacity: 0;
+//         }
+//     }
+// }
+
+
+// .date-picker {
+//   ::ng-deep .datepicker--imagesize {
+//     left: auto;
+//     right: 8px;
+//   }
+
+//   ::ng-deep input {
+//     padding-left: 13px !important;
+//     padding-right: 32px !important;
+//   }
+
+//   ::ng-deep .datepicker {
+//     width: 267px;
+//   }
+// }
+
+.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+}

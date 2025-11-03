@@ -1,0 +1,543 @@
+<div class="mt-16 rounded-sm p-24" [ngClass]="isViewMode?'':'preference-body section'">
+
+    <div class="tax-details-header" [formGroup]="taxConfigForm">
+
+        <h3> {{ 'tax_configuration' | i18next }} </h3>
+
+        <ng-container *ngIf="!isViewMode">
+
+            <div class="row pt-24">
+                <div class="col-sm-10">
+                    <div class="form-group">
+                        <label>
+                            {{ 'tax_configuration_name_' | i18next }}
+                            <span class="require">*</span>
+                        </label>
+                        <input type="text" class="form-control mb-8"
+                        formControlName="name" [readonly]='isViewMode'
+                        [placeholder]='"Enter Configuration Name" | i18next'/>
+                        <span class="error-text"
+                            *ngIf="taxConfigForm.get('name').invalid &&
+                            taxConfigForm.get('name').touched && !isViewMode">
+                                {{ '*_this_is_a_required_field' | i18next }}
+                        </span>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="toggle-panel mt-24 w-100">
+                        <div class="toggle-panel-inner">
+                            <span class="status-text mr-24">
+                                {{ 'status' | i18next }}
+                            </span>
+                            <toggle-button
+                                [disabled]="isViewMode"
+                                [checked]="taxConfigForm.get('status').value"
+                                (changed)="toggleStatus($event)"
+                            ></toggle-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row pt-12">
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <hierarchy-treeview I18n
+                            [mandatory]="true"
+                            [disabled]="isViewMode"
+                            [treeInput]="hierarchyTreeInput"
+                            [selected]="taxConfigForm.get('hierarchy').value"
+                            (changed)="changeHierarchySelections($event)"
+                        >
+                        </hierarchy-treeview>
+                        <div class="error-text mt-8"
+                            *ngIf="taxConfigForm.get('hierarchy').invalid &&
+                                taxConfigForm.get('hierarchy').touched && !isViewMode">
+                            {{ '*_this_is_a_required_field' | i18next }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label>
+                            {{ 'sourcing_model_' | i18next }}
+                            <span class="require">*</span>
+                        </label>
+                        <ng-select
+                            formControlName="sourcing_model"
+                            [placeholder]="'Select Sourcing Model' | i18next"
+                            [readonly]="isViewMode"
+                            [multiple]="true"
+                        >
+                            <ng-option value="SOW">{{ 'sow' | i18next }}</ng-option>
+                            <ng-option value="CONTINGENT">{{ 'contingent' | i18next }}</ng-option>
+                            <ng-option value="DIRECT_SOURCING">{{ 'direct_sourcing' | i18next }}</ng-option>
+                        </ng-select>
+                        <div class="error-text mt-8"
+                            *ngIf="taxConfigForm.get('sourcing_model').invalid &&
+                                taxConfigForm.get('sourcing_model').touched && !isViewMode">
+                            {{ '*_this_is_a_required_field' | i18next }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label>
+                            {{ 'tax_applicable_to_' | i18next }}
+                            <span class="require">*</span>
+                        </label>
+                        <ng-select
+                            formControlName="category"
+                            [placeholder]="'Select User Category' | i18next"
+                            [readonly]="isViewMode"
+                            [multiple]="false"
+                        >
+                            <ng-option value="CLIENT">{{ 'client' | i18next }}</ng-option>
+                            <ng-option value="VENDOR">{{ 'vendor' | i18next }}</ng-option>
+                        </ng-select>
+                        <div class="error-text mt-8"
+                            *ngIf="taxConfigForm.get('category').invalid &&
+                                taxConfigForm.get('category').touched && !isViewMode">
+                            {{ '*_this_is_a_required_field' | i18next }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label>
+                            {{ 'tax_allocation_based_on_' | i18next }}
+                            <span class="require">*</span>
+                        </label>
+                        <ng-select
+                            formControlName="allocation_method"
+                            [placeholder]="'Select Allocation Method' | i18next"
+                            [readonly]="isViewMode"
+                            [multiple]="false"
+                            (change)="changeAllocationMethod($event)"
+                        >
+                            <ng-option value="REGION">{{ 'region/country' | i18next }}</ng-option>
+                            <ng-option value="LOCATION">{{ 'work_location' | i18next }}</ng-option>
+                        </ng-select>
+                        <div class="error-text mt-8"
+                            *ngIf="taxConfigForm.get('allocation_method').invalid &&
+                                taxConfigForm.get('allocation_method').touched && !isViewMode">
+                            {{ '*_this_is_a_required_field' | i18next }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row pt-12">
+
+                <ng-container *ngIf="selectedTaxAllocation === 'LOCATION'">
+
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label>
+                                {{ 'work_location_' | i18next }}
+                                <span class="require">*</span>
+                            </label>
+                            <ng-select
+                                formControlName="location"
+                                [placeholder]="'Select Work Location' | i18next"
+                                (search)="locationSub.next({term: $event.term, event: 'search'})"
+                                (open)="locationSub.next({term: '', event: 'open'})"
+                                [loading]="locationListLoading"
+                                [readonly]="isViewMode"
+                                [multiple]="true"
+                            >
+                                <ng-option *ngIf="locationList.length" [disabled]="disableAllOption('location')" [value]="'ALL'" > {{ 'all' | i18next }} </ng-option>
+                                <ng-option [disabled]="taxConfigForm.get('location').value.includes('ALL')"
+                                    *ngFor="let entry of locationList;"
+                                    [value]="entry.id">
+                                        {{ entry.name | i18next }}
+                                </ng-option>
+                                <ng-template ng-footer-tmp
+                                    *ngIf="locationTotalRecords > locationList.length">
+                                    <span class="show-more" (click)="locationSub.next({term: locationSearchTerm, event: 'show'})">
+                                            {{ 'show_more...' | i18next }}
+                                    </span>
+                                </ng-template>
+                            </ng-select>
+                            <div class="error-text mt-8"
+                                *ngIf="taxConfigForm.get('location').invalid &&
+                                    taxConfigForm.get('location').touched && !isViewMode">
+                                {{ '*_this_is_a_required_field' | i18next }}
+                            </div>
+                        </div>
+                    </div>
+
+                </ng-container>
+
+                <ng-container *ngIf="selectedTaxAllocation === 'REGION'">
+
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label>
+                                {{ 'country_' | i18next }}
+                                <span class="require">*</span>
+                            </label>
+                            <ng-select
+                                formControlName="country"
+                                [placeholder]="'Select Country' | i18next"
+                                [loading]="countryListLoading"
+                                [readonly]="isViewMode"
+                                [multiple]="true"
+                                (change)="searchForStates()"
+                            >
+                                <ng-option *ngIf="countryList.length" [value]="'ALL'" [disabled]="disableAllOption('country')" > {{ 'all' | i18next }} </ng-option>
+                                <ng-option [disabled]="taxConfigForm.get('country').value.includes('ALL')"
+                                    *ngFor="let entry of countryList;"
+                                    [value]="entry.value">
+                                        {{ entry.name | i18next }}
+                                </ng-option>
+                            </ng-select>
+                            <div class="error-text mt-8"
+                                *ngIf="taxConfigForm.get('country').invalid &&
+                                    taxConfigForm.get('country').touched && !isViewMode">
+                                {{ '*_this_is_a_required_field' | i18next }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <ng-container *ngIf="countrySelected">
+
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label>
+                                    {{ 'location_-_state_' | i18next }}
+                                </label>
+                                <ng-select
+                                    formControlName="state"
+                                    [placeholder]="'Select State' | i18next"
+                                    (search)="stateSub.next({ term: $event.term, event: 'search' })"
+                                    (open)="stateSub.next({ term: '', event: 'open' })"
+                                    [loading]="stateListLoading"
+                                    [readonly]="isViewMode"
+                                    [multiple]="true"
+                                    (change)="searchForCounties()"
+                                >
+                                    <ng-option *ngIf="stateList.length" [value]="'ALL'" [disabled]="disableAllOption('state')" > {{ 'all' | i18next }} </ng-option>
+                                    <ng-option [disabled]="taxConfigForm.get('state').value.includes('ALL')"
+                                        *ngFor="let entry of stateList;"
+                                        [value]="entry.id">
+                                            {{ entry.name | i18next }}
+                                    </ng-option>
+                                    <ng-template ng-footer-tmp
+                                        *ngIf="stateTotalRecords > stateList.length">
+                                            <span class="show-more" (click)="stateSub.next({ term: stateSearchTerm, event: 'show' })">
+                                                {{ 'show_more...' | i18next }}
+                                            </span>
+                                    </ng-template>
+                                </ng-select>
+                            </div>
+                        </div>
+
+                    </ng-container>
+
+                    <ng-container *ngIf="stateSelected">
+
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label>
+                                    {{ 'county' | i18next }}
+                                </label>
+                                <ng-select
+                                    formControlName="county"
+                                    [placeholder]="'Select County' | i18next"
+                                    (search)="countySub.next({ term: $event.term, event: 'search' })"
+                                    (open)="countySub.next({ term: '', event: 'open' })"
+                                    [loading]="countyListLoading"
+                                    [readonly]="isViewMode"
+                                    [multiple]="true"
+                                    (change)="searchForCities()"
+                                >
+                                    <ng-option *ngIf="countyList.length" [value]="'ALL'" [disabled]="disableAllOption('county')" > {{ 'all' | i18next }} </ng-option>
+                                    <ng-option [disabled]="taxConfigForm.get('county').value.includes('ALL')"
+                                        *ngFor="let entry of countyList;"
+                                        [value]="entry.id">
+                                            {{ entry.name | i18next }}
+                                    </ng-option>
+                                    <ng-template ng-footer-tmp
+                                        *ngIf="countyTotalRecords > countyList.length">
+                                            <span class="show-more" (click)="countySub.next({ term: countySearchTerm, event: 'show' })">
+                                                {{ 'show_more...' | i18next }}
+                                            </span>
+                                    </ng-template>
+                                </ng-select>
+                            </div>
+                        </div>
+
+                    </ng-container>
+
+                    <ng-container *ngIf="countySelected">
+
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label>
+                                    {{ 'city_' | i18next }}
+                                </label>
+                                <ng-select
+                                    formControlName="city"
+                                    [placeholder]="'Select City' | i18next"
+                                    (search)="citySub.next({ term: $event.term, event: 'search' })"
+                                    (open)="citySub.next({ term: '', event: 'open' })"
+                                    [loading]="cityListLoading"
+                                    [readonly]="isViewMode"
+                                    [multiple]="true"
+                                >
+                                    <ng-option *ngIf="cityList.length" [value]="'ALL'" [disabled]="disableAllOption('city')" > {{ 'all' | i18next }} </ng-option>
+                                    <ng-option [disabled]="taxConfigForm.get('city').value.includes('ALL')"
+                                        *ngFor="let entry of cityList;"
+                                        [value]="entry.id">
+                                            {{ entry.name | i18next }}
+                                    </ng-option>
+                                    <ng-template ng-footer-tmp
+                                        *ngIf="cityTotalRecords > cityList.length">
+                                            <span class="show-more" (click)="citySub.next({ term: citySearchTerm, event: 'show' })">
+                                                {{ 'show_more...' | i18next }}
+                                            </span>
+                                    </ng-template>
+                                </ng-select>
+                            </div>
+                        </div>
+
+                    </ng-container>
+
+                </ng-container>
+
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label>
+                            {{ 'modules_' | i18next }}
+                            <span class="require">*</span>
+                        </label>
+                        <ng-select
+                            formControlName="modules"
+                            [placeholder]="'Select Modules' | i18next"
+                            [loading]="moduleListLoading"
+                            [readonly]="isViewMode"
+                            [multiple]="true"
+                        >
+                            <ng-option *ngIf="moduleList.length" [disabled]="disableAllOption('modules')" [value]="'ALL'" > {{ 'all' | i18next }} </ng-option>
+                            <ng-option [disabled]="taxConfigForm.get('modules').value.includes('ALL')"
+                                *ngFor="let entry of moduleList;"
+                                [value]="entry.id">
+                                    {{ entry.name | i18next }}
+                            </ng-option>
+                        </ng-select>
+                        <div class="error-text mt-8"
+                            *ngIf="taxConfigForm.get('modules').invalid &&
+                                taxConfigForm.get('modules').touched && !isViewMode">
+                            {{ '*_this_is_a_required_field' | i18next }}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <h4 class="pt-12"> {{ 'manage_tax' | i18next }} </h4>
+            <div class="form-group d-flex">
+                <input type="radio" name="tax_system"
+                    class='mr-16 abs-2t' value="AUTO"
+                    [disabled]="!isViewMode" formControlName="tax_system"/>
+                <span class="label"> {{ 'allow_system_to_enter_tax_name_-_self_driven' | i18next }} </span>
+                <input type="radio" name="tax_system"
+                    class='mr-16 abs-2t' value="MANUAL"
+                    [disabled]="!isViewMode" formControlName="tax_system"/>
+                <span class="label"> {{ 'configure_the_tax_for_system_user_to_enter_value' | i18next }} </span>
+            </div>
+
+        </ng-container>
+
+        <div class="row pt-24" *ngIf="isViewMode">
+            <div [ngStyle]="{'height':'280px'}" class=" col-sm-12 preference-body section-child p-12">
+                <div class="row p-24 view-tax-details">
+                    <div class="col-sm-3 mt-12">
+                        <p> {{ 'tax_configuration_name' | i18next }} </p>
+                        <label> {{ ( taxConfigForm.value['name'] || 'Undefined' ) | i18next }} </label>
+                    </div>
+                    <div class="col-sm-3 mt-12">
+                        <p> {{ 'hierarchy' | i18next }} </p>
+                        <label> {{ displayHierarchyList | i18next }} </label>
+                    </div>
+                    <div class="col-sm-3 mt-12">
+                        <p> {{ 'sourcing_model' | i18next }} </p>
+                        <label> {{ (taxConfigForm.value['sourcing_model'].join(', ') || 'None') | snakeToTitleCase | uppercase | i18next }} </label>
+                    </div>
+                    <div class="col-sm-3 mt-12">
+                        <p> {{ 'tax_applicable_to' | i18next }} </p>
+                        <label> {{ taxConfigForm.value['category'] | snakeToTitleCase | i18next }} </label>
+                    </div>
+                    <div class="col-sm-3 mt-12">
+                        <p> {{ 'tax_allocation_based_on' | i18next }} </p>
+                        <label> {{ displayAllocationMethod | i18next }} </label>
+                    </div>
+                    <div *ngIf="selectedTaxAllocation === 'LOCATION'" class="col-sm-3 mt-12">
+                        <p> {{ 'work_location' | i18next }} </p>
+                        <label> {{ (displayWorkLocations || 'None') | i18next }} </label>
+                    </div>
+                    <div *ngIf="selectedTaxAllocation === 'REGION'" class="col-sm-3 mt-12">
+                        <p> {{ 'country' | i18next }} </p>
+                        <label> {{ (displayCountries || 'None') | i18next }} </label>
+                    </div>
+                    <div *ngIf="selectedTaxAllocation === 'REGION'" class="col-sm-3 mt-12">
+                        <p> {{ 'location_-_state' | i18next }} </p>
+                        <label> {{ (displayStates || 'None') | i18next }} </label>
+                    </div>
+                    <div *ngIf="selectedTaxAllocation === 'REGION'" class="col-sm-3 mt-12">
+                        <p> {{ 'county' | i18next }} </p>
+                        <label> {{ (displayCounties || 'None') | i18next }} </label>
+                    </div>
+                    <div *ngIf="selectedTaxAllocation === 'REGION'" class="col-sm-3 mt-12">
+                        <p> {{ 'city' | i18next }} </p>
+                        <label> {{ (displayCities || 'None') | i18next }} </label>
+                    </div>
+                    <div class="col-sm-3 mt-12">
+                        <p> {{ 'modules' | i18next }} </p>
+                        <label> {{ (displayModules || 'None') | i18next }} </label>
+                    </div>
+                    <div class="col-sm-3 mt-12">
+                        <p> {{ 'manage_tax' | i18next }} </p>
+                        <label> {{ displayTaxSystem | i18next }} </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="isManualTaxSystemSelected" class="manage-tax pt-24">
+
+        <h3> {{ 'tax_system' | i18next }} </h3>
+
+        <ng-container *ngIf="!isViewMode">
+
+            <div [formGroup]="taxInputForm" class="row pt-16">
+
+                <div class="form-group col-sm-3">
+                    <label>
+                        {{ 'tax_name_' | i18next }}
+                        <span class="require">*</span>
+                    </label>
+                    <input type="text" class="form-control" [readonly]="isViewMode"
+                        [placeholder]="'Enter Tax Name' | i18next"
+                        formControlName="name" />
+                </div>
+
+                <div class="form-group col-sm-3">
+                    <label>
+                        {{ 'applicable_range_(min_-_max)_' | i18next }}
+                        <span class="require">*</span>
+                    </label>
+                    <div class="row">
+                        <div class="col-sm-6 w-120px">
+                            <input type="text" class="form-control"
+                                [placeholder]="'Min' | i18next" [readonly]="isViewMode"
+                                [allowUptoNDigitDecimalNumber]="0" formControlName="min_value" />
+                        </div>
+                        <div class="col-sm-6 w-120px">
+                            <input type="text" class="form-control"
+                                [placeholder]="'Max' | i18next" [readonly]="isViewMode"
+                                [allowUptoNDigitDecimalNumber]="0" formControlName="max_value" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group col-sm-2">
+                    <label>
+                        {{ 'tax_type_' | i18next }}
+                        <span class="require">*</span>
+                    </label>
+                    <ng-select [multiple]="false" [disabled]="isViewMode"
+                        formControlName="tax_type"
+                        [placeholder]="'Select Tax Type' | i18next"
+                    >
+                        <ng-option value="FLAT"> {{ 'flat' | i18next }} </ng-option>
+                        <ng-option value="PERCENTAGE"> {{ 'percentage' | i18next }} </ng-option>
+                    </ng-select>
+                </div>
+
+                <div class="form-group col-sm-2">
+                    <label>
+                        {{ 'start_date_' | i18next }}
+                        <span class="require">*</span>
+                    </label>
+                    <svms-datepicker i18n
+                        formControlName="start_date"
+                        [options]="datePickerStartOptions"
+                        [disabled]="isViewMode"
+                        [inputdateFormat]="defaultDateFormat"
+                        [placeholder]="('Start Date' | i18next)"
+                    >
+                    </svms-datepicker>
+                </div>
+
+                <div class="form-group col-sm-2">
+                    <label>
+                        {{ 'end_date_' | i18next }}
+                        <span class="require">*</span>
+                    </label>
+                    <svms-datepicker i18n
+                        formControlName="end_date"
+                        [options]="datePickerEndOptions"
+                        [disabled]="isViewMode"
+                        [inputdateFormat]="defaultDateFormat"
+                        [placeholder]="('End Date' | i18next)"
+                    >
+                    </svms-datepicker>
+                </div>
+            </div>
+
+            <p *ngIf="taxInputForm.touched && taxInputForm.valid && !isTaxRangeValid" class="error-text mt-8">
+                {{ '*_minimum_tax_range_greater_than_maximum_tax_range' | i18next }}
+            </p>
+
+            <div class="d-flex justify-content-end mt-16 p-8">
+                <button *ngIf="!isViewMode" type="button"
+                    class="btn btn-primary float-right" (click)="addTaxDetail()">
+                    {{ 'add' | i18next }}
+                </button>
+            </div>
+
+        </ng-container>
+
+        <tax-system-list
+            [list]="taxDetailsList"
+            (edit)="editTaxDetail($event)"
+            (remove)="removeTaxDetail($event)"
+            [disabled]="isViewMode"
+        >
+        </tax-system-list>
+
+        <app-tax-table #taxTable
+            [isViewMode]="isViewMode" [isEditMode]="isEditMode"
+            [ngStyle]="{'display': isTaxTableApplicable?'block':'none' }"
+            [hierarchy]="taxConfigForm.get('hierarchy').value"
+            [sourcing_model]="taxConfigForm.get('sourcing_model').value"
+            [allocation_method]="[taxConfigForm.get('allocation_method').value]"
+            [category]="taxConfigForm.get('category').value"
+            [work_location]="taxConfigForm.get('location').value"
+            [country]="taxConfigForm.get('country').value"
+            [state]="taxConfigForm.get('state').value"
+            [county]="taxConfigForm.get('county').value"
+            [city]="taxConfigForm.get('city').value"
+            [allCountryList]="countryList"
+            [defaultDateFormat]="defaultDateFormat"
+            [payloadDateFormat]="payloadDateFormat"
+        >
+        </app-tax-table>
+
+    </div>
+
+    <div class="d-flex justify-content-between mt-32 p-8" *accessControl>
+        <button type="button"
+            class="btn cancel-btn" (click)="redirectToListing()">
+            {{ 'cancel' | i18next }}
+        </button>
+        <button *ngIf="!isViewMode" type="button"
+            class="btn btn-primary" (click)="onSave()">
+            {{ 'save' | i18next }}
+        </button>
+    </div>
+
+</div>

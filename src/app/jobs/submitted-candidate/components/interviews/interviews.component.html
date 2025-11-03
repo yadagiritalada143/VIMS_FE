@@ -1,0 +1,101 @@
+<app-submitted-candidate>
+  <div class="description-card bg-light p-32">
+    <div class="recent-items position-relative mb-32 pb-8" *ngIf="todaysInterviews?.length > 0">
+      <h3 class="mb-24">{{ 'todays_interviews' | i18next }} ({{toDaysDate}})</h3>
+      <div class="item-paginator position-absolute p-32">
+        <button class="btn small btn-light rounded float-right">
+          <icon size="20px" name="keyboard_arrow_right" type="material" class="d-flex" cuClass="d-flex"></icon>
+        </button>
+        <button class="btn small btn-light rounded float-right mr-4">
+          <icon size="20px" name="keyboard_arrow_left" type="material" class="d-flex" cuClass="d-flex"></icon>
+        </button>
+      </div>
+      <ul *ngFor="let interview of todaysInterviews">
+        <li class="mr-8">
+          <div class="p-24">
+            <div class="float-left">
+              <h4>{{interview?.name}}</h4>
+              <p class="type" *ngIf=" interview?.interview_type === 'F2F' ">
+                <icon class="d-inline-block mr-4"  size="20px" name="people_alt" type="material" cuClass="d-flex"></icon>
+                {{ 'in_person_interview' | i18next }}
+              </p>
+              <p class="type"  *ngIf=" interview?.interview_type === 'PHONE' ">
+                <icon class="d-inline-block mr-4" size="20px" name="phone_in_talk" type="material" cuClass="d-flex"></icon>
+                {{ 'in_telephonic_interview' | i18next }} 
+              </p>
+              <p class="type" *ngIf=" interview?.interview_type === 'VIRTUAL' ">
+                <icon class="d-inline-block mr-4"  size="20px" name="videocam" type="material" cuClass="d-flex"></icon>
+                {{ 'in_virtual_interview' | i18next }}
+              </p>
+            </div>
+            <div class="time red float-right">
+              <icon class="d-inline-block mr-4" size="15px" name="timer" type="material" cuClass="d-flex"></icon>
+              00:10:53
+            </div>
+            <div class="clearfix"></div>
+            <div class="d-flex other-info mt-24">
+              <p class="mr-32">{{ 'time(est)' | i18next }} <span class="ml-8">{{interview?.time}}</span></p>
+              <p>{{ 'duration' | i18next }} <span class="ml-8">{{interview?.duration | localDateFormat}} {{ 'mint' | i18next }}</span></p>
+            </div>
+          </div>
+          <div class="item-footer d-flex">
+            <p>
+              <figure class="d-inline-block mr-8">
+                <img src="../../../../../assets/images/5.jpg" alt="">
+              </figure>
+              <span class="font-weight-medium">{{interview?.candidateName}}</span>
+            </p>
+            <p class="posted text-right">
+              <icon class="d-inline-block mr-4" size="15px" name="schedule" type="material" cuClass="d-flex"></icon> {{interview?.dasyDifference}}
+              {{ 'days_ago' | i18next }}
+            </p>
+          </div>
+        </li>
+        <!-- <li>
+          <div class="p-24">
+            <div class="float-left">
+              <h4>Initial interview(HR)</h4>
+              <p class="type">
+                <icon class="d-inline-block mr-4" size="20px" name="videocam" type="material" cuClass="d-flex"></icon>
+                In
+                Virtual Interview
+              </p>
+            </div>
+            <div class="time blue float-right">
+              <icon class="d-inline-block mr-4" size="15px" name="timer" type="material" cuClass="d-flex"></icon>
+              00:10:53
+            </div>
+            <div class="clearfix"></div>
+            <div class="d-flex other-info mt-24">
+              <p class="mr-32">Time(EST) <span class="ml-8">10:00am</span></p>
+              <p>Duration <span class="ml-8">30 mint</span></p>
+            </div>
+          </div>
+          <div class="item-footer d-flex">
+            <p>
+              <figure class="d-inline-block mr-8">
+                <img src="../../../../../assets/images/5.jpg" alt="">
+              </figure>
+              <span class="font-weight-medium">Tressa John</span>
+            </p>
+            <p class="posted text-right">
+              <icon class="d-inline-block mr-4" size="15px" name="schedule" type="material" cuClass="d-flex"></icon> 2
+              Days ago
+            </p>
+          </div>
+        </li> -->
+      </ul>
+      <div class="clearfix"></div>
+    </div>
+    <div *ngIf="viewGrid" class="overflow-box">
+      <vms-table *ngIf="tableLoaded" [vmsTableConfig]="tableConfig" [vmsDataSource]="vmsData?.interview"
+        [loading]="dataLoading" [open]="isExpand" [totalItem]="totalRecords" [itemsPerPage]="itemsPerPage"
+        (onViewClick)="onClickView($event)" (onEditClick)="onEditClick($event)" (search)="onSearch($event)"
+        (onListFilter)="onListFilter($event)" (onSelectAllClick)="selectAllClicked($event)"
+        (onSelectClick)="selectClicked($event)" (onCancelInterviewClick)="cancelInterview($event)" (onRescheduleInterviewClick)="rescheduleInterview($event)">
+      </vms-table>
+    </div>
+    <app-interview-details></app-interview-details></div>
+    <!-- interview tab code here-->
+    
+</app-submitted-candidate>

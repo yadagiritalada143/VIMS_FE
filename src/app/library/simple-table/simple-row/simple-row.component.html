@@ -1,0 +1,129 @@
+<td
+  *ngIf="isImage"
+  [ngClass]="{ 'pl-24': !isVmsTableExpand && index === 0, 'd-flex': index !== 0 }"
+  class="position-relative align-items-center"
+>
+  <p *ngIf="!isContact && vmsRowDataSource">
+    <span *ngIf="isIcon && vmsRowDataSource.title" class="d-flex align-items-center">
+      <img *ngIf="vmsRowDataSource.icon" [src]="vmsRowDataSource.icon" height="30" class="mr-8" />
+      <a (click)="clickToView()" class="text-ellipsis">{{ vmsRowDataSource.title |i18next}}</a>
+    </span>
+    <span
+      *ngIf="isIcon && !vmsRowDataSource.title"
+      class="initials initials__purple"
+      [ngClass]="{ initials_blue: !isVmsTableExpand && index === 1 }"
+      >{{ vmsRowDataSource | shortName: 'last' }}</span
+    >
+    <a *ngIf="!vmsRowDataSource.title" (click)="clickToView()" class="text-ellipsis">{{ vmsRowDataSource|i18next }}</a>
+  </p>
+  <p *ngIf="isContact && vmsRowDataSource" class="contact-avatar-list d-flex align-items-center justify-content-between">
+    <span class="initials initials__green">{{ vmsRowDataSource || '--' }}</span>
+    <span class="initials initials__gray">{{ vmsRowDataSource || '--' }}</span>
+  </p>
+  <a href="" class="create-candidate d-none">
+    <app-table-icon size="20px" name="how_to_reg" type="material" cuClass="d-flex" class="flex"> </app-table-icon>
+  </a>
+  <span class="actions" *ngIf="!isNoOption">
+    <span class="cursor-pointer px-4" (click)="showDropdownFirstCol()" #optionButton>
+      <app-table-icon size="24px" name="more_horiz" type="material" cuClass="d-flex" class="flex"> </app-table-icon>
+    </span>
+  </span>
+</td>
+
+<td *ngIf="!isImage && isObject() !== 'number' && isObject() !== 'boolean' && !isFIle && !isDescription && !isCurrency">
+  <span
+    *ngIf="
+      (vmsRowDataSource?.toString() | lowercase) !== 'approved' &&
+      (vmsRowDataSource?.toString() | lowercase) !== 'open' &&
+      (vmsRowDataSource?.toString() | lowercase) !== 'inactive' &&
+      (vmsRowDataSource?.toString() | lowercase) !== 'closed' &&
+      (vmsRowDataSource?.toString() | lowercase) !== 'active' &&
+      (vmsRowDataSource?.toString() | lowercase) !== 'pending' &&
+      (vmsRowDataSource?.toString() | lowercase) !== 'pending approval' &&
+      (vmsRowDataSource?.toString() | lowercase) !== 'rejected' &&
+      (vmsRowDataSource?.toString() | lowercase) !== 'scheduled' &&
+      (vmsRowDataSource?.toString() | lowercase) !== 'completed' &&
+      (vmsRowDataSource?.toString() | lowercase) !== 'cancelled' &&
+      (vmsRowDataSource?.toString() | lowercase) !== 'draft' &&
+      (vmsRowDataSource?.toString() | lowercase) !== 'withdrawn' &&
+      (vmsRowDataSource?.toString() | lowercase) !== 'sourcing' &&
+      (vmsRowDataSource?.toString() | lowercase) !== 'deferred' &&
+      (vmsRowDataSource?.toString() | lowercase) !== 'in progress' &&
+      (vmsRowDataSource?.toString() | lowercase) !== 'overdue'
+    "
+    (click)="openPanel()"
+  >
+    <span
+      *ngIf="isIcon && vmsRowDataSource"
+      class="initials initials__purple"
+      [ngClass]="{ initials_blue: !isVmsTableExpand && index === 1 }"
+    >
+      {{ vmsRowDataSource | shortName: 'last' }}</span
+    >
+    <span> {{ vmsRowDataSource |i18next}}</span>
+  </span>
+  <span
+    *ngIf="
+      (vmsRowDataSource?.toString() | lowercase) == 'approved' ||
+      (vmsRowDataSource?.toString() | lowercase) == 'pending' ||
+      (vmsRowDataSource?.toString() | lowercase) == 'pending approval' ||
+      (vmsRowDataSource?.toString() | lowercase) == 'rejected' ||
+      (vmsRowDataSource?.toString() | lowercase) == 'draft' ||
+      (vmsRowDataSource?.toString() | lowercase) == 'withdrawn'
+    "
+    class="status-ui"
+    [ngClass]="{
+      approved: (vmsRowDataSource?.toString() | lowercase) === 'approved',
+      withdrawn: (vmsRowDataSource?.toString() | lowercase) == 'withdrawn',
+      'pending-approval':
+        (vmsRowDataSource?.toString() | lowercase) == 'pending' || (vmsRowDataSource?.toString() | lowercase) == 'pending approval',
+      rejected: (vmsRowDataSource?.toString() | lowercase) == 'rejected',
+      draft: (vmsRowDataSource?.toString() | lowercase) == 'draft'
+    }"
+  >
+    {{ (vmsRowDataSource|i18next) || '--' }}
+  </span>
+</td>
+
+<td *ngIf="!isCurrency && isObject() === 'number' && vmsRowDataSource > 999999999">
+  {{ vmsRowDataSource | localDateFormat: 'd MMM y' || '--' }}
+  <app-table-icon *ngIf="vmsRowDataSource === undefined" size="24px" name="remove" type="material" cuClass="icon"> </app-table-icon>
+</td>
+
+<td *ngIf="isCurrency"title=" ">
+  <span tooltip="{{ showTooltip(vmsRowDataSource?.amount,vmsRowDataSource?.currency) }}" placement="right" delay="500">{{ (vmsRowDataSource.amount | accuracy: accuracyConfig?.AMOUNT : { currencyCode: vmsRowDataSource?.currency }) || ('' | accuracy: '' : { currencyCode: currencyConfig?.DEFAULT_CURRENCY } )}}</span>
+</td>
+
+<td class="text-right" *ngIf="!isCurrency && isObject() === 'number' && vmsRowDataSource < 999999999">
+  {{ vmsRowDataSource || '--' }}
+</td>
+
+<td *ngIf="!isImage && isObject() !== 'number' && isObject() !== 'boolean' && isFIle && !isDescription" class="d-flex">
+  <ng-container *ngIf="isFIle && vmsRowDataSource; else noDataTemplate">
+    <div class="attachment-box mr-8" *ngFor="let fileSrc of vmsRowDataSource">
+      <img src="{{ fileSrc?.previewPath }}" alt="" class="attachment-box__attachment" />
+      <div class="attachment-box__download-wrapper">
+        <a href="javascript:void(0)" (click)="openPreview(fileSrc)"
+          ><img src="../assets/images/app-download-icon.png" alt="" class="attachment-box__download-wrapper__icon"
+        /></a>
+      </div>
+    </div>
+  </ng-container>
+  <ng-template #noDataTemplate>
+    <div class="attachment-box align-justify-center">--</div>
+  </ng-template>
+</td>
+
+<td *ngIf="!isImage && isObject() !== 'number' && isObject() !== 'boolean' && !isFIle && isDescription">
+  <ng-container *ngIf="vmsRowDataSource; else noDataSource">
+    <span *ngIf="!fullText">
+      {{ (vmsRowDataSource | slice: 0:50) || '--'
+      }}<span *ngIf="vmsRowDataSource.length > 50">.. <a href="javascript:void(0)" (click)="ShowFUll()">{{ 'show_more' | i18next }}</a> </span>
+    </span>
+    <span *ngIf="fullText" class="fullText">
+      {{ (vmsRowDataSource | slice: 0:1000000000) || '--' }}
+      <a href="javascript:void(0)" *ngIf="vmsRowDataSource.length > 50" (click)="ShowLess()">{{ 'show_less' | i18next }}</a>
+    </span>
+  </ng-container>
+  <ng-template #noDataSource> -- </ng-template>
+</td>

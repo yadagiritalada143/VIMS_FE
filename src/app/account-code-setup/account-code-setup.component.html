@@ -1,0 +1,371 @@
+<section class="account-code-setup">
+  <a class="back-button" (click)="goToBack()">
+    <icon size="24px" name="keyboard_backspace" type="material" cuClass="d-flex"></icon>
+  </a>
+  <h3 class="text-center my-24 font-weight-medium">{{ 'account_codes' | i18nextEager }}</h3>
+
+  <div class="account-form-wrapper account-code">
+    <app-logs [log]="logs"></app-logs>
+    <div class="my-24"
+      *ngIf="configurationNotExist">
+      <div class="alert_message alert_pending">
+        <div class="d-flex align-items-center w-100">
+          <div class="d-flex align-items-center justify-content-start ">
+            <icon class="d-flex mr-8" size="24px" name="warning" type="material" cuClass="d-flex"></icon>
+          </div>
+          <div class="pl-8">
+            <div class="font-weight-bold mb-0 medium-font">
+              {{ 'no_program_configuration_found_for_account_code.' | i18nextEager }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-light" *ngIf="accountCodeForm?.get('foundational_data') && accountCodeForm?.get('foundational_data').controls?.length <= 0"
+    >
+    <div class="panel-body p-24">
+      <div class="row pt-12">
+        <div class="col-3">
+          <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+            width: '50%',
+            height: '15px',
+            'border-radius': '4px',
+            'background-color': '#f8f8f9',
+            'border-top': '0',
+            'margin-bottom': '8px'
+          }">
+          </ngx-skeleton-loader>
+          <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+            width: '100%',
+            height: '40px',
+            'border-radius': '4px',
+            'margin-bottom': '0',
+            'background-color': '#f8f8f9',
+            'border-top': '0'
+          }">
+          </ngx-skeleton-loader>
+        </div>
+        <div class="col-3">
+          <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+            width: '50%',
+            height: '15px',
+            'border-radius': '4px',
+            'background-color': '#f8f8f9',
+            'border-top': '0',
+            'margin-bottom': '8px'
+          }">
+          </ngx-skeleton-loader>
+          <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+            width: '100%',
+            height: '40px',
+            'border-radius': '4px',
+            'margin-bottom': '0',
+            'background-color': '#f8f8f9',
+            'border-top': '0'
+          }">
+          </ngx-skeleton-loader>
+        </div>
+        <div class="col-3">
+          <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+            width: '50%',
+            height: '15px',
+            'border-radius': '4px',
+            'background-color': '#f8f8f9',
+            'border-top': '0',
+            'margin-bottom': '8px'
+          }">
+          </ngx-skeleton-loader>
+          <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+            width: '100%',
+            height: '40px',
+            'border-radius': '4px',
+            'margin-bottom': '0',
+            'background-color': '#f8f8f9',
+            'border-top': '0'
+          }">
+          </ngx-skeleton-loader>
+        </div>
+        <div class="col-3">
+          <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+            width: '50%',
+            height: '15px',
+            'border-radius': '4px',
+            'background-color': '#f8f8f9',
+            'border-top': '0',
+            'margin-bottom': '8px'
+          }">
+          </ngx-skeleton-loader>
+          <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+            width: '100%',
+            height: '40px',
+            'border-radius': '4px',
+            'margin-bottom': '0',
+            'background-color': '#f8f8f9',
+            'border-top': '0'
+          }">
+          </ngx-skeleton-loader>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <div class="d-flex justify-content-end align-items-center">
+        <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+          width: '150px',
+          height: '40px',
+          'border-radius': '4px',
+          'margin-bottom': '0',
+          'background-color': '#ebf3f9',
+          'border-top': '0',
+          'margin-top': '24px'
+        }">
+        </ngx-skeleton-loader>
+      </div>
+    </div>
+    </div>
+
+    <div class="panel panel-light"
+      *ngIf="accountCodeForm?.get('foundational_data') && accountCodeForm?.get('foundational_data').controls?.length > 0">
+      <div class="panel-body p-24">
+
+        <!-- <div class="row pt-12">
+
+          <div class="col">
+            <div class="form-group pb-8">
+              <label>{{ 'gl_business_unit' | i18nextEager }} <span class="require">*</span></label>
+              <ng-select [clearable]="true" class="medium" placeholder="10600" [searchable]="false">
+                <ng-option [value]="'1'">1</ng-option>
+                <ng-option [value]="'2'">2</ng-option>
+                <ng-option [value]="'3'">3</ng-option>
+              </ng-select>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="form-group pb-8">
+              <label>{{'Account Number'|tanslate}} <span class="require">*</span></label>
+              <ng-select [clearable]="true" class="medium" placeholder="ComboBox" [searchable]="false">
+                <ng-option [value]="'1'">1</ng-option>
+                <ng-option [value]="'2'">2</ng-option>
+                <ng-option [value]="'3'">3</ng-option>
+              </ng-select>
+
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="form-group pb-8">
+              <label>{{ 'operating_unit' | i18nextEager }} <span class="require">*</span></label>
+              <ng-select [clearable]="true" class="medium" placeholder="72125-{{ 'tax_westar_ene' | i18nextEager }}.." [searchable]="false">
+                <ng-option [value]="'1'">1</ng-option>
+                <ng-option [value]="'2'">2</ng-option>
+                <ng-option [value]="'3'">3</ng-option>
+              </ng-select>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="form-group pb-8">
+              <label>{{ 'department_id' | i18nextEager }} <span class="require">*</span></label>
+              <ng-select [clearable]="true" class="medium" placeholder="{{ 'combobox' | i18nextEager }}" [searchable]="false">
+                <ng-option [value]="'1'">1</ng-option>
+                <ng-option [value]="'2'">2</ng-option>
+                <ng-option [value]="'3'">3</ng-option>
+              </ng-select>
+            </div>
+          </div>
+        </div> -->
+
+        <div class="row pt-12">
+          <div class="col-3" *ngFor="
+              let item of accountCodeForm?.get('foundational_data')?.controls;let i = index
+            ">
+            <div class="form-group-row" [formGroup]="item">
+              <div class="form-group pb-8">
+                <label I18n>{{ item?.get("foundational_data_name")?.value | i18nextEager }}
+                  <span class="require" *ngIf="item?.get('is_required')?.value">*</span></label>
+                <ng-select [multiple]="false" [formControl]="item?.get('values')" bindLabel="name" placeholder="{{ 'select' | i18nextEager }}"
+                  (search)="getfoundationalData($event ,item , i)">
+                  <ng-option *ngFor="let option of item?.get('options')?.value" [value]="option">
+                    <span [hidden]="hideMasterDataTypeName">{{ option.name | i18nextEager }} -</span>
+                    {{option?.code | i18nextEager }}
+                  </ng-option>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="panel-footer">
+        <div class="d-flex justify-content-end align-items-center">
+          <button class="btn btn-primary mt-24" [disabled]="!accountCodeForm.valid" (click)="createAccountCode()">
+            {{ 'create_account_code' | i18nextEager }}
+          </button>
+        </div>
+      </div>
+
+
+    </div>
+
+    <div class="clearfix"></div>
+    <div class="my-16 text-center">
+      <div class="position-relative">
+        <ul class="nav-item cursor-pointer card bg-light">
+          <li class="mr-16" (click)="viewMode ='account_code'" [ngClass]="{'active':viewMode =='account_code'}">
+            {{ 'account_code' | i18nextEager }}
+          </li>
+          <li (click)="viewMode ='history'; getAccountCodeHistory();" [ngClass]="{'active':viewMode =='history'}">
+            {{ 'history' | i18nextEager }} </li>
+        </ul>
+        <button class="filter-btn btn btn-light small" *ngIf="viewMode =='account_code'" (click)="showFilter()">
+          <icon name="filter_alt" size="16px"></icon>
+        </button>
+        <div class="action-dropdown" [ngClass]="{'active': showFilters}" (mouseleave)="hideFilter()">
+          <ul>
+            <li>
+              <a [ngClass]="{'active': selectedStatus === 'active'}" (click)="setSelectedStatus('')">
+                <icon name="done" size="14px"></icon> {{ 'all' | i18nextEager }}
+              </a>
+            </li>
+            <li>
+              <a [ngClass]="{'active': selectedStatus === 'active'}" (click)="setSelectedStatus('active')">
+                <icon name="done" size="14px"></icon> {{ 'active' | i18nextEager }}
+              </a>
+            </li>
+            <li>
+              <a [ngClass]="{'active': selectedStatus === 'in-active'}" (click)="setSelectedStatus('in-active')">
+                <icon name="done" size="14px"></icon>
+                {{ 'in' | i18nextEager }}-{{ 'active' | i18nextEager }}
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="panel panel-light" [ngSwitch]="viewMode">
+      <div *ngSwitchCase="'account_code'">
+        <app-logs [log]="accountCodeLogs"></app-logs>
+        <ng-container *ngIf="accountCodeList?.length > 0; else noAccountCodeSection">
+          <div class="scroll-wrapper">
+            <table>
+              <thead class="border-bottom">
+                <tr>
+                  <th class="text-left">{{ 'charge_codes' | i18nextEager }}/{{ 'account_codes' | i18nextEager }}</th>
+                  <th class="text-left">{{ 'status' | i18nextEager }}</th>
+                </tr>
+
+              </thead>
+              <tbody>
+                <tr *ngFor="let code of accountCodeList">
+                  <td>{{code?.value | i18nextEager }}</td>
+                  <td class="text-left"><span class="status-ui"
+                      [ngClass]="{'default' : 'default', 'active' : 'active', 'in-active' : 'inactive'}[code?.status]">
+                      {{code?.status | i18nextEager }} </span></td>
+
+
+                  <td (mouseleave)="code.showDropdown= false;">
+                    <div class="position-relative">
+                      <button class="btn btn-outine small outline-btn position-relative"
+                        *ngIf="code?.status != 'default'" (click)="code.showDropdown= true;">
+                        <icon name="more_horiz" size="24px" type="material" color="inherit" class="pt-4"></icon>
+                      </button>
+                      <ul class="action-list position-absolute bg-light rounded-sm active border"
+                        *ngIf="code?.showDropdown">
+                        <li>
+                          <a class="p-4" (click)="updateAccountCodeStatus(code)">
+                            {{code.status === 'active' ? ('In-active' | i18nextEager): ('Active' | i18nextEager)}}
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </ng-container>
+        <ng-template #noAccountCodeSection>
+          <div class="content-area ui-content-wrapper no-content">
+            <div class="no-history">
+              <img src="./assets/images/Handsome2.svg" alt="no history" width="165" class="img-fluid">
+              <h5 class="pt-16">{{ 'there_is_no' | i18nextEager }} {{selectedStatus | titlecase}} {{ 'account_code' | i18nextEager }}
+              </h5>
+              <h6 class="py-4 small">{{ 'there_is_no' | i18nextEager }} {{selectedStatus | titlecase}} {{'Account code found on
+                this'|i18next}}</h6>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+
+      <div *ngSwitchCase="'history'">
+        <app-logs [log]="historyLogs"></app-logs>
+
+        <!-- when history -->
+
+        <ng-container *ngIf="history?.length > 0; else noHistorySection">
+          <div class="py-24">
+            <div class="history-tl-container px-24" *ngFor="let codeHistory of history">
+              <ul class="tl">
+                <li class="tl-item">
+                  <div class="timestamp">
+                    <p class="font-weight-medium text-dark"> {{codeHistory?.updatedDate | localDateFormat }} </p>
+                    <span>{{codeHistory?.updatedTime}}</span>
+                    <p>{{ 'revision' | i18nextEager }} : {{codeHistory?.revision}}</p>
+                  </div>
+                  <div
+                    class="d-flex rounded-sm align-items-center p-16 justify-content-between mb-16 history column-direction">
+                    <div class="d-flex align-items-center code-history-title">
+                      <div class="ml-16">
+                        <h4 class="mb-4">{{codeHistory?.request_title | i18nextEager}} </h4>
+                        <!--Inactivate-->
+                        <p><span class="text-dark">{{ 'status' | i18nextEager }}: </span>
+                          <span class="status-ui"
+                          *ngIf="codeHistory?.status"
+                            [ngClass]="{'default' : 'approved', 'active' : 'active', 'in-active' : 'draft'}[codeHistory.status]">{{
+                              codeHistory?.status | i18nextEager}}
+                          </span>
+                        </p>
+                        <p> <span class="text-dark">{{ 'created_by' | i18nextEager }}: </span> <a href="javascript:void(0)">{{
+                            (codeHistory?.created_by?.first_name +' '+codeHistory?.created_by?.last_name) | i18nextEager }}</a>
+                        </p>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center code-history-value">
+                      <div class="ml-16">
+                        <p>{{codeHistory?.value | i18nextEager}}
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- <button type="button" class="btn  primary-outline text-primary small">
+                    <icon size="16px" name="visibility" type="material" class="icon--on-left" cuClass="icon-cu">
+                    </icon>
+                    {{ 'view' | i18nextEager }}
+                  </button> -->
+                  </div>
+                </li>
+              </ul>
+
+            </div>
+          </div>
+
+        </ng-container>
+
+        <!-- when no history -->
+        <ng-template #noHistorySection>
+          <div class="content-area ui-content-wrapper no-content">
+            <div class="no-history">
+              <img src="./assets/images/Handsome2.svg" alt="no history" width="165" class="img-fluid">
+              <h5 class="pt-16">{{ 'there_is_no_update_on_this_history' | i18nextEager }}</h5>
+              <h6 class="py-4 small">{{ 'there_is_no_history_found_on_this' | i18nextEager }}</h6>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</section>

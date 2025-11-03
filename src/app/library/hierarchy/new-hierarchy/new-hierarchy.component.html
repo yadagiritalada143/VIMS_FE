@@ -1,0 +1,50 @@
+<svms-sidebar [title]="'select_hierarchy'" icon="" [dataVisibility]="dataVisibility" (onClose)="onCloseClicked()">
+
+    <svms-sidebar-body>
+      <div class="p-24" *ngIf="hierarchyData?.length > 0">
+        <h3 class="pb-16 hierarchy-title font-weight-bold">{{'select_hierarchy'| i18next}}</h3>
+        <div class="position-relative search-hierarchy">
+          <ng-select placeholder="{{'select_hierarchy'| i18next}}" bindLabel="name" bindValue="id"
+          [(ngModel)]="selectHierarchyId" (change)="dropdownSelect($event)"
+          (clear)="clearHierarchy()">
+          <ng-option *ngFor="let option of hierarchyDropdown" [value]="option" [disabled]="option?.isDisabled">
+            <span>{{ option?.name }}</span>
+          </ng-option>
+          </ng-select>
+          <div class="position-absolute search-icon">
+            <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+          </div>
+        </div>
+        <div class="hierarchy-wrapper" *ngIf="!selectHierarchyId" >
+          <ul >
+            <li *ngFor="let hierarchy of hierarchyData, let i = index">
+              <icon id="hierarchy-icon" size="28px" name="arrow_drop_down" type="material" cuclass="icon-cu"
+                class="hierarchy-down-arrow cursor-pointer" (click)="childHierarchy()" [ngClass]="{'rotated': hierarchyToggle}"
+                *ngIf="hierarchy?.hierarchies?.length"></icon>
+              <p [ngClass]="{disabled: hierarchy?.isDisabled}" class="herarchy-name cursor-pointer"
+              (click)="onSelectLevel(i, hierarchy?.id, hierarchy?.isDisabled)">{{hierarchy.name}}</p>
+              <new-hierarchy-child-renderer *ngFor="let childLevel of hierarchy?.hierarchies" [isReadMode]="isReadMode"
+                  [isUserOnly]="isUserOnly" [childRenderData]="childLevel" [selectedTreeArr]="selectedHierarchy"
+                  [parentCheckboxState]="parentCheckboxState[hierarchy.id]" (selectHierarchyLevel)="selectParent($event)"
+                  [ngClass]=" hierarchyToggle ? 'active' : 'inactive' ">
+              </new-hierarchy-child-renderer>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div *ngIf="hierarchyData?.length === 0"
+                class="content-area ui-content-wrapper no-content bg-light list-not-found">
+                <div class="no-data text-center">
+                    <img src="./assets/images/no-data.png" alt="hierarchy-board" class="img-fluid">
+                    <h2>{{ 'you_do_not_have_a_hierarchy_created_yet' | i18next }}.</h2>
+                </div>
+            </div>
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+      <!--show this in basic info tabs tabs -->
+      <button [disabled]="this.selectedHierarchy?.length == 0" type="submit" class="btn btn-primary float-right" (click)="onContinueClicked()">
+           <icon size="20px" name="check_circle" type="material" class="icon--on-left" cuClass="icon-cu">
+          </icon>{{ 'continue' | i18next }}
+      </button>
+    </svms-sidebar-footer>
+    </svms-sidebar>

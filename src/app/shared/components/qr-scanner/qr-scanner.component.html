@@ -1,0 +1,39 @@
+<a class="qr-modal-cta py-m-0"  (click)="openQRScaner()">
+  <icon name="qr_code_scanner" size="20px" type="material"></icon> <span>{{'qr_code' | i18next}}</span>
+</a>
+
+<div class="qr-scanner-modal"  [ngClass]="{'active' : qrScannerModal}">
+    <a  class="close-trigger" (click)="closeQRScanner()">
+        <icon name="close" size="24px" type="material"></icon>
+    </a>
+  <div class="d-flex align-items-stretch justify-content-between">
+    <div class="qr-left d-flex align-items-center justify-content-center">
+      <figure class="mobile-screen">
+        <img src="assets/images/mobile-screen.png" width="860" height="1069" alt="">
+      </figure>
+      <p class="text-center font-weight-medium d-none">{{ 'download_mobile_app_from' | i18next }}</p>
+      <div class="store-logo text-center mt-12 d-none">
+        <figure class="d-inline-block mr-12">
+          <img src="assets/images/app-store.png" width="522" height="171" alt="">
+        </figure>
+        <figure class="d-inline-block">
+          <img src="assets/images/google-play.png" width="512" height="168" alt="">
+        </figure>
+      </div> 
+    </div>
+    <div class="qr-right">
+      <h4 class="qr-right-title font-weight-medium">{{ 'to_login_to_your_@simplify_account_in_mobile_app_you_need_to_scan_this_qr_code_first' | i18next }}</h4>
+      <div class="code-body">
+        <ngx-qrcode [elementType]="elementType" [errorCorrectionLevel]="correctionLevel" [width]="300" value="{{newData}}" cssClass="bshadow">
+        </ngx-qrcode>
+      </div>
+      <h4 class="how-works font-weight-medium">{{ 'how_it_works_?' | i18next }}</h4>
+      <ol>
+        <li>{{ 'download_@simplify_mobile_app' | i18next }}</li>
+        <li>{{ 'open_mobile_app_&_scan_qr_code' | i18next }}</li>
+        <li>{{ 'enter_your_password_and_continue' | i18next }}</li>
+      </ol>
+    </div>
+  </div>
+</div>
+<div class="qr-scaner-overlay"  [ngClass]="{'active' : qrScannerModal}"></div>

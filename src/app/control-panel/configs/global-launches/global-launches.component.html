@@ -1,0 +1,39 @@
+
+<div class="program-config-page">
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <h3 class="font-weight-semibold mb-0">{{ 'global_launch_flags' | i18next }}</h3>
+        <button (click)="toggle()"
+            class="c-btn" [ngClass]="readOnly? 'c-btn-secondary-medium-left-icon':'c-btn-success-medium'">
+            <i class="material-icons" *ngIf="readOnly">drive_file_rename_outline</i> {{ (readOnly?'edit':'save') | i18nextEager }}
+        </button>
+    </header>
+    <section class="section-body-content">
+        <form>
+            <div class="global-flags" [ngClass]="{'disableDiv': readOnly}">
+                <ng-container *ngFor="let globalLaunch of globalLaunchList; let i = index">
+                    <div class="d-flex align-items-center justify-content-between border-bottom px-24 py-16"
+                      *ngIf="globalLaunch?.slug !=='assignment_list_view_\'try_new_view\''">
+                        <div>
+                            <p class="title font-weight-medium">{{ globalLaunch?.name | i18nextEager}}</p>
+                            <p class="description small">{{globalLaunch?.descriptions | i18nextEager}}</p>
+                        </div>
+                        <toggle-button class="c-toggle-button-switch" [disabled]="readOnly" [checked]="globalLaunch?.is_enabled" (changed)="changed(globalLaunch?.is_enabled, i)"></toggle-button>
+                    </div>
+                </ng-container>
+            </div>
+        </form>
+        <div class="px-24 py-16" *ngIf="emptyList">
+            <div class="c-notifications error mb-24">
+                <div class="notification-text-box d-flex align-items-center justify-content-between">
+                  <i class="type material-icons">report</i>
+                  <div>
+                    <p class="font-weight-medium"> {{ 'error' | i18next }}</p>
+                    <p class="summary"> {{ 'something_went_wrong_please_reload_after_sometime_to_get_global_flag_list' | i18next }}</p>
+                  </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+

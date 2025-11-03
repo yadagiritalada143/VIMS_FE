@@ -1,0 +1,1286 @@
+<form [formGroup]="createJobForm">
+  <div class="create-wrapper p-24 px-m-0 py-m-0">
+    <div class="create-form pt-32 m-auto">
+      <h3 class="font-weight-medium page-title-mobile">{{job_action|i18next}} {{ 'job'|i18next}}</h3>
+      <ng-container  *ngIf="support_text?.module_level">
+        <app-supporting-text [support_data]="support_text?.module_level"></app-supporting-text>
+      </ng-container>
+      <app-logs [log]="logs"></app-logs>
+      <div class="card bg-light mt-24 border rounded-sm mobile-card-view">
+        <div class="breadcrumb d-flex align-items-center border-bottom mobile-comp">
+          <div (click)="goToBasic()" class="item pl-24 pr-24 border-left cursor-pointer" [ngClass]="{
+              active: basicInfo,
+              finished: financialDetail || jobDetails
+            }">
+            <span class="mr-8 num rounded-circle text-center">1</span>
+            <icon class="mr-8" size="20px" name="done_outline"></icon>
+            <span class="title">{{ 'basic_info' | i18next }}</span>
+          </div>
+          <div (click)="goToFinancialDetail()" class="item pl-24 pr-24 border-left cursor-pointer"
+            [ngClass]="{ active: financialDetail || name === 'editApprovedJob', finished: jobDetails }">
+            <span class="mr-8 num rounded-circle text-cente">2</span>
+            <icon class="mr-8" size="20px" name="done_outline"></icon>
+            <span class="title">{{ 'financial_details' | i18next }}</span>
+          </div>
+          <div (click)="goToJobDetails()" class="item pl-24 pr-24 border-left cursor-pointer"
+            [ngClass]="{ active: jobDetails || name === 'editApprovedJob'}">
+            <span class="mr-4 num rounded-circle text-center">3</span>
+            <icon class="mr-8" size="20px" name="done_outline"></icon>
+            <span class="title">{{ 'job_details' | i18next }}</span>
+          </div>
+        </div>
+        <ng-container *ngIf="support_text?.basic_info_page && basicInfo">
+          <div class="px-16 pt-16">
+            <app-supporting-text [support_data]="support_text?.basic_info_page"></app-supporting-text>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="support_text?.financial_details_page && financialDetail">
+          <div class="px-16 pt-16">
+            <app-supporting-text [support_data]="support_text?.financial_details_page"></app-supporting-text>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="support_text?.job_details_page && !basicInfo && !financialDetail">
+          <div class="px-16 pt-16">
+            <app-supporting-text [support_data]="support_text?.job_details_page"></app-supporting-text>
+          </div>
+        </ng-container>
+        <div class="p-32 pt-16" *ngIf="basicInfo">
+          <ng-container *ngIf="support_text?.job_template_selection">
+            <div class="px-8 pb-16">
+              <app-supporting-text [support_data]="support_text?.job_template_selection"></app-supporting-text>
+            </div>
+          </ng-container>
+          <div class="p-8">
+            <div class="row">
+              <div class="form-group managers col-md-6">
+                <label> {{ 'job_manager' | i18next }} <span class="require">*</span> </label>
+                <div class="mr-8 position-relative search-candidate">
+                  <ng-select bindLabel="name" [searchable]="accessType == 'ALL' || canClientEditManager"
+                    (search)="this.usersearchManager.next($event)" [loading]='managerLoading' loadingText='Loading...'
+                    (clear)="searchManagerList('', 'true')" placeholder="{{ 'search_job_manager' | i18next }}"
+                    formControlName="job_manager" ngDefaultControl (change)="loadDefaultJobValue($event)"
+                    [readonly]="selectedTemplate && selectedTemplate?.id && !jobId"
+                    >
+                    <ng-option *ngFor="let option of managerList" [value]="option">
+                      <div [title]="option?.email">
+                        <div class="initials initials__purple text-uppercase">
+                          {{ option?.first_name | slice: 0:1 }}{{ option?.last_name | slice: 0:1 }}
+                        </div>
+                        <span class="text-capitalize">{{ option?.full_name }}</span>
+                      </div>
+                    </ng-option>
+                  </ng-select>
+                  <div class="position-absolute search-icon">
+                    <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+                  </div>
+                </div>
+                <p class="mt-8 fs-12 warning" *ngIf="isJobManagerDisabled?.length > 0 && visibility">{{isJobManagerDisabled}}</p>
+              </div>
+              <div *ngIf="showJobType" class="form-group col-md-6">
+                <label class="d-flex">{{'job_type' | i18next }}<span class="require">*</span>
+                  <i class="info-icon custom-field-info material-icons ml-8" tooltip="{{'job_type_desc' | i18next}}"
+                  placement="right">help</i></label>
+                <ng-select placeholder="{{'select' | i18next}}" (change)="selectJobType($event)"[(ngModel)]="selectedJobType"
+                  [ngModelOptions]="{standalone: true}" [disabled]="selectedJobType || job_action!=='create'"
+                  [loading]="jobTypeLoading">
+                  <ng-option *ngFor="let item of jobTypes" [value]="item?.value">
+                    {{item?.label | i18next}}
+                  </ng-option>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+          <ng-container *ngIf="((showJobType && selectedJobType) || !showJobType) && isHierarchyIntersectionPresent">
+          <div class="p-8" *ngIf="!!createJobForm?.value?.job_manager?.id">
+            <div class="form-group" (clickOutside)="suggestionPaneVisible = false">
+              <label> {{ 'job_template' | i18next }} <span class="require">*</span> </label>
+              <div class="with-icon position-relative" [ngClass]="{'disableDiv': visibility === 'isedit'}">
+                <icon class="icon-on-inout no-pointer" size="24" name="search"></icon>
+                <!-- templet search input -->
+                <input type="text" class="form-control s_height"
+                  placeholder="{{ 'search_job_template_by_name' | i18next }}"
+                  [(ngModel)]="selectedTemplate.template_name" (focus)="suggestionPaneVisible = true"
+                  (keyup)="usersearchTemplate.next($event)" [ngModelOptions]="{ standalone: true }"
+                  [readonly]="selectedTemplate?.id"
+                  (keydown.enter)="stopPropagation($event)"
+                  />
+                <div class="loader search-loader" *ngIf="dataLoading"></div>
+                <div class="dropdown-templates position-absolute rounded-sm d-flex flex-column w-100"
+                  *ngIf="suggestionPaneVisible && templateData && templateData?.length > 0 && !selectedTemplate?.id">
+                  <div class="job-template d-flex align-items-center px-24 py-12 cursor-pointer" *ngFor="let jobTemplate of templateData">
+                    <div class="w-100" (click)="selectedJobtemplate(jobTemplate)">
+                      <div class="d-flex">
+                        <p class="job-title text-dark">{{ jobTemplate?.template_name }}</p>
+                        <div (click)="selectedJobtemplate(jobTemplate)">
+                          <div class="badges template-badge text-nowrap">{{ jobTemplate?.job_id }}</div>
+                        </div>
+                      </div>
+                      <div class="d-flex align-items-center mt-8 position-relative">
+                        <span class="d-flex w-25 align-items-center pr-32" title="Title">
+                          <icon size="14px" name="next_week" type="material" class="d-flex position-static"
+                            cuClass="d-flex">
+                          </icon>
+                          <p class="ml-8 small text-truncate" [title]="jobTemplate?.ref_title?.title">{{
+                            jobTemplate?.ref_title?.title }}</p>
+                        </span>
+                        <span class="d-flex w-25 align-items-center pr-32" title="Category">
+                          <icon size="14px" name="category" type="material" class="d-flex  position-static"
+                            cuClass="d-flex">
+                          </icon>
+                          <p class="ml-8 small text-truncate" [title]="jobTemplate?.category?.category_name">{{
+                            jobTemplate?.category?.category_name }}</p>
+                        </span>
+                        <span *ngIf="jobTemplate?.hierarchy?.length" class="d-flex w-25 align-items-center pr-32"
+                          title="Hierarchy">
+                          <icon size="14px" name="account_tree" type="material" class="d-flex position-static"
+                            cuClass="d-flex">
+                          </icon>
+                          <p class="ml-8 small text-truncate" [title]="setVals(jobTemplate?.hierarchy, 'name')">{{
+                            setVals(jobTemplate?.hierarchy, 'name') }}</p>
+                        </span>
+                        <span *ngIf="jobTemplate?.program_industry?.length && jobTemplate?.program_industry[0]?.name"
+                          class="d-flex w-25 align-items-center pr-32" title="Labor Category">
+                          <icon size="14px" name="corporate_fare" type="material" class="d-flex position-static"
+                            cuClass="d-flex">
+                          </icon>
+                          <p class="ml-8 small text-truncate" [title]="jobTemplate?.program_industry[0].name">{{
+                            jobTemplate?.program_industry[0].name }}</p>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Commented as part of AMFMI-2763
+                <icon *ngIf="this.visibility === 'clonejob' && selectedTemplate?.id" size="20px" name="cancel" class="icon-on-inout clear-search"
+                  (click)="clearTemplate()"></icon> -->
+              </div>
+            </div>
+            <div *ngIf="!selectedTemplate || !selectedTemplate?.id">
+              <p class="text-dark text-uppercase small mb-8 font-weight-medium">
+                {{ 'recent_job_templates' | i18next }}
+              </p>
+              <p class="text-center" *ngIf="
+                  tempRecentArray &&
+                  tempRecentArray?.length === 0 && !recentJobsLoading
+                ">
+                {{ 'no_data_found' | i18next }}
+              </p>
+
+              <ul class="template-list" *ngIf="recentJobsLoading">
+                <li class="skeleton" *ngFor="let sk of [1, 2, 3, 4, 5, 6]; let i = index"></li>
+              </ul>
+              <ul class="template-list">
+                <li *ngFor="let recentJob of tempRecentArray; let i = index">
+                  <a (click)="selectedJobtemplate(recentJob)" >{{ recentJob?.template_name
+                    }}</a>
+                </li>
+              </ul>
+            </div>
+
+            <div *ngIf="!selectedTemplate || !selectedTemplate?.id">
+              <p class="text-dark text-uppercase small mb-8 font-weight-medium">
+                {{ 'popular_job_templates' | i18next }}
+              </p>
+              <p class="text-center" *ngIf="
+                  tempPopularArray &&
+                  tempPopularArray?.length === 0 && !popularJobsLoading
+                ">
+                {{ 'no_data_found' | i18next }}
+              </p>
+              <ul class="template-list" *ngIf="popularJobsLoading">
+                <li class="skeleton" *ngFor="let sk of [1, 2, 3, 4, 5, 6]; let i = index"></li>
+              </ul>
+              <ul class="template-list">
+                <li *ngFor="let recentJob of tempPopularArray; let i = index">
+                  <a (click)="selectedJobtemplate(recentJob)" >{{
+                    recentJob?.template_name || recentJob?.title?.title
+                    }}</a>
+                </li>
+              </ul>
+            </div>
+            <ng-container *ngIf="!!createJobForm?.value?.job_manager?.id">
+            <div class="form-group-row" *ngIf="selectedTemplate && selectedTemplate?.id">
+              <div class="form-group">
+                <label> {{ 'hierarchy' | i18next }} <span class="require">*</span> </label>
+                <!-- <input type="text" class="form-control aligntextLeft" placeholder="{{ 'choose_hierarchy' | i18next }}"
+                  formControlName="hierarchy" (click)="sidebarOpen()" readonly /> -->
+                  <div class="position-relative hierarchy-select">
+                    <ng-select placeholder="{{'choose_hierarchy' | i18next}}"
+                    [readonly]="name === 'editApprovedJob'" (change)="selectHierarchy($event, false, true)" (clear)="clearHierarchy()" notFoundText="{{'no_data_found'|i18next}}" formControlName="hierarchy" bindLabel="name" bindValue="name">
+                    <ng-option *ngFor="let option of hierarchyFlattenArray" [value]="option" [disabled]="option && option?.isDisabled">
+                      <span> {{ option?.name }}</span>
+                    </ng-option>
+                  </ng-select>
+                    <span class="cursor-pointer hierarchy hierarchy-sel" (click)="sidebarOpen()">
+                    <icon size="19px" name="account_tree" type="material" class="d-flex" cuClass="d-flex"></icon>
+                  </span>
+                  </div>
+              </div>
+              <div class="form-group">
+                <label> {{ 'work_location' | i18next }} <span class="require">*</span> </label>
+                <div [tooltip]="!selectElement?.isOpen && workLocation ? workLocation : null" placement="top" class="mr-8 position-relative search-candidate">
+                  <ng-select #selectElement placeholder="{{ 'search_work_location' | i18next }}" formControlName="locations"
+                    (change)="changeLocation($event); updateLocationTooltipData();" (search)=this.usersearchLocation.next($event)
+                    (clear)="getWorkLocations('', true)" [readonly]="disableWorkLocation || name==='editApprovedJob'">
+                    <ng-option [value]="location?.id" *ngFor="let location of createJobObject?.locations">
+                      <span class="text-capitalize">{{
+                        location?.name
+                        }} <span *ngIf="location?.code">- {{location?.code}}</span></span>
+                    </ng-option>
+                  </ng-select>
+                  <div class="position-absolute search-icon">
+                    <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+                  </div>
+                </div>
+              </div>
+              <!-- labor categories -->
+              <div class="form-group managers" *ngIf="filteredLaborCategories && filteredLaborCategories?.length > 0">
+                <label> {{ 'labor_category' | i18next }} <span class="require">*</span> </label>
+                  <div class="mr-8 position-relative search-candidate">
+                <ng-select bindLabel="name" [searchable]="true" (search)="this.laborCategories.next($event)"
+                  [readonly]="readOnlyLaborCategory" label="id" [clearable]="filteredLaborCategories.length > 1"
+                  placeholder="{{ 'search_labor_category' | i18next }}" formControlName="labor_category"
+                  [multiple]="false" ngDefaultControl>
+                  <ng-option *ngFor="let option of filteredLaborCategories" [value]="option?.id">
+                    <span class="text-capitalize">{{ option?.name }}</span>
+                  </ng-option>
+                </ng-select>
+                <div class="position-absolute search-icon">
+                  <icon name="search" size="20px" type="material"
+                      class="d-flex" cuClass="d-flex"></icon>
+              </div></div>
+              </div>
+              <!-- end -->
+            </div>
+
+            <!-- <div class="form-group" *ngIf="selectedTemplate && selectedTemplate?.id">
+              <label> {{'Job Description'|i18next}} </label>
+              <quill-editor [readOnly]="!is_Edit_Description"
+                [modules]="modules" formControlName="description" [styles]="{ height: '200px' }" format="html" [sanitize]="true">
+              </quill-editor>
+            </div> -->
+
+            <div *ngIf="selectedTemplate && selectedTemplate?.id" class="form-group">
+              <label> {{'job_description' | i18next}} <span *ngIf="jdRequired" class="require">*</span></label>
+              <app-quill-uploader (fileData)="getFileData($event)" exts=".pdf, .doc, .docx, .txt"
+                (quillInputEmitter)="getQuillInputText($event)" [quillInputTxt]="quillInputTxt"
+                [isUploadBtn]="jdAttachment" [uploadFileData]="jobDescriptionFile" [modules]="modules"
+                [readOnly]="!is_Edit_Description" (errorLog)="showError($event)"
+                [isUploadBtnReq]="jdAttachmentMandate" (dataBeforeParse)="dataBeforeParseFile($event)"
+                [isParsingDone]="isJobParsingDone"
+                refName="jobs"></app-quill-uploader>
+              </div>
+              <div *ngIf="selectedTemplate && selectedTemplate?.id" class="form-group position-relative attachments-box">
+              <label class="d-flex align-items-center"><span class="mr-4">{{'additional_attachments' | i18next}}</span>
+                <icon cuClass="d-flex cursor-pointer" size="18px" name="info"
+                [tooltip]="'Only_pdf,_doc,_docx,_xls,_xlsx,_zip,_rar,_txt_files_with_maximum_size_of_25MB_for_each_file' | i18next" placement="right"></icon>
+            </label>
+              <app-add-attachment uploadLabel="{{'additional_attachments' | i18next}}" refName="jobs" [multiple]="true"
+                (uploadDataFiles)="uploadFiles($event)" [oldUploadedFiles]="uploadJD"
+                [formatAllowed]="['pdf', 'doc', 'docx', 'xls', 'xlsx', 'zip', 'rar', 'txt']">
+              </app-add-attachment>
+            </div>
+            <div *ngIf="isQualificationEnabled">
+              <div class="mt-24" *ngIf="
+                createJobForm.get('qualifications')?.controls &&
+                selectedTemplate &&
+                selectedTemplate?.id
+              ">
+              <h4 I18n class="float-left mr-16 title-height font-weight-medium">
+                {{ 'qualifications' | i18next }}
+              </h4>
+              <div class="add-opton float-left">
+                <button (click)="openDropdown()" (clickOutside)="onClickedOutside()"
+                  class="mr-24 d-flex align-items-center justify-content-center">
+                  <icon name="add" size="20px" cuClass="d-flex"></icon>
+                  {{ 'add_qualifications' | i18next }}
+                  <icon [name]="showQualification ? 'expand_less' : 'expand_more'" cuClass="d-flex" size="20px"></icon>
+                </button>
+                <ul class="qualification-dropdown" [ngClass]="{ active: showQualification }">
+                  <li *ngFor="
+                      let qualification of qualification_types;
+                      let j = index
+                    ">
+                    <a  [class.active]="qualification.selected"
+                      (click)="closeDropdown(qualification, j)">{{ qualification?.name }}</a>
+                  </li>
+                </ul>
+              </div>
+              <div class="clearfix"></div>
+              <div class="py-16 add-qualifications">
+                <div class="row">
+                  <div class="col-12" [formGroup]="item" *ngFor="
+                      let item of createJobForm.get('qualifications')?.controls;
+                      let i = index
+                    ">
+                    <div class="form-group-row flex-direction-unset-m">
+                      <div class="form-group">
+                        <label>{{ item.get("qualification_type")?.value | i18next}}  <span *ngIf="item?.get('is_qualification_type_required')?.value" class="require">*</span>
+                        </label>
+                        <div class="position-relative search-qualification" *ngIf="credentialsData">
+                          <ng-select bindLabel="name" formControlName="values" [multiple]="true" [loading]='qualLoading'
+                            loadingText='Loading...'
+                            (search)="this.usersearchQualifications.next({item: item, event: $event})"
+                            (clear)="searchQualifications(item, $event)" [searchable]="true" [clearOnBackspace]="true"
+                            placeholder="{{ 'search' | i18next }} {{ item.get('qualification_type')?.value | i18next }}">
+                            <ng-option *ngIf="!item.get('data')?.value" disabled>
+                              <div>{{ 'type_to_search' | i18next }} {{ item.get('qualification_type')?.value }}</div>
+                            </ng-option>
+                            <div *ngIf="item.get('data')?.value">
+                              <ng-option *ngFor="let option of item.get('data')?.value" [value]="option" [disabled]="option?.is_locked">
+                                {{ option?.name }}
+                              </ng-option>
+                            </div>
+                          </ng-select>
+                          <div class="position-absolute search-icon">
+                            <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+                          </div>
+                        </div>
+                      </div>
+                      <div *ngIf="!item?.get('is_qualification_type_required')?.value"
+                        class="delete-icon d-flex align-items-center cursor-pointer"
+                        (click)="removeQualification(i)" [tooltip]="isQualificationLocked[i] ? ('this_qualification_can_not_be_removed_because_a_locked_field_is_present' | i18next) : ('remove_qualification' | i18next)" placement="left"
+                        [ngClass]="{'opacity-10': isQualificationLocked[i]}" >
+                        <icon name="delete_forever" color="#B25858" size="20px"></icon>
+                      </div>
+                    </div>
+                    <div class="tabs d-flex flex-wrap">
+                      <div class="tabs-panel p-8 mr-8 mb-16" *ngFor="
+                          let c of item.get('values')?.value;
+                          let i = index
+                        ">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <p class="small font-weight-medium">{{ c?.name }}</p>
+                          <span class="cursor-pointer">
+                            <icon size="13px" [name]="c?.is_locked ? 'lock' : 'close'" type="material" class="d-flex" cuClass="d-flex" [color]="c?.is_locked ? 'blue' : 'grey'"
+                              (click)="removeQualificationValues(item, i, c?.is_locked)">
+                            </icon>
+                          </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                          <p class="small font-weight-medium">{{ c?.code }}</p>
+                        </div>
+                        <!-- <div class="small font-weight-medium">{{c?.code}}</div> -->
+                        <div class="d-flex justify-content-between align-items-center my-8 mb-8">
+                          <span class="toggle-with-icon cursor-pointer">
+                            <div class="toggle-panel-inner px-0 remove_style">
+                              <span class="toggle-switch" [ngClass]="
+                                  c?.is_required ? 'toggle-on' : 'toggle-off'
+                                " (click)="c.is_required = (c?.is_locked ? c.is_required : !c?.is_required)"></span>
+                            </div>
+                          </span>
+                          <span class="small pl-8 left-option">
+                            <span *ngIf="!c?.is_required">{{ 'optional' | i18next }}</span>
+                            <span *ngIf="c?.is_required">{{ 'required' | i18next }}</span>
+                          </span>
+                        </div>
+                        <div class="strength w-100" *ngIf="
+                            item.get('qualification_type')?.value === 'Skill' ||
+                            item.get('qualification_type')?.value ===
+                              'Speciality'
+                          ">
+                          <div class="pt-4 strength-bar">
+                            <ul>
+                              <li tooltip="{{ tooltipTitle }}" [visibility]="tooltipvisible" placement="bottom"
+                                delay="500" *ngFor="let r of [1, 2, 3]; let index = index"
+                                (click)="clickOnRatings(c, r)" [ngClass]="{
+                                  active: c.level >= r
+                                }" (mouseover)="showTooltip(index)"></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+            <!-- Background checks -->
+            <!-- <ng-container *authorize="'view_background_checklist'">
+              <div class="panel panel-light p-0 mt-24 removesearch"
+                *ngIf="createJobForm?.value?.background_check_list && createJobForm?.value?.background_check_list?.length>0">
+                <div class="panel-content my-16">
+                  <div class="d-flex align-items-center justify-content-between mb-16">
+                    <h4 class="d-flex align-items-center">
+                      {{ 'background_checks' | i18next }}
+                      <span class="require" *ngIf="selectedTemplate.isbackgroundChecks">*</span>
+                    </h4>
+                    <div>
+                      <div class="toggle-panel-inner remove_style">
+                        <span (click)="removeBackgroundChecks()" class="toggle-switch"
+                          [ngClass]="selectedTemplate.isbackgroundChecks ? 'toggle-on' : 'toggle-off'">
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div *ngIf="selectedTemplate.isbackgroundChecks">
+                    <div class="d-flex align-items-center justify-content-between mb-16"
+                      *ngFor="let cl of createJobForm?.value?.background_check_list;let i = index">
+                      <p class="d-flex align-items-center"> {{cl?.name}}</p>
+                      <div>
+                        <label class="checkbox-container">
+                          <input type="checkbox" name="checklist" [checked]="cl?.is_enabled"
+                            (change)="toggleBackgroudCheck(cl)">
+                          <span class="checkmark"></span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-container> -->
+            <!-- end -->
+
+            <!--Onboarding checklist-->
+            <div class="d-none panel panel-light p-0 mt-24 removesearch"
+              *ngIf="createJobForm?.value?.checklist && createJobForm?.value?.checklist?.length>0 && !disableOnboarding">
+              <div class="panel-content my-16">
+                <div class="d-flex align-items-center justify-content-between mb-16">
+                  <h4 class="d-flex align-items-center">
+                    {{ 'onboarding_checklist' | i18next }}
+                    <span class="require" *ngIf="createJobForm.get('is_onboarding_checklist').value">*</span>
+                  </h4>
+                  <div>
+                    <div class="toggle-panel-inner remove_style">
+                      <span (click)="removeOnboardingCheckList()" class="toggle-switch"
+                        [ngClass]="createJobForm.get('is_onboarding_checklist').value ? 'toggle-on' : 'toggle-off'">
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="createJobForm.get('is_onboarding_checklist').value">
+                  <div class="d-flex align-items-center justify-content-between mb-16"
+                    *ngFor="let cl of createJobForm?.value?.checklist;let i = index">
+                    <p class="d-flex align-items-center"> {{cl?.name}}</p>
+                    <div>
+                      <label class="checkbox-container">
+                        <input type="radio" name="checklist" [checked]="cl?.is_enabled"
+                          (change)="toggleOnBoardingChecklist(cl)">
+                        <span class="checkmark"></span>
+                      </label>
+                      <!-- <icon class="d-flex text-success" size="24px" name="check_circle" type="material" cuClass="d-flex"></icon> -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--End Onboarding checklist-->
+          </ng-container>
+          </div>
+          </ng-container>
+        </div>
+        <div class="p-32 pt-16" *ngIf="financialDetail">
+          <div class="p-8">
+            <div class="form-group-row">
+              <div class="form-group date-picker position-relative">
+                <label> {{ 'start_date' | i18next }} <span class="require">*</span> </label>
+                <svms-datepicker [inputdateFormat]="dateFormat"
+                  [options]="options" id="start_date" I18n formControlName="start_date"
+                 [ngClass]="{'disableDiv': name === 'editApprovedJob' }" flip="false">
+                </svms-datepicker>
+                <div *ngIf="createJobForm?.get('start_date')?.value && createJobForm?.invalid && createJobForm?.errors?.startEndDateExceedError" class="mt-8 fs-12 danger">
+                  {{
+                    createJobForm?.errors?.startEndDateExceedError | i18next
+                  }}
+                </div>
+              </div>
+              <div class="form-group date-picker position-relative"
+                [ngClass]="{'mb-24': tenureSpan && tenureSpanUnit && createJobForm.get('start_date').value}">
+                <label> {{ 'end_date' | i18next }} <span class="require">*</span> </label>
+                <svms-datepicker
+                  [inputdateFormat]="dateFormat"
+                  [options]="options2"
+                  id="end_date"
+                  I18n
+                  formControlName="end_date"
+                  [durationStartDate]="createJobForm.get('start_date').value"
+                  [allowDuration]="true"
+                  flip="false"
+                  [ngClass]="{'disableDiv': name === 'editApprovedJob' }">
+                </svms-datepicker>
+                <div *ngIf="tenureSpan && tenureSpanUnit && createJobForm.get('start_date').value && !tenureLimitCheck" class="position-absolute mt-8 fs-12 danger">
+                  {{tenureMessage | i18next | snakeToTitleCase}} {{this.tenureSpan | i18next}} {{this.tenureSpanUnit | i18next | lowercase}}.
+                </div>
+              </div>
+              <div class="form-group">
+                <label>
+                  {{ 'number_of_positions' | i18next }} <span class="require">*</span>
+                </label>
+                <input type="text" class="form-control" placeholder="{{ 'number_of_positions' | i18next }}"
+                  formControlName="num_resources" (blur)="getResourceBudget()" onkeydown="return ( event.ctrlKey || event.altKey
+                  || (47<event.keyCode && event.keyCode<58 && event.shiftKey==false)
+                  || (95<event.keyCode && event.keyCode<106)
+                  || (event.keyCode==8) || (event.keyCode==9)
+                  || (event.keyCode>34 && event.keyCode<40)
+                  || (event.keyCode==46) )" (change)="fetchMarkupValues()" [readonly]="name === 'editApprovedJob'" />
+                <p class="validation-msg" *ngIf="createJobForm?.get('num_resources')?.errors?.pattern">
+                  {{ 'positions_must_be_greater_than_zero' | i18next }}.
+                </p>
+              </div>
+
+              <div *ngIf="showExpenseAllowed" class="form-group">
+                <label> {{'expense_allowed' | i18next}}<i class="info-icon custom-field-info material-icons ml-8"
+                  [tooltip]="'If you choose to select Yes to the ‘Expense Allowed’ for the job then consider adding additional budget in \'View Detailed Estimate\' page under \'Budget Summary\' section.' | i18next" placement="right">help</i></label>
+                <ng-select [items]="items" [clearable]="false" bindLabel="value" bindValue="value" formControlName="allow_expense" [readonly]="name === 'editApprovedJob' || !editExpenseAllowed"></ng-select>
+              </div>
+              </div>
+
+            <h4 class="text-black font-weight-medium">{{ 'rate_details' | i18next }}</h4>
+            <div class="form-group-row">
+              <div class="form-group">
+                <label> {{ 'currency' | i18next }} <span class="require">*</span> </label>
+                <div class="mr-8 position-relative search-candidate">
+                  <ng-select bindLabel="unit_of_measure" placeholder="{{ 'search_currency' | i18next }}"
+                    formControlName="currency" (change)="getRateCard()" [readonly]="name === 'editApprovedJob'">
+                    <ng-option *ngFor="let c of createJobObject?.currencies" [value]="c?.name">
+                      <span class="text-uppercase">{{c?.name}}</span>
+                    </ng-option>
+                  </ng-select>
+                  <div class="position-absolute search-icon">
+                    <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label> {{ 'unit_of_measure' | i18next }} <span class="require">*</span> </label>
+                <ng-select [clearable]="false" bindLabel="unit_of_measure"
+                  placeholder="{{'select_unit_of_measure' | i18next}}" formControlName="unit_of_measure"
+                  (change)="getRateCard();fetchTimesheetTypes()" [readonly]="name === 'editApprovedJob'">
+                  <ng-option *ngFor="let c of createJobObject?.rateOption" [value]="c?.unit_of_measure">
+                    <span width="20px" class="mr-4 text-capitalize"
+                      *ngIf="c?.unit_of_measure_label">{{c?.unit_of_measure_label}}</span>
+                  </ng-option>
+                </ng-select>
+              </div>
+              <div class="form-group">
+                <label> {{ratemodel === 'PAY_RATE' ? ('min_pay_rate'|i18next) : ('min_bill_rate'|i18next)}} <span
+                    class="require">*</span> </label>
+                <div class="input-with-fixed-value position-relative">
+                  <span>{{ createJobObject?.currencySymbol | uppercase }}</span>
+                  <input class="form-control pl-64" type="text" placeholder="{{ ratemodel === 'PAY_RATE' ? ('enter_minimum_pay_rate'|i18next) : ('enter_minimum_bill_rate' |i18next)}}"
+                    inputAccuracy="rate" onlyNumber
+                    formControlName="min_bill_rate" (blur)="ToFloat()" 
+                    [readonly]="createJobObject?.rates?.isMinNotChange || name === 'editApprovedJob'" (change)="fetchMarkupValues();addAccuracy('min')" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label> {{ratemodel === 'PAY_RATE' ? ('max_pay_rate'|i18next) : ('max_bill_rate'|i18next)}} <span
+                    class="require">*</span> </label>
+                <div class="input-with-fixed-value position-relative">
+                  <span>{{ createJobObject?.currencySymbol | uppercase}}</span>
+                  <input class="form-control pl-64" type="text" placeholder="{{ ratemodel === 'PAY_RATE' ? ('enter_maximum_pay_rate'|i18next) : ('enter_maximum_bill_rate' |i18next)}}"
+                    inputAccuracy="rate" onlyNumber
+                    (keyup)="showSummary()" formControlName="max_bill_rate" (blur)="checkMaxMin()"
+                    [readonly]="createJobObject?.rates?.isMaxNotChange || name === 'editApprovedJob'" (change)="fetchMarkupValues();addAccuracy('max')" />
+                </div>
+              </div>
+            </div>
+            <!-- <div class="form-group-row">
+              <div class="form-group">
+                <div class="form-group-row">
+                  <div class="form-group">
+                    <label> {{ 'work_period' | i18next }} <span class="require">*</span> </label>
+                    <ng-select class="text-capitalize" bindLabel="name" placeholder="{{ 'select_work_type' | i18next }}"
+                    [readonly]="getunitMeasureStatus" formControlName="work_period">
+                    <ng-option *ngFor="let c of workPeriods" [value]="c?.value">
+                      <span class="text-capitalize">{{c?.name}}</span>
+                    </ng-option>
+                  </ng-select>
+                  </div>
+                  <div class="form-group">
+                    <label> {{ 'timesheet_type' | i18next }} <span class="require">*</span> </label>
+                    <ng-select bindLabel="name" placeholder="{{ 'select_timesheet_entry_type' | i18next }}" formControlName="timesheet_type">
+                      <ng-option *ngFor="let c of timesheetTypeList" [value]="c?.id">
+                        <span class="text-uppercase">{{c?.label}}</span>
+                      </ng-option>
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="float-left d-flex mt-24 pt-12 checkbox-wrapper">
+                  <label class="checkbox-container">
+                    <input type="checkbox"   formControlName="is_submission_exceed_max_bill_rate">
+                    <span class="checkmark"></span>
+                    <p><b>{{ 'submissions_may_exceed_maximum_bill_rate' | i18next }}</b></p>
+                </label>
+
+                </div>
+              </div>
+            </div> -->
+            <div  class="form-group-row">
+              <div *ngIf="!hide_ot_exempt" class="form-group ml-0 pl-0">
+                <label>{{'ot_exempt' | i18next}}</label>
+                <ul class="overtime-control">
+                  <li>
+                    <div class="radio-wrapper">
+                      <input type="radio" name="overtime" value="false" [checked]="!is_ot_exempt"
+                        (change)="is_ot_exempt = false;resetRatefactorList()">
+                      <label>{{ 'no' | i18next }}</label>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="radio-wrapper">
+                      <input type="radio" name="overtime" value="true" [checked]="is_ot_exempt"
+                        (change)="is_ot_exempt = true;resetRatefactorList()">
+                      <label>Yes</label>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <div class="form-group">
+                <div *ngIf="showTimesheetType">
+                  <label>{{'timesheet_type'|i18next}} <span class="require">*</span></label>
+                  <ng-select [items]="timesheetTypeList" placeholder="{{ 'choose_timesheet_type' | i18next }}"
+                    [clearOnBackspace]="true" [searchable]="true" [clearable]="true" bindLabel="label" bindValue="value"
+                    ngDefaultControl formControlName="timesheetType" [loading]="loadingtimesheetType" loadingText="Loading...">
+                  </ng-select>
+                </div>
+                </div>
+              <div class="form-group">&nbsp;</div>
+              <div class="form-group">&nbsp;</div>
+              <div *ngIf="hide_ot_exempt" class="form-group">&nbsp;</div>
+            </div>
+            <ng-container *authorize="'view_mark_up_details'">
+            <h4 class="text-black font-weight-medium"
+              *ngIf="rate_model && ratemodel != null && ratemodel != 'BILL_RATE'">
+              {{('markup_details'|i18next) + " ("+rate_model+" "+('rate_base'|i18next)+")"}}
+            </h4>
+            <div class="form-group-row" *ngIf="rate_model && ratemodel != null && ratemodel != 'BILL_RATE'">
+              <div class="form-group" *ngIf="!isMaxBudgetCalculation">
+                <label>{{ 'average_markup' | i18next }}</label>
+                <input type="text" class="form-control" [readonly]="true" formControlName="averagemarkup" inputAccuracy="markup_percentage">
+              </div>
+              <div class="form-group " *ngIf="!isMaxBudgetCalculation">
+                <label>{{ 'minimum_markup' | i18next }}</label>
+                <input type="text" class="form-control" [readonly]="true" formControlName="minmarkup" inputAccuracy="markup_percentage">
+              </div>
+              <div class="form-group ">
+                <label>{{ 'maximum_markup' | i18next }}</label>
+                <input type="text" class="form-control" [readonly]="true" formControlName="maxmarkup" inputAccuracy="markup_percentage">
+              </div>
+              <div class="form-group ">&nbsp;</div>
+            </div>
+            </ng-container>
+            <!--
+              Section Not Required as part of VDTC-115
+            <div class="form-group-row" *ngIf="ratemodel !== 'BILL_RATE'">
+              <div class="form-group ">
+                <label>{{ 'average___+_rate_+___rate_with_markup' | i18next }}</label>
+                <div class="input-with-fixed-value position-relative">
+                  <span>{{ createJobObject?.currencySymbol | uppercase}}</span>
+                  <input type="text" class="form-control" [readonly]="true" formControlName="estpayrate"
+                    style="text-align: right;">
+                </div>
+              </div>
+              <div class="form-group ">
+                <label>{{ 'min___+_rate_+___rate_with_markup' | i18next }}</label>
+                <div class="input-with-fixed-value position-relative">
+                  <span>{{ createJobObject?.currencySymbol | uppercase}}</span>
+                  <input type="text" class="form-control" [readonly]="true" formControlName="estminrate"
+                    style="text-align: right;">
+                </div>
+              </div>
+              <div class="form-group ">
+                <label>{{ 'max___+_rate_+___rate_with_markup' | i18next }}</label>
+                <div class="input-with-fixed-value position-relative">
+                  <span>{{ createJobObject?.currencySymbol | uppercase}}</span>
+                  <input type="text" class="form-control" [readonly]="true" formControlName="estmaxrate"
+                    style="text-align: right;">
+                </div>
+              </div>
+              <div class="form-group">&nbsp;</div>
+            </div>
+            -->
+            <!-- <div class="border-top mt-16 pt-24 mb-24 d-flex align-items-center justify-content-between">
+              <h4 class="text-black font-weight-medium">{{ 'activity_based_pricing' | i18next }}</h4>
+              <toggle-button [checked]="show_activities" (changed)="setActivityFlag($event)"></toggle-button>
+            </div>
+ -->
+            <!-- <div class="form-group" *ngIf="show_activities">
+              <label>{{ 'activities' | i18next }}</label>
+              <input type="text" class="form-control" formControlName="activity" (keyup.enter)="addActivity()"
+                [ngClass]="{ 'error':
+              createJobForm.controls['activity']?.invalid && (createJobForm.controls['activity']?.dirty || createJobForm.controls['activity']?.touched)}" />
+            </div>
+            <div class="d-flex flex-wrap align-items-center" *ngIf="show_activities">
+              <div class="badge badge-light mt-12" *ngFor="let activity of activities;let i = index">
+                {{activity}}
+                <icon size="14px" name="cancel" (click)="removeActivity(i)" theme="outlined" type="material"
+                  class="d-flex ml-8" cuClass="d-flex">
+                </icon>
+              </div>
+            </div> -->
+            <div *ngIf="manageRatePermission || viewRatePermission">
+            <div class="border-top pt-24 mt-24 mb-24 rate-section">
+              <h4 class="text-black font-weight-medium mb-8">{{ 'rate_type' | i18next }}</h4>
+              <p>{{ 'select_rate_types' | i18next }}</p>
+              <div class="d-flex align-items-center">
+                <div class="mr-8 position-relative search-candidate w-100">
+                  <ng-select [clearable]="false" [readonly]="name === 'editApprovedJob' || !manageRatePermission" class="w-100"
+                    formControlName="rates" [searchable]="true" multiple="true" bindLabel="name"
+                    placeholder="{{ 'search_rate_type' | i18next }}">
+                    <ng-option *ngFor="let rate of rateFactor ; let i = index" [value]="rate" [disabled]="rate?.abbreviation?.toLowerCase() === 'st' && isStRatePresentInForm">
+                      <span>{{rate?.name}}</span>
+                    </ng-option>
+                  </ng-select>
+                  <div class="position-absolute search-icon">
+                    <icon name="search" size="20px" type="material" class="d-flex" cuClass="d-flex"></icon>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="panel panel-light p-16 mb-16" *ngFor="let r of createJobForm?.value?.rates;let i = index">
+                <div class="d-flex align-items-center justify-content-between"
+                  [ngClass]="{'mb-16': !manageRatePermission}">
+                  <p class="font-weight-medium text-black text-capitialize">{{r?.name}}</p>
+                  <div class="d-flex align-items-center">
+                    <icon *ngIf="manageRatePermission && r?.abbreviation.toLowerCase() !== 'st'" size="18px" name="delete_outline" color="#376CC7" theme="outlined" type="material"
+                    class="d-flex ml-8 cursor-pointer" color="#D0021B" cuClass="d-flex" (click)="removeRateFactor(r, i)">
+                  </icon>
+                  <icon size="18px" [name]="r?.showAccordian ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
+                  name="keyboard_arrow_up" theme="outlined" color="#000000" type="material"
+                  class="d-flex ml-8 cursor-pointer" cuClass="d-flex" (click)="r.showAccordian=!r?.showAccordian">
+                </icon>
+                  </div>
+                </div>
+                <div *ngIf="r?.showAccordian">
+                  <div>
+                    <p class="sub-title font-weight-medium py-8">{{r?.name}} <span class="rate-label">{{' bill_rate' | i18next}}</span></p>
+                  </div>
+                  <div class="row no-gutters">
+                    <ng-container *ngFor="let rb of r?.bill_rate;let j = index;let last= last; let first= first">
+                      <div class="col-md-1">
+                        <div class="form-group">
+                          <label class="label-grey">{{ 'factor' | i18next }}</label>
+                          <input type="text" [disabled]="!manageRatePermission || r?.abbreviation.toLowerCase() === 'st'"
+                            [(ngModel)]="rb.factor" [ngModelOptions]="{standalone: true}" class="form-control border-grey-left"
+                            (blur)="addAccuracyInFactor(rb)" placeholder="0" [ngClass]="{error:rb.factor>10 }" onkeydown="return ( event.ctrlKey || event.altKey
+                          || (47<event.keyCode && event.keyCode<58 && event.shiftKey==false)
+                          || (95<event.keyCode && event.keyCode<106)
+                          || (event.keyCode==8) || (event.keyCode==9)
+                          || (event.keyCode>34 && event.keyCode<40)
+                          || (event.keyCode==46) || (event.keyCode ===190) )"
+                          inputAccuracy="rate">
+                        </div>
+                        <div class="form-group" *ngIf="rb.factor>10">
+                          <p class="danger">{{ 'please_add_rate_factor_less_than' | i18next }} 10</p>
+                        </div>
+                      </div>
+                      <div class="col-md-2">
+                        <div class="form-group">
+                          <label class="label-grey">{{ 'select_rate' | i18next }}</label>
+                          <input disabled type="text" class="form-control text-capitalize border-grey-right" value="{{getRateType(rb?.rate)}}">
+                        </div>
+                      </div>
+  
+                      <div class="col-md-auto px-8" *ngIf="j===0 && r?.bill_rate?.length>=2">
+                        <label>&nbsp;</label>
+                        <div class="radio-group">
+                          <div class="radio-container">
+                            <input type="radio" checked />
+                            <span class="checkmark align-justify-center">
+                              <icon class="d-flex" color="inherit" cuclass="d-flex" size="24px" name="add"></icon>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    <div *ngIf="manageRatePermission && r?.bill_rate?.length === 1 && r?.abbreviation.toLowerCase() !== 'st'" class="col-md-auto pl-8">
+                      <div [ngClass]="{'d-none': first, 'd-flex': last , 'flex-row': r?.abbreviation?.toLowerCase() !== 'st' }" class="mt-24">
+                        <a class="btn btn-light text-dark mr-8"
+                        (click)="addRate(i, j ,rb ,'bill_rate')">
+                        <icon size="16px" name="add" color="inherit" theme="outlined" type="material"
+                          class="icon--on-left" cuClass="d-flex">
+                        </icon>
+                        {{ 'add_rate' | i18next }}
+                      </a>
+                      </div>
+                    </div>
+                    <div *ngIf="manageRatePermission && last && rb?.is_remove_rate" [ngClass]="{'d-none': first, 'd-flex': last , 'flex-row': r?.abbreviation?.toLowerCase() !== 'st'  }" class="mt-24 pl-8">
+                      <label> &nbsp;</label>
+                      <a (click)="removeRateOrAdjustment(i, j ,rb ,'bill_rate' , 'rate')"
+                        class="text-link fs-13 d-flex align-items-center cross-height">
+                        <div _ngcontent-gix-c585="" class="add-more-link cursor-pointer">
+                          <i _ngcontent-gix-c585="" class="material-icons cross-circle" color="#FF0000">highlight_off</i>
+                        </div>
+                      </a>
+                    </div>
+           
+                    <div class="col-md-auto px-8" *ngIf="last && r?.is_bill_flat">
+                      <label>&nbsp;</label>
+                      <div class="radio-group">
+                        <div class="radio-container">
+                          <input type="radio" checked />
+                          <span class="checkmark align-justify-center">
+                            <icon class="d-flex" color="inherit" cuclass="d-flex" size="24px" name="add"></icon>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                      <div class="col-md-2" *ngIf="r?.is_bill_flat && last">
+                        <label> {{ 'flat_adjustment' | i18next }}</label>
+                        <div class="input-with-fixed-value position-relative">
+                          <span>{{createJobObject?.currencySymbol | uppercase}}</span>
+                          <input class="form-control pl-64" type="number" [(ngModel)]="r.bill_flat_adjustment"
+                            [ngModelOptions]="{standalone: true}" inputAccuracy="amount" [disabled]="!manageRatePermission" (blur)="addAccuracyInFlatAdjustment(r , 'bill_flat_adjustment')" />
+                        </div>
+                      </div>
+                      <div *ngIf="(manageRatePermission && last && r?.is_bill_remove_flat) || (manageRatePermission && !r?.is_bill_flat && last)" class="col-md-auto pl-8">
+                        <div [ngClass]="{'d-none': first, 'd-flex': last , 'flex-row': r?.abbreviation?.toLowerCase() !== 'st' }" class="mt-24">
+                          <label> &nbsp;</label>
+                          <a *ngIf="manageRatePermission && last && r?.is_bill_remove_flat"
+                            (click)="removeRateOrAdjustment(i, j ,rb ,'bill_rate', 'adjustment')"
+                            class="text-link fs-13 d-flex align-items-center cross-height">
+                            <div _ngcontent-gix-c585="" class="add-more-link cursor-pointer">
+                              <i _ngcontent-gix-c585="" class="material-icons cross-circle mr-8" color="#FF0000">highlight_off</i>
+                            </div>
+                          </a>
+                          <a (click)="addFlatAdjustment(i, j ,rb ,'bill_rate')" class="btn btn-light text-dark"
+                            *ngIf="manageRatePermission && !r?.is_bill_flat && last">
+                            <icon size="16px" name="add" color="inherit" theme="outlined" type="material"
+                              class="icon--on-left" cuClass="d-flex">
+                            </icon>
+                            {{ 'add_adjustment' | i18next }}
+                          </a>
+                        </div>
+                      </div>
+                    </ng-container>
+                  </div>
+                  <div>
+                    <p class="sub-title font-weight-medium pb-8 text-capitialize">{{r?.name}} <span class="rate-label">{{' pay_rate'|i18next}}</span></p>
+                  </div>
+                  <div class="row no-gutters">
+                    <ng-container *ngFor="let rp of r?.pay_rate;let k = index;let last= last; let first= first">
+                      <div class="col-md-1">
+                        <div class="form-group">
+                          <label>{{ 'factor' | i18next }}</label>
+                          <input type="text" [disabled]="!manageRatePermission || r?.abbreviation.toLowerCase() === 'st'"
+                            (blur)="addAccuracyInFactor(rp)" [(ngModel)]="rp.factor" [ngModelOptions]="{standalone: true}"
+                            class="form-control border-grey-left" placeholder="0" [ngClass]="{error:rp?.factor>10 }" onkeydown="return ( event.ctrlKey || event.altKey
+                          || (47<event.keyCode && event.keyCode<58 && event.shiftKey==false)
+                          || (95<event.keyCode && event.keyCode<106)
+                          || (event.keyCode==8) || (event.keyCode==9)
+                          || (event.keyCode>34 && event.keyCode<40)
+                          || (event.keyCode==46) || (event.keyCode ===190) )"
+                          inputAccuracy="rate">
+                        </div>
+                        <div class="form-group" *ngIf="rp?.factor>10">
+                          <p class="danger">{{ 'please_add_rate_factor_less_than' | i18next }} 10</p>
+                        </div>
+                      </div>
+                      <div class="col-md-2">
+                        <div class="form-group">
+                          <label>{{ 'select_rate' | i18next }}</label>
+                          <input disabled type="text" class="form-control text-capitalize border-grey-right" value="{{getRateType(rp?.rate)}}">
+                        </div>
+                      </div>
+                      <div class="col-md-auto px-8" *ngIf="r?.abbreviation.toLowerCase() !== 'st' && k===0 && r?.pay_rate?.length>=2">
+                        <label>&nbsp;</label>
+                        <div class="radio-group">
+                          <div class="radio-container">
+                            <input type="radio" checked />
+                            <span class="checkmark align-justify-center">
+                              <icon class="d-flex" color="inherit" cuclass="d-flex" size="24px" name="add"></icon>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-auto px-8" *ngIf="r?.abbreviation?.toLowerCase() !== 'st' && manageRatePermission && last && r?.is_pay_flat">
+                        <label>&nbsp;</label>
+                        <div class="radio-group" (click)="AddPayRate('add' , i, k, rp)">
+                          <div class="radio-container">
+                            <input type="radio" checked />
+                            <span class="checkmark align-justify-center">
+                              <icon class="d-flex" color="inherit" cuclass="d-flex" size="24px" name="add"></icon>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-2" *ngIf="last && r?.is_pay_flat" [ngClass]="{'ml-12': !manageRatePermission}">
+                        <label> {{ 'flat_adjustment' | i18next }}</label>
+                        <div class="input-with-fixed-value position-relative">
+                          <span>{{createJobObject?.currencySymbol | uppercase}}</span>
+                          <input class="form-control pl-64" type="number" inputAccuracy="amount" [(ngModel)]="r.pay_flat_adjustment"
+                            [ngModelOptions]="{standalone: true}" [disabled]="!manageRatePermission" (blur)="addAccuracyInFlatAdjustment(r , 'pay_flat_adjustment')" />
+                        </div>
+                      </div>
+                      <div class="col-md-auto pl-8 align-items-center flex-column"
+                        [ngClass]="{'d-none': first, 'd-flex': last}">
+                        <label>&nbsp;</label>
+                        <a *ngIf="manageRatePermission && last && rp?.is_remove_rate"
+                          (click)="removeRateOrAdjustment(i, k ,rp ,'pay_rate')"
+                          class="text-link d-flex align-items-center cross-height mb-8">
+                          <div _ngcontent-gix-c585="" class="add-more-link cursor-pointer">
+                            <i _ngcontent-gix-c585="" class="material-icons cross-circle mr-8" color="#FF0000">highlight_off</i>
+                          </div>
+                        </a>
+                        <a *ngIf="manageRatePermission && r?.pay_rate?.length ===1 && r?.abbreviation.toLowerCase() !== 'st' " (click)="addRate(i, k ,rp ,'pay_rate')"
+                          class="btn btn-light">
+                          <icon size="16px" name="add" color="inherit" theme="outlined" type="material"
+                            class="icon--on-left" cuClass="d-flex">
+                          </icon>
+                          {{ 'add_rate' | i18next }}
+                        </a>
+                        <!-- <a class="link d-flex align-items-center" *ngIf=" !r?.is_pay_flat && last"
+                          (click)="addFlatAdjustment(i, k ,rp ,'pay_rate')">
+                          <icon size="16px" name="add" color="inherit" theme="outlined" type="material"
+                            class="d-flex mr-8" cuClass="d-flex">
+                          </icon>
+                          <u>{{ 'add_adjustment' | i18next }}</u>
+                        </a> -->
+                      </div>
+                    </ng-container>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+            <div *ngIf="
+                createJobForm.get('formatted_working_days').value &&
+                createJobForm.get('single_net_budget').value &&
+                (+createJobForm.get('max_bill_rate').value) > 0
+              ">
+              <h4 class="pt-12 pb-12 font-weight-medium">{{ 'budget_summary' | i18next }}</h4>
+              <div class="budget-section d-flex">
+                <div class="budget-item w-100 mr-16 p-12 rounded-sm">
+                  <icon name="hourglass_empty" size="20" class="green"></icon>
+                  <p class="float-none text-black text-center">
+                    <span class="font-weight-medium">{{
+                      createJobForm.get("formatted_working_days").value
+                      }}</span>
+                    <span>{{ 'duration' | i18next }}</span>
+                  </p>
+                </div>
+                <div class="budget-item w-100 mr-16 p-12 rounded-sm ">
+                  <icon name="person_outline" size="20" class="blue"></icon>
+
+                  <p class="float-none text-black text-center" *ngIf="isMaxBudgetCalculation;else avgBudgetCalculation">
+                    <span class="font-weight-medium">
+                      {{createJobForm.get("max_single_net_budget")?.value | accuracy : 'amount' :  { currencyCode: createJobObject?.currencySymbol + '' } }}
+                    </span>
+                    <span>{{ 'budget' | i18next }} / {{ 'resource' | i18next }}</span>
+                  </p>
+
+                  <ng-template #avgBudgetCalculation>
+                    <p class="float-none text-black text-center">
+                      <span class="font-weight-medium">
+
+                        {{ createJobForm.get("single_net_budget")?.value | accuracy : 'amount' : { currencyCode: createJobObject?.currencySymbol + '' } }}
+                      </span>
+
+                      <span> ({{ (createJobForm.get("min_single_net_budget")?.value ? createJobForm.get("min_single_net_budget")?.value : 0) | accuracy : 'amount' : { currencyCode: createJobObject?.currencySymbol + '' }
+                        }} - {{createJobForm.get("max_single_net_budget")?.value | accuracy : 'amount' : { currencyCode: createJobObject?.currencySymbol + '' }
+                      }})</span>
+                      <span>{{ 'budget' | i18next }} / {{ 'resource' | i18next }}</span>
+                    </p>
+                  </ng-template>
+
+                </div>
+                <div class="budget-item w-100 mr-16 p-12 rounded-sm">
+                  <icon name="payments" size="20" class="yellow"></icon>
+                  <p class="float-none text-black text-center">
+
+                    <span class="font-weight-medium" *ngIf="isMaxBudgetCalculation;else avgNetBudget">
+                      {{createJobForm.get("max_net_budget")?.value | accuracy : 'amount' : { currencyCode: createJobObject?.currencySymbol + '' } }}
+                      <!-- | currency: "symbol":"2.2-2" -->
+                    </span>
+
+                    <ng-template #avgNetBudget>
+                      {{ createJobForm.get("net_budget")?.value | accuracy : 'amount' : { currencyCode: createJobObject?.currencySymbol + '' } }}
+                    </ng-template>
+
+                    <span *ngIf="!isMaxBudgetCalculation"> ({{ (createJobForm.get("min_net_budget")?.value ? createJobForm.get("min_net_budget")?.value : 0) | accuracy : 'amount' : { currencyCode: createJobObject?.currencySymbol + '' } }} -
+                      {{createJobForm.get("max_net_budget")?.value | accuracy : 'amount' : { currencyCode: createJobObject?.currencySymbol + '' } }})</span>
+                    <span>{{ 'total_est._budget' | i18next }}</span>
+                  </p>
+                </div>
+                <div class="detail-button" (click)="openCreateEstimateOpen()">
+                  <button>{{ 'view_detailed_estimate' | i18next }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="p-32 pt-16" [ngClass]="{'d-none': !jobDetails}">
+          <div class="p-8">
+            <div *ngIf="allow_pre_identified_candidates" class="toggle-panel toggle-with-icon w-100">
+              <div class="toggle-panel-inner p-16" [ngClass]="preidntified ? 'if-active' : 'if-inactive'">
+                <icon size="20px" name="how_to_reg" type="material" class="mr-24 d-flex align-items-center justify-content-center" cuClass="d-flex"></icon>
+                <p>{{ 'do_you_have_a_pre-identified_candidate' | i18next }}?</p>
+                <span class="toggle-switch" [ngClass]="preidntified ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle()"></span>
+              </div>
+              <!-- Pre-Identified Candidate  -->
+              <app-pre-identified-candidate *ngIf="addCandidate" [isCreateEdit]="true" (candidatedata)="getCandidateDetails($event)" [preIdCandidates]="candidates" [jobDetails]="jobData"></app-pre-identified-candidate>
+            </div>
+            <!--  Foundational fields Section -->
+            <!-- <h4 class="mt-32 pb-12 font-weight-medium" >{{ 'master_fields' | i18next }}</h4> -->
+            <!-- <div class="row">
+              <div class="col-4" *ngFor="
+                  let item of createJobForm.get('foundational_data')?.controls;let i = index
+                ">
+                <div class="form-group-row" [formGroup]="item">
+                  <div class="form-group">
+                    <label I18n>{{ item?.get("foundational_data_name")?.value }}
+                      <span class="require" *ngIf="item?.get('is_required')?.value">*</span></label>
+                    <ng-select [multiple]="false" [formControl]="item?.get('values')" bindLabel="name"
+                      placeholder="{{ 'select' | i18next }}" (search)="getfondationData($event ,item , i)">
+                      <ng-option *ngFor="let option of item?.get('options')?.value" [value]="option">{{ option.name }}
+                      </ng-option>
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
+            </div> -->
+            <app-foundational-fields [moduleName]="'JOBS'" [activeOptions]="visibility === 'clonejob'"
+              (isFoundationalFieldsFormValid)="setFoundationalFieldsFormValid($event)"
+              (foundationalFieldUpdated)="foundationalFieldUpdated($event)" [foundational_data]="isFdValuesLoaded || !jobId ? jobData?.foundational_data : []"
+              [foundational_params]="foundational_params" [isManagerUpdated]="isJobManagerChanged" (fdLoaded)="sendFdData()"></app-foundational-fields>
+
+            <!--  custom fields Section -->
+            <ng-container *ngIf="this.basicJobInfo?.selectedHierarchy?.id && ((showJobType && customFieldParams) || !showJobType)">
+              <app-custom-fields [moduleName]="'JOBS'" [hierarchyIds]="this.basicJobInfo.selectedHierarchy?.id"
+                [custom_fields]="jobData?.custom_fields" [showLabel]="false" [uploadS3RefName]="'jobs'" [isCreate]="!name"
+                (isCustomFieldsFormValid)="setCustomFieldsFormValue($event)"
+                (customFieldUpdated)="customFieldUpdated($event)"
+                [queryParameters]="customFieldParams"></app-custom-fields>
+            </ng-container>
+            <!--Load Account Code Genreate Section-->
+            <div *ngIf="accountCodeCreationActive">
+              <h4 class="mt-32 pb-12 font-weight-medium">{{ 'account_code' | i18next }}<span class="require">*</span>
+              </h4>
+              <div class="row mb-12">
+                <div class="col-md-12" *ngIf="!createJobForm.get('account_code').value">
+                  <button type="button" class="btn btn-light w-100" (click)="showAccountCode='visible'">
+                    <icon name="add" size="18px" type="material" class="icon--on-left " theme="outlined"></icon>
+                    {{ 'account_code' | i18next }}
+                  </button>
+                </div>
+                <div class="col-md-8" *ngIf="createJobForm.get('account_code').value">
+                  <input type="text" class="form-control" formControlName="account_code" placeholder=""
+                    [readonly]="true" style="font-size: 12px;">
+                </div>
+                <div class="col-md-2" *ngIf="createJobForm.get('account_code').value">
+                  <button type="button" class="btn btn-light w-50" (click)="showAccountCode='visible'">
+                    <icon class="d-flex ml-8" size="18px" name="edit" type="material" theme="outlined" cuClass="d-flex">
+                    </icon>
+                  </button>
+                </div>
+              </div>
+              <app-account-code-generate [module]="'JOBS'" [accountCodeFields]="accountCode"
+                (onCreateAccountCode)="onAccountCodeSideBarClose($event)" [visiblity]="showAccountCode"
+                (onClose)="onCloseSideBar($event)"  [entityId]="jobDetails?.id">
+              </app-account-code-generate>
+            </div>
+
+
+            <ng-template [ngIf]="approvalList?.length > 0">
+              <h4 class="pt-12 pb-12 font-weight-medium">{{ 'approval_work_flow' | i18next }}</h4>
+              <p>{{ 'approvers' | i18next }}</p>
+              <div class="approvers d-flex mb-4 p-12" *ngFor="let approver of approvalList; let i = index">
+                <div class="initials align-self-center initials-profile initials__green d-flex mr-8"
+                  *ngIf="approver && approver?.first_name">
+                  {{ approver?.first_name | shortName: "first" }}
+                </div>
+                <div class="d-flex flex-column">
+                  <span class="subtitle-2 font-weight-medium">{{
+                    approver?.first_name
+                    }}</span>
+                  <span class="x-small">{{ approver?.role?.name }}</span>
+                </div>
+              </div>
+              <div class="form-group pt-16 pb-0 mb-0">
+                <label> {{ 'note_for_approver(s)' | i18next }} </label>
+                <textarea rows="3" placeholder="{{ 'add_note' | i18next }}" formControlName="note_for_approver"
+                  class="form-control"></textarea>
+              </div>
+            </ng-template>
+            <div *ngIf="visibility === 'edit_review'" class="form-group-row">
+              <div class="form-group">
+                <label>Review Notes</label>
+                <textarea class="form-control" rows="3" formControlName="review_notes"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-footer d-flex p-24">
+          <div class="footer-left" *ngIf="showSummaries">
+            <h4 class="mb-0 font-weight-medium">{{ 'market_rate' | i18next }}</h4>
+            <p>{{ 'what_salaries_are_candidates_looking' | i18next }}?</p>
+          </div>
+          <div class="cancel-btn">
+            <button type="submit" class="btn btn-outline-primary" (click)="goBack()">
+              {{ 'Cancel' | i18next }}
+            </button>
+          </div>
+          <ng-container>
+          <ng-container *accessControl>
+          <button *ngIf="showSaveDraft" type="button" class="btn btn-light mx-16" (click)="saveDraft()" [disabled]="isSaveLoader || isDraft || createJobForm?.errors?.startEndDateExceedError">
+            {{ 'save_as_draft' | i18next }}
+            <span *ngIf="isDraft" class="ml-8">
+              <button-loader></button-loader>
+            </span>
+          </button>
+          </ng-container>
+          <button *ngIf="!jobDetails" type="submit" class="btn btn-primary" (click)="clickToContinue()"
+            [disabled]="isDisabled || isDraft || isSaveLoader">
+            {{ btnText |i18next }}
+            <icon *ngIf="!jobDetails && !isSaveLoader" size="20px" name="chevron_right" type="material"
+              class="icon--on-right" cuClass="icon-cu"></icon>
+            <span *ngIf="!isDraft && isSaveLoader" class="ml-8">
+              <button-loader></button-loader>
+            </span>
+          </button>
+          <ng-container *accessControl>
+          <button *ngIf="jobDetails" type="submit" class="btn btn-primary" (click)="clickToContinue()"
+            [disabled]="isDraft || isDisabled || isSaveLoader || checkCandidate() || !isCustomFieldsFormValid || !isFoundationalFieldsValid">
+            {{ btnText | i18next }}
+            <icon *ngIf="!jobDetails && !isSaveLoader" size="20px" name="chevron_right" type="material"
+              class="icon--on-right" cuClass="icon-cu"></icon>
+            <span *ngIf="isSaveLoader" class="ml-8">
+              <button-loader></button-loader>
+            </span>
+          </button>
+        </ng-container>
+      </ng-container>
+        </div>
+      </div>
+      <div class="card summary bg-light mt-24 p-32" *ngIf="showSummaries">
+        <div class="d-flex">
+          <div class="left-panel">
+            <div class="child-card pt-8 mt-8">
+              <h4 class="pl-16 pr-16 mb-4">
+                {{ selectedTemplate?.ref_title?.title }} (Level
+                {{ selectedTemplate?.level }})
+              </h4>
+              <p class="pl-16 pr-16 pb-8">
+                <icon name="corporate_fare" size="24px" class="mr-8"></icon>
+                {{ this.createJobObject.selectedLocation?.name}}
+                <!-- United States of America -->
+              </p>
+              <div class="card-bottom p-16 d-flex">
+                <p class="small">{{ 'your_rate' | i18next }}</p>
+                <p class="large">
+                  ${{
+                  createJobObject?.rateCartDetails?.salary / (2000 * 40) ||
+                  135
+                  }}
+                </p>
+              </div>
+            </div>
+            <ul class="other-info mt-16">
+              <li>
+                {{ createJobObject?.rateCartDetails?.supply }}
+                <span>{{ 'supply' | i18next }}</span>
+              </li>
+              <li>
+                {{ createJobObject?.rateCartDetails?.demand }}
+                <span>{{ 'demand' | i18next }}</span>
+              </li>
+              <li>
+                {{ createJobObject?.rateCartDetails?.typical_posting_duration }}
+                <span class="color-gray">{{ 'posting_duration' | i18next }}</span>
+              </li>
+              <li>
+                ${{
+                createJobObject?.rateCartDetails?.salary / (2000 * 40) ||
+                66.66
+                }}
+                <span class="color-gray">{{ 'market_hourly_billing' | i18next }} ..</span>
+              </li>
+            </ul>
+          </div>
+          <div class="right-panel pt-16">
+            <!-- <app-create-job-chart></app-create-job-chart> -->
+            <!--Chart Code-->
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="343" height="236"
+              viewBox="0 0 343 236">
+              <defs>
+                <clipPath id="clip-path">
+                  <rect id="Rectangle_3215" data-name="Rectangle 3215" width="89" height="236"
+                    transform="translate(0 0)" fill="#776de0" stroke="#707070" stroke-width="1" />
+                </clipPath>
+              </defs>
+              <g id="Group_3633" data-name="Group 3633" transform="translate(0 0)">
+                <path id="Union_11" data-name="Union 11"
+                  d="M322.565,164.338h.277a.568.568,0,0,1-.119.009A1.561,1.561,0,0,1,322.565,164.338ZM0,164.338H.275a1.527,1.527,0,0,1-.157.009A.562.562,0,0,1,0,164.338Zm161.376,0H.275c2.273-.232,19.876-5.948,99.266-113.83-.106-.472,32.782-47.871,61.833-50.5a.03.03,0,0,1,0-.009l.045,0,.046,0a.021.021,0,0,1,0,.009c29.051,2.628,61.94,50.028,61.831,50.5,79.392,107.883,96.993,113.6,99.265,113.83Z"
+                  transform="translate(9.357 33.803)" fill="#f6fafd" stroke="rgba(119,109,224,0.56)" stroke-width="2"
+                  stroke-dasharray="10 6" />
+                <g id="Mask_Group_7" data-name="Mask Group 7" transform="translate(127)" clip-path="url(#clip-path)">
+                  <path id="Union_12" data-name="Union 12"
+                    d="M322.565,164.338h.277a.568.568,0,0,1-.119.009A1.561,1.561,0,0,1,322.565,164.338ZM0,164.338H.275a1.527,1.527,0,0,1-.157.009A.562.562,0,0,1,0,164.338Zm161.376,0H.275c2.273-.232,19.876-5.948,99.266-113.83-.106-.472,32.782-47.871,61.833-50.5a.03.03,0,0,1,0-.009l.045,0,.046,0a.021.021,0,0,1,0,.009c29.051,2.628,61.94,50.028,61.831,50.5,79.392,107.883,96.993,113.6,99.265,113.83Z"
+                    transform="translate(-117.645 33.107)" fill="#776de0" />
+                </g>
+                <line id="Line_228" data-name="Line 228" y2="164.09" transform="translate(170.616 33.054)" fill="none"
+                  stroke="#fff" stroke-width="3" stroke-dasharray="10 12" />
+                <line id="Line_229" data-name="Line 229" y1="164.09" transform="translate(140.023 33.054)" fill="none"
+                  stroke="#ffc409" stroke-width="4" />
+                <path id="Polygon_16" data-name="Polygon 16"
+                  d="M7.129,1.508a1,1,0,0,1,1.734,0l6.267,10.9a1,1,0,0,1-.867,1.5H1.729a1,1,0,0,1-.867-1.5Z"
+                  transform="translate(144.132 17.96) rotate(60)" fill="#ffc409" />
+                <text id="Min:22.10" transform="translate(10 219)" fill="#002626" font-size="12"
+                  font-family="SegoeUI, Segoe UI">
+                  <tspan x="0" y="0">
+                    {{ 'min' | i18next }}: $
+                    {{ createJobObject?.rateCartDetails?.range_min || 22.1 }}
+                  </tspan>
+                </text>
+                <text id="Max:65.65" transform="translate(268 218)" fill="#002626" font-size="11"
+                  font-family="SegoeUI, Segoe UI">
+                  <tspan x="0" y="0">
+                    {{ 'max' | i18next }}:$
+                    {{ createJobObject?.rateCartDetails?.range_max || 65.65 }}
+                  </tspan>
+                </text>
+                <text id="Mean_:_43.55" data-name="Mean : $43.55" transform="translate(130 218)" fill="#002626"
+                  font-size="11" font-family="SegoeUI, Segoe UI">
+                  <tspan x="0" y="0">
+                    {{ 'mean' | i18next }} : ${{
+                    createJobObject?.rateCartDetails?.range_min || 43.55
+                    }}
+                  </tspan>
+                </text>
+                <rect id="Rectangle_3216" data-name="Rectangle 3216" width="343" height="7" transform="translate(0 195)"
+                  fill="#fff" />
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+<app-job-estimate *ngIf="isCreateEstimate" [rateModel]="ratemodel" [dateFormat]="dateFormat"
+  selectedCurrency="{{createJobObject?.currencySymbol | uppercase }}" [estimatorFields]="createJobForm?.value"
+  (onCreateClose)="closePopup($event)" [disableEditableFields]="name==='editApprovedJob'" [jobAction]="job_action"></app-job-estimate>
+    <svms-new-hierarchy *ngIf="hierarchyData?.length > 0 && seletHierarchy == 'visible'" class="sidebar-margin" [hierarchyData]="hierarchyData"
+      (selectHierarchyLevel)="selectHierarchy($event)" [selectedHierarchy]="defaultHierarchy" [isUserOnly]="true"
+      [userAssociatedHierarchyID]="userAssociateHierarchy" [isCreateEditJob]="true" [isReadMode]="name==='editApprovedJob'"
+      [hierarchyDropdown]="hierarchyFlattenArray"
+      (sidebarClosed)="sidebarClose()"
+      [dataVisibility]="seletHierarchy"
+      (selectHierarchyLevel)="selectHierarchy($event, true, true, true)"
+      >
+    </svms-new-hierarchy>
+<section class="success-modal py-64" [ngClass]="{ active: jobDetails?.id }" *ngIf="false">
+  <icon size="70px" name="check_circle" type="material" class="success-icon pb-8" cuClass="icon-cu"></icon>
+  <h3 class="mt-16">{{ 'job_successfully_created_message' | i18next }}</h3>
+  <p class="mb-16">{{ 'job_id' | i18next }} : {{ jobDetails?.id }}</p>
+  <button class="btn btn-secondary mb-16" (click)="viewJob()">{{ 'view_job' | i18next }}</button>
+  <button class="btn btn-outline" (click)="createJob()">{{ 'create_new_job' | i18next }}</button>
+</section>
+<div class="modal-overlay" [ngClass]="{ active: jobDetails?.id }"></div>
+<app-svms-modal title="{{ 'expense_allowed' | i18next }}" [visibility]="modalVisibility" (onClose)="onCloseModal()">
+  <app-svms-modal-body>
+    <p>{{ "since_you_have_selected_the_expense_allowed_to_'yes'_for_the_job_then_you_should_consider_adding_the_additional_budget_in_'view_detailed_estimate'_page_under_'budget_summary'_section." | i18next }}</p>
+  </app-svms-modal-body>
+  <app-svms-modal-footer>
+    <div class="d-flex justify-content-between">
+    <button class="btn btn-light" (click)="clickToContinue(true)">{{ 'skip_and_continue' | i18next }}</button>
+    <button class="btn btn-primary" (click)="openCreateEstimateOpen(true)">{{ 'view_detailed_estimate' | i18next }}</button>
+  </div>
+</app-svms-modal-footer>
+</app-svms-modal>

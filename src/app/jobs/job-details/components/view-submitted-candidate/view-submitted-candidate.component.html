@@ -1,0 +1,191 @@
+<svms-sidebar size="large" class="extended-sidebar" title="Candidate Profile" [dataVisibility]="viewCandidateProfile"
+  dataExtended="extended" (onClose)="sidebarClose()">
+  <svms-sidebar-extended >
+    <div class="extend-bar" *ngIf="basicInfo">
+      <figure class="user-avatar overflow-hidden mb-16">
+        <img src="/assets/images/5.jpg" alt="">
+      </figure>
+      <h4 class="mb-4">{{basicInfo?.first_name}} {{basicInfo?.last_name}}</h4>
+      <p>{{basicInfo?.title}}</p>
+      <div class="social-profile mt-8 mb-32" *ngIf="basicInfo?.social_profiles" >
+        <div *ngFor="let profile of basicInfo?.social_profiles,let i = index ">
+          <a target="_blank" class="mr-12" *ngIf="profile.type === 'facebook'">
+            <img src="../../../assets/images/facebook-icon.svg" alt="" width="20" />
+          </a>
+          <a target="_blank" class="mr-12" *ngIf="profile.type === 'linked'">
+            <img src="../../../assets/images/linked.svg" alt="" width="20" />
+          </a>
+        </div>
+      </div>
+      <div class="contact-info">
+        <icon class="mr-12" size="18px" name="mail_outline" type="material" cuClass="icon-cu"></icon>
+        <p >
+          <a href="mailto:basicInfo?.email" >{{basicInfo?.email}}</a>
+        </p>
+      </div>
+      <div class="contact-info" *ngIf="basicInfo?.phone_number" >
+        <icon class="mr-12" size="18px" name="call" type="material" cuClass="icon-cu"></icon>
+        <p>
+          <a href="tel:basicInfo.phone_number">{{basicInfo?.phone_isdcode}} {{basicInfo?.phone_number}}</a>
+        </p>
+      </div>
+      <div class="contact-info" >
+        <icon class="mr-12" size="18px" name="home" type="material" cuClass="icon-cu"></icon>
+        <p>
+         {{basicInfo?.addresses[0]?.street_1}}{{basicInfo?.addresses[0]?.street_2}}{{basicInfo?.addresses[0]?.city}}{{basicInfo?.addresses[0]?.country}}
+        </p>
+      </div>
+      <button class="btn btn-download" (click)="downloadResume()">{{ 'download_resume' | i18next }} <icon size="20px" name="save_alt" type="material" class="icon--on-right" cuClass="icon-cu"></icon></button>
+    </div>
+  </svms-sidebar-extended>
+  <svms-sidebar-body>
+    <div class="pl-24 pr-24 pt-32">
+      <!--Certification-->
+      <section class="profile-section pl-24 pb-8 pr-24 pt-24 mb-24" *ngIf="certificationsArr.length !== 0">
+        <h4>
+          <icon class="section-icon mr-4" size="18px" name="verified" type="material" cuClass="icon-cu"></icon>
+          {{ 'certifications' | i18next }}
+        </h4>
+        <ul class="item-list"  *ngFor="let certi of certificationsArr, let i = index">
+          <li class="clearfix position-relative mb-16">
+            <figure class="bullet float-left text-center d-flex mt-12">
+              <img src="/assets/images/badge.svg" alt="">
+            </figure>
+            <div class="item-description float-right pt-12">
+              <h4>{{certi.certification_name}}</h4>
+              <p>{{certi.authority}}Issued {{certi.initial_date | localDateFormat:'MMM y'}} .
+                {{certi.expiration_date ? 'Expiration Date ' + (certi.expiration_date | localDateFormat:'MMM y') : 'No Expiration Date'}}
+              </p>
+              <p class="mt-8">{{ 'certificate_id' | i18next }} <a>{{certi.certification_id}}</a></p>
+              <div *ngFor="let file of certi.files, let i = index">
+                <figure class="item-img mt-16 float-left mr-16">
+                  <img src="/assets/images/certificate.svg" alt="">
+                  <figcaption>{{file.name}}</figcaption>
+                </figure>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </section>
+      <!--Skill-->
+      <!-- <section class="profile-section pl-24 pb-8 pr-24 pt-24 mb-24" *ngIf="skillsArr.length !== 0"> -->
+        <section class="profile-section pl-24 pb-8 pr-24 pt-24 mb-24" *ngIf="basicInfo">
+        <h4>
+          <icon class="section-icon mr-4" size="18px" name="category" type="material" cuClass="icon-cu"></icon>
+          {{ 'skills' | i18next }}
+        </h4>
+        <ul class="item-list" *ngFor="let skill of skillsArr, let i = index">
+          <li class="clearfix position-relative mb-16">
+            <figure class="bullet float-left text-center d-flex mt-12">
+              <img src="/assets/images/medicine.svg" alt="">
+            </figure>
+            <div class="item-description full-width float-right pt-12">
+              <h4>{{skill.skill_name}}</h4>
+              <p>{{ 'experience' | i18next }} : {{skill.experience_level}}</p>
+              <p>{{skill.description}}
+                <!-- <a >More</a> -->
+              </p>
+            </div>
+          </li>
+        </ul>
+        <div class="no-document text-center mb-32" *ngIf="!skillsArr.length">
+          <img src="/assets/images/specialities.svg" alt="">
+          <p class="font-weight-medium">{{ 'no_skills_added' | i18next }} !</p>
+          <p class="small mb-8">{{ 'here_you_can_add_the_skills_here' | i18next }}</p>
+        </div>
+      </section>
+      <!--Education-->
+      <section class="profile-section pl-24 pb-8 pr-24 pt-24 mb-24" *ngIf="educationArr.length !==0">
+        <h4>
+          <icon class="section-icon mr-4" size="18px" name="school" type="material" cuClass="icon-cu"></icon>
+          {{ 'education' | i18next }}
+        </h4>
+        <ul class="item-list" *ngFor="let educ of educationArr, let i = index">
+          <li class="clearfix position-relative mb-16">
+            <figure class="bullet float-left text-center d-flex mt-12">
+              <img src="/assets/images/education.svg" alt="">
+            </figure>
+            <div class="item-description full-width float-right pt-12">
+              <h4>{{educ.institution}}</h4>
+              <p>{{educ.degree}}</p>
+              <p>{{educ.start_date | localDateFormat:'y'}} - {{educ.end_date | localDateFormat:'y'}}</p>
+              <div *ngFor="let file of educ.files, let i = index">
+                <figure class="item-img mt-16 float-left mr-16">
+                  <img src="/assets/images/certificate.svg" alt="">
+                  <figcaption>{{file.name}}</figcaption>
+                </figure>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </section>
+      <!--Vaccinations-->
+      <section class="profile-section pl-24 pb-8 pr-24 pt-24 mb-24" *ngIf="vaccinationsArr.length !==0">
+        <h4>
+          <icon class="section-icon mr-4" size="18px" name="local_hospital" type="material" cuClass="icon-cu"></icon>
+          {{ 'vaccinations' | i18next }}
+        </h4>
+        <ul class="item-list" *ngFor="let vaccine of vaccinationsArr, let i = index">
+          <li class="clearfix position-relative mb-16">
+            <figure class="bullet float-left text-center d-flex mt-12">
+              <img src="/assets/images/medicine.svg" alt="">
+            </figure>
+            <div class="item-description full-width float-right pt-12">
+              <h4>{{vaccine.vaccine_name}}</h4>
+              <p>{{vaccine.provider}}</p>
+              <p>{{ 'issued' | i18next }} {{vaccine.vaccination_date | localDateFormat:'MMM y'}} . {{ 'expiration_date' | i18next }}
+                {{vaccine.expiration_date | localDateFormat:'MMM y'}}</p>
+            </div>
+          </li>
+        </ul>
+      </section>
+      <!--Specialities-->
+      <section class="profile-section pl-24 pb-8 pr-24 pt-24 mb-24" *ngIf="specialityArr.length !==0">
+        <h4>
+          <icon class="section-icon mr-4" size="18px" name="local_library" type="material" cuClass="icon-cu"></icon>
+          {{ 'specialities' | i18next }}
+        </h4>
+        <ul class="item-list" *ngFor="let speciality of specialityArr, let i = index">
+          <li class="clearfix position-relative mb-16">
+            <figure class="bullet float-left text-center d-flex mt-12">
+              <img src="/assets/images/medicine.svg" alt="">
+            </figure>
+            <div class="item-description full-width float-right pt-12">
+              <h4>{{speciality.speciality_name}}</h4>
+              <p>{{speciality.experience_level}}</p>
+              <p class="mt-8">{{speciality.description}}</p>
+            </div>
+          </li>
+        </ul>
+      </section>
+      <!--Credentials-->
+      <section class="profile-section pl-24 pb-8 pr-24 pt-24 mb-24" *ngIf="credentialsArr.length !==0">
+        <h4>
+          <icon class="section-icon mr-4" size="18px" name="local_library" type="material" cuClass="icon-cu"></icon>
+          {{ 'credentials' | i18next }}
+        </h4>
+        <ul class="item-list" *ngFor="let cred of credentialsArr, let i = index">
+          <li class="clearfix position-relative mb-16">
+            <figure class="bullet float-left text-center d-flex mt-12">
+              <img src="/assets/images/medicine.svg" alt="">
+            </figure>
+            <div class="item-description full-width float-right pt-12">
+              <h4>{{cred.credential_name}}</h4>
+              <p>{{cred.issuing_authority}} Issued {{cred.initial_issue_date | localDateFormat:'MMM y'}} . {{ 'expiration_date' | i18next }}
+                {{cred.expiration_date | localDateFormat:'MMM y'}}</p>
+              <p class="mt-8">{{ 'credential_id' | i18next }} <a class="text-underline"
+                 >{{cred.credential_id}}</a>
+              </p>
+              <div *ngFor="let file of cred.files, let i = index">
+                <figure class="item-img mt-16 float-left mr-16">
+                  <img src="/assets/images/certificate.svg" alt="">
+                  <figcaption>{{file.name}}</figcaption>
+                </figure>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </section>
+    </div>
+  </svms-sidebar-body>
+</svms-sidebar>

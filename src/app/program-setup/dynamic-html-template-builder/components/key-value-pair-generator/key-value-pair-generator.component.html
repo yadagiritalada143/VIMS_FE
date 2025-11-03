@@ -1,0 +1,26 @@
+<div class="p-4 p4-0">
+    <p class="mb-8"> {{ title }}</p>
+    <div *ngFor="let item of items; let index=index let last= last ">
+        <div class="d-flex justify-content-start">
+            <ng-container *ngIf="title?.toLowerCase() == 'styles'">
+                <ng-select placeholder="Select" [(ngModel)] = 'item.key' class="width-50">
+                    <ng-option *ngFor="let key of css_keys_properties" value="{{key}}">
+                        {{ key }}
+                    </ng-option>
+                </ng-select>
+            </ng-container>
+            <ng-container *ngIf="title?.toLowerCase() == 'attributes'">
+                <ng-select placeholder="Select" [(ngModel)] = 'item.key' class="width-50">
+                    <ng-option *ngFor="let attribute of attributes" value="{{attribute}}">
+                        {{ attribute }}
+                    </ng-option>
+                </ng-select>
+            </ng-container>
+            <input class="form-control width-50" type="text" [(ngModel)]='item.value'/>
+            <span>
+                <div class="p-8 pr-0" (click)="addStyle()" *ngIf="last"><i title="Add new style" class="material-icons cursor-pointer ">add</i></div>
+                <div class="p-8 pr-0" (click)="deleteStyle(index)" *ngIf="!last"><i title="Delete style" class="material-icons cursor-pointer ">delete</i></div>
+            </span>
+        </div>
+    </div>
+</div>

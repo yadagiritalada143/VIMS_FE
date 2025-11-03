@@ -1,0 +1,74 @@
+<div class="view-detail-page">
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <i (click)="backClicked()" class="material-icons back-arrow-icon cursor-pointer" tooltip="{{'Back' | i18next}}" placement="bottom">arrow_back</i>
+            <div class="ml-16">
+                <h3 class="font-weight-semibold mb-0">{{'view_vendor_compliance_document_group' | i18next}}</h3>
+                <p class="small">
+                    {{ commonViewService.getTimeStamp(createdTime, modifiedTime) | i18next }}
+                </p>
+            </div>
+        </div>
+
+        <div>
+            <button *authorize="'vendor_compliance_manage'" (click)="navigateEditPage()" class="c-btn c-btn-secondary-medium-left-icon"><i class="material-icons">drive_file_rename_outline</i> {{'edit' | i18next}}</button>
+        </div>
+    </header>
+    <section class="section-body-content">
+        <div class="px-32 py-16">
+            <div class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'vendor_compliance_document_group_name' | i18next }}</div>
+                <div class="item-value font-weight-medium">{{groupName | i18next}}</div>
+            </div>
+            <div class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'status' | i18next }}</div>
+                <div class="item-value"><span class="c-status-ui active">{{isActive | i18next}}</span></div>
+            </div>
+            <div class="detail-item d-flex  mb-32">
+                <div class="item-label">{{ 'description' | i18next }}</div>
+                <div class="item-value">
+                    <p>
+                        {{(readMore) ? description : description | slice:0:250}}
+                        <span *ngIf="(description.length > 250) && (readMore==false)">...&nbsp;</span>
+                        <a href="javascript:void(0);" *ngIf="(description.length > 250) && (readMore==false)" (click)="readMore=true">{{'Read more'|i18next}}</a>
+                        <a href="javascript:void(0);" *ngIf="readMore" (click)="readMore=false">{{'View Less'|i18next}}</a>
+                    </p>
+                </div>
+            </div>
+            <div class="create-view-table-main" *ngIf="selectedDocument.length > 0">
+                <div class="top-head p-16 d-flex justify-content-between align-items-center">
+                    <div class="top-left-head">
+                        <p class="font-weight-medium">{{ 'documents' | i18next }}</p>
+                        <span>{{ 'supporting_text_required' | i18next }}</span>
+                    </div>
+                </div>
+
+                <table class="create-view-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <span> {{ 'document_name' | i18next }}
+                                    <div class="sorting">
+                                        <span class="asc">
+                                            <i class="material-icons">arrow_drop_up</i>
+                                        </span>
+                                        <span class="dec">
+                                            <i class="material-icons">arrow_drop_down</i>
+                                        </span>
+                                    </div>
+                                </span>
+
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody *ngFor="let list of selectedDocument">
+                        <tr>
+                            <td>{{list | i18next}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,58 @@
+<div *ngIf="!deleted" class="list-widget" [ngClass]="{'edit-widget': editMode}">
+  <h5 *ngIf="editMode" class="edit-mode-label font-weight-normal">{{ widget.label |i18next}}</h5>
+  <div class="widget-content-info">
+    <div class="no-border">
+      <div class="widget-header border-bottom p-16">
+        <div class="d-flex justify-content-start align-items-center">
+          <icon size="24px" name="access_alarm" type="material" cuClass="d-flex" class="pt-2 mr-8 text-red">
+          </icon>
+          <span class="text-red font-weight-medium">{{ 'rejected_timesheet(s)' | i18next }}</span>
+        </div>
+      </div>
+
+      <div class="widget-body" *ngIf="!isDataLoading">
+        <p class="my-24  text-center" *ngIf="!tableData?.length">
+          <span *ngIf="isTimesheetEnable; else elseBlock">
+            {{ 'great_job_-_you_do_not_have_rejected_timesheets' | i18next }}.
+          </span>
+          <ng-template #elseBlock>
+            {{ 'user_doesn’t_have_access_to_the_timesheet_module' | i18next }}
+          </ng-template>
+        </p>
+        <div class="panel-item" *ngFor="let timesheet of tableData" (click)="onOpenTimesheet(timesheet)">
+          <div class="d-flex justify-content-between align-items-center cursor-pointer mx-16">
+            <div class="d-flex flex-column left-part my-8">
+              <p class="text-truncate" tooltip="{{getFormattedDate(timesheet.start_date,timesheet.end_date,timesheet.periodicity)}}"
+              placement="bottom" delay="100">
+                {{getFormattedDate(timesheet.start_date,timesheet.end_date,timesheet.periodicity)}}
+              </p>
+              <div>
+                <p class="small text-truncate w-180"
+                  tooltip="{{timesheet?.assignment_title}} ({{timesheet?.assignment_code}})"
+                  placement="bottom" delay="100">
+                  <span class=""> {{timesheet?.assignment_title}} ({{timesheet?.assignment_code}})
+                  </span>
+                </p>
+              </div>
+            </div>
+            <div class="ml-12 status-ui rejected">
+           {{ 'rejected' | i18next }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="isDataLoading" class="dotloader"></div>
+      <div class="widget-pagination" *ngIf="tableData?.length">
+        <paginator [currentPage]="currentPage" [itemsPerPage]="itemsPerPage" [maxPages]="maxPages"
+        (onChangeItemsPerPage)="onChangeItemsPerPage($event)" (onChangePage)="onChangePage($event)"></paginator>
+      </div>
+    </div>
+  </div>
+  <div class="tools-widget">
+    <div class="tool-icons">
+      <span class="material-icons icon-build" (click)="openEditWidgetModal()">build_circle</span>
+      <span class="material-icons icon-delete" (click)="deleteWidget()">delete</span>
+    </div>
+  </div>
+  <span class="icon-move"></span>
+</div>

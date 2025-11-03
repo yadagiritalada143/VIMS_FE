@@ -1,0 +1,34 @@
+<ng-template #statusTemplate let-value="value">
+    <span class="c-status-ui pending" *ngIf="value == 'is_setup'">
+        {{ 'pending_setup' | i18next }}
+    </span>
+    <span class="c-status-ui active" *ngIf="value == true">
+        {{ 'active' | i18next }}
+    </span>
+    <span class="c-status-ui inactive" *ngIf="value == false">
+        {{ 'inactive' | i18next }}
+    </span>
+</ng-template>
+
+<ng-template #showData let-value="value">
+    {{value | i18next}}
+</ng-template>
+
+<ng-template #auditTemplate let-value="value">
+    <div class="check-required">
+        <div class="checkbox-box">
+            <div class="checkbox-wrapper">
+                <label class="checkbox-container">
+                    <input [disabled]="'true'" [checked]="value" type="checkbox" name="EDIT">
+                    <span class="checkmark"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<app-svms-table [tableOptions]="tableOptions" [coloumnDefintions]="svmstableColomnDefn"
+    [dataSource]="vendorList"></app-svms-table>
+
+<app-create-vendor [createManageVendor]="createManageVendor" (onClose)="onCloseCreateVendor($event)"
+    [editData]="editData" [viewData]="viewData" [isViewClicked]="viewclick"></app-create-vendor>

@@ -1,0 +1,233 @@
+<div class="vendor-step-form userProfileWrapper account-step-form d-flex">
+  <div class="sideimg position-relative">
+    <img src="../../../../../../../../assets/images/account_blue.svg" width="100" />
+    <div class="img-text">
+      <h1>{{'vendor_onboarding' | i18nextEager}}</h1>
+      <p>{{'our_mission_is_to_make_you_more_productive_this_will_take_a_minute_to_setup_your_account' | i18nextEager }}</p>
+    </div>
+  </div>
+  <div class="step-form-Content">
+    <header class="profileHead d-flex justify-content-between p-24">
+      <h3 class="font-weight-semibold mb-0">{{'user_profile' | i18nextEager}}</h3>
+      <div class="progress-ui m-0">
+        <ul>
+          <li class="active">
+            <span></span>
+          </li>
+          <li>
+            <span></span>
+          </li>
+        </ul>
+      </div>
+    </header>
+
+    <div class="form-content">
+    <div class="form-wrapper pb-24">
+      <h4 class="font-weight-medium my-24">{{'set_account_password'|i18nextEager}}</h4>
+      <div class="c-form-group-row">
+        <div class="c-form-group position-relative mb-0">
+          <label>{{'enter_your_password'|i18nextEager}} <span class="require">*</span></label>
+          <input type="password" class="c-form-control medium no-radius" [ngClass]="{'error': isPasswordError}"
+            [(ngModel)]="password" placeholder="{{'enter_password'|i18nextEager}}" (input)="checkPasswordRegex()"
+            appPasswordToggle>
+        </div>
+      </div>
+      <div class="output-checker mb-24">
+        <vms-password-strength [passwordToCheck]="password" >
+        </vms-password-strength>
+      </div>
+      <div class="validation-alert p-8 alert-error overflow-hidden d-flex mb-16"
+        *ngIf="isPasswordError || isRePasswordError">
+        <icon name="error_outline" size="24px" type="material" class="d-flex mr-16 justify-content-align-center"></icon>
+        <p class="small" *ngIf="errorMessage">
+          {{errorMessage | i18nextEager}}
+        </p>
+      </div>
+      <div class="c-form-group-row">
+        <div class="c-form-group mb-8">
+          <label>{{'confirm_your_password'|i18nextEager}} <span class="require">*</span></label>
+          <input type="password" class="c-form-control medium" [ngClass]="{'error': isRePasswordError}"
+            [(ngModel)]="rePassword" (ngModelChange)="checkPassword(rePassword)" placeholder="{{'enter_confirm_password'|i18nextEager}}" appPsswordToggle>
+        </div>
+      </div>
+      <h4 class="font-weight-medium mt-32 mb-24">{{'basic_profile_details'|i18nextEager}}</h4>
+      <div class="validation-alert mt-12 p-8 alert-error overflow-hidden mb-16 d-flex align-items-center"
+        *ngIf="isFirstNameError || isLastNameError || isTitleError">
+        <icon name="error_outline" size="24px" type="material" class="pt-0 float-left mr-8"></icon>
+        <p class="text12">
+          {{errorMassage |i18nextEager}}
+        </p>
+      </div>
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+          <label>{{'first_name'|i18nextEager}} <span class="require">*</span></label>
+          <input type="text" name="firstname" class="c-form-control medium" maxlength="23"
+            [ngClass]="{'error': isFirstNameError}" [(ngModel)]="userInfo.first_name" placeholder="{{'first_name'|i18nextEager}}"
+            (keydown)="onKeydown($event)" (keyup)="resetError('first_name')">
+        </div>
+        <div class="c-form-group">
+          <label>{{'middle_name'|i18nextEager}}</label>
+          <input type="text" name="middlename" class="c-form-control medium" maxlength="23"
+            [(ngModel)]="userInfo.middle_name" placeholder="{{'middle_name'|i18nextEager}}" (keydown)="onKeydown($event)">
+        </div>
+        <div class="c-form-group">
+          <label>{{'last_name'|i18nextEager}} <span class="require">*</span></label>
+          <input type="text" name="lastname" class="c-form-control medium" maxlength="23"
+            [ngClass]="{'error': isLastNameError}" [(ngModel)]="userInfo.last_name" placeholder="{{'last_name'|i18nextEager}}"
+            (keydown)="onKeydown($event)" (keyup)="resetError('last_name')">
+        </div>
+      </div>
+      <div class="c-form-group-row">
+        <div class="c-form-group">
+           <label>{{'user_name'|i18nextEager}} <span class="require">*</span></label>
+            <div class="position-relative rounded-0 shadow-sm mb-4 d-flex align-items-center">
+              <input (keyup)="validateUserName($event)" placeholder="{{'enter_user_name'|i18nextEager}}" type="text" class="form-control medium" [(ngModel)]="userInfo.username"
+              [ngClass]="{ 'error': !isValidUserName && userInfo?.username}">
+              <span *ngIf="(!isValidUserName || userNameAlreadyExist) && !validatingUserName && userInfo?.username" class="material-icons error-text align">
+                error
+              </span>
+              <span *ngIf="(isValidUserName && !userNameAlreadyExist) && !validatingUserName  && userInfo?.username" class="material-icons align green-check">
+                check_box
+              </span>
+              <span *ngIf="validatingUserName  && userInfo?.username"><i class="fa fa-circle-o-notch fa-spin loader align"
+                  aria-hidden="true"></i>
+              </span>
+            </div>
+          <div class="validation-alert mt-12 p-8 alert-error overflow-hidden mb-16 d-flex align-items-center"
+            *ngIf="!isValidUserName && !validatingUserName && userInfo?.username?.length > 4 && userInfo?.username?.length < 256">
+            <icon name="error_outline" size="24px" type="material" class="pt-0 float-left mr-8"></icon>
+            <p class="text12">
+              {{'Invalid Characters Available in User Name'|i18nextEager}}.
+            </p>
+          </div>
+            <div class="validation-alert mt-12 p-8 alert-error overflow-hidden mb-16 d-flex align-items-center"
+              *ngIf="userNameAlreadyExist && !validatingUserName">
+              <icon name="error_outline" size="24px" type="material" class="pt-0 float-left mr-8"></icon>
+              <p class="text12">
+                {{'User Name was already availed by another prospect. Please change and try again'|i18nextEager}}.
+              </p>
+            </div>
+            <div class="validation-alert mt-12 p-8 alert-error overflow-hidden mb-16 d-flex align-items-center"
+              *ngIf="userInfo?.username && (userInfo?.username?.length < 5 || userInfo?.username?.length > 255)">
+              <icon name="error_outline" size="24px" type="material" class="pt-0 float-left mr-8"></icon>
+              <p class="text12">
+                {{'user_name_should_be_5_256'|i18nextEager}}.
+              </p>
+            </div>
+        </div>
+        </div>
+        <div class="c-form-group-row">
+          <div class="c-form-group mb-32">
+            <label for="title">{{'designation_/_job_title'|i18nextEager}}</label>
+            <input type="text" name="title" class="form-control" (keyup)="resetError('title')" [ngClass]="{'error': isTitleError}"
+              [(ngModel)]="userInfo.title" placeholder="{{'enter_job_title'|i18nextEager}}">
+          </div>
+        </div>
+
+      <div class="customize-avatar">
+        <div class="form-wrapper">
+          <h4 class="font-weight-medium mb-0">{{'profile_avatar'|i18nextEager}}</h4>
+          <div class="other-avatar-option">
+            <ul>
+              <li [ngClass]="{'imageselected': imageOrColorSelected == 'image' && defaultColor == ''}">
+                <div class="position-relative">
+
+                  <div class="upload-box" (click)="fileInput.click()" [ngClass]="{'after-image-upload': showCropper}">
+                    <div class="before-img-upload">
+                      <icon cuClass="upload-icon" name="cloud_upload" size="30px" type="material"></icon>
+                      <p *ngIf="!croppedImage">{{'upload_an_image_or'|i18nextEager}}
+                        <span>{{'browse'|i18nextEager}}</span>
+                      </p>
+                    </div>
+                    <input hidden type="file" accept="image/*" #fileInput (change)="fileChangeEvent($event)">
+                    <img *ngIf="croppedImage" class="img-after-upload" [src]="croppedImage"
+                      [style.z-index]="croppedImage ? '1' : '-1'" />
+                    <div class="upload-image-edit">
+                      <div class="edit-icon" (click)="fileInput.click()">
+                        <icon cuClass="d-flex" name="photo_camera" size="20px" type="material"></icon>
+                      </div>
+
+                    </div>
+                  </div>
+                  <div *ngIf="croppedImage" class="edit-icon deleteicon" (click)="deleteUpload()">
+                    <icon cuClass="d-flex" name="delete" size="20px" type="material"></icon>
+                  </div>
+                </div>
+              </li>
+              <li *ngFor="let avatars of avatarList">
+                <label class="radio-container" [style.background-color]="avatars.color">
+                  <input type="radio" [(ngModel)]="defaultColor" name="my-avatar" [value]="avatars.color"
+                    (click)="setAvatar($event, avatars)">
+                  <span class="checkmark greencolor"></span>
+                  <span class="text">{{userInfo?.first_name?.substring(0,1) + userInfo?.last_name?.substring(0,1)}} </span>
+                </label>
+              </li>
+            </ul>
+
+          </div>
+          <div class="text-right">
+            <button class="c-btn c-btn-primary-medium-right-icon" [disabled]="(buttonDisable) || (password != rePassword) || !isValidPassword || !userInfo.first_name || !userInfo.last_name || !userInfo.username || !isValidUserName || (userInfo?.username?.length < 5 || userInfo?.username?.length > 255) " (click)="gotoVendorDetail()">{{'save'|i18nextEager}} &amp; {{'continue'|i18nextEager}}
+              <i *ngIf="buttonDisable" class="fa fa-circle-o-notch fa-spin loader align"></i>
+              <i *ngIf="!buttonDisable" class="material-icons">navigate_next</i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cropping-avtar align-items-center justify-content-center d-none" *ngIf="imageLoad">
+        <div class="cropping-avtar-image rounded-sm position-relative">
+          <div class="close_img_croper" (click)="cancelUpload()">
+            <icon cuClass="d-flex justify-content-end" name="close" size="30px" type="material"></icon>
+          </div>
+          <div class="image">
+            <!-- <img src="../../../../assets/images/crop-images.png" class="img-fluid" /> -->
+            <image-cropper [imageChangedEvent]="imageChangedEvent" [maintainAspectRatio]="true"
+              [containWithinAspectRatio]="containWithinAspectRatio" [aspectRatio]="1/ 1" [onlyScaleDown]="true"
+              [roundCropper]="false" [canvasRotation]="canvasRotation" [transform]="transform" [alignImage]="'center'"
+              [style.display]="showCropper ? null : 'none'" format="png" (imageCropped)="imageCropped($event)"
+              (imageLoaded)="imageLoaded()" (cropperReady)="cropperReady($event)" (loadImageFailed)="loadImageFailed()">
+            </image-cropper>
+          </div>
+          <div class="mt-16 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <button type="button" class="btn btn-light" (click)="zoomIn()">
+                <icon cuClass="d-flex" name="zoom_in" size="24px" type="material"></icon>
+              </button>
+              <button type="button" class="btn btn-light" (click)="zoomOut()">
+                <icon cuClass="d-flex" theme="outlined" name="zoom_out" size="24px" type="material"></icon>
+              </button>
+            </div>
+            <div class="d-flex align-items-center justify-content-end">
+              <button type="reset" class="btn btn-outline-danger mr-16" (click)="cancelUpload()">
+                {{'cancel'|i18nextEager}}
+              </button>
+              <button type="button" class="btn btn-secondary" (click)="crop()">
+                {{'crop'|i18nextEager}} & {{'save'|i18nextEager}}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  </div>
+</div>
+<svms-dialog width="400px" height="auto" [visibility]="showBackPopup">
+  <svms-dialog-header class="text-align-left" (close)="showBackPopup = false;">
+    <h4> {{ 'Simplify VMS' | i18next }}</h4>
+  </svms-dialog-header>
+
+  <svms-dialog-body  class="text-align-left mt-16 mb-16">
+    Please do not click browser back button otherwise you have to fill all details again.
+  </svms-dialog-body>
+
+  <svms-dialog-footer>
+    <div class="w-100 d-flex justify-content-end">
+      <button class="btn btn-primary" (click)="showBackPopup = false; ">
+        {{ 'ok' | i18next }}
+      </button>
+    </div>
+  </svms-dialog-footer>
+
+</svms-dialog>

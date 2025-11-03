@@ -1,0 +1,161 @@
+<div class="my-24 status-message-mobile" *ngIf="
+    data?.status &&
+    data?.status?.toLowerCase() !== statuses.draft &&
+    data?.status?.toLowerCase() !== statuses.pending &&
+    data?.status?.toLowerCase() !== statuses.action
+  ">
+  <div class="alert_message" [ngClass]="getStatusClass()">
+    <div class="d-flex align-items-center w-100">
+      <div class="d-flex align-items-center justify-content-start">
+        <icon *ngIf="
+            data?.status?.toLowerCase() === statuses.rejected
+            || data?.status?.toLowerCase() === statuses.deleted
+          " class="d-flex mr-8" size="24px" name="not_interested" type="material" cuClass="d-flex"></icon>
+        <icon *ngIf="
+            data?.status?.toLowerCase() === statuses.approved
+            || data?.status?.toLowerCase() === statuses.modified
+            || data?.status?.toLowerCase() === statuses.withdrawn
+          " class="d-flex mr-8" size="24px" name="check_circle" type="material" cuClass="d-flex"></icon>
+          <icon *ngIf="
+          data?.status?.toLowerCase() === statuses.closed"
+          class="d-flex mr-8" size="24px" name="work_off" type="material" cuClass="d-flex"></icon>
+      </div>
+      <div class="pl-8" *ngIf="simpleMessage; else expenseDetails">
+        <div class="font-weight-bold medium-font">
+          {{ simpleMessage }}
+        </div>
+      </div>
+      <ng-template #expenseDetails>
+        <div class="pl-8">
+          <div class="font-weight-bold mb-4 medium-font">
+            {{ getStatusText(data?.status, data?.is_archive) |i18next}}
+            <ng-container *ngIf="data?.updated_by">
+              {{ 'by' | i18next }} :
+             <span *ngIf="data.status?.toLowerCase() == 'rejected'"> {{ data?.approve_reject_by ? data?.approve_reject_by : "--" }} {{ 'on' | i18next }} : </span>
+             <span *ngIf="data.status?.toLowerCase() != 'rejected'"> {{ data?.updated_by?.name ? data?.updated_by?.name : "--" }} {{ 'on' | i18next }} : </span>
+              <ng-template [ngIf]="data?.delegation?.by?.name">
+                ({{ 'on_behalf_of' | i18next }} {{data?.delegation?.by?.name}})
+              </ng-template>
+              <span *ngIf="customFormatted; else localDateFormat">
+                {{
+                getFormattedDate(data?.date)
+                ? "{{ 'on' | i18next }} " + getFormattedDate(data?.date)
+                : ""
+                }}
+                {{
+                getFormattedTime(data?.date)
+                ? " at " + getFormattedTime(data?.date)
+                : ""
+                }}
+              </span>
+              <ng-template #localDateFormat>
+                <span *ngIf="data?.date; else noDate">
+                  {{ data?.date | localDateFormat }} {{ 'at' | i18next }}  {{ data?.date | localDateFormat: 'hh:mm:ss a z' }}
+                </span>
+                <ng-template #noDate>--</ng-template>
+              </ng-template>
+              <ng-template [ngIf]="data?.impersonation?.submit?.by?.name && data?.status?.toLowerCase() == statuses?.pending?.toLowerCase()">({{'impersonated_by' | i18next}} {{ data?.impersonation?.submit?.by?.name + ' - ' + data?.impersonation?.submit?.by?.organization_category + ' (' + data?.impersonation?.submit?.by?.role + ')' }})</ng-template>
+              <ng-template [ngIf]="data?.impersonation?.approved?.by?.name && data?.status?.toLowerCase() == statuses?.approved?.toLowerCase()">({{'impersonated_by' | i18next}} {{ data?.impersonation?.approved?.by?.name + ' - ' + data?.impersonation?.approved?.by?.organization_category + ' (' + data?.impersonation?.approved?.by?.role + ')' }})</ng-template>
+              <ng-template [ngIf]="data?.impersonation?.update?.by?.name && data?.status?.toLowerCase() == statuses?.modified?.toLowerCase()">({{'impersonated_by' | i18next}} {{ data?.impersonation?.update?.by?.name + ' - ' + data?.impersonation?.update?.by?.organization_category + ' (' + data?.impersonation?.update?.by?.role + ')' }})</ng-template>
+              <ng-template [ngIf]="data?.impersonation?.rejected?.by?.name && data?.status?.toLowerCase() == statuses?.rejected?.toLowerCase()">({{'impersonated_by' | i18next}} {{ data?.impersonation?.rejected?.by?.name + ' - ' + data?.impersonation?.rejected?.by?.organization_category + ' (' + data?.impersonation?.rejected?.by?.role + ')' }})</ng-template>
+              <ng-template [ngIf]="data?.impersonation?.withdrawn?.by?.name && data?.status?.toLowerCase() == statuses?.withdrawn?.toLowerCase()">({{'impersonated_by' | i18next}} {{ data?.impersonation?.withdrawn?.by?.name + ' - ' + data?.impersonation?.withdrawn?.by?.organization_category + ' (' + data?.impersonation?.withdrawn?.by?.role + ')' }})</ng-template>
+              <ng-template [ngIf]="data?.impersonation?.delete?.by?.name && data?.status?.toLowerCase() == statuses?.deleted?.toLowerCase()">({{'impersonated_by' | i18next}} {{ data?.impersonation?.delete?.by?.name + ' - ' + data?.impersonation?.delete?.by?.organization_category + ' (' + data?.impersonation?.delete?.by?.role + ')' }})</ng-template>
+            </ng-container>
+          </div>
+          <ng-container *ngIf="
+            data?.status?.toLowerCase() === this.statuses.withdrawn
+            || data?.status?.toLowerCase() === this.statuses.rejected
+            || data?.status?.toLowerCase() === this.statuses.modified
+            || data?.status?.toLowerCase() === this.statuses.deleted
+            || data?.status?.toLowerCase() === this.statuses.closed
+          ">
+            <div class="mb-4">
+              <span class="font-weight-bold">
+                {{ 'reason_for' | i18next }} {{ getActionName(data?.status, data?.is_archive)}} :
+              </span>
+              {{ data?.reason || " - " }}
+            </div>
+            <div>
+              <span class="font-weight-bold">{{ 'notes' | i18next }} :</span>
+              {{ data?.notes || "N/A" | i18next }}
+            </div>
+          </ng-container>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<div class="my-24 status-message-mobile" *ngIf="data?.status && data?.date && data?.isModified">
+  <div class="alert_message" [ngClass]="getStatusClass()">
+    <div class="d-flex align-items-center w-100">
+      <div class="d-flex align-items-center justify-content-start">
+        <icon class="d-flex mr-8" size="24px" name="check_circle" type="material" cuClass="d-flex"></icon>
+      </div>
+      <div>
+        <div class="pl-8">
+          <div class="font-weight-bold mb-4 medium-font">
+            {{ 'modified' | i18next }}
+            <ng-container *ngIf="data?.updated_by">
+              {{ 'by' | i18next }} :
+             <span> {{ data?.modification_by ? data?.modification_by : "--" }} {{ 'on' | i18next }} : </span>
+              <ng-template [ngIf]="data?.delegation?.by?.name">
+                ({{ 'on_behalf_of' | i18next }} {{data?.delegation?.by?.name}})
+              </ng-template>
+              <span *ngIf="customFormatted; else localDateFormat">
+                {{
+                getFormattedDate(data?.modification_at)
+                ? "{{ 'on' | i18next }} " + getFormattedDate(data?.modification_at)
+                : ""
+                }}
+                {{
+                getFormattedTime(data?.modification_at)
+                ? " {{ 'at' | i18next }} " + getFormattedTime(data?.modification_at)
+                : ""
+                }}
+              </span>
+              <ng-template #localDateFormat>
+                <span *ngIf="data?.date; else noDate">
+                  {{ data?.modification_at | localDateFormat }} {{ 'at' | i18next }}  {{ data?.modification_at | localDateFormat: 'hh:mm:ss a z' }}
+                </span>
+                <ng-template #noDate>--</ng-template>
+              </ng-template>
+            </ng-container>
+          </div>
+          <ng-container>
+            <div class="mb-4">
+              <span class="font-weight-bold">
+                {{ 'reason_for_modify' | i18next }} :
+              </span>
+              {{ data?.modification_reason || " - " }}
+            </div>
+            <div>
+              <span class="font-weight-bold">{{ 'notes' | i18next }} :</span>
+              {{ data?.modification_note || "N/A" | i18next }}
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Action Message -->
+<div class="my-24 status-message-mobile"  *ngIf="data?.status && data?.status == statuses.action">
+  <div class="alert_message" [ngClass]="getStatusClass()">
+    <div class="d-flex align-items-center w-100 justify-content-between"> 
+      <div class="d-flex align-items-center justify-content-start">
+        <img class="d-flex mr-8" size="24px" [src]="data.icon_src"/>
+        <div>
+          <div>{{data.reason}}</div>
+          <div class="text-muted">{{data.notes}}</div>
+        </div>
+      </div>
+      <button class="btn small mr-8" (click)="data.action()">
+        {{ 'take_action' | i18next}}
+      </button>
+    </div>
+  </div>
+
+</div>

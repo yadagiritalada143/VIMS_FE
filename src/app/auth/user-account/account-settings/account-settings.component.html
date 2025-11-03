@@ -1,0 +1,205 @@
+<div class="create-wrapper p-24 pt-32">
+  <div class="user-preference-wrap">
+    <app-user-preference-header [profileUser]="profileUser" [programMember]="programMember" (loadData)="init()">
+    </app-user-preference-header>
+    <div class="preference-body mt-16 rounded-sm p-24">
+      <aside class="profile-sidebar p-16 rounded-sm">
+        <h4 class="mb-16 font-weight-medium">{{ 'contact_info' | i18nextEager }}</h4>
+        <ul class="contact-info">
+          <li>
+            <icon class="float-left mr-12" name="mail" theme="outlined" size="20px" type="material"></icon>
+            <p>
+              <span>{{ 'email' | i18nextEager }}</span>
+              <a tooltip="{{profileUser?.email}}" placement="bottom" delay="500"
+                href="mailto:{{profileUser?.email}}">{{profileUser?.email}}</a>
+            </p>
+          </li>
+          <li *ngIf="profileUser?.contacts?.length > 0 && profileUser?.contacts?.[0]?.number">
+            <icon class="float-left mr-12" theme="outlined" name="call" size="20px" type="material"></icon>
+            <p>
+              <span>{{ 'phone' | i18nextEager }}</span>
+              <span *ngFor="let contact of profileUser?.contacts">
+                <a href="tel:{{contact?.isd_code}} {{contact?.number}}" *ngIf="contact?.number">{{contact?.isd_code}}-{{contact?.number}}</a>
+              </span>
+            </p>
+          </li>
+          <li *ngIf="profileUser?.addresses?.length > 0 && profileUser?.addresses?.[0]?.address_line1">
+            <icon class="float-left mr-12" theme="outlined" name="home" size="20px" type="material"></icon>
+            <p>
+              <span>{{ 'address' | i18nextEager }}</span>
+              <a tooltip="{{profileUser?.addresses[0]?.address_line1 | i18nextEager}}" placement="bottom" delay="500">
+                {{profileUser?.addresses[0]?.address_line1 | i18nextEager}}
+              </a>
+            </p>
+          </li>
+        </ul>
+        <h4 class="mb-16 font-weight-medium" *ngIf="false">{{ 'social_media' | i18nextEager }}</h4>
+        <ul class="social-info" *ngIf="false">
+          <li>
+            <a href="https://github.com/" target="_blank">
+              <img src="../../../../assets/images/social-icons/github.svg" alt="">
+            </a>
+          </li>
+          <li>
+            <a href="https://in.linkedin.com/" target="_blank">
+              <img src="../../../../assets/images/social-icons/linkedin.svg" alt="">
+            </a>
+          </li>
+          <li>
+            <a href="https://twitter.com/?lang=en" target="_blank">
+              <img src="../../../../assets/images/social-icons/twitter.svg" alt="">
+            </a>
+          </li>
+          <li>
+            <a href="https://www.facebook.com/" target="_blank">
+              <img src="../../../../assets/images/social-icons/facebook.svg" alt="">
+            </a>
+          </li>
+          <li>
+            <a href="http://www.besocial.com/" target="_blank">
+              <img src="../../../../assets/images/social-icons/be.svg" alt="">
+            </a>
+          </li>
+          <li>
+            <a href="https://dribbble.com/" target="_blank">
+              <img src="../../../../assets/images/social-icons/dribbble.svg" alt="">
+            </a>
+          </li>
+        </ul>
+      </aside>
+      <div class="profile-left-section">
+        <div class="d-flex justify-content-between">
+          <h4 class="mb-32 font-weight-medium">
+            <icon class="d-inline-block mr-12" theme="outlined" name="account_circle" size="20px" type="material">
+            </icon>
+           {{ 'profile_info' | i18nextEager }}
+          </h4>
+          <button *ngIf="currentProgram?.id" class="float-right btn btn-primary small edit-profile" (click)="editProfile($event)">
+            {{ 'edit_profile' | i18nextEager }}</button>
+        </div>
+        <div class="profile-info d-flex justify-content-start mb-32">
+          <p>
+            <span>{{ 'full_name' | i18nextEager }}</span>
+            {{
+              (
+                (profileUser?.name_prefix ? profileUser?.name_prefix : '') + " " + 
+                (profileUser?.first_name | titlecase) + " " +
+                (profileUser?.middle_name ? (profileUser?.middle_name | titlecase) : '') + " " + 
+                (profileUser?.last_name ? (profileUser?.last_name | titlecase) : '') +" " + 
+                (profileUser?.name_suffix ? profileUser?.name_suffix : '' )
+              ) | i18nextEager
+            }}
+          </p>
+          <p>
+            <span>{{ 'user_name' | i18nextEager }}</span>
+            {{profileUser?.username ? profileUser?.username : '-' | i18nextEager}}
+            <!-- <a >
+              <icon class="d-inline-block mr-4" name="add_circle" size="20px" type="material"></icon>
+              Setup User Name
+            </a> -->
+          </p>
+          <p>
+            <span>{{ 'title' | i18nextEager }}</span>
+            {{profileUser?.title ? profileUser?.title : '-' | i18nextEager}}
+          </p>
+        </div>
+        <div class="profile-info d-flex justify-content-start mb-32">
+          <!-- <p>
+            <span>{{ 'supervisor' | i18nextEager }}</span>
+          <figure class="profile-img d-inline-block mr-8" *ngIf="programMember?.supervisor?.avatar">
+            <img [src]="programMember?.supervisor?.avatar" alt="">
+          </figure>{{programMember?.supervisor?.full_name ? programMember?.supervisor?.full_name : '-'}}
+          </p> -->
+          <p *ngIf="(programMember?.role?.name !== 'Candidate') && (programMember?.role?.name !== 'Worker')">
+            <span>{{ 'user_role' | i18nextEager }}</span>
+            {{programMember?.role?.name | i18nextEager}}
+          </p>
+        </div>
+        <h4 class="mb-32 font-weight-medium location">
+          <icon class="d-inline-block mr-12" name="language" size="20px" type="material"></icon>
+         {{ 'localization' | i18nextEager }}
+        </h4>
+        <div class="profile-info d-flex">
+          <p>
+            <span>{{ 'time_zone' | i18nextEager }}</span>
+            <!-- IST - Central Time -->
+          {{profileUser?.display_preferred_time_zone|i18next}}
+          </p>
+          <p>
+            <span>{{ 'language' | i18nextEager }}</span>
+           {{profileUser?.preferred_language|i18next}}
+          </p>
+          <p style="display: none;">
+            <span>{{ 'date_format' | i18nextEager }}</span>
+           <!-- {{profileUser?.preferred_language|i18next}} -->
+           {{userDateFormate}}
+
+          </p>
+        </div>
+      </div>
+      <div class="clearfix"></div>
+    </div>
+
+    <div *ngIf="!!customFields?.length" class="preference-body mt-16 rounded-sm p-24">
+      <div class="profile-left-section" >
+        <h4 class="mb-32 font-weight-medium">
+          <icon class="d-inline-block mr-16 program-user-cf" name="extension" theme="outlined" size="20px" type="material"></icon>
+          {{ 'custom_fields' | i18next }}
+        </h4>
+
+        <div class="section-info overflow-hidden row">
+          <div class="col-md-4" *ngFor="let custom of customFields">
+            <div class="value-group">
+                <label class="value-head">{{custom?.label}}</label>
+                <span class="value-content">{{custom?.value}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="currentProgram?.id && !user?.is_candidate" class="preference-body mt-16 rounded-sm p-24">
+      <div class="profile-left-section">
+        <h4 class="mb-32 font-weight-medium hierarchy">
+          <icon class="d-inline-block mr-16" name="account_tree" theme="outlined" size="20px" type="material"></icon>
+          {{ 'assigned_hierarchy_levels' | i18nextEager }}
+        </h4>
+        <div *ngIf="rendererData?.length> 0">
+          <app-renderer *ngFor="let renderLevel of rendererData" [renderData]="renderLevel"></app-renderer>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="custom_fields?.length> 0" class="preference-body mt-16 rounded-sm p-24">
+
+      <div class="profile-left-section" >
+        <h4 class="mb-32 font-weight-medium hierarchy">
+          <icon class="d-inline-block mr-16" name="account_tree" theme="outlined" size="20px" type="material"></icon>
+          {{ 'custom_fields_' | i18nextEager }}
+        </h4>
+        <div >
+          <div class="section-info overflow-hidden row" *ngIf="custom_fields">
+            <div class="col-md-4" *ngFor="let custom of custom_fields">
+              <div class="value-group" *ngIf="custom?.value">
+                  <label class="value-head">{{custom?.slug | i18nextEager}}</label>
+                  <ng-container *ngIf="isNaN(custom?.value); else shownumber">
+                    <ng-container *ngIf="!isThisArray(custom?.value); else showArray;">
+                      <span class="value-content" *ngIf="custom?.value">{{custom?.value | snakeToTitleCase | i18nextEager}}</span>
+                    </ng-container>
+                  </ng-container>
+                  <ng-template #shownumber>
+                    <span class="value-content" *ngIf="custom?.value">{{custom?.value | i18nextEager}}</span>
+                  </ng-template>
+                  <ng-template #showArray>
+                    <span class="value-content" *ngIf="custom?.value">{{(custom?.value?.join(', ') | titlecase ) | i18nextEager}}</span>
+                  </ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+  </div>
+</div>
+<app-edit-profile (submited)="updateUser($event)"></app-edit-profile>

@@ -1,0 +1,49 @@
+<div class="ot-factor-popover p-16" (click)="onClickInsideChild($event)">
+  <div class="factor-top d-flex align-items-start justify-content-between">
+   <p>{{rateFactorValue}} {{'factor'|i18next}}</p>
+   <div>
+    <ng-container *ngFor="let rate of rateTypeFactors; let last = last">
+    <div class="factor-value border" >
+      <input type="text" [(ngModel)]="rate.factor" inputAccuracy="rate" (change)="updateFactorValue(rateFactorValue,rate?.rate_type,rate?.factor,rateType)"
+      [disabled]="factorInputDisabled || otExempt" (blur)="onBlurAmount(rate)">
+      <p>{{rate?.rate_type | snakeToTitleCase | i18next}}</p>
+    </div>
+    <ng-container *ngIf="!last && rateTypeFactors.length > 1">
+      <div class="mt-8 mb-8 text-center">
+          <icon name="add_circle" size="20px" color="#FFC77B"></icon>
+      </div>
+    </ng-container>
+    </ng-container>
+    </div>
+  </div>
+  <ng-container *ngIf="!editFromAssignment">
+  <ng-container *authorize="'manage_rate_type_offer'">
+    <div class="mt-12">
+      <button class="btn btn-primary small w-100" type="button"
+      *ngIf="isUpdateCancel" (click)="showEditButtons()" >
+      <icon size="14px" name="drive_file_rename_outline" theme="outlined" color="inherit" type="material"
+          cuclass="icon-cu" class="icon--on-left"></icon>
+          {{'edit_rate_factor'|i18next}} </button>
+      <div class="d-flex justify-content-between" *ngIf="isEditing">
+        <button class="btn btn-light small" type="button" (click)="cancelEdit()">Cancel</button>
+        <button class="btn btn-primary small" type="button" [disabled]="otExempt" (click)="updateRateFactors()">Update</button>
+      </div>
+    </div>
+ </ng-container>
+</ng-container>
+<ng-container *ngIf="editFromAssignment">
+  <ng-container>
+    <div class="mt-12">
+      <button class="btn btn-primary small w-100" type="button"
+      *ngIf="isUpdateCancel" (click)="showEditButtons()" >
+      <icon size="14px" name="drive_file_rename_outline" theme="outlined" color="inherit" type="material"
+          cuclass="icon-cu" class="icon--on-left"></icon>
+          {{'edit_rate_factor'|i18next}} </button>
+      <div class="d-flex justify-content-between" *ngIf="isEditing">
+        <button class="btn btn-light small" type="button" (click)="cancelEdit()">Cancel</button>
+        <button class="btn btn-primary small" type="button" [disabled]="otExempt" (click)="updateRateFactors()">Update</button>
+      </div>
+    </div>
+ </ng-container>
+</ng-container>
+</div>

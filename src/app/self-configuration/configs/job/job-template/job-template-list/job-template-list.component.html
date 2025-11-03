@@ -1,0 +1,25 @@
+<app-svms-table [dataSource]="vmsData" [tableOptions]="tableOptions" [coloumnDefintions]="tableColumnConfig">
+</app-svms-table>
+
+<!-- template being used for showing ui of job template status -->
+<ng-template #jobTemplateStatus let-value="value">
+    <span class="c-status-ui active" *ngIf="value">
+        {{ 'active' | i18next }}
+    </span>
+    <span class="c-status-ui inactive" *ngIf="!value">
+        {{ 'inactive' | i18next }}
+    </span>
+</ng-template>
+
+<!-- template being used for showing active job count ui -->
+<ng-template #activeJobCount let-value="value">
+    <span class="initial-bg">{{(value ?? 0) | i18next}}</span>
+</ng-template>
+
+<!-- template being used for showing job template title ui -->
+<ng-template let-rowData let-value="value" #jobTemplateTitle>
+    <div class="d-flex align-items-center">
+        <!-- <span class="initials initials__purple">{{ value | shortName:'first'}}</span> -->
+        <a><span class="font-weight-medium cursor-pointer" (click)="onClickView(rowData)">{{value | i18next}}</span></a>
+    </div>
+</ng-template>

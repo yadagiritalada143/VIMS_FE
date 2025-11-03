@@ -1,0 +1,135 @@
+<ng-container *ngIf="approversList$ | async as approversList">
+  <ng-container *ngIf="approversList.approvers[0].members.length > 0">
+    <h4 class="font-weight-medium mt-24 mb-16" [hidden]="!additionalBudget">{{ 'list_of_approvers' | i18nextEager }}</h4>
+    <ul [hidden]="!additionalBudget">
+      <ng-container *ngFor="let approverData of approversList.approvers">
+        <li
+          class="
+            border-bottom
+            py-12
+            d-flex
+            justify-content-between
+            align-items-center
+          "
+          *ngFor="let member of approverData.members"
+        >
+        <div>
+          {{ member.first_name }} {{ member.middle_name }}
+          {{ member.last_name }}
+          <span *ngIf="member?.is_impersonated">
+            ({{'impersonated_by'|i18next}}:
+            {{member?.impersonated_data?.impersonated_by?.first_name}}
+            {{member?.impersonated_data?.impersonated_by?.middle_name}}
+            {{member?.impersonated_data?.impersonated_by?.last_name}})
+          </span>
+        </div>
+          <div class="d-flex">
+            <ng-container
+              *ngIf="
+                member.id === currentUserId &&
+                member.is_approval_allowed &&
+                member.status?.toLowerCase() !== ApprovalStatus.approved &&
+                member.status?.toLowerCase() !== ApprovalStatus.rejected
+              "
+            >
+              <button
+                class="btn btn-primary btn-green"
+                (click)="approveBudget(approverData?.approval_chain_id)"
+              >
+                <icon
+                  size="20px"
+                  name="check_circle"
+                  type="material"
+                  class="icon&#45;&#45;on-left"
+                >
+                </icon>
+                {{ 'approve' | i18nextEager }}
+              </button>
+              <button
+                class="btn btn-primary btn-red ml-16"
+                (click)="rejectBudget(approverData?.approval_chain_id)"
+              >
+                <icon
+                  size="20px"
+                  name="block"
+                  type="material"
+                  class="icon&#45;&#45;on-left"
+                >
+                </icon
+                >{{ 'reject' | i18nextEager }}
+              </button>
+            </ng-container>
+            <div
+              *ngIf="
+                member.status?.toLowerCase() === ApprovalStatus.pending && !(member.id === currentUserId && member.is_approval_allowed)
+              "
+            >
+              <div class="d-flex align-items-center">
+                <span class="mr-4">
+                  <icon
+                    size="15px"
+                    name="hourglass_top"
+                    type="material"
+                    class="d-flex op-5"
+                    cuClass="d-flex"
+                  >
+                  </icon>
+                </span>
+
+                <span class="text-dark">{{ 'pending' | i18nextEager }}</span>
+              </div>
+            </div>
+            <div *ngIf="member.status?.toLowerCase() === ApprovalStatus.approved">
+              <div class="d-flex align-items-center">
+                <span class="mr-4">
+                  <icon
+                    size="15px"
+                    name="today"
+                    type="material"
+                    class="d-flex"
+                    cuClass="d-flex"
+                  >
+                  </icon>
+                </span>
+
+                <span
+                  ><span class="text-green">{{ 'approved_on' | i18nextEager }}</span> :
+                  {{ member?.status_modified_on | localDateFormat:'MMMM d, y' }} {{member?.status_modified_on | localDateFormat : 'hh:mm a z'}}
+                </span>
+              </div>
+            </div>
+            <div *ngIf="approverData.status?.toLowerCase() === ApprovalStatus.rejected">
+              <div class="d-flex align-items-center">
+                <span class="mr-4">
+                  <icon
+                    size="15px"
+                    name="today"
+                    type="material"
+                    class="d-flex"
+                    cuClass="d-flex"
+                  >
+                  </icon>
+                </span>
+
+                <span
+                  ><span class="text-red">{{ 'rejected_on' | i18nextEager }}</span> :
+                  {{ member?.status_modified_on | localDateFormat:'MMMM d, y' }} {{member?.status_modified_on | localDateFormat : 'hh:mm a z'}}
+                </span>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ng-container>
+    </ul>
+  </ng-container>
+</ng-container>
+
+<app-rejection-sidebar
+  *ngIf="isOpenReject"
+  (closeRejectModal)="closeReject()"
+  (rejectRequest)="rejectApprovalRequest($event)"
+  [programId]="programId"
+  [assignmentId]="assignmentId"
+  requestType="additional_budget"
+  title="{{ 'reject_additional_budget' | i18nextEager }}"
+></app-rejection-sidebar>

@@ -1,0 +1,122 @@
+<div [formGroup]='form' class="modal-date-time" [ngClass]="{'active' : modalShow}">
+    <header class="position-relative">
+        <h4 class="font-weight-medium">{{ 'interview_date_&_time' | i18next }}</h4>
+        <a class="close-date-time-modal" (click)="hideDateTimeModal()">
+            <icon name="close"></icon>
+        </a>
+    </header>
+    <div class="py-16 px-24">
+        <div class="modal-body d-flex justify-content-between">
+            <div class="date-box">
+                <svms-datepicker [formControl]="form.controls['date']" [inputdateFormat]="'mm/dd/yyyy'"
+                    [hideDisplayValue]="true" I18n [options]="options" alwaysVisible="true"
+                    (onDateChange)='onDateChange($event)'>
+                </svms-datepicker>
+            </div>
+            <div class="time-box">
+                <div class="form-group-row">
+                    <div class="form-group mb-4 position-relative">
+                        <label>{{ 'start_time' | i18next }} <span class="require">*</span></label>
+                        <div class="time-input position-relative">
+                            <icon name="expand_more"></icon>
+                            <input type="text" formControlName='startTime' class="form-control"
+                                [ngClass]="{'error-input': startTimeError}" placeholder="{{ 'hh_mm_tt' | i18next }}"
+                                (click)="showTimePicker('start')" (change)="onSelect($event, 'startTime')"
+                                (clickOutside)="startTimePicker = false;">
+                            <span *ngIf="form.get('startTime').value" class="clear-wrapper" title="Clear all"
+                                (click)="onSelect(null, 'startTime')">
+                                <span aria-hidden="true" class="clear">×</span>
+                            </span>
+                        </div>
+                        <p *ngIf="startTimeError" class="error-message">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                            <span>{{ 'invalid_time' | i18next }}</span>
+                        </p>
+                        <div class="time-dropdown" *ngIf="startTimePicker">
+                            <div *ngIf="!startTimeArray?.length" class="no-records">{{ 'no_items_found' | i18next }}</div>
+                            <ul>
+                                <li *ngFor="let startTime of startTimeArray" (click)="onSelect(startTime, 'startTime')">
+                                    {{startTime.label}}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="form-group mb-4 position-relative">
+                        <label>{{ 'end_time' | i18next }} <span class="require">*</span></label>
+                        <div class="time-input position-relative">
+                            <icon name="expand_more"></icon>
+                            <input type="text" formControlName='endTime' class="form-control"
+                                [ngClass]="{'error-input': endTimeError}" placeholder="{{ 'hh_mm_tt' | i18next }}"
+                                (click)="showTimePicker('end')" (change)="onSelect($event, 'endTime')"
+                                (clickOutside)="endTimePicker = false;">
+                            <span *ngIf="form.get('endTime').value" class="clear-wrapper" title="Clear all"
+                                (click)="onSelect(null, 'endTime')">
+                                <span aria-hidden="true" class="clear">×</span>
+                            </span>
+                        </div>
+                        <p *ngIf="endTimeError" class="error-message">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                            {{ 'invalid_time' | i18next }}
+                        </p>
+                        <div class="time-dropdown" *ngIf="endTimePicker">
+                            <div *ngIf="!endTimeArray?.length" class="no-records">{{'No items found' | i18next}}</div>
+                            <ul>
+                                <li *ngFor="let endTime of endTimeArray" (click)="onSelect(endTime, 'endTime')">
+                                    {{endTime.label}}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <p class="small">{{ 'duration' | i18next }} : {{duration}}{{ 'mins' | i18next }}</p>
+                <div class="candidate-lists mt-12">
+                    <perfect-scrollbar [config]="{ suppressScrollX: true, suppressScrollY: false}">
+                        <div *ngFor='let interviewer of interviewerList'
+                            class="item-box mt-8 d-flex align-items-center justify-content-between">
+                            <p class="small">
+                                <span class="initials initials__purple text-capitalize">{{ interviewer?.first_name |
+                                    slice: 0:1 }}{{ interviewer?.last_name | slice: 0:1 }}</span>
+                                <span class="text-capitalize">{{ interviewer?.first_name }} {{ interviewer?.middle_name
+                                    }} {{ interviewer?.last_name }}</span>
+                            </p>
+                            <p class="status-busy small" *ngIf="interviewer.slotAvailability">{{ 'busy' | i18next }}</p>
+                            <p class="status-free small" *ngIf="!interviewer.slotAvailability">{{ 'free' | i18next }}</p>
+                        </div>
+                        <!-- <div class="item-box mt-8 d-flex align-items-center justify-content-between">
+                            <p class="small">
+                                <span class="initials initials__purple">MS</span>
+                                <span>Sudheer Kumar</span>
+                            </p>
+                            <p class="status-busy small">{{ 'busy' | i18next }}</p>
+                        </div>
+                        <div class="item-box mt-8 d-flex align-items-center justify-content-between">
+                            <p class="small">
+                                <span class="initials initials__purple">MS</span>
+                                <span>Suresh Gupta</span>
+                            </p>
+                            <p class="status-busy small">{{ 'busy' | i18next }}</p>
+                        </div> -->
+                        <!-- <div class="item-box mt-8 d-flex align-items-center justify-content-between">
+                            <p class="small">
+                                <span class="initials initials__purple">MS</span>
+                                <span>Muhammad Shanu</span>
+                            </p>
+                            <p class="status-busy small">{{ 'busy' | i18next }}</p>
+                        </div>
+                        <div class="item-box mt-8 d-flex align-items-center justify-content-between">
+                            <p class="small">
+                                <span class="initials initials__purple">MS</span>
+                                <span>Suresh Gupta</span>
+                            </p>
+                            <p class="status-busy small">{{ 'busy' | i18next }}</p>
+                        </div> -->
+                    </perfect-scrollbar>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="d-flex justify-content-end">
+        <button [disabled]='!form.valid' (click)="save()" class="btn btn-primary">
+            {{ 'save' | i18next }}
+        </button>
+    </footer>
+</div>
+<div class="overlay-date-time" [ngClass]="{'active' : modalShow}"></div>

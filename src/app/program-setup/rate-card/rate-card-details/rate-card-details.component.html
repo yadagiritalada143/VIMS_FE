@@ -1,0 +1,59 @@
+<div class="rate-card-header">
+  <app-rate-card-header *ngIf="rateCard" [isCreate]="isCreate" [isFilter]="isFilter" [isSearch]="isSearch"
+    [isTheme]="isTheme" [isCreateButtonName]="'Add Rate'" [mainmenuName]="'Rate Card'" [submenuName]="submenuName"
+    (onCreate)="onCreate($event)" (onSearch)="onSearch($event)" (clearFilterList)="clearFilterList()" (filtersAppliedList)="filtersAppliedList($event)">
+  </app-rate-card-header>
+</div>
+<div class="rate-card-details" *ngIf="rateCard">
+  <div class="templates">
+    <ul class="main-list p-0">
+      <div class="default-rates">
+        <ul class="p-0">
+          <li class="ul-header">
+            {{ 'default_rates' | i18next }}
+          </li>
+          <li class="ul-list-item"
+            (click)="openEditRate()">
+            {{ 'default' | i18next }}
+            <span class="jobs-count">
+              {{  activeDefaultRateCount }}
+            </span>
+          </li>
+        </ul>
+      </div>
+      <div class="job-templates">
+        <ul>
+
+          <li class="ul-header">
+            {{ 'job_templates' | i18next }}
+          </li>
+
+          <li *ngFor="let template of chainedTemplateKeys; index as it;"
+             class="ul-list-item" (click)='selectActiveTemplate(template)'
+            [class.active]="template === selectedJobTemplate"
+            >
+            {{ mapper.jobTemplates.get(template) || 'Undefined' | i18next }}
+            <span class="jobs-count">
+              {{ chainedTemplates.get(template)?.length }}
+            </span>
+          </li>
+        </ul>
+      </div>
+    </ul>
+  </div>
+
+  <app-rate-card-details-data
+    *ngIf="rateCard"
+    [templateSelected]='selectedJobTemplate'
+    [chainedTemplates]='chainedTemplates'
+    [addRateVisibility]="addRateVisibility"
+    [jobTemplateDisabled]='disableJobTemplate'
+    [rateCard]="rateCard"
+    [job]="activeJob.job"
+    (onClose)="onClose()"
+    (onUpdateData)="onUpdateData($event)">
+  </app-rate-card-details-data>
+
+</div>
+<app-edit-rate-card [card]="editRateCard" [title]="'Edit Rate Card'" [editCardVisibility]="editCardVisibility" (onClose)="onCloseEditCard()" (onUpdateRateCard)="onUpdateRateCard($event)">
+</app-edit-rate-card>

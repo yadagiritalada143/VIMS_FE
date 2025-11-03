@@ -1,0 +1,103 @@
+<section class="activity-pricing-wrapper">
+    <div class="position-relative pt-24">
+        <a  class="back-button" (click)="goToDetailPage()">
+            <icon size="24px" name="keyboard_backspace" type="material" cuClass="d-flex"></icon>
+          </a>
+          <h3 class="text-center mb-24 font-weight-medium">{{ 'activity_based_pricing' | i18nextEager }}</h3>
+          <div class="activity-form-wrapper">
+            <app-logs [log]="logs"></app-logs>
+              <div class="panel panel-light" [hidden]="!assignmentConfig?.project_based?.is_create">
+                <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+                  <div class="panel-body p-24">
+                      <div class="form-group-row">
+                          <div class="form-group">
+                              <label>{{ 'activity' | i18nextEager }}</label>
+                              <input placeholder="{{ 'activity' | i18nextEager }}" type="text" class="form-control" formControlName="title" [ngClass]="{ 'is-invalid': submitted && regFormValidate?.title?.errors }">
+                               <div *ngIf="submitted && regFormValidate?.title?.errors" class="invalid-feedback">
+                                  <div *ngIf="regFormValidate?.title?.errors?.required">{{ 'activity_is_required' | i18nextEager }}</div>
+                              </div>
+                          </div>
+                          <div class="form-group position-relative">
+                            <label>{{'activity_added_date' | i18nextEager}}</label>
+                        <svms-datepicker [options]="options" [inputdateFormat]="dateFormat" ngDefaultControl I18n formControlName="start_date"
+                            #start_date>
+                        </svms-datepicker>
+                            <div *ngIf="submitted && regFormValidate?.start_date?.errors" class="invalid-feedback">
+                                <div *ngIf="regFormValidate?.start_date?.errors?.required">{{ 'title_is_required' | i18nextEager }}</div>
+                            </div>
+                        </div>
+                        <div class="toggle">
+                            <label>{{ 'status' | i18nextEager }}</label>
+                              <div class="toggle-panel">
+                                <div class="toggle-panel-inner" [ngClass]="activity?.value ? 'if-active' : 'if-inactive'">
+                                  <span class="status-text mr-12">{{activity?.title | i18nextEager}}</span>
+                                  <span class="toggle-switch" [ngClass]="activity?.value ? 'toggle-on' : 'toggle-off'"
+                                   (click)="onClickToggleActivity()" ></span>
+                                </div>
+                              </div>
+                        </div>
+                      </div>
+                    <div class="form-group-row">
+                        <div class="form-group" *ngIf="showClientBillRate">
+                            <label>{{ 'client_bill_rate' | i18nextEager }}</label>
+                            <div class="input-with-fixed-value position-relative">
+                                <span>{{currency}}</span>
+                                <input type="number" onlyNumber inputAccuracy="{{accuracyConfig?.rate}}" class="form-control"
+                                    placeholder="0.00" formControlName="billrate"
+                                    (change)="baseRatesChanged('billrate')">
+                            </div>
+                            <div *ngIf="submitted && regFormValidate?.billrate?.errors" class="invalid-feedback">
+                                <div *ngIf="regFormValidate?.billrate?.errors?.required">{{ 'client_bill_rate_is_required' | i18nextEager }}</div>
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group"  *ngIf="showVendorBillRate">
+                            <label>{{ 'vendor_bill_rate' | i18nextEager }}</label>
+                                <div class="input-with-fixed-value position-relative">
+                                    <span>{{currency}}</span>
+                                    <input type="number" onlyNumber inputAccuracy="{{accuracyConfig?.rate}}" class="form-control"
+                                        placeholder="0.00" formControlName="vendor_rate"
+                                        (change)="baseRatesChanged('vendor_rate')">
+                                </div>
+                            <div *ngIf="submitted && regFormValidate?.vendor_rate?.errors" class="invalid-feedback">
+                                <div *ngIf="regFormValidate?.vendor_rate?.errors?.required">{{ 'vendor_bill_rate_is_required' | i18nextEager }}</div>
+                            </div>
+                        </div>
+                        <div class="form-group"  *ngIf="showPayrate">
+                            <label>{{ 'pay_rate' | i18nextEager }}</label>
+                            <div class="input-with-fixed-value position-relative">
+                                <span>{{currency}}</span>
+                                <input type="number" onlyNumber inputAccuracy="{{accuracyConfig?.rate}}" class="form-control"
+                                    placeholder="0.00" formControlName="payrate"  [disabled]="programType === 'MARKUP'"
+                                    (change)="baseRatesChanged('payrate')" >
+                                <p *ngIf="(registerForm?.invalid && registerForm?.errors?.gtr)"
+                                    class="text-red position-absolute">
+                                    {{registerForm?.errors?.gtr|i18next}}
+                                </p>
+                            </div>
+                        </div>
+
+
+                        <div class="add-btn">
+                            <button type="submit" [disabled]="registerForm?.invalid" class="btn w-100 btn-primary float-right">{{ 'add' | i18nextEager }}</button>
+                        </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div class="panel panel-light mt-24 activities-panel">
+                <app-logs [log]="listLogs"></app-logs>
+                <vms-table
+                [loading]="dataLoading"
+               [vmsTableConfig]="tableConfig" [vmsDataSource]="activityPricingList" [totalItem]="totalRecords"
+                [currentPage]="pageNo"
+                [itemsPerPage]="itemPerPage" (onOptionClicked)="optionClicked($event)"
+                (search)="onSearch($event)" (changePage)="onPaginationClick($event)"
+                (onListFilter)="onListFilter($event)">
+              </vms-table>
+              </div>
+          </div>
+    </div>
+</section>

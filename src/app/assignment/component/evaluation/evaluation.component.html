@@ -1,0 +1,50 @@
+<svms-sidebar [title]="'Assignment Evaluation'|i18next" icon="check_circle" [dataVisibility]="isEvalution"
+  (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <app-logs [log]="logs"></app-logs>
+    <div class="row no-gutters justify-content-center align-items-center h-100">
+      <div class="col-6">
+        <div class="d-flex flex-column align-items-center">
+          <span>
+            <icon size="30px" name="account_circle" color="blue" theme="outlined" type="material" class="d-flex"
+              cuClass="icon-cu">
+            </icon>
+          </span>
+          <span>
+            <icon size="16px" name="grade" color="blue" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+            <icon size="16px" name="grade" color="blue" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+            <icon size="16px" name="grade" color="blue" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+          </span>
+
+        </div>
+        <h4 class="text-center mt-8">
+          {{ 'worker_evaluation' | i18nextEager }}
+        </h4>
+        <div class="mt-24">
+          <div class="row align-items-center" *ngFor="let field of evaluationItems" [id]="field?.id">
+            <div class="col-md-6">
+              <p class="evaluated-field">{{field.name | i18nextEager}}</p>
+            </div>
+            <div class="col-md-6 d-flex justify-content-end">
+              <span *ngFor="let grade of value, let i = index" class="curser-pointer">
+                <icon size="24px" name="grade" theme="outlined"
+                  [ngClass]="{'icon--on-left': true,'active-star' : ((grade.value <= evaluationVisualData[field?.id]) && (evaluationVisualData[field?.id] !== -1))}"
+                  type="material" value="grade.value" (click)="getGrade(field.id,grade.value)" cuClass="icon-cu">
+                </icon>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="w-100 d-flex align-items-center justify-content-between mt-32" *ngIf="!isViewMode">
+          <button type="submit"class="btn btn-light small" (click)="sidebarClose()">
+            {{ 'evaluate_later' | i18nextEager }}
+          </button>
+          <button type="submit"  [disabled]="evaluationResult.length === 0" class="btn btn-primary small" (click)="evaluateAssignment()" *accessControl>
+            <icon size="24px" name="check_circle" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+           {{ 'submit' | i18nextEager }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </svms-sidebar-body>
+</svms-sidebar>

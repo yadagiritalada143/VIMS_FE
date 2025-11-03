@@ -1,0 +1,97 @@
+<svms-sidebar title="{{title | i18next}}" [dataVisibility]="visibility" (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <div class="form-group sidebarContent rate-factor-create">
+      <vms-tab-group [selectedIndex]="tabIndex"
+        (onSelectedIndexChange)="tabIndexChange.emit($event)">
+        <vms-tab label="Job Template">
+          <div class="rate-factor-template-form">
+            <div class="form-group-row">
+              <div class="form-group mb-0 pb-0">
+                <label> {{ 'job_template' | i18next }} </label>
+                <input id='jobSearch' class="search-job" [(ngModel)]="templateSearchTerm"
+                  type="text" placeholder="{{'Search Job Template by Name or Title' | i18next}}"
+                  (keyup)='filterJobList($event)'
+                />
+                <span id="search-icon" class="material-icons-outlined">
+                  search
+                </span>
+              </div>
+            </div>
+          </div>
+          <table class="job-template-list">
+            <thead>
+              <tr>
+                <th>
+                  <input type='checkbox' [(ngModel)]="selectAllOption"
+                    id='job-template-controller'
+                    (click)='selectAllOptions()'
+                  />
+                </th>
+                <th>
+                  <label for="template_name">
+                    {{ 'template_name' | i18next }}
+                  </label>
+                </th>
+                <th>
+                  {{ 'job_category' | i18next }} &amp; {{ 'job_title' | i18next }}
+                </th>
+              </tr>
+            </thead>
+            <tbody id='template-list'>
+              <tr class="border-bottom" *ngFor="let template of jobTemplates; let i =index">
+                <td>
+                  <label id="checkbox-container" for="{{template.id}}">
+                    <input [id]="template.id" [(ngModel)]="template.selected" class="checkbox" type="checkbox" />
+                  </label>
+                </td>
+                <td>
+                  <label>
+                    {{ template.name | i18next }}
+                  </label>
+                </td>
+                <td>
+                  <label>
+                    {{ template.title | i18next }}
+                  </label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf='jobTemplates.length === 0' class='table-container'>
+            <h4> {{ 'no_records_found' | i18next }} </h4>
+          </div>
+          <svms-sidebar-footer>
+            <button (click)="tabIndexChange.emit(1)" type="submit" class="btn btn-primary float-right">
+              {{ 'continue' | i18next }}
+              <span class="material-icons-outlined">
+                {{ 'chevron_right' | i18next }}
+              </span>
+            </button>
+          </svms-sidebar-footer>
+        </vms-tab>
+
+        <vms-tab label="Hierarchy">
+          <div class="form-group hierarchy-panel">
+            <label class="px-24 py-16 mb-0">
+              {{ 'select_hierarchy_' | i18next }}
+              <span class="require">*</span>
+            </label>
+            <app-tree id='app-tree'
+              [vmsTreeDataSource]="hierarchyTree"
+              [treeConfig]="treeConfig"
+              [viewBlock]="false"
+            ></app-tree>
+          </div>
+          <svms-sidebar-footer *accessControl>
+            <button type="submit" class="btn btn-primary float-right" (click)="onSave()">
+              {{ 'save' | i18next }}
+              <span class="material-icons-outlined">
+                {{ 'chevron_right' | i18next }}
+              </span>
+            </button>
+          </svms-sidebar-footer>
+        </vms-tab>
+      </vms-tab-group>
+    </div>
+  </svms-sidebar-body>
+</svms-sidebar>

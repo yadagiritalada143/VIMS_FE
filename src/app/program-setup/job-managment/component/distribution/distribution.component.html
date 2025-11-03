@@ -1,0 +1,278 @@
+<form [formGroup]="distributionForm">
+    <div class="panel panel-light p-0" [ngClass]="{'disableDiv' : visibility === 'isview'}">
+        <div class="panel-head">
+            <div class="d-flex align-items-center justify-content-between">
+                <h4 class="d-flex align-items-center ">
+                    {{ 'distribute_to_vendors' | i18next }}
+                </h4>
+                <div class="d-flex align-items-center">
+                    <p class="mr-12">{{ 'set_submission_limit_for_all_vendors' | i18next }}</p>
+                    <input type="number" formControlName="submission_limit_vendor" class="form-control w-70" />
+                    
+                </div>
+            </div> 
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <p class="validation-msg" *ngIf="distributionForm.controls['submission_limit_vendor'].invalid">
+                            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                            {{ 'submission_limit_must_be_between_1_to' | i18next }} 65535
+                        </p>
+                        <p class="w-70"></p>
+                    </div>
+                    </div>
+           
+        </div>
+        <div class="panel-content">
+            <div class="radio-wrapper">
+                <label class="radio-container ">
+                    <input type="checkbox" (change)="selectDistribution('is_automatic_distribution')"
+                        formControlName="is_automatic_distribution">
+                    <span class="checkmark"></span>
+                </label>
+                <p class="text-dark">{{ 'automatic_distribution' | i18next }}</p>
+            </div>
+            <div class="panel panel-light mt-16" *ngIf="distributionForm?.value?.is_automatic_distribution">
+                <div class="panel-head pb-12">
+                    <h4>
+                        {{ 'distribute_to_vendors' | i18next }}
+                    </h4>
+                </div>
+                <div class="panel-content">
+
+                    <p class="text-dark mb-8 font-weight-medium">{{ 'distribution_method' | i18next }}</p>
+                    <div class="radio-wrapper">
+                        <label class="radio-container">
+                            <input type="checkbox" (change)="setDistributionMethod('is_automatic_distribute_submit')"
+                                formControlName="is_automatic_distribute_submit">
+                            <span class="checkmark"></span>
+                        </label>
+                        <p>{{ 'automatically_distribute_upon_submit' | i18next }}</p>
+                    </div>
+                    <div class="radio-wrapper">
+                        <label class="radio-container ">
+                            <input type="checkbox"
+                                (change)="setDistributionMethod('is_automatic_distribute_final_approval')"
+                                formControlName="is_automatic_distribute_final_approval">
+                            <span class="checkmark"></span>
+                        </label>
+                        <p>{{ 'automatically_distribute_upon_final_approval' | i18next }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="radio-wrapper my-16">
+                <label class="radio-container ">
+                    <input type="checkbox" (change)="selectDistribution('is_tiered_distribute_schedule')"
+                        formControlName="is_tiered_distribute_schedule">
+                    <span class="checkmark"></span>
+                </label>
+                <p class="text-dark">{{ 'tiered_distribution_schedule' | i18next }}</p>
+            </div>
+
+            <div class="panel panel-light mt-16" *ngIf="distributionForm?.value?.is_tiered_distribute_schedule">
+                <div class="panel-content mt-24">
+                    <div class="form-group">
+                        <label>{{ 'distribution_schedule' | i18next }}</label>
+                        <ng-select formControlName="distribute_schedule"
+                            (change)="distributionScheduleSelected(distributionForm.value.distribute_schedule)"
+                            [clearable]="false" [searchable]="true" [multiple]="false"
+                            [items]="distributionScheduleList?.distribution_schedules" bindLabel="name" autofocus
+                            placeholder="{{ 'select_distribution_schedule' | i18next }} 1" ngDefaultControl>
+                        </ng-select>
+                    </div>
+
+                    <!-- loop here -->
+                    <div *ngFor="let vendorSchedule of vendorsList; let ind = index">
+                        <p class="text-dark mt-16 font-weight-medium"
+                            *ngIf="vendorSchedule?.schedule_unit==='IMMEDIATE'">{{ 'immediately_release_to' | i18next }}</p>
+                        <div class="d-flex flex-wrap align-items-center"
+                            *ngIf="vendorSchedule?.schedule_unit==='IMMEDIATE'">
+                            <div class="badge badge-blue mt-12 mr-8"
+                                *ngFor="let item of vendorSchedule?.vendors; let vIndex= index">
+                                <span> {{item?.vendor?.name}}</span>
+                                <span>
+                                    <icon (click)="deleteVendor(ind, 'vendors', vIndex)" size="15px" name="cancel"
+                                        type="material" class="d-flex ml-8 cursor-pointer" cuClass="d-flex">
+                                    </icon>
+                                </span>
+                            </div>
+                            <!-- <div class="badge badge-blue mt-12 mr-8" *ngFor="let item of vendorSchedule?.vendors;let vIndex= index">
+                                {{item?.vendor?.name}}
+                                <icon size="14px" name="cancel" type="material" class="d-flex ml-8 cursor-pointer"
+                                    cuClass="d-flex" (click)="deleteVendor(ind, 'vendors', vIndex)"
+                                    >
+                                </icon> 
+                            </div>
+
+                            <div class="badge badge-blue mt-12" *ngIf="distributionForm?.value?.distribute_schedule?.name">
+                            {{distributionForm?.value?.distribute_schedule?.name}}
+                            <icon size="14px" name="cancel" type="material" class="d-flex ml-8 cursor-pointer"
+                                cuClass="d-flex"
+                                (click)="removeDistribution(distributionForm.value.distribute_schedule)">
+                            </icon>
+                        </div> -->
+                        </div>
+                        <div (clickOutside)="vendorSearchList = false;searchInput.value= ''" class="form-group mt-16 mb-0"
+                            *ngIf="vendorSchedule?.schedule_unit==='IMMEDIATE'"
+                            (mouseLeave)="vendorsList[0].vendorSearch = ''">
+                            <label>{{ 'add_more_vendors' | i18next }}</label>
+                            <!-- (keyup)="searchVendor(searchInput.value, 'IMMEDIATE')" -->
+                            <input type="text" #searchInput [debounce]="500"
+                                (debounceChange)="searchVendor(searchInput.value, 'IMMEDIATE')" class="form-control"  placeholder="{{ 'search_more_vendors' | i18next }}" />
+                            <div class="autocomplete-items" *ngIf="vendorsList.length > 0 && searchInput.value">
+                                <div *ngFor="let item of (vendorsList[0]?.vendorSearch || [])"
+                                    (click)="addMoreVendor(item, vendorsList[0]?.id)">
+                                    {{item?.vendor?.name}}
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- <div class="d-flex flex-wrap align-items-center">
+                        <div class="badge badge-light mt-12">
+                            Vendor A
+                            <icon size="14px" name="cancel" type="material" class="d-flex ml-8" cuClass="d-flex">
+                            </icon>
+                        </div>
+                    </div> -->
+                        <p class="text-dark mt-16 font-weight-medium"
+                            *ngIf="vendorSchedule?.schedule_unit !='IMMEDIATE'">
+                            {{ 'after_immediate_distribution_,_distribute_job_after' | i18next }} {{vendorSchedule?.schedule_value}}
+                            {{vendorSchedule?.schedule_unit}}
+                            <!-- &lt;Hours / Days / Weeks&gt;: -->
+                            <!-- Immediately Release To -->
+                        </p>
+                        <div class="d-flex flex-wrap align-items-center"
+                            *ngIf="vendorSchedule?.schedule_unit != 'IMMEDIATE'">
+                            <div class="d-flex flex-wrap align-items-center">
+
+                                <div class="badge badge-blue mt-12 mr-8" *ngFor="let item of vendorSchedule?.vendors;let vIndex= index">
+                                    {{item?.vendor?.name}}
+                                    <icon size="14px" (click)="deleteVendor(ind, 'vendors', vIndex)" name="cancel" type="material" class="d-flex ml-8  cursor-pointer" cuClass="d-flex">
+                                    </icon>
+                                </div>
+                                <div class="badge badge-blue mt-12 mr-8"
+                                    *ngFor="let item of vendorSchedule?.vendor_groups">
+                                    {{item?.vendor?.name}}
+                                    <!-- <icon size="14px" name="cancel" type="material" class="d-flex ml-8" cuClass="d-flex">
+                                    </icon> -->
+                                </div>
+
+                            </div>
+                            <!-- <div class="badge badge-blue mt-12">
+                                Vendor A
+                                <icon size="14px" name="cancel" type="material" class="d-flex ml-8" cuClass="d-flex">
+                                </icon>
+                            </div> -->
+
+                        </div>
+                        <div (clickOutside)="vendorSearchList = false;vendorSchedule.searchValue = ''" class="form-group mt-16 mb-0"
+                            *ngIf="vendorSchedule?.schedule_unit != 'IMMEDIATE'" (mouseLeave)="vendorsList = [];">
+                            <label>{{ 'add_more_vendors' | i18next }}</label>
+                            <!-- (keyup)="searchVendor(vendorSchedule.searchValue, vendorSchedule.id)" -->
+                            <input [(ngModel)]="vendorSchedule.searchValue" [ngModelOptions]="{standalone: true}"
+                                [debounce]="500"
+                                (debounceChange)="searchVendor(vendorSchedule.searchValue, vendorSchedule.id)"
+                                type="text" class="form-control position-relative px-32" maxlength="254" type="text"
+                                class="form-control"
+                                placeholder="{{ 'search_more_vendors' | i18next }}" />
+                            <div class="autocomplete-items" *ngIf="vendorsList.length > 0 && vendorSchedule.searchValue">
+                                <div *ngFor="let item of (vendorSchedule?.vendorSearch || [])"
+                                    (click)="addMoreVendor(item, vendorSchedule.id)">
+                                    {{item?.vendor?.name}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap align-items-center">
+
+                            <div class="badge badge-light mt-12" *ngFor="let item of vendorSchedule?.moreVendors;let vIndex = index">
+                                {{item?.vendor?.name}}
+                                <icon size="14px" (click)="deleteVendor(ind, 'moreVendors', vIndex)" name="cancel" type="material" class="d-flex ml-8  cursor-pointer" cuClass="d-flex">
+                                </icon>
+                            </div>
+                            <!-- <div class="badge badge-light mt-12" *ngFor="let item of vendorSchedule?.vendors">
+                                {{item?.vendor?.name}}
+                                <icon size="14px" name="cancel" type="material" class="d-flex ml-8" cuClass="d-flex">
+                                </icon>
+                            </div>
+                            <div class="badge badge-light mt-12" *ngFor="let item of vendorSchedule?.moreVendors">
+                                {{item?.vendor?.name}}
+                                <icon size="14px" name="cancel" type="material" class="d-flex ml-8" cuClass="d-flex">
+                                </icon>
+                            </div> -->
+
+                        </div>
+                    </div>
+                    <!-- end -->
+                </div>
+            </div>
+            <div class="radio-wrapper my-16">
+                <label class="radio-container ">
+                    <input type="checkbox" (change)="selectDistribution('is_manual_distribution_job_submit')"
+                        formControlName="is_manual_distribution_job_submit">
+                    <span class="checkmark"></span>
+                </label>
+                <p class="text-dark">{{ 'require_manual_distribution_after_job_submit' | i18next }}</p>
+            </div>
+
+
+        </div>
+    </div>
+
+    <!-- API is not ready time being its hide -->
+    <!-- <div class="panel panel-light mt-24 " [ngClass]="{'disableDiv' : visibility === 'isview'}">
+        <div class="panel-head">
+            <div class="d-flex align-items-center justify-content-between">
+                <h4 class="d-flex align-items-center ">
+                    Distribute To Job Boards (Direct Sourcing)
+                </h4>
+                <div>
+                    <div class="toggle-disable">
+                        <div class="toggle-panel-inner">
+                            <span class="toggle-switch" [ngClass]="toggleDisable?.value ? 'toggle-on' : 'toggle-off'"
+                                (click)="onClickToggleDisable()"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-content">
+            <div class="no-gutters row mb-16">
+                <div class="col-6 mb-12" *ngFor="let d of direct_sourcing">
+                    <div class="panel panel-light p-16 mr-8 h-80">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <img src="{{d?.src}}" class="img-fluid" width="99" height="25">
+                            <div>
+                                <label class="checkbox-container">
+                                    <input type="radio" [checked]="d?.ischecked"
+                                        (change)="selectDirectSourcing(direct_sourcing,d)">
+                                    <span class="checkmark checkmark1"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+
+    <div class="row no-gutters mt-24 mb-16">
+        <div class="col-12 d-flex align-items-center justify-content-between">
+            <button type="button" class="btn btn-outline" (click)="backTo()">
+                <icon size="24px" name="keyboard_backspace" theme="outlined" type="material" class="d-flex"
+                    cuClass="d-flex">
+                </icon>
+            </button>
+            <button [disabled]="isSaveLoader || distributionForm?.invalid" *accessControl [hidden]="visibility === 'isview'" type="button" class="btn btn-primary"
+                (click)="saveDistributionForm()">
+                <icon size="20px" name="check_circle" type="material" class="icon--on-Left mr-8" cuClass="icon-cu">
+                </icon> {{ 'submit' | i18next }}
+                <span *ngIf="isSaveLoader" class="ml-8">
+                    <button-loader></button-loader>
+                </span>
+            </button>
+        </div>
+    </div>
+</form>

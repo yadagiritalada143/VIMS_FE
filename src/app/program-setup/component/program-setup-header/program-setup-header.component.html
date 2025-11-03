@@ -1,0 +1,86 @@
+<div class="header-fixed d-flex align-items-center justify-content-between" *ngIf="dataLoad">
+  <div class="header-left d-flex align-items-center">
+    <icon cuClass="header-chat-link d-flex" name="layers" size="19px" type="material"></icon>
+    <icon cuClass="header-chat-link d-flex" name="arrow_right" size="20px" type="material"></icon>
+    <div>{{program_name}}</div>
+    <div class="cursor-pointer mor-horz pl-4 position-relative" #moreIcon>
+      <icon cuClass="header-chat-link d-flex" name="more_horizontal" size="24px" type="material"
+        [ngClass]="{'active' : showProgramDrop}" (click)="onShowProgramDrop()"></icon>
+      <div class="dropdown dropdown-program-detail" *ngIf="showProgramDrop">
+        <div class=" d-flex align-items-center justify-content-between p-16">
+          <div class=" d-flex align-items-center">
+            <div class="program-name-initials d-flex align-justify-center rounded-sm mr-8 subtitle-1 " *ngIf="program_name">{{program_name | shortName: 'last'}}</div>
+            <div class="d-flex flex-column">
+              <span class="subtitle-2 font-weight-medium">{{program_name}}</span>
+              <p class="prog-id small">{{programData?.program_uniqId}}</p>
+            </div>
+          </div>
+          <span *ngIf="client_status" class="status d-flex align-justify-center rounded-sm"  [ngClass]="{'status-active':client_status}">
+            <icon size="8px" name="stop_circle" type="material" cuClass="circle d-flex mr-4">
+            </icon> {{ 'active' | i18next }}
+          </span>
+          <span *ngIf="!client_status" class="status d-flex align-justify-center rounded-sm"  [ngClass]="{'status-inactive':!client_status}">
+            <icon size="8px" name="stop_circle" type="material" cuClass="circle d-flex mr-4">
+            </icon> {{ 'inactive' | i18next }}
+          </span>
+        </div>
+        <div class="btn-bg p-16">
+          <button class="btn btn-secondary small" (click)="onViewClick(programData)">{{ 'view_details' | i18next }}</button>
+        </div>
+      </div>
+    </div>
+    <div class="text-secondary" *ngIf="breadcrumList?.name">
+      <icon cuClass="header-chat-link d-flex mx-8" name="arrow_right" size="20px" type="material"></icon>
+    </div>
+    <div class="text-secondary cursor-pointer position-relative" [ngClass]="{'active' : showSubmenuDropdwon}"
+      (click)="onShowSubmenuDropdwon()" #subMenu >
+      <div>{{breadcrumList?.name}}</div>
+      <div class="dropdown" [hidden]="!showSubmenuDropdwon">
+        <ul class="submenu  mt-16 mr-8 mb-0 ml-8 p-0" *ngFor="let s of breadcrumList?.sideBarSubMenu">
+          <li class="seperationlabel mt-16 ml-16">{{s?.title}}</li>
+          <li *ngFor="let sm of s?.subMenuItem">
+            <a href="{{sm?.path}}" class="overflow-hidden d-block pt-0 pb-0 pl-16 pr-16 position-relative">
+              <icon class="float-left mr-16" cuClass="sidebar-icon-submenu" name="{{sm?.icon}}" size="20px"
+                type="material">
+              </icon>
+              {{sm?.title}}
+            </a>
+
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="text-secondary" *ngIf="bradCrumSubMenu">
+      <icon cuClass="header-chat-link d-flex mx-8" name="arrow_right" size="20px" type="material"></icon>
+    </div>
+    <div  class="text-secondary cursor-pointer">
+     <a href="{{bradCrumSubMenu?.path}}"> {{bradCrumSubMenu?.title}}</a>
+    </div>
+    <div class="text-secondary" *ngIf="breadCrumbName">
+      <icon cuClass="header-chat-link d-flex mx-8" name="arrow_right" size="20px" type="material"></icon>
+    </div>
+    <div class="text-secondary cursor-pointer">
+      {{breadCrumbName}}
+    </div>
+
+  </div>
+  <div class="header-right">
+    <div class="notification">
+      <app-notification></app-notification>
+    </div>
+    <div class="language mt-4">
+      <app-lang-switcher></app-lang-switcher>
+    </div>
+    <div class="insights mr-12" (click)="onInsightClick()">
+      <icon cuClass="d-flex mx-8" name="track_changes" size="20px" type="material"></icon>
+    </div>
+    <div class="exit-program">
+      <a href="javascript:void(0)" (click)="exitProgramSetup()" class="pl-16 pr-16 d-flex cursor-pointer">
+        <icon cuClass="d-flex mr-8" name="exit_to_app" size="19px" type="material"></icon>
+        <span>{{ 'exit_program_mode' | i18next }}</span>
+      </a>
+    </div>
+
+  </div>
+
+</div>

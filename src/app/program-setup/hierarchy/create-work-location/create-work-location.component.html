@@ -1,0 +1,113 @@
+<svms-sidebar [title]="title" icon="add_to_photos" [dataVisibility]="visible"
+  (onClose)="sidebarClose()" (onClose)="sidebarClose()">
+  <form [formGroup]="workLocationForm" (ngSubmit)="onSubmit()">
+    <svms-sidebar-body>
+      <div class="p-24">
+        <div class="form-group-row">
+          <div class="form-group">
+            <label>{{ 'code' | i18next }} <span class="require">*</span></label>
+            <input formControlName="code" type="text" [readonly]="isViewMode || isEditMode" class="form-control" placeholder="{{ 'enter_location_code' | i18next }}" name="code" maxlength="100">
+            <span *ngIf="form.code.touched && form.code.errors?.pattern" class="require">{{ 'special_characters_are_not_allowed' | i18next }}.</span>
+            <span *ngIf="form.code.touched && form.code.errors?.required" class="require">{{ 'this_field_is_required' | i18next }}.</span>
+          </div>
+          <div class="toggle-panel mt-24" *ngIf="(isViewMode || isEditMode)">
+            <div class="toggle-panel-inner toggle-background">
+              <span class="status-text">{{toggle?.title | i18next}}</span>
+              <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+              (click)="isViewMode ? null : onClickToggle()"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'work_location' | i18next }} <span class="require">*</span></label>
+          <input formControlName="location" type="text" [readonly]="isViewMode" class="form-control" placeholder="{{ 'enter_location_name' | i18next }}" name="worklocation" maxlength="100">
+          <span *ngIf="form.location.touched && form.location.errors?.required" class="require">{{ 'this_field_is_required' | i18next }}.</span>
+        </div>
+        <div class="form-group">
+          <label>{{ 'description' | i18next }} </label>
+          <textarea formControlName="description" rows="5" [readonly]="isViewMode" class="form-control" placeholder="{{ 'enter_your_description' | i18next }}" name="description"
+            maxlength="2000"></textarea>
+        </div>
+        <div class="form-group-row">
+          <div class="form-group">
+            <label> {{ 'timezone' | i18next }} </label>
+            <ng-select formControlName="timezone" [readonly]="isViewMode" [clearable]="true"
+              placeholder="{{'select_timezone' | i18next}}" [loading]="timezoneLoader">
+              <ng-option *ngFor="let zone of timezoneList | uniqueKey:'id'" [value]="zone?.id">{{ zone?.name | i18next }}</ng-option>
+            </ng-select>
+          </div>
+          <div class="form-group">
+            <label> {{ 'currency' | i18next }} </label>
+            <ng-select formControlName="currency"
+              [readonly]="isViewMode" [clearable]="true" [multiple]="true"
+              [items]="currencyList" bindLabel="name" bindValue="value"
+              placeholder="{{ 'select_currency' | i18next }}" (change)="selectDefaultItem($event)">
+
+              <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+                <div class="ng-value d-flex space-between" *ngFor="let item of items">
+                  <div class="ng-value-label p-4 d-flex">
+                    <icon size="16px" type="material" color="#4c7ff0"
+                      [name]="(selectedDefaultCurrency === item?.value)?'flag':'outlined_flag'"
+                      cuclass="d-flex" class="d-flex p-4 cursor-pointer"
+                      (click)="!isViewMode?(selectedDefaultCurrency = item?.value):''"
+                    ></icon>
+                    <p> {{ item?.name | i18next }} </p>
+                  </div>
+                  <div class="ng-value-icon right p-8" (click)="removeItem(item?.value)" aria-hidden="true">×</div>
+                </div>
+              </ng-template>
+
+            </ng-select>
+          </div>
+        </div>
+        <div class="form-group-row">
+          <div class="form-group">
+            <label>{{ 'country' | i18next }} <span class="require">*</span></label>
+            <ng-select formControlName="country" [readonly]="isViewMode" [clearable]="false" placeholder="{{ 'select_country' | i18next }}" (change)="changeCountry($event)">
+              <ng-option *ngFor="let country of allCountryList" [value]="country.id">
+                {{country.name | i18next}}
+              </ng-option>
+            </ng-select>
+          <span *ngIf="form.country.touched && form.country.errors?.required" class="require">{{ 'this_field_is_required' | i18next }}.</span>
+          </div>
+          <div class="form-group">
+            <label>{{ 'state' | i18next }}/{{ 'province' | i18next }}</label>
+            <ng-select formControlName="state" [readonly]="isViewMode || !stateList?.length" [clearable]="false" placeholder="{{ 'select_state' | i18next }}/{{ 'province' | i18next }}">
+              <ng-option *ngFor="let state of stateList" [value]="state.id">{{state.name | i18next}}</ng-option>
+            </ng-select>
+            <div *ngIf="noStatePresent" class="warn-text mt-4 mb-8">
+              {{ ("{{ 'note_:_no_state/province_found_for' | i18next }} " + noStatePresent)  | i18next }}
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>
+            {{ 'zip_code_' | i18next }}
+            <span *ngIf="isZipcodeMandatory" class="require">*</span>
+          </label>
+          <input formControlName="zipcode" type="text"
+            (mouseleave)="trimSpace($event)" (blur)="trimSpace($event)" [readonly]="isViewMode"
+            class="form-control" placeholder="{{ 'enter_zip_code' | i18next }}" />
+          <div *ngIf="form?.zipcode?.touched" class="pt-4">
+            <p class="error-text" *ngIf="form.zipcode?.errors?.required"> {{ 'this_field_is_required' | i18next }} </p>
+            <p class="error-text" *ngIf="form.zipcode?.errors?.pattern"> {{ 'invalid_zip_code_pattern' | i18next }} </p>
+            <p class="error-text" *ngIf="form.zipcode?.errors?.minlength"> {{ 'minimum_5_characters_required' | i18next }} </p>
+            <p class="error-text" *ngIf="form.zipcode?.errors?.maxlength"> {{ 'maximum_6_characters_allowed' | i18next }} </p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{{ 'address' | i18next }}</label>
+          <search-address #searchAddress id="addr" formControlName="address" [adressType]="'geocode'" #address2 [country]="countryShortName">
+          </search-address>
+        </div>
+      </div>
+  </svms-sidebar-body>
+  <svms-sidebar-footer *ngIf="!isViewMode">
+    <button type="submit" *accessControl class="btn btn-primary float-right" [disabled]="!workLocationForm.valid">
+      <icon size="20px" name="check_circle" type="material" class="icon--on-left" cuClass="icon-cu"></icon>
+      {{buttonLabel | i18next}}
+    </button>
+  </svms-sidebar-footer>
+</form>
+</svms-sidebar>

@@ -1,0 +1,383 @@
+<header class="section-header page-title-main p-24 d-flex align-items-center justify-content-between">
+    <div class="page-title font-weight-semibold d-flex align-items-center" I18n>
+         <!-- <a href="javascript:void(0)"><i class="material-icons font-weight-semibold mr-16" (click)="onBack()">arrow_back</i></a> -->
+        {{ 'new_invoice_configuration' | i18next }}
+    </div>
+    <app-logs [log]="logs"></app-logs>
+    <!-- <button class="c-btn c-btn-success-medium" (click)="saveAction()">Save</button> -->
+    <div>
+        <button class="c-btn c-btn-success-medium d-none">{{ 'action' | i18next }}</button>
+        <button class="c-btn c-btn-success-medium" (click)="saveAction()">{{ 'save' | i18next }}</button>
+    </div>
+</header>
+<section class="section-body-content">
+  <div class="row no-gutters program-details-mobile">
+    <div class="col-12">
+        <div class="invoice-config p-24">
+                <div  class="c-form-group-row invoice-form d-flex justify-content-between">
+                    <div class="c-form-group invoice-c-input">
+                        <label>{{ 'configuration_name' | i18next }}<span class="require">*</span></label>
+                        <input type="text" [(ngModel)]="payload.config_name" class="c-form-control" [placeholder]="'Enter Name'|i18next">
+                    </div>
+                    <!-- <div class="c-form-group toggle-panel active-inactive-toggle mt-24 d-flex justify-content-between">
+                        <div class="toggle-panel-inner" [ngClass]="payload?.is_active ? 'if-active' : 'if-inactive'">
+                          <span class="is_active-text">{{(payload?.is_active ? 'Active' : 'In-Active') | i18next}}</span>
+                          <span class="toggle-switch" [ngClass]="payload?.is_active ? 'toggle-on' : 'toggle-off'"
+                            (click)="payload.is_active = !payload?.is_active"></span>
+                        </div>
+                      </div> -->
+                </div>
+
+                <div class="c-form-group-row invoice-form d-flex justify-content-between">
+                    <!-- <div class="c-form-group invoice-c-dropdown">
+                        <label>{{'Hierarchy'| i18next}}<span class="require">*</span></label>
+                        <ng-select placeholder="{{'Select'|i18next}}" [(ngModel)]="hierarchy.name"   *ngFor="let hierarchy of hierarchyIds" (click)="selectedHierarchyValue(hierarchy.id)">
+                            <ng-option [value]="hierarchy.id"> {{hierarchy.name}}</ng-option>
+                        </ng-select>
+                    </div> -->
+                    <div class="c-form-group invoice-c-dropdown position-relative">
+                        <label>{{'invoice_start_date' | i18next}}<span class="require">*</span></label>
+                        <svms-datepicker placeholder="{{dateFormat}}"
+                            [(ngModel)]="payload.invoice_start_date" [inputdateFormat]="dateFormat" ngDefaultControl [options]="calendarOptions"
+                            id="invoiceStartDate" I18n>
+                        </svms-datepicker>
+                    </div>
+                </div>
+        </div>
+
+        <div class="invoice-config-inner">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{ 'consolidation' | i18next }}</p>
+            </div>
+            <app-config-common-listing mainIcon="gamepad" [updatedSelectBoxValue]="payload.config.consolidation_type"
+                (onValueChange)="getConsolidationType($event)" itemLevel="parent" subtitle="{{ 'consolidation_selection' | i18next }}"
+                description="{{ 'define_consolidation_creation_type' | i18next }}" selectBox="true" [options]="options.consolidateInvoiceType">
+            </app-config-common-listing>
+            <ng-container *ngIf="isHideConsolidationData">
+                <app-config-common-listing itemLevel="child" [updatedSelectBoxValue]="payload.config.invoice_cycle" (onValueChange)="getConsolidationInvoiceCycle($event)" subtitle="{{ 'invoice_cycle' | i18next }}"
+                description="{{ 'define_consolidation_cycle_type' | i18next }}"
+                selectBox="true" [options]="options.invoiceCycle"></app-config-common-listing>
+
+                <app-config-common-listing itemLevel="child" [updatedSelectBoxValue]="payload.config.week_start_day" (onValueChange)="getConsolidationWeekDay($event)" subtitle="{{ 'week_start_day_to_generate_auto_consolidate_invoice' | i18next }}"
+                description="{{ 'selection_of_week_day_for_consolidation' | i18next }}"
+                selectBox="true" [options]="options.weekStartDay" ></app-config-common-listing>
+
+                <app-config-common-listing itemLevel="child" [updatedSelectBoxValue]="payload.config.consolidate_invoice.consolidation_cycle.cycle_end_at" (onValueChange)="getConsolidationBillingType($event)" subtitle="{{ 'consolidation_billing_period' | i18next }}"
+                description="{{ 'define_consolidation_period_type' | i18next }}"
+                selectBox="true" [options]="options.invoiceCycle"></app-config-common-listing>
+
+                <app-config-common-listing itemLevel="child" [updatedTimeValue]="payload.config.invoice_generated_time" subtitle="{{ 'invoice_generated_time' | i18next }}"
+                description="{{ 'define_time_of_automation_time_for_consolidate_invoice' | i18next }}" selectTimeBox="true" (onTimeValueChange)="getTimeValue($event)"></app-config-common-listing>
+
+                <app-config-common-listing itemLevel="child" [updatedSelectBoxValue]="payload.config.client_email" subtitle="{{ 'email_to_client' | i18next }}"
+                description="{{ 'invoice_will_be_sent_on_that_client_email_address' | i18next }}" textArea="true" (onValueChange)="valueChanged($event, 'client_email')"></app-config-common-listing>
+
+                <app-config-common-listing itemLevel="child" [updatedSelectBoxValue]="payload.config.msp_email" subtitle="{{ 'email_to_msp' | i18next }}"
+                description="{{ 'invoice_will_be_sent_on_that_msp_email_address' | i18next }}"
+                textArea="true" (onValueChange)="valueChanged($event, 'msp_email')"></app-config-common-listing>
+            </ng-container>
+        </div>
+
+        <div class="invoice-config-inner">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{ 'generation_logic' | i18next }}</p>
+            </div>
+            <app-config-common-listing mainIcon="view_list" [updatedSelectBoxValue]="payload.config.invoice_generation_logic" (onValueChange)="getInvoiceRolloup($event)" itemLevel="parent"  subtitle="{{ 'invoice_rollup_group' | i18next }}"
+            description="{{ 'this_layout_we_can_use_for_the_configuration_with_toggle_on/off_button' | i18next }}"
+            selectBox="true" [options]="options.invoiceGenrationLogic"></app-config-common-listing>
+
+            <app-config-common-listing itemLevel="child" *ngIf="isHideFoundationalSelection" [updatedSelectBoxValue]="payload.config.foundational_selection" (onValueChange)="getFoundationalSelection($event)" subtitle="{{ 'foundational_selection' | i18next }}"
+            description="{{ 'used_for_grouping_the_invoices.' | i18next }}"
+            selectBox="true" [options]="foundationalData" ></app-config-common-listing>
+
+            <app-config-common-listing mainIcon="tag" [updatedInputValue]="payload.config.invoice_number.start_from" itemLevel="parent" subtitle="{{ 'set_consolidated_invoice_number_for' | i18next }}"
+            description="{{ 'consolidated_invoice_number' | i18next }}"
+            multioptionInput="true" (onValueChange)="getInvoiceNumberData($event, 'invoice_number')"  [options]="options.invoiceCode"></app-config-common-listing>
+
+            <app-config-common-listing mainIcon="label" [updatedInputValue]="payload.config.invoice_number.start_from" [toggleOptionsInputValue]="inoiceNumberValue" itemLevel="parent" subtitle="{{ 'invoice_start' | i18next }}"
+            description="{{ 'consolidated_invoice_start' | i18next }}"
+            toggleOptionsInput="true" (onTextValueChange)="getTextValueChange($event, 'invoice_number')"></app-config-common-listing>
+        </div>
+
+        <div class="invoice-config-inner">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{ 'invoice_standard_template' | i18next }}</p>
+            </div>
+            <app-config-common-listing mainIcon="newspaper" itemLevel="parent" subtitle="{{ 'uploaded_standard_template_file' | i18next }}"
+            description="{{ 'this_layout_we_can_use_for_the_configuration_with_toggle_on/off_button' | i18next }}" buttonInput="Add" (onBtnClick)="addStandardTemplate($event)"></app-config-common-listing>
+        </div>
+
+        <div class="invoice-config-inner">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{ 'invoice_header' | i18next }}</p>
+            </div>
+            <app-config-common-listing mainIcon="tune" itemLevel="parent" subtitle="{{ 'invoice_from_address_&_logo' | i18next }}"
+            description="{{ 'logo_image_url_of_invoice_created_from' | i18next }}" buttonInput="Add" (onBtnClick)="addIvoiceFromAddress($event)"></app-config-common-listing>
+
+            <app-config-common-listing mainIcon="tune" itemLevel="parent" subtitle="{{ 'invoice_to_address_&_logo' | i18next }}" description="{{ 'address_of_invoice_created_from' | i18next }}" buttonInput="Add" (onBtnClick)="addIvoiceToAddress($event)">
+            </app-config-common-listing>
+
+            <!-- <app-config-common-listing itemLevel="parent" mainIcon="featured_play_list"  subtitle="Header Layout" description="This layout we can use for the configuration with toggle on/off button"
+            addressLayout="true" buttonInput="Change" (onBtnClick)="changeHeaderLayout($event)"></app-config-common-listing> -->
+
+        </div>
+
+        <div class="invoice-config-inner">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{ 'payment_authorization' | i18next }}</p>
+                <toggle-button class="c-toggle-button-switch" [checked]="payload.config.pa" (changed)="getPaymentAuthorization($event)"></toggle-button>
+            </div>
+            <ng-container *ngIf="payload.config.pa">
+                <app-config-common-listing mainIcon="tune" [updatedSelectBoxValue]="payload.config.rollback"
+                    itemLevel="parent" subtitle="{{ 'rollback' | i18next }}"
+                    description="{{ 'used_to_enable_or_disable_payment_allocation/client_payment_rollback_feature_in_the_invoice.' | i18next }}"
+                    toggleSwitch="true" (onValueChange)="onToggleChanged('rollback')"></app-config-common-listing>
+                <ng-container *ngIf="payload.config.rollback">
+                    <app-config-common-listing itemLevel="child" [updatedSelectBoxValue]="payload.config.client_rollback"
+                        (onValueChange)="onToggleChanged('client_rollback')"
+                        subtitle="{{ 'enable/disable_rollback_option_on_client_payments' | i18next }}"
+                        description="{{ 'enable_and_disable_the_client_payment_rollback' | i18next }}" toggleSwitch="true">
+                    </app-config-common-listing>
+
+                    <app-config-common-listing itemLevel="child" [updatedSelectBoxValue]="payload.config.vendor_rollback"
+                        (onValueChange)="onToggleChanged('vendor_rollback')"
+                        subtitle="{{ 'enable/disable_rollback_option_on_vendor_payments' | i18next }}"
+                        description="{{ 'enable_and_disable_the_client_payment_rollback' | i18next }}" toggleSwitch="true">
+                    </app-config-common-listing>
+                </ng-container>
+                <app-config-common-listing mainIcon="tune" itemLevel="parent" subtitle="{{ 'transaction_complete' | i18next }}"
+                    [updatedSelectBoxValue]="isTransactionToggle"
+                    description="{{ 'here_you_can_define_the_assignment_fields_while_updating' | i18next }}"
+                    (onValueChange)="transactionToggleChange($event)" toggleSwitch="true"></app-config-common-listing>
+                <ng-container *ngIf="isTransactionToggle">
+                    <app-config-common-listing itemLevel="child"
+                        [updatedSelectBoxValue]="payload.config.transaction_complete.type"
+                        (onValueChange)="getTransactionCompleteType($event)" subtitle="{{ 'transaction_complete_type' | i18next }}"
+                        description="{{ 'defining_invoice_transaction_complete_type' | i18next }}" selectBox="true"
+                        [options]="options.transactionCompleteType"></app-config-common-listing>
+                    <ng-container *ngIf="isHideTCDropdown">
+                        <app-config-common-listing itemLevel="child"
+                            [updatedSelectBoxValue]="payload.config.transaction_complete.option"
+                            (onValueChange)="getTransactionCompleteData($event, 'option')" subtitle="{{ 'transaction_complete_cycle' | i18next }}"
+                            description="{{ 'define_consolidation_cycle_type' | i18next }}" selectBox="true" [options]="options.invoiceCycle">
+                        </app-config-common-listing>
+
+                        <app-config-common-listing itemLevel="child"
+                            [updatedSelectBoxValue]="payload.config.transaction_complete.start_day"
+                            (onValueChange)="getTransactionCompleteData($event, 'start_day')"
+                            subtitle="{{ 'transaction_complete_start_day' | i18next }}" description="{{ 'selection_of_week_day_for_consolidation' | i18next }}"
+                            selectBox="true" [options]="options.weekStartDay">
+                        </app-config-common-listing>
+
+                        <app-config-common-listing itemLevel="child"
+                            [updatedTimeValue]="payload.config.transaction_complete.generate_time"
+                            subtitle="{{ 'transaction_complete_generated_time' | i18next }}"
+                            description="{{ 'define_time_of_automation_time_for_consolidate_invoice' | i18next }}" selectTimeBox="true"
+                            (onTimeValueChange)="onGeneratedTime($event)"></app-config-common-listing>
+
+                        <app-config-common-listing itemLevel="child"
+                            [updatedSelectBoxValue]="payload.config.transaction_complete.is_notes_mandatory"
+                            (onValueChange)="getTransactionCompleteData($event, 'is_notes_mandatory')"
+                            subtitle="{{ 'transaction_complete_notes' | i18next }}" description="{{ 'defining_invoice_transaction_complete_notes' | i18next }}"
+                            selectBox="true" [options]="options.transactionCompleteNotes"></app-config-common-listing>
+                    </ng-container>
+                </ng-container>
+            </ng-container>
+        </div>
+
+        <div class="invoice-config-inner">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{ 'voucher_details' | i18next }}</p>
+            </div>
+            <app-config-common-listing mainIcon="tune"  itemLevel="parent" [updatedInputValue]="payload.config.voucher_number.start_from"  subtitle="{{ 'voucher_number_formate' | i18next }}"
+            description="{{ 'used_to_setup_voucher_number_structure_(vcn-0001)' | i18next }}" [options]="options.voucherCode"
+            multioptionInput="true"  (onValueChange)="getVoucherNumberData($event,'voucher_number')" ></app-config-common-listing>
+
+            <app-config-common-listing itemLevel="child" [toggleOptionsInputValue]="voucherNumberValue" [updatedInputValue]="payload.config.voucher_number.start_from"  subtitle="{{ 'voucher_number_start' | i18next }}"
+            description="{{ 'starting_string_of_voucher_number' | i18next }}"
+            toggleOptionsInput="true" (onTextValueChange)="getTextValueChange($event,'voucher_number')"></app-config-common-listing>
+        </div>
+        <div class="invoice-config-inner d-none">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{ 'rebate_discount' | i18next }}</p>
+                <toggle-button class="c-toggle-button-switch"></toggle-button>
+            </div>
+        </div>
+
+        <div class="invoice-config-inner">
+            <div class="list-heading px-24 py-8 d-flex justify-content-between align-items-center sticky-header">
+                <p class="font-weight-medium">{{ 'other_settings' | i18next }}</p>
+            </div>
+            <app-config-common-listing mainIcon="tune" itemLevel="parent" [updatedSelectBoxValue]="payload.config.cancel_approved_consolidated_invoice"  (onValueChange)="onToggleChanged('cancel_approved_consolidated_invoice')" subtitle="{{ 'cancel_consolidation_on_approved_consolidated_invoice' | i18next }}"
+            description="{{ 'enable_and_disable_consolidate_invoice_approval' | i18next }}"
+            toggleSwitch="true"></app-config-common-listing>
+
+            <app-config-common-listing mainIcon="tune" itemLevel="parent" [updatedSelectBoxValue]="payload.config.credit_debit.is_enabled" (onValueChange)="updateCreditDebit()" subtitle="{{ 'credit_/_debit' | i18next }}"
+            description="{{ 'credit/_debit_functionality_enable_or_disable' | i18next }}"
+            toggleSwitch="true"></app-config-common-listing>
+
+            <app-config-common-listing mainIcon="tune" itemLevel="parent" [updatedSelectBoxValue]="payload.config.tade_discount" (onValueChange)="onToggleChanged('tade_discount')" subtitle="{{ 'trade_discount' | i18next }}"
+            description="{{ 'this_layout_we_can_use_for_the_configuration_with_toggle_on/off_button' | i18next }}"
+            toggleSwitch="true"></app-config-common-listing>
+
+            <app-config-common-listing mainIcon="tune" itemLevel="parent" [updatedSelectBoxValue]="payload.config.other_notes" (onValueChange)="onToggleChanged('other_notes')" subtitle="{{ 'notes' | i18next }}"
+            description="{{ 'this_layout_we_can_use_for_the_configuration_with_toggle_on/off_button' | i18next }}"
+            toggleSwitch="true"></app-config-common-listing>
+        </div>
+    </div>
+  </div>
+</section>
+<app-svms-modal title="{{ 'standard_template_format' | i18next }}" [visibility]="standardTemplateModal" (onClose)="sidebarClose()">
+    <app-svms-modal-body>
+        <div class="c-form-group-row">
+            <div class="c-form-group">
+                <label>{{ 'standard_template_label' | i18next }}</label>
+                <div class="file-input">
+                    <div>
+                        <input type="text" class="c-form-control" [(ngModel)]="payload.config.invoice_template[0].label" (change)="onTeamplateDatachange(payload.config.invoice_template[0].label, payload.config.invoice_template[0].type, payload.config.invoice_template[0].format, false)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-form-group-row">
+            <div class="c-form-group">
+                <label>{{ 'standard_template_format' | i18next }}</label>
+                <ng-select placeholder="{{ 'select' | i18next }}" [(ngModel)]="payload.config.invoice_template[0].type" (change)="onTeamplateDatachange(payload.config.invoice_template[0].label, payload.config.invoice_template[0].type, payload.config.invoice_template[0].format, false)">
+                    <ng-option [value]="item.value" *ngFor="let item of options.UploadStandardTeamplateFile">
+                        {{item.name}}</ng-option>
+                </ng-select>
+            </div>
+        </div>
+        <div class="c-form-group-row">
+            <div class="c-form-group">
+                <label class="mb-16">{{ 'file_format_download' | i18next }} <a href="javascript:void(0)">{{ 'select_all' | i18next }}</a></label>
+                <div class="d-flex">
+                    <div class="mr-24" *ngFor="let item of options.filoeExtension">
+                        <label class="c-input-checkbox">
+                            <input type="checkbox" [value]="item.value"
+                                [checked]="payload.config.invoice_template[0].format === item.value"
+                                (change)="onTeamplateDatachange(payload.config.invoice_template[0].label, payload.config.invoice_template[0].type, item.value, false)">
+                            <span class="cb-ui"></span>
+                            <span class="cb-label">{{ item.name |i18next}}</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </app-svms-modal-body>
+    <app-svms-modal-footer>
+        <div class="text-right">
+            <button class="c-btn c-btn-primary-medium" (click)="onTeamplateDatachange(payload.config.invoice_template[0].label, payload.config.invoice_template[0].type, payload.config.invoice_template[0].format, true)">{{ 'add' | i18next }}</button>
+        </div>
+    </app-svms-modal-footer>
+</app-svms-modal>
+
+<app-svms-modal title="{{ 'from_address_&_logo' | i18next }}" [visibility]="fromInvoiceAddess" (onClose)="fromAddressClose()">
+    <app-svms-modal-body>
+        <div class="c-form-group-row">
+            <div class="c-form-group">
+                <label>{{ 'logo_url' | i18next }}</label>
+                <div class="file-input">
+                    <div>
+                        <input type="text" class="c-form-control" [(ngModel)]="payload.config.from_template.logo" (change)="fromHeader(payload.config.from_template.logo, payload.config.from_template.address, false)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-form-group-row">
+            <div class="c-form-group">
+                <label class="mb-16">{{ 'from_address' | i18next }}</label>
+                <textarea class="c-form-control" [(ngModel)]="payload.config.from_template.address" (change)="fromHeader(payload.config.from_template.logo, payload.config.from_template.address, false)"></textarea>
+            </div>
+        </div>
+    </app-svms-modal-body>
+    <app-svms-modal-footer>
+        <div class="text-right">
+            <button class="c-btn c-btn-primary-medium" (click)="fromHeader(payload.config.from_template.logo, payload.config.from_template.address, true)">{{ 'add' | i18next }}</button>
+        </div>
+    </app-svms-modal-footer>
+</app-svms-modal>
+
+<app-svms-modal title="{{ 'to_address_&_logo' | i18next }}" [visibility]="toInvoiceAddress" (onClose)="toAddressClose()">
+    <app-svms-modal-body>
+        <div class="c-form-group-row">
+            <div class="c-form-group">
+                <label>{{ 'logo_url' | i18next }}</label>
+                <div class="file-input">
+                    <div>
+                        <input type="text" class="c-form-control" [(ngModel)]="payload.config.to_template.logo" (change)="toHeader(payload.config.to_template.logo, payload.config.to_template.address, false)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-form-group-row">
+            <div class="c-form-group">
+                <label class="mb-16">{{ 'to_address' | i18next }}</label>
+                <textarea class="c-form-control" [(ngModel)]="payload.config.to_template.address" (change)="toHeader(payload.config.to_template.logo, payload.config.to_template.address, false)"></textarea>
+            </div>
+        </div>
+    </app-svms-modal-body>
+    <app-svms-modal-footer>
+        <div class="text-right">
+            <button class="c-btn c-btn-primary-medium" (click)="toHeader(payload.config.to_template.logo, payload.config.to_template.address, true)">{{ 'add' | i18next }}</button>
+        </div>
+    </app-svms-modal-footer>
+</app-svms-modal>
+
+<app-svms-modal title="{{ 'invoice_header_layout' | i18next }}" [visibility]="headerLayout" (onClose)="headerLayoutClose()">
+    <app-svms-modal-body>
+       <!--- layout style 1-->
+       <div class="header-layout-popup d-flex justify-content-between py-16 px-12 mb-16 active">
+         <div class="address-box d-flex">
+           <figure class="addrss-logo mr-12"></figure>
+           <div class="addres-line">
+             <p>{{ 'from' | i18next }}</p>
+             <p>{{ 'address' | i18next }}</p>
+           </div>
+         </div>
+         <div class="address-box d-flex">
+           <figure class="addrss-logo mr-12"></figure>
+           <div class="addres-line">
+             <p>{{ 'to' | i18next }}</p>
+             <p>{{ 'address' | i18next }}</p>
+           </div>
+         </div>
+       </div>
+
+       <!--- layout style 2-->
+       <div class="header-layout-popup d-flex justify-content-between py-16 px-12 mb-16">
+        <div class="address-box d-flex">
+            <figure class="addrss-logo mr-12"></figure>
+            <div class="addres-line">
+              <p>{{ 'to' | i18next }}</p>
+              <p>{{ 'address' | i18next }}</p>
+            </div>
+          </div>
+        <div class="address-box d-flex">
+          <figure class="addrss-logo mr-12"></figure>
+          <div class="addres-line">
+            <p>{{ 'from' | i18next }}</p>
+            <p>{{ 'address' | i18next }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!--- layout style 3-->
+      <div class="header-layout-popup py-16 px-12">
+        <div class="address-box d-flex mb-16">
+          <figure class="addrss-logo mr-12"></figure>
+          <div class="addres-line">
+            <p>{{ 'from' | i18next }}</p>
+            <p>{{ 'address' | i18next }}</p>
+          </div>
+        </div>
+        <div class="address-box d-flex">
+          <figure class="addrss-logo mr-12"></figure>
+          <div class="addres-line">
+            <p>{{ 'to' | i18next }}</p>
+            <p>{{ 'address' | i18next }}</p>
+          </div>
+        </div>
+      </div>
+    </app-svms-modal-body>
+</app-svms-modal>

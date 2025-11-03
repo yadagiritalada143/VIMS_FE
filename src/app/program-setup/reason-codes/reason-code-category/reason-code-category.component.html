@@ -1,0 +1,144 @@
+<div class="sidebar-custom">
+  <div>
+    <h4>{{ 'global_modules' | i18next }}</h4>
+  </div>
+  <ul class="submenu  mt-16 mr-8 mb-0 ml-8 p-0" *ngFor="let subMenu of category[0]?.sideBarSubMenu">
+    <li *ngIf="subMenu?.title" class="seperationlabel mt-16 ml-16">{{subMenu?.title | i18next}}</li>
+    <li *ngFor="let sortSubMenu of subMenu?.subMenuItem; let i = index">
+      <a  [routerLink]="sortSubMenu?.path" [queryParams]="sortSubMenu?.queryParams"
+      [ngClass]="{'active': selectedIndex === i}" (click)="onModuleChange(category[0].name, sortSubMenu?.title, i)"
+        class="overflow-hidden d-block pt-0 pb-0 pl-16 pr-16 position-relative">
+        <icon *ngIf="sortSubMenu?.icon" class="float-left mr-16" [cuClass]="sortSubMenu?.class"
+          [name]="sortSubMenu?.icon" size="20px" type="material">
+        </icon>
+        {{sortSubMenu?.title | i18next}}
+        <span *ngIf="category[0].name === 'Reason Code'" style="position: absolute; right: 25px">{{getReasonCodeCount(sortSubMenu?.title)}}</span>
+      </a>
+    </li>
+  </ul>
+</div>
+
+
+
+<div class="sidenav-reason position-fixed overflow-auto">
+  <div class="nav-title overflow-hidden pt-8 pr-16 pb-8 pl-24">
+    <h4 class="float-left m-0">{{moduleName | i18next}}</h4>
+  </div>
+  <div class="reason-content">
+    <div class="add-code flex">
+      <input type="text" placeholder="{{ 'add_new_reason_code' | i18next }}" [(ngModel)]="newReasonCode">
+      <button (click)="addNewReasonCode()" *accessControl>{{ 'add' | i18next }}</button>
+    </div>
+    <div class="reason-code-top-text">{{ 'reason_codes' | i18next }}</div>
+    <div *ngFor="let reasonCode of selectedModule; let i = index" (mouseover)="hoverItem = i"
+      (mouseleave)="hoverItem = undefined" [ngClass]="{'active': selectedIndex2 === i}" (click)="reasonCodesClick(i)"
+      class="edit-view-content" (click)="showReasons(reasonCode.id)">
+      <div #target [attr.id]="'reasonCode' + i" class="edit-view flex"
+        [ngClass]="buttonOptions.themeType === 'red' ? 'active' : ''">
+        <input (focusout)="confirmSave(i, reasonCode.name, reasonCode.id)" [readonly]="!(readonly === 'reasonCode'+i)" type="text" value="{{reasonCode.name}}" />
+        <span *ngIf="(readonly === 'reasonCode'+i)" class="material-icons-outlined">
+          {{'done'}}
+        </span>
+        <span *ngIf="(readonly === 'reasonCode'+i)" (click)="closeClick(i, reasonCode.name)" class="material-icons-outlined">
+          {{'close'}}
+        </span>
+
+        <button *ngIf="!(readonly === 'reasonCode'+i) && hoverItem === i" class="btn-view">
+          <span *ngIf="!(readonly === 'reasonCode'+i) && hoverItem === i" class="material-icons-outlined">
+          {{ 'visibility' | i18next }}
+          </span>
+          {{ 'view_reasons' | i18next }}
+        </button>
+        <div *accessControl>
+          <span *ngIf="!(readonly === 'reasonCode'+i) && hoverItem === i" (click)="editClick(i, reasonCode.name)" class="material-icons-outlined">
+            {{ 'create' | i18next }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="reasons">
+  <div class="add-code">
+    <h2>{{ 'reasons' | i18next }}</h2>
+    <button (click)="openSidebar()" class="add-new-reason">+ {{ 'add_new_reason' | i18next }}</button>
+  </div>
+
+  <div class="reason-list">
+    <div *ngFor="let reason of currentReasons; let i = index" class="edit-view-content">
+      <div class="reasons_" [attr.id]="'reason' + i" #target2>
+        {{reason["name"]}}
+
+        <div>
+          <p class="type"> {{ getReview(reason['category']) | i18next }} </p>
+          <p class="status" [ngClass]="reason['is_enabled'] ? 'active' : 'inactive'">● {{(reason["is_enabled"] ? "Active"
+            : "Inactive") | i18next}}</p>
+
+          <div class="dots">
+
+            <button style="cursor: pointer; border: none;" (click)="showOptionDropdown(i)">
+              <icon class="dots" name="more_horiz" size="24px" cuClass="d-flex align-items-center"></icon>
+            </button>
+
+            <nav class="option-dropdown position-absolute" [ngClass]="{'active' : showdropdown}">
+              <ul *ngIf="showdropdown && selectedId === i">
+                <li>
+                  <a href="javascript:void(0)" (click)="openSidebar('edit', reason['id'])">
+                    <icon style="position: absolute; top: 12px; left: 12px;" name="edit" size="20px" class="dots"
+                      cuClass="d-flex align-items-center"></icon>
+                    {{ 'edit' | i18next }}
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+
+          </div>
+
+        </div>
+        <!-- <button (click)="openSidebar('edit', reason['id'])" class="edit-reason">Edit</button> -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<svms-sidebar [title]="sidebarTitle" [size]="'large'" [icon]="'supervised_user_circle'" (onClose)="sidebarClose()" [dataVisibility]="sidebarOpen">
+  <svms-sidebar-body>
+    <div style="padding: 30px;">
+      <div class="form-group-row">
+        <div class="form-group">
+          <label class="gray">{{ 'reason_name' | i18next }}</label>
+          <div class="d-flex align-items-center">
+            <input type="text" placeholder="{{ 'enter_your_reason' | i18next }}" class="form-control" [(ngModel)]="newReason">
+            <div class="toggle-panel" >
+              <div class="toggle-panel-inner toggle-background">
+                <span class="status-text">{{toggle?.title | i18next}}</span>
+                <span class="toggle-switch" [ngClass]="toggle.value ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickToggle()"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="form-group-row">
+        <div class="form-group">
+          <label>{{ 'reason_type' | i18next }}</label>
+          <ng-select [(ngModel)]="review" [clearable]="false"
+            placeholder="{{ 'select_reason_type' | i18next }}">
+            <ng-option value="FAVORABLE">{{ 'positive' | i18next }}</ng-option>
+            <ng-option value="UNFAVORABLE">{{ 'negative' | i18next }}</ng-option>
+            <ng-option value="NEUTRAL">{{ 'neutral' | i18next }}</ng-option>
+          </ng-select>
+        </div>
+      </div>
+    </div>
+  </svms-sidebar-body>
+
+  <svms-sidebar-footer>
+    <button (click)="onSave()" *accessControl type="submit" class="btn btn-primary float-right" >
+      {{buttonTitle|i18next}}
+    </button>
+  </svms-sidebar-footer>
+
+</svms-sidebar>

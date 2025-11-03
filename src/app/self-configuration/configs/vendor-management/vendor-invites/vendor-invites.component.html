@@ -1,0 +1,37 @@
+<app-svms-table
+    [dataSource]="vmsData"
+    [tableOptions]="tableOptions"
+    [coloumnDefintions]="tableColumnConfig"
+>
+</app-svms-table>
+
+<ng-template #primaryContact let-value="value">
+  <p class="d-flex align-items-center">
+    <span class="initials initials__purple text-uppercase mr-8">{{value?.first_name?.substring(0,1)+value?.last_name?.substring(0,1)}}</span>
+    <span class="name text-truncate"  placement="top">
+      {{ (value?.first_name + ' ' + value?.last_name) | i18nextEager}}
+    </span>
+  </p>
+</ng-template>
+
+<ng-template #primaryContactEmail let-value="value">
+  <p class="d-flex align-items-center">
+    <span class="name text-truncate" [tooltip]="value" placement="top">
+      {{value | i18nextEager}}
+    </span>
+  </p>
+</ng-template>
+
+<ng-template #status let-value="value">
+    <span class="c-status-ui expired" *ngIf="value == 'EXPIRED'">
+        {{ 'expired' | i18nextEager }}
+      </span>
+    <span class="c-status-ui pending" *ngIf="value == 'PENDING'">
+        {{ 'pending_registration' | i18nextEager }}
+    </span>
+    <span class="c-status-ui active" *ngIf="value == 'ACCEPTED'">
+      {{ 'registration_completed' | i18nextEager }}
+    </span>
+
+</ng-template>
+

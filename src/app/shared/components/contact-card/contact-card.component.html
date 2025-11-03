@@ -1,0 +1,55 @@
+<div class="contact-form">
+    <div class="contact-details mb-16">
+        <p class="sub-title font-weight-medium">{{subtitle | i18next}}</p>
+        <p class="small">{{description | i18next}}</p>
+    </div>
+    <form>
+        <div class="c-form-group" *ngIf="CountrySelectBox">
+            <label>{{ 'country' | i18next }}</label>
+            <ng-select placeholder="{{ 'select' | i18next }}" [readonly]="readonly" [clearable]="false" (change)="selectCountry($event)" [(ngModel)]="selectedCountry" [ngModelOptions]="{standalone: true}">
+                <ng-option *ngFor="let country of countryList" [value]="country?.id">{{country?.name}}</ng-option>
+            </ng-select>
+        </div>
+
+        <div class="c-form-group" *ngIf="textArea" [formGroup]="addressForm">
+            <label>{{ 'address' | i18next }}</label>
+            <search-address (setAddress)="changeAddress($event)" [adressType]="'geocode'" #address
+                [country]="countryShortName" id="date1" formControlName="address" [readonlyMode]="readonly"
+            ></search-address>
+        </div>
+
+        <div class="c-form-group" *ngIf="contactPersonInput">
+            <label>{{ 'contact_person_name' | i18next }}</label>
+            <input type="text" class="c-form-control" [readonly]="readonly" [(ngModel)]="contactDetails.name" (keyup)="changeValue($event)" [ngModelOptions]="{standalone: true}">
+        </div>
+
+        <div class="c-form-group" *ngIf="DesignationInput">
+            <label>{{ 'designation' | i18next }}</label>
+            <input type="text" class="c-form-control" [readonly]="readonly" [(ngModel)]="contactDetails.title" (keyup)="changeValue($event)" [ngModelOptions]="{standalone: true}">
+        </div>
+
+        <div class="c-form-group" *ngIf="PhoneNumberInput">
+
+            <label>{{ 'phone' | i18next }}</label>
+            <div class="d-flex align-items-center position-relative">
+                <ng-select class="country-code" [searchable]="true" [clearable]="false" [(ngModel)]="contactDetails.iso_code2" [ngModelOptions]="{standalone: true}" [readonly]="readonly">
+                    <ng-option *ngFor="let country of countryList" [value]="country.iso_code_2" (change)="changeValue($event)">
+                        <img src="../../../assets/images/flag/{{country.iso_code_2.toLowerCase()}}.png" width="20px" class="mr-4" />
+                        <span>+{{country.isd_code}}</span>
+                    </ng-option>
+                </ng-select>
+                <input type="number" class="c-form-control" [pattern]="mobNumberPattern" [readonly]="readonly" [(ngModel)]="contactDetails.phone" (keyup)="changeValue($event)" [ngModelOptions]="{standalone: true}"  #mob="ngModel"
+                    [ngClass]="{'error': mob.control.errors}">
+            </div>
+            <p *ngIf="mob.control.errors" class="validation-msg">
+                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                {{ 'phone_number_is_not_valid.' | i18next }}
+            </p>
+        </div>
+
+        <div class="c-form-group" *ngIf="EmailInput">
+            <label>{{ 'email' | i18next }}</label>
+            <input type="email" class="c-form-control" [readonly]="readonly" [(ngModel)]="contactDetails.email" (keyup)="changeValue($event)" [ngModelOptions]="{standalone: true}">
+        </div>
+    </form>
+</div>

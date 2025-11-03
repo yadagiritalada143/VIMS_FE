@@ -1,0 +1,43 @@
+<div class="create-vendor-compliance-Document">
+  <header class="section-header p-24 d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center">
+        <i (click)="backClicked()" class="material-icons back-arrow-icon cursor-pointer mr-16">arrow_back</i>
+        <h3 class="font-weight-semibold mb-0">{{ (headerlabel) | i18nextEager }}</h3>
+      </div>
+      <div>
+        <button type="submit" [disabled]="!vendorInviteObj.vendorName || !vendorInviteObj.primaryContactFirstName || !vendorInviteObj.primaryContactLastName ||  !vendorInviteObj.primaryContactEmail" (click)="onSave()" class="c-btn c-btn-success-medium">{{(buttonLabel) |i18nextEager}}</button>
+      </div>
+
+  </header>
+  <section class="section-body-content">
+      <div class="p-24">
+          <div class="c-form-group-row mb-12 " *ngIf="vendorInviteMode =='RESEND' || vendorInviteMode =='EDIT'">
+            <app-supporting-text [support_data]="support_data"> </app-supporting-text>
+          </div>
+          <div class="c-form-group-row align-items-end">
+              <div class="c-form-group">
+                <label>{{ 'vendor_name' | i18nextEager }} <span class="require mr-4">*</span></label>
+                <input type="text" class="c-form-control" id="vendorName" name="vendorName" vendorName="ngModel" [(ngModel)]="vendorInviteObj.vendorName">
+              </div>
+          </div>
+          <div class="c-form-group-row">
+              <div class="c-form-group">
+                <label>{{ 'primary_contact_first_name' | i18nextEager }} <span class="require mr-4">*</span></label>
+                <input type="text" class="c-form-control" id="primaryContactFirstName" name="primaryContactFirstName" primaryContactFirstName="ngModel" [(ngModel)]="vendorInviteObj.primaryContactFirstName">
+              </div>
+              <div class="c-form-group">
+                <label>{{ 'primary_contact_last_name' | i18nextEager }} <span class="require mr-6">*</span></label>
+                <input type="text" class="c-form-control" id="primaryContactLastName" name="primaryContactLastName" primaryContactLastName="ngModel" [(ngModel)]="vendorInviteObj.primaryContactLastName">
+              </div>
+              <div class="c-form-group">
+                <label>{{ 'primary_contact_email' | i18nextEager }} <span class="require mr-4">*</span></label>
+                <input [disabled]="vendorInviteMode=='EDIT'" type="text" class="c-form-control" id="primaryContactEmail" name="primaryContactEmail" primaryContactEmail="ngModel" [(ngModel)]="vendorInviteObj.primaryContactEmail">
+                <p class="validation-msg" *ngIf="isError">
+                  <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                  {{"user_with_email_id_already_exists_please_specify_a_different_email_id_for_primary_Contact_simplifyvms_allows_to_have_unique_address_using_+_or_for_example_if_john_doe" |i18nextEager}}
+                </p>
+              </div>
+          </div>
+      </div>
+  </section>
+</div>

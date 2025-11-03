@@ -1,0 +1,1619 @@
+<svms-sidebar-ng [title]="historyRecord.type | i18next" [dataVisibility]="creditDebit" [showFooter]="false"
+    (onClose)='clearForm()'>
+
+    <!-- payment authorisation tabs start-->
+    <div class="sidebar-wrapper p-24" *ngIf="historyRecord.history_type =='create_payment_allocation'">
+        <div class="row  mt-12">
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="tag" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'consolidated_invoice_number' | i18next }}</p>
+                        <p>{{paymentAllocationDetails?.consolidate_invoice?.invoice_number}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="receipt" theme="outlined" size="18px" color="#536476" class="d-flex"
+                            cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'batch_invoice_number' | i18next }}</p>
+                        <p>{{paymentAllocationDetails?.consolidate_invoice?.batch_number}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="event_available" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'invoice_duration' | i18next }}</p>
+                        <p class="white-space-pre">{{ getDate(invoiceDetails?.data?.invoice_start_date, true)}} - {{
+                            getDate(invoiceDetails?.data?.invoice_end_date, true)}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="payment" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'invoice_amount' | i18next }}</p>
+                        <p class="small">{{ invoiceDetails?.data?.calculation?.total_amount || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }} </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="account_balance" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'currency' | i18next }}</p>
+                        <p>{{paymentAllocationDetails?.currency}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="paid" size="18px" theme="outlined" color="#536476" class="d-flex" cuclass="d-flex">
+                        </icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'balance_amount' | i18next }}</p>
+                        <p class="small">{{ paymentAllocationDetails?.remaining_amount || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-24">
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'payment_authorization_number' | i18next }}</label>
+                    <span class="value-content">{{ paymentAllocationDetails?.payment_id}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'payment_details' | i18next }}</label>
+                    <span class="value-content">{{paymentAllocationDetails?.check_type}} -
+                        {{paymentAllocationDetails?.check_number}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'received_date' | i18nextEager }}</label>
+                    <span class="value-content">{{getDateTime(paymentAllocationDetails?.received_date, true)}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'entered_date' | i18nextEager }}</label>
+                    <span class="value-content">{{getDateTime(paymentAllocationDetails?.entered_date, true)}}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'pa_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{ paymentAllocationDetails?.pa_amount || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'notes' | i18nextEager }}</label>
+                    <span class="value-content">{{paymentAllocationDetails?.notes}}</span>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'activity_date' | i18nextEager }}</label>
+                    <span class="value-content">{{historyRecord?.activity_on}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'activity_by' | i18nextEager }}</label>
+                    <span class="value-content">{{historyRecord?.activity?.name}}</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- payment authorisation tabs end-->
+    <!-- credit debit details start-->
+
+    <div class="sidebar-wrapper p-24" *ngIf="historyRecord.history_type == 'credit_debit'">
+        <div class="row no-gutters">
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'select_worker_name' | i18nextEager }}</label>
+                    <span class="value-content">{{creditDebitDetails?.worker?.name}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'vendor_name' | i18nextEager }}</label>
+                    <span class="value-content">{{creditDebitDetails?.vendor?.name}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'type' | i18nextEager }}</label>
+                    <span class="value-content">{{creditDebitDetails?.cd_invoice_type}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'timesheet' | i18nextEager }}/{{ 'expense' | i18nextEager }}/{{ 'misc' | i18nextEager }}.ID</label>
+                    <span class="value-content">{{creditDebitDetails?.invoice_type}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'invoice_id' | i18nextEager }}</label>
+                    <span class="value-content">{{creditDebitDetails?.invoice_id}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'start_date' | i18nextEager }}</label>
+                    <span class="value-content">{{getDateTime(creditDebitDetails?.start_date, true)}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'end_date' | i18nextEager }}</label>
+                    <span class="value-content">{{getDateTime(creditDebitDetails?.end_date, true)}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'select_type_credit' | i18nextEager }}/{{ 'debit' | i18nextEager }}</label>
+                    <span class="value-content">{{creditDebitDetails?.cd_type}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'cd_fund' | i18nextEager }}: {{ 'ar' | i18nextEager }}/{{ 'ap' | i18nextEager }}</label>
+                    <span class="value-content">{{creditDebitDetails?.cd_fund}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{accuracyEnum.AMOUNT|i18next}}</label>
+                    <span class="value-content">{{ creditDebitDetails?.cd_amount || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'msp_fee' | i18nextEager }} (%)</label>
+                    <span class="value-content">{{ 'general_use_sjinv' | i18nextEager }}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'tax' | i18nextEager }} (%)</label>
+                    <span class="value-content">{{ 'general_use_sjinv' | i18nextEager }}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'reason_for_credit_debit' | i18nextEager }}</label>
+                    <span class="value-content">{{creditDebitDetails?.cd_reason}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'notes' | i18nextEager }}</label>
+                    <span class="value-content">{{creditDebitDetails?.cd_notes}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'activity_date' | i18nextEager }}</label>
+                    <span class="value-content">{{historyRecord?.activity_on}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'activity_by' | i18nextEager }}</label>
+                    <span class="value-content">{{historyRecord?.activity?.name}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- credit debit details end-->
+
+     <!-- vendor roll back payment start  -->
+     <div class="sidebar-wrapper p-24" *ngIf="historyRecord.history_type == 'rollback_supplier_payment'">
+        <div class="row  mt-12">
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="tag" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'consolidated_invoice_number' | i18nextEager }}</p>
+                        <p>{{paymentAllocationDetails?.consolidate_invoice?.invoice_number}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="receipt" theme="outlined" size="18px" color="#536476" class="d-flex"
+                            cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'batch_invoice_number' | i18nextEager }}</p>
+                        <p>{{paymentAllocationDetails?.consolidate_invoice?.batch_number}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="event_available" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'invoice_duration' | i18nextEager }}</p>
+                        <p class="white-space-pre">{{ getDate(invoiceDetails?.data?.invoice_start_date, true)}} - {{
+                            getDate(invoiceDetails?.data?.invoice_end_date, true)}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="payment" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'invoice_amount' | i18nextEager }}</p>
+                        <p class="small">{{ invoiceDetails?.data?.calculation?.total_amount || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }} </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="account_balance" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'currency' | i18nextEager }}</p>
+                        <p>{{paymentAllocationDetails?.currency}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="paid" size="18px" theme="outlined" color="#536476" class="d-flex" cuclass="d-flex">
+                        </icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'balance_amount' | i18nextEager }}</p>
+                        <p class="small">{{ paymentAllocationDetails?.remaining_amount || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-24">
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'payment_authorization_number' | i18nextEager }}</label>
+                    <span class="value-content">{{ paymentAllocationDetails?.payment_id}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'payment_details' | i18nextEager }}</label>
+                    <span class="value-content">{{paymentAllocationDetails?.check_type}} -
+                        {{paymentAllocationDetails?.check_number}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'received_date' | i18nextEager }}</label>
+                    <span class="value-content">{{getDateTime(paymentAllocationDetails?.received_date , true)}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'entered_date' | i18nextEager }}</label>
+                    <span class="value-content">{{getDateTime(paymentAllocationDetails?.entered_date, true)}}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'pa_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{ paymentAllocationDetails?.pa_amount || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'voucher_number' | i18nextEager }}</label>
+                    <span class="value-content">{{paymentAllocationDetails?.voucher_number}}</span>
+                </div>
+            </div>
+
+
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'voucher_date' | i18nextEager }}</label>
+                    <span class="value-content">{{getDate(paymentAllocationDetails?.voucher_date, true)}}</span>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'rollback_reason' | i18nextEager }}</label>
+                    <span class="value-content">{{paymentAllocationDetails?.rollback_reason}} </span>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'notes' | i18nextEager }}</label>
+                    <span class="value-content">{{paymentAllocationDetails?.rollback_notes}}</span>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'activity_date' | i18nextEager }}</label>
+                    <span class="value-content">{{historyRecord?.activity_on}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'activity_by' | i18nextEager }}</label>
+                    <span class="value-content">{{historyRecord?.activity?.name}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- vendor roll back payment end  -->
+
+ <!-- roll back payment start  -->
+
+ <div class="sidebar-wrapper p-24" *ngIf="historyRecord.history_type == 'rollback_payment_allocation'">
+    <div class="row  mt-12">
+        <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+                <div class="mr-8">
+                    <icon name="tag" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                </div>
+                <div class="d-flex flex-column">
+                    <p class="small">{{ 'consolidated_invoice_number' | i18nextEager }}</p>
+                    <p>{{paymentAllocationDetails?.consolidate_invoice?.invoice_number}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+                <div class="mr-8">
+                    <icon name="receipt" theme="outlined" size="18px" color="#536476" class="d-flex"
+                        cuclass="d-flex"></icon>
+                </div>
+                <div class="d-flex flex-column">
+                    <p class="small">{{ 'batch_invoice_number' | i18nextEager }}</p>
+                    <p>{{paymentAllocationDetails?.consolidate_invoice?.batch_number}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+                <div class="mr-8">
+                    <icon name="event_available" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                </div>
+                <div class="d-flex flex-column">
+                    <p class="small">{{ 'invoice_duration' | i18nextEager }}</p>
+                    <p class="white-space-pre">{{ getDate(invoiceDetails?.data?.invoice_start_date, true)}} - {{
+                        getDate(invoiceDetails?.data?.invoice_end_date, true)}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+                <div class="mr-8">
+                    <icon name="payment" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                </div>
+                <div class="d-flex flex-column">
+                    <p class="small">{{ 'invoice_amount' | i18nextEager }}</p>
+                    <p class="small">{{ invoiceDetails?.data?.calculation?.total_amount || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }} </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+                <div class="mr-8">
+                    <icon name="account_balance" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                </div>
+                <div class="d-flex flex-column">
+                    <p class="small">{{ 'currency' | i18nextEager }}</p>
+                    <p>{{paymentAllocationDetails?.currency}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-12">
+            <div class="d-flex align-items-center">
+                <div class="mr-8">
+                    <icon name="paid" size="18px" theme="outlined" color="#536476" class="d-flex" cuclass="d-flex">
+                    </icon>
+                </div>
+                <div class="d-flex flex-column">
+                    <p class="small">{{ 'balance_amount' | i18nextEager }}</p>
+                    <p class="small">{{ paymentAllocationDetails?.remaining_amount || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-24">
+        <div class="col-md-4 mb-12">
+            <div class="value-group">
+                <label class="value-head">{{ 'payment_authorization_number' | i18nextEager }}</label>
+                <span class="value-content">{{ paymentAllocationDetails?.payment_id}}</span>
+            </div>
+        </div>
+        <div class="col-md-4 mb-12">
+            <div class="value-group">
+                <label class="value-head">{{ 'payment_details' | i18nextEager }}</label>
+                <span class="value-content">{{paymentAllocationDetails?.check_type}} -
+                    {{paymentAllocationDetails?.check_number}}</span>
+            </div>
+        </div>
+        <div class="col-md-4 mb-12">
+            <div class="value-group">
+                <label class="value-head">{{ 'received_date' | i18nextEager }}</label>
+                <span class="value-content">{{getDateTime(paymentAllocationDetails?.received_date, true)}}</span>
+            </div>
+        </div>
+        <div class="col-md-4 mb-12">
+            <div class="value-group">
+                <label class="value-head">{{ 'entered_date' | i18nextEager }}</label>
+                <span class="value-content">{{getDateTime(paymentAllocationDetails?.entered_date, true)}}</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="value-group">
+                <label class="value-head">{{ 'pa_amount' | i18nextEager }}</label>
+                <span class="value-content">{{ paymentAllocationDetails?.pa_amount || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="value-group">
+                <label class="value-head">{{ 'rollback_reason' | i18nextEager }}</label>
+                <span class="value-content">{{paymentAllocationDetails?.rollback_reason}} </span>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="value-group">
+                <label class="value-head">{{ 'notes' | i18nextEager }}</label>
+                <span class="value-content">{{paymentAllocationDetails?.rollback_notes}}</span>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-12">
+            <div class="value-group">
+                <label class="value-head">{{ 'activity_date' | i18nextEager }}</label>
+                <span class="value-content">{{historyRecord?.activity_on}}</span>
+            </div>
+        </div>
+        <div class="col-md-4 mb-12">
+            <div class="value-group">
+                <label class="value-head">{{ 'activity_by' | i18nextEager }}</label>
+                <span class="value-content">{{historyRecord?.activity?.name}}</span>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- roll back payment end  -->
+
+    <!-- supplier payment start  -->
+
+    <div class="sidebar-wrapper p-24" *ngIf="historyRecord.history_type == 'supplier_payment'">
+        <div class="row  mt-12">
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="tag" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'consolidated_invoice_number' | i18nextEager }}</p>
+                        <p>{{invoiceDetails?.data?.invoice_number}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="receipt" theme="outlined" size="18px" color="#536476" class="d-flex"
+                            cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'batch_invoice_number' | i18nextEager }}</p>
+                        <p>{{invoiceDetails?.data?.batch_number}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="event_available" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'invoice_duration' | i18nextEager }}</p>
+                        <p class="white-space-pre">{{ getDate(invoiceDetails?.data?.invoice_start_date, true)}} - {{
+                            getDate(invoiceDetails?.data?.invoice_end_date, true)}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="payment" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'invoice_amount' | i18nextEager }}</p>
+                        <p class="small">{{ invoiceDetails?.data?.calculation?.total_amount || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }} </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="account_balance" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'currency' | i18nextEager }}</p>
+                        <p>{{invoiceDetails?.data?.currency}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="paid" size="18px" theme="outlined" color="#536476" class="d-flex" cuclass="d-flex">
+                        </icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'balance_amount' | i18nextEager }}</p>
+                        <p class="small">{{ invoiceDetails?.data?.calculation?.total_remaining_amount || '--' |
+                            accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-24">
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'total_paid_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.total_paid_amount || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'vendor_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.vendor_total_amount || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'msp_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.total_msp_amount || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'client_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.amount_with_tax || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'created_on' | i18nextEager }}</label>
+                    <span class="value-content">{{getDateTime(invoiceDetails?.data?.created_at, false) }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'updated_on' | i18nextEager }}</label>
+                    <span class="value-content">{{getDateTime(invoiceDetails?.data?.updated_at, false) }}</span>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'vendor_name' | i18nextEager }}</label>
+                    <span class="value-content">{{supplierPaymentDetails?.vendor.name }}</span>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'voucher_number' | i18nextEager }}</label>
+                    <span class="value-content">{{supplierPaymentDetails?.voucher_number}}</span>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'activity_date' | i18nextEager }}</label>
+                    <span class="value-content">{{historyRecord?.activity_on}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'activity_by' | i18nextEager }}</label>
+                    <span class="value-content">{{historyRecord?.activity?.name}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- supplier payment end  -->
+
+    <!-- invoice approved start  -->
+
+    <div class="sidebar-wrapper p-24" *ngIf="historyRecord.history_type == 'invoice_approved'">
+        <div class="row  mt-12">
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="tag" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'consolidated_invoice_number' | i18nextEager }}</p>
+                        <p>{{invoiceDetails?.data?.invoice_number}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="receipt" theme="outlined" size="18px" color="#536476" class="d-flex"
+                            cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'batch_invoice_number' | i18nextEager }}</p>
+                        <p>{{invoiceDetails?.data?.batch_number}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="event_available" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'invoice_duration' | i18nextEager }}</p>
+                        <p class="white-space-pre">{{ getDate(invoiceDetails?.data?.invoice_start_date, true)}} - {{
+                            getDate(invoiceDetails?.data?.invoice_end_date, true)}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="payment" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'invoice_amount' | i18nextEager }}</p>
+                        <p class="small">{{ invoiceDetails?.data?.calculation?.total_amount || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }} </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="account_balance" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{'Currency'}}</p>
+                        <p>{{invoiceDetails?.data?.currency}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="paid" size="18px" theme="outlined" color="#536476" class="d-flex" cuclass="d-flex">
+                        </icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'balance_amount' | i18nextEager }}</p>
+                        <p class="small">{{ invoiceDetails?.data?.calculation?.total_remaining_amount || '--' |
+                            accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-24">
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'transaction_status' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.transaction_complete? 'Completed'  : 'Not Completed' | i18nextEager}}
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'invoice_type' | i18nextEager }}</label>
+                    <span class="value-content">{{ invoiceDetails?.data?.invoice_type}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'generation_type' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.invoice_generation_type}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'approval_type' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.approved_cancel_type}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'approval_at' | i18nextEager }}</label>
+                    <span class="value-content">{{getDateTime(invoiceDetails?.data?.approved_cancel_date, false)}}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'approval_reason' | i18nextEager }}</label>
+                    <span class="value-content">{{ invoiceDetails?.data?.approved_cancel_reason || '--'}}</span>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'approval_notes' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.approved_cancel_notes || '--'}} </span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'approved_by' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.approval_cancel_manager?.name}}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'hierarchy' | i18nextEager }}</label>
+                    <span class="value-content">{{ invoiceDetails?.data?.hierarchy?.name}}</span>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'client' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.client?.name}} </span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'timesheet_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.timesheet || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'expense_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{ invoiceDetails?.data?.calculation?.expense || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'misc_expense_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.misc_expense || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }} </span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'total_paid_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.total_paid_amount || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'vendor_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{ invoiceDetails?.data?.calculation?.vendor_total_amount || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency }  }}</span>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'msp_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.total_msp_amount || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }} </span>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'client_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.amount_with_tax || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'created_on' | i18nextEager }}</label>
+                    <span class="value-content">{{ getDateTime(invoiceDetails?.data?.created_at, false) }}</span>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'updated_on' | i18nextEager }}</label>
+                    <span class="value-content">{{getDateTime(invoiceDetails?.data?.updated_at, false)}} </span>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'notes' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.amount_with_tax ?
+                        invoiceDetails?.data?.approved_cancel_notes : '--'}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'activity_date' | i18nextEager }}</label>
+                    <span class="value-content">{{historyRecord?.activity_on}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'activity_by' | i18nextEager }}</label>
+                    <span class="value-content">{{historyRecord?.activity?.name}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- invoice approved end  -->
+
+    <!-- invoice created start  -->
+
+    <div class="sidebar-wrapper p-24" *ngIf="historyRecord.history_type == 'invoice_created'">
+        <div class="row  mt-12">
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="tag" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'consolidated_invoice_number' | i18nextEager }}</p>
+                        <p>{{invoiceDetails?.data?.invoice_number}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="receipt" theme="outlined" size="18px" color="#536476" class="d-flex"
+                            cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'batch_invoice_number' | i18nextEager }}</p>
+                        <p>{{invoiceDetails?.data?.batch_number}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="event_available" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'invoice_duration' | i18nextEager }}</p>
+                        <p class="white-space-pre">{{ getDate(invoiceDetails?.data?.invoice_start_date, true)}} - {{
+                            getDate(invoiceDetails?.data?.invoice_end_date, true) }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="payment" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'invoice_amount' | i18nextEager }}</p>
+                        <p class="small">{{ invoiceDetails?.data?.calculation?.total_amount || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }} </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="account_balance" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'currency' | i18nextEager }}</p>
+                        <p>{{invoiceDetails?.data?.currency}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="paid" size="18px" theme="outlined" color="#536476" class="d-flex" cuclass="d-flex">
+                        </icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'balance_amount' | i18nextEager }}</p>
+                        <p class="small">{{ invoiceDetails?.data?.calculation?.total_remaining_amount || '--' |
+                            accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-24">
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'transaction_status' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.transaction_complete? 'Completed' : 'Not Completed' | i18nextEager}}
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'invoice_type' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.invoice_type}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'generation_type' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.invoice_generation_type}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'hierarchy' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.hierarchy?.name}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'client' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.client?.name}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'timesheet_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.timesheet || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'expense_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.expense || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'misc_expense_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.misc_expense || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'total_paid_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.total_paid_amount || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'vendor_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.vendor_total_amount || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'msp_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.total_msp_amount || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'client_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.amount_with_tax || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'created_on' | i18nextEager }}</label>
+                    <span class="value-content">{{getDateTime(invoiceDetails?.data?.created_at, false)}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'updated_on' | i18nextEager }}</label>
+                    <span class="value-content">{{getDateTime(invoiceDetails?.data?.updated_at, false)}}</span>
+                </div>
+            </div>
+
+
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'notes' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.approved_cancel_notes ?
+                        invoiceDetails?.data?.approved_cancel_notes : '--'}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'activity_date' | i18nextEager }}</label>
+                    <span class="value-content">{{historyRecord?.activity_on}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'activity_by' | i18nextEager }}</label>
+                    <span class="value-content">{{historyRecord?.activity?.name}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- invoice created end  -->
+
+    <!-- invoice cancelled start  -->
+
+    <div class="sidebar-wrapper p-24" *ngIf="historyRecord.history_type == 'invoice_cancelled'">
+        <div class="row  mt-12">
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="tag" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'consolidated_invoice_number' | i18nextEager }}</p>
+                        <p>{{invoiceDetails?.data?.invoice_number}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="receipt" theme="outlined" size="18px" color="#536476" class="d-flex"
+                            cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'batch_invoice_number' | i18nextEager }}</p>
+                        <p>{{invoiceDetails?.data?.batch_number}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="event_available" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'invoice_duration' | i18nextEager }}</p>
+                        <p class="white-space-pre">{{ getDate(invoiceDetails?.data?.invoice_start_date, true)}} - {{
+                            getDate(invoiceDetails?.data?.invoice_end_date,true)}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="payment" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'invoice_amount' | i18nextEager }}</p>
+                        <p class="small">{{ invoiceDetails?.data?.calculation?.total_amount || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }} </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="account_balance" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'currency' | i18nextEager }}</p>
+                        <p>{{invoiceDetails?.data?.currency}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="paid" size="18px" theme="outlined" color="#536476" class="d-flex" cuclass="d-flex">
+                        </icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'balance_amount' | i18nextEager }}</p>
+                        <p class="small">{{ invoiceDetails?.data?.calculation?.total_remaining_amount || '--' |
+                            accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-24">
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'transaction_status' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.transaction_complete? 'Completed' : 'Not Completed' | i18nextEager}}
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'invoice_type' | i18nextEager }}</label>
+                    <span class="value-content">{{ invoiceDetails?.data?.invoice_type}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'generation_type' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.invoice_generation_type}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'cancel_type' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.approved_cancel_type}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'cancel_at' | i18nextEager }}</label>
+                    <span class="value-content">{{getDateTime(invoiceDetails?.data?.approved_cancel_date, false)}}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'cancel_reason' | i18nextEager }}</label>
+                    <span class="value-content">{{ invoiceDetails?.data?.approved_cancel_reason || '--'}}</span>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'cancel_notes' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.approved_cancel_notes || '--'}} </span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'cancel_by' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.approval_cancel_manager?.name}}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'hierarchy' | i18nextEager }}</label>
+                    <span class="value-content">{{ invoiceDetails?.data?.hierarchy?.name}}</span>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'client' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.client?.name}} </span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'timesheet_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.timesheet || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'expense_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{ invoiceDetails?.data?.calculation?.expense || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency }  }}</span>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'misc_expense_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.misc_expense || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }} </span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'total_paid_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.total_paid_amount || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'vendor_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{ invoiceDetails?.data?.calculation?.vendor_total_amount || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency }  }}</span>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'msp_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.total_msp_amount || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }} </span>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'client_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.amount_with_tax || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'created_on' | i18nextEager }}</label>
+                    <span class="value-content">{{ getDateTime(invoiceDetails?.data?.created_at, false) }}</span>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'updated_on' | i18nextEager }}</label>
+                    <span class="value-content">{{getDateTime(invoiceDetails?.data?.updated_at, false)}} </span>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'notes' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.amount_with_tax ?
+                        invoiceDetails?.data?.approved_cancel_notes : '--'}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'activity_date' | i18nextEager }}</label>
+                    <span class="value-content">{{historyRecord?.activity_on}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'activity_by' | i18nextEager }}</label>
+                    <span class="value-content">{{historyRecord?.activity?.name}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- invoice cancelled end  -->
+
+    <!-- invoice transaction complete start  -->
+
+    <div class="sidebar-wrapper p-24" *ngIf="historyRecord.history_type == 'transaction_complete'">
+        <div class="row  mt-12">
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="tag" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'consolidated_invoice_number' | i18nextEager }}</p>
+                        <p>{{invoiceDetails?.data?.invoice_number}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="receipt" theme="outlined" size="18px" color="#536476" class="d-flex"
+                            cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'batch_invoice_number' | i18nextEager }}</p>
+                        <p>{{invoiceDetails?.data?.batch_number}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="event_available" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'invoice_duration' | i18nextEager }}</p>
+                        <p class="white-space-pre">{{ getDate(invoiceDetails?.data?.invoice_start_date, true)}} - {{
+                            getDate(invoiceDetails?.data?.invoice_end_date, true)}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="payment" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'invoice_amount' | i18nextEager }}</p>
+                        <p class="small">{{ invoiceDetails?.data?.calculation?.total_amount || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }} </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="account_balance" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'currency' | i18nextEager }}</p>
+                        <p>{{invoiceDetails?.data?.currency}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="d-flex align-items-center">
+                    <div class="mr-8">
+                        <icon name="paid" size="18px" theme="outlined" color="#536476" class="d-flex" cuclass="d-flex">
+                        </icon>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <p class="small">{{ 'balance_amount' | i18nextEager }}</p>
+                        <p class="small">{{ invoiceDetails?.data?.calculation?.total_remaining_amount || '--' |
+                            accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-24">
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'transaction_status' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.transaction_complete? 'Completed' : 'Not Completed' | i18nextEager}}
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'invoice_type' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.invoice_type }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'generation_type' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.invoice_generation_type }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'hierarchy' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.hierarchy?.name }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'client' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.client?.name }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'timesheet_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.timesheet || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'expense_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.expense || '--' | accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'misc_expense_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.misc_expense || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'total_paid_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.total_paid_amount || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'vendor_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.vendor_total_amount || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'msp_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.total_msp_amount || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'client_amount' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.calculation?.amount_with_tax || '--' |
+                        accuracy : accuracyEnum.AMOUNT : { currencyCode: invoiceDetails?.data?.currency } }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'created_on' | i18nextEager }}</label>
+                    <span class="value-content">{{getDateTime(invoiceDetails?.data?.created_at, false) }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'updated_on' | i18nextEager }}</label>
+                    <span class="value-content">{{getDateTime(invoiceDetails?.data?.updated_at, false) }}</span>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="value-group">
+                    <label class="value-head">{{ 'notes' | i18nextEager }}</label>
+                    <span class="value-content">{{invoiceDetails?.data?.approved_cancel_notes ?
+                        invoiceDetails?.data?.approved_cancel_notes : '--'}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'activity_date' | i18nextEager }}</label>
+                    <span class="value-content">{{historyRecord?.activity_on}}</span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-12">
+                <div class="value-group">
+                    <label class="value-head">{{ 'activity_by' | i18nextEager }}</label>
+                    <span class="value-content">{{historyRecord?.activity?.name}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- invoice transaction complete end  -->
+    <div class="sidebar-wrapper p-24" *ngIf="historyRecord?.candidate_uuid ">
+        <div class="row  mt-12">
+            <ng-container *ngIf="workerDetails?.worker_uuid">
+                <div class="col-md-4 mb-12">
+                    <div class="d-flex align-items-center">
+                        <div class="mr-8">
+                            <icon name="tag" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <p class="small">{{ 'worker_uuid' | i18nextEager }}</p>
+                            <p>{{workerDetails?.worker_uuid}}</p>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="workerDetails?.official_worker_id">
+                <div class="col-md-4 mb-12">
+                    <div class="d-flex align-items-center">
+                        <div class="mr-8">
+                            <icon name="receipt" theme="outlined" size="18px" color="#536476" class="d-flex"
+                                cuclass="d-flex"></icon>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <p class="small">{{ 'officail_worker_id' | i18nextEager }}</p>
+                            <p>{{workerDetails?.official_worker_id}}</p>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="workerDetails?.original_start_date">
+                <div class="col-md-4 mb-12">
+                    <div class="d-flex align-items-center">
+                        <div class="mr-8">
+                            <icon name="event_available" size="18px" color="#536476" class="d-flex" cuclass="d-flex">
+                            </icon>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <p class="small">{{ 'worker_start_date' | i18nextEager }}</p>
+                            <p class="white-space-pre">
+                                {{ getDateFromString(workerDetails?.original_start_date) |
+                                    localDateFormat : '': '':'' : true}}
+                               </p>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+            <ng-container *ngIf=" workerDetails?.source_type">
+                <div class="col-md-4 mb-12">
+                    <div class="d-flex align-items-center">
+                        <div class="mr-8">
+                            <icon name="payment" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <p class="small">{{ 'worker_type' | i18nextEager }}</p>
+                            <p class="small">{{ workerDetails?.source_type.replace('_',' ') }} </p>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="workerDetails?.official_email">
+                <div class="col-md-4 mb-12">
+                    <div class="d-flex align-items-center">
+                        <div class="mr-8">
+                            <icon name="payment" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <p class="small">{{ 'worker_official_email' | i18nextEager }}</p>
+                            <p class="small worker-email-text">{{ workerDetails?.official_email }} </p>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="workerDetails?.source_id">
+                <div class="col-md-4 mb-12">
+                    <div class="d-flex align-items-center">
+                        <div class="mr-8">
+                            <icon name="payment" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <p class="small">{{ 'source_id' | i18nextEager }}</p>
+                            <p class="small">{{ workerDetails?.source_id }} </p>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="workerDetails?.sso_id">
+                <div class="col-md-4 mb-12">
+                    <div class="d-flex align-items-center">
+                        <div class="mr-8">
+                            <icon name="payment" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <p class="small">{{ 'sso_id' | i18nextEager }}</p>
+                            <p class="small">{{ workerDetails?.sso_id }} </p>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="workerDetails?.classification">
+                <div class="col-md-4 mb-12">
+                    <div class="d-flex align-items-center">
+                        <div class="mr-8">
+                            <icon name="payment" size="18px" color="#536476" class="d-flex" cuclass="d-flex"></icon>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <p class="small">{{ 'classification' | i18nextEager }}</p>
+                            <p class="small">{{ workerDetails?.classification }} </p>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+</svms-sidebar-ng>

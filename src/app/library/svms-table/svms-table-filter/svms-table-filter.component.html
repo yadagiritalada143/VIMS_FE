@@ -1,0 +1,96 @@
+<svms-sidebar
+    [dataVisibility]="visibility"
+    (onClose)="sidebarClose()"
+>
+
+    <h4 class="px-24 font-weight-normal highlight">
+        <icon size="19px" name="filter_alt" type="material" cuClass="d-flex" class="float-left mr-4"></icon>
+        {{ 'filters' | i18next }}
+    </h4>
+
+    <svms-sidebar-body>
+        <div [formGroup]="filterForm" class="px-24">
+            <ng-container *ngFor="let field of advanceFilterConfig; index as it">
+
+                <div *ngIf="showAdvanceFilter(field)" class="form-group mb-16 w-100">
+
+                    <label *ngIf="field?.type != FilterType.NONE"> {{ field?.title | i18next }} </label>
+
+                    <ng-container *ngIf="field?.type === FilterType.TEXT">
+                        <input type="text"
+                            [formControlName]="field?.name"
+                            [placeholder]="(field?.placeholder ?? field?.title) | i18next"
+                            class="form-control"
+                        />
+                    </ng-container>
+
+                    <ng-container *ngIf="field?.type === FilterType.SELECT">
+                        <ng-select
+                            [formControlName]="field?.name"
+                            [placeholder]="(field?.placeholder ?? field?.title) | i18next"
+                            [clearable]="true"
+                            [multiple]="false"
+                            (open)="onSearchEvent({ term: '' }, field)"
+                            (search)="onSearchEvent($event, field)"
+                            (change)="onChangeEvent($event, field)"
+                            [loading]="(field?.loading ?? false)"
+                            (scrollToEnd)="onScrollEvent(field)"
+                        >
+                            <ng-option [value]="entry?.value"
+                                *ngFor="let entry of field?.options">
+                                {{ entry?.name | i18next }}
+                            </ng-option>
+                        </ng-select>
+                    </ng-container>
+
+                    <ng-container *ngIf="field?.type === FilterType.MULTISELECT">
+                        <ng-select
+                            [formControlName]="field?.name"
+                            [placeholder]="(field?.placeholder ?? field?.title) | i18next"
+                            [clearable]="true"
+                            [multiple]="true"
+                            (open)="onSearchEvent({ term: '' }, field)"
+                            (search)="onSearchEvent($event, field)"
+                            (change)="onChangeEvent($event, field)"
+                            [loading]="(field?.loading ?? false)"
+                            (scrollToEnd)="onScrollEvent(field)"
+                        >
+                            <ng-option [value]="entry?.value"
+                                *ngFor="let entry of field?.options">
+                                {{ entry?.name | i18next }}
+                            </ng-option>
+                        </ng-select>
+                    </ng-container>
+
+                    <ng-container *ngIf="field?.type === FilterType.DATEPICKER">
+                        <svms-datepicker
+                            [inputdateFormat]=""
+                            [responsiveDatepicker]="true"
+                            [formControlName]="field?.name"
+                            [placeholder]="(field?.placeholder ?? field?.title) | i18next"
+                            [options]="field?.config ?? datepickerOptions"
+                        >
+                        </svms-datepicker>
+                    </ng-container>
+
+                </div>
+            </ng-container>
+        </div>
+        <div class="mt-24">&nbsp;</div>
+    </svms-sidebar-body>
+
+    <svms-sidebar-footer>
+        <svms-sidebar-footer>
+            <button class="btn btn-outine float-left" type="reset" (click)="clearAllFilters()">
+                <icon size="20px" name="highlight_off" type="material" cuClass="d-flex"
+                    class="icon--on-left d-flex">
+                </icon> {{ 'clear_all_filters' | i18next }}
+            </button>
+            <button class="btn btn-primary float-right" (click)="filterData()">
+                <icon size="20px" name="check_circle" type="material" cuClass="d-flex"
+                    class="icon--on-left d-flex">
+                </icon> {{ 'apply' | i18next }}
+            </button>
+        </svms-sidebar-footer>
+    </svms-sidebar-footer>
+</svms-sidebar>

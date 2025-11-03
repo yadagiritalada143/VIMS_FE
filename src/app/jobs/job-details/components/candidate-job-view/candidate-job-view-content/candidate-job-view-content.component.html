@@ -1,0 +1,105 @@
+<div class="card bg-light job-view-content">
+    <div class="nav-wrapper">
+        <nav>
+            <ul>
+                <li>
+                    <a  [ngClass]="{ active: currentTab == 'profile' }" (click)="tabClick('profile')">
+                        <icon name="account_circle" size="18px" type="material" theme="outlined" class="mr-4"></icon>
+                        {{ 'profile' | i18next }}
+                    </a>
+                </li>
+                <li>
+                  <a  [ngClass]="{ active: currentTab == 'resume' }" (click)="tabClick('resume')">
+                      <icon name="article" size="18px" type="material" theme="outlined" class="mr-4"></icon>
+                      {{ 'resume' | i18next }}
+                  </a>
+              </li>
+              <li>
+                <a *ngIf="canViewCredentialing"  [ngClass]="{ active: currentTab == 'credentials' }" (click)="tabClick('credentials')">
+                    <icon name="admin_panel_settings" size="18px" type="material" theme="outlined" class="mr-4"></icon>
+                    {{ 'credentials' | i18next }}
+                </a>
+                </li>
+                <li>
+                    <a  [ngClass]="{ active: currentTab == 'submissions' }" *ngIf="submitedCandidateDetail" (click)="tabClick('submissions')">
+                        <icon name="inbox" size="18px" type="material" theme="outlined" class="mr-4"></icon>
+                        {{ 'submission' | i18next }}
+                    </a>
+                </li>
+                <li>
+                    <a  [ngClass]="{ active: currentTab == 'interviews' }" *ngIf="submitedCandidateDetail?.status && submitedCandidateDetail?.status!='REHIRE_CHECK_PENDING' && submitedCandidateDetail?.status!='REHIRE_REJECTED' && submitedCandidateDetail?.status!='PENDING_SHORTLIST' && submitedCandidateDetail?.status!='PENDING_SHORTLIST_REVIEW' && submitedCandidateDetail?.status!='SHORTLIST_REVIEW_REJECTED'" (click)="tabClick('interviews')">
+                        <icon name="forum" size="18px" type="material" theme="outlined" class="mr-4"></icon>
+                        {{ 'interview(s)' | i18next }}
+                    </a>
+
+                </li>
+                <li *ngIf="jobStatus !== 'PENDING_APPROVAL_SOURCING' && jobStatus !== 'PENDING_APPROVAL' ">
+                    <a  [ngClass]="{ active: currentTab == 'offers' }" (click)="tabClick('offers')"
+                    *ngIf="submitedCandidateDetail && submitedCandidateDetail?.offer_visibility &&
+            (submitedCandidateDetail?.status?.toUpperCase() === 'SUBMITTED' ||
+            submitedCandidateDetail?.status?.toUpperCase() === 'OFFER_RELEASED'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'REJECTED'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'CLOSED'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'HIRED'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'WITHDRAWN'
+            ||  submitedCandidateDetail?.status?.toUpperCase() === 'COUNTERED'
+            ||  submitedCandidateDetail?.status?.toUpperCase() === 'ACCEPTED'
+            ||  submitedCandidateDetail?.status?.toUpperCase() === 'OFFER_ACCEPTED'
+            ||  submitedCandidateDetail?.status?.toUpperCase() === 'OFFER_REJECTED'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'OFFER_COUNTERED'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'PENDING_SHORTLIST'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'OFFER_PENDING_APPROVAL'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'OFFER_WITHDRAWN'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'PENDING_OFFER_REVIEW'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'OFFER_CANCELLED'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'INTERVIEW_CANCELLED'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'INTERVIEW_SCHEDULED'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'INTERVIEW_ACCEPTED'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'INTERVIEW_REJECTED'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'INTERVIEW_COMPLETED'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'PENDING_INTERVIEW_ACCEPTANCE'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'PENDING_INTERVIEW_REVIEW'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'COUNTERED_OFFER_PENDING_REVIEW'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'COUNTERED_OFFER_REVIEW_CANCELLED'
+            || submitedCandidateDetail?.status?.toUpperCase() === 'OFFER_COUNTERED_PENDING_APPROVAL'
+            )">
+                        <icon name="mark_as_unread" size="18px" type="material" theme="outlined" class="mr-4"></icon>
+                        {{ 'offer' | i18next }}
+                        <!-- <icon *ngIf="offerInfo?.status?.toLowerCase() === 'accepted' && !offerInfo?.assignment_id" name="error" size="20px" color="#FE5858" class="mb-16"></icon> -->
+                    </a>
+                </li>
+                <ng-container *authorize="'view_onboarding_checklist'">
+                  <ng-container *ngIf="!showOnBoarding">
+                    <li *ngIf="!noOffer && offerData?.status?.toUpperCase()=='ACCEPTED' && !disableOnboarding && submitedCandidateDetail?.offer_visibility">
+                        <a  [ngClass]="{ active: currentTab == 'onboarding' }" (click)="tabClick('onboarding')">
+                            <icon name="ads_click" size="18px" type="material" theme="outlined" class="mr-4"></icon>
+                            {{ 'on-boarding' | i18next }}
+                        </a>
+                    </li>
+                  </ng-container>
+                </ng-container>
+
+                <ng-container *ngIf="user_type!='vendor' || user_type =='super_org'">
+                  <li *ngIf="showHistory">
+                    <a  [ngClass]="{ active: currentTab == 'history' }" *ngIf="submitedCandidateDetail" (click)="tabClick('history')">
+                        <icon name="history" size="18px" type="material" theme="outlined" class="mr-4"></icon>
+                        {{ 'history' | i18next }}
+                    </a>
+                  </li>
+                </ng-container>
+
+                <!-- <ng-container *authorize="'view_background_checklist'">
+                    <li>
+                        <a *ngIf="!setAvailableCd"  [ngClass]="{ active: currentTab == 'credentialing' }" (click)="tabClick('credentialing')">
+                            <icon name="admin_panel_settings" size="18px" type="material" theme="outlined" class="mr-4"></icon>
+                            Background Check
+                        </a>
+                    </li>
+                </ng-container> -->
+            </ul>
+        </nav>
+    </div>
+    <div class="content-details m-min-height-auto">
+        <router-outlet></router-outlet>
+    </div>
+</div>

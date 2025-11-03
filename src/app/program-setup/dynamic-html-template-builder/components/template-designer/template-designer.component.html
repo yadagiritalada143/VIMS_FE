@@ -1,0 +1,66 @@
+<svms-sidebar class="email-designer-panel" [title]="formTitle" size="full-screen" [dataVisibility]="headerFooterEditor"
+  (onClose)="sidebarClose()">
+  <div class="design-editor">
+    <div class="editor-area">
+      <perfect-scrollbar [config]="{ suppressScrollX: true, suppressScrollY: false }">
+        <div class="editor-tab">
+          <ul>
+            <li>
+              <a [ngClass]="{'active' : editorMode === 'design'}" class="active" (click)="switchMode('design')">
+                <span class="d-flex align-items-center">
+                  <icon name="edit" size="20px" class="mr-8" cuClass="d-flex"></icon> <span>{{ 'design_mode' | i18next }}</span>
+                </span>
+              </a>
+            </li>
+            <li>
+              <a [ngClass]="{'active' : editorMode === 'preview'}" (click)="switchMode('preview')">
+                <span class="d-flex align-items-center">
+                  <icon name="visibility" size="20px" class="mr-8" cuClass="d-flex"></icon> <span>{{ 'preview_mode' | i18next }}</span>
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="editor-preview" *ngIf="editorMode === 'design'">
+          <table style="width: 100%;" width='100%'
+              *ngFor="let row of currentConfig?.rows || []; let i=index">
+            <tr [ngClass]="{'row-dot-border': selectedRowIndex === i}" appRowRenderer
+              [rowObj]="row" [rowIndex]="i">
+              <!-- <app-row-renderer [rowObj]="row?.cols" [rowIndex]="i"
+                              (clickDeleteCell)="onClickCellDelete($event)"
+                              (clickDeleteRow)="onClickRowDelete($event)"\
+                            ][po iuytrewq
+                              (clickCell)="onCellClick($event)"
+                              (clickDeleteItem)="onClickItemDelete($event)">
+            </app-row-renderer> -->
+              <td *ngFor="let col of row?.cols, let j=index">
+                <app-col-renderer [colIndex]="j" [colObject]="col" (clickDeleteCell)="onClickCellDelete($event)"
+                  (clickCell)="onCellClick($event)" (clickDeleteItem)="onClickItemDelete($event)">
+                </app-col-renderer>
+              </td>
+              <div class="inline-toolbar" *ngIf="selectedRowIndex === i" [tooltip]="'Delete row' | i18next">
+                <icon title="Delete Row" size="20px" name="delete" theme="outlined" type="material" cuClass="d-flex"
+                  (onClick)="onClickRowDelete(i)"></icon>
+              </div>
+            </tr>
+          </table>
+      </div>
+      <div class="editor-preview preview-ui" *ngIf="editorMode === 'preview'">
+        <app-template-render [id] = "templateDesignerConfig?.type?.toLowerCase()" [config]="currentConfig"></app-template-render>
+      </div>
+      </perfect-scrollbar>
+    </div>
+    <div class="toolbar-area">
+      <perfect-scrollbar [config]="{ suppressScrollX: true, suppressScrollY: false }">
+        <div class="p-24">
+          <span class="d-flex justify-content-between align-items-center p-10 w-100 mb-4">
+            <h3>{{ 'add_properties' | i18next }}</h3>
+            <button class="btn btn-primary small mb-4" type="submit" (click)="saveTemplate()" *accessControl>{{ 'save' | i18next }}</button>
+          </span>
+          <app-toolbar></app-toolbar>
+          <app-item-properties></app-item-properties>
+        </div>
+      </perfect-scrollbar>
+    </div>
+  </div>
+</svms-sidebar>

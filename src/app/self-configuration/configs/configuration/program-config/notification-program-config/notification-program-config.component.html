@@ -1,0 +1,30 @@
+<form [formGroup]="formGroup">
+    <app-program-config-control
+      subtitle="Enable Whitelist Domains/Emails IDs"
+      description="A whitelist is a list of domains to whom notifications will be sent. If 
+      this flag is enabled then the system will send notifications to only the domains/emails IDs entered in the field below. When the flag 
+      is not enabled then the system will send notifications to all recipients regardless of their email domain.."
+      [type]="ControlType.TOGGLE"
+      formControlName="whitelist"
+    >
+    </app-program-config-control>
+    <app-program-config-control
+      *ngIf="VisibleWhistlistArea"
+      directoryIcon = "true"
+      subtitle="List of Domains/Email IDs to Whitelist"
+      description="Enter the domain(s) and/or email IDs which you would like to have notifications sent. If you would like to enter multiple domains, please use a semi-colon (';') as the delimiter."
+      [type]="ControlType.TEXTAREA"
+      placeholderText="Enter Whitelist Email(s)"
+      formControlName="exclude_msp"
+      [isRequired]="true"
+    >
+    </app-program-config-control>
+    <app-program-config-control
+      subtitle="Include Approval Link In Notification"
+      description="When enabled the system will include an approval link within the notification."
+      [type]="ControlType.TOGGLE"
+      formControlName="approval_link"
+    >
+    </app-program-config-control>
+  </form>
+  

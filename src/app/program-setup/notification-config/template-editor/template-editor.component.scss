@@ -1,0 +1,213 @@
+@import '../../../../assets/sass/abstracts/variables';
+
+.notification-editor-wrapper {
+    background-image: radial-gradient(#DDEAFF 8%, transparent 8%), radial-gradient(#DDEAFF 8%, transparent 8%);
+    background-color: #F8FAFF;
+    background-position: 0 0, 40px 0;
+    background-size: 40px 30px;
+    height: calc(100vh - 50px);
+    display: flex;
+    justify-content: space-between;
+    gap: 0;
+
+    .editor-zone {
+        flex: 1;
+        max-width: 525px;
+        background-color: $light;
+        box-shadow: -4px 1px 11px #00000007;
+        border: 1px solid #E8F0F7;
+    }
+
+    .preview-zone {
+        flex: 1;
+
+        .preview-tabs {
+            background-color: $light;
+            box-shadow: 0px 1px 3px #0000001A;
+
+            button {
+                padding: $p8 6px;
+                height: 38px;
+            }
+
+            ul {
+                list-style-type: none;
+                border-left: 1px solid #E8F0F7;
+
+                li {
+                    display: inline-block;
+                    margin-right: $m4;
+
+                    a {
+                        font-size: 13px;
+                        color: #0F2E4E;
+                        font-weight: $font-weight-medium;
+                        display: block;
+                        padding: 0 $p24;
+                        line-height: 64px;
+                        position: relative;
+                        transition: $transition;
+
+                        icon {
+                            ::ng-deep i {
+                                vertical-align: middle;
+                                margin-right: $m8;
+                            }
+                        }
+
+                        &.active {
+                            color: $color-assets-primary;
+
+                            icon {
+                                ::ng-deep i {
+                                    color: $color-assets-primary;
+                                }
+                            }
+
+                            &:after {
+                                position: absolute;
+                                left: 0;
+                                right: 0;
+                                bottom: -1px;
+                                height: 2px;
+                                background-color: $color-assets-primary;
+                                content: '.';
+                                text-indent: -9999px;
+                                overflow: hidden;
+                                display: block;
+                                visibility: visible;
+                            }
+                        }
+
+                        &:hover {
+                            color: $color-assets-primary;
+
+                            icon {
+                                ::ng-deep i {
+                                    color: $color-assets-primary;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .preview-body {
+            height: calc(100vh - 114px);
+            overflow: auto;
+        }
+
+        .dropdown-selectors {
+            max-width: 719px;
+            margin: 0 auto;
+
+            .ng-select {
+                ::ng-deep {
+                    .ng-select-container {
+                        background-color: #e2edfe;
+
+                        .ng-placeholder {
+                            color: $color-body-txt-default;
+                        }
+                    }
+                }
+            }
+        }
+
+        .email-preview-container {
+            background-color: $light;
+            box-shadow: 0px 0px 22px #00000010;
+            border-radius: 6px;
+            max-width: 719px;
+            margin: auto;
+            border-radius: 6px;
+            overflow: hidden;
+            padding: 22px;
+            margin-bottom: 10px;
+            ::ng-deep table {
+                td {
+                    padding: 0;
+                }
+            }
+
+            .not-content {
+                background-color: #eb445a;
+                text-align: center;
+                padding: $p4;
+                border-radius: $border-radius;
+
+                p {
+                    color: $light;
+                }
+
+                icon {
+                    ::ng-deep i {
+                        color: $light;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.template-outer {
+    min-height: calc(100vh - 114px);
+    .selector {
+        background-color: #FFE20012;
+        border: 1px dashed #87888257;
+        position: absolute;
+        max-width: 719px;
+        width: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 32px;
+        height: 117px;
+        cursor: pointer;
+        z-index: 100;
+        display: none;
+
+        span {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: #1C2022;
+            color: $light;
+            line-height: 35px;
+            padding: 0 19px;
+            font-size: 12px;
+        }
+
+        &.content-selector {
+            top: 149px;
+            height: 200px;
+        }
+    }
+
+    &:hover {
+        .selector {
+            display: block;
+        }
+    }
+}
+
+// table,
+//             th,
+//             td {
+//                 border: 1px solid black;
+//                 border-collapse: collapse;
+//                 &:active {
+//                   border: 1px dotted black;
+//                 }
+//             }
+
+//             table {
+//                 width: 50%;
+//             }
+
+//             table.fixed {
+//                 table-layout: fixed;
+//             }
+//             table.fixed td {
+//                 overflow: hidden;
+//             }

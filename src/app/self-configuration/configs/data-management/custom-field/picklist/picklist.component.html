@@ -1,0 +1,126 @@
+<div class="table-view mb-24">
+  <div class="p-16 d-flex align-items-center justify-content-between">
+    <div>
+      <p class="blue-color font-weight-medium">{{ type | titlecase }} {{ ' Values' | i18next }} <span class="require">*</span></p>
+      <p class="small">{{ ('define_the_' | i18next)+type?.toLowerCase()+('_values_by_entering_them_in_Textbox_available_below_and_press_+Add_button._once_they_are_added,_you_can_remove_them_using_x_button._you_can_also_define_the_dependent_custom_fields_to_display_for_each_added_' | i18next)+type?.toLowerCase()+('_value' | i18next) }}</p>
+    </div>
+    <div class="d-flex align-items-center" *ngIf="showMultiselect">
+      <div class="toggle-panel transparent-bg-toggle">
+        <div class="toggle-panel-inner" [ngClass]="dropdownToggle?.value ? 'if-active' : 'if-inactive'">
+          <span class="toggle-switch" [ngClass]="dropdownToggle?.value ? 'toggle-on' : 'toggle-off'"
+            (click)="onClickDropdown()"></span>
+            <span class="status-text">{{'multi_select' | i18next}}</span>
+        </div>
+      </div>
+      <div class="ml-8">
+        <i class="tooltip-icon material-icons" tooltip="Tooltip text goes here" placement="left">info</i>
+      </div>
+    </div>
+  </div>
+  <div class="px-16 py-8 d-flex align-items-center justify-content-between border-bottom border-top bg-light">
+    <input class="c-form-control transparent" id="newValue" name="newValue" #newValue="ngModel" [(ngModel)]="picklistForm.newValue" placeholder="{{ 'enter_value_name_and_press_“+add”_button' | i18next }}">
+    <button class="c-btn c-btn-primary-medium-left-icon ml-24" type="button" (click)="addNewValue()">
+      <i class="material-icons">add</i> {{ 'add' | i18next }}
+    </button>
+  </div>
+
+  <ul
+    dndDropzone
+    dndEffectAllowed="copyMove"
+    class="value-list custom-field-value-list bg-light"
+    (dndDrop)="onDropField($event)"
+    #optionsList
+  >
+    <li
+      *ngFor="let option of picklistOptions; let i = index"
+      draggable="true"
+      [dndDraggable]="option.value"
+      dndEffectAllowed="move"
+      class="option"
+    >
+      <ng-container>
+        <div class="field-display d-flex justify-content-between align-items-center">
+          <div class="d-flex pl-16">
+            <div class="ml-16">
+              <span class="d-flex align-items-center small">
+                <icon size="16px" name="drag_indicator" type="material" cuClass="d-flex" class="d-flex drag-icon gray-icon mr-12"></icon>
+                <label class="mb-0 c-input-radio">
+                  <input type="radio"
+                  id="selected{{i}}"
+                  name="selected{{i}}"
+                  #selected="ngModel"
+                  [(ngModel)]="option.selected"
+                  value="ON"
+                  (click)="changeCheckbox(i, option.selected)" class="mr-8">
+                  <span class="cb-ui"></span>
+                </label>
+                <input
+                  type="text"
+                  id="label"
+                  name="label"
+                  #label="ngModel"
+                  [(ngModel)]="option.label"
+                  class="border-0 fs-12 outline-0"
+                  (change)="editOption($event, i)"
+                />
+              </span>
+            </div>
+          </div>
+          <div class="d-flex align-items-center">
+            <div class="toggle-panel transparent-bg-toggle" *ngIf="!hideDependentInModule.includes(selectedModule)">
+              <div class="toggle-panel-inner" [ngClass]="option?.dependent ? 'if-active' : 'if-inactive'">
+                <span class="toggle-switch" [ngClass]="option?.dependent ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickDependend(i)"></span>
+                  <span class="status-text">{{'Dependent Custom Fields' | i18next}}</span>
+              </div>
+            </div>
+            <div class="ml-8" *ngIf="!hideDependentInModule.includes(selectedModule)">
+              <i class="tooltip-icon material-icons" tooltip="{{'when_dependent_custom_fields”_setting_is_enabled,_the_system_will_allow_the_end_user_to_customize_which_other_custom_fields_will_be_displayed_only_when_this_value_has_been_selected.' | i18next}}" placement="left">info</i>
+            </div>
+            <div class="border-left pl-16 pr-12 py-12 ml-12">
+              <i class="material-icons cursor-pointer remove-link" (click)="removeOption(i)">highlight_off</i>
+            </div>
+          </div>
+        </div>
+        <div class="pb-12 pl-12 border-top" *ngIf="option?.dependent">
+          <p class="mt-12">{{ 'if_value_selected_“yes”_display_these_resulting_fields' | i18next }}</p>
+          <div class="resulting-field d-flex flex-wrap">
+            <button class="c-btn c-btn-outline-medium-left-icon small mr-12 mt-8" (click)="addResultingFields(i)">
+              <i class="material-icons">add</i> {{ 'add_resulting_fields' | i18next }}
+            </button>
+            <p class="selected-value mt-8 mr-12" *ngFor="let resultField of option.selectedResultingFields; let fieldIndex = index">{{ resultField?.name | i18next }} <i class="ml-12 material-icons cursor-pointer" (click)="removeResultingField(fieldIndex,i)">cancel</i></p>
+          </div>
+        </div>
+      </ng-container>
+    </li>
+  </ul>
+</div>
+
+<app-svms-modal class="common-checkbox-modal" title="{{ 'select_conditional_fields' | i18next }}" [visibility]="conditionalFields" (onClose)="onCloseModal()">
+  <app-svms-modal-body>
+    <div class="c-search-panel-wrapper mb-16 position-relative">
+      <div class="c-search-panel position-absolute">
+          <div class="position-relative" placement="top">
+              <i class="material-icons">search</i>
+          <input type="search" #cust_search [(ngModel)]="searchText" (input)="search()" class="custom-form-control" placeholder="{{'Search...' | i18next}}" />
+          </div>
+      </div>
+  </div>
+  <div class="px-16">
+    <div class="content-item" *ngFor="let cf of customFieldListByModule let i = index">
+      <div *ngIf="cf.checked || !allSelectedOptions.includes(cf.id)" class="checkbox-block">
+        <label class="c-input-checkbox mb-0">
+          <input type="checkbox" [(ngModel)]="cf.checked" (ngModelChange)="selectCF($event,cf)">
+          <span class="cb-ui"></span>
+          <span class="cb-label">{{cf?.name}}</span>
+        </label>
+      </div>
+    </div>
+  </div>
+  </app-svms-modal-body>
+  <app-svms-modal-footer>
+    <div class="d-flex justify-content-end">
+    <button class="btn btn-primary" (click)="selectResultingField()">{{ 'add' | i18next }}</button>
+  </div>
+</app-svms-modal-footer>
+</app-svms-modal>

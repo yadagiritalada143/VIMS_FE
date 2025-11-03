@@ -1,0 +1,13 @@
+<div id="svmsSidebar" class="svms-sidebar position-fixed bg-light sidebar-ng-mobile" [class]="size"
+  [attr.data-visibility]="dataVisibility" [attr.data-profilepanel]="dataProfilePanel" #svmsSidebarPanel [ngClass]="{'footer-active': showFooter, 'header-active': showHeader}">
+  <a  (click)="closeSidebar()" class="close-trigger">
+    <sidebar-icon size="24px" name="close" type="material" cuClass="icon d-flex"></sidebar-icon>
+  </a>
+  <div class="svms-header position-relative p-16" *ngIf="showHeader">
+    <h4 class="pl-16 mb-0">
+      <sidebar-icon size="24px" *ngIf="icon" [name]="icon" theme="outlined" type="material" cuClass="icon float-left pr-16"></sidebar-icon> {{title | i18next}}
+    </h4>
+  </div>
+  <ng-content></ng-content>
+</div>
+<div id="svmsSidebarBackdrop" class="svms-backdrop position-fixed" [attr.data-visibility]="dataVisibility" (click)="closeSvmsSidebar()"></div>

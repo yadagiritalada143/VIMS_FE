@@ -1,0 +1,51 @@
+<div class="panel panel-light mb-24" *ngIf="!resumeFile.name && !viewMode">
+  <div class="resume-wrapper p-24" appDragAndDrop (fileDropped)="onFileDropped($event)">
+    <div *ngIf="progressBar"></div>
+    <div class="drop-zone mb-16">
+      <icon size="24px" name="publish" type="material" cuClass="d-flex"></icon>
+    </div>
+    <h4 class="pt-4 mb-4" *ngIf="!resumeFile.name && !viewMode">{{ 'drag' | i18next }} &amp; {{ 'drop_file_or' | i18next }} <a
+        (click)="fileInput.click()">{{ 'browse' | i18next }}</a></h4>
+    <input hidden type="file" accept=".pdf, .doc, .docx" #fileInput (change)="uploadResume($event,'parsing')">
+    <p class="file-format mb-32" *ngIf="!resumeFile.name && !viewMode">{{ 'only_.pdf,_.doc_files_with_maximum_size_of_10_mb' | i18next }}</p>
+    <!-- <div class="autofill pt-32 pb-24" *ngIf="!fileNotSupportAlert && isValidFileSize && !viewMode && resumeFile.name">
+       <div class="toggle-panel">
+         <div class="toggle-panel-inner" [ngClass]="toggleResumeAutoFill?.value ? 'if-active' : 'if-inactive'">
+           <span class="status-text mr-12">Auto Fill the Profile Details from Resume?</span>
+           <span class="toggle-switch" [ngClass]="toggleResumeAutoFill?.value ? 'toggle-on' : 'toggle-off'"
+             (click)="onClickToggleAutofill()"></span>
+         </div>
+       </div>
+     </div> -->
+  </div>
+</div>
+<ul class="uploaded-list-sidebar" [ngClass]="{'error': fileNotSupportAlert || !isValidFileSize}">
+  <li *ngIf="resumeFile.name">
+    <figure *ngIf="resumeFile.ext == 'pdf'">
+      <img src="/assets/images/pdf.svg" alt="">
+    </figure>
+    <figure *ngIf="resumeFile.ext == 'docx' || resumeFile.ext == 'doc' ">
+      <img src="/assets/images/word.svg" alt="">
+    </figure>
+    <div class="item-description">
+      {{resumeFile.name}}
+      <icon class="d-inline-block ml-8" size="18px" name="check_circle" type="material" cuClass="d-flex"
+        *ngIf="!fileNotSupportAlert && isValidFileSize"></icon>
+      <p class="upload-size" *ngIf="!fileNotSupportAlert && isValidFileSize">
+        {{resumeFileSize}} {{mbKbFileSize}}<span>|</span>{{resumeFile.time | localDateFormat:'d MMM'}}
+      </p>
+      <icon class="d-inline-block ml-8" size="18px" name="error" type="material" cuClass="d-flex"
+        *ngIf="fileNotSupportAlert || !isValidFileSize"></icon>
+      <p class="upload-size" *ngIf="!isValidFileSize">
+        {{ 'error_:_file_size_must_be_less_than_10mb' | i18next }}
+      </p>
+      <p class="upload-size" *ngIf="fileNotSupportAlert">
+        {{ 'error_:_file_type_is_not_supported._please_upload_the_resume_either_in_.pdf_/_.doc_/_.docx_format' | i18next }}
+      </p>
+    </div>
+    <a (click)="deleteResume()" class="delete-resume" *ngIf="resumeFile.name && !viewMode">
+      <icon class="d-flex" size="20px" name="delete_forever" type="material" cuClass="d-flex">
+      </icon>
+    </a>
+  </li>
+</ul>

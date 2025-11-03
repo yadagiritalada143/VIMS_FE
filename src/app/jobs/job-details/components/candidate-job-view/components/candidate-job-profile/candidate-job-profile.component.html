@@ -1,0 +1,731 @@
+<div class="candidate-job-profile">
+  <app-logs [log]="logs"></app-logs>
+  <div class="profile-info p-24" *ngIf="isMtpCandicate">
+    <div class="d-flex justify-content-between" *ngIf="candidateData">
+      <figure *ngIf="candidateData?.avatar && !profileImageHide" class="mr-12">
+        <img [src]="candidateData?.avatar" alt="{{ candidateData?.avatar }}" />
+      </figure>
+      <figure
+        *ngIf="!candidateData?.avatar || (profileImageHide && candidateData?.avatar)"
+        class="rounded-circle mr-12 text-center position-relative mb-0 d-flex justify-content-center align-items-center"
+      >
+        <span *ngIf="candidateData?.name_initials" class="text-capitalize"> {{ candidateData?.name_initials }}</span>
+        <span class="availability rounded-circle online d-none"></span>
+      </figure>
+      <div class="profile-text my-auto">
+        <div class="d-flex align-item-center">
+          <div class="check-one">
+            <h4 class="font-weight-medium candidate-name-title mr-12 mb-0 mb-m-0">
+              {{ candidateData?.name_prefix }} {{ candidateData?.full_name }} {{ candidateData?.name_suffix }}
+            </h4>
+            <div class="mtp-id d-flex align-items-center mt-4">
+              <img src="./assets/images/profile-yellow-tag.png" alt="mtp-yellow-tag" />
+              <span>{{ candidateData?.unique_id }}</span>
+            </div>
+          </div>
+          <span *ngIf="mtpCandidate?.candidate?.do_not_rehire" tooltip="{{ 'do_not_re-hire' | i18next }}" placement="right" > 
+            <icon class="cursor-pointer mr-8" color="red" size="24px" name="no_accounts" type="material" ></icon>
+          </span>
+          <img
+            class="current-work"
+            *ngIf="candidateWorkerDetails"
+            tooltip="{{ 'Previous or Current Worker' }}"
+            placement="right"
+            delay="500"
+            src="../../../../../../../assets/images/badge_black.png"
+            alt=""
+          />
+          <div *ngIf="candidateData?.social_profiles?.url" class="social-profile">
+            <a class="mr-12">
+              <img [src]="candidateData?.social_profiles?.url" alt="" width="14" />
+            </a>
+            <a >
+              <img [src]="candidateData?.social_profiles?.url" alt="" width="14" />
+            </a>
+          </div>
+        </div>
+        <div class="link-master-profile" *ngIf="isMtpCandicate">
+          <div class="row">
+            <div class="col">
+              <div class="d-inline-block linked-mtp-dropdown">
+                <button
+                  type="button"
+                  class="btn btn-light"
+                  (click)="mtpCandidate.showLinkDropdown = !mtpCandidate.showLinkDropdown"
+                  *ngIf="checkAuthorization(masterProfilePermissions?.MANAGE_MASTER_TALENT_PROFILE)"
+                >
+                  Link to Another Master
+                </button>
+                <div class="dropdown-menu" [ngClass]="{'active' : mtpCandidate.showLinkDropdown}" >
+                  <div class="mb-3" class="search-box">
+                    <img src="../../../../../../../assets/images/search.png" alt="" />
+                    <input
+                      #searchVal
+                      type="text"
+                      class="form-control"
+                      id="exampleDropdownFormEmail1"
+                      placeholder="Search"
+                      (keyup.enter)="onSearchEvent(searchVal.value)"
+                      (keyup)="emptySearch(searchVal.value)">
+                  </div>
+                  <ng-container *ngIf="linkTalentProfile?.length">
+                    <div class="linked-profiles-content">
+                      <div class="linked-profile" (click)="linkToAnotherMaster(mtp.id)" *ngFor="let mtp of linkTalentProfile">
+                        <figure
+                          class="rounded-circle mr-12 text-center position-relative mb-0 d-flex justify-content-center align-items-center"
+                        >
+                          <span *ngIf="candidateData?.name_initials" class="text-uppercase"> {{ mtp?.talent_name | slice: 0:2 }}</span>
+                          <span class="availability rounded-circle online d-none"></span>
+                        </figure>
+                        <div>
+                          <h4>{{ mtp?.talent_name }}</h4>
+                          <span>{{ mtp?.unique_id }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-container>
+                  <div class="no-search-data-found" *ngIf="!linkTalentProfile?.length">
+                    <h3>No Data Found!</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="profile-page-buttons d-flex align-item-center">
+          <ng-container *ngIf="jobDetails?.status?.toLowerCase() != 'halt' && currentOptStatus">
+            <button
+              class="btn btn-primary color-green small mr-8"
+              (click)="onSubmitedCandidate()"
+              [hidden]="showSubmitCandidate"
+              *ngIf="
+                (jobDetails?.status | lowercase) !== 'hold' &&
+                (jobDetails?.status | lowercase) !== 'filled' &&
+                !isUserRole('CLIENT') &&
+                !submitedCandidateDetail
+              "
+            >
+              <icon name="dashboard_customize" size="18px" type="material" class="icon--on-left" theme="outlined"></icon>
+              {{ 'submit_candidate' | i18next }}
+            </button>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+    <div class="vertical-section">
+      <div class="inner">
+         <!-- phone  -->
+         <div class="d-flex email mb-8 align-item-center">
+          <icon name="cake" size="14px" type="material" theme="outlined" class="mr-8"></icon>
+          <p>{{ candidateData?.dob }}</p>
+        </div>
+         <div class="d-flex mtp-phone phone mb-8 align-item-center">
+          <icon *ngIf="candidateData?.phone_number" name="phone" size="14px" type="material" theme="outlined" class="mr-8"> </icon>
+          <p *ngIf="candidateData?.phone_number">
+            <span *ngIf="candidateData?.phone_isdcode?.indexOf('+') == -1">+</span>{{ candidateData?.phone_isdcode }}
+            {{ candidateData?.phone_number }}
+          </p>
+          <icon *ngIf="candidateData?.phone_number" color="#4BC725" name="verified" size="14px" type="material" class="ml-4"></icon>
+          <icon
+            *ngIf="candidateData?.phone_number_secondary"
+            name="phone"
+            size="14px"
+            type="material"
+            theme="outlined"
+            class="ml-32 mr-8"
+          ></icon>
+          <p *ngIf="candidateData?.phone_number_secondary">
+            <span *ngIf="candidateData?.phone_isdcode_secondary?.indexOf('+') == -1">+</span>{{ candidateData?.phone_isdcode_secondary }}
+            {{ candidateData?.phone_number_secondary }}
+          </p>
+        </div>
+        <!-- email  -->
+        <div class="d-flex email mb-8 align-item-center">
+          <icon name="email" size="14px" type="material" theme="outlined" class="mr-8"></icon>
+          <p>{{ candidateData?.email }}</p>
+          <icon *ngIf="candidateData?.email" color="#4BC725" name="verified" size="14px" type="material" class="ml-4"> </icon>
+          <icon *ngIf="candidateData?.email_secondary" name="email" size="14px" type="material" theme="outlined" class="ml-32 mr-8"></icon>
+          <p>{{ candidateData?.email_secondary }}</p>
+        </div>
+      </div>
+      <!-- address  -->
+      <div class="d-flex mtp-address address mt-24 mb-8 align-item-center" *ngIf="address">
+        <icon name="home" size="14px" type="material" theme="outlined" class="mr-8"></icon>
+        <p>
+          {{ address?.street_1 ? address?.street_1 + ', ' : '' }}{{ address?.street_2 ? address?.street_2 + ', ' : '' }}
+          {{ address?.city ? address?.city + ', ' : '' }}{{ address?.country ? address?.country + ', ' : '' }}
+          {{ address?.state ? address?.state + ', ' : '' }}{{ address?.zipcode }}
+        </p>
+        <icon *ngIf="address" color="#4BC725" name="verified" size="14px" type="material" class="ml-4"></icon>
+      </div>
+    </div>
+  </div>
+  <div class="profile-info p-24" *ngIf="!isMtpCandicate">
+    <div class="d-flex justify-content-between" *ngIf="candidateData">
+      <figure *ngIf="candidateData?.avatar && !profileImageHide" class="mr-12">
+        <img [src]="candidateData?.avatar" alt="{{candidateData?.avatar}}">
+      </figure>
+      <figure *ngIf="!candidateData?.avatar || (profileImageHide && candidateData?.avatar)"
+        class="rounded-circle mr-12 text-center position-relative mb-0 d-flex justify-content-center align-items-center">
+        <span *ngIf="candidateData?.name_initials" class="text-capitalize"> {{candidateData?.name_initials}}</span>
+        <span class="availability rounded-circle online d-none"></span>
+      </figure>
+      <div class="profile-text my-auto">
+        <div class="d-flex align-item-center">
+          <h4 class="font-weight-medium candidate-name-title mr-12 mb-0 mb-m-0">{{candidateData?.name_prefix}} {{candidateData?.full_name}} {{ candidateData?.name_suffix }}</h4>
+          <div *ngIf="candidateData?.social_profiles?.url" class="social-profile">
+            <a class="mr-12">
+              <img [src]="candidateData?.social_profiles?.url" alt="" width="14">
+            </a>
+            <a >
+              <img [src]="candidateData?.social_profiles?.url" alt="" width="14">
+            </a>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="profile-page-buttons d-flex align-item-center">
+          <ng-container *ngIf="jobDetails?.status?.toLowerCase() != 'halt' && currentOptStatus">
+          <button class="btn btn-primary color-green small mr-8" (click)="onSubmitedCandidate()" [hidden]="showSubmitCandidate"
+            *ngIf='(jobDetails?.status | lowercase) !== "hold" && (jobDetails?.status | lowercase) !== "filled" && !isUserRole("CLIENT") && !submitedCandidateDetail'>
+            <icon name="dashboard_customize" size="18px" type="material" class="icon--on-left" theme="outlined"></icon>
+            {{ 'submit_candidate' | i18next }}
+          </button>
+        </ng-container>
+          <!-- <button class="btn btn-outine download small mr-8" *ngIf="candidateData?.resume_url"
+            (click)="downloadAttachment(candidateData?.resume_url)">
+            {{ 'download_resume' | i18next }}
+          </button> -->
+          <!-- <button class="btn btn-outine more-btn small mr-8">
+            <icon name="more_horiz" size="18px" type="material"></icon>
+          </button>
+           <button class="bookmark-button" tooltip="Bookmark" placement="left" delay="500">
+            <icon name="bookmark_add" size="22px" type="material" theme="two-tone"></icon>
+          </button> -->
+        </div>
+      </div>
+    </div>
+    <div class="d-flex address mt-24 mb-8 align-item-center" *ngIf="address">
+      <icon name="home" size="14px" type="material" theme="outlined" class="mr-8"></icon>
+      <p>
+        {{address?.street_1 ? address?.street_1 + ', ' : ''}}{{address?.street_2 ? address?.street_2 + ', ' : ''}}
+        {{address?.city ? address?.city + ', ' : ''}}{{address?.country ? address?.country + ', ' : ''}}
+        {{address?.state ? address?.state + ', ' : ''}}{{address?.zipcode}}
+      </p>
+      <icon *ngIf="address" color="#4BC725" name="verified" size="14px" type="material" class="ml-4"></icon>
+    </div>
+    <div class="d-flex  address mt-12 mb-8 align-item-center" *ngIf="SecondaryAddressArr?.length>1">
+      <icon  name="home" size="14px" type="material" theme="outlined" class="mr-8"></icon>
+      <p *ngFor="let address of SecondaryAddressArr">
+        {{address?.street_1}}{{address?.street_1 ? "&nbsp;" : ""}} {{address?.street_2}}{{address?.street_2 ? "&nbsp;" : ''}}
+        {{address?.city }}{{address?.city ? "&nbsp;" : ''}} {{address?.country}}{{address?.country ? "&nbsp;" : ''}}
+        {{address?.state}} {{address?.state ? "&nbsp;" : ''}} {{address?.zipcode}}{{address?.zipcode ? "&nbsp;" : ''}}
+      </p>
+      <icon  color="#4BC725" name="verified" size="14px" type="material" class="ml-4"></icon>
+    </div>
+    <div class="d-flex phone mb-8 align-item-center">
+      <icon *ngIf="candidateData?.phone_number" name="phone" size="14px" type="material" theme="outlined" class="mr-8">
+      </icon>
+      <p *ngIf="candidateData?.phone_number"> <span *ngIf="candidateData?.phone_isdcode?.indexOf('+')==-1">+</span>{{candidateData?.phone_isdcode}} {{candidateData?.phone_number}}</p>
+      <icon *ngIf="candidateData?.phone_number" color="#4BC725" name="verified" size="14px" type="material"
+        class="ml-4"></icon>
+      <icon *ngIf="candidateData?.phone_number_secondary" name="phone" size="14px" type="material" theme="outlined"
+        class="ml-32 mr-8"></icon>
+      <p *ngIf="candidateData?.phone_number_secondary"><span *ngIf="candidateData?.phone_isdcode_secondary?.indexOf('+')==-1">+</span>{{candidateData?.phone_isdcode_secondary}} {{candidateData?.phone_number_secondary}}</p>
+    </div>
+    <div class="d-flex email mb-8 align-item-center">
+      <icon name="email" size="14px" type="material" theme="outlined" class="mr-8"></icon>
+      <p>{{candidateData?.email}}</p>
+      <icon *ngIf="candidateData?.email" color="#4BC725" name="verified" size="14px" type="material" class="ml-4">
+      </icon>
+      <icon *ngIf="candidateData?.email_secondary" name="email" size="14px" type="material" theme="outlined"
+        class="ml-32 mr-8"></icon>
+      <p>{{candidateData?.email_secondary}}</p>
+    </div>
+  </div>
+  <div class="px-24 py-32 detailed-page-section p-m-0">
+    <h4 class="font-weight-medium section-title mb-16 mb-m-0" [ngClass]="{'active' : (detailedValue === 'cBasicInfo')}"  (click)="detailCollapse('cBasicInfo')">
+      <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'cBasicInfo') ? 'remove' : 'add'" type="material"
+      cuClass="icon-cu"></icon>{{ 'basic_info' | i18next }}</h4>
+    <!-- basic-infos -->
+    <div [ngClass]="(detailedValue === 'cBasicInfo') ? 'active' : 'inactive'">
+    <div class="info-cards">
+      <div class="info-cards-child">
+        <icon name="cake" theme="outlined" type="material" cuClass="d-flex">
+        </icon>
+        <div class="right-content d-flex-m d-flex-1-m row-direction-m">
+          <p class="label d-flex-1-m font-m">{{ 'date_of_birth' | i18next }}</p>
+          <div class="d-flex dob-vision d-flex-1-m">
+            <div *ngIf="!showDOB" class="dob-hide"></div>
+            <p class="dot-show" *ngIf="showDOB">{{(candidateData?.dob | localDateFormat : 'MM/DD' : null : null :true : 'MM/DD/YYYY') || '-'}}</p>
+            <ng-container *ngIf="hideEyeIcon">
+              <icon name="remove_red_eye" theme="outlined" *ngIf="candidateData?.dob" (click)="showDOB = !showDOB"
+                type="material" cuClass="d-flex" class="cursor-pointer">
+              </icon>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-cards-child">
+        <icon name="public" theme="outlined" type="material" cuClass="d-flex">
+        </icon>
+        <div class="right-content d-flex-m d-flex-1-m row-direction-m">
+          <p class="label d-flex-1-m font-m">{{ 'state/national_id' | i18next }}</p>
+          <div class="d-flex dob-vision d-flex-1-m">
+            <div *ngIf="!showStateID" class="dob-hide"></div>
+            <p class="dot-show" *ngIf="showStateID">{{address?.state_id}}</p>
+            <ng-container *ngIf="hideEyeIcon">
+              <icon name="remove_red_eye" *ngIf="address?.state_id" theme="outlined" (click)="showStateID = !showStateID"
+                type="material" cuClass="d-flex" class="cursor-pointer">
+              </icon>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+      <!--  -->
+      <div class="info-cards-child">
+        <icon name="pin_drop" theme="outlined" type="material"></icon>
+        <div class="right-content d-flex-m d-flex-1-m row-direction-m">
+          <p class="label d-flex-1-m font-m">{{ 'country' | i18next }}</p>
+          <p class="d-flex-1-m font-m"> {{address?.country||'-'}}</p>
+        </div>
+      </div>
+      <ng-container *ngIf="user_type!= 'client'">
+      <div class="info-cards-child" *ngIf="accountDetails?.role?.name?.toLowerCase() !=='hiring manager'">
+        <icon name="corporate_fare" type="material"></icon>
+        <div class="right-content d-flex-m d-flex-1-m row-direction-m">
+          <p class="label d-flex-1-m font-m">{{ 'vendor' | i18next }}</p>
+          <p class="d-flex-1-m font-m"> {{candidateData?.vendor?.name ||'-'}}</p>
+        </div>
+      </div>
+    </ng-container>
+    </div>
+  </div>
+
+    <!-- <div *ngFor="let qualification of candidateData?.qualifications">
+      <h4 class="font-weight-medium mt-32 mb-24">{{qualification?.qualification_type?.name}}</h4>
+      <ul class="item-list">
+        <li class="clearfix position-relative  mb-12">
+          <figure class="bullet float-left text-center d-flex mt-12">
+            <img src="/assets/images/certification-small.svg" alt="">
+          </figure>
+          <div class="item-description float-right pt-12">
+            <h4>{{qualification?.qualification_name}}</h4>
+            <p>{{qualification?.authority}}</p>
+            <p>{{qualification?.notes}}
+            </p>
+            <p class="mt-8" *ngIf="qualification?.certification_id">{{ 'certification_id' | i18next }}
+              <a>{{qualification?.certification_id}}</a></p>
+          <div *ngFor="let file of qualification?.files">
+            <figure class="item-img mt-16 float-left mr-16">
+              <img  *ngIf="file?.url && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')" [src]="file?.url" alt="" (click)="openFile(file)">
+
+              <img *ngIf="checkValidFileType(file.filename) == 'pdf'" src="/assets/images/pdf.svg" alt="" (click)="openFile(file)">
+
+              <img *ngIf="checkValidFileType(file.filename) == 'docx' || checkValidFileType(file.filename) == 'doc' " src="/assets/images/word.svg" alt="" (click)="openFile(file)">
+              <figcaption>{{file?.filename}}</figcaption>
+            </figure>
+          </div>
+          </div>
+        </li>
+      </ul>
+    </div> -->
+    <section class="profile-body pt-32 pb-32 pr-24 p-m-0"
+      *ngIf="!showSkelton && (certificationsArr?.length > 0 || credentialsArr?.length>0 || skillsArr?.length>0 || vaccinationsArr?.length>0 || educationArr?.length>0 || specialityArr?.length>0 || candidateData?.custom_fields?.length>0) ">
+
+<div class="detailed-page-section">
+      <h4 class="profile-title font-weight-medium section-title position-relative mb-16 mb-m-0" [ngClass]="{'active' : (detailedValue === 'certificate')}" (click)="detailCollapse('certificate')"  *ngIf="certificationsArr?.length > 0">
+        <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'certificate') ? 'remove' : 'add'" type="material"
+          cuClass="icon-cu"></icon>{{ 'certificate' | i18next }}
+      </h4>
+      <div [ngClass]="(detailedValue === 'certificate') ? 'active' : 'inactive'">
+      <ngx-skeleton-loader *ngIf="showSkelton" count="1" animation="progress" appearance="line"
+        [theme]="{'width': '200px', height: '24px', 'border-radius':'0px', 'margin-bottom':'0', 'background-color': '#FCF8FF', 'border-top': '0'}">
+      </ngx-skeleton-loader>
+      <div class="section-info overflow-hidden" *ngIf="certificationsArr?.length>0  && !showSkelton">
+        <ul class="item-list">
+          <li class="d-flex clearfix position-relative mb-16" *ngFor="let cert of  certificationsArr, let i=index">
+            <icon (click)="showHideDetail(i)" class="click-trigger float-left mr-4 mt-16"
+              [name]="visibleIndices.has(i) ? 'keyboard_arrow_down' : 'keyboard_arrow_right'" size="18px"
+              type="material">
+            </icon>
+            <figure class="bullet float-left text-center d-flex mt-12 mr-16">
+              <img src="/assets/images/certification-badge.svg" alt="">
+            </figure>
+            <div class="item-description float-right pt-12">
+              <p class="title">{{cert?.qualification_name}}</p>
+              <p class="small">{{cert?.authority}}</p>
+              <div *ngIf="visibleIndices.has(i)">
+                <p class="small">{{cert?.notes}}
+                </p>
+                <p class="small mt-8" *ngIf="cert?.certification_id">{{ 'certification_id' | i18next }} <a
+                   >{{cert?.certification_id}}</a></p>
+                <div *ngFor="let file of cert?.files">
+                  <figure class="item-img mt-16 float-left mr-16">
+
+                    <img
+                      *ngIf="file?.url && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')"
+                      [src]="file?.url" alt="" (click)="openFile(file)">
+
+                    <img *ngIf="checkValidFileType(file.filename) == 'pdf'" src="/assets/images/pdf.svg" alt=""
+                      (click)="openFile(file)">
+
+                    <img
+                      *ngIf="checkValidFileType(file.filename) == 'docx' || checkValidFileType(file.filename) == 'doc' "
+                      src="/assets/images/word.svg" alt="" (click)="openFile(file)">
+
+                    <figcaption>{{file?.filename}}</figcaption>
+                  </figure>
+                </div>
+              </div>
+            </div>
+              </li>
+            </ul>
+          </div>
+          </div>
+      </div>
+<div class="detailed-page-section">
+      <h4 class="profile-title font-weight-medium section-title position-relative mb-16 mb-m-0" [ngClass]="{'active' : (detailedValue === 'credentials')}" (click)="detailCollapse('credentials')" *ngIf="credentialsArr?.length>0 ">
+        <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'credentials') ? 'remove' : 'add'" type="material"
+          cuClass="icon-cu"></icon>
+        {{ 'credentials' | i18next }}
+      </h4>
+      <div [ngClass]="(detailedValue === 'credentials') ? 'active' : 'inactive'">
+      <div class="section-info overflow-hidden" *ngIf="credentialsArr?.length>0 ,let i=index">
+        <ul class="item-list">
+          <li class="d-flex clearfix position-relative mb-16" *ngFor="let cre of credentialsArr">
+            <icon (click)="showHideCredentialDetail(i)" class="click-trigger float-left mr-4 mt-16"
+              [name]="visibleCredentialIndices.has(i)? 'keyboard_arrow_down' : 'keyboard_arrow_right'" size="18px"
+              type="material"></icon>
+            <figure class="bullet float-left text-center d-flex mt-12 mr-16">
+              <img src="/assets/images/certification-badge.svg" alt="">
+            </figure>
+            <div class="item-description float-right pt-12">
+              <p class="title">{{cre?.qualification_name}}</p>
+              <p class="small">{{cre?.issuing_authority}}</p>
+              <div *ngIf="visibleCredentialIndices.has(i)">
+                <p class="small">{{cre?.notes}}
+                </p>
+                <p class="small mt-8" *ngIf="cre?.certification_id">{{ 'credential_id' | i18next }} <a
+                   >{{cre?.credential_id}}</a></p>
+                <div *ngFor="let file of cre?.files">
+                  <figure class="item-img mt-16 float-left mr-16">
+                    <img
+                      *ngIf="file?.url && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')"
+                      [src]="file?.url" alt="" (click)="openFile(file)">
+
+                    <img *ngIf="checkValidFileType(file.filename) == 'pdf'" src="/assets/images/pdf.svg" alt=""
+                      (click)="openFile(file)">
+
+                    <img
+                      *ngIf="checkValidFileType(file.filename) == 'docx' || checkValidFileType(file.filename) == 'doc' "
+                      src="/assets/images/word.svg" alt="" (click)="openFile(file)">
+                    <figcaption>{{file?.filename}}</figcaption>
+                  </figure>
+                </div>
+              </div>
+            </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+<div class="detailed-page-section">
+      <h4 class="profile-title font-weight-medium section-title position-relative mb-16 mb-m-0" *ngIf="skillsArr?.length>0" [ngClass]="{'active' : (detailedValue === 'skills')}" (click)="detailCollapse('skills')">
+        <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'skills') ? 'remove' : 'add'" type="material"
+        cuClass="icon-cu"></icon>{{ 'skills' | i18next }}
+      </h4>
+      <div class="section-info qualif-block-set mb-24" *ngIf="skillsArr?.length>0" [ngClass]="(detailedValue === 'skills') ? 'active' : 'inactive'">
+        <ul class="item-list">
+          <li class="d-flex clearfix position-relative mb-16" *ngFor="let skill of  skillsArr,let i=index"> 
+            <icon (click)="showHideSkillDetail(i)" class="click-trigger float-left mr-4 mt-16"
+              [name]="visibleSkillIndices.has(i) ? 'keyboard_arrow_down' : 'keyboard_arrow_right'" size="18px"
+              type="material"></icon>
+            <figure class="bullet float-left text-center d-flex mt-12 mr-16">
+              <img src="/assets/images/skills-icon.svg" alt="">
+            </figure>
+            <div class="item-description float-right pt-12">
+              <p class="title">{{skill?.qualification_name}}</p>
+              <p class="small">{{skill?.experience_level}}</p>
+              <div *ngIf="visibleSkillIndices.has(i)">
+                <p class="small">{{skill?.notes}}
+                </p>
+
+                <div *ngFor="let file of skill?.files">
+                  <figure class="item-img mt-16 float-left mr-16">
+                    <img
+                      *ngIf="file?.url && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')"
+                      [src]="file?.url" alt="" (click)="openFile(file)">
+
+                    <img *ngIf="checkValidFileType(file.filename) == 'pdf'" src="/assets/images/pdf.svg" alt=""
+                      (click)="openFile(file)">
+
+                    <img
+                      *ngIf="checkValidFileType(file.filename) == 'docx' || checkValidFileType(file.filename) == 'doc' "
+                      src="/assets/images/word.svg" alt="" (click)="openFile(file)">
+                    <figcaption>{{file?.filename}}</figcaption>
+                  </figure>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+</div>
+<div class="detailed-page-section">
+  <h4 *ngIf="vaccinationsArr?.length>0" class="profile-title font-weight-medium section-title position-relative mb-16 mb-m-0" (click)="detailCollapse('vaccinations')">
+    <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'vaccinations') ? 'remove' : 'add'" type="material"
+    cuClass="icon-cu"></icon>
+    {{ 'vaccinations' | i18next }}
+  </h4>
+  <div [ngClass]="(detailedValue === 'vaccinations') ? 'active' : 'inactive'">
+    <div class="section-info overflow-hidden" *ngIf="vaccinationsArr?.length>0">
+
+        <ul class="item-list">
+          <li class="d-flex clearfix position-relative mb-16" *ngFor="let vaccination of vaccinationsArr, let i =index">
+            <icon (click)="showHideVaccination(i)" class="click-trigger float-left mr-4 mt-16"
+              [name]="visibleVaccinationIndices.has(i)? 'keyboard_arrow_down' : 'keyboard_arrow_right'" size="18px"
+              type="material"></icon>
+            <figure class="bullet float-left text-center d-flex mt-12 mr-16">
+              <img src="/assets/images/education-icon.svg" alt="">
+            </figure>
+            <div class="item-description float-right pt-12">
+              <p class="title">{{vaccination?.qualification_name}}</p>
+              <p class="small">{{ vaccination?.provider}}</p>
+              <div *ngIf="visibleVaccinationIndices.has(i)">
+                <p class="small">{{vaccination?.notes}}
+                </p>
+
+                <p class="small mt-8">{{ 'vaccination_date' | i18next }} <a
+                   >{{vaccination?.vaccination_date}}</a>
+                </p>
+                <div *ngFor="let file of vaccination?.files">
+                  <figure class="item-img mt-16 float-left mr-16">
+                    <img
+                      *ngIf="file?.url && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')"
+                      [src]="file?.url" alt="" (click)="openFile(file)">
+
+                    <img *ngIf="checkValidFileType(file.filename) == 'pdf'" src="/assets/images/pdf.svg" alt=""
+                      (click)="openFile(file)">
+
+                    <img
+                      *ngIf="checkValidFileType(file.filename) == 'docx' || checkValidFileType(file.filename) == 'doc' "
+                      src="/assets/images/word.svg" alt="" (click)="openFile(file)">
+                    <figcaption>{{file?.filename}}</figcaption>
+                  </figure>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="detailed-page-section">
+      <h4 class="profile-title font-weight-medium position-relative section-title mb-16 mb-m-0" [ngClass]="{'active' : (detailedValue === 'educations')}"  *ngIf="educationArr?.length>0" (click)="detailCollapse('educations')">
+        <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'educations') ? 'remove' : 'add'" type="material"
+          cuClass="icon-cu"></icon>
+        {{ 'educations' | i18next }}
+      </h4>
+      <div [ngClass]="(detailedValue === 'educations') ? 'active' : 'inactive'">
+      <div class="section-info overflow-hidden" *ngIf="educationArr?.length>0">
+
+        <ul class="item-list">
+          <li class="clearfix d-flex position-relative mb-16" *ngFor="let education of educationArr, let i=index">
+            <icon (click)="showHideEducation(i)" class="click-trigger float-left mr-4 mt-16"
+              [name]="visibleEducationIndices.has(i) ? 'keyboard_arrow_down' : 'keyboard_arrow_right'" size="18px"
+              type="material"></icon>
+            <figure class="bullet float-left text-center d-flex mt-12 mr-16">
+              <img src="/assets/images/education-icon.svg" alt="">
+            </figure>
+            <div class="item-description float-right pt-12">
+              <p class="title">{{education?.qualification_name}}</p>
+              <p class="small">{{ education?.degree}}</p>
+              <div *ngIf="visibleEducationIndices.has(i)">
+                <p class="small">{{education?.notes}}
+                </p>
+                <p class="small mt-8">{{ 'institution' | i18next }} <a
+                   >{{education?.institution}}</a></p>
+                <div *ngFor="let file of education?.files">
+                  <figure class="item-img mt-16 float-left mr-16">
+                    <img
+                      *ngIf="file?.url && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')"
+                      [src]="file?.url" alt="" (click)="openFile(file)">
+
+                    <img *ngIf="checkValidFileType(file.filename) == 'pdf'" src="/assets/images/pdf.svg" alt=""
+                      (click)="openFile(file)">
+
+                    <img
+                      *ngIf="checkValidFileType(file.filename) == 'docx' || checkValidFileType(file.filename) == 'doc' "
+                      src="/assets/images/word.svg" alt="" (click)="openFile(file)">
+                    <figcaption>{{file?.filename}}</figcaption>
+                  </figure>
+                </div>
+              </div>
+            </div>
+              </li>
+            </ul>
+          </div>
+          </div>
+      </div>
+<div class="detailed-page-section">
+      <h4 *ngIf="specialityArr?.length>0" class="profile-title font-weight-medium section-title position-relative mb-16 mb-m-0" (click)="detailCollapse('speciality')">
+        <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'speciality') ? 'remove' : 'add'" type="material"
+          cuClass="icon-cu"></icon>
+          {{ 'speciality' | i18next }}
+      </h4>
+      <div [ngClass]="(detailedValue === 'speciality') ? 'active' : 'inactive'">
+      <div class="section-info overflow-hidden">
+        <ul class="item-list">
+          <li class="d-flex clearfix position-relative mb-16" *ngFor="let speciality of specialityArr, let i=index">
+            <icon (click)="showHideSpeciality(i)" class="click-trigger float-left mr-4 mt-16"
+              [name]="visibleSpecialityIndices.has(i)? 'keyboard_arrow_down' : 'keyboard_arrow_right'" size="18px"
+              type="material"></icon>
+            <figure class="bullet float-left text-center d-flex mt-12 mr-16">
+              <img src="/assets/images/education-icon.svg" alt="">
+            </figure>
+            <div class="item-description float-right pt-12">
+              <p class="title">{{speciality?.qualification_name}}</p>
+
+              <div *ngIf="visibleSpecialityIndices.has(i)">
+                <p class="small">{{speciality?.notes}}
+                </p>
+                <p class="small mt-8">{{ 'institution' | i18next }} <a
+                   >{{speciality?.institution}}</a></p>
+                <div *ngFor="let file of speciality?.files">
+                  <figure class="item-img mt-16 float-left mr-16">
+                    <img
+                      *ngIf="file?.url && (checkValidFileType(file.filename) == 'png' || checkValidFileType(file.filename) == 'jpg' || checkValidFileType(file.filename) == 'jpeg')"
+                      [src]="file?.url" alt="" (click)="openFile(file)">
+
+                    <img *ngIf="checkValidFileType(file.filename) == 'pdf'" src="/assets/images/pdf.svg" alt=""
+                      (click)="openFile(file)">
+
+                    <img
+                      *ngIf="checkValidFileType(file.filename) == 'docx' || checkValidFileType(file.filename) == 'doc' "
+                      src="/assets/images/word.svg" alt="" (click)="openFile(file)">
+                    <figcaption>{{file?.filename}}</figcaption>
+                  </figure>
+                </div>
+              </div>
+            </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+<div class="detailed-page-section">
+      <h4 *ngIf="candidateData?.custom_fields?.length > 0" class="profile-title font-weight-medium position-relative section-title mb-16 mb-m-0"  [ngClass]="{'active' : (detailedValue === 'customFields')}" (click)="detailCollapse('customFields')">
+        <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'customFields') ? 'remove' : 'add'" type="material"
+        cuClass="icon-cu"></icon> {{ 'custom_fields_' | i18next }}
+     </h4>
+     <div [ngClass]="(detailedValue === 'customFields') ? 'active' : 'inactive'">
+     <div class="section-info overflow-hidden row" *ngIf="candidateData?.custom_fields">
+      <div class="col-md-4" *ngFor="let custom of candidateData?.custom_fields" [hidden]="!custom?.value">
+        <div class="value-group row-direction-m" *ngIf="custom?.type !== 'FILE' && custom?.type !== 'DATETIME' && custom?.type !== 'DATE' && custom?.type!=='HYPERLINK' && custom?.type!=='PASSWORD' && custom?.type!='IMAGE'">
+            <label class="value-head d-flex-1-m">{{custom?.label || custom?.slug}}</label>
+            <span class="value-content d-flex-1-m" *ngIf="custom?.value?.name">{{custom?.value?.name}}</span>
+            <ng-template [ngIf]="custom?.type!='NUMBERS' && custom?.type!='CURRENCY' && !custom?.value?.name" class="value-content d-flex-1-m"><span> {{isObjectArray(custom?.value) ? custom?.value?.join(', ') : custom?.value | snakeToTitleCase}}</span></ng-template>
+            <ng-template [ngIf]="(custom?.type=='NUMBERS' || custom?.type=='CURRENCY') && !custom?.value?.name" class="value-content d-flex-1-m"><span><span *ngIf="custom?.currency">{{'' | accuracy : '' : { currencyCode: custom?.currency, display: 'symbol' } }}</span> {{custom?.value}}</span></ng-template>
+        </div>
+       </div>
+      </div>
+    </div>
+  </div>
+    </section>
+    <section *ngIf="isMtpCandicate">
+      <div class="detailed-page-section worker-details mt-m-0">
+        <h4 class="font-weight-medium section-title mb-16 mb-m-0" [ngClass]="{'active' : (detailedValue === 'workerDetail')}"  (click)="detailCollapse('workerDetail')">
+          <icon class="mr-8 hide-on-desktop" theme="outlined" size="15px" [name]="(detailedValue === 'workerDetail') ? 'remove' : 'add'" type="material"
+          cuClass="icon-cu"></icon>{{ 'worker_details' | i18next }}</h4>
+        <!-- workdetails -->
+        <div class="work" [ngClass]="(detailedValue === 'workerDetail') ? 'active' : 'inactive'" *ngIf="candidateWorkerDetails">
+          <div class="py-8">
+            <div class="no-gutters row mb-16 mb-m-0">
+              <div class="col">
+                <div class="value-group row-direction-m">
+                  <label i18n class="value-head">{{ 'Worker ID' }}</label>
+                  <span i18n class="value-content">{{ candidateWorkerDetails?.official_worker_id | uppercase }}</span>
+                </div>
+              </div>
+
+              <div class="col">
+                <div class="value-group row-direction-m">
+                  <label i18n class="value-head">{{ 'Worker Name' | i18nextEager }}</label>
+                  <span i18n class="value-content"> {{ candidateWorkerDetails?.created_by?.name | uppercase }}</span>
+                </div>
+              </div>
+              <div class="col">
+                <div class="value-group row-direction-m">
+                  <label i18n class="value-head">{{ 'Username' | i18nextEager }}</label>
+                  <div class="value-content d-flex-1-m">
+                    <!-- <p class="d-flex"><span
+                    class="font-weight-medium mr-8 d-flex">{{ 'no' | i18nextEager }}
+                </span>
+                </p> -->
+                    <p class="d-flex">
+                      <span class="font-weight-medium mr-8 d-flex">{{ candidateWorkerDetails?.created_by?.username | i18nextEager }} </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="no-gutters row mb-16">
+              <div class="col-4">
+                <div class="value-group row-direction-m">
+                  <label i18n class="value-head">{{ 'Worker Source Type' | i18nextEager }}</label>
+                  <span i18n class="value-content">{{ candidateWorkerDetails?.source_type | uppercase }}</span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="value-group row-direction-m">
+                  <label i18n class="value-head">{{ 'Worker Original/Tenure Start Date' | i18nextEager }}</label>
+                  <span i18n class="value-content">{{ candidateWorkerDetails?.original_start_date }}</span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="value-group row-direction-m">
+                  <label i18n class="value-head">{{ 'Worker Email Address' | i18nextEager }}</label>
+                  <span i18n class="value-content">{{ candidateWorkerDetails?.official_email }}</span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="value-group row-direction-m">
+                  <label i18n class="value-head">{{ 'SSO ID' | i18nextEager }}</label>
+                  <span i18n class="value-content">{{ candidateWorkerDetails?.sso_id || '-' }}</span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="value-group row-direction-m">
+                  <label i18n class="value-head">{{ 'Worker Classification' | i18nextEager }}</label>
+                  <span i18n class="value-content">{{ candidateWorkerDetails?.classification || '-' }}</span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="value-group row-direction-m">
+                  <label i18n class="value-head">{{ 'ERP External ID' | i18nextEager }}</label>
+                  <span i18n class="value-content">{{ candidateWorkerDetails?.erp_external_id || '-' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- no work -->
+        <div class="no-work" *ngIf="!candidateWorkerDetails">
+          <img src="../../../../../../../assets/images/info_black.png" alt="" />
+          <span>{{ 'no_worker_details' | i18next }}</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<!-- qualification Data is not avialable -->
+<div *ngIf="candidateData?.qualifications?.length == 0 " class="no-data text-align-center text-center pb-64"><img
+    alt="no data" width="100" class="img-fluid" src="../../../../assets/images/no-qualification.svg">
+  <h5 _ngcontent-ule-c159="" class="pt-16">{{ 'no_qualifications_added_yet' | i18next }}</h5>
+  <p class="py-4 small">{{ 'no_certification_added_yet_for_this_profile' | i18next }}</p>
+</div>

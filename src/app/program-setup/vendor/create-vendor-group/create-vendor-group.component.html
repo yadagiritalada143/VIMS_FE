@@ -1,0 +1,127 @@
+<svms-sidebar title="{{title | i18next}}" [icon]="" [dataVisibility]= "isCreateVendorGroup" (onClose)="sidebarClose()">
+    <svms-sidebar-body>
+        <form [formGroup]="createVendorGroupForm">
+            <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)">
+
+                <vms-tab label="{{ 'basic_info' | i18next }}">
+
+                    <div class="create-vendor-data-form">
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label>{{ 'vendor_group_name' | i18next }}<span class="require">*</span></label>
+                                <input type="text" class="form-control" [ngClass]="{'error':
+                                createVendorGroupForm.controls['name'].invalid && (createVendorGroupForm.controls['name'].dirty || createVendorGroupForm.controls['name'].touched)
+                                  }" maxlength="100" minlength="2"
+                                    placeholder="{{ 'enter_group_name' | i18next }}" [readonly]="isEditMode ? true : false"
+                                    formControlName="name">
+                                <p class="validation-msg"
+                                    *ngIf="createVendorGroupForm.get('name').touched && createVendorGroupForm.get('name').errors?.required">
+                                    <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                                   {{ 'vendor_group_name_is_required' | i18next }}
+                                </p>
+
+                                <p class="validation-msg"
+                                    *ngIf="createVendorGroupForm.get('name').touched && createVendorGroupForm.get('name').errors?.pattern">
+                                    <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                                   {{ 'only_alphanumeric_values_with_spaces_are_allowed' | i18next }}
+                                </p>
+                            </div>
+                            <div class="toggle-panel"  [ngClass]="{'disableDiv': isEditMode ? true : false}">
+                                <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+                                    <span class="status-text">{{toggle?.title | i18next}}</span>
+                                    <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+                                        (click)="onClickToggle()" ></span>
+                                </div>
+                            </div>
+                        </div>
+                      <div class="form-group-row">
+                        <div class="form-group labor-category-box mb-0 position-relative">
+                            <label>{{'Labor Category'|i18next}}</label>
+                          <ng-select
+                            #laborCategories
+                            id='laborCategories'
+                            formControlName="laborCategories"
+                            [bindLabel]="'Labor Category' | i18next"
+                            [clearable]="true"
+                            [searchable]="true"
+                            [multiple]="true"
+                            placeholder="{{ 'select_labor_category' | i18next }}"
+                            ngDefaultControl
+                            [readonly]="isViewMode"
+                          >
+                            <ng-option *ngFor="let labor_category of laborCategoryList" [value]="labor_category.id">{{labor_category?.name}}</ng-option>
+                          </ng-select>
+
+                        </div>
+                      </div>
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label>{{ 'description' | i18next }}</label>
+                                <textarea placeholder="{{ 'enter_description' | i18next }}..." maxlength="2000" class="form-control"
+                                    rows="4" formControlName="description" [readOnly]="isEditMode ? true : false"></textarea>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </vms-tab>
+
+                <!-- <vms-tab label="Hierarchy"  >
+                    <p class="level font-weight-medium mb-24">Hierarchy Level Name</p>
+                    <div *ngIf="rendererData?.length" [ngClass]="{'disableDiv': isEditMode ? true : false}">
+                        <app-renderer *ngFor="let renderLevel of rendererData" [renderData]="renderLevel">
+                        </app-renderer>
+                    </div>
+                </vms-tab> -->
+
+                <vms-tab label="{{ 'vendor_list' | i18next }}" >
+                    <div class="form-group"  >
+                        <label> {{ 'select_vendor' | i18next }} <span class="require">*</span></label>
+                        <ng-select #vendor formControlName="userId" ngDefaultControl autofocus bindLabel="name" bindValue="id" [searchable]="true"
+                            (search)="this.vendorSubject.next($event)" [loading]='vendorLoading' loadingText='Loading...'
+                            (clearable)="false" [multiple]="true" placeholder="{{ 'add_vendor_by_their_name' | i18next }}" (change)="addVendor($event)"
+                            [items]="vmsData" [readonly]="isEditMode ? true : false">
+                        </ng-select>
+
+                        <table class="w-100 table vendor-manager" *ngIf="vendorGroupName">
+                            <thead>
+                                <tr>
+                                    <th colspan="2" class="level">
+                                        {{ 'vendor_name' | i18next }}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let u of vendorList;let i = index">
+                                    <td> <span
+                                            class="initials initials__green text-uppercase">{{u?.name | slice: 0:2}}</span>
+                                        {{u?.name}}
+                                    </td>
+                                    <td class="text-right cursor" [ngClass]="{'disableDiv': isEditMode ? true : false}">
+                                        <icon size="18px" name="cancel" *ngIf="!isViewMode" type="material" cuClass="icon-close"
+                                            (click)="removeVendor(u.id,i)" class="icon-close"  ></icon>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </vms-tab>
+
+            </vms-tab-group>
+        </form>
+    </svms-sidebar-body>
+    <svms-sidebar-footer *accessControl>
+        <button type="submit" class="btn btn-primary float-right" *ngIf="tabIndex <1  && !isViewMode " (click)="goToNext()" [disabled]="!isBasicValid">
+            {{ 'continue' | i18next }} <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu">
+            </icon>
+        </button>
+
+        <!--show this in hierarchy tabs -->
+        <button type="submit" class="btn btn-primary float-right" *ngIf="tabIndex === 1 && !isViewMode" [disabled]="createVendorGroupForm.invalid" (click)="createVendorGroup()" [ngClass]="{'disableDiv': isEditMode ? true : false}">
+            <icon size="20px" name="check_circle" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+            &nbsp;&nbsp;{{isUpdateReq?'update':'save'|i18next}}
+        </button>
+    </svms-sidebar-footer>
+</svms-sidebar>

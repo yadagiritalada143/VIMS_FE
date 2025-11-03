@@ -1,0 +1,351 @@
+<div class="dashboard-widget-header"
+     [class.update-view]="widgetModalUpdateView">
+  <p class="header-text"
+     *ngIf="!widgetModalUpdateView">{{ 'dashboard_widget_configuration' | i18nextEager }}</p>
+  <span class="exit-btn">
+    <i class="material-icons cursor-pointer" (click)=hideModal()>
+      cancel
+    </i>
+  </span>
+</div>
+<div class="dashboard-widget"
+     [class.update-view]="widgetModalUpdateView">
+
+  <div class="dashboard-widget-container">
+    <div class="width_70" *ngIf="!widgetModalUpdateView">
+        <div class="dashboard-tab-content-wrapper">
+          <div class="dashboard-tab-content d-flex">
+            <div class="tab-content-item cursor-pointer outline_none" (click)="changeTab('tab0')">
+              <div class="tab-content-item-link d-flex align-items-center justify-content-center" [ngClass]="{'active':viewMode =='tab0'}">
+                <i class="material-icons cursor-pointer">all_inclusive</i>{{ 'all' | i18nextEager }}
+              </div>
+            </div>
+            <div *ngIf="!isObjectEmpty(widgets?.quick_link)" class="tab-content-item cursor-pointer outline_none" (click)="changeTab('tab1')">
+              <div class="tab-content-item-link d-flex align-items-center justify-content-center" [ngClass]="{'active':viewMode =='tab1'}">
+                <i class="material-icons cursor-pointer">add_link</i>{{ 'quick_links' | i18nextEager }}
+              </div>
+            </div>
+            <div *ngIf="!isObjectEmpty(widgets?.lists)" class="tab-content-item cursor-pointer" (click)="changeTab('tab2')">
+              <div class="tab-content-item-link d-flex align-items-center outline_none justify-content-center" [ngClass]="{'active':viewMode =='tab2'}">
+                <i class="material-icons cursor-pointer">view_list</i>{{ 'list_widgets' | i18nextEager }}
+              </div>
+            </div>
+            <div *ngIf="!isObjectEmpty(widgets?.charts)" class="tab-content-item cursor-pointer" (click)="changeTab('tab3')">
+              <div class="tab-content-item-link d-flex align-items-center outline_none justify-content-center" [ngClass]="{'active':viewMode =='tab3'}">
+                <i class="material-icons cursor-pointer">leaderboard</i>{{ 'charts' | i18nextEager }}
+              </div>
+            </div>
+            <div *ngIf="!isObjectEmpty(widgets?.calendars)" class="tab-content-item cursor-pointer" (click)="changeTab('tab4')">
+              <div class="tab-content-item-link d-flex align-items-center outline_none justify-content-center" [ngClass]="{'active':viewMode =='tab4'}">
+                <i class="material-icons cursor-pointer">event_available</i>{{ 'calendars' | i18nextEager }}
+              </div>
+            </div>
+          </div>
+
+          <div class="search d-flex" [ngClass]="{ 'search-opened': openSearch }">
+            <input *ngIf="openSearch"
+                  class="form-control"
+                  placeholder="{{ 'search_widgets_by_title' | i18nextEager }}"
+                  type="text"
+                  [formControl]="searchControl"
+                  id="searchField"
+                  (blur)="hideIfEmpty()" />
+            <i *ngIf="!openSearch" class="material-icons cursor-pointer" (click)="openSearchInput()">search</i>
+          </div>
+        </div>
+
+        <div class="widget-content" [class.no-widgets]="isNoWidgets()">
+          <div class="quick-links d-flex flex-column" *ngIf="viewMode === 'tab1' || viewMode === 'tab0'">
+            <div *ngIf="!isObjectEmpty(widgets?.quick_link)" class="links-title">{{ 'quick_links' | i18nextEager }}</div>
+            <div class="d-flex flex-wrap" *ngIf="!isEmpty(sortedWidgets.quick_link); else noWidgets" >
+              <div class="links-container d-flex flex-column justify-content-between align-items-center"
+                   (click)="selectWidget(w)"
+                   [class.active]="w.isActive"
+                   [class.selected]="isWidgetSelected(w)"
+                   *ngFor="let w of sortedWidgets.quick_link | transformToArr">
+
+                <div class="widget-link-checkbox position-absolute">
+                  <div class="checkbox-wrapper d-inline-block">
+                    <label class="checkbox-container">
+                      <input type="checkbox" [checked]="w.isActive" [disabled]='!w.isActive && !w.changed' (change)='onChange(w)'>
+                      <span class="checkmark"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <app-widget-icon [iconConfig]="{ icon: w.icon, iconColor: w.iconColor }"></app-widget-icon>
+                <div class="title">{{w.label|i18next}}</div>
+              </div>
+            </div>
+            <ng-template #noWidgets>
+              <ng-container *ngIf="!isObjectEmpty(widgets?.quick_link)">{{ 'no_matches_found' | i18nextEager }}</ng-container>
+            </ng-template>
+          </div>
+
+          <div class="list-widgets" *ngIf="viewMode === 'tab2' || viewMode === 'tab0'">
+            <div *ngIf="!isObjectEmpty(widgets?.lists)" class="links-title">{{ 'list_widgets' | i18nextEager }}</div>
+            <div class="d-flex flex-wrap" *ngIf="!isEmpty(sortedWidgets.lists); else noWidgets">
+              <div class="links-container d-flex flex-column justify-content-between align-items-center"
+                   (click)="selectWidget(w)"
+                   [class.active]="w.isActive"
+                   [class.selected]="isWidgetSelected(w)"
+                   *ngFor="let w of listsByRole(sortedWidgets.lists) | transformToArr">
+
+                <div class="widget-link-checkbox position-absolute">
+                  <div class="checkbox-wrapper d-inline-block">
+                    <label class="checkbox-container">
+                      <input type="checkbox" [checked]="w.isActive" [disabled]='!w.isActive && !w.changed' (change)='onChange(w)'>
+                      <span class="checkmark"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <app-widget-icon [iconConfig]="{ icon: w.icon, iconColor: w.iconColor }"></app-widget-icon>
+                <div class="title">{{w.label|i18next}}</div>
+              </div>
+            </div>
+            <ng-template #noWidgets>
+              <ng-container *ngIf="!isObjectEmpty(widgets?.lists)">{{ 'no_matches_found' | i18nextEager }}</ng-container>
+            </ng-template>
+          </div>
+
+          <div class="charts" *ngIf="viewMode === 'tab3' || viewMode === 'tab0'">
+            <div *ngIf="!isObjectEmpty(widgets?.charts)" class="links-title">{{ 'charts' | i18nextEager }}</div>
+            <div class="d-flex flex-wrap" *ngIf="!isEmpty(sortedWidgets.charts); else noWidgets">
+              <div class="links-container d-flex flex-column justify-content-between align-items-center"
+                   (click)="selectWidget(w)"
+                   [class.active]="w.isActive"
+                   [class.selected]="isWidgetSelected(w)"
+                   *ngFor="let w of sortedWidgets.charts | transformToArr">
+
+                <div class="widget-link-checkbox position-absolute">
+                  <div class="checkbox-wrapper d-inline-block">
+                    <label class="checkbox-container">
+                      <input type="checkbox" [checked]="w.isActive" [disabled]='!w.isActive && !w.changed' (change)='onChange(w)'>
+                      <span class="checkmark"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <app-widget-icon [iconConfig]="{ icon: w.icon, iconColor: w.iconColor }"></app-widget-icon>
+                <div class="title">{{w.label|i18next}}</div>
+              </div>
+            </div>
+            <ng-template #noWidgets>
+              <ng-container *ngIf="!isObjectEmpty(widgets?.charts)">{{ 'no_matches_found' | i18nextEager }}</ng-container>
+            </ng-template>
+          </div>
+
+          <div class="calendars" *ngIf="viewMode === 'tab4' || viewMode === 'tab0'">
+            <div *ngIf="!isObjectEmpty(widgets?.calendars)" class="links-title">{{ 'calendars' | i18nextEager }}</div>
+            <div class="d-flex flex-wrap" *ngIf="!isEmpty(sortedWidgets.calendars); else noWidgets">
+              <div class="links-container d-flex flex-column justify-content-between align-items-center"
+                   (click)="selectWidget(w)"
+                   [class.active]="w.isActive"
+                   [class.selected]="isWidgetSelected(w)"
+                   *ngFor="let w of sortedWidgets.calendars | transformToArr">
+
+                <div class="widget-link-checkbox position-absolute">
+                  <div class="checkbox-wrapper d-inline-block">
+                    <label class="checkbox-container">
+                      <input type="checkbox" [checked]="w.isActive" [disabled]='!w.isActive && !w.changed' (change)='onChange(w)'>
+                      <span class="checkmark"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <app-widget-icon [iconConfig]="{ icon: w.icon, iconColor: w.iconColor }"></app-widget-icon>
+                <div class="title">{{w.label|i18next}}</div>
+              </div>
+            </div>
+            <ng-template #noWidgets>
+              <ng-container *ngIf="!isObjectEmpty(widgets?.calendars)">{{ 'no_matches_found' | i18nextEager }}</ng-container>
+            </ng-template>
+          </div>
+
+          <div class="tables" *ngIf="viewMode === 'tab0' && !isObjectEmpty(sortedWidgets.table)">
+            <div *ngIf="!isObjectEmpty(widgets?.table)" class="links-title">{{ 'tables' | i18nextEager }}</div>
+            <div class="d-flex flex-wrap" *ngIf="!isEmpty(sortedWidgets.table); else noWidgets">
+              <div class="links-container d-flex flex-column justify-content-between align-items-center"
+                   (click)="selectWidget(w)"
+                   [class.active]="w.isActive"
+                   [class.selected]="isWidgetSelected(w)"
+                   *ngFor="let w of sortedWidgets.table | transformToArr">
+
+                <div class="widget-link-checkbox position-absolute">
+                  <div class="checkbox-wrapper d-inline-block">
+                    <label class="checkbox-container">
+                      <input type="checkbox" [checked]="w.isActive" [disabled]='!w.isActive && !w.changed' (change)='onChange(w)'>
+                      <span class="checkmark"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <app-widget-icon [iconConfig]="{ icon: w.icon, iconColor: w.iconColor }"></app-widget-icon>
+                <div class="title">{{w.label|i18next}}</div>
+              </div>
+            </div>
+            <ng-template #noWidgets>
+              <ng-container *ngIf="!isObjectEmpty(widgets?.table)">{{ 'no_matches_found' | i18nextEager }}</ng-container>
+            </ng-template>
+          </div>
+
+          <div class="custom" *ngIf="viewMode === 'tab0' && !isObjectEmpty(sortedWidgets.custom)">
+            <div *ngIf="!isObjectEmpty(widgets?.custom)" class="links-title">{{ 'custom' | i18nextEager }}</div>
+            <div class="d-flex flex-wrap" *ngIf="!isEmpty(sortedWidgets.custom); else noWidgets">
+              <div class="links-container d-flex flex-column justify-content-between align-items-center"
+                   (click)="selectWidget(w)"
+                   [class.active]="w.isActive"
+                   [class.selected]="isWidgetSelected(w)"
+                   *ngFor="let w of sortedWidgets.custom | transformToArr">
+
+                <div class="widget-link-checkbox position-absolute">
+                  <div class="checkbox-wrapper d-inline-block">
+                    <label class="checkbox-container">
+                      <input type="checkbox" [checked]="w.isActive" [disabled]='!w.isActive && !w.changed' (change)='onChange(w)'>
+                      <span class="checkmark"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <app-widget-icon [iconConfig]="{ icon: w.icon, iconColor: w.iconColor }"></app-widget-icon>
+                <div class="title">{{w.label|i18next}}</div>
+              </div>
+            </div>
+            <ng-template #noWidgets>
+              <ng-container *ngIf="!isObjectEmpty(widgets?.custom)">{{ 'no_matches_found' | i18nextEager }}</ng-container>
+            </ng-template>
+          </div>
+          <div *ngIf="isNoWidgets()" class="no-widget-title">
+            {{ 'no_widgets_available' | i18nextEager }}
+          </div>
+
+
+          <!--          <div *ngSwitchCase="'tab1'">-->
+          <!--            <app-quick-links></app-quick-links>-->
+          <!--          </div>-->
+          <!--          <div *ngSwitchCase="'tab2'">-->
+          <!--            <app-list-widget></app-list-widget>-->
+          <!--          </div>-->
+          <!--          <div *ngSwitchCase="'tab3'">-->
+          <!--            <app-charts></app-charts>-->
+          <!--          </div>-->
+          <!--          <div *ngSwitchCase="'tab4'">-->
+          <!--            <app-calendars></app-calendars>-->
+          <!--          </div>-->
+        </div>
+    </div>
+    <div class=" p-0 width_30" [class.update-view]="widgetModalUpdateView">
+      <div class="widget_add_details h-100"
+           [class.update-view]="widgetModalUpdateView"
+           *ngIf="selectedWidget">
+        <form [formGroup]="form" class="h-100">
+          <div class="d-flex flex-column h-100">
+            <div class="widget-info-title">
+              {{selectedWidget.label| i18nextEager}}
+            </div>
+            <div class="widget-options d-flex flex-column h-100">
+              <div class="widget-options-container d-flex flex-column">
+                <div class="form-row overflow-visible">
+                  <span class="form-label">{{ 'widget_label' | i18nextEager }}</span>
+                  <input formControlName="widget_name"
+                         type="text" class="input-form"
+                         [placeholder]='selectedWidget.formData.label.placholder'
+                         maxlength="35">
+                  <div class="invalid msg-input-bottom" *ngIf="form.get('widget_name').errors?.pattern">
+                    <p class="validation-msg">
+                      <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'please_enter_a_valid_widget_name' | i18nextEager }}.
+                    </p>
+                  </div>
+                </div>
+
+
+
+                <div class="form-row d-flex flex-column overflow-hidden" *ngIf="selectedWidgetChartDimensions.length">
+                  <span class="form-label">{{ 'dimension' | i18nextEager }}</span>
+                  <div class="widget_type">
+                    <ng-container *ngFor="let item of selectedWidgetChartDimensions">
+                      <div class="widget-checkbox">
+                        <label class="checkbox-container"
+                            [class.selected]="isChartDimensionSelected(item.dimension)">
+                          <input type="checkbox"
+                            [checked]="isChartDimensionSelected(item.dimension)"
+                            (change)="selectChartDimension(item.dimension)" >
+                          <span class="checkmark rounded"></span>
+                          <span class="status-text">{{item.label|i18next}}</span>
+                        </label>
+                      </div>
+                    </ng-container>
+                  </div>
+                </div>
+
+                <div class="form-row d-flex flex-column  overflow-hidden" *ngIf="selectedWidgetChartTypes.length">
+                  <span class="form-label">{{ 'chart_type' | i18nextEager }}</span>
+                  <div class="chart_type">
+                    <ng-container *ngFor="let item of selectedWidgetChartTypes">
+                      <div class="chart-checkbox d-flex align-items-center justify-content-center"
+                           [class.selected]="isChartTypeSelected(item.type)">
+                        <label class="checkbox-container">
+                          <input type="checkbox"
+                                 [checked]="isChartTypeSelected(item.type)"
+                                 (change)="selectChartType(item.type)">
+
+                          <span class="chart_type-item">
+                              <i class="material-icons cursor-pointer">{{item.icon}}</i>
+                                </span>
+
+                          <span class="status-text">{{item.label|i18next}}</span>
+                        </label>
+                      </div>
+                    </ng-container>
+                  </div>
+                </div>
+
+                <div class="form-row d-flex flex-column overflow-hidden" *ngIf="selectedWidgetListOptions.length">
+                  <span class="form-label">{{ 'options' | i18nextEager }}</span>
+                  <div class="widget_type">
+                    <ng-container *ngFor="let item of selectedWidgetListOptions">
+                      <div class="widget-checkbox">
+                        <label class="checkbox-container"
+                            [class.selected]="isListOptionSelected(item.option)">
+                          <input type="checkbox"
+                            [checked]="isListOptionSelected(item.option)"
+                            (change)="selectListOption(item.option)" >
+                          <span class="checkmark rounded"></span>
+                          <span class="status-text">{{item.label|i18next}}</span>
+                        </label>
+                      </div>
+                    </ng-container>
+                  </div>
+                </div>
+              </div>
+
+              <div class="widgetinfoFooter d-flex flex-column">
+                <div class="dashboard-form-validator">{{errorMessage}}</div>
+                <button *ngIf="!widgetModalUpdateView" type="submit" (click)="onSubmit()" [disabled]="!form.valid"
+                        class="update-widget-btn btn-primary">
+                  {{(selectedWidget.isActive ? 'Update Widget' : 'Add to Dashboard')|i18next}}
+                </button>
+                <button *ngIf="widgetModalUpdateView" type="submit" (click)="onSubmit()" [disabled]="!form.valid"
+                        class="update-widget-btn btn-primary">
+                  {{'Update Widget'}}
+                </button>
+
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="no-widget" *ngIf="!selectedWidget">
+        <img src="assets/images/no-widget-selected.png"
+             width="107"
+             height="65"
+             class="no-widget-img">
+        <div class="no-widget-title">{{ 'no_widgets_selected' | i18nextEager }}</div>
+        <div class="no-widget-text">{{ 'select_any_of_the_widgets_in_left_side_to_manage_the_properties' | i18nextEager }}</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="dialog-backdrop position-fixed active"></div>

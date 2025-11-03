@@ -1,0 +1,21 @@
+<div class="detail-page-wrapper">
+    <section class="description-panel p-32 position-relative">
+        <a  class="back-btn back-mobile" (click)="back()">
+            <icon class="d-inline-block cursor-pointer" size="24px" name="chevron_left" type="material" cuClass="d-flex"></icon>
+            <span>{{ 'back' | i18next }}</span>
+        </a>
+        <app-status-message *ngIf="submitedCandidateDetail && statusMessageData" [data]="statusMessageData" [type]="StatusMessageTypes.Mtp"></app-status-message>
+        <div class="panel-wrapper mt-24 d-flex mt-m-0">
+            <div class="left-panel-view">
+                <app-candidate-job-view-content [isDsaasVendor]="isDsaasVendor" [submitedCandidateDetailData]="submitedCandidateDetail"></app-candidate-job-view-content>
+            </div>
+            <div class="right-panel-view">
+                <app-candidate-job-view-right-panel [submitedCandidateDetail]="submitedCandidateDetail" [jobDetails]="jobData"
+                (isDsaasVendor)="checkIsDsaasVendor($event)" (showMessage)="showMessage($event)"
+                ></app-candidate-job-view-right-panel>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </section>
+</div>
+

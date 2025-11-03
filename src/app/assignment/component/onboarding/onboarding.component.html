@@ -1,0 +1,117 @@
+<div class="onboarding-list">
+  <!-- <vms-table *ngIf="tableLoaded" [vmsTableConfig]="tableConfig" [vmsDataSource]="onboardingList" [loading]="dataLoading"
+    [totalItem]="totalRecords" [itemsPerPage]="itemPerPage" (changePage)="onPaginationClick($event)"
+    (onViewClick)="onClickView($event)" (onSort)="onSortClick($event)" (search)="onSearch($event)">
+  </vms-table> -->
+  <app-logs [log]="logs"></app-logs>
+  <div class="job-view-content-header d-flex justify-content-between align-items-center mb-32 mb-m-0" *ngIf="onboardingStatus">
+    <h4 class="mb-0">{{ 'onboarding' | i18nextEager }} <span class="status-ui float-none ml-4 float-none-m pending-approval"
+        [ngClass]="{'pending-approval': (onboardingStatus?.toLowerCase() == 'pending' || onboardingStatus?.toLowerCase() == 'pending review' || onboardingStatus?.toLowerCase() == 'reopened'), 'completed': (onboardingStatus?.toLowerCase() == 'completed' || onboardingStatus?.toLowerCase() == 'reviewed'),'rejected': onboardingStatus?.toLowerCase() == 'cancelled', 'in-progress': onboardingStatus?.toLowerCase() == 'in progress', 'overdue': onboardingStatus?.toLowerCase() == 'overdue'}">{{onboardingStatus| titlecase | i18nextEager}}</span>
+    </h4>
+    <button *ngIf="isMsp && isOnboardingReview && onboardingStatus?.toLowerCase() !== 'reviewed' && onboardingStatus?.toLowerCase() !== 'cancelled'"  class="btn btn-success small"
+      (click)="showOnboardingReview($event)">{{ 'review' | i18nextEager }}</button>
+  </div>
+  <p class="mb-12" *ngIf="onboardingReviewerName && onboardingReviewTime && onboardingStatus?.toLowerCase() === 'reviewed'" class="text-success">{{ 'onboarding_reviewed_by_' | i18nextEager }} {{(onboardingReviewerName | titlecase) +" on "}}{{onboardingReviewTime | localDateFormat}} {{onboardingReviewTime | localDateFormat:'hh:mm:ss a z'}}</p>
+  <div class="table-listing-wo-component">
+    <div class="onboarding-grid">
+      <perfect-scrollbar [config]="{ suppressScrollX: false, suppressScrollY: true }">
+      <table class="table" *ngIf="!dataLoading && onboardingList && onboardingList?.length > 0">
+        <thead>
+          <tr>
+            <th><p class="small text-uppercase">{{'task'|i18next}}</p></th>
+            <th><p class="small text-uppercase">{{'status'|i18next}}</p></th>
+            <th><p class="small text-uppercase d-flex">{{'required'|i18next}}
+              <icon class="ml-4" cuClass="d-flex" name="help" size="16px" color="#A3B0C0" textAlignment="left" tooltip="When a Task is identified as required, the onboarding item is required for the individual to start their assignment.  If the Task is not identified as required, then an individual can start their assignment without the onboarding item being completed." placement="right"></icon>
+            </p></th>
+            <th><p class="small text-uppercase">{{'start_date'|i18next}}</p></th>
+            <th><p class="small text-uppercase">{{'due_date'|i18next}}</p></th>
+            <th><p class="small text-uppercase">{{'actor'|i18next}}</p></th>
+            <th>
+                <p class="small text-uppercase">{{ 'updated_on' | i18nextEager }}</p>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let onboard of onboardingList; , let i=index" [ngClass]="{'inactive-grid':onboard?.dependent_task && !onboard?.dependent_task?.updated_documents}">
+            <td data-value="Task">
+              <div class="action-td d-flex flex-column position-relative">
+                <span class="font-weight-medium" [ngClass]="(onboard?.dependent_task && onboard?.dependent_task?.status?.toLowerCase() != 'completed') || onboard?.status.toLowerCase() == 'withdrawn' ? 'not-clickable' : 'clickable' "  (click)="onClickView(onboard)">
+                  <span class="max-data-visibility" tooltip="{{onboard?.name}}" placement="top">{{onboard?.name}}</span></span>
+                <p class="small font-weight-medium mt-4 clickable" [ngClass]="onboard?.dependent_task?.status?.toLowerCase() == 'withdrawn' ? 'not-clickable' : 'clickable'" *ngIf="onboard?.dependent_task">{{ 'dependency_on' | i18nextEager }} <a (click)="onClickView(onboard?.dependent_task)" class="text-blue">{{onboard?.dependent_task?.name}}</a></p>
+                <div class="actions position-absolute" [ngClass]="{'active-action' : actionDropdownBox}" (click)="actionButtonClick($event);selectTask(onboard)" *ngIf="onboard?.isAction">
+                  <icon name="more_horiz"></icon>
+                </div>
+              </div>
+            </td>
+            <td data-value="Status">
+              <div class="status-ui pending-approval"  [ngClass]="{'pending-approval': (onboard?.status?.toLowerCase() == 'pending' || onboard?.status?.toLowerCase() == 'reopened'), 'completed': onboard?.status?.toLowerCase() == 'completed', 'in-progress': onboard?.status?.toLowerCase() == 'in progress', 'overdue': onboard?.status?.toLowerCase() == 'overdue' , 'withdrawn': onboard?.status.toLowerCase() == 'withdrawn' }">
+                {{onboard?.status | titlecase |i18next}}
+              <!-- <icon name="keyboard_arrow_down" cuclass="d-flex" class="d-flex ml-8" color="inherit" size="18px"></icon>  -->
+              </div>
+            </td>
+            <td data-value="Required">
+              <div class="text-black">
+                <ng-container *ngIf="onboard?.is_required; else notRequired">
+                 <span class="validation-msg">{{'yes' | titlecase | i18nextEager}}</span>
+                </ng-container>
+                <ng-template #notRequired>
+                  {{'no' | titlecase | i18nextEager}}
+                </ng-template>
+                <!-- {{(onboard?.is_required  ? 'Yes' : 'No') | titlecase | i18nextEager}} -->
+              </div>
+            </td>
+            <td data-value="Start Date">
+              <span class="text-black">{{onboard?.start_date | localDateFormat: '': '':'' : true}}</span>
+            </td>
+            <td data-value="Due Date">
+              <span class="text-black">{{onboard?.due_date | localDateFormat: '': '':'' : true}}</span>
+            </td>
+            <td data-value="Actor">
+                <ng-container *ngFor="let actor of (onboard?.actor?.length ? onboard?.actor : [onboard?.role]) ; let i = index">
+                  <span *ngIf="(onboard?.showAllValues ? true : i < 2)" class="status-badge">{{actor?.name + '(' +
+                    (actor?.organization_category ? actor?.organization_category : '') + ')'}}</span>
+                </ng-container>
+                <span *ngIf="(onboard?.showAllValues ? false : onboard?.actor?.length > 2 )" class="status-badge more"
+                  (click)="getActorValue(i)">{{'+' + (onboard?.actor?.length - 2)}}</span>
+            </td>
+            <td>
+              <span class="text-black" *ngIf="(onboard?.status?.toLowerCase() === 'completed') ; else nonComplete">
+              {{onboard?.task_updated_on | localDateFormat}} {{(onboard?.task_updated_on | localDateFormat : 'hh:mm:ss a z')}}
+              </span>
+              <ng-template #nonComplete>
+                <span class="text-black">
+                   {{'--'}}
+                </span>
+              </ng-template>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      </perfect-scrollbar>
+    </div>
+    <nav class="action-dropdown-box" id="actionDropdownList" (mouseleave)="hideActionButton()" [ngClass]="{'active' : actionDropdownBox}">
+      <ul>
+        <li *ngIf="this.selectedTaskData?.status == 'completed'">
+          <ng-container *authorize="'reopen_onboarding_task'">
+          <a (click)="reopenTask(this.selectedTaskData)">{{ 'reopen' | i18nextEager }}</a>
+        </ng-container>
+        </li>
+        <li *ngIf="this.selectedTaskData?.status == 'reopened'">
+          <ng-container>
+          <a (click)="editTask(this.selectedTaskData)">{{ 'edit' | i18nextEager }}</a>
+        </ng-container>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+
+  <div *ngIf="dataLoading" class="text-center pb-64" style="margin-top: 64px">
+    <img alt="no data" width="100" src="../../../../../assets/images/freepik--Envelope--inject-10.svg"
+      class="img-fluid">
+    <h5 class="pt-16">{{ 'no_onboarding_checklist_for_this_candidate' | i18nextEager }}</h5>
+  </div>
+</div>
+<app-task-details *ngIf="selectedTask" [taskDetails]="taskDetails" [assignmentStatus]="assignmentStatus" [taskDetailsData]="selectedTask" [assignmentID]="assignmentID" [candidateID]="workerID" [taskID]="currentTaskId" [credentialArr]="credentialArr" [hello_sign_email_status]="hello_sign_email_status"
+ [vendorDetail]="vendor_details" [assignmentData] ="assignment_details" (onClose)="onCloseTaskDetails($event)"></app-task-details>
+<app-pending-review-onboarding-flyout [tasksCompleted] = "completedStatus"></app-pending-review-onboarding-flyout>

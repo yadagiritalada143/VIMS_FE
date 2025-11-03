@@ -1,0 +1,51 @@
+  <div class="history-listing job-history-listing description-card p-24 history-padd">
+    <div class="pt-24 pb-16 pt-m-0">
+      <h4 class="title font-weight-medium">{{ 'history' | i18next }}</h4>
+    </div>
+    <div *ngIf="jobHistory.length && usersList.length">
+      <div class="history-item" *ngFor="let jobHis of jobHistory, let i = index">
+        <div class="row">
+          <div>
+            <div class="fs-13 font-weight-medium main-text-color pb-4">{{jobHis.modified_date}}</div>
+            <div class="fs-12 font-weight-regular sub-text-color">{{jobHis.modified_time}}</div>
+          </div>
+          <div class="divider" [ngClass]="{'divider-w-border': jobHistory.length - 1 > i }">
+            <div class="circle" [ngClass]="{'circle-w-divider-border': jobHistory.length - 1 > i }"></div>
+          </div>
+          <div class="col history-detail" [ngClass]="{'py-16':jobHis.hideUpdateBy}">
+            <div class="d-flex justify-content-between column-direction">
+              <div>
+                <h4 class="fs-16 font-weight-medium main-text-color mb-4">
+                  {{jobHis.activity | i18next}}
+                </h4>
+                <div *ngIf="jobHis.reason" class="pb-4">
+                  <span class="fs-13 font-weight-regular main-text-color">{{ 'reason' | i18next }} : </span>
+                  <span class="fs-13 font-weight-regular sub-text-color">{{jobHis.reason | i18next}}</span>
+                </div>
+                <div *ngIf="!jobHis.hideUpdateBy" class="pb-4">
+                  <span class="fs-13 font-weight-regular main-text-color">{{ 'updated_by' | i18next }} : </span>
+                  <span class="fs-13 font-weight-regular sub-text-color">{{jobHis?.impersonated_to ?
+                    displayUserName(jobHis?.impersonated_to) : displayUserName(jobHis.action_taken_by, jobHis)}}</span>
+                  <ng-container *ngIf="jobHis?.impersonated_by">
+                    <span class="ml-8 fs-13 font-weight-bold main-text-color">{{ 'impersonated_by' | i18next }}:
+                    </span>
+                    <span
+                      class="fs-13 font-weight-bold sub-text-color">{{displayUserName(jobHis?.impersonated_by, null, true)}}</span>
+                  </ng-container>
+                </div>
+              </div>
+              <button type="button" *ngIf="jobHis?.is_view" class="my-auto btn primary-outline text-primary small"
+                (click)="viewHistory(jobHis)">
+                <icon size="16px" name="visibility" type="material" class="icon--on-left" cuClass="icon-cu">
+                </icon>
+                {{ 'view' | i18next }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <app-no-data *ngIf="!jobHistory.length"></app-no-data>
+  </div>
+<app-history-details *ngIf="viewHistoryDetails" [viewHistoryPanel]="viewHistoryPanel" [historyData]="historyData"
+  (onClose)="sidebarClose()" [customFields]="customFields"></app-history-details>

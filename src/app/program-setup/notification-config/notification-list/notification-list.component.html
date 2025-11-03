@@ -1,0 +1,51 @@
+<div class="generic-list-page" [ngClass]="{'self-config-notification-wrapper': route.url.includes('self-configuration')}">
+  <ng-template #statusTemplate let-value="value">
+    <span class="c-status-ui active" *ngIf="value">
+      {{ 'active' | i18next }}
+    </span>
+    <span class="c-status-ui inactive" *ngIf="!value">
+      {{ 'inactive' | i18next }}
+    </span>
+  </ng-template>
+
+  <ng-template #showData let-value="value">
+    {{value | i18next}}
+  </ng-template>
+
+  <ng-template #customizedTemplate let-value="value">
+    {{(value ? 'Yes': 'No')| i18next}}
+  </ng-template>
+
+  <ng-template #messageType let-value="value">
+    <span class="messageType">
+      {{value | i18next | titlecase}}
+    </span>
+  </ng-template>
+  <div class="notification-message" [ngClass]="!isSectionVisible && 'd-none'"  *ngIf="(disableModules?.length || !programDetails?.is_enabled) && programDetails">
+    <div class="c-notifications warning notification-list">
+      <div class="d-flex justify-content-between">
+        <i class="material-icons message-icon mt-16">warning</i>
+        <div class="ml-12">
+          <p class="type font-weight-medium mb-4">Warning</p>
+          <p *ngIf="!programDetails?.is_enabled" class="small summary">{{ 'enable_notification_engine_disabled_message' | i18nextEager }}</p>
+          <div *ngIf="programDetails?.is_enabled === true && disableModules?.length">
+            <p class="small summary">{{ 'enable_notification_engine_module_level_disabled_message' | i18nextEager }}</p>
+            <ul>
+              <li *ngFor="let val of disableModules">{{ val?.module?.sub_module }} </li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <button class="close" (click)="closeWarningMessage()">
+            <icon size="14px" name="close" type="material" cuClass="icon-cu"></icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div [ngClass]="(disableModules?.length || !programDetails?.is_enabled ) && 'show-warning'">
+    <app-svms-table [tableOptions]="tableOptions" [coloumnDefintions]="svmstableColomnDefn"
+      [dataSource]="notificationListArr"
+      ></app-svms-table>
+  </div>
+</div>

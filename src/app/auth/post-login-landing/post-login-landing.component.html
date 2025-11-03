@@ -1,0 +1,69 @@
+<div class="landing-wrapper" [ngClass]="{ disableDiv: programSelected ? true : false }">
+    <div class="card bg-light text-center pt-24 pb-16">
+        <ng-container *ngIf="orgDetails?.logo_url; else orgName">
+            <figure class="landing-logo mb-12">
+                <img [src]="orgDetails?.logo_url" alt="" width="113" height="41">
+            </figure>
+        </ng-container>
+        <ng-template #orgName>
+            <p class="font-weight-big mb-12">{{orgDetails?.name}}</p>
+        </ng-template>
+        <p class="font-weight-medium mb-32">{{ 'choose_a_program_to_continue' | i18nextEager }}</p>
+        <div class="program-search">
+            <input type="text" placeholder="{{ 'search..' | i18nextEager }}" [(ngModel)]="searchValue"
+                (keyup.enter)="searchProgram()" (keyup)="searchProgram()">
+            <icon class="search-icon material-icons" cuClass="d-flex" name="search" size="18px"></icon>
+            <icon class="clear-search material-icons" cuClass="d-flex" name="cancel" size="18px" color="#0044C5"
+                [ngClass]="{'show-clear-icon': clearIcon}" (click)="clearSearch()"></icon>
+        </div>
+        <div class="list-available">
+            <perfect-scrollbar>
+                <div *ngFor="let program of programs;let i = index" (click)="selectProgram(program)" >
+                    <div *ngIf="!dataLoader"
+                        class="list-item d-flex align-items-center justify-content-between cursor-pointer">
+                        <div class="d-flex align-items-center">
+                            <figure>{{program?.name | shortName:'first'}}</figure> <span
+                                class="ml-16">{{program?.name}}</span>
+                        </div>
+                        <div>
+                            <icon *ngIf="defaultProgramId == program?.id" name="star" size="20px" color="#FFD000"
+                                class="material-icons cursor-pointer mr-24"
+                                (click)="removeDefault(program); $event.stopPropagation()"></icon>
+                            <icon *ngIf="defaultProgramId != program?.id" name="star_border" size="20px" color="#E8E4E4"
+                                class="material-icons cursor-pointer mr-24"
+                                (click)="makeDefault(program); $event.stopPropagation()"></icon>
+                            <icon *ngIf="userType == 'MSP'" name="settings" size="18px"
+                                class="material-icons cursor-pointer mr-24"
+                                (click)="redirectToSettings(program); $event.stopPropagation()"></icon>
+                            <icon name="arrow_forward_ios" size="18px" class="material-icons cursor-pointer"></icon>
+                        </div>
+                    </div>
+                    <div *ngIf="dataLoader" class="mb-12">
+                        <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                          width: '32px',
+                          height: '32px',
+                          float: 'left',
+                          'margin-bottom': '0px',
+                          'margin-right': '10px',
+                          'background-color': '#ECEDFF',
+                          'border-top': '0'
+                        }">
+                        </ngx-skeleton-loader>
+                        <ngx-skeleton-loader count="1" animation="progress" appearance="line" [theme]="{
+                            width: '85%',
+                            height: '14px',
+                            float: 'left',
+                            'margin-top': '12px',
+                            'border-radius': '0',
+                            'margin-bottom': '4px',
+                            'background-color': '#ECEDFF',
+                            'border-top': '0'
+                        }">
+                        </ngx-skeleton-loader>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </perfect-scrollbar>
+        </div>
+    </div>
+</div>

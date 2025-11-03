@@ -1,0 +1,129 @@
+<form [formGroup]="userForm">
+  <div class="Upload_box_wrapper">
+    <svms-upload-avatar [image]="userForm?.controls?.avatar?.value" (hideError)="getCropImage($event)" [ngClass]="{'disable':isViewClicked1}"></svms-upload-avatar>
+    <div   class="upload-panel-body">
+      <h4 *ngIf="!logoComponent?.logoUrl || !isImagePresent" class="mb-4">{{ 'profile_avatar' | i18next }}</h4>
+      <div *ngIf="(!isImagePresent || !logoComponent?.logoUrl) && !isViewClicked1"   class="error-text">{{ 'only_.png,_.jpg_formats_with_maximum_file_size_of_3_mb' | i18next }}</div>
+      <p class="error-text small">{{logoSize}}</p>
+    </div>
+
+    <!-- <div class="toggle-panel" [ngClass]="{'disable':isViewClicked1}">
+      <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+        <span class="status-text">{{toggle?.title}}</span>
+        <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+          (click)="onClickToggle()"></span>
+      </div>
+    </div> -->
+  </div>
+
+  <div class="form-group-row">
+    <div class="form-group">
+      <label>{{ 'first_name' | i18next }} <span class="require">*</span></label>
+      <input type="text" class="form-control" placeholder="{{ 'enter_first_name' | i18next }}" formControlName="first_name" required [ngClass]="{'error':
+      userForm.controls['first_name'].invalid && (userForm.controls['first_name'].dirty || userForm.controls['first_name'].touched)
+        }" minlength="2" [readonly]="isViewClicked1">
+    <p class="validation-msg"
+      *ngIf="userForm.controls.first_name.touched && userForm.controls['first_name'].invalid && userForm.controls['first_name'].errors?.required">
+      <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>{{ 'first_name_is_required' | i18next }}
+    </p>
+    <p class="validation-msg" *ngIf="userForm.controls.first_name.errors?.minlength">
+      {{ 'first_name_must_be_at_least_2_characters_long.' | i18next }}
+    </p>
+    </div>
+    <div class="form-group">
+      <label>{{ 'middle_name' | i18next }}</label>
+      <input type="text" class="form-control" placeholder="{{ 'enter_middle_name' | i18next }}" formControlName="middle_name" [readonly]="isViewClicked1">
+    </div>
+    <div class="form-group">
+      <label>{{ 'last_name' | i18next }} <span class="require">*</span></label>
+      <input type="text" class="form-control" placeholder="{{ 'enter_last_name' | i18next }}" formControlName="last_name" required [ngClass]="{'error':
+      userForm.controls['last_name'].invalid && (userForm.controls['last_name'].dirty || userForm.controls['last_name'].touched)
+        }" minlength="2" [readonly]="isViewClicked1">
+    <p class="validation-msg"
+      *ngIf="userForm.controls.last_name.touched && userForm.controls['last_name'].invalid && userForm.controls['last_name'].errors?.required">
+      <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>{{ 'last_name_is_required' | i18next }}
+    </p>
+    <p class="validation-msg" *ngIf="userForm.controls.last_name.errors?.minlength">
+     {{ 'last_name_must_be_at_least_2_characters_long.' | i18next }}
+    </p>
+    </div>
+  </div>
+  <div class="form-group-row">
+    <div class="form-group" *ngIf="!getPrefixSuffixFlag()">
+      <label>{{ 'prefix' | i18next }}</label>
+      <ng-select [clearable]="false" placeholder="{{ 'choose' | i18next }}" ngDefaultControl formControlName="name_prefix" [readonly]="isViewClicked1">
+        <ng-option [value]="'Mr'">{{ 'mr' | i18next }}</ng-option>
+        <ng-option [value]="'Mrs'">{{ 'mrs' | i18next }}</ng-option>
+        <ng-option [value]="'Miss'">{{ 'miss' | i18next }}</ng-option>
+        <ng-option [value]="'Dr'">{{ 'dr' | i18next }}</ng-option>
+        <ng-option [value]="'Prof'">{{ 'prof' | i18next }}</ng-option>
+        <ng-option [value]="'MX'">{{ 'mx' | i18next }}</ng-option>
+        <ng-option [value]="'IND'">{{ 'ind' | i18next }}</ng-option>
+        <ng-option [value]="'Misc'">{{ 'misc' | i18next }}</ng-option>
+      </ng-select>
+    </div>
+    <div class="form-group" *ngIf="!getPrefixSuffixFlag()">
+      <label>{{ 'suffix' | i18next }}</label>
+      <ng-select [clearable]="false" placeholder="{{ 'choose' | i18next }}" ngDefaultControl formControlName="name_suffix" [readonly]="isViewClicked1">
+        <ng-option [value]="'Jr'">{{ 'jr' | i18next }}</ng-option>
+        <ng-option [value]="'Sr'">{{ 'sr' | i18next }}</ng-option>
+        <ng-option [value]="'III'">{{ 'iii' | i18next }}</ng-option>
+        <ng-option [value]="'IV'">{{ 'iv' | i18next }}</ng-option>
+        <ng-option [value]="'V'">{{ 'v' | i18next }}</ng-option>
+      </ng-select>
+    </div>
+    <div class="form-group">
+      <label>{{ 'supervisor' | i18next }}</label>
+      <ng-select [clearable]="false" placeholder="Choose" ngDefaultControl formControlName="supervisor_id" [readonly]="isViewClicked1">
+        <ng-option [value]="data?.id" *ngFor="let data of supervisorList">{{data?.first_name}} {{data?.last_name}}</ng-option>
+      </ng-select>
+    </div>
+
+    <div class="form-group" *ngIf="false">
+      <label>{{ 'phone' | i18next }}</label>
+      <div class="d-flex align-items-center country-searchable">
+        <ng-select [searchable]="false" [clearable]="false" ngDefaultControl formControlName="phone" [readonly]="isViewClicked1">
+          <ng-option>
+            <img src="../../../assets/images/flag/हिन्दी.png" width="20px" class="mr-4" />
+            <span>{{ '+91' | i18next }}</span>
+          </ng-option>
+          <ng-option>
+            <img src="../../../assets/images/flag/au.png" width="20px" class="mr-4" />
+            <span>{{ '+12' | i18next }}</span>
+          </ng-option>
+          <ng-option>
+            <img src="../../../assets/images/flag/us.png" width="20px" class="mr-4" />
+            <span>{{ '+1' | i18next }}</span>
+          </ng-option>
+        </ng-select>
+        <input type="number" class="form-control" placeholder="{{ 'contact_person_phone_number' | i18next }}">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>{{ 'title' | i18next }}</label>
+    <input type="text" class="form-control" formControlName="title" [readonly]="isViewClicked1">
+  </div>
+
+  <div class="form-group">
+    <label>{{ 'email' | i18next }} <span class="require">*</span></label>
+    <input type="email" class="form-control" formControlName="email" pattern="[A-Za-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,10}$" [ngClass]="{'error':
+    userForm.controls['email'].invalid && (userForm.controls['email'].dirty)
+      }"  [readonly]="this.editData?.first_name">
+    <p *ngIf="
+      userForm.get('email').dirty &&
+              (userForm.get('email').errors?.pattern || userForm.get('email').errors?.required || userForm.get('email').invalid)
+            " class="validation-msg">
+      <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+      {{ 'email_is_not_valid.' | i18next }}
+    </p>
+  </div>
+
+  <div class="form-group" *ngIf="this.editData?.first_name">
+    <label>{{ 'user_role' | i18next }} <span class="require">*</span></label>
+    <ng-select [clearable]="false" placeholder="{{ 'choose' | i18next }}" ngDefaultControl formControlName="role_id" [readonly]="this.editData?.first_name">
+      <ng-option [value]="role?.id" *ngFor = "let role of Roles">{{role?.name}}</ng-option>
+    </ng-select>
+  </div>
+</form>

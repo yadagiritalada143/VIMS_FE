@@ -1,0 +1,404 @@
+<div class="panel panel-light" *ngIf="jobData?.basicInfo">
+  <div class="panel-head info-bg border-bottom">
+    <div class="d-flex">
+      <div class="d-flex justify-content-between align-items-center w-100">
+
+        <div class="hierarchy-logo d-flex align-items-center" *ngIf="hierarchyData?.name">
+          <div class="logo d-flex align-justify-center rounded-sm mr-8">
+            <img src="../../../assets/images/job-icon.svg" alt="" />
+          </div>
+          <div class="" >
+            <p class="small d-flex align-items-center">
+              {{ 'hierarchy' | i18next }}
+              <span class="star d-flex align-items-center justify-content-center ml-4">
+                <icon size="8px" name="star" type="material" class="d-flex" cuClass="d-flex">
+                </icon>
+              </span>
+            </p>
+            <p class="text-dark">
+              {{hierarchyData?.name}}
+            </p>
+          </div>
+        </div>
+        <div class="" *ngIf="hierarchyData?.addresses">
+          <p *ngFor="let address of hierarchyData?.addresses | slice: 0:1" class="d-flex align-items-center">
+            <icon size="16px" name="location_on" type="material" class="d-flex mr-4" cuClass="d-flex"></icon>
+            <span class="d-flex small"> {{address?.address_line1}}</span>
+          </p>
+          <!-- <span class="small pr-8">Manager(s)</span>
+          <div class="profiles-img">
+            <span class="initials initials__purple">SG</span>
+            <span class="initials initials__green">RH</span>
+            <span class="initials initials__pink">RH</span>
+          </div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="panel-content p-24" *ngIf="jobData?.basicInfo?.rate_dtls?.job_title">
+    <h3> {{selectedTemplate?.title?.title}}</h3>
+
+    <div class="d-flex mb-16">
+      <ul class="listed-inline">
+        <li>
+          <icon size="16px" name="category" type="material" class="d-flex mr-4" cuClass="d-flex">
+          </icon>
+          <span class="d-flex small">{{selectedTemplate?.category?.category_name}}</span>
+        </li>
+
+        <li>
+          <icon size="16px" name="leaderboard" type="material" class="d-flex mr-4" cuClass="d-flex">
+          </icon>
+          <span class="d-flex small">{{selectedTemplate?.title?.level}}</span>
+        </li>
+
+        <li>
+          <icon size="16px" name="location_on" type="material" class="d-flex mr-4" cuClass="d-flex">
+          </icon>
+          <span class="d-flex small">{{selectedTemplate?.location}}</span>
+        </li>
+      </ul>
+    </div>
+
+    <!--Job Description-->
+    <h4>{{ 'job_description' | i18next }}</h4>
+    <p [innerHtml]="jobData?.qualificationInfo?.description" class="small mb-16"> </p>
+    <!--Job Description-->
+
+    <!--qualifications-->
+    <div class="mb-24" *ngIf="jobData?.qualificationInfo">
+      <div class="d-flex align-items-center justify-content-between mb-16">
+        <h4 i18n class="d-flex align-items-center ">
+          <icon size="19px" name="description" type="material" class="d-flex mr-8" cuClass="d-flex">
+          </icon> {{ 'qualifications' | i18next }}
+        </h4>
+      </div>
+      <div *ngIf="jobData?.qualificationInfo?.selectCredentials">
+        <label>{{ 'credentials' | i18next }}</label>
+        <div class="tabs d-flex flex-wrap mb-16">
+          <div class="tabs-panel p-8 mr-8" *ngFor="let c of jobData?.qualificationInfo?.selectCredentials">
+            <div class="d-flex justify-content-between align-items-center mt-8">
+              <span class="small">
+                {{c?.name}}
+              </span>
+              <!-- <span class="cursor-pointer">
+                <icon size="13px" name="lock" type="material" class="d-flex " cuClass="d-flex">
+                </icon>
+              </span> -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="jobData?.qualificationInfo?.selectedSkills">
+        <label>{{ 'skills' | i18next }}</label>
+        <div class="tabs d-flex flex-wrap">
+          <div class="tabs-panel tabs-panel-strength p-8 mr-8"
+            *ngFor="let s of jobData?.qualificationInfo?.selectedSkills">
+            <div class="d-flex justify-content-between align-items-center">
+              <p>
+                {{s?.name}}
+              </p>
+              <span class="cursor-pointer">
+                <icon size="13px" name="close" type="material" class="d-flex" cuClass="d-flex">
+                </icon>
+              </span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="strength w-100">
+                <div class="pt-4 strength-bar">
+                  <ul>
+                    <li *ngFor="let r of s?.ratings" [ngClass]="{'active': r.flag === true}" class=""></li>
+                  </ul>
+                </div>
+                <p class="x-small text-right" *ngFor="let r of s?.ratings;let index = index">
+                  <span *ngIf="index === 0">
+                    <span *ngIf="getType(s?.ratings)<2 && getType(s?.ratings)!=0">{{ 'beginner' | i18next }}</span>
+                    <span *ngIf="getType(s?.ratings)===2">{{ 'intermediated' | i18next }}</span>
+                    <span *ngIf="getType(s?.ratings)>2">{{ 'expert' | i18next }}</span>
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--qualifications-->
+
+    <!--job details-->
+    <div class="d-flex align-items-center justify-content-between">
+      <h4 i18n class="d-flex align-items-center ">
+        <icon size="19px" name="next_week" type="material" class="d-flex mr-8" cuClass="d-flex">
+        </icon> {{ 'job_details' | i18next }}
+      </h4>
+    </div>
+
+    <div *ngIf="jobData?.basicInfo" class="d-flex align-items-center mt-16">
+      <div class="w-50">
+        <span>{{jobData?.basicInfo?.start_date | localDateFormat}}</span>
+        <label>{{ 'estimated_start_date' | i18next }}</label>
+      </div>
+      <div class="w-50">
+        <span>{{jobData?.basicInfo?.end_date | localDateFormat}}</span>
+        <label>{{ 'estimated_end_date' | i18next }}</label>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center mt-16">
+      <div class="w-50" *ngIf="jobData?.jobInfo?.job_manager">
+        <div *ngIf="jobData?.jobInfo?.job_manager?.first_name" class="d-flex align-items-center mb-8">
+          <div class="initials initials-profile initials__pink d-flex mr-8 ">
+            {{jobData?.jobInfo?.job_manager?.first_name | slice: 0:1}}</div>
+          <div class="d-flex flex-column">
+            <span class="subtitle-2 font-weight-medium">{{jobData?.jobInfo?.job_manager?.first_name}}
+              {{jobData?.jobInfo?.job_manager?.last_name}}</span>
+          </div>
+        </div>
+        <label>{{ 'job_manager' | i18next }}</label>
+      </div>
+      <div class="w-50" *ngIf="selectedTemplate?.msp_manager?.first_name">
+        <div *ngIf="selectedTemplate?.msp_manager?.first_name" class="d-flex align-items-center mb-8">
+          <div class="initials initials-profile initials__pink d-flex mr-8 ">
+            {{selectedTemplate?.msp_manager?.first_name | slice: 0:1}}
+            {{selectedTemplate?.msp_manager?.last_name | slice: 0:1}}</div>
+          <div class="d-flex flex-column">
+            <span class="subtitle-2 font-weight-medium">{{selectedTemplate?.msp_manager?.first_name}}
+              {{selectedTemplate?.msp_manager?.last_name}}</span>
+          </div>
+        </div>
+        <label>{{ 'msp_manager' | i18next }}</label>
+      </div>
+    </div>
+
+    <div class="d-flex flex-wrap  align-items-center mt-16">
+      <div class="w-50" *ngIf="jobData?.jobInfo?.foundational">
+        <span>001</span>
+        <label>{{jobData?.jobInfo?.foundational?.centers}}</label>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center mt-16">
+      <div class="w-50" *ngFor="let item of jobData?.jobInfo?.foundational | keyvalue">
+        <span>{{item.value}}</span>
+        <label>{{snakeCaseToTitle(item.key)}}</label>
+      </div>
+    </div>
+
+    <!--job details-->
+  </div>
+</div>
+<!-- candidate start -->
+<div class="panel panel-light mt-16 p-24">
+  <div class="d-flex align-items-center justify-content-between">
+    <h4 i18n class="d-flex align-items-center ">
+      <icon size="19px" name="how_to_reg" type="material" class="d-flex mr-8" cuClass="d-flex">
+      </icon> {{ 'pre-identified_candidate(s)' | i18next }}?
+    </h4>
+  </div>
+
+  <div class="row" *ngIf="jobData?.qualificationInfo?.candidates">
+    <div class="p-8 col-6" *ngFor="let c of jobData?.qualificationInfo?.candidates">
+      <div class="border rounded-sm p-16  h-150">
+        <div class="d-flex align-items-center ">
+          <div class="Quali-logo d-flex align-justify-center mr-8">
+            {{c?.candidateName | slice:0:1}}
+          </div>
+          <div class="candidate-select">
+            <p>
+              {{c?.candidateName}}
+            </p>
+            <p class="x-small">
+              {{c?.email}}
+            </p>
+          </div>
+        </div>
+        <div class="contacts d-flex align-items-center mt-16">
+          <icon size="15px" name="email" type="material" theme="outlined" class="d-flex" cuClass="d-flex">
+          </icon>
+          <span class="ml-8">
+            {{c?.email}}
+          </span>
+        </div>
+        <div class="contacts d-flex align-items-center mt-16">
+          <icon size="15px" name="local_phone" type="material" class="d-flex" cuClass="d-flex">
+          </icon>
+          <span class="ml-8"> {{c?.phone}}
+          </span>
+        </div>
+      </div>
+    </div>
+    <!-- <div class="p-8 col-6">
+      </div> -->
+
+  </div>
+</div>
+<!-- candidate end -->
+
+<div class="panel panel-light mt-16 p-24">
+  <div class="d-flex align-items-center justify-content-between">
+    <h4 i18n class="d-flex align-items-center ">
+      <icon size="19px" name="payments" type="material" class="d-flex mr-8" cuClass="d-flex">
+      </icon> {{ 'rate_details' | i18next }}
+    </h4>
+  </div>
+  <div *ngIf="jobData?.basicInfo" class="no-gutters row mt-16">
+    <div class="col">
+      <span>{{jobData?.basicInfo?.min_bill_rate | customcurrency}}</span>
+      <label>{{ 'minimum_bill_rate' | i18next }}</label>
+    </div>
+    <div class="col">
+      <span>{{jobData?.basicInfo?.max_bill_rate | customcurrency}}</span>
+      <label>{{ 'maximum_bill_rate' | i18next }}</label>
+    </div>
+    <div class="col"></div>
+  </div>
+</div>
+<!--Budget Estimate-->
+<div class="panel panel-light mt-16">
+  <div class="panel-head">
+    <div class="d-flex align-items-center justify-content-between">
+      <h4 i18n class="d-flex align-items-center ">
+        <icon size="19px" name="request_quote" theme="outlined" type="material" class="d-flex mr-8" cuClass="d-flex">
+        </icon> {{ 'budget_estimate' | i18next }}
+      </h4>
+    </div>
+  </div>
+  <div class="panel-content" *ngIf="jobData?.jobInfo || selectedTemplate">
+    <div class="no-gutters row">
+      <div class="col-8">
+        <label class="spc">{{ 'estimated_budget' | i18next }} / {{ 'position' | i18next }}</label>
+        <label class="spc">{{ 'number_of_positions' | i18next }}</label>
+        <label class="spc"> {{ 'work_days' | i18next }} / {{ 'week' | i18next }}</label>
+        <label class="spc"> {{ 'work_duration' | i18next }}</label>
+        <ng-container *ngIf="showEstimate">
+          <label class="spc"> {{ 'total_working_hours' | i18next }} / {{ 'position' | i18next }}</label>
+          <label class="spc"> {{ 'amount' | i18next }} / {{ 'position' | i18next }}</label>
+          <label class="spc"> {{ 'additional_amount' | i18next }} / {{ 'position' | i18next }}</label>
+          <label class="spc"> {{ 'sub_total' | i18next }} / {{ 'position' | i18next }}</label>
+          <label class="spc"> {{ 'adjustment' | i18next }} 1 - {{ 'local_tax' | i18next }} / {{ 'position' | i18next }}</label>
+          <label class="spc"> {{ 'sub_total_with_adjustments' | i18next }} / {{ 'position' | i18next }}</label>
+        </ng-container>
+      </div>
+      <div class="col-4">
+        <input type="text" class="form-control  highlight-form mb-16 text-right"
+          value="{{jobData?.jobInfo?.num_resources }}" placeholder="$17,380.00" disabled>
+        <input type="text" class="form-control  highlight-form mb-16 text-right"
+          value="{{jobData?.jobInfo?.num_resources}}" placeholder="2" disabled>
+        <input type="text" class="form-control  highlight-form mb-16 text-right"
+          value="{{jobData?.jobInfo?.week_working_days}}" placeholder="8" disabled>
+        <input type="text" class="form-control  highlight-form mb-16 text-right"
+          value="{{jobData?.jobInfo?.formatted_working_days}}" placeholder="5" disabled>
+        <ng-container *ngIf="showEstimate" >
+          <input type="number" class="form-control highlight-form mb-16 text-right"
+            value="{{jobData?.jobInfo?.working_hours}}" disabled>
+          <!-- <input type="number" class="form-control highlight-form mb-16 text-right"
+            value="{{jobData?.jobInfo?.single_initial_budget |currency:'USD':'symbol':'4.2-2'}}" disabled>
+          <input type="number" class="form-control highlight-form mb-16 text-right"
+            value="{{jobData?.jobInfo?.additional_amount |currency:'USD':'symbol':'4.2-2'}}" disabled>
+          <input type="number" class="form-control highlight-form mb-16 text-right"
+            value="{{jobData?.jobInfo?.single_gross_budget |currency:'USD':'symbol':'4.2-2'}}" disabled>
+          <input type="number" class="form-control highlight-form mb-16 text-right"
+            value="{{jobData?.jobInfo?.adjustment_value}}" disabled> -->
+            <div class="form-control mb-16 text-right disable-color"> {{jobData?.jobInfo?.single_initial_budget  |customcurrency:'USD' }}</div>
+            <div class="form-control mb-16 text-right disable-color"> {{jobData?.jobInfo?.additional_amount.value |customcurrency:'USD' }}</div>
+            <div class="form-control mb-16 text-right disable-color"> {{jobData?.jobInfo?.single_gross_budget |customcurrency:'USD' }}</div>
+            <div class="form-control mb-16 text-right disable-color"> {{jobData?.jobInfo?.adjustment_value |customcurrency:'USD' }}</div>
+            <div class="form-control mb-16 text-right disable-color"> {{jobData?.jobInfo?.single_net_budget |customcurrency:'USD' }}</div>
+          <!-- <input type="number" class="form-control highlight-form mb-16 text-right"
+            value="{{jobData?.jobInfo?.single_net_budget |currency:'USD':'symbol':'4.2-2'}}" disabled> -->
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow_position">
+    <button (click)="showEstimate = !showEstimate" type="button"
+      class="btn small btn-light light-bg mt-4 blue font-weight-normal">
+      {{(showEstimate ? 'Hide': 'Show') | i18next }} {{ 'detailed_estimate' | i18next }}
+      <icon size="24px" name="keyboard_arrow_up" type="material" class="icon--on-right blue ml-8" cuClass="cu-icon">
+      </icon>
+    </button>
+  </div>
+
+  <div class="panel-footer">
+    <div class="no-gutters row justify-content-center pt-24">
+      <div class="col-8"><label class="font-weight-medium">{{ 'total_estimated_budget' | i18next }}</label>
+      </div>
+      <div class="col-4"><label class="font-weight-medium text-right">{{jobData?.jobInfo?.net_budget | customcurrency}}</label>
+      </div>
+    </div>
+  </div>
+</div>
+<!--Budget Estimate-->
+
+<!--Trigger Approval Workflow-->
+<div class="panel panel-light mt-16">
+  <div class="panel-head">
+    <div class="d-flex align-items-center justify-content-between mb-16">
+      <h4 class="d-flex align-items-center ">
+        <icon class="d-flex mr-8" size="19px" name="add_task" type="material" cuClass="d-flex"></icon>
+        {{ 'trigger_approval_workflow' | i18next }}
+      </h4>
+      <div>
+        <div class="toggle-disable">
+          <div class="toggle-panel-inner">
+            <span class="toggle-switch" [ngClass]="toggleDisable?.value ? 'toggle-on' : 'toggle-off'"
+              ></span>
+              <!-- (click)="onClickToggleDisable()" -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="panel-content">
+    <div *ngIf="toggleDisable.value">
+      <label>{{ 'approvers' | i18next }}</label>
+      <div class="panel-info mb-8 p-16" *ngFor="let approve of jobData?.jobInfo?.approverList">
+        <div class="no-gutters row">
+          <div class="col-8">
+            <div class="d-flex align-items-center">
+              <div class="initials initials-profile initials__green d-flex mr-8 ">
+                {{approve?.first_name | slice: 0:1}} {{approve?.last_name | slice: 0:1}}
+              </div>
+              <div class="d-flex flex-column">
+                <span class="subtitle-2 font-weight-medium"> {{approve?.first_name}} {{approve?.last_name}} </span>
+                <span class="x-small">{{approve?.role}}</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="justify-content-end">
+              <div class="toggle-disable">
+                <div class="toggle-panel-inner">
+                  <span class="toggle-switch" [ngClass]="approve?.value ? 'toggle-on' : 'toggle-off'"
+                   ></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group mb-16">
+        <label> {{ 'note_for_approver(s)' | i18next }} </label>
+        <textarea type="textarea" rows="7" [(ngModel)]="jobData.jobInfo.note_for_approver" cols="12" maxlength="1000" class="form-control"
+           ></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+<!--Trigger Approval Workflow-->
+<div class="row no-gutters mt-24 mb-16">
+  <div class="col-12 d-flex align-items-center justify-content-between">
+    <!-- <button type="button" class="btn btn-outline mr-8">
+      {{ 'save_as_draft' | i18next }}
+    </button> -->
+    <button type="button" class="btn btn-outline" (click)="backToJobInfo()">
+      <icon size="24px" name="keyboard_backspace" theme="outlined" type="material" class="d-flex" cuClass="d-flex">
+      </icon>
+    </button>
+    <button type="button" class="btn btn-primary ml-auto" (click)="saveJob()">
+      <icon size="24px" name="check_circle" type="material" class="icon--on-right mr-8" cuClass="icon-cu">
+      </icon> {{ 'submit' | i18next }}
+    </button>
+  </div>
+</div>

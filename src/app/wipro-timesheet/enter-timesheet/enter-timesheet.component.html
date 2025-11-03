@@ -1,0 +1,74 @@
+<svms-sidebar title="{{ 'enter_timesheet' | i18next }}" [dataVisibility]="enterTimesheet" size="small" (onClose)="sidebarClose()">
+  <app-logs [log]="logs"></app-logs>
+  <svms-sidebar-body>
+    <div class="p-24" [formGroup]="enterTimesheetForm">
+      <div class="form-group" *ngIf="!isWorker">
+        <label>{{ 'select_worker' | i18next }}<span class="require">*</span></label>
+        <div class="position-relative search-candidate">
+          <ng-select [clearable]="false" placeholder="{{ 'search_worker' | i18next }}" formControlName="worker"
+                     [typeahead]="workerTypeAhead$" loadingText="{{ 'loading' | i18next }}..."
+                     [clearOnBackspace]="true"
+                     [loading]="workerLoading"
+                     [searchable]="true"
+                     (scrollToEnd)="loadMoreWorkerData(workerName?.searchTerm)"
+                     clearAllText="Clear" (change)="getAssignment($event)"
+                     typeToSearchText="{{ 'type_to_search' | i18next }}" #workerName>
+            <ng-option *ngFor="let worker of workers" [value]="worker">
+              {{worker?.user?.name || 'Worker' | i18next }} ({{ worker?.user?.email  | i18next }})
+              <!-- - {{worker?.assignment_title?.title | i18next }} ({{worker?.status | i18next }}) -->
+            </ng-option>
+            <ng-option *ngIf="workerLoading">
+              <span >{{ 'loading_more_results...' | i18next }}</span>
+            </ng-option>
+          </ng-select>
+          <div class="position-absolute search-cand">
+            <icon name="search" size="20px" type="material"
+                  class="d-flex" cuClass="d-flex"></icon>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>{{ 'select_assignment' | i18next }} <span class="require">*</span></label>
+        <div class="position-relative search-candidate">
+          <ng-select [clearable]="false" placeholder="{{ 'search_assignment' | i18next }}" [readonly]="!assignment?.length" loadingText="{{ 'loading' | i18next }}..." formControlName="assignment" (change)="checkIfTimesheetEnabled($event, timesheet?.worker?.value?.user?.id)" notFoundText="{{ 'no_items_found' | i18next }}">
+            <ng-option *ngFor="let a of assignment" [value]="a?.assignment_uuid">
+              {{a?.assignment_title?.title + "("+ a?.code +') ' + a?.status   | i18next }}
+            </ng-option>
+          </ng-select>
+          <div class="position-absolute search-cand">
+            <icon name="search" size="20px" type="material"
+                  class="d-flex" cuClass="d-flex"></icon>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="form-group month-selector" *ngIf="isTimesheetEnabled; else showTSDisableMessage">
+        <label>{{ 'select_work_period' | i18next }} <span class="require">*</span></label>
+        <ng-select [clearable]="false" placeholder="{{ 'select' | i18next }}" formControlName="month" [readonly]="!duration.length">
+          <ng-option [value]="date" *ngFor="let date of duration">
+            {{date.display_value | i18next }}
+          </ng-option>
+        </ng-select>
+      </div>
+      <ng-template #showTSDisableMessage>
+        <div *ngIf="isTimesheetEnabled != undefined && !isTimesheetEnabled" class="alert_message alert_warning">
+          <div class="d-flex align-items-center w-100">
+            <div class="d-flex align-items-center justify-content-start ">
+              <icon class="d-flex mr-8" size="24px" name="warning" type="material" cuClass="d-flex"></icon>
+            </div>
+            <div class="pl-8">
+              <div class="font-weight-bold mb-0 medium-font">
+                {{ 'timesheet_is_not_enabled_for_this_assignment' | i18next }}. {{ 'please_contact_program_administrator' | i18next }}.
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+  </svms-sidebar-body>
+  <svms-sidebar-footer>
+    <button class="btn btn-primary float-right" (click)="goToEntryPage()">{{ 'continue' | i18next }} <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu"></icon></button>
+  </svms-sidebar-footer>
+</svms-sidebar>

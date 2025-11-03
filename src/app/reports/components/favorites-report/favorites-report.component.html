@@ -1,0 +1,22 @@
+<div class="favourite-reports position-relative">
+  <div class="favourite-title d-flex">
+    <span class="material-icons favorite-icon">favorite</span>
+    <div class="title">{{ 'favorites' | i18next }}</div>
+  </div>
+  <div *ngIf="reports?.length" class="favourite-reports-list pb-m-0">
+    <div *ngFor="let report of reports" class="favourite-report-item">
+      <div class="report-name" (click)="showReport(report.key)">{{ report?.label }}</div>
+      <span class="action material-icons-outlined delete-icon" name="delete" type="material" cuClass="d-flex"
+        tooltip="Remove from Favorite" placement="left" delay="0" (click)="removeReportFromFavorite.emit({event: $event, item: report})">
+        cancel
+      </span>
+    </div>
+  </div>
+  <div class="no-favourite mt-m-0" *ngIf="!reports?.length">
+    <div class="d-flex flex-column align-items-center">
+      <img src="assets/images/favourite-circle.png" alt="" width="95">
+      <h3>{{ 'no_favorites_yet' | i18next }}</h3>
+      <p>{{ 'no_favourite_reports' | i18next }}</p>
+    </div>
+  </div>
+</div>

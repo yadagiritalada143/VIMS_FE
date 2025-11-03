@@ -1,0 +1,327 @@
+<div class="basic-info create">
+  <form *ngIf="renderFormModel[tabName]" [formGroup]="renderFormModel[tabName]" (submit)="onSubmit()">
+    <div class="p-32">
+      <div class="p-8">
+      <div *ngFor="let group of groups" [id]="group?.id">
+
+        <div *ngIf="group?.is_visible" class="d-flex align-items-center justify-content-between">
+          <h4 class="d-flex align-items-center pb-8 font-weight-medium">
+            {{group?.label|i18next}}
+          </h4>
+          <div>
+            <div class="toggle-disable" *ngIf="group?.is_toggle?.is_needed">
+              <div class="toggle-panel-inner">
+                <span class="toggle-switch" [ngClass]="cardToggole[group?.is_toggle?.slug] ? 'toggle-on' : 'toggle-off'"
+                  (click)="onClickCardToggle(group?.is_toggle?.slug)"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="group?.is_visible">
+          <div [hidden]="getShowHideCardFlag(group?.is_toggle?.slug)">
+            <div *ngFor="let field of group?.fields, let i=index">
+              <div *ngIf="!field.group_type" class="form-group">
+                <label I18n *ngIf="checkFieldType(field?.type)">
+                  {{(field?.label ? field?.label : field?.slug)|i18next}}
+                  <span *ngIf="fieldRequiredList[field?.slug]" class="require">*</span>
+                </label>
+                <app-field-handler [renderForm]="renderFormModel[tabName]" [field]="field" [is_continue]="is_continue"
+                  [is_update]="is_update" [updateConfig]="updateConfig" [updateValue]="updateValue"
+                  [candidateId]="candidateId" [errorMassage]="errorCheckList" [dateFieldDisable]="allDateFieldDisable"
+                  (onClickHierarchy)="onClickHirerachy(field?.slug)" (onDataChange)="onFieldValueChange($event)"
+                  (onClickCandidateView)="onCandidateView($event)" (onClickVendorView)="onVendorClick($event)"
+                  (onBtnClick)="onBtnClickEvent($event)" (selectedHierarchy)="selectHierarchy($event)" [jobId]="jobId">
+                </app-field-handler>
+              </div>
+
+              <div *ngIf="field.group_type === 'ARRAY'" class="row">
+                <ng-container *ngFor="let item of field?.fields">
+                  <div [hidden]="!fieldProp[item?.slug]" class="col-md-{{item?.meta_data?.col}}">
+                    <div
+                      [ngClass]="{'form-group': (item?.type !== 'PERSON_DROPDOWN') && (item?.type !== 'JOB_DROPDOWN') && (item?.type !== 'CANDIDATE_DROPDOWN') && (item?.type !== 'HUMAN_DROPDOWN')}">
+                      <label I18n>{{(item?.label ? item?.label : item?.slug)|i18next}}
+                        <span *ngIf="fieldRequiredList[item?.slug]" class="require">*</span>
+                      </label>
+                      <app-field-handler [renderForm]="renderFormModel[tabName]" [field]="item"
+                        [dateFieldDisable]="allDateFieldDisable" [is_continue]="is_continue" [is_update]="is_update"
+                        [updateConfig]="updateConfig" [updateValue]="updateValue" [errorMassage]="errorCheckList"
+                        [candidateId]="candidateId" (onClickCandidateView)="onCandidateView($event)"
+                        (onClickVendorView)="onVendorClick($event)" (onClickHierarchy)="onClickHirerachy(item?.slug)"
+                        (onDataChange)="onFieldValueChange($event)" (onBtnClick)="onBtnClickEvent($event)"
+                        (selectedHierarchy)="selectHierarchy($event)" [jobId]="jobId">
+                      </app-field-handler>
+                    </div>
+                  </div>
+                </ng-container>
+
+              </div>
+
+              <div *ngIf="field.group_type === 'TABLE'">
+                <table class="w-100 table">
+                  <thead class="no-border-bottom">
+                    <tr>
+                      <th class="text-uppercase"> &nbsp; </th>
+                      <th class="text-uppercase" *ngFor="let item of field?.fields[0], let i=index">
+                        {{item?.label|i18next}} <span *ngIf="fieldRequiredList[item?.slug]" class="require">*</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let items of field?.fields, let i = index">
+                      <td class="w-25">
+                        <div class="toggle-panel w-75">
+                          <div class="toggle-panel-inner trans-bg pl-0"
+                            [ngClass]="this.tableRowToggle[field?.row[i]?.slug] ? 'if-active' : 'if-inactive'">
+                            <span class="status-text">{{field?.row[i]?.label|i18next}}</span>
+                            <span class="toggle-switch" *ngIf="field?.row[i]?.is_show_hide"
+                              [ngClass]="this.tableRowToggle[field?.row[i]?.slug] ? 'toggle-on' : 'toggle-off'"
+                              (click)="onClickRowToggle(field?.row[i]?.slug, i, group?.id)"></span>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="w-25 for-error-absolute" *ngFor="let item of items">
+                        <app-field-handler [renderForm]="renderFormModel[tabName]" [field]="item"
+                          [dateFieldDisable]="allDateFieldDisable" [is_continue]="is_continue" [is_update]="is_update"
+                          [updateConfig]="updateConfig" [updateValue]="updateValue" [errorMassage]="errorCheckList"
+                          [candidateId]="candidateId" (onClickCandidateView)="onCandidateView($event)"
+                          (onClickVendorView)="onVendorClick($event)" (onClickHierarchy)="onClickHirerachy(item?.slug)"
+                          (onDataChange)="onFieldValueChange($event)" (onBtnClick)="onBtnClickEvent($event)"
+                          (selectedHierarchy)="selectHierarchy($event)" [jobId]="jobId">
+                        </app-field-handler>
+                      </td>
+                      <td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </div>
+
+              <div *ngIf="field.group_type === 'FOOTER_ARRAY'">
+
+                <div class="budget-section d-flex mb-24">
+                  <div class="budget-item mr-8 p-12" *ngFor="let item of field?.fields, let index = index">
+                    <icon name="hourglass_empty" size="20" class="green mr-12 budget-icon"></icon>
+                    <p class="small">
+                      {{(item?.type === 'CURRENCY') ? (renderFormModel[tabName].get(item?.slug)?.value ?
+                      (renderFormModel[tabName].get(item?.slug)?.value | customcurrency:currency) : item?.placeholder |
+                      customcurrency:currency) : (renderFormModel[tabName].get(item?.slug)?.value ?
+                      renderFormModel[tabName].get(item?.slug)?.value : item?.placeholder)}}
+                      <span>{{(item?.label ? item?.label : item?.slug)|i18next}}</span>
+                    </p>
+                  </div>
+                </div>
+
+
+
+              </div>
+
+              <div class="display-table" *ngIf="field.group_type === 'DISPLAY_TABLE'">
+                <table class="w-100">
+                  <thead>
+                    <tr>
+                      <th *ngFor="let item of field?.coll, let i=index" class="text-left">
+                        {{item|i18next}}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let items of field?.fields, let i = index">
+                      <td class="w-75">
+                        <span class="status-text">{{field?.row[i]|i18next}}</span>
+                      </td>
+                      <td class="w-25" *ngFor="let item of items">
+                        <app-field-handler [renderForm]="renderFormModel[tabName]" [field]="item"
+                          [dateFieldDisable]="allDateFieldDisable" [is_continue]="is_continue"
+                          [updateConfig]="updateConfig" [is_update]="is_update" [updateValue]="updateValue"
+                          [errorMassage]="errorCheckList" [candidateId]="candidateId"
+                          (onClickCandidateView)="onCandidateView($event)" (onClickVendorView)="onVendorClick($event)"
+                          (onClickHierarchy)="onClickHirerachy($event)" (onDataChange)="onFieldValueChange($event)"
+                          (onBtnClick)="onBtnClickEvent($event)" (selectedHierarchy)="selectHierarchy($event)" [jobId]="jobId">
+                        </app-field-handler>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div class="p-24" *ngIf="is_update && tabIndex === (config?.length - 1)">
+      <div class="d-flex align-items-center justify-content-between">
+        <h4 class="d-flex align-items-center py-8 font-weight-medium">
+          {{ 'assignment_update_details' | i18next }}
+        </h4>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="from-group">
+            <label I18n>{{ 'effective_date' | i18next }}
+              <span class="require">*</span>
+            </label>
+            <svms-datepicker ngDefaultControl id="effective_date" I18n [inputdateFormat]="'yy-mm-dd'"
+              formControlName="effective_date" [options]="effectiveDateOption"
+              [ngClass]="((is_continue && renderFormModel[tabName].get('effective_date').invalid) || errorCheckList['effective_date_selection_invalid']) ? 'error' : ''">
+            </svms-datepicker>
+
+            <p class="text-red" *ngIf="errorCheckList['effective_date_selection_invalid']; else effective_date_selection">
+              {{errorCheckList['effective_date_selection_invalid']}}
+            </p>
+            <ng-template #effective_date_selection>
+              <p class="text-red" *ngIf="is_continue && renderFormModel[tabName].get('effective_date').invalid && errorCheckList['effective_date']">
+                {{errorCheckList['effective_date']|i18next}}
+              </p>
+            </ng-template>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div>
+            <label I18n>{{ 'reason_for_update' | i18next }}
+              <span class="require">*</span>
+            </label>
+            <div class="form-group">
+              <ng-select [items]="updateOfReason$ | async" [bindLabel]="'name'" [bindValue]="'id'" placeholder="{{ 'select_a_reason' | i18next }}"
+                [clearable]="true" formControlName="request_reason"
+                [ngClass]="(is_continue && renderFormModel[tabName].get('request_reason').invalid) ? 'error' : ''">
+              </ng-select>
+              <p class="text-red" *ngIf="is_continue && renderFormModel[tabName].get('request_reason').invalid">
+                {{errorCheckList['request_reason']|i18next}}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>
+              {{ 'upload_document' | i18next }}
+            </label>
+            <app-resume-upload (resumeData)="uploadFiles($event)"></app-resume-upload>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>
+              {{ 'updated_notes' | i18next }}
+            </label>
+            <textarea class="form-control h-199" formControlName="request_notes"></textarea>
+          </div>
+        </div>
+      </div>
+      <!-- <app-impacted-timesheet-table [renderForm]="renderFormModel" [tabName]="tabName" ></app-impacted-timesheet-table> -->
+     <!-- <h3 class="font-weight-medium pl-8 pb-8">Update Impacted Timesheet(s)</h3>
+      <div class="p-8">
+        <table>
+          <thead>
+            <tr>
+              <td class="pl-16">
+                <input type="checkbox">
+              </td>
+              <td class="font-weight-medium">
+                Timesheet ID
+              </td>
+              <td class="font-weight-medium">
+                Work Period
+                 </td>
+              <td class="font-weight-medium">
+                Status
+              </td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="1">&nbsp;</td>
+            </tr>
+            <tr>
+              <td class="pl-16">
+                <input type="checkbox" >
+              </td>
+              <td>
+                  <span class="text-primary"> TS-13</span>
+              </td>
+              <td>
+                <span>
+                  12-11-2020
+                </span>
+              </td>
+              <td>
+                  <span class="status-ui pending-approval">Pending Approval</span>
+              </td>
+            </tr>
+            <tr>
+              <td class="pl-16">
+                <input type="checkbox" >
+              </td>
+              <td>
+                  <span class="text-primary"> TS-13</span>
+              </td>
+              <td>
+                <span>
+                  12-11-2020
+                </span>
+              </td>
+              <td>
+                  <span class="status-ui pending-approval">Pending Approval</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div> -->
+    </div>
+
+    <div class="form-footer p-24">
+      <div *ngIf="tabIndex === (config?.length - 1) && !is_update && !is_candidate_registered"
+        class="my-16 d-flex justify-content-start align-items-center">
+        <input class="from-group mr-8" type="checkbox" formControlName="is_account_required">
+        {{ 'send_welcome_email_to_candidate' | i18next }}
+      </div>
+      <div class="row no-gutters">
+        <div class="col-12 d-flex align-items-center justify-content-between">
+          <button [class.display-hidden]="!(tabIndex > 0)" type="button" class="btn btn-outine btn-primary-color"
+            (click)="onClickBack()">
+            <icon size="24px" name="keyboard_backspace" theme="outlined" type="material" class="d-flex"
+              cuClass="d-flex">
+            </icon>
+          </button>
+          <button type="button" class="btn btn-primary" *ngIf="tabIndex !== (config?.length - 1)"
+            (click)="onContinue()">{{ 'continue' | i18next }}
+            <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu"></icon>
+          </button>
+          <button type="submit" class="btn btn-primary" *ngIf="tabIndex === (config?.length - 1)">{{ 'save_assignment' | i18next }}
+            <!-- <icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu"></icon> -->
+            <span *ngIf="isSaveLoader" class="ml-8"><button-loader></button-loader></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<svms-sidebar [title]="'select_hierarchy'" icon="" [dataVisibility]="isAddHirerachy" (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <svms-hierarchy *ngIf="allAPIData['hirerachyLvlList']?.length > 0" [hierarchyData]="allAPIData['hirerachyLvlList']"
+      (selectHierarchyLevel)="selectHierarchy($event)" [selectedHierarchy]="selectedHierarchy" [isUserOnly]="true"
+      [userAssociatedHierarchyID]="userAssociatedHierarchyID">
+    </svms-hierarchy>
+    <div *ngIf="allAPIData['hirerachyLvlList']?.length === 0"
+      class="content-area ui-content-wrapper no-content bg-light list-not-found">
+      <div class="no-data text-center">
+        <img src="./assets/images/no-data.png" alt="hierarchy-board" class="img-fluid">
+        <h2>{{ 'you_do_not_have_a_hierarchy_created_yet' | i18next }}.</h2>
+      </div>
+    </div>
+  </svms-sidebar-body>
+
+  <svms-sidebar-footer>
+    <!--show this in basic info tabs tabs -->
+    <button type="submit" class="btn btn-primary float-right" (click)="sidebarClose()">
+      {{ 'continue' | i18next }}<icon size="20px" name="chevron_right" type="material" class="icon--on-right" cuClass="icon-cu">
+      </icon>
+    </button>
+  </svms-sidebar-footer>
+</svms-sidebar>

@@ -1,0 +1,95 @@
+<svms-sidebar
+    [dataVisibility]="visible"
+    [clickOutside]="false"
+    [title]="sidebarTitle"
+    (onClose)="sidebarClose()"
+>
+
+    <svms-sidebar-body>
+        <form [formGroup]="picklistForm" class="picklist-body p-24">
+
+            <div *ngIf="!isViewMode; else firstViewRow" class="row">
+                <div [ngClass]="(picklistCategory?.toUpperCase() !== 'PREDEFINED')?'col-sm-9':'col-sm-12'">
+                    <div class="form-group">
+                        <label>
+                            {{ 'picklist_name' | i18next }}
+                            <span class="require"> * </span>
+                        </label>
+                        <input type="text" class="form-control" [readonly]="picklistCategory?.toUpperCase() === 'PREDEFINED'"
+                            placeholder="{{ 'enter_picklist_name' | i18next }}" formControlName="name"
+                        />
+
+                        <p *ngIf="picklistNameForm.touched && !picklistNameForm.valid" class="error-text mt-8">
+                            {{ '*_this_field_is_required' | i18next }}
+                        </p>
+
+                    </div>
+                </div>
+                <div *ngIf="picklistCategory?.toUpperCase() !== 'PREDEFINED'" class="col-sm-3">
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <div class='toggle-panel w-100'>
+                            <div class='toggle-panel-inner p-16 d-flex justify-content-space-between'>
+                                <span> {{ 'status' | i18next }} </span>
+                                <toggle-button
+                                    [checked]="picklistForm.get('status').value"
+                                    (changed)="changeStatus($event)"
+                                    [disabled]="isViewMode"
+                                >
+                                </toggle-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <ng-template #firstViewRow>
+                <div class="form-group">
+                    <label>
+                        {{ 'picklist_name' | i18next }}
+                        <span class="require"> * </span>
+                    </label>
+                    <p>  {{ (picklistNameForm.value || '--') | i18next }} </p>
+                </div>
+            </ng-template>
+
+            <div *ngIf="!isViewMode; else secondViewRow" class="row">
+                <div class="form-group w-100 px-8">
+                    <label> {{ 'description' | i18next }} </label>
+                    <textarea I18n formControlName="description" [cols]="2" maxlength="1000"
+                        class="form-control" placeholder="Enter description here...">
+                    </textarea>
+                </div>
+            </div>
+
+            <ng-template #secondViewRow>
+                <div class="form-group">
+                    <label> {{ 'description' | i18next }} </label>
+                    <p>  {{ (picklistForm.get('description').value || '--') | i18next }} </p>
+                </div>
+            </ng-template>
+
+            <app-picklist-table
+                [visibility]="visible"
+                [(selections)]="initialSelections"
+                [(multiselect)]="multiselect"
+                [readonly]="isViewMode"
+                [showFilter]="!isViewMode"
+                [showMultiselect]="!isViewMode && (picklistCategory?.toUpperCase() !== 'PREDEFINED')"
+                [disableEntry]="isViewMode || !isAdmin"
+            >
+            </app-picklist-table>
+
+        </form>
+    </svms-sidebar-body>
+
+    <svms-sidebar-footer *accessControl>
+        <button (click)="sidebarClose()" class="btn btn-outlined float-left">
+            {{ 'cancel' | i18next }}
+        </button>
+        <button *ngIf="!isViewMode" [disabled]="picklistForm.invalid"
+          (click)="onSave()" class="btn btn-primary float-right">
+            {{ (isEditMode?'Update':'Save') | i18next }}
+        </button>
+    </svms-sidebar-footer>
+</svms-sidebar>

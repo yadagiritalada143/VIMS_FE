@@ -1,0 +1,244 @@
+<svms-sidebar [title]="title | i18next" [size]="'large'" [icon]="'supervised_user_circle'" [dataVisibility]="createRole"
+  (onClose)="sidebarClose()">
+  <svms-sidebar-body>
+    <vms-tab-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="onIndexChange($event)">
+
+      <vms-tab label="{{ 'basic_info' | i18next }}">
+        <div class="basic-info-scroll">
+        <div class="form-group-row">
+          <div class="form-group">
+            <label class="gray">{{ 'user_role' | i18next }} <span class="require">*</span> </label>
+            <div class="d-flex align-items-center">
+              <input type="text" placeholder="{{ 'custom_user_role' | i18next }}" [readonly]="isViewMode || disableRoleEditExceptPermissions" class="form-control"
+                [(ngModel)]="_role.name">
+              <div class="toggle-panel" [ngClass]="{'disable':isViewClicked}">
+                <div class="toggle-panel-inner toggle-background">
+                  <span class="status-text">{{toggle?.title | i18next}}</span>
+                  <span class="toggle-switch" [ngClass]="toggle.value ? 'toggle-on' : 'toggle-off'"
+                    (click)="isViewMode || disableRoleEditExceptPermissions ? null : onClickToggle()"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group-row mb-32">
+          <div class="form-group">
+            <label>{{ 'organization_category' | i18next }}<span class="require">*</span> </label>
+            <ng-select [readonly]="isViewMode || disableRoleEditExceptPermissions" (change) = "orgCategoryChange()" placeholder="{{ 'select_organization_category' | i18next }}" [(ngModel)]="_role.organization_category">
+              <ng-option value="MSP">{{ 'msp' | i18next }}</ng-option>
+              <ng-option value="VENDOR">{{ 'vendor' | i18next }}</ng-option>
+              <ng-option value="CLIENT">{{ 'client' | i18next }}</ng-option>
+              <ng-option *ngIf='!customRolePage' value="CANDIDATE">{{ 'worker' | i18next }}</ng-option>
+            </ng-select>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center">
+          <label class="gray">{{ 'access_' | i18next }} <span class="require">*</span></label>
+          <div class="ml-24">
+            <div class="radio-wrapper">
+              <label for="true_own_access" class="radio-container mt-6">
+                <input type="radio" id="true_own_access" name="true_own_access" [(ngModel)]="defaultAccessValue" value="TRUE_OWN"
+                  (click)="isViewMode || disableRoleEditExceptPermissions ? false : setAccessValue($event)">
+                <span class="checkmark" style="margin-top: 3px"></span>
+                <p class="text-dark">{{ 'true_own' | i18next }}</p>
+              </label>
+            </div>
+          </div>
+
+          <div class="ml-24">
+            <div class="radio-wrapper">
+              <label for="own_access" class="radio-container mt-6">
+                <input type="radio" id="own_access" name="own_access" [(ngModel)]="defaultAccessValue" value="OWN"
+                  (click)="isViewMode || disableRoleEditExceptPermissions ? false : setAccessValue($event)">
+                <span class="checkmark" style="margin-top: 3px"></span>
+                <p class="text-dark">{{ 'my_own' | i18next }}</p>
+              </label>
+            </div>
+          </div>
+
+          <div class="ml-24">
+            <div class="radio-wrapper">
+              <label for="all_access" class="radio-container ">
+                <input type="radio" id="all_access" name="all_access" [(ngModel)]="defaultAccessValue" value="ALL"
+                  (click)="isViewMode || disableRoleEditExceptPermissions ? false : setAccessValue($event)">
+                <span class="checkmark" style="margin-top: 3px"></span>
+                <p class="text-dark">{{ 'all' | i18next }}</p>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group-row mb-32" *ngIf="_role?.organization_category == 'CLIENT' || _role?.organization_category == 'MSP'">
+          <div class="form-group">
+            <label>
+              {{'additional_user_roles_for_delegation'|i18next}}
+              <icon style="vertical-align: middle;" class="pl-4" name="help" placement="right" size="16px" color="#A3B0C0"
+                    tooltip="When defined, System will allow delegation to the users who are associated to the defined additional user roles along with users associated to same user role">
+              </icon>
+            </label>
+
+            <ng-select
+              [multiple]="true"
+              [readonly]="isViewMode || disableRoleEditExceptPermissions"
+              placeholder="{{'select_values'|i18next}}"
+              [(ngModel)]="_role.additional_delegation_roles"
+              [loading]="delegatesLoading"
+              (open)="searchRoles({ term: '' })"
+              (search)="searchRoles($event)"
+              (scrollToEnd)="loadMoreRoles()"
+            >
+              <ng-option *ngFor="let item of userRoles | keysort:'name'" [value]="item?.id">
+                {{item?.name}}
+              </ng-option>
+            </ng-select>
+          </div>
+        </div>
+
+        <div class="form-group mt-12">
+          <label>{{ 'modules' | i18next }} <span class="require">*</span> </label>
+          <app-modules 
+            [hideHiddenModules]="true"
+            [hideEmptyPermissionModules]="true"
+            [access]="defaultAccessValue"
+            [readOnly]="!isViewMode" [moduleData]="moduleGroup"
+            (moduleDataChange)="isViewMode ? null : onClickModule($event)"></app-modules>
+        </div>
+        </div>
+      </vms-tab>
+
+      <vms-tab [disabled]="isBasicInfoInvalid" label="{{ 'permissions' | i18next }}">
+        <div class="permissons-form tab-content-wrapper">
+
+          <div class="leftPanel">
+            <ul class="vertical-menu">
+              <ng-container *ngFor="let module of enabledModules; let i = index">
+                <li *ngIf="showModuleGroup(module)" class="pt-24"
+                  (click)="onClickActiveModule(i)"
+                  [ngClass]="{'active':visibleModuleIndex == i}"
+                >
+                  {{ module?.name | i18next }}
+                </li>
+              </ng-container>
+            </ul>
+          </div>
+
+          <div class="rightPanel">
+            <div class="sidebar-content-scroll" *ngFor="let groupmodule of enabledModules; let groupIndex = index"
+              [hidden]="visibleModuleIndex !== groupIndex">
+              <ng-container *ngFor="let module of (groupmodule.modules | keysort:'ref_order');">
+                <!-- `&& module.name.toLowerCase() !== 'dashboard'` Added as part of V2M-26018
+                  Condition should be removed once BE removes the same from Permissions List
+                -->
+                <ng-container *ngIf="module?.permissions?.length && module.name.toLowerCase() !== 'dashboard'">
+
+                  <div class="border rounded-sm mb-16">
+
+                    <div class="p-16" (click)="isViewMode ? null : setPermissionModule(module)">
+                      <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                          <span class="cursor-pointer" *ngIf="module.permissions.length; else arrow">
+                            <icon [name]="permissionData[module.id]?.isActive ? 'keyboard_arrow_down' : 'keyboard_arrow_right' "
+                              size="24px" color="#000000" class="d-flex" cuclass="d-flex"></icon>
+                          </span>
+                          <ng-template #arrow>
+                            <span class="cursor-pointer">
+                              <icon name="keyboard_arrow_right" size="24px" color="#000000" class="d-flex" cuclass="d-flex">
+                              </icon>
+                            </span>
+                          </ng-template>
+                          <p class="text-black mx-16">{{module.name | i18next}}</p>
+                          <!-- <span (click)="preventParentCleck($event)">
+                                            <toggle-button [checked]="permissionData[module.id].is_enabled" (changed)="togglePermission(module.id,$event)"></toggle-button>
+                                          </span>  -->
+                        </div>
+
+                        <div class="d-flex align-items-center"
+                          *ngIf="permissionData[module.id]?.permissions?.length && permissionData[module.id]?.isActive">
+                          <div class="checkbox-wrapper">
+                            <label class="checkbox-container"
+                              (click)="isViewMode ? null : selectAllPermissions(module.id,$event)">
+                              <input [disabled]="isViewMode" type="checkbox"
+                                [checked]="permissionData[module.id].selectedAll" />
+                              <span class="checkmark"></span>
+                              <p class="text-link">{{ 'select_all' | i18next }}</p>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="content-scrollbar">
+                      <ng-container *ngIf="(module?.code !== 'CONFIGURATOR_VIEW_MANAGE') else permGroup">
+                      <div class="row no-gutters border-top px-16 pt-16 pb-4"
+                        [ngClass]="{'dispToggle':!permissionData[module.id]?.isActive}" *ngIf="module.permissions.length">
+
+                        <ng-container *ngFor="let permission of module.permissions; let permissionIndex = index">
+                          <div class="col-md-6 mb-12">
+                            <div class="d-flex align-items-center">
+                              <div class="checkbox-wrapper">
+                                <label class="checkbox-container">
+                                  <input [disabled]="isViewMode" type="checkbox"
+                                    (change)="permissionCheckBoxHandler(module.id, permission.id)"
+                                    [checked]="checkPermissionSelected(module.id, permission.id)" />
+                                  <span class="checkmark"></span>
+                                  <p>{{permission.label | i18next}}</p>
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                        </ng-container>
+                      </div>
+                      </ng-container>
+
+                      <!-- Configurator View/Manage -->
+                      <ng-template #permGroup>
+                        <ng-container *ngFor="let group of configViewGroup;">
+                          <div class="p-12 group-wrapper border-top" [ngClass]="{'dispToggle':!permissionData[module.id]?.isActive}">
+                          <label class="mb-0"> {{ group?.name | i18next }} </label>
+                        </div>
+                        <div class="row no-gutters border-top px-16 pt-16 pb-4"
+                          [ngClass]="{'dispToggle':!permissionData[module.id]?.isActive}">
+                          <div *ngFor="let permission of group?.permissions;" class="col-md-6 mb-12">
+                            <div class="d-flex align-items-center">
+                              <div class="checkbox-wrapper">
+                                <label class="checkbox-container">
+                                  <input [disabled]="isViewMode" type="checkbox"
+                                    (change)="permissionCheckBoxHandler(module.id, permission.id)"
+                                    [checked]="checkPermissionSelected(module.id, permission.id)" />
+                                  <span class="checkmark"></span>
+                                  <p>{{permission.label | i18next}}</p>
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </ng-container>
+                    </ng-template>
+
+                    </div>
+
+                  </div>
+
+                </ng-container>
+              </ng-container>
+              <!-- special handling for credentialing -->
+              <ng-container *ngIf="groupmodule?.name === 'Credentialing'">
+                <app-credentialing-iframe *ngIf="showWidget" [iframeStyle]="iframeStyle" [onRoleCreated]="onRoleChanged" [onRoleUpdated]="onRoleChanged" [roleParam]="roleParam" class="iframe-component" [widgetType]="widgetType"></app-credentialing-iframe>
+              </ng-container>
+            </div>
+          </div>
+
+        </div>
+      </vms-tab>
+    </vms-tab-group>
+  </svms-sidebar-body>
+  <svms-sidebar-footer>
+    <div *ngIf="!isViewMode" class="d-flex justify-content-between">
+      <button type="button" class="btn btn-light" (click)="onCancel($event)"> {{ 'cancel' | i18next }} </button>
+      <button type="button" *accessControl class="btn btn-primary" (click)="onContinue()"
+        [disabled]="isBasicInfoInvalid">{{buttonTitle | i18next}}</button>
+    </div>
+  </svms-sidebar-footer>
+
+</svms-sidebar>

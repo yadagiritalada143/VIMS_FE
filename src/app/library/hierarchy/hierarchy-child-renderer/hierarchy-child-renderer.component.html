@@ -1,0 +1,23 @@
+<ul class="sub-level-listing hierarchy-sub-list">
+    <li>
+        <div class="listing-item" [ngStyle]="{'padding-left': (childRenderData?.hierarchy_level)*30 + 'px'}"
+            [ngClass]="{'active': checkboxState}">
+            <div class="listing-info">
+                <span class="sub-level-title">{{childRenderData?.name}}</span>
+            </div>
+            <div class="level-status">
+                <div class="checkbox-wrapper">
+                    <label class="checkbox-container">
+                        <input type="checkbox" [attr.disabled]="isReadMode ? true : null" name="hierarchy_level"
+                            [(ngModel)]="checkboxState" (change)="onSelectLevel($event)">
+                        <span class="checkmark"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <hierarchy-child-renderer *ngFor="let childLevel of childRenderData?.hierarchies" [childRenderData]="childLevel"
+            [isUserOnly]="isUserOnly" [isReadMode]="isReadMode" [parentCheckboxState]="checkboxState"
+            (selectHierarchyLevel)="selectParent($event)" [selectedTreeArr]="selectedTreeArr">
+        </hierarchy-child-renderer>
+    </li>
+</ul>

@@ -1,0 +1,11 @@
+<app-logs [log]="logs"></app-logs>
+<vms-table *ngIf="tableLoaded" [vmsTableConfig]="tableConfig" [vmsDataSource]="vmsData?.timesheet" [loading]="dataLoading" [totalItem]="totalRecords" [itemsPerPage]="itemPerPage" (changePage)="onPaginationClick($event)" [count]="countData" (onViewClick)="onClickView($event)"
+    (onCreate)="onCreateClick($event)" [isMultipleSelectionDropdown] ="true" (search)="onSearch($event)" [currentTab]="selectedTab" (onTabClick)="onTabClick($event)" (onSort)="onSortClick($event)"
+    (changeRecords)="onClickRecords($event)" [manuallySelectedCount]="selectedTimesheetCount" (onSelectAllClick)="onselectAllClick($event)" [selectedRecordslist]="selectedTimesheetIds" [recordType]="'timesheet'"
+     (onOpenPanel)="viewSidePanel($event)" (selectedRecords)="selectedRecord($event)" (onActionButtonClick)="bulkApproval($event)" #timesheetTableRef
+     (onSelectClick)="selectClicked($event)" [availableCountForSelect]="availableCountForSelect"  (onAllRecordsSelected)="onAllRecordsSelected($event)" (onDownloadButtonClick)="onDownloadClick($event)" class="timesheet-listing"
+     managerListTitle="Timesheet Managers">
+</vms-table>
+<app-enter-timesheet *authorize="'create_timesheet'" (hasTimesheetAccess)="hasTimesheetAccess($event)"[enterTimesheet]="enterTimesheet" [config]="configData"></app-enter-timesheet>
+
+<app-assignment-details-flyout></app-assignment-details-flyout>

@@ -1,0 +1,112 @@
+<div class="job card" *ngIf="job">
+  <div class="job-info">
+    <div class="title d-flex">
+      <img src="../../../../../assets/images/account_tree.svg" alt="">
+      <span>{{ (mapper.hierarchies.get(job?.hierarchy_id) || 'Undefined') |i18next}}</span>
+    </div>
+
+    <div class="d-flex">
+      <ng-container *ngIf='job?.is_active; else inactive'>
+        <div class="job-status d-flex">
+          <span class="circle"></span>
+          <span>{{ 'active' | i18next }}</span>
+        </div>
+      </ng-container>
+      <ng-template #inactive>
+        <div class="job-status cannot d-flex">
+          <span class="circle"></span>
+          <span>{{ 'inactive' | i18next }}</span>
+        </div>
+      </ng-template>
+      <div class="author">
+        <span>{{ ( mapper.workLocations.get(job?.work_location_id) || 'Undefined' ) |i18next}}</span>
+      </div>
+    </div>
+
+    <div class="last-update">
+      <icon color="#7F92A3" name="history"></icon>
+      <p class="small ml-8">{{ 'last_updated_on' | i18next }}:</p>
+    </div>
+    <p class="updated_et"> {{ modified_on }} </p>
+  </div>
+  <div class="job-uoms">
+    <tabs-group [selectedIndex]="tabIndex" (onSelectedIndexChange)="changeSelectedUom($event)">
+      <ng-container *ngFor="let uom of job.filtered_unit_of_measures">
+        <app-tab *ngIf='uom?.is_active' [tabTitle]="uom.unit_of_measure" >
+          <div class="min_rate">
+            <span class="rate_title">{{ 'min_rate' | i18next }}</span>
+            <span class="amount">{{ uom.min_rate | accuracy : 'rate' : { currencyCode: currency }  }}</span>
+
+            <div class="rate_status">
+              <i class="material-icons small center"
+                 [ngClass]="uom.min_rate_rule.split(' ')[0] === 'Can' ? 'can' : 'cannot'"
+              >check_circle</i>
+              <span>{{uom.min_rate_rule}}</span>
+            </div>
+          </div>
+          <div class="max_rate">
+            <span class="rate_title">{{ 'max_rate' | i18next }}</span>
+            <span class="amount">{{ uom.max_rate | accuracy : 'rate' : { currencyCode: currency } }}</span>
+
+            <div class="rate_status">
+              <i class="material-icons small center"
+                 [ngClass]="uom.max_rate_rule.split(' ')[0] === 'Can' ? 'can' : 'cannot'">cancel</i>
+              <span>{{ uom.max_rate_rule}}</span>
+            </div>
+          </div>
+          <div class="actions">
+            <img *ngIf="talentNeuron" src="../../../../../assets/images/insights-24px.svg" alt="" (click)="chartVisibility = !chartVisibility">
+            <i class="material-icons edit-rate" (click)="onEditClick({uom: uom, job: job})">edit</i>
+          </div>
+        </app-tab>
+      </ng-container>
+    </tabs-group>
+  </div>
+</div>
+
+<div class="graph-content mb-16" *ngIf="chartVisibility">
+  <div class="info d-flex">
+    <div class="graph">
+      <img src="../../../../../assets/images/market-rate-chat.svg" alt="">
+      <div class="graph-values">
+        <span>
+          {{ 'min:_' | i18next }}
+          {{ selectedUom?.min_rate | currency: currency }}
+        </span>
+        <span *ngIf="selectedUom?.min_rate && selectedUom?.max_rate">
+          {{ 'mean:_' | i18next }}
+          {{ meanRate | currency: currency }}
+        </span>
+        <span>
+          {{ 'max:_' | i18next }}
+          {{ selectedUom?.max_rate | currency: currency }}
+        </span>
+      </div>
+      <span></span>
+    </div>
+    <div class="more">
+      <div *ngIf="(talentNeuron?.supply ?? '')?.toString()" class="card more-info">
+        <span class="value"> {{ talentNeuron?.supply }} </span>
+        <p class="title">{{ 'supply' | i18next }}</p>
+      </div>
+      <div *ngIf="(talentNeuron?.demand ?? '')?.toString()" class="card more-info">
+        <span class="value"> {{ talentNeuron?.demand }} </span>
+        <p class="title">{{ 'demand' | i18next }}</p>
+      </div>
+      <div class="card more-info">
+        <span class="value"> {{ talentNeuron?.posting_duration ?? 'N/A' | i18next }} </span>
+        <p class="title">{{ 'posting_duration' | i18next }}</p>
+      </div>
+      <!--
+        <div class="card more-info">
+          <span class="value">$66.66</span>
+          <p class="title">{{ 'market_hourly_billing' | i18next }} ..</p>
+        </div>
+      -->
+      <div *ngIf="(talentNeuron?.salary ?? '')?.toString()" class="card more-info">
+        <span class="value"> {{ talentNeuron?.salary | currency: currency }} </span>
+        <p class="title">{{ 'yearly_estimated_salary' | i18next }}</p>
+      </div>
+    </div>
+  </div>
+</div>

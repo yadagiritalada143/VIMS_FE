@@ -1,0 +1,44 @@
+<ng-template #popContent>
+  <div class="no-approved-panel replace-approver-panel">
+    <div class="p-12 d-flex justify-content-center flex-column ">
+      <div class="d-flex align-items-center">
+        <span class="text-dark">{{ 'replace_approver' | i18next }}</span>
+      </div>
+      <div class="align-items-center justify-content-between mt-12 d-flex">
+        <div class="d-flex align-items-center">
+          <ng-select bindLabel="name" [searchable]="true" (search)="this.approverSearch.next($event)"
+            placeholder="{{ 'select_new_approver' | i18next }}" ngDefaultControl [(ngModel)]="selectedApprover"
+            [loading]='approverLoading' loadingText='Loading...' (clear)="this.approverSearch.next($event)"
+            class="approver-dropdown">
+            <ng-option *ngFor="let option of approverList" [value]="option">
+              <div class="initials initials__purple text-capitalize ">
+                {{ option?.first_name | slice: 0:1 }}{{ option?.last_name | slice: 0:1 }}
+              </div>
+              <span class="text-capitalize user-options">{{ option?.full_name }}</span>
+            </ng-option>
+          </ng-select>
+        </div>
+      </div>
+      <div class="d-flex align-items-center mt-12" *ngIf="selectedApprover">
+        <span class="text-red" style="font-size: 10px;">{{ 'are_you_sure_want_to_update_the_approval?' | i18next }}</span>
+      </div>
+    </div>
+    <div class="d-flex align-items-center justify-content-between mt-12 d-flex" *ngIf="selectedApprover">
+      <button type="button" class="btn btn-danger small ml-12" (click)="onCancelReplaceApproval()">
+        <icon size="14px" name="do_not_disturb" type="material" class="icon--on-left" cuClass="icon-cu">
+        </icon>
+        {{ 'no' | i18next }}
+      </button>
+      <button type="button" class="btn btn-success small mr-12" (click)="replace()">
+        <icon size="14px" name="check_circle_outline" type="material" class="icon--on-left" cuClass="icon-cu">
+        </icon>
+        {{ 'yes' | i18next }}
+      </button>
+    </div>
+    <br>
+  </div>
+</ng-template>
+
+<app-popover [popOverTemplate]="popContent" [placement]="'bottom'" (onOpenPopOver)="onClickPopOver($event)"
+  (onClosePopOver)="onClosingPopOver()">
+</app-popover>

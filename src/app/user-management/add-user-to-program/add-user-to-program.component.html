@@ -1,0 +1,375 @@
+<svms-sidebar
+  [title]="title |i18next" [size]="'medium'"
+  [dataVisibility]="createUser" (onClose)="sidebarClose()">
+
+  <form [formGroup]="AddtoProgramForm" (ngSubmit)="onSave()">
+    <svms-sidebar-body>
+
+      <div *ngIf="show_org && !isEditClicked && (!profileOrganizationView && !profileProgramView)"
+        class="sidebarContent form-group">
+        <label>{{ 'organizations' | i18next }}</label>
+        <ng-select [readonly]='(this.editData !== null)' [clearable]="false" [(ngModel)]="selectedOrg"
+          [ngModelOptions]="{standalone: true}" (change)="onChangeOrg($event)" placeholder="{{ 'organizations' | i18next }}">
+          <ng-option *ngFor="let org of orgLists" [value]="org.id">{{org.name}}</ng-option>
+        </ng-select>
+      </div>
+
+      <div *ngIf="show_org && !isEditClicked && showVendorDD" class="sidebarContent form-group">
+        <label>{{ 'select_vendors' | i18next }}<span class="require">*</span></label>
+        <ng-select
+          [clearable]="false"
+          [(ngModel)]="selectedVendor"
+          [ngModelOptions]="{standalone: true}"
+          (change)="onChangeVendor()"
+          placeholder="{{ 'select' | i18next }}"
+          (search)="searchVendor($event)"
+          [loading]="vendorListLoading"
+        >
+          <ng-option *ngFor="let vendor of (vendorLists | keysort:'name')" [value]="vendor.id">{{vendor.name}}</ng-option>
+        </ng-select>
+      </div>
+
+      <div *ngIf="type == 'org' && showProgram" class="form-group">
+        <label>{{'program' | i18next}}<span class="require">*</span></label>
+        <ng-select
+          [readonly]='(this.editData !== null)'
+          formControlName="program" [clearable]="false"
+          placeholder="{{'select'|i18next}}"
+          (change)="selectProgram($event)"
+          (search)="searchProgram($event)"
+          [loading]="programListLoading"
+        >
+          <ng-option *ngFor="let program of programs" [value]="program.program_id">{{program.name}}</ng-option>
+        </ng-select>
+        <span *ngIf="form.program.touched && form.program.errors?.required" class="error-text">{{ 'this_field_is_required' | i18next }}.</span>
+      </div>
+
+      <div *ngIf="type == 'program'" class="form-group">
+        <label>{{ 'select_user_to_add_to_program' | i18next }}<span class="require">*</span></label>
+        <ng-select
+          formControlName="user"
+          [readonly]='(this.editData !== null)'
+          [clearable]="false"
+          placeholder="{{ 'select' | i18next }}"
+          (search)="searchUsers($event)"
+          [loading]="usersLoading"
+        >
+          <ng-option *ngFor="let user of users" [value]="user.id">{{ user['first_name'] + ' ' + user['last_name'] }}
+          </ng-option>
+        </ng-select>
+        <span *ngIf="form.user.touched && form.user.errors?.required" class="error-text">{{ 'this_field_is_required' | i18next }}.</span>
+      </div>
+
+      <div class="form-group">
+        <label>{{ 'role' | i18next }}<span class="require">*</span></label>
+        <ng-select formControlName="user_role" [clearable]="true" placeholder="{{ 'select' | i18next }}" (search)="searchRoles($event)"
+          [loading]='userRoleLoading' loadingText='Loading....'>
+          <ng-option *ngFor="let role of roles" [value]="role.id">
+            {{ role.name }}
+          </ng-option>
+        </ng-select>
+        <span *ngIf="form.user_role.touched && form.user_role.errors?.required" class="error-text">
+          {{ 'this_field_is_required' | i18next }}.</span>
+        <span *ngIf="!form.user_role.touched && isRoleNotAvailable && editData?.id" class="error-text">
+            {{ editData?.role?.name +' Role is not available. Please choose different Role' }}.</span>
+
+      </div>
+
+      <!-- Hierarchy -->
+      <div class="mb-16" *ngIf="onAddOrgCategory === 'CLIENT' || onAddOrgCategory === 'MSP'">
+
+        <h3>{{'hierarchy'|i18next}}</h3>
+        <br/>
+
+        <div class="form-group d-flex align-items-center">
+          <toggle-button class="mr-16"
+            [checked]="isAllHierarchiesSelected"
+            (changed)="allHierarchyToggled($event)"
+          ></toggle-button>
+          <div class="mr-4"> {{ 'associate_to_all_hierarchies' | i18next }} </div>
+          <icon class="cursor-pointer" cuClass="d-flex" name="help" size="16px" color="#A3B0C0" textAlignment="left"
+            tooltip="When enabled, this user will be associated to all Hierarchies for the program.  Hierarchy association may impact visibility to transactions based on the user role assigned for this user."
+            placement="right"></icon>
+        </div>
+
+        <div *ngIf="!isAllHierarchiesSelected" class="form-group">
+          <div class="d-flex">
+            <label class="mr-4"> {{'associated_hierarchies'|i18next}} </label>
+            <icon class="cursor-pointer" cuClass="d-flex" name="help" size="16px" color="#A3B0C0" textAlignment="left"
+              tooltip="User can be associated to specific Hierarchy/Hierarchies. Hierarchy association may impact visibility to transactions based on the user role assigned for this user."
+              placement="right"></icon>
+          </div>
+          <ng-select [clearable]="true" [multiple]="true"
+            [(ngModel)]="selections" [ngModelOptions]="{ 'standalone': true }"
+            placeholder="{{'select' | i18next}}" [loading]='hierarchyLoading'
+            (search)="(hierarchySearchTerm = $event?.term)" (clickOutside)="(hierarchySearchTerm = '')"
+            (close)="(hierarchySearchTerm = '')" (clear)="allHierarchyToggled(false)">
+
+            <ng-template ng-multi-label-tmp="items">
+                <label [ngClass]="hierarchySearchTerm ?'d-none':''" class="holder">
+                    {{ (selections?.length || 0) + " option(s) selected"  | i18next}}
+                </label>
+            </ng-template>
+
+            <ng-option *ngFor="let hierarchy of hierarchyList" [value]="hierarchy?.id">
+                {{ hierarchy?.name | i18next }}
+            </ng-option>
+          </ng-select>
+
+          <div class="mt-8 d-flex flex-wrap align-items-center">
+            <div *ngFor='let id of selections || []' class="badge badge-light mb-12 rounded-sm mr-8">
+                <div class="px-8"> {{ (hierarchyMap.get(id) || 'Undefined') | i18next }} </div>
+                <icon class="cursor-pointer" cuClass="d-flex" name="cancel" color="#51C6D5" size="11px"
+                (click)="removeHierarchySelection(id)"></icon>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+          <div class="d-flex">
+            <label class="mr-4"> {{'default_hierarchy'|i18next}} </label>
+            <icon class="cursor-pointer" cuClass="d-flex" name="help" size="16px" color="#A3B0C0" textAlignment="left"
+              tooltip='The default value defined here will pre-populate the "Hierarchy" field while creating Jobs/Assignments.'
+              placement="right"></icon>
+          </div>
+          <ng-select [clearable]="true"
+            [(ngModel)]="defaultSelections" [ngModelOptions]="{ 'standalone': true }"
+            placeholder="{{'select' | i18next}}" [loading]='isAllHierarchiesSelected && hierarchyLoading'
+            (search)="isAllHierarchiesSelected && (hierarchySearchTerm = $event?.term)"
+            (clickOutside)="isAllHierarchiesSelected && (hierarchySearchTerm = '')"
+            (close)="isAllHierarchiesSelected && (hierarchySearchTerm = '')" >
+
+              <ng-option *ngFor="let hierarchy of defaultHierarchyList" [value]="hierarchy?.id">
+                {{ hierarchy?.name | i18next }}
+              </ng-option>
+          </ng-select>
+        </div>
+      </div>
+
+      <div *ngIf="onAddOrgCategory === 'CLIENT'">
+
+        <!-- Work Location -->
+        <h3>{{'work_location'|i18next}}</h3>
+        <br/>
+
+        <div class="form-group d-flex align-items-center">
+          <toggle-button class="mr-16"
+            [checked]="allWorkLocationsSelected"
+            (changed)="allWorkLocationToggled($event)"
+          ></toggle-button>
+          <div class="mr-4"> {{ 'associate_to_all_work_locations' | i18next }} </div>
+          <icon class="cursor-pointer" cuClass="d-flex" name="help" size="16px" color="#A3B0C0" textAlignment="left"
+            tooltip="When enabled, this user will be associated to all Work Location for the program. Work Location association may impact visibility to transactions based on the user role assigned for this user."
+            placement="right"></icon>
+        </div>
+
+        <div *ngIf="!allWorkLocationsSelected" class="form-group">
+          <div class="d-flex">
+            <label class="mr-4"> {{'associated_work_location(s)'|i18next}} </label>
+            <icon class="cursor-pointer" cuClass="d-flex" name="help" size="16px" color="#A3B0C0" textAlignment="left"
+              tooltip="User can be associated to specific Work Location/Work Locations. Work Location association may impact visibility to transactions based on the user role assigned for this user."
+              placement="right"></icon>
+          </div>
+          <ng-select formControlName="work_location" [clearable]="true"
+            (open)="searchWorkLocations({term: ''})" placeholder="{{'select' | i18next}}"
+            (search)="searchWorkLocations($event)" [loading]='workLoading'
+            (scrollToEnd)="showMoreLocations()" [multiple]="true"
+            (clear)="allWorkLocationToggled(false)">
+
+            <ng-template ng-multi-label-tmp="items">
+                <label [ngClass]="currentworkLocationTerm ?'d-none':''" class="holder">
+                    {{ (form?.work_location?.value?.length || 0) + " option(s) selected"  | i18next}}
+                </label>
+            </ng-template>
+
+            <ng-option *ngFor="let workLocation of workLocationList" [value]="workLocation?.id">
+                {{ workLocation?.name + ' ('+workLocation?.code+')' | i18next }}
+            </ng-option>
+          </ng-select>
+
+          <div class="mt-8 d-flex flex-wrap align-items-center">
+            <div *ngFor='let id of form?.work_location?.value || []' class="badge badge-light mb-12 rounded-sm mr-8">
+                <div class="px-8"> {{ (workLocationLabelMap.get(id) || 'Undefined') | i18next }} </div>
+                <icon class="cursor-pointer" cuClass="d-flex" name="cancel" color="#51C6D5" size="11px" (click)="removeWorkLocation(id)"></icon>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+          <div class="d-flex">
+            <label class="mr-4"> {{'default_work_location'|i18next}} </label>
+            <icon class="cursor-pointer" cuClass="d-flex" name="help" size="16px" color="#A3B0C0" textAlignment="left"
+              tooltip='The default value defined here will pre-populate the "Work Location" field while creating Jobs/Assignments.'
+              placement="right"></icon>
+          </div>
+          <ng-select [clearable]="true"
+            [(ngModel)]="defaultWorkLocation"
+            placeholder="{{'select' | i18next}}"
+            [ngModelOptions]="{ 'standalone': true }"
+            [loading]='allWorkLocationsSelected && workLoading'
+            (open)="allWorkLocationsSelected && searchWorkLocations({term: ''})"
+            (search)="allWorkLocationsSelected && searchWorkLocations($event)"
+            (scrollToEnd)="allWorkLocationsSelected && showMoreLocations()"
+          >
+            <ng-option *ngFor="let workLocation of defaultWorkLocationList" [value]="workLocation?.id">
+                {{ workLocation?.name + ' ('+workLocation?.code+')' | i18next }}
+            </ng-option>
+          </ng-select>
+        </div>
+
+        <!-- Master Data -->
+        <h3>{{'master_data'|i18next}}</h3>
+        <br />
+
+        <div *ngFor='let fdType of foundationalDataStore; index as it;'>
+          <!-- <div class="form-group-row" >
+            <div class="form-group">
+              <div class="form-group d-flex align-items-center">
+                <toggle-button class="mr-16"
+                  [checked]="foundationalDataStore[it]?.associate"
+                  (changed)="masterDataToggled($event,it)"
+                ></toggle-button>
+                <div class="mr-4"> Associate to all {{fdType?.name}} </div>
+                <icon class="cursor-pointer" cuClass="d-flex" name="help" size="16px" color="#A3B0C0" textAlignment="left"
+                  tooltip="When enabled, this user will be associated to all {{fdType?.name}} for the program. {{fdType?.name}} association may impact visibility to transactions based on the user role assigned for this user."
+                  placement="right"></icon>
+              </div>
+              <label *ngIf="!foundationalDataStore[it]?.associate" class="d-flex align-items-center">
+                <span class="mr-4">Associated {{ fdType?.name | i18next }}</span>
+                <icon class="cursor-pointer" cuClass="d-flex" name="help" size="16px" color="#A3B0C0" textAlignment="left"
+                tooltip='The default value defined here will pre-populate the "{{fdType?.name}}" field while creating Jobs/Assignments.'
+                placement="right"></icon>
+                </label>
+
+                <ng-select *ngIf="!foundationalDataStore[it]?.associate"
+                  placeholder="{{ 'select' | i18next }}"
+                  [formControl]='defaultDynamicForm.controls[it]'
+                  [clearable]="!foundationalDataStore[it]?.defaultMultiselect"
+                  [(ngModel)]='foundationalDataStore[it].defaultSelected'
+                  (open)='searchFoundationalStore(it, { term: null })'
+                  (change)='fetchDefaultFoundationalDataItem(it, $event)'
+                  [multiple]="foundationalDataStore[it]?.defaultMultiselect"
+                  (search)="searchFoundationalStore(it, $event)"
+                  [loading]="foundationalDataStore[it].loading"
+                  (clear)="this.foundationalDataStore[it].searchTerm = null;"
+                  (scrollToEnd)="showMore(foundationalDataStore[it]?.id?.toString(), foundationalDataStore[it]?.current_page, it)"
+                >
+
+                  <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+                    <div class="ng-value" *ngFor="let item of items | slice:0:2">
+                      <div class="ng-value-label">
+                        {{ getChipName(item) | i18next }}
+                        <icon class="pl-4 cursor-pointer" size="12px" name="cancel"
+                          color="#51C6D5" (click)="clearFoundationalData(it, item)" aria-hidden="true">
+                        </icon>
+                      </div>
+                    </div>
+                    <div class="ng-value" *ngIf="items.length > 2">
+                      <span class="ng-value-label">+{{items.length - 2}} {{'more'|i18next}}</span>
+                    </div>
+                  </ng-template>
+
+                  <ng-option *ngFor="let option of (fdType.options | keysort:'name' )" [value]="option.id">{{ option.name }}({{option?.code}})
+                  </ng-option>
+
+                </ng-select>
+                <span *ngIf="!foundationalDataStore[it]?.associate && !foundationalDataStore[it].defaultSelected" class="error-text">
+                  *Associated {{ fdType?.name | i18next }} Field is required</span>
+            </div>
+          </div> -->
+
+          <div class="form-group-row" >
+            <div class="form-group">
+              <label  class="d-flex align-items-center">
+                <span class="mr-4">Default {{ fdType?.name | i18next }} </span>
+                <icon class="cursor-pointer" cuClass="d-flex" name="help" size="16px" color="#A3B0C0" textAlignment="left"
+              tooltip='The default value defined here will pre-populate the "{{fdType?.name}}" field while creating Jobs/Assignments.'
+              placement="right"></icon>
+              </label>
+
+              <ng-select placeholder="{{ 'select' | i18next }}"
+                [formControl]='dynamicForm.controls[it]'
+                [clearable]="!foundationalDataStore[it]?.multiple"
+                [(ngModel)]='foundationalDataStore[it].selected'
+                (open)='searchFoundationalStore(it, { term: null })'
+                (change)='fetchFoundationalDataItem(it, $event)'
+                [multiple]="foundationalDataStore[it]?.multiple"
+                (search)="searchFoundationalStore(it, $event)"
+                [loading]="foundationalDataStore[it].loading"
+                (clear)="this.foundationalDataStore[it].searchTerm = null;"
+                (scrollToEnd)="showMore(foundationalDataStore[it]?.id?.toString(), foundationalDataStore[it]?.current_page, it)"
+              >
+
+                <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+                  <div class="ng-value" *ngFor="let item of items | slice:0:2">
+                    <div class="ng-value-label">
+                      {{ getChipName(item) | i18next }}
+                      <icon class="pl-4 cursor-pointer" size="12px" name="cancel"
+                        color="#51C6D5" (click)="clearFoundationalData(it, item)" aria-hidden="true">
+                      </icon>
+                    </div>
+                  </div>
+                  <div class="ng-value" *ngIf="items.length > 2">
+                    <span class="ng-value-label">+{{items.length - 2}} {{'more'|i18next}}</span>
+                  </div>
+                </ng-template>
+
+                <ng-option *ngFor="let option of (fdType.options | keysort:'name' )" [value]="option.id">{{ option.name }}({{option?.code}})
+                </ng-option>
+
+              </ng-select>
+
+            </div>
+          </div>
+
+        </div>
+
+        <h3>{{ 'financial_authority' | i18next }}</h3>
+        <div class="form-group-row">
+          <div class="toggle-panel" >
+            <div class="toggle-panel-inner toggle-background">
+              <!-- [ngClass]="_role?.is_enabled ? 'if-active' : 'if-inactive'"> -->
+              <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+                (click)="onClickToggle()"></span>
+              <span class="status-text">{{toggle?.title | i18next}}</span>
+            </div>
+          </div>
+          <div class="margin-left">
+            <label>{{ 'min_limit' | i18next }}</label>
+            <div class="d-flex position-relative">
+              <icon class="icon-bg d-flex" size="16px" name="attach_money"
+                  type="material"></icon>
+              <input type="number" step=".01" onchange="(function(el){el.value=parseFloat(el.value).toFixed(2);})(this)" [(ngModel)]="min_financial_limit"  [ngModelOptions]="{standalone: true}"  class="form-control remove-radius" placeholder="0.00" [disabled]="toggle?.value">
+            </div>
+          </div>
+          <div class="margin-left">
+            <label>{{ 'max_limit' | i18next }}</label>
+            <div class="d-flex position-relative">
+              <icon class="icon-bg d-flex" size="16px" name="attach_money"
+                  type="material"></icon>
+              <input type="number" step=".01" onchange="(function(el){el.value=parseFloat(el.value).toFixed(2);})(this)" [(ngModel)]="max_financial_limit"  [ngModelOptions]="{standalone: true}" class="form-control remove-radius" placeholder="0.00" [disabled]="toggle?.value">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <app-custom-fields *ngIf="isCFallowed" [queryParameters]="{ 'org_category': onAddOrgCategory }"
+        (isCustomFieldsFormValid)="customFieldsFormValid = $event" moduleName="PROGRAM_USERS"
+        [custom_fields]="receivedCFs" showLabel="true" [isCreate]="!this.editData?.id"
+        (customFieldUpdated)="this.customFieldSelections = $event"
+      ></app-custom-fields>
+
+    </svms-sidebar-body>
+    <svms-sidebar-footer>
+      <div class="d-flex justify-content-end">
+        <button type="submit" *accessControl class="fs-14 font-weight-normal btn btn-primary"
+          [disabled]="!(AddtoProgramForm.valid && (AddtoProgramForm.controls.program.value || AddtoProgramForm.controls.user.value) )">
+          <span class="material-icons fs-16 mr-8">check_circle</span>
+          {{ submit_name | i18next }}
+        </button>
+      </div>
+    </svms-sidebar-footer>
+  </form>
+</svms-sidebar>

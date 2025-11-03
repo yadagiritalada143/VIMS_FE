@@ -1,0 +1,317 @@
+<div class="create-new-hierarchy">
+    <header class="section-header page-title-main p-24 d-flex align-items-center justify-content-between">
+        <div class="page-title font-weight-semibold d-flex align-items-center" I18n>
+            <a href="javascript:void(0)" (click)="goBack()"><i class="material-icons back-arrow-icon mr-16" tooltip="{{'back' | i18next}}" placement="bottom">arrow_back</i></a>
+            {{ pageTitle }}
+        </div>
+        <!-- <app-logs [log]="logs"></app-logs> -->
+        <div>
+            <button class="c-btn c-btn-success-medium d-none">{{ 'action' | i18next }}</button>
+            <button *accessControl class="c-btn c-btn-success-medium" (click)="createHierarchy()" [ngClass]="{'disabled':!isValid()}">{{ (isEdit?'Update':'Save') | i18nextEager }}</button>
+        </div>
+    </header>
+    <section class="section-body-content">
+        <div class="row no-gutters program-details-mobile">
+            <div class="col-12">
+                <div class="invoice-config p-24">
+
+                    <div *ngIf="!isParent" class="c-form-group-row invoice-form d-flex justify-content-between">
+                        <div class="c-form-group invoice-c-dropdown">
+                            <label>{{ 'parent_hierarchy' | i18next }}<span class="require">*</span></label>
+                            <ng-select  [multiple]="false" [readonly]="'true'"
+                                placeholder="{{'select' | i18next}}" [clearable]="false" [(ngModel)]="selectedParentHierarchy"
+                                (change)="changeParent($event)" [items]="hierarchyListData"
+                                bindLabel="name" bindValue="id">
+                                <!-- *ngIf="!isParent" -->
+                            </ng-select>
+                        </div>
+                    </div>
+
+                    <div class="c-form-group-row invoice-form d-flex justify-content-between">
+                        <div class="c-form-group invoice-c-input">
+                            <label>{{ 'hierarchy_name' | i18next }}<span class="require">*</span></label>
+                            <input type="text" class="c-form-control" [placeholder]="'enter_name'|i18next" [(ngModel)]="hierarchyName" #hName="ngModel">
+                            <p class="validation-msg"
+                                *ngIf="(hName.control.value == '' || !hName.control.value) && hName.control.touched">
+                                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                                {{ 'hierarchy_name_is_required' | i18next }}.
+                            </p>
+                        </div>
+                        <!-- <div class="c-form-group">
+                            <div class="c-form-group-row"> -->
+                                <div *ngIf="isParent"
+                                    class="c-form-group toggle-width toggle-hide-width  toggle-panel active-inactive-toggle mt-24 d-flex justify-content-between">
+                                    <div class="toggle-panel-inner"
+                                        [ngClass]="is_hidden ? 'if-active' : 'if-inactive'">
+                                        <span class="is_active-text">{{ 'hide_root_hierarchy' | i18next }}</span>
+                                        <span class="toggle-switch" [ngClass]="is_hidden ? 'toggle-on' : 'toggle-off'"
+                                            (click)="changeStatus('is_hidden')"></span>
+                                    </div>
+                                </div>
+                                <div
+                                    class="c-form-group toggle-width toggle-panel active-inactive-toggle mt-24 d-flex justify-content-between">
+                                    <div class="toggle-panel-inner"
+                                        [ngClass]="statusToggle ? 'if-active' : 'if-inactive'">
+                                        <span class="is_active-text">{{(statusToggle ? 'active' : 'inactive') | i18nextEager}}</span>
+                                        <span class="toggle-switch" [ngClass]="statusToggle ? 'toggle-on' : 'toggle-off'"
+                                            (click)="changeStatus('statusToggle')"></span>
+                                    </div>
+                                </div>
+                            <!-- </div>
+                        </div> -->
+                    </div>
+
+                    <div *ngIf="!hide()">
+                        <div class="mb-24" *ngIf="!isEdit">
+                            <app-toggle-box title="Same as Parent" (isToggleBtnChecked)="sameAsParentToggle($event)"
+                                subtitle="When enabled, Parent Hierarchy data will be Pre-filled">
+                            </app-toggle-box>
+                        </div>
+                    </div>
+
+                    <div class="c-form-group-row invoice-form d-flex justify-content-between">
+                        <div class="c-form-group invoice-c-input">
+                            <label>{{ 'code' | i18next }}<span class="require">*</span></label>
+                            <input type="text" class="c-form-control" [placeholder]="'Enter Code'|i18next" 
+                                [(ngModel)]="hierarchyCode" #hCode="ngModel" 
+                                [minlength]="4" [mandatePattern]="codePattern"
+                            >
+                            <p class="validation-msg" *ngIf="hierarchyValidationError(hCode?.control)">
+                                <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                                {{ hierarchyValidationError(hCode?.control) | i18nextEager }}.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="Hierarchy-field">
+                        <div class="d-flex">
+                            <p class="large mb-16">{{'localization' | i18next}}</p>
+                            <div *ngIf="!hide()">
+                                <div *ngIf="!isEdit" class="d-flex ml-12 pt-4">
+                                    <label [ngClass]="{'disabled': !hierarchies}" class="c-input-checkbox">
+                                        <input class="mr-8" [checked]="localizationSameAsparent" type="checkbox" value="localizationSameAsparent" (change)="sameAsParentToggleLevel('localization')">
+                                        <span class="cb-ui"></span>
+                                        <span class="cb-label">{{ 'same_as_parent' | i18next }}</span>
+                                    </label>
+                                    <i placement="right" class="tooltip-icon material-icons" tooltip="{{'when_enabled_system_pre_fills_the_localization_data_such_as_default_date_format_time_zone_if_defined_for_parent_hierarchy' | i18next}}">help</i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="c-form-group-row">
+                            <div *ngIf="!hide()" class="c-form-group">
+                                <label>{{ 'language_(default)' | i18next }} <span class="require">*</span></label>
+                                <ng-select [clearable]="false" placeholder="{{ 'select' | i18next }}" [readonly]="localizationSameAsparent"
+                                    [(ngModel)]="preferred_language" #prefLang="ngModel">
+                                    <ng-option *ngFor="let lang of languages" [value]="lang.key">{{lang.value}}</ng-option>
+                                </ng-select>
+                                <p class="validation-msg"
+                                    *ngIf="(prefLang.control.value == '' || !prefLang.control.value) && prefLang.control.touched">
+                                    <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                                    {{ 'language_is_required' | i18next }}.
+                                </p>
+                            </div>
+                            <div *ngIf="!hide()" class="c-form-group">
+                                <label>{{ 'currency_(default)' | i18next }} <span class="require">*</span></label>
+                                <ng-select [clearable]="false" placeholder="{{ 'select' | i18next }}" (change)="selectCurrency($event)" [readonly]="localizationSameAsparent"
+                                    [(ngModel)]="preferred_currency" #prefCurr="ngModel">
+                                    <ng-option *ngFor="let cur of currencyList" [value]="cur">{{cur}}</ng-option>
+                                </ng-select>
+                                <p class="validation-msg"
+                                    *ngIf="(prefCurr.control.value == '' || !prefCurr.control.value) && prefCurr.control.touched">
+                                    <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                                    {{ 'currency_is_required' | i18next }}.
+                                </p>
+                            </div>
+                            <div class="c-form-group">
+                                <label>{{ 'date_format_(default)' | i18next }} <span class="require">*</span></label>
+                                <ng-select placeholder="Select" [(ngModel)]="preferred_date_format" #prefDateFormat="ngModel" [searchable]="false">
+                                    <ng-option *ngFor="let format of dateFormats" [value]="format">{{format}}</ng-option>
+                                </ng-select>
+                                <p class="validation-msg"
+                                    *ngIf="(prefDateFormat.control.value == '' || !prefDateFormat.control.value) && prefDateFormat.control.touched">
+                                    <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+                                    {{ 'date_format_is_required' | i18next }}.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="Hierarchy-field">
+                        <div class="d-flex">
+                            <p class="large mb-16">{{'preferences' | i18next}}</p>
+                            <div *ngIf="!hide()">
+                                <div *ngIf="!isEdit" class="d-flex ml-12 pt-4">
+                                    <label [ngClass]="{'disabled': !hierarchies}" class="c-input-checkbox">
+                                        <input class="mr-8" [checked]="preferencesSameAsparent" type="checkbox" value="preferencesSameAsparent" (change)="sameAsParentToggleLevel('preferences')">
+                                        <span class="cb-ui"></span>
+                                        <span class="cb-label">{{ 'same_as_parent' | i18next }}</span>
+                                    </label>
+                                    <i placement="right" class="tooltip-icon material-icons" tooltip="{{'when_enabled_system_pre_fills_the_rate_model_if_defined_for_parent_hierarchy' | i18next}}">help</i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="c-form-group-row invoice-form d-flex justify-content-between">
+                            <div *ngIf="!hide()" class="c-form-group invoice-c-dropdown">
+                                <label>{{ 'workflow' | i18next }}<span class="require">*</span></label>
+                                <ng-select [clearable]="false" placeholder="{{ 'select' | i18next}}" [(ngModel)]="workflow" [readonly]="preferencesSameAsparent">
+                                    <ng-option>{{ 'standard' | i18next}}</ng-option>
+                                </ng-select>
+                            </div>
+                            <div class="c-form-group" [ngClass]="{'disabled': preferencesSameAsparent}">
+                                <label>{{ 'rate_model' | i18next }}</label>
+                                <div class="d-flex mb-24">
+                                    <div class="d-flex align-items-center mr-24">
+                                        <div>
+                                            <label class="mb-0 c-input-radio">
+                                                <input class="mr-8" type="radio" name="ratemodel" value="BILL_RATE" [(ngModel)]="ratemodel">
+                                                <span class="cb-ui"></span>
+                                                <span class="cb-label">{{ 'bill_rate_(no_markup)' | i18next }}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center mr-24">
+                                        <div>
+                                            <label class="mb-0 c-input-radio">
+                                                <input class="mr-8" type="radio" name="ratemodel" value="MARKUP" [(ngModel)]="ratemodel">
+                                                <span class="cb-ui"></span>
+                                                <span class="cb-label">{{ 'bill_rate_(markup)' | i18next }}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center mr-24">
+                                        <div>
+                                            <label class="mb-0 c-input-radio">
+                                                <input class="mr-8" type="radio" name="ratemodel" value="PAY_RATE" [(ngModel)]="ratemodel">
+                                                <span class="cb-ui"></span>
+                                                <span class="cb-label">{{ 'pay_rate_(markup)' | i18next }}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div *ngIf="!hide()">
+                        <div class="mb-24" *ngIf="!isParent">
+                            <app-toggle-box title="Enforce Rate Card" [isTrue]="enforceRateCard" (isToggleBtnChecked)="enforceRateCardToggle($event)"
+                                subtitle="Enabling this toggle will Enforce a Rate Card for this Hierarchy">
+                            </app-toggle-box>
+                        </div>
+                    </div>
+
+
+                    <div *ngIf="!hide()" class="c-form-group-row" [ngClass]="{'disabled': preferencesSameAsparent}">
+                        <div class="c-form-group">
+                            <label class="mb-16">{{ 'timesheet_type' | i18next }} <a href="javascript:void(0)" (click)="selectAllTimesheet()">( {{ 'select_all' | i18next }} )</a><span class="require">*</span></label>
+                            <div class="d-flex">
+                                <div *ngFor="let timesheet of timesheetType">
+                                    <div class="mr-24">
+                                        <label class="c-input-checkbox">
+                                            <input [checked]="selectedTimesheet?.includes(timesheet?.id)" class="mr-8" type="checkbox" value="timesheet?.id" (change)="timesheetSelection(timesheet?.id)">
+                                            <span class="cb-ui"></span>
+                                            <span class="cb-label">{{timesheet?.label}}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div *ngIf="!hide()" class="Hierarchy-field">
+                        <div class="d-flex">
+                            <p class="large mb-16">{{ 'master_data' | i18next}}</p>
+                            <div *ngIf="!hide()">
+                                <div *ngIf="!isEdit" class="d-flex ml-12 pt-4">
+                                    <label [ngClass]="{'disabled': !hierarchies}" class="c-input-checkbox">
+                                        <input class="mr-8" [checked]="masterDataSameAsparent" type="checkbox" value="masterDataSameAsparent" (change)="sameAsParentToggleLevel('master_data')">
+                                        <span class="cb-ui"></span>
+                                        <span class="cb-label">{{ 'same_as_parent' | i18next }}</span>
+                                    </label>
+                                    <i placement="right" class="tooltip-icon material-icons" tooltip="{{'when_enabled_system_pre_fills_the_master_data_if_defined_for_parent_hierarchy' | i18next}}">help</i>
+                                </div>
+                            </div>
+                        </div>
+                        <form *ngIf="listOfFundationalDataType?.length" [formGroup]="foundDataTypeFG">
+                            <div class="c-form-group-row" *ngFor="let control of listOfFundationalDataType">
+                              <div class="c-form-group invoice-c-dropdown" *ngIf="control?.configuration?.hierarchy_included !=='OFF'">
+                                <label>{{ control?.name }}<span *ngIf="control?.configuration?.hierarchy_included=='REQUIRED'"
+                                    class="require">*</span>
+                                  <span *ngIf="control?.configuration?.hierarchy_included =='OPTIONAL'" class="require"></span>
+                                </label>
+
+                                <ng-select bindLabel="{{control?.id}}" [readonly]="masterDataSameAsparent" [multiple]="true"
+                                  [labelForId]="control?.id" [clearable]="false"
+                                  [(ngModel)]="selectedFoundationalDataTypeIds[control?.id]" placeholder="{{ 'choose_master_data' | i18next }}"
+                                  ngDefaultControl formControlName="{{control?.name}}" (keyup)='searchingFoundationalTypeId = control?.id'
+                                  loadingText="{{ 'loading' | i18next }}" [typeahead]="foundationalInput" [loading]="loader[control?.id]"
+                                  (input)="changeInput($event,control?.id)" (click)="getAllFoundationalData(control?.id)">
+                                  <ng-container *ngIf="getfoundationalTypeItems?.length">
+                                    <ng-option [value]="data.id" *ngFor="let data of getfoundationalTypeItems(control?.id)">
+                                      {{data.name}}
+                                    </ng-option>
+                                  </ng-container>
+                                </ng-select>
+                              </div>
+                            </div>
+                        </form>
+                        <p class="validation-msg" *ngIf="!this.listOfFundationalDataType?.length">
+                            {{ 'no_master_data_available_for_the_program' | i18next }}.
+                        </p>
+                    </div>
+
+                    <div *ngIf="!hide()" class="Hierarchy-field">
+                        <p class="large mb-16">{{ 'address' | i18next }}</p>
+                        <div class="c-form-group-row">
+                            <div class="c-form-group">
+                                <app-contact-card subtitle="Primary Address" [countryList]="allCountryList" [selectedCountry]="primaryCountry" (emitSelectedCountry)="primaryCountryChange($event)"
+                                    description="Provide Your Primary Address For mailing and Other Purposes" [address]="primaryAddress" (emitAddress)="primaryAddressChange($event)" [readonly]="sameAsParent"
+                                    CountrySelectBox="true" textArea="true">
+                                </app-contact-card>
+                            </div>
+                            <div class="c-form-group">
+                                <app-contact-card subtitle="Secondary Address" [countryList]="allCountryList" [selectedCountry]="secondaryCountry" (emitSelectedCountry)="secondaryCountryChange($event)"
+                                    description="Provide Your Secondary Address For mailing and Other Purposes" [address]="secondaryAddress" (emitAddress)="secondaryAddressChange($event)" [readonly]="sameAsParent"
+                                    CountrySelectBox="true" textArea="true">
+                                </app-contact-card>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div *ngIf="!hide()" class="Hierarchy-field">
+                        <p class="large mb-16">{{'contact' | i18next}}</p>
+                        <div class="c-form-group-row">
+                            <div class="c-form-group">
+                                <app-contact-card subtitle="Primary Contact"
+                                    description="Provide Your Primary Contact Details" [countryList]="allCountryList" [selectedCountry]="primaryCountry" [readonly]="sameAsParent"
+                                    contactPersonInput="true" DesignationInput="true" PhoneNumberInput="true" [contactDetails]="primaryContactDetails" (emitContactDetails)="primaryContactDetailsChange($event)"
+                                    EmailInput="true"></app-contact-card>
+                            </div>
+                            <div class="c-form-group">
+                                <app-contact-card subtitle="Secondary Contact"
+                                    description="Provide Your Secondary Contact Details" [countryList]="allCountryList" [selectedCountry]="secondaryCountry" [readonly]="sameAsParent"
+                                    contactPersonInput="true" DesignationInput="true" PhoneNumberInput="true" [contactDetails]="secondaryContactDetails" (emitContactDetails)="secondaryContactDetailsChange($event)"
+                                    EmailInput="true">
+                                </app-contact-card>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="w-100">
+                        <app-custom-fields
+                          (isCustomFieldsFormValid)="isCFValid = $event" 
+                          moduleName="HIERARCHY" showLabel="true" 
+                          [isCreate]="!isEdit" 
+                          (customFieldUpdated)="updatedCFs = $event"
+                          [custom_fields]="recievedCFs"
+                        ></app-custom-fields>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

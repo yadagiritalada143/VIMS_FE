@@ -1,0 +1,30 @@
+<div class="card bg-light mb-24 mb-m-0 seperation-border-m master-data-card" *ngIf="isMdtAllow">
+    <div class="t-master-data py-16 px-24 px-m-16">
+        <p class="small d-flex align-items-center" (click)="collapseMD()">
+            <icon class="navigate-next mr-8" cuClass="d-flex" [name]="status ? 'navigate_next' : 'expand_more'" size="16px"></icon>
+            MASTER DATA
+        </p>
+        <div class="t-master-data-content" [ngClass]="status ? 'd-none' : 'd-block'">
+            <div class="row">
+            <div class="col-md-2 Msterdata-col my-16" *ngFor = "let masterMain of masterData;index as i">
+                <span>
+                    {{ masterMain?.name }}
+                </span>
+                <div class="multilabel d-flex align-items-center align-items-start-m column-direction">
+                    <label class="font-weight-bold-500 mr-4 mt-4">{{ masterMain?.values?.length > 0 ? (masterMain?.values[0]?.name + ' - ' + masterMain?.values[0]?.code) || '--' : '--' }}</label>
+                    <div *ngIf="masterMain?.values?.length > 1" class="collapsePanel d-flex align-items-center">
+                        <a  href="javascript:void(0)" class="font-weight-bold-500 mt-4" (click)="dropdownToggle(i)">+{{ masterMain?.values?.length - 1 }} more</a> 
+                        <div class="more-label" (mouseleave)="leave($event)" [ngClass]="toggleMenu[i] ? 'd-none' : 'd-block'">
+                            <label class="dropdown-title-bg-color p-8">{{ masterMain?.name }}</label>
+                            <hr>
+                            <label class="p-8" *ngFor = "let masterValue of masterMain?.values;index as j">
+                                <span *ngIf = " j != 0">{{ masterValue?.name + ' - ' + masterValue?.code || '--' }}</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>

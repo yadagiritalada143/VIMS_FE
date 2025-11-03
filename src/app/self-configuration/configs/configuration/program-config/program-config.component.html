@@ -1,0 +1,24 @@
+<div class="program-config-page">
+  <header class="section-header p-24 d-flex align-items-center justify-content-between">
+    <div class="d-flex">
+        <h3 class="font-weight-semibold mb-0">{{ 'program_configuration' | i18next }}</h3>
+    </div>
+    <div>
+      <button *ngIf="hasUpdatePermission && !(!readOnly && !saveAccess)"
+        class="c-btn"
+        (click)="toggleMode()" [ngClass]="readOnly? 'c-btn-secondary-medium-left-icon':'c-btn-success-medium'">
+        <i class="material-icons" *ngIf="readOnly">drive_file_rename_outline</i> {{ (readOnly?'Edit':'Save') | i18next }}
+      </button>
+    </div>
+  </header>
+  <section class="section-body-content">
+    <vms-tab-group class="pc-tab-group" [ngClass]="readOnly?'disabled': ''"
+      (onSelectedIndexChange)="setCurrentTab($event)">
+      <ng-container *ngFor="let configuration of programConfiguration">
+        <vms-tab [label]="configuration.tabName" [iconLeft]="configuration.tabIcon" [active]="configuration?.tabActive">
+          <ng-template [loadComp]="configuration.tabComponent" [data]="configuration?.config"> </ng-template>
+        </vms-tab>
+      </ng-container>
+    </vms-tab-group>
+  </section>
+</div>

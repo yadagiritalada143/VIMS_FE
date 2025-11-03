@@ -1,0 +1,69 @@
+<svms-sidebar-ng [title]="panelHeading |i18next" [dataVisibility]="addCertificate" (onClose)="sidebarClose()">
+  <div class="sidebar-wrapper">
+    <app-logs [log]="logs"></app-logs>
+    <form [formGroup]="addCertificateForm">
+      <div class="p-24">
+        <div class="form-group">
+          <label>{{ 'select_certification' | i18nextEager }} <span class="require">*</span></label>
+          <ng-select  [loading] = 'certificateLoading' loadingText = 'Loading....' [clearable]="false" placeholder="{{ 'select' | i18nextEager }}" [typeahead]="input$" formControlName="type">
+            <ng-option [value]="type.id" *ngFor="let type of certificationTypeList">{{type.name}}</ng-option>
+          </ng-select>
+          <p class="validation-msg"
+            *ngIf="(addCertificateForm.controls.type.touched && addCertificateForm.controls['type'].errors)">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'certification_type_is_required' | i18nextEager }}
+          </p>
+        </div>
+        <div class="form-group">
+          <label>{{ 'certification_authority' | i18nextEager }} <span class="require">*</span></label>
+          <input type="text" class="form-control" placeholder="{{ 'enter_details' | i18nextEager }}" formControlName="authority">
+          <p class="validation-msg"
+            *ngIf="(addCertificateForm.controls.authority.touched && addCertificateForm.controls['authority'].errors)">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'certification_authority_is_required' | i18nextEager }}
+          </p>
+        </div>
+        <div class="form-group-row">
+          <div class="form-group position-relative date-field">
+            <label>{{'initial_certification_date' | i18nextEager}} <span class="require">*</span></label>
+            <svms-datepicker   [inputdateFormat]="defaultDateFormat" [placeholder]="'select_date'|i18next" ngDefaultControl
+              formControlName="initialDate" I18n #initialDate>
+            </svms-datepicker>
+          </div>
+          <div class="form-group position-relative date-field">
+            <label>{{'re-certification_date' | i18nextEager}}</label>
+            <svms-datepicker [inputdateFormat]="defaultDateFormat" [options]="re_certification_options" [placeholder]="'select_date'|i18next" ngDefaultControl
+              formControlName="reCertificationDate" #recertiDate>
+            </svms-datepicker>
+          </div>
+          <div class="form-group position-relative rev-date date-field">
+            <label>{{'certification_expiration_date' | i18nextEager}}</label>
+            <svms-datepicker [inputdateFormat]="defaultDateFormat" [options]="expiration_options"  [placeholder]="'select_date'|i18next" ngDefaultControl
+              formControlName="expiryDate" I18n #expiryDate>
+            </svms-datepicker>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{{ 'certification_id' | i18nextEager }}</label>
+          <input type="text" class="form-control" placeholder="{{ 'enter_certification_id' | i18nextEager }}" formControlName="id">
+        </div>
+        <div class="form-group">
+          <label>{{ 'notes' | i18nextEager }}</label>
+          <textarea class="form-control notes" rows="4" formControlName="notes" placeholder="{{ 'enter_notes' | i18nextEager }}"></textarea>
+        </div>
+
+
+        <app-upload-documents  uploadLabel="{{ 'upload_certification_documents' | i18nextEager }}" (oldUploadDataFiles)= "updateoldFiles($event)" (uploadDataFiles)="uploadFiles($event)"
+          [closePanel]="closePanel" [newUploadfileArr]="newUploadfileArr" [oldUploadfileArr]="oldUploadfileArr"></app-upload-documents>
+      </div>
+    </form>
+  </div>
+  <svms-sidebar-footer-ng>
+    <button type="submit" class="btn btn-primary float-right" (click)="saveCertification('save')">
+      {{btnText| i18nextEager}}
+    </button>
+    <button type="submit" class="btn btn-outine float-right mr-16" (click)="saveCertification('saveThenAdd')">
+      {{ 'add_new' | i18nextEager }}
+    </button>
+  </svms-sidebar-footer-ng>
+</svms-sidebar-ng>

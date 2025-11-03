@@ -1,0 +1,44 @@
+
+<ng-template #locationStatus let-value="value">
+  <span class="c-status-ui active" *ngIf="value">
+    {{ 'active' | i18next }}
+  </span>
+  <span class="c-status-ui inactive" *ngIf="!value">
+    {{ 'inactive' | i18next }}
+  </span>
+</ng-template>
+
+<app-svms-table [tableOptions]="tableOptions"
+                [coloumnDefintions]="svmstableColomnDefn"
+                [dataSource]="svmsData"></app-svms-table>
+
+<ng-template #emptyDataTemplate>
+  <app-no-listing-page
+    clickHere="click here"
+    btnClickUrl="WORK_LOCATION_CREATE"
+    btnmsg="Create Your First Work Location"
+    pmsg="If you would like to add Work Location,"
+    headingmsg="No Work Location found for the selected program."
+    (onCreateClick)="onCreateClick($event)"
+    #emptyDataTemplate
+  >
+  </app-no-listing-page>
+</ng-template>
+
+<app-no-listing-page
+  *ngIf="false"
+  clickHere="click here"
+  title="Work Locations"
+  btnClickUrl="WORK_LOCATION_CREATE"
+  btnmsg="Create Your First Work Location"
+  pmsg="If you would like to add Work Location,"
+  headingmsg="No Work Location found for the selected program."
+  (onCreateClick)="onCreateClick($event)"
+>
+</app-no-listing-page>
+
+<app-create-work-location
+    [(visible)]="sidepanelVisibility"
+    (onSaveWorkLocation)="refreshListing()">
+</app-create-work-location>
+

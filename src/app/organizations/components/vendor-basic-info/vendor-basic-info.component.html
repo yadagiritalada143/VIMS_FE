@@ -1,0 +1,49 @@
+<form [formGroup]="vendorCreate">
+  <div class="Upload_box_wrapper column-direction">
+    <svms-upload-avatar [image]="vendorCreate?.controls?.logo?.value" [ngClass]="{disable:isViewClicked}" (hideError)="getCropImage($event)"></svms-upload-avatar>
+    <div class="upload-panel-body">
+      <h5 *ngIf="!logoComponent?.logoUrl || !isImagePresent">{{ 'vendor_logo' | i18next }}</h5>
+      <div *ngIf="(!logoComponent?.logoUrl || !isImagePresent) && !isViewClicked" class="error-text">{{ 'only' | i18next }} .{{ 'png' | i18next }}, .{{ 'jpg' | i18next }} {{ 'formats_with_file_size' | i18next }} 3 {{ 'mb' | i18next }}</div>
+    </div>
+
+    <div class="toggle-panel" [ngClass]="{disable:isViewClicked}">
+      <div class="toggle-panel-inner" [ngClass]="toggle?.value ? 'if-active' : 'if-inactive'">
+        <span class="status-text">{{toggle?.title | i18next}}</span>
+        <span class="toggle-switch" [ngClass]="toggle?.value ? 'toggle-on' : 'toggle-off'"
+          (click)="onClickToggle()"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>{{ 'organization_name' | i18next }}<span class="require">*</span></label>
+    <input type="text" class="form-control" placeholder="{{ 'vendor_name' | i18next }}" formControlName="org_name" required [readonly]="isViewClicked" [ngClass]="{'error':
+    vendorCreate.controls['org_name'].invalid && (vendorCreate.controls['org_name'].dirty || vendorCreate.controls['org_name'].touched),'disable':isViewClicked
+      }" minlength="2">
+    <p class="validation-msg"
+      *ngIf="vendorCreate.controls.org_name.touched && vendorCreate.controls['org_name'].invalid && vendorCreate.controls['org_name'].errors?.required">
+      <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'vendor_name_is_required' | i18next }}
+    </p>
+    <p class="validation-msg" *ngIf="vendorCreate.controls.org_name.errors?.minlength">
+      {{ 'vendor_name_must_be_at_least' | i18next }} 2 {{ 'characters_long' | i18next }}.
+    </p>
+    <p class="validation-msg"  *ngIf="!isNameValid">{{duplicateOrg}}</p>
+  </div>
+
+  <div class="form-group">
+    <label>{{ 'organization_type' | i18next }} <span class="require">*</span></label>
+    <input type="text" class="form-control" placeholder="{{ 'vendor' | i18next }}" formControlName="org_type" readonly>
+  </div>
+
+  <div class="form-group">
+    <label>{{ 'vendor_industry' | i18next }} <span class="require">*</span></label>
+    <ng-select bindLabel="name" [class.hide-arrow]="isViewClicked" [clearable]="false" [multiple]=" true" placeholder="{{ 'vendor_industry' | i18next }}" ngDefaultControl
+      formControlName="vendor_industry" [readonly]="isViewClicked">
+      <ng-option [value]="data.id" *ngFor="let data of vendorIndustries">{{data.name}}</ng-option>
+    </ng-select>
+    <p class="validation-msg"
+      *ngIf="vendorCreate.controls.vendor_industry.touched && vendorCreate.controls['vendor_industry'].errors">
+      <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon> {{ 'vendor_industry_is_required' | i18next }}
+    </p>
+  </div>
+</form>

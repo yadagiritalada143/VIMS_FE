@@ -1,0 +1,115 @@
+<svms-sidebar title="{{title + 'questionnaire' | i18next}}" [dataVisibility]="cretequestionnaire" (onClose)="sidebarClose()">
+    <form [formGroup]="createQuestionnaireForm">
+        <svms-sidebar-body>
+            <div class="py-24">
+                <div class="px-24">
+                    <div class="form-group">
+                        <label>{{ 'title' | i18next }} <span class="require">*</span></label>
+                        <input type="text" placeholder="{{ 'field_label' | i18next }}" class="form-control" formControlName="title"
+                            [ngClass]="{ 'error': submitted && createQuestionnaire.title.errors,'disabled': visibility == 'view' }">
+                        <div *ngIf="submitted && createQuestionnaire.title.errors" class="invalid-feedback  mt-8">
+                            <div *ngIf="createQuestionnaire.title.errors.required">{{ 'title_is_required' | i18next }}</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>{{ 'description' | i18next }}</label>
+                        <textarea formControlName="description"
+                            [ngClass]="{ 'error': submitted && createQuestionnaire.description.errors,'disabled': visibility == 'view' }"
+                            class="form-control" rows="4" placeholder="{{ 'field_description' | i18next }}"></textarea>
+                        <div *ngIf="submitted && createQuestionnaire.description.errors" class="invalid-feedback  mt-8">
+                            <div *ngIf="createQuestionnaire.description.errors.required">{{ 'description_is_required' | i18next }}</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- add first table here -->
+
+                <div *ngIf="isContinue" class="pb-24">
+                    <div class="px-24">
+                        <div class="form-group">
+                            <label>{{ 'select_questions' | i18next }} <span class="require">*</span></label>
+                        </div>
+                    </div>
+                    <table *ngIf="questionnairesList && questionnairesList?.length > 0" class="questionnaire-table">
+                        <thead>
+                            <tr>
+                                <th>{{ 'title' | i18next }}</th>
+                                <th>{{ 'question_type' | i18next }}</th>
+                                <th>{{ 'add_to_questionnaire' | i18next }}</th>
+                            </tr>
+                        </thead>
+                        <tbody [ngClass]="{'disabled': visibility == 'view' }">
+                            <tr *ngFor="let allQuestion of questionnairesList; let i = item">
+                                <td>{{allQuestion?.label}}</td>
+                                <td>{{allQuestion?.question_type}}</td>
+                                <td width="25%">
+                                    <div class="checkbox-wrapper d-inline-block">
+                                        <label class="checkbox-container">
+                                            <input type="checkbox" (change)="selectQuestion($event,allQuestion)"
+                                                [checked]="allQuestion.isAdded" name="isAdded">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- end first table here -->
+                <table *ngIf="!isContinue" class="questionnaire-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>{{ 'label' | i18next }}</th>
+                            <th>{{ 'question_type' | i18next }}</th>
+                            <th>{{ 'required' | i18next }}</th>
+                            <th>{{ 'updated_date' | i18next }}</th>
+                            <th>{{ 'status' | i18next }}</th>
+                        </tr>
+                    </thead>
+                    <tbody dndDropzone dndEffectAllowed="copyMove" (dndDrop)="onDrop($event)">
+                        <tr dndPlaceholderRef class="dndPlaceholder"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr *ngFor="let allQuestion of selectedQues, let i = index"
+                            [dndDraggable]="allQuestion" (dndStart)="onDragStart(i)">
+                            <td class="move">
+                                <icon name="menu" size="20px"></icon>
+                            </td>
+                            <td>{{allQuestion?.label}}</td>
+                            <td>{{allQuestion?.question_type}}</td>
+                            <td>
+                                <div class="checkbox-wrapper d-inline-block disabled">
+                                    <label class="checkbox-container">
+                                        <input [checked]="allQuestion?.isAdded" type="checkbox" name="isAdded">
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                            </td>
+                            <td>{{allQuestion?.modified_on | localDateFormat:'d MMM y'}}</td>
+                            <td><span class="active">{{ 'active' | i18next }}</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-24">
+                <div class="form-group" [ngClass]="{'disabled': visibility == 'view' }">
+                    <label>{{ 'add_to_job_template' | i18next }}</label>
+                    <ng-select (search)="jobTemplatesSearch.next($event)" [clearable]="false" [searchable]="true"
+                        multiple="true" placeholder="{{ 'choose' | i18next }}" [items]="jobTemplateList" bindValue="id"
+                        bindLabel="template_name" formControlName="jobTemplate"
+                        [ngClass]="{'disabled': visibility == 'view' }">
+                    </ng-select>
+                </div>
+            </div>
+        </svms-sidebar-body>
+        <svms-sidebar-footer [ngClass]="{'disabled': visibility == 'view' }" *ngIf="isContinue">
+            <button (click)="sidebarClose()" type="reset" class="btn btn-outine float-left">{{ 'cancel' | i18next }}</button>
+            <button (click)="goToNext()" class="btn btn-primary float-right">{{ 'continue' | i18next }}</button>
+            <div class="clearfix"></div>
+        </svms-sidebar-footer>
+        <svms-sidebar-footer *ngIf="!isContinue">
+            <button (click)="goBack()" type="reset" class="btn btn-outine float-left">{{ 'back' | i18next }}</button>
+            <button *ngIf="!isEdit" (click)="saveQuestionnaire()" class="btn btn-primary float-right">{{ 'save' | i18next }}</button>
+            <button *ngIf="isEdit" (click)="saveQuestionnaire()" class="btn btn-primary float-right">{{ 'update' | i18next }}</button>
+            <div class="clearfix"></div>
+        </svms-sidebar-footer>
+    </form>
+</svms-sidebar>

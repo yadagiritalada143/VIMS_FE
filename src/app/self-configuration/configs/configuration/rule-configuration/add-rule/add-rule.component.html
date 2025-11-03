@@ -1,0 +1,112 @@
+<app-svms-modal title="Add Rule" size="medium" [visibility]="addRule" (onClose)="sidebarClose()">
+    <app-svms-modal-body>
+        <div *ngFor="let addruleconfig of request?.rules_config; index as i">
+            <div class="c-form-group-row">
+                <div class="c-form-group">
+                    <label>{{'rule_name' | i18next}} <span class="require">*</span></label>
+                    <input type="text"  class="c-form-control" (change) = "changeSelection(addruleconfig?.name)" [(ngModel)]="addruleconfig.name">
+                </div>
+            </div>
+            <div class="c-form-group-row">
+                <div class="c-form-group">
+                    <label>{{'rule_apply' | i18next}} <span class="require">*</span></label>
+                    <ng-select  [clearable]="true"  [(ngModel)]="addruleconfig.apply_on" (change)="getRuleDuration(i);getRateFactor(null)"
+                    [multiple]='false' [searchable]="false" placeholder="{{'select_rule_apply' | i18next}}">
+                    <ng-option *ngFor="let ruleApplyoption of ruleApplyoptions" value="{{ruleApplyoption?.value}}">
+                        {{ruleApplyoption?.label}}
+                    </ng-option>
+                  </ng-select>
+                </div>
+                <div class="c-form-group" *ngIf="addruleconfig?.apply_on == 'weekend'">
+                    <label>{{'select_weekend_days'|i18next}} <span class="require">*</span></label>
+                    <ng-select  [clearable]="true" [(ngModel)]="addruleconfig.slug"
+                    [multiple]='false' [searchable]="false" placeholder="{{'select_weekend_days'|i18next}}">
+                    <ng-option *ngFor="let day of weekendOptions" value="{{day.value}}">
+                        {{day?.label}}
+                    </ng-option>
+                  </ng-select>
+                </div>
+            </div>
+            <div class="c-form-group-row">
+                <div class="c-form-group" >
+                    <label>{{'rule_duration' | i18next}} <span class="require">*</span></label>
+                    <ng-select  [clearable]="true" (change) = "changeSelection(addruleconfig?.rules[0]?.periodicity)"  [(ngModel)]="addruleconfig.rules[0].periodicity"
+                    [multiple]='false' [searchable]="false" placeholder="{{'select_rule_duration' | i18next}}">
+                    <span *ngIf="addruleconfig.apply_on == 'overtime'">
+                    <ng-option *ngFor="let ruleDurationOption of ruleDurationOptions" value="{{ruleDurationOption.value}}">
+                        {{ruleDurationOption?.label}}
+                    </ng-option>
+                    </span>
+                    <span *ngIf="addruleconfig.apply_on != 'overtime'">
+                    <ng-option *ngFor="let ruleDurationOption of ruleDurationHolidayOptions" value="{{ruleDurationOption.value}}">
+                        {{ruleDurationOption?.label}}
+                    </ng-option>
+                    </span>
+
+                  </ng-select>
+                </div>
+                <div class="c-form-group"></div>
+            </div>
+
+            <div class="rule-table mt-16">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="text-uppercase">{{ 'define_condition' | i18next }}</th>
+                            <th>&nbsp;</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let addrules of addruleconfig?.rules[0]?.conditions;index as j">
+                            <td>
+                                <div class="rule-conditions add-rule-conditions d-flex">
+                                    <ng-select (change) = "changeSelection(addrules?.type)" [clearable]="false"  [(ngModel)]="addrules.type" [multiple]='false' [searchable]="false" placeholder="{{'select_types' | i18next}}">
+                                        <ng-option *ngFor="let typeOption of typeOptions" value="{{typeOption?.value}}">
+                                            {{typeOption?.label}}
+                                        </ng-option>
+                                    </ng-select>
+                                    <ng-select (change) = "changeSelection(addrules?.operator)" [clearable]="false" [(ngModel)]="addrules.operator"[multiple]='false' [searchable]="false" placeholder="{{'select_operator' | i18next}}">
+                                        <ng-option *ngFor="let operatorOption of operatorOptions" value="{{operatorOption?.value}}">
+                                            {{operatorOption?.label}}
+                                        </ng-option>
+                                    </ng-select>
+                                    <input (change) = "changeSelection(addrules?.value)" type="number" class="c-form-control add-rule-value" [(ngModel)]="addrules.value">
+                                    <ng-select *ngIf ="addrules.logical_operator == 'AND' " [clearable]="false" (change) = "changeSelection(addrules.logical_operator)" [(ngModel)]="addrules.logical_operator" [multiple]='false' [searchable]="false" placeholder="{{'select_logical_operator' | i18next}}">
+                                        <ng-option *ngFor="let logicalOperatorOption of logicalOperatorOptions" value="{{logicalOperatorOption}}">
+                                            {{logicalOperatorOption}}
+                                        </ng-option>
+                                    </ng-select>
+                                </div>
+                            </td>
+                            <td>
+                               <i class="material-icons delete-rule cursor-pointer" (click)="deleteCondition(i,j)">highlight_off</i>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button class="c-btn c-btn-transparent-bg mb-24" (click)="addMoreCondition(i)"><i class="material-icons">add_circle</i> {{ 'add_another_condition' | i18next }}</button>
+            </div>
+            <div class="c-form-group-row">
+                <div class="c-form-group">
+                    <label>{{'apply_rate' | i18next}} </label>
+                    <ng-select #rateSearch (keyup)="searchTerm$.next(rateSearch?.searchTerm)"
+                    (clear)="searchRateValues(rateSearch?.searchTerm)" [loading]="applyRateLoading"
+                    loadingText = "{{'Loading....' | i18next}}"
+                    notFoundText = "{{'no_data_found' | i18next}}" (change)="changeSelection(addruleconfig?.rules[0]?.rate_factor);changeRateType($event,addruleconfig?.rules[0])"  [clearable]="true"   [(ngModel)]="addruleconfig.rules[0].rate_factor"
+                    [multiple]='false' [searchable]="true" placeholder="{{'select_rate_factor' | i18next}}">
+                    <ng-option *ngFor="let rateFactor of rateFactors" value="{{rateFactor?.abbreviation}}">
+                        {{rateFactor?.name}}
+                    </ng-option>
+                  </ng-select>
+                </div>
+                <div class="c-form-group"></div>
+            </div>
+            <hr><br>
+        </div>
+    </app-svms-modal-body>
+    <app-svms-modal-footer>
+        <div class="text-right">
+            <button class="c-btn c-btn-primary-medium" (click)="addConfigRule()">{{ 'add' | i18next }}</button>
+        </div>
+    </app-svms-modal-footer>
+</app-svms-modal>

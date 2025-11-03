@@ -1,0 +1,115 @@
+<app-svms-modal size="largest" [visibility]="mtpDetailsModal" (onClose)="mtpModalClose()">
+  <app-svms-modal-body>
+    <div class="mtp-container">
+      <div class="mtp-section mtp-section-header position-absolute">
+        <div class="mtp-details d-flex align-items-center position-relative pt-24 pb-12 px-32 p-m-16">
+          <img src="./assets/images/master-profile-tag.png" class="master-profile-tag position-absolute" alt="master tag" width="99" />
+          <figure *ngIf="profileDetails?.avatar" class="mr-24">
+            <img [src]="profileDetails?.avatar" alt="{{ profileDetails?.avatar }}" />
+          </figure>
+          <figure *ngIf="!profileDetails?.avatar"
+            class="mr-24 text-center position-relative mb-0 d-flex justify-content-center align-items-center">
+            <span class="text-uppercase"> {{ profileDetails?.talent_name | slice: 0:2 }}</span>
+            <span class="availability rounded-circle online d-none"></span>
+          </figure>
+          <div class="mtp-name-section d-flex flex-column">
+            <div class="mtp-name d-flex align-items-center" *ngIf="!profileDetails?.isEditName">
+              <h4 class="font-weight-medium mb-0">{{ profileDetails?.talent_name }}</h4>
+              <icon *ngIf="checkAuthorization(masterProfilePermissions?.EDIT_MTP)" class="d-inline-block cursor-pointer ml-8"
+                size="20px" name="drive_file_rename_outline" type="material" cuClass="d-flex"
+                (click)="profileDetails.isEditName = !profileDetails?.isEditName; profileDetails.updated_talent_name = profileDetails?.talent_name">
+              </icon>
+              <span *ngIf="profileDetails?.do_not_rehire" tooltip="{{ 'do_not_re-hire' | i18next }}" placement="right" > 
+                <icon class="cursor-pointer ml-8" color="red" size="20px" name="no_accounts" type="material" ></icon>
+              </span>
+            </div>
+            <div class="mtp-name-input d-flex align-items-center" *ngIf="profileDetails?.isEditName">
+              <input class="form-control mr-8" [(ngModel)]="profileDetails.updated_talent_name" />
+              <button class="btn btn-primary mr-4" (click)="updateMasterTalentProfile()">Save</button>
+              <button (click)="profileDetails.isEditName = false" class="btn btn-outine">Cancel</button>
+              <span *ngIf="profileDetails?.do_not_rehire" tooltip="{{ 'do_not_re-hire' | i18next }}" placement="right" > 
+                <icon class="cursor-pointer ml-8" color="red" size="20px" name="no_accounts" type="material" ></icon>
+              </span>
+            </div>
+            <div class="mtp-id d-flex align-items-center mt-4">
+              <img src="./assets/images/profile-yellow-tag.png" alt="mtp-yellow-tag" />
+              <p class="small ml-8">{{ profileDetails?.unique_id }}</p>
+            </div>
+          </div>
+        </div>
+        <!-- <icon class="d-inline-block cursor-pointer" (click)="backToMtpListing()" size="18px" name="close" type="material"
+          cuClass="d-flex"></icon> -->
+      </div>
+      <ng-container *ngIf="profileDetails && profileDetails?.master_talent_profiles_mapped?.length > 0;else: nolinkedprofiles">
+        <div class="nav-wrapper bg-light">
+          <nav>
+            <ul class="px-32">
+              <li class="d-inline-block">
+                <a href="javascript:void(0)" class="font-weight-medium" [ngClass]="{ active: currentTab == 'Linked Profiles' }">
+                  {{ 'Linked Profiles' | i18next }}
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+        <!-- list-section  -->
+        <div class="mtp-users-list">
+          <div class="mtp-section d-flex flex-column">
+            <div class="mtp-details d-flex p-16" [ngClass]="selectedCandidate.id === profile.id && 'is-active'"
+              *ngFor="let profile of profileDetails.master_talent_profiles_mapped" (click)="selectProfile(profile)">
+              <figure *ngIf="profile?.candidate.avatar" class="mr-24 mtp-picture position-relative">
+                <img [src]="profile?.candidate?.avatar" alt="{{ profile?.candidate?.avatar }}" />
+              </figure>
+              <figure *ngIf="!profile?.candidate.avatar"
+                class="mr-24 text-center position-relative mb-0 d-flex justify-content-center align-items-center">
+                <span class="text-uppercase"> {{ profile?.candidate?.first_name | slice: 0:1
+                  }}{{profile?.candidate?.last_name | slice: 0:1}}</span>
+                <span class="availability rounded-circle online d-none"></span>
+              </figure>
+    
+              <div class="mtp-name-section d-flex flex-column">
+                <div class="mtp-listing-name d-flex align-items-center"
+                  [ngClass]="selectedCandidate.id === profile.id && 'is-active-name'">
+                  <p class="font-weight-medium">{{ profile?.candidate?.first_name + ' ' + profile?.candidate?.last_name }}</p>
+                  <span *ngIf="profile?.candidate?.do_not_rehire" tooltip="{{ 'do_not_re-hire' | i18next }}" placement="right" > 
+                    <icon class="cursor-pointer ml-8" color="red" size="20px" name="no_accounts" type="material" ></icon>
+                  </span>
+                </div>
+                <div class="mtp-id d-flex align-items-center">
+                  <img src="./assets/images/profile-yellow-tag.png" alt="mtp-yellow-tag" />
+                  <span class="ml-8">{{ profile?.candidate?.unique_id }}</span>
+                </div>
+                <div class="mtp-profile-details d-flex flex-column mt-8">
+                  <p class="small">Submission ID  :  <span class="mtp-d-name"># {{ profile.candidate.unique_id }}</span></p>
+                  <p class="small"> {{'vendor_name'| i18next}}: <span class="mtp-d-name">{{ profile?.candidate?.vendor?.name }}</span></p>
+                </div>
+              </div>
+              <icon name="chevron_right" class="list-arrow hide-on-desktop"></icon>
+            </div>
+          </div>
+          <div class="profile-detail-section" [ngClass]="{'active' : showDetailSection}" *ngIf="profileDetails && selectedCandidate">
+            <icon name="close" class="close-detail-box hide-on-desktop position-absolute" (click)="hideDetailbox()"></icon>
+            <app-candidate-job-profile
+              (getMasterTalent)="getMasterTalentProfileDetails({ programId: currentProgramId, mtpId: profileId })"
+              [isMtpCandicate]="true" [mtpProfileId]="profileDetails?.id"
+              [mtpCandidate]="selectedCandidate"></app-candidate-job-profile>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #nolinkedprofiles>
+        <div class="mtp-container-no-linked d-flex flex-column"
+          *ngIf="profileDetails && !profileDetails?.master_talent_profiles_mapped?.length">
+          <div class="mtp-container-no-linked-section d-flex align-items-center justify-content-center flex-column">
+            <img src="../../../assets/images/no-profile-linked.png" alt="">
+            <h4 class="font-weight-medium mt-16">{{ 'no_linked_profile' | i18next }}</h4>
+            <p>{{ 'no_link_profile_found_on_mtp' | i18next }}</p>
+            <button class="btn btn-white no-border mt-8" (click)="deleteMasterProfile()"
+              *ngIf="checkAuthorization(masterProfilePermissions?.MANAGE_MASTER_TALENT_PROFILE)">Delete Master
+              Profile</button>
+          </div>
+        </div>
+      </ng-template>
+    
+    </div>
+  </app-svms-modal-body>
+</app-svms-modal>

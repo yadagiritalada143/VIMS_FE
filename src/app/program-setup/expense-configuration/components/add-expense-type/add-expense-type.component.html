@@ -1,0 +1,114 @@
+<svms-sidebar [title]="sidebarTitle" [dataVisibility]="sidebarVisibility" (onClose)="sidebarClose($event)"
+              [needConfirmation]="needConfirmation" message="Are you sure you want to leave this page?">
+  <app-logs [log]="logs"></app-logs>
+  <svms-sidebar-body *ngIf="isLoaded">
+    <form class="p-32" [formGroup]="addExpenseTypeForm">
+      <div class="form-group">
+        <label for="expense_category">{{ 'expense_category' | i18next }}</label>
+        <ng-select [clearable]="false" formControlName="expense_type" id="expense_category" [readonly]="formMode === 'view'">
+          <ng-option *ngFor="let category of expenseType" [value]="category.value">{{ category.label }}</ng-option>
+        </ng-select>
+        <p *ngIf="addExpenseTypeForm.get('expense_type').touched && addExpenseTypeForm.get('expense_type').errors"
+           class="validation-msg">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'expense_category_is_required' | i18next }}.
+        </p>
+      </div>
+      <div class="form-group-row">
+        <div class="form-group">
+          <label for="expense_code">{{ 'expense_code' | i18next }}</label>
+          <div class="d-flex">
+            <input class="form-control no-pointer mr-16" style="width: 100px;" type="text" [value]="categoryCode" readonly />
+            <input class="form-control" type="text" id="expense_code" name="expense_code" formControlName="expense_code" [readonly]="formMode === 'view'" />
+          </div>
+          <p *ngIf="addExpenseTypeForm.get('expense_code').touched && addExpenseTypeForm.get('expense_code').errors"
+             class="validation-msg">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'expense_code_is_required' | i18next }}.
+          </p>
+          <app-server-error [data]="validationsServerErrorArray" [fieldName]="'expense_code'"></app-server-error>
+        </div>
+      </div>
+      <div class="form-group-row">
+        <div class="form-group">
+          <label for="expense_name">{{ 'expense_name/type' | i18next }}</label>
+          <input class="form-control" type="text" id="expense_name" name="expense_name" formControlName="expense_name" [readonly]="formMode === 'view'" />
+          <p *ngIf="addExpenseTypeForm.get('expense_name').touched && addExpenseTypeForm.get('expense_name').errors"
+             class="validation-msg">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'expense_name_is_required' | i18next }}.
+          </p>
+          <app-server-error [data]="validationsServerErrorArray" [fieldName]="'expense_name'"></app-server-error>
+
+        </div>
+        <div class="form-group icon-box">
+          <label for="expense_icon">{{ 'expense_icon' | i18next }}</label>
+          <ng-select [clearable]="false" formControlName="expense_icon" id="expense_icon" [readonly]="formMode === 'view'">
+            <ng-option [value]="''">
+              {{ 'no_icon' | i18next }}
+            </ng-option>
+            <ng-option *ngFor="let icon of iconItems" [value]="icon.url">
+              <img [src]="icon.url" class="mr-8" height="16" />{{ icon.title }}
+            </ng-option>
+          </ng-select>
+          <p *ngIf="addExpenseTypeForm.get('expense_icon').touched && addExpenseTypeForm.get('expense_icon').errors"
+             class="validation-msg">
+            <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+            {{ 'expense_icon_is_required' | i18next }}.
+          </p>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="radio-group">
+          <label class="mb-24">{{ 'attachment' | i18next }} </label>
+          <div class="radio-button-container d-flex">
+            <div *ngFor="let radioItem of radioOptionItems;" [ngClass]="{ 'disable': formMode === 'view' }">
+              <input class="radio-custom-input" [id]="'attachment_' + radioItem.label" type="radio" [value]="radioItem.value"
+                     name="attachment_mandatory" formControlName="attachment_mandatory" [readonly]="formMode === 'view'">
+              <label class="radio-custom-label mr-12" [for]="'attachment_' + radioItem.label">{{ radioItem.label | i18next}}</label>
+            </div>
+          </div>
+        </div>
+        <p *ngIf="addExpenseTypeForm.get('attachment_mandatory').touched && addExpenseTypeForm.get('attachment_mandatory').errors"
+           class="validation-msg">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'attachment_is_required' | i18next }}.
+        </p>
+      </div>
+      <div class="form-group">
+        <div class="radio-group">
+          <label class="mb-24">{{ 'notes' | i18next }}</label>
+          <div class="radio-button-container d-flex">
+            <div *ngFor="let radioItem of radioOptionItems;" [ngClass]="{ 'disable': formMode === 'view' }">
+              <input class="radio-custom-input" [id]="'notes_' + radioItem.label" type="radio" [value]="radioItem.value"
+                     name="notes_mandatory" formControlName="notes_mandatory" [readonly]="formMode === 'view'">
+              <label class="radio-custom-label mr-12" [for]="'notes_' + radioItem.label">{{ radioItem.label | i18next }}</label>
+            </div>
+          </div>
+        </div>
+        <p *ngIf="addExpenseTypeForm.get('notes_mandatory').touched && addExpenseTypeForm.get('notes_mandatory').errors"
+           class="validation-msg">
+          <icon name="error" size="14px" type="material" cuClass="validation-icon"></icon>
+          {{ 'notes_is_required' | i18next }}.
+        </p>
+      </div>
+      <div class="form-group">
+        <div class="toggle-group">
+          <ng-container *ngFor="let toggleOption of toggleOptionItems;">
+            <div class="toggle-panel-inner" [ngClass]="{ 'if-active': toggleOption.value, 'if-inactive': !toggleOption.value, 'disable': formMode === 'view' }">
+              <span>{{ toggleOption.label }}</span>
+              <span class="toggle-switch" [id]="toggleOption.id" [ngClass]="toggleOption.value ? 'toggle-on' : 'toggle-off'"
+                    (click)="onClickToggle(toggleOption)">
+              </span>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </form>
+  </svms-sidebar-body>
+  <svms-sidebar-footer *ngIf="formMode !== 'view'">
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-primary" (click)="submitAddExpenseType()">{{ 'save' | i18next }}</button>
+    </div>
+  </svms-sidebar-footer>
+</svms-sidebar>

@@ -1,0 +1,108 @@
+<div class="view-detail-page assignment-rate-change">
+    <header class="section-header p-24 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <i (click)="backClicked()" class="material-icons back-arrow-icon mr-16 cursor-pointer" tooltip="{{'Back' | i18next}}" placement="bottom">arrow_back</i>
+            <h3 class="font-weight-semibold mb-0">{{ 'edit_reasons' | i18next }}</h3>
+        </div>
+            <button *accessControl class="c-btn c-btn-success-medium"  (click)="onSave()" >{{ 'save' | i18next }}</button>
+    </header>
+    <section class="section-body-content">
+        <div class="p-24">
+            <app-self-config-log *ngIf="isAutoClosedAssignment"
+                [showButton]="false"
+                title="Information"
+                message="This Reason Code will be used for Auto Closed Assignments. Any Changes will be applied only on future Auto Closed Assignments."
+            ></app-self-config-log>
+            <h4 class="font-weight-medium mb-16">{{ 'reason_code_details' | i18next }}</h4>
+            <div class="detail-item d-flex align-items-center mb-16">
+                <div class="item-label">{{ 'event' | i18next }}</div>
+                <div class="item-value font-weight-medium">{{name | i18next }}</div>
+            </div>
+            <div class="detail-item d-flex align-items-center mb-32">
+                <div class="item-label">{{ 'module' | i18next }}</div>
+                <div class="item-value font-weight-medium">{{module | i18next }}</div>
+            </div>
+            <h4 class="font-weight-medium mb-0">{{ 'reasons' | i18next }}</h4>
+            <table class="detail-page-table no-border">
+                <thead>
+                    <tr>
+                        <th>{{ 'reason_name' | i18next }}</th>
+                        <th>{{ 'reason_rating' | i18next }}</th>
+                        <th>{{ 'status' | i18next }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let reason of tempCurrentReasons; let last = last" >
+                        <td>
+                            <input type="text" class="c-form-control" [value]="reason.name || '' " (focusout)="updateName(reason,$event.target.value)" (change)="updateName(reason,$event.target.value)" placeholder="{{'please_enter_reason_code_name' | i18next}}" [ngClass]="{'error':reason?.nameError}" >
+                        </td>
+                        <td>
+                            <ng-select  (change)="reasonRatingChange(reason,$event)" [(ngModel)]="reason.category" [clearable]="false"
+                            placeholder="{{ 'select_reason_rating' | i18next }}" >
+                            <ng-option value="FAVORABLE">{{ 'positive' | i18next }}</ng-option>
+                            <ng-option value="UNFAVORABLE">{{ 'negative' | i18next }}</ng-option>
+                            <ng-option value="NEUTRAL">{{ 'neutral' | i18next }}</ng-option>
+                            </ng-select>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="toggle-panel">
+                                    <div class="toggle-panel-inner" [ngClass]="reason?.is_enabled ? 'if-active' : 'if-inactive'">
+                                      <span class="status-text">{{(reason?.is_enabled ? 'Active':'Inactive') | i18next}}</span>
+                                      <span
+                                        class="toggle-switch"
+                                        [ngClass]="{'editable-color': !reason?.is_editable, 'toggle-on': reason?.is_enabled, 'toggle-off': !reason?.is_enabled}"
+                                        (click)="onClickToggle(reason)"
+                                      ></span>
+                                    </div>
+                                </div>
+                                <div class="add-more-link cursor-pointer" *ngIf="reason?.is_editable">
+                                  <i class="material-icons" *ngIf="!reason.isDelete" (click)="reason.isDelete = true; confirmDelete(reason)" >highlight_off</i>
+                                  <i class="material-icons" *ngIf="reason.isDelete" (click)="reason.isDelete = false; confirmDelete(reason)" >cancel</i>
+                                </div>
+                                <div class="add-more-link cursor-pointer" *ngIf="last && tempCurrentReasons.length < reasonCodeLimit" >
+                                  <i class="material-icons" (click)="addNewReason()" >add_circle</i>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- <tr>
+                        <td colspan="3" class="text-center d-flex align-items-center" *ngIf="tempCurrentReasons?.length == 0">
+                            <span class="no-data-found">{{'No data found Add new reason'|i18next}}</span>
+                            <div class="add-more-link" >
+                                <i class="material-icons cursor-pointer" (click)="addNewReason()" >add_circle</i>
+                            </div>
+                        </td>
+                    </tr> -->
+
+                    <tr *ngIf="tempCurrentReasons?.length == 0">
+                      <td colspan="3">
+                        <div class="d-flex align-items-center justify-content-center py-32 flex-column text-center" *ngIf="tempCurrentReasons?.length == 0" >
+                          <div>
+                            <img src="../../../assets/images/no-records.svg" alt="empty-icon" />
+                          </div>
+                          <div class="mt-8">
+                            <h4 class="font-weight-medium">{{ 'no_records_found' | i18next }}</h4>
+                          </div>
+                          <div>
+                            <p>
+                              {{
+                                'No code for ' + name + ' added yet, lets create your first ' + name + ' code'
+                                  | i18next
+                              }}
+                            </p>
+                            <div class="add-more-link mt-24">
+                              <i class="material-icons cursor-pointer" (click)="addNewReason()" tooltip="{{ 'add_new_reasons_code' | i18next }}" placement="top">add_circle</i>
+                          </div>
+                          </div>
+
+                        </div>
+                      </td>
+                     </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

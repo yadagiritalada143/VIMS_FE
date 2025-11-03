@@ -1,0 +1,71 @@
+<div class="interview-detail-view ">
+<div class="d-flex align-items-center justify-content-between px-24 py-16 " *ngIf='!detailsLoading && interviews.length > 0'>
+  <h4 class="mb-0">
+    {{ 'interviews' | i18next }}
+  </h4>
+
+  <div class="position-relative search-head">
+    <input type="text" placeholder="{{ 'search_by_title_or_id' | i18next }}" class="form-control">
+    <icon size="17px" name="search" type="material" color="inherit" class="icon-search" cuClass="d-flex">
+    </icon>
+  </div>
+
+</div>
+
+  <div *ngFor='let intDetails of interviews'
+    class="interview header-section px-24 py-16 mt-16 rounded-sm">
+    <div class="d-flex align-items-center justify-content-between">
+    <div class="d-flex flex-column">
+        <p class="font-weight-medium mr-24">{{intDetails?.name}}</p>
+      <div class="d-flex align-items-center">
+        <span class="mr-4">
+          <icon size="16px" name="label" color="#ffc409" type="material" class="d-flex" cuClass="d-flex">
+          </icon>
+        </span>
+        <p class="small">{{ 'int' | i18next }}-{{intDetails?.displayID}}</p>
+        <span class="ml-12">
+          <icon size="16px" theme="outlined" name="watch_later" type="material" class="d-flex" cuClass="d-flex">
+          </icon>
+        </span>
+        <p class="small ml-4">
+          {{ 'created_on' | i18next }} : {{intDetails?.created_on | localDateFormat:'MMM dd ,yyyy'}}
+        </p>
+      </div>
+    </div>
+      <div class="status-ui rejected" *ngIf="intDetails?.status ==='REJECTED'">{{intDetails?.status | titlecase | i18next}}</div>
+      <div class="status-ui withdrawn" *ngIf="intDetails?.status ==='CANCELLED'">{{intDetails?.status | titlecase | i18next}}</div>
+      <div class="status-ui interview-scheduled" *ngIf="intDetails?.status ==='SCHEDULED'">{{intDetails?.status | titlecase | i18next}}</div>
+      <div class="status-ui offer-accepted" *ngIf="intDetails?.status ==='ACCEPTED'">{{intDetails?.status | titlecase | i18next}}</div>
+      <icon name="remove_red_eye"  theme="outlined" class="trigger-to-detail ml-24" size="16px" (click)='gotoInterview(intDetails.id)'></icon>
+    </div>
+  </div>
+
+  <div *ngIf='!detailsLoading && interviews.length === 0' class="d-flex flex-column justify-content-center align-items-center py-32 top-margin">
+    <img alt="no data" width="100" src="../../../../../../assets/images/no-interview-scheduled.svg" class="img-fluid" />
+    <h4 class="pt-16 mb-0">{{ 'no_interviews_for_this_candidate' | i18next }}</h4>
+    <p>{{ 'no_interviews_for_this_job' | i18next }}</p>
+
+    <button class="btn btn-primary small btn-icon-on-left mt-4" type="button" (click)='scheduleInterview()' *ngIf="visibleCreateButton">
+      {{ 'schedule_interview' | i18next }}</button>
+  </div>
+
+  <div *ngIf="detailsLoading" class="schedule-wrapper pl-24 pt-24">
+    <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+      [theme]="{'width': '50%', height: '24px', 'border-radius':'0px', 'margin-bottom':'10px', 'margin-top': '10px', 'background-color': '#e9e6ef', 'border-top': '0'}">
+    </ngx-skeleton-loader>
+
+    <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+      [theme]="{'width': '80%', height: '24px', 'border-radius':'0px', 'margin-bottom':'50px', 'background-color': '#e9e6ef', 'border-top': '0'}">
+    </ngx-skeleton-loader>
+
+
+    <ngx-skeleton-loader style="margin-top: 100px;" count="1" animation="progress" appearance="line"
+      [theme]="{'width': '50%', height: '24px', 'border-radius':'0px', 'margin-bottom':'10px', 'background-color': '#e9e6ef', 'border-top': '0'}">
+    </ngx-skeleton-loader>
+
+    <ngx-skeleton-loader count="1" animation="progress" appearance="line"
+      [theme]="{'width': '80%', height: '24px', 'border-radius':'0px', 'margin-bottom':'0', 'background-color': '#e9e6ef', 'border-top': '0'}">
+    </ngx-skeleton-loader>
+  </div>
+
+</div>

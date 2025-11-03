@@ -1,0 +1,52 @@
+<vms-table
+  *ngIf="showTable"
+  [vmsTableConfig]="tableConfig"
+  [vmsDataSource]="vmsData?.foundational_data_types"
+  [totalItem]="totalRecords"
+  [itemsPerPage]="itemPerPage"
+  [open]="expand"
+  (search)="onSearch($event)"
+  (changePage)="onPaginationClick($event)"
+  (onCreate)="onCreateClick($event)"
+  (onDetailClick)="onDetailClick($event)"
+  (onEditClick)="onEditClick($event)"
+  (onDisableClicked)="onDisableClicked($event)"
+  (onDeleteClick)="onDeleteClick($event)"
+  (onViewClick)="onClickView($event)"
+  (onReorderClicked)="onReorderClicked()"
+  (onListFilter)="onListFilter($event)"
+  (onExpandClick)="onExpandClick($event)"
+>
+  <div class="expanded-col">
+    <p> {{ (description || 'Data not available') | i18next }} </p>
+  </div>
+</vms-table>
+
+<app-no-listing-page
+  *ngIf="!showTable"
+  clickHere="click here"
+  [title]="tableConfig.title"
+  btnClickUrl='FOUNDATION_DATA_TYPE_CREATE'
+  btnmsg="Create Your First Master data type"
+  pmsg="If you would like to add Master data type,"
+  headingmsg="No Master data type found for the selected program."
+  (onCreateClick)="onCreateClick($event)"
+>
+</app-no-listing-page>
+
+<app-create-foundational-data-type
+  title="Add New Master data Type"
+  icon="library_add" type="TYPE_MSP"
+  [visibility]="masterFlyoutVisibility"
+  (toggleVisibility)="toggleMasterFlyoutVisibility($event)"
+>
+</app-create-foundational-data-type>
+
+<app-reorder-flyout
+  *ngIf="reorderFlyoutVisibility && vmsTable && vmsData"
+  [page]="vmsTable?.currentPage || 1"
+  [limit]="itemPerPage || 10"
+  [visibility]="reorderFlyoutVisibility"
+  [dataList]="vmsData?.foundational_data_types || []"
+  (onClose)="closeReorderFlyout()"
+></app-reorder-flyout>

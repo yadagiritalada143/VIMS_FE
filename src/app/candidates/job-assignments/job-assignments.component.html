@@ -1,0 +1,50 @@
+<svms-sidebar size="large" title="{{sidebarTitle | i18nextEager}}" [dataVisibility]="currentAssignments" (onClose)="sidebarClose()">
+    <svms-sidebar-body>
+        <div class="p-24 pt-32">
+            <figure class="avatar float-left rounded-circle overflow-hidden mr-12">
+                <!-- <img src="/assets/images/5.jpg" alt=""> -->
+
+                <img *ngIf="!!candidateDetails?.avatar" [src]="candidateDetails?.avatar"  (load)="loaded = true"  alt=""  [hidden]="!loaded"   />
+
+                <span class="initials initials__purple" *ngIf="(!loaded || (loaded && !candidateDetails?.avatar ))"  alt=""   >{{ candidateDetails?.candidate_name | shortName: "last" }}</span>
+
+            </figure>
+            <div class="user-description float-left">
+
+                <h4 class="mb-0">{{candidateDetails?.candidate_name}}(#{{candidateDetails?.candidate_id}})</h4>
+                <p>{{candidateDetails?.location}}</p>
+            </div>
+            <ul class="tab-list float-right">
+                <li class="d-inline-block mr-16">
+                    <a class="d-inline-block" [ngClass]="{'active': submittedJob}" href="javascript:void(0)" (click)="submittedJobsList()">
+                        {{ 'submitted_job' | i18nextEager }} <span>{{submittedJobCount}}</span>
+                    </a>
+                </li>
+                <li class="d-inline-block mr-16">
+                    <a class="d-inline-block" [ngClass]="{'active': currentAssignmet}" href="javascript:void(0)" (click)="currentAssignmentList('Current Assignment List')">
+                        {{ 'current_assignment' | i18nextEager }} <span>{{currentAssignmetCount}}</span>
+                    </a>
+                </li>
+                <li class="d-inline-block">
+                    <a class="d-inline-block" [ngClass]="{'active': closedAssignmet}" href="javascript:void(0)" (click)="closedAssignmentList('Previous Assignment List')">
+                        {{ 'previous_assignment' | i18nextEager }} <span>{{closedAssignmetCount}}</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <div>
+            <vms-table *ngIf="submittedJob" (onViewClick)="onClickView($event,'job')"
+              [vmsTableConfig]="tableConfig" [vmsDataSource]="vmsData"  [loading]="dataLoading"
+              [totalItem]="totalRecords" [itemsPerPage]="itemPerPage" (changePage)="onPaginationClick($event)"
+              [currentPage]="pageNo">
+          </vms-table>
+
+          <vms-table *ngIf="!submittedJob" (onViewClick)="onClickView($event,'assign')"
+            [vmsTableConfig]="tableConfigAssignment" [vmsDataSource]="assignmentData"  [loading]="dataLoading"
+            [totalItem]="totalRecords" [itemsPerPage]="itemPerPage" (changePage)="onPaginationClick($event)"
+            [currentPage]="pageNo">
+          </vms-table>
+        </div>
+    </svms-sidebar-body>
+</svms-sidebar>
