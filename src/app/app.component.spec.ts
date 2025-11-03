@@ -45,6 +45,6 @@
 //   it(`should have as title 'svms-web'`, () => {
 //     const fixture = TestBed.createComponent(AppComponent);
 //     const app = fixture.componentInstance;
-//     expect(app.title).toEqual('Simplify VMS 2.0');
+//     expect(app.title).toEqual('TalentIQ VMS 2.0');
 //   });
 // });

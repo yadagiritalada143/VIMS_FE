@@ -28,8 +28,8 @@ export class PasswordPolicyComponent implements OnInit {
     { label: 'Last Name', value: 'LAST_NAME' },
     { label: 'Words', value: 'WORDS' },
     { label: 'Special Characters', value: 'SPECIAL' },
-    { label: 'SimplifyVMS Account User Name', value: 'SIMPLIFY_USERNAME' },
-    { label: 'SimplifyVMS Account Email address', value: 'SIMPLIFY_EMAIL' },
+    { label: 'TalentIQVMS Account User Name', value: 'TalentIQ_USERNAME' },
+    { label: 'TalentIQVMS Account Email address', value: 'TalentIQ_EMAIL' },
     { label: 'Sequential Characters (a,b,c...)', value: 'CHAR_SEQUENCE' },
     { label: 'Sequential Numbers (1,2,3...)', value: 'NUM_SEQUENCE' }
   ];

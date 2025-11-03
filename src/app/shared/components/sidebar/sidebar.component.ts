@@ -388,9 +388,9 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnDestroy {
     this.programService.get(`${url}`)
       .subscribe({next:(res:any) => {
         let response = JSON.parse(JSON.stringify(res));
-        this.supportEmail = response?.config?.email || 'info@simplifyvms.com';
+        this.supportEmail = response?.config?.email || 'info@talentiqvms.com';
       },error: err => {
-        this.supportEmail = 'info@simplifyvms.com';
+        this.supportEmail = 'info@talentiqvms.com';
         // console.error(errorHandler(err));
       }});
 

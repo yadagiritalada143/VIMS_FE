@@ -13,7 +13,7 @@ import { SessionService } from './main.service';
   styleUrls: ['./main.component.scss'],
 })
 export class MainComponent implements OnInit, DoCheck, OnDestroy {
-  title = 'Simplify VMS 2.0';
+  title = 'TalentIQ VMS 2.0';
   showBackdrop = false;
   valueEmittedFromChildComponent = '';
   toggleProgramPanel = false;

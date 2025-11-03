@@ -78,7 +78,7 @@ export class CustomFieldOptionsFormComponent implements OnInit, OnDestroy {
   public selectedLocalModules = [];
   public sourceLOV = [{id : 'USER',name : 'Users'}];
   public userType = [{id : 'ALL',name : 'ALL'}, {id : 'BY ORGANIZATION',name : 'By Org'}, {id : 'BY USER ROLE',name : 'By User Role'}];
-  public userCategory = [{id : 'SIMPLIFYVMS',name : 'SimplifyVMS'}, {id : 'CLIENT',name : 'CLIENT'}, {id : 'MSP',name : 'MSP'}];
+  public userCategory = [{id : 'TalentIQVMS',name : 'TalentIQVMS'}, {id : 'CLIENT',name : 'CLIENT'}, {id : 'MSP',name : 'MSP'}];
   public userRoles : any = [];
   public currencyData$: Observable<any>;
   public customFieldData;

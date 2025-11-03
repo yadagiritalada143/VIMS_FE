@@ -12,7 +12,7 @@ import { LoginService } from './auth/login/login.service';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit, OnDestroy {
-  title = 'Simplify VMS 2.0';
+  title = 'TalentIQ VMS 2.0';
   showBackdrop = false;
   public showRouter = true
   valueEmittedFromChildComponent = '';
