@@ -62,7 +62,7 @@ export class InterviewConfigComponent extends BaseProgramConfigComponent impleme
 
     this.programControls.push({
       subtitle: "Allow External Attendees",
-      description: 'When enabled, the system will display an additional field to the interview scheduler called "Additional Attendees" to enter email addresses of interviewers who all non-Simplify users.  Any email addresses entered here will NOT be given Simplify system access.',
+      description: 'When enabled, the system will display an additional field to the interview scheduler called "Additional Attendees" to enter email addresses of interviewers who all non-TalentIQ users.  Any email addresses entered here will NOT be given TalentIQ system access.',
       type: ControlType.TOGGLE,
       formControlName: 'is_additional_attendees_from_out_organization',
     });

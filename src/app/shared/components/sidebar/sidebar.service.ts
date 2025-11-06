@@ -20,107 +20,107 @@ export class SidebarService {
       isSideMenu: false,
       isSearch: false
     },
-    {
-      name: 'rfx',
-      title: 'RFx',
-      icon: 'gavel',
-      class: 'sidebar-icon',
-      permission: 'view_rfx',
-      isSideMenu: true,
-      isSearch: false,
-      closeSubMenu: {
-        title: 'RFx',
-        icon: 'close',
-        class: 'sidebar-close-icon',
-        isNotification: false
-      },
-      sideBarSubMenu: [
-        {
-          subMenuItem: [
-            {
-              title: 'create_rfx',
-              icon: 'add',
-              class: 'sidebar-icon-submenu',
-              linkClass: "create",
-              permission: 'create_rfx',
-              isNotification: false,
-              path: '/rfx/create'
-            },
-            {
-              title: 'RFxs',
-              icon: 'gavel',
-              class: 'sidebar-icon-submenu',
-              permission: 'view_rfx',
-              isNotification: false,
-              path: '/rfx/list'
-            },
-            {
-              title: 'Bids',
-              icon: 'ballot',
-              class: 'sidebar-icon-submenu',
-              permission: 'view_bid',
-              isNotification: false,
-              path: '/rfx/bidlist'
-            },
-          ]
-        }
-      ]
-    },
-    {
-      name: 'sow',
-      title: 'sow',
-      icon: 'dns',
-      class: 'sidebar-icon',
-      path: '/sow',
-      permission: 'menu_sow',
-      isSideMenu: true,
-      isSearch: false,
-      closeSubMenu: {
-        title: 'statement_of_work',
-        icon: 'close',
-        class: 'sidebar-close-icon',
-        isNotification: false
-      },
-      sideBarSubMenu: [
-        {
-          subMenuItem: [
-            {
-              title: 'create_sow',
-              icon: 'add',
-              class: 'sidebar-icon-submenu',
-              linkClass: "create",
-              permission: 'menu_sow_create',
-              isNotification: false,
-              path: '/sow/create_sow'
-            },
-            {
-              title: 'sows',
-              icon: 'view_stream',
-              class: 'sidebar-icon-submenu',
-              permission: 'menu_sow_view',
-              isNotification: false,
-              path: '/sow'
-            },
-            {
-              title: 'Milestones',
-              icon: 'content_paste_go',
-              class: 'sidebar-icon-submenu',
-              permission: 'menu_sow_view',
-              isNotification: false,
-              path: '/sow/milestones_list'
-            },
-            {
-              title: 'Milestone Progress Updates',
-              icon: 'playlist_add_check',
-              class: 'sidebar-icon-submenu',
-              permission: 'menu_progress_view',
-              isNotification: false,
-              path: '/sow/progress_list'
-            }
-          ]
-        }
-      ]
-    },
+    // {
+    //   name: 'rfx',
+    //   title: 'RFx',
+    //   icon: 'gavel',
+    //   class: 'sidebar-icon',
+    //   permission: 'view_rfx',
+    //   isSideMenu: true,
+    //   isSearch: false,
+    //   closeSubMenu: {
+    //     title: 'RFx',
+    //     icon: 'close',
+    //     class: 'sidebar-close-icon',
+    //     isNotification: false
+    //   },
+    //   sideBarSubMenu: [
+    //     {
+    //       subMenuItem: [
+    //         {
+    //           title: 'create_rfx',
+    //           icon: 'add',
+    //           class: 'sidebar-icon-submenu',
+    //           linkClass: "create",
+    //           permission: 'create_rfx',
+    //           isNotification: false,
+    //           path: '/rfx/create'
+    //         },
+    //         {
+    //           title: 'RFxs',
+    //           icon: 'gavel',
+    //           class: 'sidebar-icon-submenu',
+    //           permission: 'view_rfx',
+    //           isNotification: false,
+    //           path: '/rfx/list'
+    //         },
+    //         {
+    //           title: 'Bids',
+    //           icon: 'ballot',
+    //           class: 'sidebar-icon-submenu',
+    //           permission: 'view_bid',
+    //           isNotification: false,
+    //           path: '/rfx/bidlist'
+    //         },
+    //       ]
+    //     }
+    //   ]
+    // },
+    // {
+    //   name: 'sow',
+    //   title: 'sow',
+    //   icon: 'dns',
+    //   class: 'sidebar-icon',
+    //   path: '/sow',
+    //   permission: 'menu_sow',
+    //   isSideMenu: true,
+    //   isSearch: false,
+    //   closeSubMenu: {
+    //     title: 'statement_of_work',
+    //     icon: 'close',
+    //     class: 'sidebar-close-icon',
+    //     isNotification: false
+    //   },
+    //   sideBarSubMenu: [
+    //     {
+    //       subMenuItem: [
+    //         {
+    //           title: 'create_sow',
+    //           icon: 'add',
+    //           class: 'sidebar-icon-submenu',
+    //           linkClass: "create",
+    //           permission: 'menu_sow_create',
+    //           isNotification: false,
+    //           path: '/sow/create_sow'
+    //         },
+    //         {
+    //           title: 'sows',
+    //           icon: 'view_stream',
+    //           class: 'sidebar-icon-submenu',
+    //           permission: 'menu_sow_view',
+    //           isNotification: false,
+    //           path: '/sow'
+    //         },
+    //         {
+    //           title: 'Milestones',
+    //           icon: 'content_paste_go',
+    //           class: 'sidebar-icon-submenu',
+    //           permission: 'menu_sow_view',
+    //           isNotification: false,
+    //           path: '/sow/milestones_list'
+    //         },
+    //         {
+    //           title: 'Milestone Progress Updates',
+    //           icon: 'playlist_add_check',
+    //           class: 'sidebar-icon-submenu',
+    //           permission: 'menu_progress_view',
+    //           isNotification: false,
+    //           path: '/sow/progress_list'
+    //         }
+    //       ]
+    //     }
+    //   ]
+    // },
     {
       name: 'jobs',
       title: 'job',
@@ -238,52 +238,52 @@ export class SidebarService {
     //     }
     //   ]
     // },
-    {
-      name: 'Assignments',
-      title: 'assignment',
-      icon: 'assignment',
-      class: 'sidebar-icon',
-      permission: 'menu_assignments',
-      path: '/assignment',
-      isSideMenu: true,
-      isSearch: false,
-      closeSubMenu: {
-        title: 'Assignments',
-        icon: 'close',
-        class: 'sidebar-close-icon',
-        isNotification: false
-      },
-      sideBarSubMenu: [
-        {
-          subMenuItem: [
-            {
-              title: 'create_quick_assignment',
-              icon: 'add',
-              class: 'sidebar-icon-submenu',
-              linkClass: "create",
-              permission: 'create_quick_assignment',
-              isNotification: false,
-              path: '/assignment/create-assignment'
-            },
-            {
-              title: 'assignments',
-              icon: 'assignment',
-              class: 'sidebar-icon-submenu',
-              permission: 'view_assignment',
-              isNotification: false,
-              path: '/assignment/all-list'
-            }
-            // {
-            //   title: 'Qualification',
-            //   icon: 'verified_user',
-            //   class: 'sidebar-icon-submenu',
-            //   isNotification: false,
-            //   path: '/qualifications/qualification-type'
-            // }
-          ]
-        }
-      ]
-    },
+    // {
+    //   name: 'Assignments',
+    //   title: 'assignment',
+    //   icon: 'assignment',
+    //   class: 'sidebar-icon',
+    //   permission: 'menu_assignments',
+    //   path: '/assignment',
+    //   isSideMenu: true,
+    //   isSearch: false,
+    //   closeSubMenu: {
+    //     title: 'Assignments',
+    //     icon: 'close',
+    //     class: 'sidebar-close-icon',
+    //     isNotification: false
+    //   },
+    //   sideBarSubMenu: [
+    //     {
+    //       subMenuItem: [
+    //         {
+    //           title: 'create_quick_assignment',
+    //           icon: 'add',
+    //           class: 'sidebar-icon-submenu',
+    //           linkClass: "create",
+    //           permission: 'create_quick_assignment',
+    //           isNotification: false,
+    //           path: '/assignment/create-assignment'
+    //         },
+    //         {
+    //           title: 'assignments',
+    //           icon: 'assignment',
+    //           class: 'sidebar-icon-submenu',
+    //           permission: 'view_assignment',
+    //           isNotification: false,
+    //           path: '/assignment/all-list'
+    //         }
+    //         // {
+    //         //   title: 'Qualification',
+    //         //   icon: 'verified_user',
+    //         //   class: 'sidebar-icon-submenu',
+    //         //   isNotification: false,
+    //         //   path: '/qualifications/qualification-type'
+    //         // }
+    //       ]
+    //     }
+    //   ]
+    // },
     {
       name: 'Master Talent Profiles',
       title: 'master_talent_profiles',
@@ -333,241 +333,241 @@ export class SidebarService {
         }
       ]
     },
-    {
-      name: 'timesheet',
-      title: 'time_&_expense',
-      icon: 'schedule',
-      class: 'sidebar-icon',
-      permission: 'menu_timesheet_and_expenses',
-      isSideMenu: true,
-      isSearch: false,
-      closeSubMenu: {
-        title: 'Time & Expense',
-        icon: 'close',
-        class: 'sidebar-close-icon',
-        isNotification: false
-      },
-      sideBarSubMenu: [
-        {
-          title: 'timesheets',
-          subMenuItem: [
-            {
-              title: 'timesheets',
-              icon: 'pending_actions',
-              class: 'sidebar-icon-submenu',
-              permission: 'view_timesheet',
-              isNotification: false,
-              path: '/timesheet/list/all'
-            },
-            {
-              title: 'account_code',
-              icon: 'pending_actions',
-              class: 'sidebar-icon-submenu',
-              permission: 'menu_account_code_setup',
-              isNotification: false,
-              path: '/setup/account-codes'
-            }
-          ]
-        },
-        {
-          title: 'Expense',
-          subMenuItem: [
-            {
-              title: 'general_expenses',
-              icon: 'account_balance_wallet',
-              class: 'sidebar-icon-submenu',
-              permission: 'view_expense',
-              isNotification: false,
-              path: '/expense/general/all'
-            },
-            {
-              title: 'Misc Expenses',
-              icon: 'payments',
-              class: 'sidebar-icon-submenu',
-              permission: 'view_misc_expense',
-              isNotification: false,
-              path: '/expense/misc/all'
-            }
-          ]
-        }
-      ]
-    },
-    {
-      name: 'Invoices',
-      title: 'invoice',
-      icon: 'receipt_long',
-      class: 'sidebar-icon',
-      path: '/invoice',
-      permission: 'menu_invoices',
-      isSideMenu: true,
-      isSearch: false,
-      closeSubMenu: {
-        title: 'Invoice',
-        icon: 'close',
-        class: 'sidebar-close-icon',
-        isNotification: false
-      },
-      sideBarSubMenu: [
-        {
-          subMenuItem: [
-            {
-              title: 'Invoices',
-              icon: 'receipt',
-              class: 'sidebar-icon-submenu',
-              permission: 'menu_submenu_individual_invoices',
-              isNotification: false,
-              path: '/invoice/individual-list'
-            },
-            {
-              title: 'Consolidated Invoices',
-              icon: 'request_quote',
-              permission: 'menu_consolidate_invoices',
-              class: 'sidebar-icon-submenu',
-              isNotification: false,
-              path: '/invoice/consolidated-list'
-            },
-            {
-              title: 'Payments',
-              icon: 'payments',
-              class: 'sidebar-icon-submenu',
-              permission: 'menu_client_payments_invoices',
-              isNotification: false,
-              path: '/invoice/invoice-client-payment'
-            },
-          ]
-        }
-      ]
-    },
-    {
-      name: 'report',
-      title: 'analytics_(reports)',
-      icon: 'analytics',
-      class: 'sidebar-icon',
-      path: '/reports/list',
-      permission: 'menu_reports',
-      isSideMenu: false,
-      isSearch: false,
+    // {
+    //   name: 'timesheet',
+    //   title: 'time_&_expense',
+    //   icon: 'schedule',
+    //   class: 'sidebar-icon',
+    //   permission: 'menu_timesheet_and_expenses',
+    //   isSideMenu: true,
+    //   isSearch: false,
+    //   closeSubMenu: {
+    //     title: 'Time & Expense',
+    //     icon: 'close',
+    //     class: 'sidebar-close-icon',
+    //     isNotification: false
+    //   },
+    //   sideBarSubMenu: [
+    //     {
+    //       title: 'timesheets',
+    //       subMenuItem: [
+    //         {
+    //           title: 'timesheets',
+    //           icon: 'pending_actions',
+    //           class: 'sidebar-icon-submenu',
+    //           permission: 'view_timesheet',
+    //           isNotification: false,
+    //           path: '/timesheet/list/all'
+    //         },
+    //         {
+    //           title: 'account_code',
+    //           icon: 'pending_actions',
+    //           class: 'sidebar-icon-submenu',
+    //           permission: 'menu_account_code_setup',
+    //           isNotification: false,
+    //           path: '/setup/account-codes'
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       title: 'Expense',
+    //       subMenuItem: [
+    //         {
+    //           title: 'general_expenses',
+    //           icon: 'account_balance_wallet',
+    //           class: 'sidebar-icon-submenu',
+    //           permission: 'view_expense',
+    //           isNotification: false,
+    //           path: '/expense/general/all'
+    //         },
+    //         {
+    //           title: 'Misc Expenses',
+    //           icon: 'payments',
+    //           class: 'sidebar-icon-submenu',
+    //           permission: 'view_misc_expense',
+    //           isNotification: false,
+    //           path: '/expense/misc/all'
+    //         }
+    //       ]
+    //     }
+    //   ]
+    // },
+    // {
+    //   name: 'Invoices',
+    //   title: 'invoice',
+    //   icon: 'receipt_long',
+    //   class: 'sidebar-icon',
+    //   path: '/invoice',
+    //   permission: 'menu_invoices',
+    //   isSideMenu: true,
+    //   isSearch: false,
+    //   closeSubMenu: {
+    //     title: 'Invoice',
+    //     icon: 'close',
+    //     class: 'sidebar-close-icon',
+    //     isNotification: false
+    //   },
+    //   sideBarSubMenu: [
+    //     {
+    //       subMenuItem: [
+    //         {
+    //           title: 'Invoices',
+    //           icon: 'receipt',
+    //           class: 'sidebar-icon-submenu',
+    //           permission: 'menu_submenu_individual_invoices',
+    //           isNotification: false,
+    //           path: '/invoice/individual-list'
+    //         },
+    //         {
+    //           title: 'Consolidated Invoices',
+    //           icon: 'request_quote',
+    //           permission: 'menu_consolidate_invoices',
+    //           class: 'sidebar-icon-submenu',
+    //           isNotification: false,
+    //           path: '/invoice/consolidated-list'
+    //         },
+    //         {
+    //           title: 'Payments',
+    //           icon: 'payments',
+    //           class: 'sidebar-icon-submenu',
+    //           permission: 'menu_client_payments_invoices',
+    //           isNotification: false,
+    //           path: '/invoice/invoice-client-payment'
+    //         },
+    //       ]
+    //     }
+    //   ]
+    // },
+    // {
+    //   name: 'report',
+    //   title: 'analytics_(reports)',
+    //   icon: 'analytics',
+    //   class: 'sidebar-icon',
+    //   path: '/reports/list',
+    //   permission: 'menu_reports',
+    //   isSideMenu: false,
+    //   isSearch: false,
 
-      // sideBarSubMenu: [
-      //   {
-      //     subMenuItem: [
-      //       {
-      //         title: 'View Reports',
-      //         icon: 'analytics',
-      //         class: 'sidebar-icon-submenu',
-      //         permission: 'menu_reports',
-      //         isNotification: false,
-      //         path: '/reports'
-      //       }
-      //     ]
-      //   }
-      // ]
-    },
-    {
-      name: 'report_pbi',
-      title: 'reports(pbi)',
-      icon: 'analytics',
-      class: 'sidebar-icon',
-      path: '/view-reports',
-      permission: 'view_pbi_analytics',
-      isSideMenu: true,
-      isSearch: false,
-      closeSubMenu: {
-        title: 'reports',
-        icon: 'close',
-        class: 'sidebar-icon',
-        isNotification: false
-      },
-      sideBarSubMenu: [
-        {
-          subMenuItem: [
-            {
-              title: 'create_new',
-              icon: 'add',
-              class: 'sidebar-icon-submenu',
-              linkClass: "create",
-              permission: 'create_self_service_reports',
-              isNotification: false,
-              path: '/view-reports/create-new'
-            },
-            // {
-            //   title: 'create_new',
-            //   icon: 'add',
-            //   class: 'sidebar-icon-submenu',
-            //   linkClass: "create",
-            //   permission: 'create_self_service_reports',
-            //   isNotification: false,
-            //   path: '/view-reports/create-report'
-            // },
-            // {
-            //   title: 'create_new_dashboard',
-            //   icon: 'add',
-            //   class: 'sidebar-icon-submenu',
-            //   permission: 'create_dashboard',
-            //   isNotification: false,
-            //   path: '/view-reports/create-dashboard'
-            // },
-            {
-              title: 'Standard Reports',
-              icon: 'table_chart',
-              class: 'sidebar-icon-submenu',
-              permission: 'view_pbi_analytics',
-              isNotification: false,
-              path: '/view-reports/standard-reports'
-            },
-            {
-              title: 'Reports',
-              icon: 'description',
-              class: 'sidebar-icon-submenu',
-              isNotification: false,
-              permission: 'view_pbi_analytics',
-              path: '/view-reports/reports/recent'
-            },
-            {
-              title: 'dashboards',
-              icon: 'space_dashboard',
-              class: 'sidebar-icon-submenu',
-              isNotification: false,
-              permission: 'view_pbi_analytics',
-              path: '/view-reports/dashboards/recent'
-            },
-            {
-              title: 'My Schedules',
-              icon: 'event_available',
-              class: 'sidebar-icon-submenu',
-              isNotification: false,
-              permission: 'view_pbi_analytics',
-              path: 'view-reports/schedules'
-            },
-            {
-              title: 'Collections',
-              icon: 'folder',
-              class: 'sidebar-icon-submenu',
-              isNotification: false,
-              permission: 'view_pbi_analytics',
+    //   // sideBarSubMenu: [
+    //   //   {
+    //   //     subMenuItem: [
+    //   //       {
+    //   //         title: 'View Reports',
+    //   //         icon: 'analytics',
+    //   //         class: 'sidebar-icon-submenu',
+    //   //         permission: 'menu_reports',
+    //   //         isNotification: false,
+    //   //         path: '/reports'
+    //   //       }
+    //   //     ]
+    //   //   }
+    //   // ]
+    // },
+    // {
+    //   name: 'report_pbi',
+    //   title: 'reports(pbi)',
+    //   icon: 'analytics',
+    //   class: 'sidebar-icon',
+    //   path: '/view-reports',
+    //   permission: 'view_pbi_analytics',
+    //   isSideMenu: true,
+    //   isSearch: false,
+    //   closeSubMenu: {
+    //     title: 'reports',
+    //     icon: 'close',
+    //     class: 'sidebar-icon',
+    //     isNotification: false
+    //   },
+    //   sideBarSubMenu: [
+    //     {
+    //       subMenuItem: [
+    //         {
+    //           title: 'create_new',
+    //           icon: 'add',
+    //           class: 'sidebar-icon-submenu',
+    //           linkClass: "create",
+    //           permission: 'create_self_service_reports',
+    //           isNotification: false,
+    //           path: '/view-reports/create-new'
+    //         },
+    //         // {
+    //         //   title: 'create_new',
+    //         //   icon: 'add',
+    //         //   class: 'sidebar-icon-submenu',
+    //         //   linkClass: "create",
+    //         //   permission: 'create_self_service_reports',
+    //         //   isNotification: false,
+    //         //   path: '/view-reports/create-report'
+    //         // },
+    //         // {
+    //         //   title: 'create_new_dashboard',
+    //         //   icon: 'add',
+    //         //   class: 'sidebar-icon-submenu',
+    //         //   permission: 'create_dashboard',
+    //         //   isNotification: false,
+    //         //   path: '/view-reports/create-dashboard'
+    //         // },
+    //         {
+    //           title: 'Standard Reports',
+    //           icon: 'table_chart',
+    //           class: 'sidebar-icon-submenu',
+    //           permission: 'view_pbi_analytics',
+    //           isNotification: false,
+    //           path: '/view-reports/standard-reports'
+    //         },
+    //         {
+    //           title: 'Reports',
+    //           icon: 'description',
+    //           class: 'sidebar-icon-submenu',
+    //           isNotification: false,
+    //           permission: 'view_pbi_analytics',
+    //           path: '/view-reports/reports/recent'
+    //         },
+    //         {
+    //           title: 'dashboards',
+    //           icon: 'space_dashboard',
+    //           class: 'sidebar-icon-submenu',
+    //           isNotification: false,
+    //           permission: 'view_pbi_analytics',
+    //           path: '/view-reports/dashboards/recent'
+    //         },
+    //         {
+    //           title: 'My Schedules',
+    //           icon: 'event_available',
+    //           class: 'sidebar-icon-submenu',
+    //           isNotification: false,
+    //           permission: 'view_pbi_analytics',
+    //           path: 'view-reports/schedules'
+    //         },
+    //         {
+    //           title: 'Collections',
+    //           icon: 'folder',
+    //           class: 'sidebar-icon-submenu',
+    //           isNotification: false,
+    //           permission: 'view_pbi_analytics',
 
-              path: 'view-reports/folders-all',
-            },
-            {
-              title: 'Bookmarks',
-              icon: 'bookmarks',
-              class: 'sidebar-icon-submenu',
-              isNotification: false,
-              permission: 'view_pbi_analytics',
-              path: 'view-reports/bookmarks/reports',
-            },
-            {
-              title: 'Archives',
-              icon: 'archive',
-              class: 'sidebar-icon-submenu',
-              isNotification: false,
-              permission: 'view_pbi_analytics',
-              path: 'view-reports/archive/reports',
-            },
-          ]
-        }
-      ]
-    },
+    //           path: 'view-reports/folders-all',
+    //         },
+    //         {
+    //           title: 'Bookmarks',
+    //           icon: 'bookmarks',
+    //           class: 'sidebar-icon-submenu',
+    //           isNotification: false,
+    //           permission: 'view_pbi_analytics',
+    //           path: 'view-reports/bookmarks/reports',
+    //         },
+    //         {
+    //           title: 'Archives',
+    //           icon: 'archive',
+    //           class: 'sidebar-icon-submenu',
+    //           isNotification: false,
+    //           permission: 'view_pbi_analytics',
+    //           path: 'view-reports/archive/reports',
+    //         },
+    //       ]
+    //     }
+    //   ]
+    // },
     // {
     //   name: 'dashboard_pbi',
     //   title: 'dashboard(pbi)',
