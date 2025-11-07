@@ -100,9 +100,9 @@ export class SupportFlyoutComponent implements OnInit {
     this.programService.get(`${url}`)
       .subscribe({next:(res:any) => {
         let response = JSON.parse(JSON.stringify(res));
-        this.supportEmail = response?.config?.email || 'info@simplifyvms.com';
+        this.supportEmail = response?.config?.email || 'info@talentiqvms.com';
       },error: err => {
-        this.supportEmail = 'info@simplifyvms.com';
+        this.supportEmail = 'info@talentiqvms.com';
         console.error(errorHandler(err));
       }});
 
@@ -113,7 +113,7 @@ export class SupportFlyoutComponent implements OnInit {
       const urlArray:string[]= control?.value?.replace(/\n/g,' ').split(' ');
       let isValid= true;
       for(const url of urlArray){
-        if(url!=='' && !(url.includes('https://') && (url.includes('simplifyvms.com') || url.includes('simplifysandbox.net') || url.includes('.simplifyvmsapp.com')))){
+        if(url!=='' && !(url.includes('https://') && (url.includes('talentiqvms.com') || url.includes('talentiqsandbox.net') || url.includes('.talentiqvmsapp.com')))){
           isValid=false;
           break;
         }
@@ -135,7 +135,7 @@ export class SupportFlyoutComponent implements OnInit {
       const messageArray:string[]= control?.value?.replace(/\n/g,' ').split(' ');
       let isValid= true;
       for(let s of messageArray){
-        if(s!=='' && isValidUrl(s) && !(s.includes('https://') && (s.includes('simplifyvms.com') || s.includes('simplifysandbox.net') || s.includes('.simplifyvmsapp.com')))){
+        if(s!=='' && isValidUrl(s) && !(s.includes('https://') && (s.includes('talentiqvms.com') || s.includes('talentiqsandbox.net') || s.includes('.talentiqvmsapp.com')))){
           isValid=false;
           break;
         }
